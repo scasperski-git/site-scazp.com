@@ -593,7 +593,7 @@ h3 i {
 const token = localStorage.getItem("session_token");
 
 if(!token){
-window.location="../lockcheck-login/";
+window.location="../checklock-login/";
 }
 
 const api = API_URL;
@@ -702,7 +702,7 @@ showSessionPopup("DEVICE");
 return;
 
 localStorage.clear();
-window.location="../lockcheck-login/";
+window.location="../checklock-login/";
 
 }
 
@@ -824,7 +824,7 @@ window.location="../lock/";
 
 function logout(){
 localStorage.clear();
-window.location="../lockcheck-login/";
+window.location="../checklock-login/";
 }
 
 function showSessionPopup(type){
@@ -844,7 +844,7 @@ document.getElementById("sessionPopup").style.display="flex";
 
 setTimeout(()=>{
 localStorage.clear();
-window.location="../lockcheck-login/";
+window.location="../checklock-login/";
 },3000);
 
 }
