@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Check Lock Portal</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+/* ===== BASE & TYPOGRAPHY ===== */
+*{
+    box-sizing: border-box;
+    font-family: 'Poppins', Arial, sans-serif;
+}
+
+html {
+    font-size: clamp(14px, 1.1vw, 16px);
+}
+
+body {
+    background: #f1f5f9;
+    margin: 0;
+    padding: 0;
+    color: #334155;
+    min-height: 100vh;
+}
+
+/* ANIMATIONS */
+@keyframes slideUpFade {
+    0% { transform: translateY(20px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== APP LAYOUT (DESKTOP SIDEBAR) ===== */
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 20px;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    z-index: 50;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+}
+
+.brand {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+}
+
+.brand i {
+    color: #3b82f6;
+    font-size: 24px;
+}
+
+.user-profile {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 16px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#userInfo {
+    font-size: 13px;
+    font-weight: 500;
+    color: #e2e8f0;
+    line-height: 1.4;
+}
+
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+
+.nav-btn {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    background: transparent;
+    color: #cbd5e1;
+    display: flex; 
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    transition: all 0.3s ease;
+}
+
+.nav-btn i {
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+}
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transform: translateX(4px);
+}
+
+.nav-btn.active {
+    background: linear-gradient(135deg, #4f46e5, #3b82f6);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.logout-btn { 
+    margin-top: auto;
+    color: #fca5a5 !important; 
+}
+.logout-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444 !important;
+}
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+    flex: 1;
+    margin-left: 280px; 
+    padding: 16px 40px 40px 40px; 
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.container {
+    width: 100%;
+    max-width: 700px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.03);
+    animation: slideUpFade 0.5s ease forwards;
+    padding: 24px 32px 32px 32px; 
+}
+
+.form-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+/* ===== INLINE SEARCH BAR (DESKTOP) ===== */
+.search-bar-row {
+    display: flex;
+    gap: 16px;
+    align-items: stretch; 
+    margin-bottom: 10px;
+}
+
+/* INPUT */
+.search-bar-row input {
+    width: 280px;
+    flex: 0 0 280px;
+    padding: 16px 20px;
+    font-size: 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    outline: none;
+    transition: 0.3s;
+    background: #f8fafc;
+    color: #1e293b;
+    text-align: center;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.search-bar-row input::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+    letter-spacing: normal;
+}
+
+.search-bar-row input:focus {
+    background: #ffffff;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    flex: 1; 
+}
+
+.button-group button {
+    flex: 1;
+    padding: 0 20px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.check-btn {
+    background: linear-gradient(135deg, #4f46e5, #3b82f6);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.check-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+}
+
+.reset-btn {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.reset-btn:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+/* ===== JS INJECTED RESULT CARD ===== */
+.result-card {
+    margin-top: 24px;
+    padding: 24px;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+    animation: fadeIn 0.4s ease forwards;
+    width: 100%;
+}
+
+.status-box {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.status-box span {
+    display: inline-block;
+    padding: 8px 24px;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    border-radius: 30px;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.created-meta {
+    font-size: 12px;
+    color: #64748b;
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 16px;
+}
+
+.col {
+    flex: 1;
+    word-break: break-word; 
+}
+
+.label {
+    font-weight: 600;
+    color: #64748b;
+    font-size: 11px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.value {
+    font-size: 15px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.amount {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 0.5px;
+}
+
+.remark {
+    margin-top: 6px;
+    line-height: 1.5;
+    font-size: 13px;
+    color: #334155;
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+/* AUDIT NOTE (UNTUK CHECK STATUS) */
+.audit-note {
+    margin-top: 20px;
+    font-size: 11px;
+    color: #334155;
+    background: #eff6ff;
+    padding: 14px;
+    border-left: 4px solid #3b82f6;
+    border-radius: 8px;
+    line-height: 1.5;
+    text-align: left;
+}
+
+/* ERROR & LOADING STATES */
+.no-lock {
+    margin-top: 24px;
+    padding: 24px;
+    background: #fef2f2;
+    border: 1px solid #fecdd3;
+    border-radius: 16px;
+    text-align: center;
+    font-weight: 600;
+    color: #be123c;
+    animation: fadeIn 0.4s ease forwards;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.no-lock::before {
+    content: '\f071';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 24px;
+    color: #ef4444;
+}
+
+.loading {
+    margin-top: 30px;
+    text-align: center;
+    font-weight: 600;
+    color: #475569;
+    width: 100%;
+}
+
+.spinner {
+    margin: 16px auto 0;
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f1f5f9;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* SESSION POPUP */
+#sessionPopup {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.session-box {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+    max-width: 340px;
+    width: 90%;
+    animation: slideUpFade 0.4s ease forwards;
+}
+
+.session-box i { font-size: 48px; color: #ef4444; margin-bottom: 16px; }
+.session-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #0f172a; }
+.session-msg { font-size: 14px; color: #475569; margin-bottom: 16px; }
+.session-count { font-size: 12px; color: #94a3b8; font-weight: 500; }
+
+/* ==========================================
+   MOBILE RESPONSIVE (BOTTOM NAV STYLE)
+   ========================================== */
+@media (max-width: 899px) {
+    .app-layout {
+        flex-direction: column;
+    }
+    
+    /* Top Header for Mobile */
+    .sidebar {
+        position: sticky;
+        top: 0;
+        width: 100%;
+        height: auto;
+        flex-direction: row; 
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px; 
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        z-index: 40;
+    }
+
+    .brand { 
+        margin-bottom: 0; 
+        font-size: 18px; 
+    }
+    
+    .brand i {
+        font-size: 20px;
+    }
+    
+    .user-profile {
+        margin-bottom: 0;
+        text-align: right; 
+        background: transparent;
+        border: none;
+        padding: 0;
+    }
+
+    #userInfo {
+        font-size: 12px;
+    }
+
+    /* Bottom Nav Menu */
+    .nav-menu {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        flex-direction: row;
+        background: #ffffff;
+        padding: 12px 10px;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+        z-index: 50;
+        border-radius: 24px 24px 0 0;
+        justify-content: space-around;
+        gap: 5px;
+    }
+
+    .nav-btn {
+        flex-direction: column; 
+        gap: 6px;
+        padding: 8px 4px;
+        font-size: 11px;
+        color: #64748b;
+        border-radius: 12px;
+        justify-content: center;
+        width: auto;
+        height: auto;
+        background: transparent;
+    }
+
+    .nav-btn span { 
+        display: block; 
+        font-size: 10px; 
+        font-weight: 500;
+    } 
+    
+    .nav-btn i {
+        font-size: 20px;
+        margin: 0;
+        width: auto;
+    }
+
+    .nav-btn:hover {
+        transform: none;
+        background: #f1f5f9;
+        color: #4f46e5;
+    }
+
+    .nav-btn.active { 
+        background: #eef2ff; 
+        color: #4f46e5; 
+        box-shadow: none; 
+    }
+
+    #navCheckLock { 
+        display: flex !important; 
+    }
+
+    .logout-btn { 
+        margin-top: 0; 
+        color: #ef4444 !important; 
+        background: transparent; 
+    }
+
+    /* Main Content Adjustments - MOBILE */
+    .main-content {
+        margin-left: 0;
+        /* LEBIH RAPAT KIRI DAN KANAN DI MOBILE */
+        padding: 16px 8px 100px 8px; 
+    }
+
+    .container {
+        /* KURANGKAN PADDING DALAM KOTAK UTAMA MOBILE */
+        padding: 20px 16px;
+        border-radius: 16px;
+    }
+
+    .search-bar-row {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .search-bar-row input {
+        width: 100%; 
+        flex: none;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .button-group button {
+        padding: 14px;
+    }
+
+    /* KEKALKAN ROW SEBARIS UNTUK RESULT CARD DI MOBILE */
+    .row {
+        flex-direction: row; 
+        gap: 10px; 
+    }
+    
+    .value {
+        font-size: 13px; 
+    }
+
+    .amount {
+        font-size: 20px; 
+    }
+
+    .result-card, .no-lock, .loading {
+        /* KURANGKAN PADDING DALAM KOTAK RESULT UNTUK RUANG MAKSIMUM */
+        padding: 16px;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="app-layout">
+
+    <nav class="sidebar">
+        <div class="brand">
+            <i class="fa fa-shield-halved"></i> Lock Portal
+        </div>
+        
+        <div class="user-profile">
+            <div id="userInfo"></div>
+        </div>
+        
+        <div class="nav-menu">
+            <button class="nav-btn active" id="navCheckLock">
+                <i class="fa fa-magnifying-glass"></i> <span>Check Lock</span>
+            </button>
+            
+            <button id="masterBtn" class="nav-btn" onclick="goMaster()" style="display:none">
+                <i class="fa-solid fa-crown"></i> <span>Master Menu</span>
+            </button>
+            
+            <button class="nav-btn logout-btn" onclick="logout()">
+                <i class="fa fa-power-off"></i> <span>Logout</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="form-title">Check Lock Status</div>
+
+            <div class="search-bar-row">
+                <input
+                    type="text"
+                    id="acc_no"
+                    autocomplete="off"
+                    inputmode="numeric"
+                    maxlength="10"
+                    placeholder="ENTER ACCOUNT NO">
+
+                <div class="button-group">
+                    <button class="check-btn" id="checkBtn">
+                        <i class="fa fa-search"></i> Check Lock
+                    </button>
+                    <button class="reset-btn" id="resetBtn">
+                        <i class="fa fa-rotate-left"></i> New Search
+                    </button>
+                </div>
+            </div>
+
+            <div id="result"></div>
+
+        </div>
+    </main>
+
+</div>
+
+<script src="../lockconfig.js"></script>
+
+<script>
+// ==========================================
+// LOGIC BAWAH NI MAINTAIN 100% TAK SENTUH
+// ==========================================
+
+const api = API_URL;
+
+const user = localStorage.getItem("lock_user");
+const role = localStorage.getItem("lock_role");
+const token = localStorage.getItem("session_token");
+
+const type = localStorage.getItem("lock_type");
+
+if(!type){
+window.location="../checklock-login/";
+}
+
+if(type=="lock"){
+alert("Access denied");
+window.location="../lock/";
+}
+
+if(type === "master"){
+document.getElementById("masterBtn").style.display = "flex";
+}
+
+async function checkSession(){
+
+try{
+
+const res = await fetch(api+"?action=session&token="+token);
+const data = await res.json();
+
+if(data.status !== "ACTIVE"){
+
+showSessionPopup("DEVICE");
+return;
+
+localStorage.clear();
+window.location="../checklock-login/";
+
+}
+
+}catch(e){
+console.log("session check error");
+}
+
+}
+
+function goMaster(){
+window.location="../menumaster/";
+}
+
+if(!token){
+logout();
+}
+
+document.getElementById("userInfo").innerHTML =
+"User: "+(user || "-")+" | Role: "+(role || "-");
+
+const input=document.getElementById("acc_no");
+const result=document.getElementById("result");
+const checkBtn=document.getElementById("checkBtn");
+const resetBtn=document.getElementById("resetBtn");
+
+let isLoading=false;
+
+window.onload=()=>{
+input.focus();
+};
+
+function formatDate(dateStr){
+
+if(!dateStr) return "-";
+
+if(dateStr.includes("-") && dateStr.split("-")[0].length==4){
+
+var p=dateStr.split("-");
+var year=p[0];
+var month=parseInt(p[1])-1;
+var day=p[2];
+
+var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+return day+" "+m[month]+" "+year;
+
+}
+
+if(dateStr.includes("/")){
+
+var p=dateStr.split("/");
+
+var day=parseInt(p[0]);
+var month=parseInt(p[1])-1;
+var year=p[2];
+
+var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+return ("0"+day).slice(-2)+" "+m[month]+" "+year;
+
+}
+
+if(dateStr.includes("T")){
+
+var d=new Date(dateStr);
+
+var day=("0"+d.getDate()).slice(-2);
+var month=d.getMonth();
+var year=d.getFullYear();
+
+var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+return day+" "+m[month]+" "+year;
+
+}
+
+return dateStr;
+
+}
+
+function formatDateTime(dateStr){
+
+if(!dateStr) return "-";
+
+/* format expected: dd/MM/yyyy HH:mm:ss */
+
+const parts = dateStr.split(" ");
+
+const datePart = parts[0].split("/");
+const timePart = parts[1].split(":");
+
+const day = datePart[0];
+const monthIndex = parseInt(datePart[1]) - 1;
+const year = datePart[2];
+
+const hour = timePart[0];
+const minute = timePart[1];
+
+const m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+return day+" "+m[monthIndex]+" "+year+" "+hour+":"+minute;
+
+}
+
+async function checkLock(){
+
+const acc=input.value.trim();
+
+if(!acc){
+alert("Enter Account No");
+input.focus();
+return;
+}
+
+if(isLoading) return;
+
+isLoading=true;
+checkBtn.disabled=true;
+
+result.innerHTML=
+"<div class='loading'>Checking Lock Status<div class='spinner'></div></div>";
+
+try{
+
+const res = await fetch(api+"?acc_no="+encodeURIComponent(acc)+"&token="+token);
+
+const data=await res.json();
+
+if(data.status=="UNAUTHORIZED"){
+
+if(data.reason=="SESSION_REPLACED"){
+alert("Your account has been logged in from another device.");
+}
+else{
+showSessionPopup("EXPIRED");
+return;
+}
+
+localStorage.clear();
+window.location="../checklock-login/";
+return;
+
+}
+
+if(data.status==="LOCKED"){
+
+const formattedDate=formatDate(data.valid);
+const created=formatDateTime(data.created);
+const amount = "RM " + Number(data.amount || 0).toLocaleString("en-MY",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+});
+
+const promiseDate=new Date(data.valid);
+
+const today=new Date();
+today.setHours(0,0,0,0);
+
+promiseDate.setHours(0,0,0,0);
+
+let statusText="LOCKED";
+let statusColor="#10b981"; // Tukar green premium sikit 
+
+if(today>promiseDate){
+statusText="EXPIRED";
+statusColor="#ef4444";
+}
+
+result.innerHTML=
+
+"<div class='result-card'>"+
+
+"<div class='status-box'><span style='background:"+statusColor+"'>"+statusText+"</span></div>"+
+
+"<div class='created-meta'>Created by "+data.dca_id+
+" • "+created+"</div>"+
+
+"<div class='row'>"+
+
+"<div class='col'>"+
+"<div class='label'>ACCOUNT NO</div>"+
+"<div class='value'>"+data.acc_no+"</div>"+
+"</div>"+
+
+"<div class='col'>"+
+"<div class='label'>BRANCH</div>"+
+"<div class='value'>"+data.branch+"</div>"+
+"</div>"+
+
+"</div>"+
+
+"<div class='row'>"+
+
+"<div class='col'>"+
+"<div class='label'>LOCK AMOUNT</div>"+
+"<div class='amount'>"+amount+"</div>"+
+"</div>"+
+
+"<div class='col'>"+
+"<div class='label'>PROMISE DATE</div>"+
+"<div class='value'>"+formattedDate+"</div>"+
+"</div>"+
+
+"</div>"+
+
+"<div class='label'>PAYMENT CATEGORY</div>"+
+"<div class='value'>"+(data.category || "-")+"</div><br>"+
+
+"<div class='label'>REMARKS</div>"+
+"<div class='remark'>"+(data.remarks || "-")+"</div>"+
+
+"<div class='audit-note'>"+
+"<i class='fa-solid fa-circle-info' style='margin-right: 5px; color: #3b82f6;'></i> <b>Branch Notice:</b> This account is currently locked by the assigned DCA. Please proceed to collect the payment from the customer as per the stated Lock Amount and Payment Category."+
+"</div>"+
+
+"</div>";
+
+}
+else{
+
+result.innerHTML=
+"<div class='no-lock'>NO LOCK FOUND</div>";
+
+}
+
+}catch(err){
+
+result.innerHTML=
+"<div class='no-lock'>SYSTEM ERROR. TRY AGAIN.</div>";
+
+}
+
+checkBtn.disabled=false;
+isLoading=false;
+
+}
+
+function newSearch(){
+
+input.value="";
+result.innerHTML="";
+checkBtn.disabled=false;
+input.focus();
+
+}
+
+function showSessionPopup(type){
+
+let title="Session Expired";
+let msg="Your session has expired. Please login again.";
+
+if(type==="DEVICE"){
+title="Logged In From Another Device";
+msg="Your account has been logged in from another device.";
+}
+
+document.getElementById("sessionTitle").innerText=title;
+document.getElementById("sessionMsg").innerText=msg;
+
+document.getElementById("sessionPopup").style.display="flex";
+
+setTimeout(()=>{
+localStorage.clear();
+window.location="../checklock-login/";
+},3000);
+
+}
+
+function logout(){
+localStorage.clear();
+window.location="../checklock-login/";
+}
+
+checkBtn.addEventListener("click",checkLock);
+resetBtn.addEventListener("click",newSearch);
+
+input.addEventListener("keypress",function(e){
+if(e.key==="Enter"){
+checkLock();
+}
+});
+
+input.addEventListener("input",function(){
+this.value=this.value.replace(/[^0-9]/g,'');
+});
+  
+let lastActivity = Date.now();
+const IDLE_LIMIT = 1200000; // 20 min
+let idleTriggered = false;
+
+function updateActivity(){
+lastActivity = Date.now();
+}
+
+function checkIdle(){
+
+if(!idleTriggered && Date.now() - lastActivity > IDLE_LIMIT){
+idleTriggered = true;
+showSessionPopup("EXPIRED");
+}
+
+}
+
+setInterval(checkIdle, 5000);
+
+[
+"touchstart",
+"touchmove",
+"click",
+"scroll",
+"keydown",
+"mousemove"
+].forEach(event=>{
+document.addEventListener(event, updateActivity, {passive:true});
+});
+
+document.addEventListener("visibilitychange",()=>{
+
+if(!document.hidden){
+if(Date.now() - lastActivity > IDLE_LIMIT){
+showSessionPopup("EXPIRED");
+}
+}
+
+});
+/* SESSION MONITOR */
+
+setInterval(checkSession,30000);
+  
+</script>
+
+<div id="sessionPopup">
+    <div class="session-box">
+        <i class="fa fa-lock"></i>
+        <div class="session-title" id="sessionTitle">Session Expired</div>
+        <div class="session-msg" id="sessionMsg">Please login again.</div>
+        <div class="session-count">Redirecting to login...</div>
+    </div>
+</div>
+
+</body>
+</html>
