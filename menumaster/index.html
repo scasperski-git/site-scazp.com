@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Master Menu</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+/* ===== BASE & TYPOGRAPHY ===== */
+*{
+    box-sizing: border-box;
+    font-family: 'Poppins', Arial, sans-serif;
+}
+
+body{
+    background: #f1f5f9;
+    margin: 0;
+    padding: 0;
+    color: #334155;
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== APP LAYOUT (DESKTOP) ===== */
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 20px;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    z-index: 50;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+}
+
+.brand {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+}
+
+.brand i {
+    color: #3b82f6;
+    font-size: 24px;
+}
+
+.user-profile {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 16px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#userInfo {
+    font-size: 12px;
+    font-weight: 500;
+    color: #cbd5e1;
+}
+
+#userInfo b {
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+
+.nav-btn {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    background: transparent;
+    color: #94a3b8;
+    display: flex; 
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    transition: all 0.3s ease;
+}
+
+.nav-btn i {
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+}
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transform: translateX(4px);
+}
+
+.nav-btn.active {
+    background: linear-gradient(135deg, #4f46e5, #3b82f6);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.logout-btn { 
+    margin-top: auto;
+    color: #fca5a5 !important; 
+}
+
+.logout-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444 !important;
+}
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+    flex: 1;
+    margin-left: 280px; 
+    padding: 20px; /* <--- PADDING DIKURANGKAN SUPAYA RAPAT ATAS & TEPI */
+    display: block; /* <--- TUKAR SUPAYA FULL WIDTH */
+}
+
+.container-box {
+    width: 100%;
+    max-width: 100%; /* <--- MAX WIDTH 100% UNTUK TARIK RAPAT KE KANAN */
+    animation: fadeIn 0.4s ease;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ===== SECTION CARDS ===== */
+.section {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03), 0 1px 3px rgba(0,0,0,0.02);
+    border: 1px solid #e2e8f0;
+}
+
+h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #1e293b;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+h3 i {
+    color: #4f46e5;
+    background: #e0e7ff;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+/* DASHBOARD GRID (FILTER) */
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.dash-grid div {
+    display: flex;
+    flex-direction: column;
+}
+
+.dash-grid label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dash-grid select,
+.dash-grid input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 14px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #334155;
+    font-family: inherit;
+    transition: 0.3s;
+}
+
+.dash-grid select:focus,
+.dash-grid input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+/* LOAD BUTTON */
+.load-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #4f46e5, #3b82f6);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.load-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+}
+
+.load-btn:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* DASH CARD (RESULT) */
+.dash-card {
+    margin-top: 24px;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px dashed #cbd5e1;
+}
+
+.dash-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.stat-box {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.stat-number {
+    font-weight: 700;
+    font-size: 26px;
+}
+
+.stat-number.lock { color: #3b82f6; }
+.stat-number.amount { color: #10b981; }
+
+.dash-status {
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+    margin-top: 12px;
+    text-align: center;
+}
+
+/* SUMMARY SECTION */
+#refreshInfo {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+    margin-bottom: 16px;
+    background: #f1f5f9;
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.box-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.box-card div:first-child {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.box-card div:last-child {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+    line-height: 1.5;
+}
+
+#sumLock, #sumAmount {
+    font-size: 22px !important;
+}
+#sumLock { color: #3b82f6 !important; }
+#sumAmount { color: #10b981 !important; }
+
+/* SPINNER */
+.spinner{
+    width: 18px; height: 18px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin{ 100%{transform:rotate(360deg)} }
+
+/* SESSION POPUP */
+#sessionPopup{
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(15, 23, 42, 0.6); backdrop-filter:blur(4px);
+    display:none; align-items:center; justify-content:center; z-index:9999;
+}
+.session-box{
+    background:white; padding:40px; border-radius:20px; text-align:center;
+    box-shadow:0 25px 50px rgba(0,0,0,0.25); max-width:340px; width:90%;
+}
+.session-box i{ font-size:48px; color:#ef4444; margin-bottom:16px; }
+.session-title{ font-size:20px; font-weight:700; margin-bottom:8px; color:#0f172a; }
+.session-msg{ font-size:14px; color:#475569; margin-bottom:16px; }
+.session-count{ font-size:12px; color:#94a3b8; font-weight:500; }
+
+/* ==========================================
+   MOBILE RESPONSIVE (BOTTOM NAV)
+   ========================================== */
+@media (max-width: 899px) {
+    .app-layout {
+        flex-direction: column;
+    }
+    
+    /* Header (dulunya Sidebar) */
+    .sidebar {
+        position: sticky;
+        top: 0;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        border-radius: 0 0 20px 20px;
+        z-index: 40;
+    }
+
+    .brand { margin-bottom: 0; font-size: 18px; }
+    .brand i { font-size: 20px; }
+    
+    .user-profile {
+        margin-bottom: 0; padding: 0; background: none; border: none; text-align: right;
+    }
+
+    /* Bottom Nav Menu */
+    .nav-menu {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        flex-direction: row;
+        background: #ffffff;
+        padding: 12px 10px;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+        z-index: 50;
+        border-radius: 24px 24px 0 0;
+        justify-content: space-around;
+        gap: 5px;
+    }
+
+    .nav-btn {
+        flex-direction: column;
+        gap: 6px;
+        padding: 8px 4px;
+        font-size: 11px;
+        color: #64748b;
+        border-radius: 12px;
+        justify-content: center;
+        width: auto;
+    }
+
+    .nav-btn i { font-size: 20px; margin: 0; }
+    
+    .nav-btn:hover { background: #f1f5f9; color: #4f46e5; transform: none; }
+    .nav-btn.active { background: #eef2ff; color: #4f46e5; box-shadow: none; }
+    .logout-btn { margin-top: 0; color: #ef4444 !important; }
+
+    /* Main Content */
+    .main-content {
+        margin-left: 0;
+        padding: 24px 16px 100px 16px; /* Padding bawah supaya tak ditutup bottom nav */
+    }
+
+    .page-title { display: none; } /* Sembunyi tajuk besar kat mobile bagi jimat ruang */
+
+    .section { padding: 20px 16px; }
+
+    .dash-grid { grid-template-columns: 1fr; gap: 12px; }
+
+    .summary-grid { grid-template-columns: 1fr; gap: 12px; }
+    
+    .stat-number { font-size: 24px; }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="app-layout">
+
+    <nav class="sidebar">
+        <div class="brand"><i class="fa-solid fa-crown"></i> Master Portal</div>
+        
+        <div class="user-profile">
+            <div id="userInfo"></div>
+        </div>
+        
+        <div class="nav-menu">
+            <button class="nav-btn active">
+                <i class="fa fa-table"></i> <span>Dashboard</span>
+            </button>
+            <button class="nav-btn" onclick="goCheck()">
+                <i class="fa fa-search"></i> <span>Check Lock</span>
+            </button>
+            <button class="nav-btn" onclick="goLock()">
+                <i class="fa fa-lock"></i> <span>New Lock</span>
+            </button>
+            <button class="nav-btn logout-btn" onclick="logout()">
+                <i class="fa fa-right-from-bracket"></i> <span>Logout</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container-box">
+            
+            <div class="page-title">Master Overview</div>
+
+            <div class="section dashboard">
+                <h3><i class="fa fa-chart-pie"></i> Lock Dashboard</h3>
+
+                <div class="dash-grid">
+                    <div>
+                        <label>DCA NAME</label>
+                        <select id="dcaFilter"></select>
+                    </div>
+
+                    <div>
+                        <label>Start Date</label>
+                        <input type="date" id="startDate">
+                    </div>
+
+                    <div>
+                        <label>End Date</label>
+                        <input type="date" id="endDate">
+                    </div>
+                </div>
+
+                <button class="load-btn" id="loadBtn" onclick="loadDashboard()">
+                    <i class="fa fa-rotate"></i> Load Dashboard
+                </button>
+
+                <div class="dash-card">
+                    <div class="dash-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Total Lock</div>
+                            <div id="dashTotal" class="stat-number lock">0</div>
+                        </div>
+
+                        <div class="stat-box">
+                            <div class="stat-label">Total Amount</div>
+                            <div id="dashAmount" class="stat-number amount">RM0</div>
+                        </div>
+                    </div>
+                    <div id="dashStatus" class="dash-status"></div>
+                </div>
+            </div>
+
+            <div class="section summary">
+                <h3><i class="fa fa-calendar-check"></i> Today's Summary</h3>
+
+                <div id="refreshInfo">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Auto refresh every 2 min &nbsp;|&nbsp; <span id="lastUpdate">Last update: -</span>
+                </div>
+
+                <div class="summary-grid">
+                    <div class="box-card">
+                        <div>Total Lock</div>
+                        <div id="sumLock">0</div>
+                    </div>
+
+                    <div class="box-card">
+                        <div>Total Amount</div>
+                        <div id="sumAmount">RM0</div>
+                    </div>
+                </div>
+
+                <div class="summary-grid">
+                    <div class="box-card">
+                        <div>Top User</div>
+                        <div id="topUser"></div>
+                    </div>
+
+                    <div class="box-card">
+                        <div>Top Branch</div>
+                        <div id="topBranch"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+</div>
+
+<script src="../lockconfig.js"></script>
+
+<script>
+
+const token = localStorage.getItem("session_token");
+
+if(!token){
+window.location="../lockcheck-login/";
+}
+
+const api = API_URL;
+  
+function getTodayLocal(){
+
+var now = new Date();
+
+var year = now.getFullYear();
+var month = ("0" + (now.getMonth()+1)).slice(-2);
+var day = ("0" + now.getDate()).slice(-2);
+
+return year + "-" + month + "-" + day;
+
+}
+  
+function loadUsers(){
+
+fetch(api+"?action=users&token="+token)
+.then(r=>r.json())
+.then(list=>{
+
+var select=document.getElementById("dcaFilter");
+
+select.innerHTML="";
+
+list.forEach(function(u){
+
+var opt=document.createElement("option");
+
+if(typeof u === "string"){
+opt.value = "ALL";
+opt.text = "ALL USER";
+}else{
+opt.value = u.id;
+opt.text = u.name;
+}
+
+select.appendChild(opt);
+
+});
+
+});
+
+}
+
+function loadSummary(){
+
+fetch(api+"?action=summary&token="+token)
+.then(r=>r.json())
+.then(data=>{
+
+document.getElementById("sumLock").innerText=data.totalLock;
+
+document.getElementById("sumAmount").innerText=
+"RM "+Number(data.totalAmount).toLocaleString("en-MY",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+})
+
+var userHTML="";
+
+data.topUser.forEach(function(u){
+
+userHTML += u.user+" ("+u.count+")<br>";
+
+});
+
+document.getElementById("topUser").innerHTML=userHTML;
+
+var branchHTML="";
+
+data.topBranch.forEach(function(b){
+
+branchHTML += b.branch+" ("+b.count+")<br>";
+
+});
+
+document.getElementById("topBranch").innerHTML=branchHTML;
+
+/* update last refresh time */
+
+var now=new Date();
+
+var time=now.toLocaleTimeString("en-MY",{
+hour:'2-digit',
+minute:'2-digit',
+second:'2-digit'
+});
+
+document.getElementById("lastUpdate").innerText="Last update: "+time;
+
+});
+}
+
+async function checkSession(){
+
+try{
+
+const res = await fetch(api+"?action=session&token="+token);
+const data = await res.json();
+
+if(data.status !== "ACTIVE"){
+
+showSessionPopup("DEVICE");
+return;
+
+localStorage.clear();
+window.location="../lockcheck-login/";
+
+}
+
+}catch(e){
+console.log("Session check error");
+}
+
+}
+  
+function loadDashboard(){
+
+var btn=document.getElementById("loadBtn");
+var status=document.getElementById("dashStatus");
+
+btn.disabled=true;
+btn.innerHTML='<div class="spinner"></div> Please wait...';
+
+status.innerText="Loading dashboard...";
+
+var dca=document.getElementById("dcaFilter").value;
+var start=document.getElementById("startDate").value;
+var end=document.getElementById("endDate").value;
+
+var url=api+"?action=dashboard&token="+token;
+
+if(dca) url+="&dca="+dca;
+if(start) url+="&start="+start;
+if(end) url+="&end="+end;
+
+/* timeout protection */
+
+var controller = new AbortController();
+var timeout = setTimeout(()=>controller.abort(),8000);
+
+fetch(url,{signal:controller.signal})
+.then(r=>r.json())
+.then(data=>{
+
+if(data.status){
+status.innerText="Access denied";
+return;
+}
+
+document.getElementById("dashTotal").innerText=data.total || 0;
+
+document.getElementById("dashAmount").innerText =
+"RM "+Number(data.amount || 0).toLocaleString("en-MY",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+});;
+
+status.innerText="";
+
+})
+.catch(err=>{
+
+if(err.name==="AbortError"){
+
+status.innerText="Server slow. Please try again.";
+
+}else{
+
+status.innerText="Error loading dashboard.";
+
+}
+
+document.getElementById("dashTotal").innerText="-";
+document.getElementById("dashAmount").innerText="RM -";
+
+})
+.finally(()=>{
+
+clearTimeout(timeout);
+
+btn.disabled=false;
+btn.innerHTML='<i class="fa fa-rotate"></i> Load Dashboard';
+
+});
+
+}
+  
+window.onload=function(){
+
+var today=getTodayLocal();
+
+document.getElementById("startDate").value=today;
+document.getElementById("endDate").value=today;
+
+document.getElementById("startDate").max=today;
+document.getElementById("endDate").max=today;
+
+loadUsers();
+loadDashboard();
+loadSummary();
+
+setInterval(function(){
+
+if(!document.hidden){
+loadSummary();
+}
+
+},120000);
+
+};
+
+const user = localStorage.getItem("lock_user");
+const role = localStorage.getItem("lock_role");
+
+document.getElementById("userInfo").innerHTML =
+"<i class='fa fa-user'></i> <b>"+(user || "-")+"</b> &nbsp;|&nbsp; "+(role || "-");
+
+function goCheck(){
+window.location="../check/";
+}
+
+function goLock(){
+window.location="../lock/";
+}
+
+function logout(){
+localStorage.clear();
+window.location="../lockcheck-login/";
+}
+
+function showSessionPopup(type){
+
+let title="Session Expired";
+let msg="Your session has expired. Please login again.";
+
+if(type==="DEVICE"){
+title="Logged In From Another Device";
+msg="Your account has been logged in from another device.";
+}
+
+document.getElementById("sessionTitle").innerText=title;
+document.getElementById("sessionMsg").innerText=msg;
+
+document.getElementById("sessionPopup").style.display="flex";
+
+setTimeout(()=>{
+localStorage.clear();
+window.location="../lockcheck-login/";
+},3000);
+
+}
+
+/* =========================
+MOBILE SAFE IDLE LOGOUT
+========================= */
+
+let lastActivity = Date.now();
+const IDLE_LIMIT = 1200000; // 20 min
+let idleTriggered = false;
+
+function updateActivity(){
+lastActivity = Date.now();
+}
+
+function checkIdle(){
+
+if(!idleTriggered && Date.now() - lastActivity > IDLE_LIMIT){
+idleTriggered = true;
+showSessionPopup("EXPIRED");
+}
+
+}
+
+setInterval(function(){
+
+var today=getTodayLocal();
+
+var start=document.getElementById("startDate").value;
+var end=document.getElementById("endDate").value;
+
+if(start===today && end===today){
+loadDashboard();
+}
+
+},60000);
+
+setInterval(checkIdle, 5000);
+
+[
+"touchstart",
+"touchmove",
+"click",
+"scroll",
+"keydown",
+"mousemove"
+].forEach(event=>{
+document.addEventListener(event, updateActivity, {passive:true});
+});
+
+document.addEventListener("visibilitychange",()=>{
+
+if(!document.hidden){
+
+if(Date.now() - lastActivity > IDLE_LIMIT){
+showSessionPopup("EXPIRED");
+}
+
+}
+
+});
+/* SESSION MONITOR */
+
+setInterval(checkSession,30000);
+
+</script>
+
+<div id="sessionPopup">
+<div class="session-box">
+
+<i class="fa fa-lock"></i>
+
+<div class="session-title" id="sessionTitle">
+Session Expired
+</div>
+
+<div class="session-msg" id="sessionMsg">
+Please login again.
+</div>
+
+<div class="session-count">
+Redirecting to login...
+</div>
+
+</div>
+</div>
+  
+</body>
+</html>
