@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>DocuTrack System</title>
+
+<style>
+/* ===== GLOBAL VARIABLES & RESET ===== */
+:root {
+  --primary: #0088ff;
+  --primary-hover: #0066cc;
+  --bg-color: #f4f7fe;
+  --sidebar-bg: #0b1437;
+  --text-main: #2b3674;
+  --text-muted: #a3aed1;
+  --card-bg: #ffffff;
+  --border-radius: 20px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+  
+body {
+  background: var(--bg-color);
+  color: var(--text-main);
+  overflow-x: hidden;
+}
+
+button {
+  transition: var(--transition);
+}
+
+/* ===== LAYOUT ===== */
+.app {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* ===== SIDEBAR (DESKTOP) ===== */
+.sidebar {
+  width: 260px;
+  background: var(--sidebar-bg);
+  color: white;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative; 
+  height: 100vh;
+  z-index: 100;
+
+  flex-shrink: 0; /* ✅ TAMBAH SINI */
+}
+
+.sidebar > div:first-child {
+  flex: 1;
+}
+
+.menu {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar h2 {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.sidebar p {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.sidebar button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 18px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar button i {
+  font-size: 20px;
+}
+
+@media (hover: hover) {
+  .sidebar button:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    transform: translateX(4px);
+  }
+}
+
+.sidebar button.active {
+  background: linear-gradient(135deg, var(--primary), #4318FF);
+  color: white;
+  box-shadow: 0 10px 20px rgba(67, 24, 255, 0.2);
+}
+
+.sidebar-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 8px 16px rgba(239, 68, 68, 0.2);
+}
+
+.sidebar-footer {
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-footer a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* ===== MAIN AREA ===== */
+.main {
+  flex: 1;
+  padding: 40px 30px;
+  margin-left: 0;   /* 🔥 BUANG 260px */
+  width: 100%;
+}
+
+.box {
+  background: var(--card-bg);
+  padding: 30px;
+  margin-bottom: 24px;
+  border-radius: var(--border-radius);
+  box-shadow: 0 18px 40px rgba(112, 144, 176, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  animation: fadeIn 0.4s ease;
+}
+
+.box h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-main);
+}
+
+.box h3 i {
+  color: var(--primary);
+  font-size: 24px;
+}
+
+/* ===== INPUTS & FORMS ===== */
+.row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+input {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 14px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-main);
+  transition: var(--transition);
+  outline: none;
+}
+
+input::placeholder {
+  color: #94a3b8;
+}
+
+input:focus {
+  border-color: var(--primary);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(0, 136, 255, 0.1);
+}
+
+button.action {
+  background: linear-gradient(135deg, var(--primary), #4318FF);
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  border: none;
+  border-radius: 14px;
+  padding: 16px;
+  width: 100%;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(67, 24, 255, 0.2);
+}
+
+button.action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 24px rgba(67, 24, 255, 0.3);
+}
+
+button.action:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* ===== DASHBOARD CARDS ===== */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+  
+.kpi {
+  color: white;
+  padding: 20px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.kpi-title {
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.9;
+}
+
+.kpi-title i { font-size: 18px; }
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.kpi-docs { background: linear-gradient(135deg, #8b5cf6, #6d28d9); box-shadow: 0 10px 20px rgba(109, 40, 217, 0.2); }
+.kpi-ic { background: linear-gradient(135deg, #10b981, #047857); box-shadow: 0 10px 20px rgba(4, 120, 87, 0.2); }
+.kpi-acc { background: linear-gradient(135deg, #f59e0b, #b45309); box-shadow: 0 10px 20px rgba(180, 83, 9, 0.2); }
+.kpi-today { background: linear-gradient(135deg, #0ea5e9, #0369a1); box-shadow: 0 10px 20px rgba(3, 105, 161, 0.2); }
+
+/* ===== FILE UPLOAD & ITEMS ===== */
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 40px 20px;
+  background: #f8fafc;
+  cursor: pointer;
+  text-align: center;
+  transition: var(--transition);
+  margin-top: 10px;
+  margin-bottom: 16px;
+}
+
+.dropzone:hover {
+  border-color: var(--primary);
+  background: #f0f7ff;
+}
+
+.dropzone i {
+  font-size: 42px;
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+
+.drop-title {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-main);
+}
+
+.drop-sub {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.file-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  border: 1px solid #e2e8f0;
+  transition: var(--transition);
+}
+
+.file-card:hover {
+  border-color: #cbd5e1;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.file-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.file-left i {
+  font-size: 26px;
+  color: var(--primary);
+}
+
+.file-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.file-info strong {
+  font-size: 14px;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.file-info span {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.file-remove {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.file-remove:hover {
+  background: #ef4444;
+  color: white;
+}
+
+/* ===== RECENT & SEARCH ITEMS ===== */
+.file-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 16px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  transition: var(--transition);
+}
+
+@media (hover: hover) {
+  .file-item:hover {
+    box-shadow: 0 8px 24px rgba(112, 144, 176, 0.12);
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+  }
+}
+
+.file-item:active {
+  transform: scale(0.98);
+}
+
+.file-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-top: 4px;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+/* ===== MODAL & OVERLAY ===== */
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(11, 20, 55, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal {
+  background: white;
+  padding: 30px 24px;
+  border-radius: 24px;
+  text-align: center;
+  width: 90%;
+  max-width: 340px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: modalScale 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalScale {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-icon {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 20px;
+  position: relative;
+}
+
+.modal-icon.loading {
+  border: 4px solid #f1f5f9;
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s cubic-bezier(0.55, 0.15, 0.45, 0.85) infinite;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.modal-sub {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+#okBtn {
+  display: none;
+  background: linear-gradient(135deg, var(--primary), #4318FF);
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  width: 100%;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(67, 24, 255, 0.2);
+}
+
+#okBtn:hover {
+  transform: translateY(-2px);
+}
+
+/* Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.check-svg { width: 100%; height: 100%; }
+.check-circle {
+  stroke: #10b981;
+  stroke-width: 4;
+  stroke-dasharray: 160;
+  stroke-dashoffset: 160;
+  animation: drawCircle 0.5s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+.check-mark {
+  stroke: #10b981;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: drawTick 0.4s ease 0.4s forwards;
+}
+
+@keyframes drawCircle { to { stroke-dashoffset: 0; } }
+@keyframes drawTick { to { stroke-dashoffset: 0; } }
+
+/* ===== MOBILE RESPONSIVE ===== */
+.mobile-header {
+  display: none !important;
+}
+
+.bottom-nav {
+  display: none;
+}
+
+.search-loader {
+  width: 36px;
+  height: 36px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 30px auto;
+}
+
+@media (max-width: 768px) {
+  .app { flex-direction: column; }
+  .sidebar { display: none; }
+  .file-name {
+    font-size: 12px;
+    line-height: 1.3;
+  }
+    .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+    .mobile-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--text-main);
+    padding: 16px;
+    font-weight: 700;
+    font-size: 18px;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    border-bottom: 1px solid #e2e8f0;
+    }
+
+  .kpi {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .kpi-value {
+    font-size: 20px;
+  }
+
+  .kpi-title {
+    font-size: 11px;
+  }
+
+  .latest-row {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 6px;
+    background: #f8fafc;
+    padding: 6px 8px;
+    border-radius: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+.main {
+  padding: 10px 12px;
+  margin-left: 0;
+  width: 100%;
+}
+
+.box {
+  padding: 20px 16px;
+  border-radius: 0;      /* optional: buang curve */
+  margin: 0;             /* 🔥 full screen */
+}
+
+  .row { flex-direction: column; gap: 12px; }
+
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 12px 8px calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    justify-content: space-around;
+    z-index: 1000;
+    box-shadow: 0 -10px 25px rgba(0,0,0,0.05);
+  }
+
+  .bottom-nav button {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    padding: 8px 4px;
+    cursor: pointer;
+  }
+
+  .bottom-nav button i {
+    font-size: 24px;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .bottom-nav button.active {
+    color: var(--primary);
+  }
+
+  .bottom-nav button.active i {
+    transform: translateY(-4px);
+  }
+
+  .bottom-nav button.active::after {
+    content: "";
+    width: 24px;
+    height: 4px;
+    background: var(--primary);
+    border-radius: 10px;
+    position: absolute;
+    bottom: 2px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<div class="sidebar">
+  <div>
+    <h2><i class="ph-fill ph-folder"></i> DocuTrack</h2>
+    <p>FILE MANAGEMENT</p>
+
+    <div class="menu">
+      <button onclick="showPage('dashboard', this, true)">
+        <i class="ph-fill ph-squares-four"></i> Dashboard
+      </button>
+      <button onclick="showPage('upload', this)" class="active">
+        <i class="ph-fill ph-cloud-arrow-up"></i> Upload File
+      </button>
+      <button onclick="showPage('search', this)">
+        <i class="ph-fill ph-magnifying-glass"></i> Search Doc
+      </button>
+    </div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <button onclick="logout()" class="logout-btn">
+      <i class="ph-fill ph-sign-out"></i> Logout
+    </button>
+    <div class="sidebar-footer">
+      Powered by <a href="https://sczpnet.org" target="_blank">sczpnet.org</a>
+    </div>
+  </div>
+</div>
+
+<div class="mobile-header">
+  <i class="ph-fill ph-folder" style="color:var(--primary); font-size:22px;"></i> DocuTrack
+</div>
+
+<div class="main">
+
+  <div id="login" class="box" style="display:none; max-width:420px; margin: 10vh auto;">
+    <h3 style="justify-content: center; font-size: 24px; margin-bottom: 30px;">
+      <i class="ph-fill ph-lock-key"></i> Secure Login
+    </h3>
+    <div class="form-group">
+      <input type="text" id="userId" placeholder="User ID">
+      <input type="password" id="password" placeholder="Password">
+      <button class="action" onclick="login()" style="margin-top: 10px;">Login</button>
+    </div>
+    <p id="loginMsg" style="text-align: center; color: #ef4444; margin-top: 16px; font-weight: 500; font-size: 14px;"></p>
+  </div>
+
+  <div id="dashboard" class="box">
+    <h3><i class="ph-fill ph-chart-bar"></i> Overview</h3>
+
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:30px; background: #f8fafc; padding: 16px 20px; border-radius: 16px; border: 1px solid #e2e8f0;">
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <div id="welcomeName" style="font-weight:700; font-size:18px; color: var(--text-main);"></div>
+        <div id="userRole" style="font-size:13px; font-weight: 600; color:#64748b; text-transform: uppercase; letter-spacing: 0.5px;"></div>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi kpi-docs">
+        <div class="kpi-title"><i class="ph-fill ph-folder"></i> Documents</div>
+        <div class="kpi-value" id="kpiDocs">0</div>
+      </div>
+      <div class="kpi kpi-ic">
+        <div class="kpi-title"><i class="ph-fill ph-identification-card"></i> IC Records</div>
+        <div class="kpi-value" id="kpiIC">0</div>
+      </div>
+      <div class="kpi kpi-acc">
+        <div class="kpi-title"><i class="ph-fill ph-briefcase"></i> Accounts</div>
+        <div class="kpi-value" id="kpiAcc">0</div>
+      </div>
+      <div class="kpi kpi-today">
+        <div class="kpi-title"><i class="ph-fill ph-trend-up"></i> Today's Uploads</div>
+        <div class="kpi-value" id="kpiToday">0</div>
+      </div>
+    </div>
+
+    <div style="margin-top:32px;">
+      <div style="font-weight:700; font-size:16px; margin-bottom:16px; display: flex; align-items: center; gap: 8px;">
+        <i class="ph-fill ph-clock-counter-clockwise" style="color:var(--primary); font-size:20px;"></i> Recent Activity
+      </div>
+      <div id="recentList"></div>
+    </div>
+  </div>
+
+  <div id="upload" class="box" style="display:none;">
+    <h3><i class="ph-fill ph-cloud-arrow-up"></i> Upload Document</h3>
+    
+    <div class="row" style="margin-top: 20px;">
+      <input type="text" id="ic" placeholder="Enter IC (e.g. XXXXXX-XX-XXXX)">
+      <input type="text" id="account" placeholder="Enter Account No" inputmode="numeric">
+    </div>
+
+    <label for="files" class="dropzone">
+      <i class="ph-fill ph-file-arrow-up"></i>
+      <div class="drop-title">Drop your files here</div>
+      <div class="drop-sub">or click to browse (Max 4 files)</div>
+    </label>
+
+    <input type="file" id="files" multiple style="display:none;">
+    <div id="fileList" style="margin-top:16px; margin-bottom: 24px;"></div>
+    
+    <button class="action" onclick="upload()">Secure Upload</button>
+    <p id="msg"></p>
+  </div>
+
+  <div id="search" class="box" style="display:none;">
+    <h3><i class="ph-fill ph-magnifying-glass"></i> Search Documents</h3>
+
+    <div class="form-group" style="margin-bottom: 24px;">
+      <input type="text" id="searchIC" placeholder="Enter IC Number (e.g. XXXXXX-XX-XXXX)" maxlength="14">
+      <button class="action" onclick="search()">Search Records</button>
+    </div>
+
+    <div id="result"></div>
+  </div>
+
+</div>
+
+<div class="bottom-nav">
+  <button onclick="showPage('dashboard', this, true)" class="active">
+    <i class="ph-fill ph-squares-four"></i> Home
+  </button>
+  <button onclick="showPage('upload', this)">
+    <i class="ph-fill ph-cloud-arrow-up"></i> Upload
+  </button>
+  <button onclick="showPage('search', this)">
+    <i class="ph-fill ph-magnifying-glass"></i> Search
+  </button>
+  <button onclick="logout()">
+    <i class="ph-fill ph-sign-out"></i> Logout
+  </button>
+</div>
+
+</div>
+
+<div id="overlay">
+  <div class="modal">
+    <div class="modal-icon" id="modalIcon">
+      <svg class="check-svg" viewBox="0 0 52 52" style="display:none;">
+        <circle class="check-circle" cx="26" cy="26" r="25" fill="none"/>
+        <path class="check-mark" fill="none" d="M14 27l7 7 16-16"/>
+      </svg>
+    </div>
+    <div class="modal-title" id="modalTitle">Processing...</div>
+    <div class="modal-sub" id="modalSub">Please wait</div>
+    <button id="okBtn" onclick="closeModal()">Done</button>
+  </div>
+</div>
+
+<script>
+// ==========================================
+// JAVASCRIPT LOGIC (100% UNTOUCHED)
+// ==========================================
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyd2deFraEXRG9d6fwghdfd6ZdGFg17-OKWoTHutEl8uHIhWSv33QzHwkgzqBUt6dIPjg/exec";
+
+function showPage(page, el, isClick = false) {
+  localStorage.setItem("activePage", page);
+  document.getElementById("dashboard").style.display = "none";
+  document.getElementById("upload").style.display = "none";
+  document.getElementById("search").style.display = "none";
+  document.getElementById("login").style.display = "none";
+
+  document.getElementById(page).style.display = "block";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  document.querySelectorAll(".sidebar button, .bottom-nav button").forEach(btn => {
+    btn.classList.remove("active");
+  });
+  if (el) el.classList.add("active");
+
+  if (page === "search") {
+    document.getElementById("result").innerHTML = "";
+    document.getElementById("searchIC").value = "";
+  }
+
+  if (page === "upload") {
+    document.getElementById("ic").value = "";
+    document.getElementById("account").value = "";
+    document.getElementById("files").value = "";
+    document.getElementById("msg").innerText = "";
+    selectedFiles = [];
+    renderFileList();
+  }
+  
+  if (page === "dashboard" && isClick) {  
+    location.reload();
+  }
+
+  if (page === "login") {
+    document.querySelector(".sidebar").style.display = "none";
+    document.querySelector(".bottom-nav").style.display = "none";
+  } else {
+    if (window.innerWidth <= 768) {
+      document.querySelector(".sidebar").style.display = "none";
+      document.querySelector(".bottom-nav").style.display = "flex";
+    } else {
+      document.querySelector(".sidebar").style.display = "flex";
+      document.querySelector(".bottom-nav").style.display = "none";
+    }
+  }
+}
+
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    let reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+let selectedFiles = [];
+
+document.getElementById("files").addEventListener("change", function(e) {
+  let newFiles = Array.from(e.target.files);
+  selectedFiles = selectedFiles.concat(newFiles);
+
+  if (selectedFiles.length > 4) {
+    alert("Maximum 4 files only!");
+    selectedFiles = selectedFiles.slice(0, 4);
+  }
+
+  renderFileList();
+  this.value = "";
+});
+
+function renderFileList() {
+  const list = document.getElementById("fileList");
+  list.innerHTML = "";
+  selectedFiles.forEach((file, index) => {
+    let sizeKB = (file.size / 1024).toFixed(1);
+    list.innerHTML += `
+      <div class="file-card">
+        <div class="file-left">
+          <i class="ph-fill ph-file-text"></i>
+          <div class="file-info">
+            <strong>${file.name}</strong>
+            <span>${sizeKB} KB</span>
+          </div>
+        </div>
+        <button class="file-remove" onclick="removeFile(${index})">
+          <i class="ph-bold ph-x"></i>
+        </button>
+      </div>
+    `;
+  });
+}
+
+function removeFile(index) {
+  selectedFiles.splice(index, 1);
+  renderFileList();
+}
+
+async function login() {
+  const userId = document.getElementById("userId").value;
+  const password = document.getElementById("password").value;
+  document.getElementById("overlay").style.display = "flex";
+  document.getElementById("modalIcon").className = "modal-icon loading";
+  document.getElementById("modalTitle").innerText = "Authenticating...";
+  document.getElementById("modalSub").innerText = "Securing your session";
+  document.getElementById("okBtn").style.display = "none";
+  document.querySelector(".check-svg").style.display = "none";
+
+  try {
+    const res = await fetch(WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "login", userId: userId, password: password })
+    });
+    const data = await res.json();
+
+    if (data.status === "success") {
+      const svg = document.querySelector(".check-svg");
+      svg.style.display = "none";
+      svg.offsetHeight;
+      svg.style.display = "block";
+      document.getElementById("modalIcon").className = "modal-icon";
+      document.getElementById("modalTitle").innerText = "Access Granted";
+      document.getElementById("modalSub").innerText = "Welcome back";
+      localStorage.setItem("user", JSON.stringify(data));
+      setTimeout(() => {
+        document.getElementById("overlay").style.display = "none";
+        showPage("dashboard");
+        applyRole(data.role);
+        loadDashboard();
+      }, 1200);
+    } else {
+      document.getElementById("overlay").style.display = "none";
+      document.getElementById("loginMsg").innerText = "Invalid login";
+    }
+  } catch (err) {
+    alert("Login failed!");
+    console.error(err);
+    location.reload();
+  }
+}
+
+function logout() {
+  localStorage.removeItem("user");
+  document.getElementById("overlay").style.display = "flex";
+  document.getElementById("modalTitle").innerText = "Logging out...";
+  document.getElementById("modalSub").innerText = "Ending session";
+  setTimeout(() => { location.reload(); }, 800);
+}
+
+function applyRole(role) {
+  const user = JSON.parse(localStorage.getItem("user"));
+  document.getElementById("welcomeName").innerHTML = "<i class='ph-fill ph-user'></i> <span style='margin-left:4px;'>Welcome, " + user.userId + "</span>";
+  document.getElementById("userRole").innerText = "Role: " + role;
+  if (role === "MASTER") { console.log("MASTER ACCESS"); }
+  if (role === "USER") { console.log("USER ACCESS"); }
+}
+  
+async function loadDashboard() {
+  try {
+    const res = await fetch(WEB_APP_URL + "?dashboard=1");
+    const data = await res.json();
+    document.getElementById("kpiDocs").innerText = data.docs || 0;
+    document.getElementById("kpiIC").innerText = data.ic || 0;
+    document.getElementById("kpiAcc").innerText = data.account || 0;
+    document.getElementById("kpiToday").innerText = data.today || 0;
+    
+    let html = "";
+    (data.recent || []).forEach(r => {
+      html += `
+        <div class="file-item" onclick="goToSearch('${r.ic}')" style="cursor:pointer;">
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size:13px;">
+            <div>👤 <span style="font-weight:600; color:var(--text-main);">IC:</span> ${r.ic}</div>
+            <div>💳 <span style="font-weight:600; color:var(--text-main);">Acc:</span> ${r.account}</div>
+            <div>📁 <span style="font-weight:600; color:var(--text-main);">Files:</span> ${r.total}</div>
+            <div>⏱ <span style="font-weight:600; color:var(--text-main);">Time:</span> ${r.time}</div>
+          </div>
+          <div style="font-size:12px; color:#64748b; margin-top:8px; border-top:1px solid #f1f5f9; padding-top:8px;">
+            🧑 Uploaded by: <span style="font-weight:600;">${r.user}</span>
+          </div>
+        </div>
+      `;
+    });
+    document.getElementById("recentList").innerHTML = html || '<div style="color:#888; font-size:14px; text-align:center; padding: 20px;">No activity today</div>';
+  } catch (e) {
+    console.error("Dashboard load error", e);
+  }
+}
+
+window.addEventListener("load", function() {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user) {
+    showPage("login");
+    return;
+  }
+  const savedPage = localStorage.getItem("activePage") || "dashboard";
+  showPage(savedPage);
+  applyRole(user.role);
+  loadDashboard();
+  document.querySelectorAll(".sidebar button, .bottom-nav button").forEach(btn => {
+    btn.classList.remove("active");
+    if (btn.getAttribute("onclick")?.includes(savedPage)) {
+      btn.classList.add("active");
+    }
+  });
+});
+
+async function upload() {
+  const btn = document.querySelector("#upload button");
+  if (btn.disabled) return;
+  btn.style.display = "none";
+  const ic = document.getElementById("ic").value.trim();
+  const account = document.getElementById("account").value.trim();
+
+  if (!ic || !account || selectedFiles.length === 0) {
+    alert("Enter IC, Account & select file!");
+    btn.style.display = "block";
+    return;
+  }
+
+  document.getElementById("overlay").style.display = "flex";
+  document.getElementById("modalIcon").className = "modal-icon loading";
+  document.getElementById("modalTitle").innerText = "Uploading...";
+  document.getElementById("modalSub").innerText = `Uploading ${selectedFiles.length} file(s) for IC: ${ic}`;
+  document.getElementById("okBtn").style.display = "none";
+  document.querySelector(".check-svg").style.display = "none";
+
+  try {
+    let filesData = await Promise.all(selectedFiles.map(async (file) => {
+      let processedFile = file;
+      if (file.type.startsWith("image/")) {
+        processedFile = await compressImage(file);
+      }
+      let base64 = await toBase64(processedFile);
+      return {
+        name: processedFile.name,
+        type: processedFile.type,
+        data: base64.split(",")[1]
+      };
+    }));
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    let payload = { ic, account, userId: user.userId, files: filesData };
+
+    await fetch(WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+    const svg = document.querySelector(".check-svg");
+    svg.style.display = "none";
+    svg.offsetHeight; 
+    svg.style.display = "block";
+    document.getElementById("modalIcon").className = "modal-icon";
+    document.getElementById("modalTitle").innerText = "Upload Successful";
+    document.getElementById("modalSub").innerText = `Documents saved for IC: ${ic}`;
+    document.getElementById("okBtn").style.display = "block";
+  } catch (err) {
+    alert("Upload failed!");
+    console.error(err);
+    location.reload();
+  }
+}
+
+async function compressImage(file) {
+  if (file.size <= 2 * 1024 * 1024) {
+    return file;
+  }
+  return new Promise((resolve) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = function(e) { img.src = e.target.result; };
+    img.onload = function() {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      let maxWidth = 1280;
+      let scale = Math.min(maxWidth / img.width, 1);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      let quality = 0.8;
+      function tryCompress() {
+        const isPNG = file.type === "image/png";
+        const format = isPNG ? "image/png" : "image/jpeg";
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            resolve(file);
+            return;
+          }
+          if (blob.size > 1.5 * 1024 * 1024 && quality > 0.4) {
+            quality -= 0.05;
+            tryCompress();
+          } else {
+            resolve(new File([blob], file.name, { type: format }));
+          }
+        }, format, quality);
+      }
+      tryCompress();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+  
+let lastSearch = "";
+async function search() {
+  const ic = document.getElementById("searchIC").value.trim();
+  if (!ic) {
+    alert("Enter IC!");
+    return;
+  }
+  lastSearch = ic;
+  document.getElementById("result").innerHTML = `
+    <div class="search-loader"></div>
+    <div style="text-align:center; font-weight:600; color:#64748b;">Searching Database...</div>
+  `;
+  const res = await fetch(`${WEB_APP_URL}?ic=${encodeURIComponent(ic)}&_=${Date.now()}`);
+  const data = await res.json();
+  if (ic !== lastSearch) return;
+  let html = data.length === 0 ? "<div style='text-align:center; padding:30px; color:#64748b; font-weight:500;'>No record found.</div>" : "";
+  let grouped = {};
+  data.forEach(d => {
+    if (!grouped[d.account]) { grouped[d.account] = []; }
+    grouped[d.account].push(d);
+  });
+
+  Object.keys(grouped).forEach(acc => {
+    let files = grouped[acc];
+    files.sort((a, b) => {
+      const getDT = (name) => {
+        const m = name.match(/_(\d{8})_(\d{6})/);
+        return m ? m[1] + m[2] : "0";
+      };
+      return getDT(b.file).localeCompare(getDT(a.file));
+    });
+    let count = files.length;
+    let latestFile = files[0].file;
+    let latestUser = files[0].user || "UNKNOWN";
+    let dateMatch = latestFile.match(/_(\d{8})_(\d{6})/);
+    let formattedDate = "Unknown";
+    if (dateMatch) {
+      let d = dateMatch[1];
+      let t = dateMatch[2];
+      let year = d.substring(0, 4), month = d.substring(4, 6), day = d.substring(6, 8);
+      let hour = t.substring(0, 2), min = t.substring(2, 4), sec = t.substring(4, 6);
+      formattedDate = `${day}/${month}/${year} ${hour}:${min}:${sec}`;
+    }
+
+    html += `
+      <div class="file-item">
+        <div style="font-weight:700; font-size: 15px; color: var(--text-main);">
+          📁 Account No: ${acc} 
+          <span style="color:#64748b; font-weight:500; font-size:13px; margin-left:6px;">(${count} ${count > 1 ? "files" : "file"})</span>
+        </div>
+<div class="latest-row">
+  Latest Upload: <strong>${formattedDate}</strong> | 
+  <span>By: ${latestUser}</span>
+</div>
+        <div style="margin-top:12px; border-top: 1px dashed #e2e8f0; padding-top: 12px;">
+    `;
+
+    files.forEach(f => {
+      html += `
+        <div style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+          <div class="file-name" style="margin:0; font-weight:500;">📄 ${f.file}</div>
+          <a href="${f.url}" target="_blank" style="background:var(--bg-color); color:var(--primary); padding:6px 12px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:700; transition:0.2s;">👁 View</a>
+        </div>
+      `;
+    });
+    html += `</div></div>`;
+  });
+  document.getElementById("result").innerHTML = html;
+}
+
+document.getElementById("searchIC").addEventListener("keypress", function(e){
+  if (e.key === "Enter") search();
+});
+
+function goToSearch(ic) {
+  showPage("search");
+  document.getElementById("searchIC").value = ic;
+  search();
+}
+
+function formatIC(value) {
+  value = value.replace(/[^0-9a-zA-Z]/g, "");
+  if (/[a-zA-Z]/.test(value)) { return value.toUpperCase(); }
+  value = value.substring(0, 12);
+  let part1 = value.substring(0, 6);
+  let part2 = value.substring(6, 8);
+  let part3 = value.substring(8, 12);
+  let result = part1;
+  if (part2) result += "-" + part2;
+  if (part3) result += "-" + part3;
+  return result;
+}
+
+function handleICInput(e) {
+  const input = e.target;
+  let start = input.selectionStart;
+  let oldLength = input.value.length;
+  let formatted = formatIC(input.value);
+  input.value = formatted;
+  let newLength = formatted.length;
+  let diff = newLength - oldLength;
+  let newPos = start + diff;
+  input.setSelectionRange(newPos, newPos);
+}
+
+document.getElementById("ic").addEventListener("input", handleICInput);
+document.getElementById("searchIC").addEventListener("input", handleICInput);
+
+document.getElementById("account").addEventListener("input", function(e){
+  let val = e.target.value.replace(/\D/g, ""); 
+  e.target.value = val.substring(0, 10); 
+});
+
+function closeModal() {
+  location.reload();
+}
+</script>
+
+</body>
+</html>
