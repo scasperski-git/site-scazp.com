@@ -947,7 +947,7 @@ setInterval(loadUserSummary,120000);
 const type = localStorage.getItem("lock_type");
 
 if(!type){
-window.location="../lockcheck-login/";
+window.location="../checklock-login/";
 }
 
 if(type=="check"){
@@ -979,7 +979,7 @@ return;
 
 localStorage.clear();
 sessionStorage.clear(); 
-window.location="../lockcheck-login/";
+window.location="../checklock-login/";
 return;
 
 }
@@ -1191,7 +1191,7 @@ if(data=="UNAUTHORIZED"){
 alert("Session expired. Please login again.");
 localStorage.clear();
 sessionStorage.clear(); 
-window.location="../lockcheck-login/";
+window.location="../checklock-login/";
 return;
 
 }
@@ -1249,7 +1249,7 @@ return dateStr;
 function logout(){
 localStorage.clear();
 sessionStorage.clear(); 
-window.location="../lockcheck-login/";
+window.location="../checklock-login/";
 }
 
 function showSuccess(formData){
@@ -1326,7 +1326,7 @@ document.getElementById("sessionPopup").style.display="flex";
 setTimeout(()=>{
 localStorage.clear();
 sessionStorage.clear(); 
-window.location="../lockcheck-login/";
+window.location="../checklock-login/";
 },3000);
 
 }
@@ -1364,7 +1364,7 @@ return;
 
 localStorage.clear();
 sessionStorage.clear();
-window.location="../lockcheck-login/";
+window.location="../checklock-login/";
 
 }
 
