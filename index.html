@@ -1,319 +1,129 @@
 <!DOCTYPE html>
+
 <html lang="en">
-  
+
 <head>
-  <meta charset="UTF-8">
-  <title>SCAZP | Personal Site</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Manrope:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 
-  <style>
-    /* VARIABLES FOR DARK MODE - BLUE THEME */
-    :root {
-      --bg-base: #09090b;
-      --card-bg: rgba(24, 24, 27, 0.6);
-      --text-main: #f4f4f5;
-      --text-muted: #a1a1aa;
-      /* Tukar ke warna Biru Moden */
-      --accent-color: #3b82f6; 
-      --accent-light: rgba(59, 130, 246, 0.15);
-      --border-color: rgba(255, 255, 255, 0.08);
-      --radius: 24px;
-    }
+<meta charset="UTF-8">
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<title>SCAZP | Personal Site</title>
 
-    /* BACKGROUND - DARK BLUE MESH GRADIENT */
-    body {
-      font-family: 'Manrope', sans-serif;
-      background-color: var(--bg-base);
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.3) 0px, transparent 50%),    /* Deep Blue */
-        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),  /* Neon Blue */
-        radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.15) 0px, transparent 50%), /* Sky Blue */
-        radial-gradient(at 0% 100%, rgba(37, 99, 235, 0.15) 0px, transparent 50%);   /* Royal Blue */
-      background-attachment: fixed;
-      color: var(--text-main);
-      line-height: 1.6;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    /* FLOATING NAVBAR */
-    .navbar {
-      position: fixed;
-      top: 20px;
-      background: rgba(9, 9, 11, 0.6);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: 0.8rem 1.5rem;
-      border-radius: 50px;
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      border: 1px solid var(--border-color);
-    }
+<link rel="stylesheet" href="style.css">
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700;
-      font-size: 1.1rem;
-      letter-spacing: -0.5px;
-    }
-
-    .logo {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--accent-color);
-      object-fit: cover;
-    }
-
-    /* BENTO GRID CONTAINER */
-    main {
-      width: 100%;
-      max-width: 1000px;
-      padding: 100px 20px 40px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-
-    /* COMMON CARD STYLES */
-    .bento-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-radius: var(--radius);
-      padding: 2.5rem;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-      transition: transform 0.3s ease, border-color 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      border: 1px solid var(--border-color);
-    }
-
-    .bento-card:hover {
-      transform: translateY(-5px);
-      border-color: rgba(255, 255, 255, 0.15);
-    }
-
-    /* HERO CARD */
-    .hero-card {
-      grid-column: 1 / -1;
-      text-align: center;
-      align-items: center;
-      background: linear-gradient(135deg, rgba(39, 39, 42, 0.4) 0%, rgba(24, 24, 27, 0.6) 100%);
-      padding: 4rem 2rem;
-    }
-
-    .tag {
-      font-family: 'Fira Code', monospace;
-      color: var(--accent-color);
-      background: var(--accent-light);
-      padding: 0.4rem 1rem;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      margin-bottom: 1.5rem;
-      display: inline-block;
-      border: 1px solid rgba(59, 130, 246, 0.2); /* Border biru */
-    }
-
-    .hero-card h1 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(2.5rem, 5vw, 4rem);
-      font-weight: 700;
-      letter-spacing: -2px;
-      line-height: 1.2;
-      margin-bottom: 0.5rem;
-    }
-
-    .hero-card h1 span {
-      /* Gradient teks biru */
-      background: linear-gradient(to right, #60a5fa, #3b82f6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .subtitle {
-      font-size: 1.2rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    /* CARD HEADINGS */
-    h2 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.6rem;
-      font-weight: 700;
-      margin-bottom: 1.5rem;
-      letter-spacing: -1px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    /* ABOUT CARD */
-    .about-card {
-      grid-column: span 2;
-    }
-
-    .about-text {
-      color: var(--text-muted);
-      font-size: 1.05rem;
-    }
-
-    .about-strong {
-      color: var(--text-main);
-      font-weight: 700;
-      font-size: 1.3rem;
-      display: block;
-      margin-bottom: 0.8rem;
-    }
-
-    /* SKILLS CARD */
-    .skills-card {
-      grid-column: span 1;
-    }
-
-    .skills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.6rem;
-      list-style: none;
-    }
-
-    .skills li {
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--text-main);
-      padding: 0.6rem 1rem;
-      border-radius: 12px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      border: 1px solid var(--border-color);
-    }
-
-    /* CONTACT CARD */
-    .contact-card {
-      grid-column: 1 / -1;
-      text-align: center;
-      align-items: center;
-      /* Gradient biru untuk kad contact */
-      background: linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(14, 165, 233, 0.15) 100%);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-    }
-
-    .contact-card h2 {
-      justify-content: center;
-    }
-
-    .contact-card p {
-      color: #d4d4d8;
-      margin-bottom: 2rem;
-    }
-
-    .email {
-      display: inline-block;
-      padding: 1rem 2.5rem;
-      background: var(--text-main);
-      color: var(--bg-base);
-      text-decoration: none;
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700;
-      font-size: 1.1rem;
-      border-radius: 50px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .email:hover {
-      transform: scale(1.05);
-      /* Bayang-bayang biru bila hover */
-      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
-    }
-
-    /* FOOTER */
-    footer {
-      padding: 2rem;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      text-align: center;
-      width: 100%;
-      margin-top: auto;
-    }
-
-    /* RESPONSIVE DESIGN (MOBILE) */
-    @media (max-width: 768px) {
-      main {
-        grid-template-columns: 1fr;
-        padding-top: 90px;
-      }
-      
-      .about-card, .skills-card {
-        grid-column: 1 / -1;
-      }
-    }
-  </style>
 </head>
+
 <body>
 
-  <header class="navbar">
-    <div class="brand">
-      <img src="logo.png" alt="" class="logo">
-      <span>SCAZP.COM</span>
-    </div>
-  </header>
 
-  <main>
-    <header class="bento-card hero-card">
-      <span class="tag">&gt; hello_world</span>
-      <h1>Hi, I'm <span>SCAZP!</span></h1>
-      <p class="subtitle">Front-End Developer · UI/UX Enthusiast</p>
-    </header>
 
-    <section class="bento-card about-card">
-      <h2>About Me</h2>
-      <p class="about-text">
-        <span class="about-strong">Crafting clean interfaces 🎨 | Coding smooth experiences ⚡</span>
-        I enjoy translating ideas into interactive visual designs. My main focus is building modern, responsive, and premium web interfaces to deliver the best possible user experience.
-      </p>
-    </section>
+<!-- NAVBAR -->
 
-    <section class="bento-card skills-card">
-      <h2>Skills</h2>
-      <ul class="skills">
-        <li>HTML & CSS</li>
-        <li>Modern UI Layouts</li>
-        <li>JavaScript</li>
-        <li>Responsive Design</li>
-        <li>Problem Solving</li>
-      </ul>
-    </section>
+<header class="navbar">
 
-    <section class="bento-card contact-card">
-      <h2>Let's Work Together</h2>
-      <p>Have an exciting idea you want to bring to life? Let's talk.</p>
-      <a href="mailto:ceo@scazp.com" class="email">
-        ceo@scazp.com
-      </a>
-    </section>
-  </main>
+<div class="brand">
 
-  <footer>
-    <p>© 2026 scazp.com</p>
-  </footer>
+<img src="logo.png" alt="SCZP Logo" class="logo">
+
+<span>SCAZP | Personal Site</span>
+
+</div>
+
+</header>
+
+
+
+<!-- HERO -->
+
+<header class="hero">
+
+<p class="tag">&gt; hello_world</p>
+
+<h1>Hi, I'm <span>SCAZP!</span></h1>
+
+<p class="subtitle">Aspiring Developer · Tech Enthusiast</p>
+
+</header>
+
+
+
+<main>
+
+<section>
+
+<h2>About</h2>
+
+<p class="about-text">
+
+<span class="about-strong">
+
+Built to learn 📚 | Built to grow 🌱
+
+</span><br>
+
+<span class="about-light">
+
+Turning curiosity into usable code, one commit at a time.
+
+</span>
+
+</p>
+
+</section>
+
+
+
+<section>
+
+<h2>Skills</h2>
+
+<ul class="skills">
+
+<li>HTML & CSS</li>
+
+<li>Basic JavaScript</li>
+
+<li>Git & GitHub</li>
+
+<li>Learning Everyday 🚀</li>
+
+</ul>
+
+</section>
+
+
+
+<section>
+
+<h2>Contact</h2>
+
+<p>
+
+Email:
+
+<a href="mailto:ceo@scazp.com" class="email">
+
+ceo@scazp.com
+
+</a>
+
+</p>
+
+</section>
+
+</main>
+
+
+
+<footer>
+
+<p>© 2026 SCAZP.COM</p>
+
+</footer>
+
+
 
 </body>
+
 </html>
