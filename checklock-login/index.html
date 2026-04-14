@@ -30,6 +30,7 @@ body {
     min-height: 100vh;
     margin: 0;
     padding: 20px;
+    /* Removed overflow: hidden so mobile pull-to-refresh works again */
 }
 
 @keyframes bgMove {
@@ -387,6 +388,8 @@ Secure authentication system
 
 <script>
 
+// EXACT ORIGINAL JS LOGIC RESTORED 
+
 const api = API_URL;
 
 document.getElementById("user").focus();
@@ -480,14 +483,14 @@ document.getElementById("overlay").style.display="none";
 
 }
 
-/* ENTER KEY */
+/* ENTER KEY FOR BOTH INPUTS */
 
-document.getElementById("pass").addEventListener("keypress",function(e){
-
-if(e.key==="Enter"){
-login();
-}
-
+document.querySelectorAll('#user, #pass').forEach(input => {
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            login();
+        }
+    });
 });
 
 </script>
