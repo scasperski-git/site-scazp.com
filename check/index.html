@@ -681,7 +681,7 @@ async function checkSession(){
 
 try{
 
-const res = await fetch(api+"?action=session&token="+token);
+const res = await fetch(api+"?action=session&token="+token+"&api_key=SCZP_SECURE_2026");
 const data = await res.json();
 
 if(data.status !== "ACTIVE"){
@@ -815,7 +815,7 @@ result.innerHTML=
 
 try{
 
-const res = await fetch(api+"?acc_no="+encodeURIComponent(acc)+"&token="+token);
+const res = await fetch(api+"?acc_no="+encodeURIComponent(acc)+"&token="+token+"&api_key=SCZP_SECURE_2026");
 
 const data=await res.json();
 
