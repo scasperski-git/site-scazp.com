@@ -963,7 +963,7 @@ function goMaster(){
 window.location="../menumaster/";
 }
 
-fetch(api+"?action=branches&token="+token)
+fetch(api+"?action=branches&token="+token+"&api_key=SCZP_SECURE_2026")
 .then(res=>res.json())
 .then(data=>{
 
@@ -1102,7 +1102,7 @@ var dca = localStorage.getItem("lock_user");
 document.getElementById("userSummary").innerText =
 "Today: loading...";
 
-fetch(api+"?action=dashboard&token="+token+"&dca="+dca)
+fetch(api+"?action=dashboard&token="+token+"&dca="+dca+"&api_key=SCZP_SECURE_2026")
 .then(r=>r.json())
 .then(data=>{
 
@@ -1176,6 +1176,7 @@ formData.append("branch_name",branchName);
 
 formData.append("token",token);
 formData.append("user",user);
+formData.append("api_key","SCZP_SECURE_2026");
 
 fetch(api,{
 method:"POST",
@@ -1354,7 +1355,7 @@ async function checkSession(){
 
 try{
 
-const res = await fetch(api+"?action=session&token="+token);
+const res = await fetch(api+"?action=session&token="+token+"&api_key=SCZP_SECURE_2026");
 const data = await res.json();
 
 if(data.status !== "ACTIVE"){
@@ -1442,7 +1443,7 @@ document.getElementById("nextBtn").disabled = true;
 
 try{
 
-const res = await fetch(api+"?action=mylocks&token="+token);
+const res = await fetch(api+"?action=mylocks&token="+token+"&api_key=SCZP_SECURE_2026");
 const data = await res.json();
 
 if(data.status){
