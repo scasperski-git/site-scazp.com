@@ -612,7 +612,7 @@ return year + "-" + month + "-" + day;
   
 function loadUsers(){
 
-fetch(api+"?action=users&token="+token)
+fetch(api+"?action=users&token="+token+"&api_key=SCZP_SECURE_2026")
 .then(r=>r.json())
 .then(list=>{
 
@@ -642,7 +642,7 @@ select.appendChild(opt);
 
 function loadSummary(){
 
-fetch(api+"?action=summary&token="+token)
+fetch(api+"?action=summary&token="+token+"&api_key=SCZP_SECURE_2026")
 .then(r=>r.json())
 .then(data=>{
 
@@ -693,7 +693,7 @@ async function checkSession(){
 
 try{
 
-const res = await fetch(api+"?action=session&token="+token);
+const res = await fetch(api+"?action=session&token="+token+"&api_key=SCZP_SECURE_2026");
 const data = await res.json();
 
 if(data.status !== "ACTIVE"){
@@ -726,7 +726,7 @@ var dca=document.getElementById("dcaFilter").value;
 var start=document.getElementById("startDate").value;
 var end=document.getElementById("endDate").value;
 
-var url=api+"?action=dashboard&token="+token;
+var url=api+"?action=dashboard&token="+token+"&api_key=SCZP_SECURE_2026";
 
 if(dca) url+="&dca="+dca;
 if(start) url+="&start="+start;
