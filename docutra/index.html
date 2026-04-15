@@ -21,11 +21,6 @@
   --card-bg: #ffffff;
   --border-radius: 20px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  /* Neumorphism Variables */
-  --neo-bg: #e6eef5; 
-  --neo-shadow-dark: #c5d3e8;
-  --neo-shadow-light: #ffffff;
 }
 
 * {
@@ -64,7 +59,6 @@ button {
   position: relative; 
   height: 100vh;
   z-index: 100;
-
   flex-shrink: 0;
 }
 
@@ -711,7 +705,9 @@ button.action:active {
   }
 }
 
-/* ===== NEUMORPHISM LOGIN UI ===== */
+/* ========================================= */
+/* PREMIUM DARK MODE LOGIN (VERCEL/LINEAR STYLE) */
+/* ========================================= */
 #login[style*="display: block"] {
   display: flex !important;
 }
@@ -719,7 +715,8 @@ button.action:active {
 #login {
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
-  background: var(--neo-bg);
+  background-color: #000000;
+  background-image: radial-gradient(circle at 50% -10%, #171725 0%, #000000 70%);
   z-index: 9999;
   justify-content: center; align-items: center;
   margin: 0 !important; max-width: none !important;
@@ -727,108 +724,113 @@ button.action:active {
   border-radius: 0 !important; box-shadow: none !important;
 }
 
-.neo-panel {
-  background: var(--neo-bg);
-  border-radius: 30px;
-  padding: 50px 40px;
+.dark-panel {
+  background: #09090b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 48px 40px;
   width: 90%;
   max-width: 400px;
-  box-shadow: 12px 12px 24px var(--neo-shadow-dark),
-              -12px -12px 24px var(--neo-shadow-light);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.neo-brand {
+.dark-brand {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 
-.neo-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: var(--neo-bg);
+.dark-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 20px auto;
-  box-shadow: 8px 8px 16px var(--neo-shadow-dark),
-              -8px -8px 16px var(--neo-shadow-light);
+  margin: 0 auto 16px auto;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.4);
 }
 
-.neo-icon i {
-  font-size: 36px;
-  color: var(--primary);
+.dark-icon i {
+  font-size: 28px;
+  color: #ffffff;
 }
 
-.neo-brand h2 {
-  font-size: 26px;
-  font-weight: 800;
-  color: var(--text-main);
-  margin-bottom: 4px;
-}
-
-.neo-brand p {
-  font-size: 11px;
+.dark-brand h2 {
+  font-size: 24px;
   font-weight: 700;
-  color: var(--text-muted);
+  color: #ffffff;
+  margin-bottom: 4px;
+  letter-spacing: -0.5px;
+}
+
+.dark-brand p {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a1a1aa;
   letter-spacing: 2px;
 }
 
-.neo-form {
+.dark-form {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
-.neo-input {
+.dark-input {
   width: 100%;
-  padding: 18px 20px;
-  border: none;
-  border-radius: 16px;
-  background: var(--neo-bg);
-  color: var(--text-main);
+  padding: 14px 16px;
+  border: 1px solid #27272a;
+  border-radius: 10px;
+  background: #18181b;
+  color: #ffffff;
   font-size: 15px;
-  font-weight: 600;
-  outline: none;
-  box-shadow: inset 6px 6px 12px var(--neo-shadow-dark),
-              inset -6px -6px 12px var(--neo-shadow-light);
-  transition: all 0.3s ease;
-}
-
-.neo-input:focus {
-  box-shadow: inset 8px 8px 16px var(--neo-shadow-dark),
-              inset -8px -8px 16px var(--neo-shadow-light);
-}
-
-.neo-input::placeholder {
-  color: #94a3b8;
   font-weight: 500;
-}
-
-.neo-button {
-  width: 100%;
-  padding: 18px;
-  border: none;
-  border-radius: 16px;
-  background: var(--neo-bg);
-  color: var(--primary);
-  font-size: 16px;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 6px 6px 12px var(--neo-shadow-dark),
-              -6px -6px 12px var(--neo-shadow-light);
+  outline: none;
   transition: all 0.2s ease;
-  margin-top: 10px;
 }
 
-.neo-button:active {
-  box-shadow: inset 4px 4px 8px var(--neo-shadow-dark),
-              inset -4px -4px 8px var(--neo-shadow-light);
-  color: var(--primary-hover);
+.dark-input:focus {
+  border-color: #3b82f6;
+  background: #18181b;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.dark-input::placeholder {
+  color: #71717a;
+}
+
+.dark-button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #000000;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.dark-button:hover {
+  background: #f4f4f5;
+  transform: translateY(-1px);
+}
+
+.dark-button:active {
+  transform: translateY(1px);
 }
 </style>
 </head>
@@ -872,20 +874,20 @@ button.action:active {
 <div class="main">
 
   <div id="login" style="display:none;">
-    <div class="neo-panel">
+    <div class="dark-panel">
       
-      <div class="neo-brand">
-        <div class="neo-icon">
+      <div class="dark-brand">
+        <div class="dark-icon">
           <i class="ph-fill ph-folder"></i>
         </div>
         <h2>DocuTrack</h2>
         <p>FILE MANAGEMENT</p>
       </div>
       
-      <div class="neo-form">
-        <input type="text" id="userId" class="neo-input" placeholder="User ID">
-        <input type="password" id="password" class="neo-input" placeholder="Password">
-        <button class="neo-button" onclick="login()">Login</button>
+      <div class="dark-form">
+        <input type="text" id="userId" class="dark-input" placeholder="User ID">
+        <input type="password" id="password" class="dark-input" placeholder="Password">
+        <button class="dark-button" onclick="login()">Log In &rarr;</button>
       </div>
       
       <p id="loginMsg" style="text-align: center; color: #ef4444; margin-top: 20px; font-weight: 600; font-size: 14px;"></p>
@@ -1419,7 +1421,7 @@ function closeModal() {
 }
 
 // ==========================================
-// NEW: ENTER KEY LOGIN LOGIC
+// ENTER KEY LOGIN LOGIC
 // ==========================================
 document.getElementById("userId").addEventListener("keypress", function(e) {
   if (e.key === "Enter") {
