@@ -59,7 +59,8 @@ button {
   position: relative; 
   height: 100vh;
   z-index: 100;
-  flex-shrink: 0;
+
+  flex-shrink: 0; /* ✅ TAMBAH SINI */
 }
 
 .sidebar > div:first-child {
@@ -172,7 +173,7 @@ button {
 .main {
   flex: 1;
   padding: 40px 30px;
-  margin-left: 0;
+  margin-left: 0;   /* 🔥 BUANG 260px */
   width: 100%;
 }
 
@@ -644,8 +645,8 @@ button.action:active {
 
 .box {
   padding: 20px 16px;
-  border-radius: 0;
-  margin: 0;
+  border-radius: 0;      /* optional: buang curve */
+  margin: 0;             /* 🔥 full screen */
 }
 
   .row { flex-direction: column; gap: 12px; }
@@ -704,134 +705,6 @@ button.action:active {
     bottom: 2px;
   }
 }
-
-/* ========================================= */
-/* PREMIUM DARK MODE LOGIN (VERCEL/LINEAR STYLE) */
-/* ========================================= */
-#login[style*="display: block"] {
-  display: flex !important;
-}
-
-#login {
-  position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  background-color: #000000;
-  background-image: radial-gradient(circle at 50% -10%, #171725 0%, #000000 70%);
-  z-index: 9999;
-  justify-content: center; align-items: center;
-  margin: 0 !important; max-width: none !important;
-  border: none !important; padding: 0 !important;
-  border-radius: 0 !important; box-shadow: none !important;
-}
-
-.dark-panel {
-  background: #09090b;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 48px 40px;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.dark-brand {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.dark-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  background: #18181b;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 16px auto;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-}
-
-.dark-icon i {
-  font-size: 28px;
-  color: #ffffff;
-}
-
-.dark-brand h2 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 4px;
-  letter-spacing: -0.5px;
-}
-
-.dark-brand p {
-  font-size: 11px;
-  font-weight: 600;
-  color: #a1a1aa;
-  letter-spacing: 2px;
-}
-
-.dark-form {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.dark-input {
-  width: 100%;
-  padding: 14px 16px;
-  border: 1px solid #27272a;
-  border-radius: 10px;
-  background: #18181b;
-  color: #ffffff;
-  font-size: 15px;
-  font-weight: 500;
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-.dark-input:focus {
-  border-color: #3b82f6;
-  background: #18181b;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
-.dark-input::placeholder {
-  color: #71717a;
-}
-
-.dark-button {
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #000000;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-}
-
-.dark-button:hover {
-  background: #f4f4f5;
-  transform: translateY(-1px);
-}
-
-.dark-button:active {
-  transform: translateY(1px);
-}
 </style>
 </head>
 
@@ -873,26 +746,24 @@ button.action:active {
 
 <div class="main">
 
-  <div id="login" style="display:none;">
-    <div class="dark-panel">
-      
-      <div class="dark-brand">
-        <div class="dark-icon">
-          <i class="ph-fill ph-folder"></i>
-        </div>
-        <h2>DocuTrack</h2>
-        <p>FILE MANAGEMENT</p>
+  <div id="login" class="box" style="display:none; max-width:420px; margin: 10vh auto;">
+    
+    <div style="text-align: center; margin-bottom: 32px;">
+      <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(0, 136, 255, 0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+        <i class="ph-fill ph-folder" style="font-size: 32px; color: var(--primary);"></i>
       </div>
-      
-      <div class="dark-form">
-        <input type="text" id="userId" class="dark-input" placeholder="User ID">
-        <input type="password" id="password" class="dark-input" placeholder="Password">
-        <button class="dark-button" onclick="login()">Log In &rarr;</button>
-      </div>
-      
-      <p id="loginMsg" style="text-align: center; color: #ef4444; margin-top: 20px; font-weight: 600; font-size: 14px;"></p>
+      <h2 style="font-size: 24px; font-weight: 800; color: var(--text-main); margin-bottom: 4px; letter-spacing: -0.5px;">DocuTrack</h2>
+      <p style="font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 2px;">FILE MANAGEMENT</p>
     </div>
+    
+    <div class="form-group">
+      <input type="text" id="userId" placeholder="User ID">
+      <input type="password" id="password" placeholder="Password">
+      <button class="action" onclick="login()" style="margin-top: 10px;">Login</button>
+    </div>
+    <p id="loginMsg" style="text-align: center; color: #ef4444; margin-top: 16px; font-weight: 500; font-size: 14px;"></p>
   </div>
+
   <div id="dashboard" class="box">
     <h3><i class="ph-fill ph-chart-bar"></i> Overview</h3>
 
@@ -997,7 +868,7 @@ button.action:active {
 
 <script>
 // ==========================================
-// JAVASCRIPT LOGIC
+// JAVASCRIPT LOGIC (100% UNTOUCHED)
 // ==========================================
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyd2deFraEXRG9d6fwghdfd6ZdGFg17-OKWoTHutEl8uHIhWSv33QzHwkgzqBUt6dIPjg/exec";
 
