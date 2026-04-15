@@ -1,545 +1,991 @@
 <!DOCTYPE html>
+
 <html>
+
+
 
 <head>
 
+
+
 <title>Secure Login Portal</title>
+
+
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
+
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
 
 <style>
 
+
+
 * {
-    box-sizing: border-box;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+box-sizing: border-box;
+
+font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
 }
 
-/* PREMIUM DARK NEBULA BACKGROUND */
+
+
+/* PREMIUM ANIMATED BACKGROUND */
+
 body {
-    background-color: #020617;
-    background-image: 
-        radial-gradient(circle at 15% 50%, rgba(30, 41, 59, 0.8), transparent 25%),
-        radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.1), transparent 25%); /* Sedikit sentuhan purple di background */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    padding: 20px;
-    color: #f8fafc;
+
+background: linear-gradient(-45deg, #1e3c72, #2a5298, #3a7bd5, #00d2ff);
+
+background-size: 400% 400%;
+
+animation: bgMove 15s ease-in-out infinite;
+
+display: flex;
+
+justify-content: center;
+
+align-items: center;
+
+min-height: 100vh;
+
+margin: 0;
+
+padding: 20px;
+
 }
 
-/* VOLUMETRIC DARK GLASS CARD */
-.box {
-    background: linear-gradient(145deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8));
-    backdrop-filter: blur(24px) saturate(150%);
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-    border-left: 1px solid rgba(255, 255, 255, 0.05);
-    border-right: 1px solid rgba(0, 0, 0, 0.4);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.6);
-    padding: 48px 40px;
-    border-radius: 24px;
-    box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.8),
-        inset 0 0 20px rgba(255, 255, 255, 0.02);
-    width: 100%;
-    max-width: 380px;
-    animation: premiumFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    opacity: 0;
+
+
+@keyframes bgMove {
+
+0% { background-position: 0% 50% }
+
+50% { background-position: 100% 50% }
+
+100% { background-position: 0% 50% }
+
 }
+
+
+
+/* PREMIUM GLASS LOGIN CARD */
+
+.box {
+
+background: rgba(255, 255, 255, 0.85);
+
+backdrop-filter: blur(20px) saturate(180%);
+
+-webkit-backdrop-filter: blur(20px) saturate(180%);
+
+border: 1px solid rgba(255, 255, 255, 0.6);
+
+padding: 48px 40px;
+
+border-radius: 24px;
+
+box-shadow:
+
+0 20px 40px -10px rgba(0, 0, 0, 0.2),
+
+0 0 20px rgba(255, 255, 255, 0.2) inset;
+
+width: 100%;
+
+max-width: 380px;
+
+animation: premiumFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+opacity: 0;
+
+}
+
+
 
 @keyframes premiumFadeIn {
-    0% { opacity: 0; transform: translateY(20px) scale(0.98); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
+
+0% { opacity: 0; transform: translateY(30px) scale(0.95); filter: blur(5px); }
+
+100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+
 }
+
+
 
 /* HEADER */
+
 .login-header {
-    text-align: center;
-    margin-bottom: 36px;
+
+text-align: center;
+
+margin-bottom: 32px;
+
 }
 
-/* --- TUKAR KEPADA PURPLE GRADIENT --- */
+
+
 .login-header i {
-    font-size: 46px;
-    background: linear-gradient(135deg, #a78bfa, #7c3aed); /* Purple gradient */
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 16px;
-    filter: drop-shadow(0 4px 12px rgba(124, 58, 237, 0.4)); /* Purple shadow */
+
+font-size: 42px;
+
+background: linear-gradient(135deg, #1e3c72, #3a7bd5);
+
+-webkit-background-clip: text;
+
+-webkit-text-fill-color: transparent;
+
+margin-bottom: 12px;
+
+filter: drop-shadow(0 4px 6px rgba(30, 60, 114, 0.2));
+
 }
+
+
 
 .login-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: #f8fafc;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
+
+font-size: 22px;
+
+font-weight: 700;
+
+color: #0f172a;
+
+letter-spacing: -0.5px;
+
+margin-bottom: 4px;
+
 }
+
+
 
 .login-sub {
-    font-size: 13px;
-    color: #94a3b8;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+
+font-size: 13px;
+
+color: #64748b;
+
+font-weight: 500;
+
 }
+
+
 
 /* ERROR */
+
 #errorMsg {
-    background: rgba(239, 68, 68, 0.1);
-    color: #fca5a5;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    padding: 12px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 24px;
-    text-align: center;
-    display: none;
-    animation: shake 0.4s ease-in-out;
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+
+background: #fef2f2;
+
+color: #ef4444;
+
+border: 1px solid #fecaca;
+
+padding: 10px;
+
+border-radius: 8px;
+
+font-size: 13px;
+
+font-weight: 500;
+
+margin-bottom: 20px;
+
+text-align: center;
+
+display: none;
+
+animation: shake 0.4s ease-in-out;
+
 }
+
+
 
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-4px); }
-    75% { transform: translateX(4px); }
+
+0%, 100% { transform: translateX(0); }
+
+25% { transform: translateX(-4px); }
+
+75% { transform: translateX(4px); }
+
 }
+
+
 
 /* INPUT GROUP */
+
 .input-group {
-    position: relative;
-    margin-bottom: 20px;
+
+position: relative;
+
+margin-bottom: 20px;
+
 }
+
+
 
 .input-group i.left {
-    position: absolute;
-    top: 50%;
-    left: 18px;
-    transform: translateY(-50%);
-    color: #64748b;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    z-index: 2;
+
+position: absolute;
+
+top: 50%;
+
+left: 16px;
+
+transform: translateY(-50%);
+
+color: #94a3b8;
+
+font-size: 14px;
+
+transition: color 0.3s ease;
+
 }
 
-/* PREMIUM DARK INPUTS */
+
+
+/* INPUT */
+
 .input-group input {
-    width: 100%;
-    padding: 16px 45px 16px 48px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #f8fafc;
-    background: rgba(15, 23, 42, 0.5);
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-    position: relative;
+
+width: 100%;
+
+padding: 16px 45px 16px 44px;
+
+border: 1px solid rgba(0, 0, 0, 0.08);
+
+border-radius: 14px;
+
+font-size: 14px;
+
+font-weight: 500;
+
+color: #334155;
+
+background: rgba(255, 255, 255, 0.9);
+
+box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+
+transition: all 0.3s ease;
+
 }
+
+
 
 .input-group input::placeholder {
-    color: #64748b;
-    font-weight: 400;
+
+color: #94a3b8;
+
+font-weight: 400;
+
 }
+
+
 
 .input-group input:focus {
-    outline: none;
-    background: rgba(15, 23, 42, 0.8);
-    border-color: rgba(139, 92, 246, 0.5); /* Focus color ditukar ke purple lembut */
-    box-shadow: 
-        inset 0 2px 4px rgba(0, 0, 0, 0.2),
-        0 0 0 3px rgba(139, 92, 246, 0.15);
+
+outline: none;
+
+background: #ffffff;
+
+border-color: #3a7bd5;
+
+box-shadow: 0 0 0 4px rgba(58, 123, 213, 0.15);
+
 }
+
+
 
 .input-group input:focus ~ i.left,
+
 .input-group input:focus + i.left {
-    color: #a78bfa; /* Icon focus ditukar ke purple */
-    text-shadow: 0 0 8px rgba(167, 139, 250, 0.4);
+
+color: #3a7bd5;
+
 }
+
+
 
 /* PASSWORD EYE */
+
 .toggle-pass {
-    position: absolute;
-    right: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    color: #64748b;
-    transition: color 0.2s ease;
-    z-index: 2;
+
+position: absolute;
+
+right: 16px;
+
+top: 50%;
+
+transform: translateY(-50%);
+
+cursor: pointer;
+
+color: #94a3b8;
+
+transition: color 0.2s ease;
+
 }
+
+
 
 .toggle-pass:hover {
-    color: #f8fafc;
+
+color: #3a7bd5;
+
 }
 
-/* GOLDEN PREMIUM BUTTON (Dikekalkan untuk kontras) */
+
+
+/* LOGIN BUTTON */
+
 button {
-    width: 100%;
-    padding: 16px;
-    margin-top: 12px;
-    background: linear-gradient(135deg, #d97706, #92400e);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 14px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: 0 8px 20px -6px rgba(217, 119, 6, 0.4);
-    letter-spacing: 0.5px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+
+width: 100%;
+
+padding: 16px;
+
+margin-top: 8px;
+
+background: linear-gradient(135deg, #2a5298, #1e3c72);
+
+color: white;
+
+border: none;
+
+border-radius: 14px;
+
+font-size: 15px;
+
+font-weight: 600;
+
+cursor: pointer;
+
+transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+box-shadow: 0 8px 20px -6px rgba(30, 60, 114, 0.5);
+
+letter-spacing: 0.5px;
+
 }
+
+
 
 button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 24px -8px rgba(217, 119, 6, 0.6);
-    background: linear-gradient(135deg, #f59e0b, #b45309);
+
+transform: translateY(-2px);
+
+box-shadow: 0 12px 24px -8px rgba(30, 60, 114, 0.7);
+
+background: linear-gradient(135deg, #3a7bd5, #1e3c72);
+
 }
+
+
 
 button:active {
-    transform: translateY(1px);
-    box-shadow: 0 4px 12px -4px rgba(217, 119, 6, 0.4);
+
+transform: translateY(1px);
+
+box-shadow: 0 4px 12px -4px rgba(30, 60, 114, 0.5);
+
 }
+
+
 
 /* ATTEMPT INDICATOR & SECURITY NOTE */
+
 .attempt, .login-note {
-    font-size: 12px;
-    color: #64748b;
-    text-align: center;
-    font-weight: 500;
+
+font-size: 12px;
+
+color: #64748b;
+
+text-align: center;
+
+font-weight: 500;
+
 }
+
+
 
 .attempt {
-    margin-top: 32px;
+
+margin-top: 24px;
+
 }
+
+
 
 .login-note {
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    color: #475569;
+
+margin-top: 8px;
+
+display: flex;
+
+align-items: center;
+
+justify-content: center;
+
+gap: 6px;
+
 }
+
+
 
 .login-note i {
-    font-size: 10px;
-    color: #a78bfa; /* Nota icon ditukar ke purple */
+
+font-size: 10px;
+
+color: #3a7bd5;
+
 }
+
+
 
 /* =========================
-CINEMATIC AUTH OVERLAY
+
+AUTH OVERLAY
+
 ========================= */
+
 #overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    background: rgba(2, 6, 23, 0.85);
+
+position: fixed;
+
+top: 0;
+
+left: 0;
+
+width: 100%;
+
+height: 100%;
+
+display: none;
+
+align-items: center;
+
+justify-content: center;
+
+z-index: 999;
+
+backdrop-filter: blur(15px);
+
+-webkit-backdrop-filter: blur(15px);
+
+background: rgba(15, 23, 42, 0.6);
+
 }
+
+
 
 .auth-card {
-    background: linear-gradient(145deg, rgba(30, 41, 59, 0.4), rgba(15, 23, 42, 0.7));
-    padding: 50px;
-    border-radius: 28px;
-    text-align: center;
-    box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
-    min-width: 280px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    position: relative;
-    overflow: hidden;
+
+background: rgba(255, 255, 255, 0.95);
+
+padding: 40px;
+
+border-radius: 24px;
+
+text-align: center;
+
+box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+
+min-width: 260px;
+
+border: 1px solid rgba(255, 255, 255, 0.5);
+
+animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
 }
 
-/* Simulated scanner line - ditukar ke purple lembut */
-.auth-card::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(to bottom, transparent, rgba(139, 92, 246, 0.03), transparent);
-    transform: rotate(45deg);
-    animation: scanPulse 3s linear infinite;
-    pointer-events: none;
-}
 
-@keyframes scanPulse {
-    0% { transform: translateY(-100%) rotate(45deg); }
-    100% { transform: translateY(100%) rotate(45deg); }
-}
 
 @keyframes popIn {
-    0% { transform: scale(0.9); opacity: 0; filter: blur(10px); }
-    100% { transform: scale(1); opacity: 1; filter: blur(0); }
+
+0% { transform: scale(0.9); opacity: 0; }
+
+100% { transform: scale(1); opacity: 1; }
+
 }
 
-.scanner-container {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 24px auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
-/* --- TUKAR ICON KEPADA PURPLE --- */
+
 .auth-icon {
-    font-size: 32px;
-    background: linear-gradient(135deg, #a78bfa, #7c3aed); /* Purple gradient */
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    position: relative;
-    z-index: 2;
-    animation: corePulse 2s ease-in-out infinite;
+
+font-size: 38px;
+
+background: linear-gradient(135deg, #1e3c72, #3a7bd5);
+
+-webkit-background-clip: text;
+
+-webkit-text-fill-color: transparent;
+
+margin-bottom: 16px;
+
+animation: smoothPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
 }
 
-/* Mechanical/Circuit Ring */
-.scanner-ring {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    border-top-color: rgba(167, 139, 250, 0.8); /* Purple lembut */
-    border-bottom-color: rgba(124, 58, 237, 0.3); /* Purple pekat transparan */
-    animation: spinRing 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-}
 
-.scanner-ring::before {
-    content: '';
-    position: absolute;
-    top: -6px;
-    left: 50%;
-    width: 6px;
-    height: 6px;
-    background: #a78bfa; /* Purple dot */
-    border-radius: 50%;
-    box-shadow: 0 0 10px #a78bfa;
-}
-
-@keyframes spinRing {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* --- SHADOW DITUKAR KE PURPLE --- */
-@keyframes corePulse {
-    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(124, 58, 237, 0.2)); }
-    50% { transform: scale(1.1); filter: drop-shadow(0 0 15px rgba(167, 139, 250, 0.6)); }
-}
 
 .auth-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #f8fafc;
-    margin-bottom: 6px;
-    letter-spacing: 1px;
+
+font-size: 18px;
+
+font-weight: 700;
+
+color: #0f172a;
+
+margin-bottom: 4px;
+
 }
+
+
 
 .auth-sub {
-    font-size: 12px;
-    color: #94a3b8;
-    font-weight: 400;
-    letter-spacing: 2px;
-    text-transform: uppercase;
+
+font-size: 13px;
+
+color: #64748b;
+
+font-weight: 500;
+
 }
 
-/* MOBILE */
-@media (max-width: 600px) {
-    .box {
-        padding: 40px 24px;
-        border-radius: 20px;
-    }
+
+
+.auth-dots {
+
+margin-top: 20px;
+
+display: flex;
+
+justify-content: center;
+
+gap: 6px;
+
 }
+
+
+
+.auth-dots span {
+
+display: inline-block;
+
+width: 8px;
+
+height: 8px;
+
+background: #3a7bd5;
+
+border-radius: 50%;
+
+animation: premiumDots 1.4s infinite ease-in-out both;
+
+}
+
+
+
+.auth-dots span:nth-child(1) { animation-delay: -0.32s; }
+
+.auth-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+
+
+@keyframes smoothPulse {
+
+0%, 100% { transform: scale(1); opacity: 1; }
+
+50% { transform: scale(1.1); opacity: 0.8; }
+
+}
+
+
+
+@keyframes premiumDots {
+
+0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+
+40% { transform: scale(1); opacity: 1; }
+
+}
+
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+.box {
+
+padding: 40px 24px;
+
+border-radius: 20px;
+
+}
+
+button {
+
+padding: 16px;
+
+font-size: 16px;
+
+}
+
+}
+
+
 
 </style>
 
+
+
 </head>
+
+
 
 <body>
 
+
+
 <div class="box">
+
+
 
 <div class="login-header">
 
+
+
 <i class="fa fa-shield-halved"></i>
 
+
+
 <div class="login-title">Lock Management</div>
+
 <div class="login-sub">Secure Access Portal</div>
 
+
+
 </div>
+
+
 
 <div id="errorMsg"></div>
 
-<div class="input-group">
-<i class="fa fa-user left"></i>
-<input id="user" placeholder="User ID">
-</div>
+
 
 <div class="input-group">
-<i class="fa fa-lock left"></i>
-<input type="password" id="pass" placeholder="Password">
-<i class="fa fa-eye toggle-pass" onclick="togglePass()"></i>
+
+<i class="fa fa-user left"></i>
+
+<input id="user" placeholder="User ID">
+
 </div>
+
+
+
+<div class="input-group">
+
+<i class="fa fa-lock left"></i>
+
+<input type="password" id="pass" placeholder="Password">
+
+<i class="fa fa-eye toggle-pass" onclick="togglePass()"></i>
+
+</div>
+
+
 
 <button onclick="login()">Login</button>
 
+
+
 <div class="attempt">
+
 Secure authentication system
+
 </div>
+
+
 
 <div class="login-note">
+
 <i class="fa fa-lock"></i> Authorized personnel only
-</div>
 
 </div>
+
+
+
+</div>
+
+
 
 <div id="overlay">
 
+
+
 <div class="auth-card">
-    
-<div class="scanner-container">
-    <div class="scanner-ring"></div>
-    <i class="fa-solid fa-shield-halved auth-icon"></i>
+
+
+
+<i class="fa-solid fa-shield-halved auth-icon"></i>
+
+
+
+<div class="auth-title">Authenticating</div>
+
+<div class="auth-sub">Verifying credentials</div>
+
+
+
+<div class="auth-dots">
+
+<span></span>
+
+<span></span>
+
+<span></span>
+
 </div>
 
-<div class="auth-title">AUTHENTICATING</div>
-<div class="auth-sub">Verifying Credentials</div>
+
 
 </div>
 
+
+
 </div>
+
+
 
 <script src="../lockconfig.js"></script>
 
+
+
 <script>
+
+
 
 const api = API_URL;
 
+
+
 document.getElementById("user").focus();
+
+
 
 /* PASSWORD TOGGLE */
 
+
+
 function togglePass(){
 
+
+
 const pass=document.getElementById("pass");
+
 const icon=document.querySelector(".toggle-pass");
 
+
+
 if(pass.type==="password"){
+
 pass.type="text";
+
 icon.classList.replace("fa-eye","fa-eye-slash");
+
 }else{
+
 pass.type="password";
+
 icon.classList.replace("fa-eye-slash","fa-eye");
-}
 
 }
+
+
+
+}
+
+
 
 /* LOGIN */
 
+
+
 async function login(){
 
+
+
 const user=document.getElementById("user").value.trim();
+
 const pass=document.getElementById("pass").value.trim();
+
+
 
 const err=document.getElementById("errorMsg");
 
+
+
 err.style.display="none";
 
+
+
 if(!user || !pass){
+
 err.innerText="Enter User ID and Password";
+
 err.style.display="block";
+
 return;
+
 }
+
+
 
 document.getElementById("overlay").style.display="flex";
 
+
+
 try{
 
+
+
 const res=await fetch(api,{
+
 method:"POST",
+
 body:new URLSearchParams({
+
 action:"login",
+
 user:user,
+
 pass:pass,
+
 api_key: "SCZP_SECURE_2026"
+
 })
+
 });
+
+
 
 const data=await res.json();
 
+
+
 if(data.status==="SUCCESS"){
 
+
+
 localStorage.setItem("session_token",data.token);
+
 localStorage.setItem("lock_user",data.user);
+
 localStorage.setItem("lock_type",data.type);
+
 localStorage.setItem("lock_role",data.role);
+
 localStorage.setItem("lock_name",data.name);
 
+
+
 if(data.type=="check"){
+
 window.location="../check/";
-}
-else if(data.type=="lock"){
-window.location="../lock/";
-}
-else if(data.type=="master"){
-window.location="../menumaster/";
-}
 
 }
+
+else if(data.type=="lock"){
+
+window.location="../lock/";
+
+}
+
+else if(data.type=="master"){
+
+window.location="../menumaster/";
+
+}
+
+
+
+}
+
 else if(data.status==="INACTIVE"){
+
 err.innerText="User ID inactive";
+
 err.style.display="block";
+
 }
+
 else{
+
 err.innerText="Invalid login credentials";
+
 err.style.display="block";
+
 }
+
+
 
 }catch(e){
 
+
+
 err.innerText="System error. Please try again.";
+
 err.style.display="block";
 
+
+
 }
+
+
 
 document.getElementById("overlay").style.display="none";
 
+
+
 }
 
-/* ENTER KEY FOR BOTH INPUTS */
 
-document.querySelectorAll('#user, #pass').forEach(input => {
-    input.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            login();
-        }
-    });
+
+/* ENTER KEY */
+
+
+
+document.getElementById("pass").addEventListener("keypress",function(e){
+
+
+
+if(e.key==="Enter"){
+
+login();
+
+}
+
+
+
 });
+
+
 
 </script>
 
+
+
 </body>
+
 </html>
