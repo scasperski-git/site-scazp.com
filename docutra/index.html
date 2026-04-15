@@ -746,29 +746,16 @@ button.action:active {
 
 <div class="main">
 
-<div id="login" style="display:none;">
-    <div class="login-bg-mesh">
-      <div class="login-blob primary"></div>
-      <div class="login-blob secondary"></div>
+  <div id="login" class="box" style="display:none; max-width:420px; margin: 10vh auto;">
+    <h3 style="justify-content: center; font-size: 24px; margin-bottom: 30px;">
+      <i class="ph-fill ph-lock-key"></i> Secure Login
+    </h3>
+    <div class="form-group">
+      <input type="text" id="userId" placeholder="User ID">
+      <input type="password" id="password" placeholder="Password">
+      <button class="action" onclick="login()" style="margin-top: 10px;">Login</button>
     </div>
-    
-    <div class="glass-panel">
-      <div class="login-brand">
-        <div class="login-icon-box">
-          <i class="ph-bold ph-lock-key"></i>
-        </div>
-        <h3>DocuTrack</h3>
-        <p class="subtitle">Secure System Access</p>
-      </div>
-      
-      <div class="form-group">
-        <input type="text" id="userId" placeholder="User ID">
-        <input type="password" id="password" placeholder="Password">
-        <button class="action" onclick="login()">Login</button>
-      </div>
-      
-      <p id="loginMsg" style="text-align: center; color: #ff6b6b; margin-top: 16px; font-weight: 500; font-size: 14px;"></p>
-    </div>
+    <p id="loginMsg" style="text-align: center; color: #ef4444; margin-top: 16px; font-weight: 500; font-size: 14px;"></p>
   </div>
 
   <div id="dashboard" class="box">
