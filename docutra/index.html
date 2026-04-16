@@ -594,6 +594,7 @@ button.action:active {
   }
 
     .mobile-header {
+      .mobile-header {
     display: flex !important;
     align-items: center;
     justify-content: center;
@@ -604,13 +605,14 @@ button.action:active {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     color: var(--text-main);
-    padding: 16px;
+    /* 🔥 KITA TAMBAH PADDING ATAS 45px UNTUK TOLAK HEADER KE BAWAH 🔥 */
+    padding: 45px 16px 16px 16px; 
     font-weight: 700;
     font-size: 18px;
     z-index: 1000;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     border-bottom: 1px solid #e2e8f0;
-    }
+  }
 
   .kpi {
     padding: 14px;
