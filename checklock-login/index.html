@@ -490,6 +490,25 @@ login();
 
 });
 
+// Letak kod ini di bahagian bawah skrip fail login anda
+window.addEventListener('DOMContentLoaded', (event) => {
+    const activeToken = localStorage.getItem("session_token");
+    const userType = localStorage.getItem("lock_type");
+    
+    // Kalau token wujud (user masih aktif), terus hantar ke page masing-masing
+    if (activeToken && userType) {
+        document.getElementById("overlay").style.display = "flex"; // Tunjuk loading screen (jika ada)
+        
+        if (userType === "check") {
+            window.location = "../check/";
+        } else if (userType === "lock") {
+            window.location = "../lock/";
+        } else if (userType === "master") {
+            window.location = "../menumaster/";
+        }
+    }
+});
+
 </script>
 
 </body>
