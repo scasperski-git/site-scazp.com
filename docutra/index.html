@@ -829,6 +829,13 @@ button.action:active {
     bottom: 2px;
   }
 }
+
+/* Sorok header mobile bila skrin login sedang aktif */
+#login[style*="block"] ~ .mobile-header,
+body:has(#login[style*="block"]) .mobile-header {
+  display: none !important;
+}
+  
 </style>
 </head>
 
@@ -1044,20 +1051,30 @@ function showPage(page, el, isClick = false) {
     location.reload();
   }
 
-  if (page === "login") {
+if (page === "login") {
     document.querySelector(".sidebar").style.display = "none";
     document.querySelector(".bottom-nav").style.display = "none";
+    // 🔥 TAMBAH INI: Sorok header mobile masa login
+    if(document.querySelector(".mobile-header")) {
+      document.querySelector(".mobile-header").style.setProperty("display", "none", "important");
+    }
   } else {
     if (window.innerWidth <= 768) {
       document.querySelector(".sidebar").style.display = "none";
       document.querySelector(".bottom-nav").style.display = "flex";
+      // 🔥 TAMBAH INI: Tunjukkan balik header mobile lepas login
+      if(document.querySelector(".mobile-header")) {
+        document.querySelector(".mobile-header").style.setProperty("display", "flex", "important");
+      }
     } else {
       document.querySelector(".sidebar").style.display = "flex";
       document.querySelector(".bottom-nav").style.display = "none";
+      // 🔥 TAMBAH INI: Sorok header mobile kalau di desktop mode
+      if(document.querySelector(".mobile-header")) {
+        document.querySelector(".mobile-header").style.setProperty("display", "none", "important");
+      }
     }
   }
-}
-
 function toBase64(file) {
   return new Promise((resolve, reject) => {
     let reader = new FileReader();
