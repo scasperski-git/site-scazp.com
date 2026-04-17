@@ -1066,10 +1066,21 @@ window.addEventListener("load", function() {
     showPage("login");
     return;
   }
+
+  // 🔥 LOGIK BARU: Kesan jika user tekan F5 atau butang Reload browser
+  const isReload = (performance.navigation && performance.navigation.type === 1) || 
+                   (window.performance.getEntriesByType && window.performance.getEntriesByType("navigation").length > 0 && window.performance.getEntriesByType("navigation")[0].type === "reload");
+  
+  if (isReload) {
+    // Jika user reload browser, kita bersihkan memori carian supaya page betul-betul "refresh"
+    sessionStorage.removeItem("savedSearchIC");
+    sessionStorage.removeItem("savedSearchResult");
+  }
+
   const savedPage = sessionStorage.getItem("activePage") || "dashboard";
   showPage(savedPage);
 
-  // 🔥 KEMAS KINI: Tarik semula hasil carian lepas pengguna tekan butang 'Back'
+  // Tarik semula hasil carian jika ia masih ada dalam memori (Contoh: selepas tekan butang Back di telefon)
   if (sessionStorage.getItem("savedSearchIC") && sessionStorage.getItem("savedSearchResult")) {
     document.getElementById("searchIC").value = sessionStorage.getItem("savedSearchIC");
     document.getElementById("result").innerHTML = sessionStorage.getItem("savedSearchResult");
