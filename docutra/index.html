@@ -419,6 +419,29 @@ button.action:active {
   color: white;
 }
 
+/* ===== BUTANG VIEW CUSTOM ===== */
+.btn-view {
+  background: transparent;
+  color: var(--primary);
+  border: 1.5px solid var(--primary); /* Garis border halus */
+  padding: 6px 16px; /* Saiz kotak lebih kecil */
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Effect bila butang disentuh/ditekan */
+.btn-view:active {
+  transform: scale(0.90); /* Effect butang "tenggelam" sikit */
+  background: var(--primary); /* Latar belakang tukar jadi biru */
+  color: white; /* Tulisan tukar putih */
+}
+
 /* ===== RECENT & SEARCH ITEMS ===== */
 .file-item {
   background: #ffffff;
@@ -1277,7 +1300,7 @@ async function search() {
       html += `
         <div style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
           <div class="file-name" style="margin:0; font-weight:500;">📄 ${f.file}</div>
-          <a href="${f.url}" target="_blank" style="background:var(--bg-color); color:var(--primary); padding:10px 20px; border-radius:10px; text-decoration:none; font-size:13px; font-weight:700; transition:0.2s; display:inline-flex; align-items:center; justify-content:center; min-height:44px; white-space:nowrap; box-shadow:0 2px 8px rgba(0,136,255,0.15);">👁 View</a>
+          <a href="${f.url}" target="_blank" class="btn-view">👁 View</a>
         </div>
       `;
     });
