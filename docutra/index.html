@@ -656,25 +656,46 @@ button.action:active {
     gap: 10px;
   }
 
-    .mobile-header {
+.mobile-header {
     display: flex !important;
+    flex-direction: column; /* Paksa susunan jadi atas dan bawah */
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 2px; /* Jarak rapat antara tajuk dan link */
     position: sticky;
     top: 0;
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     color: var(--text-main);
-    /* 🔥 KEMAS KINI: Padding atas diubah ke 45px untuk betulkan Status Bar bertindih */
     padding: 16px;
-    font-weight: 700;
-    font-size: 18px;
     z-index: 1000;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     border-bottom: 1px solid #e2e8f0;
-    }
+  }
+
+  /* Susunan tajuk DocuTrack */
+  .mobile-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  /* Style untuk font halus Powered by */
+  .mobile-powered {
+    font-size: 10px; /* Saiz paling kecil dan kemas */
+    font-weight: 500;
+    color: #94a3b8; /* Kelabu supaya tak serabutkan mata */
+    letter-spacing: 0.5px;
+  }
+
+  .mobile-powered a {
+    color: var(--primary); /* Tulisan scazp.com jadi biru (boleh klik) */
+    text-decoration: none;
+    font-weight: 700;
+  }
 
   .kpi {
     padding: 14px;
@@ -807,7 +828,12 @@ button.action:active {
 </div>
 
 <div class="mobile-header">
-  <i class="ph-fill ph-folder" style="color:var(--primary); font-size:22px;"></i> DocuTrack
+  <div class="mobile-title">
+    <i class="ph-fill ph-folder" style="color:var(--primary); font-size:22px;"></i> DocuTrack
+  </div>
+  <div class="mobile-powered">
+    Powered by <a href="https://scazp.com" target="_blank">scazp.com</a>
+  </div>
 </div>
 
 <div class="main">
