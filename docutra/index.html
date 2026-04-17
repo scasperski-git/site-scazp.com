@@ -1023,7 +1023,7 @@ body:has(#login[style*="block"]) .mobile-header {
 // ==========================================
 // JAVASCRIPT LOGIC (DENGAN PENAMBAHBAIKAN SESSION STORAGE)
 // ==========================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyd2deFraEXRG9d6fwghdfd6ZdGFg17-OKWoTHutEl8uHIhWSv33QzHwkgzqBUt6dIPjg/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwfqhFLKEED_L8KSjlrIWz-2CdFSW38_FlD5xwvvB3L8s6WRHQpKTQwYfPssDq-4Zchjg/exec";
 
 function showPage(page, el, isClick = false) {
   sessionStorage.setItem("activePage", page);
@@ -1087,6 +1087,7 @@ if (page === "dashboard" && isClick) {
     }
   }
 } // Tanda tutup fungsi showPage yang betul
+  
 function toBase64(file) {
   return new Promise((resolve, reject) => {
     let reader = new FileReader();
