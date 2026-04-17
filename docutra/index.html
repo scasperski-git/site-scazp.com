@@ -643,6 +643,19 @@ button.action:active {
   line-height: 1.4;
 }
 
+/* Style untuk badge versi di Desktop (Sidebar gelap) */
+.version-tag-desktop {
+  font-size: 10px; /* Sesuai sikit untuk skrin besar */
+  color: #ffffff; /* Tulisan putih */
+  background: rgba(255, 255, 255, 0.15); /* Latar belakang putih lutsinar */
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 700;
+  margin-left: 4px;
+  letter-spacing: 0.5px;
+  vertical-align: middle; /* Pastikan dia sebaris kemas dengan tulisan DocuTrack */
+}
+
 @media (max-width: 768px) {
   .app { flex-direction: column; }
   .sidebar { display: none; }
@@ -698,6 +711,19 @@ button.action:active {
     text-decoration: none;
     font-weight: 700;
   }
+
+  /* Style untuk badge versi (Premium Mini Badge) */
+  .version-tag {
+    font-size: 8px; /* Saiz halus sama macam powered by */
+    color: var(--primary); /* Guna warna tema biru */
+    background: rgba(0, 136, 255, 0.1); /* Latar belakang biru lutsinar */
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-weight: 700;
+    margin-left: -2px; /* Rapatkan sikit dengan huruf 'k' pada DocuTrack */
+    letter-spacing: 0.5px;
+  }
+  
   .kpi {
     padding: 14px;
     border-radius: 14px;
@@ -802,7 +828,7 @@ button.action:active {
 
 <div class="sidebar">
   <div>
-    <h2><i class="ph-fill ph-folder"></i> DocuTrack</h2>
+    <h2><i class="ph-fill ph-folder"></i> DocuTrack <span class="version-tag-desktop">v1.0</span></h2>
     <p>FILE MANAGEMENT</p>
 
     <div class="menu">
@@ -829,8 +855,9 @@ button.action:active {
 </div>
 
 <div class="mobile-header">
-  <div class="mobile-title">
+<div class="mobile-title">
     <i class="ph-fill ph-folder" style="color:var(--primary); font-size:22px;"></i> DocuTrack
+    <span class="version-tag">v1.0</span>
   </div>
   <div class="mobile-powered">
     Powered by <a href="https://scazp.com" target="_blank">scazp.com</a>
