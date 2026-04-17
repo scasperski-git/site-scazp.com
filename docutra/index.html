@@ -429,22 +429,17 @@ button.action:active {
 }
 
 /* ===== BUTANG VIEW CUSTOM ===== */
-/* ===== BUTANG VIEW CUSTOM (SAIZ LEBIH KECIL) ===== */
 .btn-view {
   background: transparent;
   color: var(--primary);
   border: 1.5px solid var(--primary);
-  /* 🔥 Kurangkan ruang dalam (padding) */
   padding: 7px 16px; 
-  /* 🔥 Rendahkan sedikit tinggi butang */
   min-height: 34px; 
-  /* 🔥 Kurangkan sikit lengkungan bucu supaya seimbang */
   border-radius: 8px;
   text-decoration: none;
-  /* 🔥 Kecilkan sikit saiz font */
   font-size: 12px;
   font-weight: 700;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease; /* Dilambatkan sikit supaya hover nampak smooth */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -452,11 +447,22 @@ button.action:active {
   margin-left: 10px; 
 }
 
-/* Effect bila butang disentuh/ditekan kekal sama */
+/* Effect bila lalukan mouse (Desktop) */
+@media (hover: hover) {
+  .btn-view:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 136, 255, 0.25);
+  }
+}
+
+/* Effect bila butang disentuh/ditekan */
 .btn-view:active {
   transform: scale(0.90); 
   background: var(--primary); 
   color: white; 
+  box-shadow: none; /* Buang bayang masa tekan supaya nampak "tenggelam" */
 }
 
 /* ===== RECENT & SEARCH ITEMS (UPGRADE EFFECT) ===== */
