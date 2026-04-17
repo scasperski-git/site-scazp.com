@@ -610,6 +610,20 @@ button.action:active {
   margin: 30px auto;
 }
 
+/* ===== LATEST UPLOAD ROW (GLOBAL) ===== */
+.latest-row {
+  font-size: 12px; /* Kecilkan saiz font untuk desktop */
+  color: #64748b;
+  margin-top: 8px;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap; /* 🔥 Ini yang buat dia auto-wrap kalau skrin mula sempit */
+  gap: 6px;
+  line-height: 1.4;
+}
+
 @media (max-width: 768px) {
   .app { flex-direction: column; }
   .sidebar { display: none; }
@@ -656,14 +670,16 @@ button.action:active {
     font-size: 11px;
   }
 
-  .latest-row {
-    font-size: 11px;
-    color: #64748b;
+.latest-row {
+    font-size: 10.5px; /* Saiz lebih optimum untuk muat 1 baris */
     margin-top: 6px;
+    padding: 6px 8px; /* Nipiskan sikit kotak */
     background: #f8fafc;
-    padding: 6px 8px;
     border-radius: 8px;
-    white-space: nowrap;
+    
+    /* 🔥 PAKSA 1 BARIS & LETAK TITIK KALAU LEBIH HADEPUAN SKRIN */
+    display: block; 
+    white-space: nowrap; 
     overflow: hidden;
     text-overflow: ellipsis;
   }
