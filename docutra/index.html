@@ -1053,8 +1053,8 @@ function showPage(page, el, isClick = false) {
     }
   }
     
-  if (page === "dashboard" && isClick) {  
-    location.reload();
+if (page === "dashboard" && isClick) {  
+    loadDashboard(); // 🔥 Cuma tarik data baru, tak payah refresh page
   }
 
   // LOGIN & RESPONSIVE LOGIC
@@ -1216,6 +1216,12 @@ function applyRole(role) {
 }
   
 async function loadDashboard() {
+  // 🔥 Letak "..." supaya nampak data tengah ditarik (evoid visual freeze)
+  document.getElementById("kpiDocs").innerText = "...";
+  document.getElementById("kpiIC").innerText = "...";
+  document.getElementById("kpiAcc").innerText = "...";
+  document.getElementById("kpiToday").innerText = "...";
+  
   try {
     const res = await fetch(WEB_APP_URL + "?dashboard=1");
     const data = await res.json();
