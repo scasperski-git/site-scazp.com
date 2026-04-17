@@ -1196,27 +1196,51 @@ async function search() {
   const res = await fetch(`${WEB_APP_URL}?ic=${encodeURIComponent(ic)}&_=${Date.now()}`);
   const data = await res.json();
   if (ic !== lastSearch) return;
+
+  // 🔥 BACKUP: Terbalikkan data dari pangkalan data supaya rekod terbaru sentiasa di hadapan
+  data.reverse(); 
+
   let html = data.length === 0 ? "<div style='text-align:center; padding:30px; color:#64748b; font-weight:500;'>No record found.</div>" : "";
+  
+  // 1. Kumpulkan data mengikut kumpulan akaun
   let grouped = {};
   data.forEach(d => {
     if (!grouped[d.account]) { grouped[d.account] = []; }
     grouped[d.account].push(d);
   });
 
-  Object.keys(grouped).forEach(acc => {
-    let files = grouped[acc];
-    files.sort((a, b) => {
+  // 2. Dapatkan senarai akaun dan susun fail di dalam setiap akaun dahulu (Paling baru di atas)
+  let accKeys = Object.keys(grouped);
+  accKeys.forEach(acc => {
+    grouped[acc].sort((a, b) => {
       const getDT = (name) => {
         const m = name.match(/_(\d{8})_(\d{6})/);
         return m ? m[1] + m[2] : "0";
       };
       return getDT(b.file).localeCompare(getDT(a.file));
     });
+  });
+
+  // 3. 🔥 LOGIK BARU: Susun KUMPULAN AKAUN supaya akaun yang terima fail paling baru naik ke atas!
+  accKeys.sort((accA, accB) => {
+    const getDT = (name) => {
+      const m = name.match(/_(\d{8})_(\d{6})/);
+      return m ? m[1] + m[2] : "0";
+    };
+    let latestA = getDT(grouped[accA][0].file);
+    let latestB = getDT(grouped[accB][0].file);
+    return latestB.localeCompare(latestA); // Bandingkan masa dan tolak ke atas
+  });
+
+  // 4. Bina paparan HTML menggunakan susunan yang telah diperbetulkan
+  accKeys.forEach(acc => {
+    let files = grouped[acc];
     let count = files.length;
     let latestFile = files[0].file;
     let latestUser = files[0].user || "UNKNOWN";
     let dateMatch = latestFile.match(/_(\d{8})_(\d{6})/);
     let formattedDate = "Unknown";
+    
     if (dateMatch) {
       let d = dateMatch[1];
       let t = dateMatch[2];
@@ -1251,11 +1275,11 @@ async function search() {
   
   document.getElementById("result").innerHTML = html;
 
-  // 🔥 KEMAS KINI: Simpan carian berjaya ke dalam session memori supaya boleh dipanggil semula bila Back
+  // Simpan result ke dalam memori untuk fungsi butang Back
   sessionStorage.setItem("savedSearchIC", ic);
   sessionStorage.setItem("savedSearchResult", html);
 }
-
+  
 document.getElementById("searchIC").addEventListener("keypress", function(e){
   if (e.key === "Enter") search();
 });
