@@ -1216,20 +1216,31 @@ function applyRole(role) {
 }
   
 async function loadDashboard() {
-  // 🔥 Letak "..." supaya nampak data tengah ditarik (evoid visual freeze)
+  // 1. Tunjukkan loading state pada KPI
   document.getElementById("kpiDocs").innerText = "...";
   document.getElementById("kpiIC").innerText = "...";
   document.getElementById("kpiAcc").innerText = "...";
   document.getElementById("kpiToday").innerText = "...";
-  
+
+  // 2. Tunjukkan loading spinner pada Recent Activity supaya nampak "fresh"
+  document.getElementById("recentList").innerHTML = `
+    <div style="text-align:center; padding:20px;">
+      <div class="search-loader"></div>
+      <p style="font-size:12px; color:#64748b; margin-top:10px;">Refreshing activity...</p>
+    </div>
+  `;
+
   try {
     const res = await fetch(WEB_APP_URL + "?dashboard=1");
     const data = await res.json();
+    
+    // Kemaskini KPI
     document.getElementById("kpiDocs").innerText = data.docs || 0;
     document.getElementById("kpiIC").innerText = data.ic || 0;
     document.getElementById("kpiAcc").innerText = data.account || 0;
     document.getElementById("kpiToday").innerText = data.today || 0;
     
+    // 3. Bina semula Recent Activity List
     let html = "";
     (data.recent || []).forEach(r => {
       html += `
@@ -1246,9 +1257,12 @@ async function loadDashboard() {
         </div>
       `;
     });
+    
     document.getElementById("recentList").innerHTML = html || '<div style="color:#888; font-size:14px; text-align:center; padding: 20px;">No activity today</div>';
+    
   } catch (e) {
     console.error("Dashboard load error", e);
+    document.getElementById("recentList").innerHTML = '<div style="color:red; text-align:center; padding:20px;">Failed to load data</div>';
   }
 }
 
