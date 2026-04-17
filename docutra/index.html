@@ -867,7 +867,7 @@ button.action:active {
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyd2deFraEXRG9d6fwghdfd6ZdGFg17-OKWoTHutEl8uHIhWSv33QzHwkgzqBUt6dIPjg/exec";
 
 function showPage(page, el, isClick = false) {
-  localStorage.setItem("activePage", page);
+  sessionStorage.setItem("activePage", page);
   document.getElementById("dashboard").style.display = "none";
   document.getElementById("upload").style.display = "none";
   document.getElementById("search").style.display = "none";
@@ -1059,7 +1059,7 @@ window.addEventListener("load", function() {
     showPage("login");
     return;
   }
-  const savedPage = localStorage.getItem("activePage") || "dashboard";
+  const savedPage = sessionStorage.getItem("activePage") || "dashboard";
   showPage(savedPage);
 
   // 🔥 KEMAS KINI: Tarik semula hasil carian lepas pengguna tekan butang 'Back'
