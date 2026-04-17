@@ -855,13 +855,14 @@ body:has(#login[style*="block"]) .mobile-header {
   OneSignalDeferred.push(function(OneSignal) {
     OneSignal.init({
       appId: "ba565152-9429-40f1-9de2-663bf17a6ca9",
-      path: "/docutra/",
+      serviceWorkerPath: "OneSignalSDKWorker.js", // Paksa dia cari dalam folder yang sama
+      serviceWorkerParam: { scope: "/docutra/" }, // Set skop khas untuk folder ni
       notifyButton: {
         enable: true,
       },
+      allowLocalhostAsSecureOrigin: true,
     });
   });
-  
 </script>
   
 </head>
