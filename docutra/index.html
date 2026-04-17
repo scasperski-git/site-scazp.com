@@ -904,8 +904,8 @@ body:has(#login[style*="block"]) .mobile-header {
     <i class="ph-fill ph-lock-key" style="font-size: 18px;"></i> Secure Login
   </h3>
     <div class="form-group">
-      <input type="text" id="userId" placeholder="User ID">
-      <input type="password" id="password" placeholder="Password">
+    <input type="text" id="userId" placeholder="User ID" onkeypress="handleLoginEnter(event)">
+    <input type="password" id="password" placeholder="Password" onkeypress="handleLoginEnter(event)">
       <button class="action" onclick="login()" style="margin-top: 10px;">Login</button>
     </div>
     <p id="loginMsg" style="text-align: center; color: #ef4444; margin-top: 16px; font-weight: 500; font-size: 14px;"></p>
@@ -1063,7 +1063,10 @@ if (page === "login") {
     // 🔥 TAMBAH INI: Sorok header mobile masa login
     if(document.querySelector(".mobile-header")) {
       document.querySelector(".mobile-header").style.setProperty("display", "none", "important");
-    }
+  }
+    // 🔥 TAMBAH INI
+    focusLogin(); 
+  }
   } else {
     if (window.innerWidth <= 768) {
       document.querySelector(".sidebar").style.display = "none";
@@ -1176,6 +1179,21 @@ async function login() {
   }
 }
 
+// Fungsi untuk kesan butang Enter
+function handleLoginEnter(e) {
+  if (e.key === "Enter") {
+    login();
+  }
+}
+
+// Fungsi untuk automatik "focus" bila page login dibuka
+function focusLogin() {
+  const userIdInput = document.getElementById("userId");
+  if (userIdInput) {
+    setTimeout(() => userIdInput.focus(), 500);
+  }
+}
+  
 function logout() {
   localStorage.removeItem("user");
   sessionStorage.clear(); // 🔥 KEMAS KINI: Bersihkan memori carian bila logout
