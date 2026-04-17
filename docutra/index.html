@@ -1178,7 +1178,15 @@ async function login() {
 // Fungsi untuk kesan butang Enter
 function handleLoginEnter(e) {
   if (e.key === "Enter") {
-    login();
+    const activeId = document.activeElement.id;
+    
+    if (activeId === "userId") {
+      // Kalau tengah taip User ID, tekan Enter akan lompat ke Password
+      document.getElementById("password").focus();
+    } else if (activeId === "password") {
+      // Kalau tengah taip Password, tekan Enter terus jalan login
+      login();
+    }
   }
 }
 
