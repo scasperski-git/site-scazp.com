@@ -1045,8 +1045,7 @@ function showPage(page, el, isClick = false) {
       selectedFiles = [];
       renderFileList();
     }
-  }
-  
+    
   if (page === "dashboard" && isClick) {  
     location.reload();
   }
@@ -1074,6 +1073,7 @@ if (page === "login") {
         document.querySelector(".mobile-header").style.setProperty("display", "none", "important");
       }
     }
+  }
   }
 function toBase64(file) {
   return new Promise((resolve, reject) => {
