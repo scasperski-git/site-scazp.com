@@ -876,13 +876,12 @@ function showPage(page, el, isClick = false) {
   document.getElementById(page).style.display = "block";
   window.scrollTo({ top: 0, behavior: "smooth" });
 
-document.querySelectorAll(".sidebar button, .bottom-nav button").forEach(btn => {
+  document.querySelectorAll(".sidebar button, .bottom-nav button").forEach(btn => {
     btn.classList.remove("active");
   });
   if (el) el.classList.add("active");
 
   // 🔥 LOGIK BARU: JIKA STAF TEKAN MANUAL PADA BUTANG MENU, KITA RESET PAGE!
-  // (Tapi kalau dia datang dari butang 'Back' telefon, 'el' tiada, jadi ia takkan reset)
   if (el) {
     if (page === "search") {
       sessionStorage.removeItem("savedSearchIC");
@@ -899,12 +898,6 @@ document.querySelectorAll(".sidebar button, .bottom-nav button").forEach(btn => 
       selectedFiles = [];
       renderFileList();
     }
-  }
-  
-    document.getElementById("files").value = "";
-    document.getElementById("msg").innerText = "";
-    selectedFiles = [];
-    renderFileList();
   }
   
   if (page === "dashboard" && isClick) {  
