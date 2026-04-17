@@ -1034,7 +1034,7 @@ function showPage(page, el, isClick = false) {
   });
   if (el) el.classList.add("active");
 
-  // 🔥 LOGIK BARU: JIKA STAF TEKAN MANUAL PADA BUTANG MENU, KITA RESET PAGE!
+  // RESET PAGE LOGIC
   if (el) {
     if (page === "search") {
       sessionStorage.removeItem("savedSearchIC");
@@ -1057,34 +1057,30 @@ function showPage(page, el, isClick = false) {
     location.reload();
   }
 
-if (page === "login") {
+  // LOGIN & RESPONSIVE LOGIC
+  if (page === "login") {
     document.querySelector(".sidebar").style.display = "none";
     document.querySelector(".bottom-nav").style.display = "none";
-    // 🔥 TAMBAH INI: Sorok header mobile masa login
     if(document.querySelector(".mobile-header")) {
       document.querySelector(".mobile-header").style.setProperty("display", "none", "important");
-  }
-    // 🔥 TAMBAH INI
+    }
     focusLogin(); 
-  }
   } else {
     if (window.innerWidth <= 768) {
       document.querySelector(".sidebar").style.display = "none";
       document.querySelector(".bottom-nav").style.display = "flex";
-      // 🔥 TAMBAH INI: Tunjukkan balik header mobile lepas login
       if(document.querySelector(".mobile-header")) {
         document.querySelector(".mobile-header").style.setProperty("display", "flex", "important");
       }
     } else {
       document.querySelector(".sidebar").style.display = "flex";
       document.querySelector(".bottom-nav").style.display = "none";
-      // 🔥 TAMBAH INI: Sorok header mobile kalau di desktop mode
       if(document.querySelector(".mobile-header")) {
         document.querySelector(".mobile-header").style.setProperty("display", "none", "important");
       }
     }
   }
-  }
+} // Tanda tutup fungsi showPage yang betul
 function toBase64(file) {
   return new Promise((resolve, reject) => {
     let reader = new FileReader();
