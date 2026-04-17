@@ -854,13 +854,14 @@ body:has(#login[style*="block"]) .mobile-header {
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(function(OneSignal) {
     OneSignal.init({
-      appId: "ba565152-9429-40f1-9de2-663bf17a6ca9", // App ID kau
+      appId: "ba565152-9429-40f1-9de2-663bf17a6ca9",
+      safari_web_id: "web.onesignal.auto.1581e28d-xxxx-xxxx", // Ambil ni kat OneSignal Dashboard kalau nak support Safari
       notifyButton: {
-        enable: true, // Akan tunjuk ikon loceng kat bawah penjuru untuk user subscribe
+        enable: true,
       },
-      allowLocalhostAsSecureOrigin: true // Berguna kalau kau tengah test kat localhost
     });
   });
+  
 </script>
   
 </head>
