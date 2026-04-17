@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<meta name="theme-color" content="#ffffff"> <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -59,8 +59,7 @@ button {
   position: relative; 
   height: 100vh;
   z-index: 100;
-
-  flex-shrink: 0; /* ✅ TAMBAH SINI */
+  flex-shrink: 0;
 }
 
 .sidebar > div:first-child {
@@ -173,7 +172,7 @@ button {
 .main {
   flex: 1;
   padding: 40px 30px;
-  margin-left: 0;   /* 🔥 BUANG 260px */
+  margin-left: 0;
   width: 100%;
 }
 
@@ -604,7 +603,8 @@ button.action:active {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     color: var(--text-main);
-    padding: 16px;
+    /* 🔥 KEMAS KINI: Padding atas diubah ke 45px untuk betulkan Status Bar bertindih */
+    padding: 45px 16px 16px 16px; 
     font-weight: 700;
     font-size: 18px;
     z-index: 1000;
@@ -645,8 +645,8 @@ button.action:active {
 
 .box {
   padding: 20px 16px;
-  border-radius: 0;      /* optional: buang curve */
-  margin: 0;             /* 🔥 full screen */
+  border-radius: 0;
+  margin: 0;
 }
 
   .row { flex-direction: column; gap: 12px; }
@@ -862,7 +862,7 @@ button.action:active {
 
 <script>
 // ==========================================
-// JAVASCRIPT LOGIC (100% UNTOUCHED)
+// JAVASCRIPT LOGIC (DENGAN PENAMBAHBAIKAN SESSION STORAGE)
 // ==========================================
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyd2deFraEXRG9d6fwghdfd6ZdGFg17-OKWoTHutEl8uHIhWSv33QzHwkgzqBUt6dIPjg/exec";
 
@@ -881,10 +881,8 @@ function showPage(page, el, isClick = false) {
   });
   if (el) el.classList.add("active");
 
-  if (page === "search") {
-    document.getElementById("result").innerHTML = "";
-    document.getElementById("searchIC").value = "";
-  }
+  // 🔥 KEMAS KINI: Kod "reset carian" telah dibuang supaya hasil sentiasa kekal di tab search
+  // if (page === "search") { ... }
 
   if (page === "upload") {
     document.getElementById("ic").value = "";
@@ -1009,6 +1007,7 @@ async function login() {
 
 function logout() {
   localStorage.removeItem("user");
+  sessionStorage.clear(); // 🔥 KEMAS KINI: Bersihkan memori carian bila logout
   document.getElementById("overlay").style.display = "flex";
   document.getElementById("modalTitle").innerText = "Logging out...";
   document.getElementById("modalSub").innerText = "Ending session";
@@ -1062,6 +1061,13 @@ window.addEventListener("load", function() {
   }
   const savedPage = localStorage.getItem("activePage") || "dashboard";
   showPage(savedPage);
+
+  // 🔥 KEMAS KINI: Tarik semula hasil carian lepas pengguna tekan butang 'Back'
+  if (sessionStorage.getItem("savedSearchIC") && sessionStorage.getItem("savedSearchResult")) {
+    document.getElementById("searchIC").value = sessionStorage.getItem("savedSearchIC");
+    document.getElementById("result").innerHTML = sessionStorage.getItem("savedSearchResult");
+  }
+
   applyRole(user.role);
   loadDashboard();
   document.querySelectorAll(".sidebar button, .bottom-nav button").forEach(btn => {
@@ -1235,7 +1241,12 @@ async function search() {
     });
     html += `</div></div>`;
   });
+  
   document.getElementById("result").innerHTML = html;
+
+  // 🔥 KEMAS KINI: Simpan carian berjaya ke dalam session memori supaya boleh dipanggil semula bila Back
+  sessionStorage.setItem("savedSearchIC", ic);
+  sessionStorage.setItem("savedSearchResult", html);
 }
 
 document.getElementById("searchIC").addEventListener("keypress", function(e){
