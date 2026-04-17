@@ -420,26 +420,34 @@ button.action:active {
 }
 
 /* ===== BUTANG VIEW CUSTOM ===== */
+/* ===== BUTANG VIEW CUSTOM (SAIZ LEBIH KECIL) ===== */
 .btn-view {
   background: transparent;
   color: var(--primary);
-  border: 1.5px solid var(--primary); /* Garis border halus */
-  padding: 6px 16px; /* Saiz kotak lebih kecil */
+  border: 1.5px solid var(--primary);
+  /* 🔥 Kurangkan ruang dalam (padding) */
+  padding: 7px 16px; 
+  /* 🔥 Rendahkan sedikit tinggi butang */
+  min-height: 34px; 
+  /* 🔥 Kurangkan sikit lengkungan bucu supaya seimbang */
   border-radius: 8px;
   text-decoration: none;
+  /* 🔥 Kecilkan sikit saiz font */
   font-size: 12px;
   font-weight: 700;
   transition: all 0.15s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0; 
+  margin-left: 10px; 
 }
 
-/* Effect bila butang disentuh/ditekan */
+/* Effect bila butang disentuh/ditekan kekal sama */
 .btn-view:active {
-  transform: scale(0.90); /* Effect butang "tenggelam" sikit */
-  background: var(--primary); /* Latar belakang tukar jadi biru */
-  color: white; /* Tulisan tukar putih */
+  transform: scale(0.90); 
+  background: var(--primary); 
+  color: white; 
 }
 
 /* ===== RECENT & SEARCH ITEMS ===== */
