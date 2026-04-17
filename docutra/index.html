@@ -363,10 +363,19 @@ button.action:active {
   transition: var(--transition);
 }
 
+/* Effect bila Desktop (Lalu mouse pada file upload) */
 .file-card:hover {
-  border-color: #cbd5e1;
+  border-color: var(--primary);
   background: #ffffff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  box-shadow: 0 8px 20px rgba(0, 136, 255, 0.12); /* Bayang biru sikit */
+  transform: translateY(-2px); /* Terapung sikit */
+}
+
+/* Effect bila Mobile/App (Bila jari tekan fail) */
+.file-card:active {
+  transform: scale(0.98);
+  border-color: var(--primary);
+  background: #f0f7ff;
 }
 
 .file-left {
@@ -450,28 +459,32 @@ button.action:active {
   color: white; 
 }
 
-/* ===== RECENT & SEARCH ITEMS ===== */
+/* ===== RECENT & SEARCH ITEMS (UPGRADE EFFECT) ===== */
 .file-item {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   padding: 16px;
   border-radius: 14px;
   margin-bottom: 12px;
-  transition: var(--transition);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* Pergerakan lebih licin */
 }
 
+/* Effect bila Desktop (Lalu mouse) */
 @media (hover: hover) {
   .file-item:hover {
-    box-shadow: 0 8px 24px rgba(112, 144, 176, 0.12);
-    border-color: #cbd5e1;
-    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0, 136, 255, 0.15); /* Bayang biru menyala */
+    border-color: var(--primary); /* Garis kotak bertukar biru */
+    transform: translateY(-4px); /* Kotak terapung ke atas sikit */
   }
 }
 
+/* Effect bila Mobile/App (Bila jari tekan kotak) */
 .file-item:active {
-  transform: scale(0.98);
+  transform: scale(0.97); /* Kotak mengecut sikit macam butang fizikal */
+  border-color: var(--primary);
+  background-color: #f0f7ff; /* Latar bertukar biru cair */
+  box-shadow: 0 4px 12px rgba(0, 136, 255, 0.1);
 }
-
 .file-name {
   font-size: 14px;
   font-weight: 600;
