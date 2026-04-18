@@ -1112,7 +1112,7 @@ body:has(#login[style*="block"]) .mobile-header {
 // ==========================================
 // JAVASCRIPT LOGIC
 // ==========================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbye0on_QN0n-hmYozqs80oDgKYTMroJba5exYeP2w1tIsxuuiGsa3jV3UHgLSt5LBl2LA/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxL_CnS1Ry6xp489LgUfQKDQbcCjGOfJBludMa6POFL4lS38_iFmEJ_F-pfNGl8zHNvBg/exec";
 
 // Toggle Dropdown Loceng & Reset Nombor
 function toggleNotif(e) {
@@ -1314,15 +1314,17 @@ async function login() {
       document.getElementById("modalSub").innerText = "Welcome back";
       localStorage.setItem("user", JSON.stringify(data));
       
-      // 🔥 TAG ONESIGNAL (Untuk kecualikan uploader)
+// 🔥 TAG ONESIGNAL (PAKSA HURUF KECIL)
       if (window.OneSignalDeferred) {
         OneSignalDeferred.push(function(OneSignal) {
-          OneSignal.User.addTag("userId", data.userId);
+          let cleanUserId = String(data.userId).toLowerCase().trim();
+          OneSignal.User.addTag("userId", cleanUserId);
         });
       }
 
       setTimeout(() => {
         document.getElementById("overlay").style.display = "none";
+// ... sambungan kod asal
         showPage("dashboard");
         applyRole(data.role);
         loadDashboard();
@@ -1428,10 +1430,11 @@ window.addEventListener("load", function() {
     return;
   }
 
-  // 🔥 TAG ONESIGNAL (WAJIB ADA DI SINI SUPAYA UPLOADER DIKECUALIKAN)
+// 🔥 TAG ONESIGNAL (PAKSA HURUF KECIL)
   if (window.OneSignalDeferred) {
     OneSignalDeferred.push(function(OneSignal) {
-      OneSignal.User.addTag("userId", String(user.userId));
+      let cleanUserId = String(user.userId).toLowerCase().trim();
+      OneSignal.User.addTag("userId", cleanUserId);
     });
   }
 
