@@ -1071,8 +1071,12 @@ body:has(#login[style*="block"]) .mobile-header {
       <div class="drop-sub">or click to browse (Max 4 files)</div>
     </label>
 
-    <input type="file" id="files" multiple style="display:none;">
-    <div id="fileList" style="margin-top:16px; margin-bottom: 24px;"></div>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+  <span id="fileCounter" style="font-size: 13px; font-weight: 700; color: var(--primary);">0/4 Files Selected</span>
+</div>
+
+<input type="file" id="files" accept="image/*,application/pdf" multiple style="display:none;">
+<div id="fileList" style="margin-top:16px; margin-bottom: 24px;"></div>
     
     <button class="action" onclick="upload()">Secure Upload</button>
     <p id="msg"></p>
@@ -1263,20 +1267,33 @@ let selectedFiles = [];
 
 document.getElementById("files").addEventListener("change", function(e) {
   let newFiles = Array.from(e.target.files);
-  selectedFiles = selectedFiles.concat(newFiles);
-
-  if (selectedFiles.length > 4) {
-    alert("Maximum 4 files only!");
-    selectedFiles = selectedFiles.slice(0, 4);
+  
+  // Strict Logic: Semak baki slot yang tinggal
+  let availableSlot = 4 - selectedFiles.length;
+  
+  if (newFiles.length > availableSlot) {
+    alert("Strict Limit: You can only add " + availableSlot + " more file(s). Total limit is 4.");
+    // Hanya ambil fail yang muat dalam slot baki sahaja
+    newFiles = newFiles.slice(0, availableSlot);
   }
 
+  selectedFiles = selectedFiles.concat(newFiles);
   renderFileList();
-  this.value = "";
+  this.value = ""; // Reset input supaya boleh pilih fail yang sama jika perlu
 });
 
 function renderFileList() {
   const list = document.getElementById("fileList");
+  const counter = document.getElementById("fileCounter");
+  
   list.innerHTML = "";
+  
+  // Update kaunter 0/4
+  counter.innerText = `${selectedFiles.length}/4 Files Selected`;
+  
+  // Tukar warna kaunter kalau dah penuh
+  counter.style.color = selectedFiles.length === 4 ? "#ef4444" : "var(--primary)";
+
   selectedFiles.forEach((file, index) => {
     let sizeKB = (file.size / 1024).toFixed(1);
     list.innerHTML += `
