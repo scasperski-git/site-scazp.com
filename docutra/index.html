@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#ffffff"> <script src="https://unpkg.com/@phosphor-icons/web"></script>
+<meta name="theme-color" content="#ffffff"> 
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -46,8 +47,124 @@ button {
   display: flex;
   min-height: 100vh;
   width: 100%;
-  align-items: stretch; /* Pastikan anak-anak dia cuba tarik sampai bawah */
+  align-items: stretch; 
 }
+
+/* ===== NOTIFICATION BELL (NEW) ===== */
+.notif-wrapper {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  z-index: 1001;
+}
+
+@media (max-width: 768px) {
+  .notif-wrapper {
+    top: 15px;
+    right: 15px;
+  }
+}
+
+/* Hide Bell on Login Screen */
+body:has(#login[style*="block"]) .notif-wrapper { 
+  display: none !important; 
+}
+
+.bell-btn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: var(--text-main);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(112, 144, 176, 0.15);
+  position: relative;
+}
+
+.bell-btn i { font-size: 22px; }
+.bell-btn:hover { background: #f8fafc; transform: translateY(-2px); }
+
+.notif-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+.notif-dropdown {
+  display: none;
+  position: absolute;
+  top: 55px;
+  right: 0;
+  background: white;
+  width: 320px;
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(11, 20, 55, 0.15);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease;
+}
+
+.notif-header {
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notif-list {
+  max-height: 320px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.notif-item {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+  line-height: 1.4;
+}
+
+.notif-item:hover { background: #f8fafc; }
+.notif-item:last-child { border-bottom: none; }
+
+.notif-icon {
+  background: rgba(0, 136, 255, 0.1);
+  color: var(--primary);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+.notif-text strong { color: var(--text-main); font-weight: 700; }
+.notif-time { font-size: 10px; color: #94a3b8; margin-top: 4px; display: block; font-weight: 600; }
 
 /* ===== SIDEBAR (DESKTOP) ===== */
 .sidebar {
@@ -57,20 +174,15 @@ button {
   padding: 30px 20px;
   display: flex;
   flex-direction: column;
-  
-  /* 🔥 TUKAR DUA BARIS INI */
-  position: sticky;   /* Dia akan melekat di tepi */
-  top: 0;            /* Melekat dari atas skrin */
-  height: 100vh;     /* Kekal tinggi mengikut skrin */
-  
+  position: sticky;  
+  top: 0;            
+  height: 100vh;     
   z-index: 100;
   flex-shrink: 0;
-  overflow-y: auto;  /* Kalau menu banyak sangat, sidebar boleh scroll sendiri */
+  overflow-y: auto;  
 }
 
-.sidebar > div:first-child {
-  flex: 1;
-}
+.sidebar > div:first-child { flex: 1; }
 
 .menu {
   margin-top: 40px;
@@ -116,9 +228,7 @@ button {
   overflow: hidden;
 }
 
-.sidebar button i {
-  font-size: 20px;
-}
+.sidebar button i { font-size: 20px; }
 
 @media (hover: hover) {
   .sidebar button:hover:not(.active) {
@@ -234,9 +344,7 @@ input {
   outline: none;
 }
 
-input::placeholder {
-  color: #94a3b8;
-}
+input::placeholder { color: #94a3b8; }
 
 input:focus {
   border-color: var(--primary);
@@ -369,15 +477,13 @@ button.action:active {
   transition: var(--transition);
 }
 
-/* Effect bila Desktop (Lalu mouse pada file upload) */
 .file-card:hover {
   border-color: var(--primary);
   background: #ffffff;
-  box-shadow: 0 8px 20px rgba(0, 136, 255, 0.12); /* Bayang biru sikit */
-  transform: translateY(-2px); /* Terapung sikit */
+  box-shadow: 0 8px 20px rgba(0, 136, 255, 0.12); 
+  transform: translateY(-2px); 
 }
 
-/* Effect bila Mobile/App (Bila jari tekan fail) */
 .file-card:active {
   transform: scale(0.98);
   border-color: var(--primary);
@@ -434,7 +540,7 @@ button.action:active {
   color: white;
 }
 
-/* ===== BUTANG VIEW CUSTOM ===== */
+/* ===== BUTTON VIEW CUSTOM ===== */
 .btn-view {
   background: transparent;
   color: var(--primary);
@@ -445,7 +551,7 @@ button.action:active {
   text-decoration: none;
   font-size: 12px;
   font-weight: 700;
-  transition: all 0.2s ease; /* Dilambatkan sikit supaya hover nampak smooth */
+  transition: all 0.2s ease; 
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -453,7 +559,6 @@ button.action:active {
   margin-left: 10px; 
 }
 
-/* Effect bila lalukan mouse (Desktop) */
 @media (hover: hover) {
   .btn-view:hover {
     background: var(--primary);
@@ -463,40 +568,38 @@ button.action:active {
   }
 }
 
-/* Effect bila butang disentuh/ditekan */
 .btn-view:active {
   transform: scale(0.90); 
   background: var(--primary); 
   color: white; 
-  box-shadow: none; /* Buang bayang masa tekan supaya nampak "tenggelam" */
+  box-shadow: none; 
 }
 
-/* ===== RECENT & SEARCH ITEMS (UPGRADE EFFECT) ===== */
+/* ===== RECENT & SEARCH ITEMS ===== */
 .file-item {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   padding: 16px;
   border-radius: 14px;
   margin-bottom: 12px;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* Pergerakan lebih licin */
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
 }
 
-/* Effect bila Desktop (Lalu mouse) */
 @media (hover: hover) {
   .file-item:hover {
-    box-shadow: 0 12px 28px rgba(0, 136, 255, 0.15); /* Bayang biru menyala */
-    border-color: var(--primary); /* Garis kotak bertukar biru */
-    transform: translateY(-4px); /* Kotak terapung ke atas sikit */
+    box-shadow: 0 12px 28px rgba(0, 136, 255, 0.15); 
+    border-color: var(--primary); 
+    transform: translateY(-4px); 
   }
 }
 
-/* Effect bila Mobile/App (Bila jari tekan kotak) */
 .file-item:active {
-  transform: scale(0.97); /* Kotak mengecut sikit macam butang fizikal */
+  transform: scale(0.97); 
   border-color: var(--primary);
-  background-color: #f0f7ff; /* Latar bertukar biru cair */
+  background-color: #f0f7ff; 
   box-shadow: 0 4px 12px rgba(0, 136, 255, 0.1);
 }
+
 .file-name {
   font-size: 14px;
   font-weight: 600;
@@ -580,9 +683,7 @@ button.action:active {
   box-shadow: 0 8px 16px rgba(67, 24, 255, 0.2);
 }
 
-#okBtn:hover {
-  transform: translateY(-2px);
-}
+#okBtn:hover { transform: translateY(-2px); }
 
 /* Animations */
 @keyframes spin {
@@ -617,13 +718,8 @@ button.action:active {
 @keyframes drawTick { to { stroke-dashoffset: 0; } }
 
 /* ===== MOBILE RESPONSIVE ===== */
-.mobile-header {
-  display: none !important;
-}
-
-.bottom-nav {
-  display: none;
-}
+.mobile-header { display: none !important; }
+.bottom-nav { display: none; }
 
 .search-loader {
   width: 30px;
@@ -636,39 +732,33 @@ button.action:active {
   display: block;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
 /* ===== LATEST UPLOAD ROW (GLOBAL) ===== */
 .latest-row {
-  font-size: 12px; /* Kecilkan saiz font untuk desktop */
+  font-size: 12px; 
   color: #64748b;
   margin-top: 8px;
   background: #f8fafc;
   padding: 8px 12px;
   border-radius: 8px;
   display: flex;
-  flex-wrap: wrap; /* 🔥 Ini yang buat dia auto-wrap kalau skrin mula sempit */
+  flex-wrap: wrap; 
   gap: 6px;
   line-height: 1.4;
 }
 
-/* Style untuk badge versi di Desktop (Sidebar gelap) */
 .version-tag-desktop {
-  font-size: 10px; /* Sesuai sikit untuk skrin besar */
-  color: #ffffff; /* Tulisan putih */
-  background: rgba(255, 255, 255, 0.15); /* Latar belakang putih lutsinar */
+  font-size: 10px; 
+  color: #ffffff; 
+  background: rgba(255, 255, 255, 0.15); 
   padding: 2px 6px;
   border-radius: 6px;
   font-weight: 700;
   margin-left: 4px;
   letter-spacing: 0.5px;
-  vertical-align: middle; /* Pastikan dia sebaris kemas dengan tulisan DocuTrack */
+  vertical-align: middle; 
 }
 
-  .version-tag {
+.version-tag {
   font-size: 9px;
   color: var(--primary);
   background: rgba(0, 136, 255, 0.1);
@@ -681,35 +771,31 @@ button.action:active {
 @media (max-width: 768px) {
   .app { flex-direction: column; }
   .sidebar { display: none; }
-  .file-name {
-    font-size: 12px;
-    line-height: 1.3;
-  }
-    .kpi-grid {
+  .file-name { font-size: 12px; line-height: 1.3; }
+  .kpi-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
 
-.mobile-header {
+  .mobile-header {
     display: flex !important;
-    flex-direction: column; /* Paksa susunan jadi atas dan bawah */
-    align-items: center;
+    flex-direction: column; 
+    align-items: flex-start;
     justify-content: center;
-    gap: 2px; /* Jarak rapat antara tajuk dan link */
+    gap: 2px; 
     position: sticky;
     top: 0;
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     color: var(--text-main);
-    padding: 16px;
+    padding: 16px 20px;
     z-index: 1000;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     border-bottom: 1px solid #e2e8f0;
   }
 
-  /* Susunan tajuk DocuTrack */
   .mobile-title {
     display: flex;
     align-items: center;
@@ -718,73 +804,50 @@ button.action:active {
     font-size: 18px;
   }
 
-/* Style untuk font halus Powered by (SAIZ MIKRO) */
   .mobile-powered {
-    font-size: 8px; /* 🔥 Saiz dikecilkan ke tahap minimum */
+    font-size: 8px; 
     font-weight: 500;
     color: #94a3b8;
     letter-spacing: 0.5px;
-    margin-top: -2px; /* 🔥 Tarik dia rapat sikit ke atas supaya tak nampak tergantung */
+    margin-top: -2px; 
   }
 
   .mobile-powered a {
-    font-size: 8px; /* 🔥 Link pun ikut kecil */
+    font-size: 8px; 
     color: var(--primary);
     text-decoration: none;
     font-weight: 700;
   }
 
-  /* Style untuk badge versi (Premium Mini Badge) */
   .version-tag {
-    font-size: 8px; /* Saiz halus sama macam powered by */
-    color: var(--primary); /* Guna warna tema biru */
-    background: rgba(0, 136, 255, 0.1); /* Latar belakang biru lutsinar */
+    font-size: 8px; 
     padding: 2px 6px;
-    border-radius: 6px;
-    font-weight: 700;
-    margin-left: -2px; /* Rapatkan sikit dengan huruf 'k' pada DocuTrack */
-    letter-spacing: 0.5px;
+    margin-left: -2px; 
   }
   
-  .kpi {
-    padding: 14px;
-    border-radius: 14px;
-  }
+  .kpi { padding: 14px; border-radius: 14px; }
+  .kpi-value { font-size: 20px; }
+  .kpi-title { font-size: 11px; }
 
-  .kpi-value {
-    font-size: 20px;
-  }
-
-  .kpi-title {
-    font-size: 11px;
-  }
-
-.latest-row {
-    font-size: 10.5px; /* Saiz lebih optimum untuk muat 1 baris */
+  .latest-row {
+    font-size: 10.5px; 
     margin-top: 6px;
-    padding: 6px 8px; /* Nipiskan sikit kotak */
+    padding: 6px 8px; 
     background: #f8fafc;
     border-radius: 8px;
-    
-    /* 🔥 PAKSA 1 BARIS & LETAK TITIK KALAU LEBIH HADEPUAN SKRIN */
     display: block; 
     white-space: nowrap; 
     overflow: hidden;
     text-overflow: ellipsis;
   }
   
-.main {
+  .main {
     padding: 10px 12px 100px 12px; 
     margin-left: 0;
     width: 100%;
-}
+  }
 
-.box {
-  padding: 20px 16px;
-  border-radius: 0;
-  margin: 0;
-}
-
+  .box { padding: 20px 16px; border-radius: 0; margin: 0; }
   .row { flex-direction: column; gap: 12px; }
 
   .bottom-nav {
@@ -823,13 +886,8 @@ button.action:active {
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
-  .bottom-nav button.active {
-    color: var(--primary);
-  }
-
-  .bottom-nav button.active i {
-    transform: translateY(-4px);
-  }
+  .bottom-nav button.active { color: var(--primary); }
+  .bottom-nav button.active i { transform: translateY(-4px); }
 
   .bottom-nav button.active::after {
     content: "";
@@ -842,7 +900,7 @@ button.action:active {
   }
 }
 
-/* Sorok header mobile bila skrin login sedang aktif */
+/* Hide header mobile bila skrin login */
 #login[style*="block"] ~ .mobile-header,
 body:has(#login[style*="block"]) .mobile-header {
   display: none !important;
@@ -855,11 +913,9 @@ body:has(#login[style*="block"]) .mobile-header {
   OneSignalDeferred.push(function(OneSignal) {
     OneSignal.init({
       appId: "ba565152-9429-40f1-9de2-663bf17a6ca9",
-      serviceWorkerPath: "OneSignalSDKWorker.js", // Paksa dia cari dalam folder yang sama
-      serviceWorkerParam: { scope: "/docutra/" }, // Set skop khas untuk folder ni
-      notifyButton: {
-        enable: true,
-      },
+      serviceWorkerPath: "OneSignalSDKWorker.js", 
+      serviceWorkerParam: { scope: "/docutra/" }, 
+      notifyButton: { enable: true },
       allowLocalhostAsSecureOrigin: true,
     });
   });
@@ -868,6 +924,23 @@ body:has(#login[style*="block"]) .mobile-header {
 </head>
 
 <body>
+
+<div class="notif-wrapper">
+  <button class="bell-btn" onclick="toggleNotif(event)">
+    <i class="ph-fill ph-bell"></i>
+    <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
+  </button>
+  
+  <div class="notif-dropdown" id="notifDropdown">
+    <div class="notif-header">
+      <span>Notifications</span>
+      <i class="ph-fill ph-checks" style="color: var(--primary); font-size: 18px;"></i>
+    </div>
+    <ul class="notif-list" id="notifList">
+      <div style='padding:20px; text-align:center; color:#94a3b8; font-size:13px;'>Fetching data...</div>
+    </ul>
+  </div>
+</div>
 
 <div class="app">
 
@@ -900,7 +973,7 @@ body:has(#login[style*="block"]) .mobile-header {
 </div>
 
 <div class="mobile-header">
-<div class="mobile-title">
+  <div class="mobile-title">
     <i class="ph-fill ph-folder" style="color:var(--primary); font-size:22px;"></i> DocuTrack
     <span class="version-tag">v1.0</span>
   </div>
@@ -1037,9 +1110,53 @@ body:has(#login[style*="block"]) .mobile-header {
 
 <script>
 // ==========================================
-// JAVASCRIPT LOGIC (DENGAN PENAMBAHBAIKAN SESSION STORAGE)
+// JAVASCRIPT LOGIC
 // ==========================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw65inTYNwSJDBacCNmcRgjsGui3QUITwQJyh24RznuFOXbV4JfgtHLRE82pzDAPfixBg/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxh52ONHwGeLd1VxAoAnDjB7RYnhInuIVkvQAfQc9PtDm-wKt8hPGVwpvc9RsC82R9pBg/exec";
+
+// Toggle Dropdown Loceng
+function toggleNotif(e) {
+  if(e) e.stopPropagation();
+  const dropdown = document.getElementById("notifDropdown");
+  dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+}
+
+// Tutup loceng bila klik tempat lain
+document.addEventListener("click", function(e) {
+  const wrapper = document.querySelector(".notif-wrapper");
+  const dropdown = document.getElementById("notifDropdown");
+  if (wrapper && !wrapper.contains(e.target) && dropdown.style.display === "block") {
+    dropdown.style.display = "none";
+  }
+});
+
+function updateNotifUI(recentData) {
+  const badge = document.getElementById("notifBadge");
+  const list = document.getElementById("notifList");
+  
+  if (!recentData || recentData.length === 0) {
+    badge.style.display = "none";
+    list.innerHTML = "<div style='padding:20px; text-align:center; color:#94a3b8; font-size:13px;'>No recent notifications</div>";
+    return;
+  }
+  
+  badge.style.display = "flex";
+  badge.innerText = recentData.length;
+  
+  let html = "";
+  recentData.forEach(r => {
+    html += `
+      <li class="notif-item" onclick="goToSearch('${r.ic}'); toggleNotif();">
+        <div class="notif-icon"><i class="ph-fill ph-cloud-arrow-up"></i></div>
+        <div class="notif-text">
+          New upload by <strong>${r.user}</strong>: ${r.total} file(s) for IC: <strong>${r.ic}</strong>
+          <span class="notif-time">${r.time}</span>
+        </div>
+      </li>
+    `;
+  });
+  list.innerHTML = html;
+}
 
 function showPage(page, el, isClick = false) {
   sessionStorage.setItem("activePage", page);
@@ -1056,7 +1173,6 @@ function showPage(page, el, isClick = false) {
   });
   if (el) el.classList.add("active");
 
-  // RESET PAGE LOGIC
   if (el) {
     if (page === "search") {
       sessionStorage.removeItem("savedSearchIC");
@@ -1076,10 +1192,9 @@ function showPage(page, el, isClick = false) {
   }
     
 if (page === "dashboard" && isClick) {  
-    loadDashboard(); // 🔥 Cuma tarik data baru, tak payah refresh page
+    loadDashboard(); 
   }
 
-  // LOGIN & RESPONSIVE LOGIC
   if (page === "login") {
     document.querySelector(".sidebar").style.display = "none";
     document.querySelector(".bottom-nav").style.display = "none";
@@ -1102,7 +1217,7 @@ if (page === "dashboard" && isClick) {
       }
     }
   }
-} // Tanda tutup fungsi showPage yang betul
+} 
   
 function toBase64(file) {
   return new Promise((resolve, reject) => {
@@ -1181,6 +1296,14 @@ async function login() {
       document.getElementById("modalTitle").innerText = "Access Granted";
       document.getElementById("modalSub").innerText = "Welcome back";
       localStorage.setItem("user", JSON.stringify(data));
+      
+      // 🔥 TAG ONESIGNAL (Untuk kecualikan uploader)
+      if (window.OneSignalDeferred) {
+        OneSignalDeferred.push(function(OneSignal) {
+          OneSignal.User.addTag("userId", data.userId);
+        });
+      }
+
       setTimeout(() => {
         document.getElementById("overlay").style.display = "none";
         showPage("dashboard");
@@ -1198,22 +1321,17 @@ async function login() {
   }
 }
 
-// Fungsi untuk kesan butang Enter
 function handleLoginEnter(e) {
   if (e.key === "Enter") {
     const activeId = document.activeElement.id;
-    
     if (activeId === "userId") {
-      // Kalau tengah taip User ID, tekan Enter akan lompat ke Password
       document.getElementById("password").focus();
     } else if (activeId === "password") {
-      // Kalau tengah taip Password, tekan Enter terus jalan login
       login();
     }
   }
 }
 
-// Fungsi untuk automatik "focus" bila page login dibuka
 function focusLogin() {
   const userIdInput = document.getElementById("userId");
   if (userIdInput) {
@@ -1223,7 +1341,7 @@ function focusLogin() {
   
 function logout() {
   localStorage.removeItem("user");
-  sessionStorage.clear(); // 🔥 KEMAS KINI: Bersihkan memori carian bila logout
+  sessionStorage.clear(); 
   document.getElementById("overlay").style.display = "flex";
   document.getElementById("modalTitle").innerText = "Logging out...";
   document.getElementById("modalSub").innerText = "Ending session";
@@ -1234,18 +1352,14 @@ function applyRole(role) {
   const user = JSON.parse(localStorage.getItem("user"));
   document.getElementById("welcomeName").innerHTML = "<i class='ph-fill ph-user'></i> <span style='margin-left:4px;'>Welcome, " + user.userId + "</span>";
   document.getElementById("userRole").innerText = "Role: " + role;
-  if (role === "MASTER") { console.log("MASTER ACCESS"); }
-  if (role === "USER") { console.log("USER ACCESS"); }
 }
   
 async function loadDashboard() {
-  // 1. Tunjukkan loading state pada KPI
   document.getElementById("kpiDocs").innerText = "...";
   document.getElementById("kpiIC").innerText = "...";
   document.getElementById("kpiAcc").innerText = "...";
   document.getElementById("kpiToday").innerText = "...";
 
-  // 2. Tunjukkan loading spinner pada Recent Activity supaya nampak "fresh"
   document.getElementById("recentList").innerHTML = `
     <div style="text-align:center; padding:20px;">
       <div class="search-loader"></div>
@@ -1257,13 +1371,11 @@ async function loadDashboard() {
     const res = await fetch(WEB_APP_URL + "?dashboard=1");
     const data = await res.json();
     
-    // Kemaskini KPI
     document.getElementById("kpiDocs").innerText = data.docs || 0;
     document.getElementById("kpiIC").innerText = data.ic || 0;
     document.getElementById("kpiAcc").innerText = data.account || 0;
     document.getElementById("kpiToday").innerText = data.today || 0;
     
-    // 3. Bina semula Recent Activity List
     let html = "";
     (data.recent || []).forEach(r => {
       html += `
@@ -1283,6 +1395,9 @@ async function loadDashboard() {
     
     document.getElementById("recentList").innerHTML = html || '<div style="color:#888; font-size:14px; text-align:center; padding: 20px;">No activity today</div>';
     
+    // 🔥 Kemas kini UI Loceng menggunakan data yang sama
+    updateNotifUI(data.recent);
+    
   } catch (e) {
     console.error("Dashboard load error", e);
     document.getElementById("recentList").innerHTML = '<div style="color:red; text-align:center; padding:20px;">Failed to load data</div>';
@@ -1296,12 +1411,10 @@ window.addEventListener("load", function() {
     return;
   }
 
-  // 🔥 LOGIK BARU: Kesan jika user tekan F5 atau butang Reload browser
   const isReload = (performance.navigation && performance.navigation.type === 1) || 
                    (window.performance.getEntriesByType && window.performance.getEntriesByType("navigation").length > 0 && window.performance.getEntriesByType("navigation")[0].type === "reload");
   
   if (isReload) {
-    // Jika user reload browser, kita bersihkan memori carian supaya page betul-betul "refresh"
     sessionStorage.removeItem("savedSearchIC");
     sessionStorage.removeItem("savedSearchResult");
   }
@@ -1309,7 +1422,6 @@ window.addEventListener("load", function() {
   const savedPage = sessionStorage.getItem("activePage") || "dashboard";
   showPage(savedPage);
 
-  // Tarik semula hasil carian jika ia masih ada dalam memori (Contoh: selepas tekan butang Back di telefon)
   if (sessionStorage.getItem("savedSearchIC") && sessionStorage.getItem("savedSearchResult")) {
     document.getElementById("searchIC").value = sessionStorage.getItem("savedSearchIC");
     document.getElementById("result").innerHTML = sessionStorage.getItem("savedSearchResult");
@@ -1437,19 +1549,16 @@ async function search() {
   const data = await res.json();
   if (ic !== lastSearch) return;
 
-  // 🔥 BACKUP: Terbalikkan data dari pangkalan data supaya rekod terbaru sentiasa di hadapan
   data.reverse(); 
 
   let html = data.length === 0 ? "<div style='text-align:center; padding:30px; color:#64748b; font-weight:500;'>No record found.</div>" : "";
   
-  // 1. Kumpulkan data mengikut kumpulan akaun
   let grouped = {};
   data.forEach(d => {
     if (!grouped[d.account]) { grouped[d.account] = []; }
     grouped[d.account].push(d);
   });
 
-  // 2. Dapatkan senarai akaun dan susun fail di dalam setiap akaun dahulu (Paling baru di atas)
   let accKeys = Object.keys(grouped);
   accKeys.forEach(acc => {
     grouped[acc].sort((a, b) => {
@@ -1461,7 +1570,6 @@ async function search() {
     });
   });
 
-  // 3. 🔥 LOGIK BARU: Susun KUMPULAN AKAUN supaya akaun yang terima fail paling baru naik ke atas!
   accKeys.sort((accA, accB) => {
     const getDT = (name) => {
       const m = name.match(/_(\d{8})_(\d{6})/);
@@ -1469,10 +1577,9 @@ async function search() {
     };
     let latestA = getDT(grouped[accA][0].file);
     let latestB = getDT(grouped[accB][0].file);
-    return latestB.localeCompare(latestA); // Bandingkan masa dan tolak ke atas
+    return latestB.localeCompare(latestA); 
   });
 
-  // 4. Bina paparan HTML menggunakan susunan yang telah diperbetulkan
   accKeys.forEach(acc => {
     let files = grouped[acc];
     let count = files.length;
@@ -1514,8 +1621,6 @@ async function search() {
   });
   
   document.getElementById("result").innerHTML = html;
-
-  // Simpan result ke dalam memori untuk fungsi butang Back
   sessionStorage.setItem("savedSearchIC", ic);
   sessionStorage.setItem("savedSearchResult", html);
 }
