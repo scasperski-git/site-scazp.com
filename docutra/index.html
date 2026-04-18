@@ -908,7 +908,8 @@ body:has(#login[style*="block"]) .mobile-header {
   
 </style>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-window.OneSignalDeferred = window.OneSignalDeferred || [];
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(function(OneSignal) {
     OneSignal.init({
       appId: "ba565152-9429-40f1-9de2-663bf17a6ca9",
