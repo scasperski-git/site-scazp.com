@@ -905,6 +905,21 @@ button.action:active {
 body:has(#login[style*="block"]) .mobile-header {
   display: none !important;
 }
+
+/* Sembunyikan semua page secara default */
+#dashboard, #upload, #search, #login {
+  display: none;
+}
+
+/* Sembunyikan sidebar secara default (untuk desktop) */
+.sidebar {
+  display: none; 
+}
+
+/* Sembunyikan mobile header secara default */
+.mobile-header {
+  display: none !important;
+}
   
 </style>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -1360,10 +1375,16 @@ function focusLogin() {
 function logout() {
   localStorage.removeItem("user");
   sessionStorage.clear(); 
+  
   document.getElementById("overlay").style.display = "flex";
   document.getElementById("modalTitle").innerText = "Logging out...";
   document.getElementById("modalSub").innerText = "Ending session";
-  setTimeout(() => { location.reload(); }, 800);
+
+  setTimeout(() => {
+    document.getElementById("overlay").style.display = "none";
+    showPage("login"); // Tukar terus ke login tanpa reload full page
+    // Kalau nak clear state betul2 baru guna location.reload() tapi point 1 tadi kena settle dulu.
+  }, 800);
 }
 
 function applyRole(role) {
