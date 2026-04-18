@@ -1112,39 +1112,47 @@ body:has(#login[style*="block"]) .mobile-header {
 // ==========================================
 // JAVASCRIPT LOGIC
 // ==========================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxh52ONHwGeLd1VxAoAnDjB7RYnhInuIVkvQAfQc9PtDm-wKt8hPGVwpvc9RsC82R9pBg/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbye0on_QN0n-hmYozqs80oDgKYTMroJba5exYeP2w1tIsxuuiGsa3jV3UHgLSt5LBl2LA/exec";
 
-// Toggle Dropdown Loceng
+// Toggle Dropdown Loceng & Reset Nombor
 function toggleNotif(e) {
   if(e) e.stopPropagation();
   const dropdown = document.getElementById("notifDropdown");
-  dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+  const badge = document.getElementById("notifBadge");
+  
+  if (dropdown.style.display === "block") {
+    dropdown.style.display = "none";
+  } else {
+    dropdown.style.display = "block";
+    // Bila buka loceng, sembunyikan badge & simpan waktu terkini
+    badge.style.display = "none";
+    localStorage.setItem("lastViewedNotif", Date.now());
+  }
 }
 
-// Tutup loceng bila klik tempat lain
-document.addEventListener("click", function(e) {
-  const wrapper = document.querySelector(".notif-wrapper");
-  const dropdown = document.getElementById("notifDropdown");
-  if (wrapper && !wrapper.contains(e.target) && dropdown.style.display === "block") {
-    dropdown.style.display = "none";
-  }
-});
-
+// Kemas kini UI Loceng & Logik Kiraan (Unread)
 function updateNotifUI(recentData) {
   const badge = document.getElementById("notifBadge");
   const list = document.getElementById("notifList");
+  const currentUser = JSON.parse(localStorage.getItem("user"))?.userId || "";
   
+  let lastViewed = localStorage.getItem("lastViewedNotif") || 0;
+  let unreadCount = 0;
+
   if (!recentData || recentData.length === 0) {
     badge.style.display = "none";
     list.innerHTML = "<div style='padding:20px; text-align:center; color:#94a3b8; font-size:13px;'>No recent notifications</div>";
     return;
   }
   
-  badge.style.display = "flex";
-  badge.innerText = recentData.length;
-  
   let html = "";
   recentData.forEach(r => {
+    // Kira jika notifikasi ini LEBIH BARU dari waktu loceng terakhir dibuka
+    // DAN pastikan ia BUKAN di-upload oleh user itu sendiri
+    if (r.timestamp > lastViewed && r.user !== currentUser) {
+      unreadCount++;
+    }
+    
     html += `
       <li class="notif-item" onclick="goToSearch('${r.ic}'); toggleNotif();">
         <div class="notif-icon"><i class="ph-fill ph-cloud-arrow-up"></i></div>
@@ -1155,6 +1163,15 @@ function updateNotifUI(recentData) {
       </li>
     `;
   });
+
+  // Jika ada notifikasi baru, barulah tunjuk nombor
+  if (unreadCount > 0) {
+    badge.style.display = "flex";
+    badge.innerText = unreadCount;
+  } else {
+    badge.style.display = "none";
+  }
+
   list.innerHTML = html;
 }
 
@@ -1409,6 +1426,13 @@ window.addEventListener("load", function() {
   if (!user) {
     showPage("login");
     return;
+  }
+
+  // 🔥 TAG ONESIGNAL (WAJIB ADA DI SINI SUPAYA UPLOADER DIKECUALIKAN)
+  if (window.OneSignalDeferred) {
+    OneSignalDeferred.push(function(OneSignal) {
+      OneSignal.User.addTag("userId", String(user.userId));
+    });
   }
 
   const isReload = (performance.navigation && performance.navigation.type === 1) || 
