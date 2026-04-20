@@ -1339,7 +1339,11 @@ async function viewMyLocks(){
         const res = await fetch(api+"?action=mylocks&token="+token+"&api_key=" + API_KEY);
         const data = await res.json();
 
-        if(data.status){
+if(data.status === "UNAUTHORIZED"){
+            if(data.reason === "SESSION_REPLACED") showSessionPopup("DEVICE");
+            else showSessionPopup("EXPIRED");
+            return;
+        } else if(data.status){
             document.getElementById("lockTable").innerHTML =
             "<tr><td colspan='5' style='text-align:center;padding:20px'>Access Denied</td></tr>";
             return;
