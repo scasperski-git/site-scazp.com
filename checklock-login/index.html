@@ -330,57 +330,48 @@ AUTH OVERLAY
 
 <div class="box">
 
-<div class="login-header">
+    <div class="login-header">
+        <i class="fa fa-shield-halved"></i>
+        <div class="login-title">Lock Management</div>
+        <div class="login-sub">Secure Access Portal</div>
+    </div>
 
-<i class="fa fa-shield-halved"></i>
+    <div id="errorMsg"></div>
 
-<div class="login-title">Lock Management</div>
-<div class="login-sub">Secure Access Portal</div>
+    <div class="input-group">
+        <i class="fa fa-user left"></i>
+        <input id="user" placeholder="User ID">
+    </div>
 
-</div>
+    <div class="input-group">
+        <i class="fa fa-lock left"></i>
+        <input type="password" id="pass" placeholder="Password">
+        <i class="fa fa-eye toggle-pass" onclick="togglePass()"></i>
+    </div>
 
-<div id="errorMsg"></div>
+    <button onclick="login()">Login</button>
 
-<div class="input-group">
-<i class="fa fa-user left"></i>
-<input id="user" placeholder="User ID">
-</div>
+    <div class="attempt">
+        Secure authentication system
+    </div>
 
-<div class="input-group">
-<i class="fa fa-lock left"></i>
-<input type="password" id="pass" placeholder="Password">
-<i class="fa fa-eye toggle-pass" onclick="togglePass()"></i>
-</div>
-
-<button onclick="login()">Login</button>
-
-<div class="attempt">
-Secure authentication system
-</div>
-
-<div class="login-note">
-<i class="fa fa-lock"></i> Authorized personnel only
-</div>
+    <div class="login-note">
+        <i class="fa fa-lock"></i> Authorized personnel only
+    </div>
 
 </div>
 
 <div id="overlay">
-
-<div class="auth-card">
-
-<i class="fa-solid fa-shield-halved auth-icon"></i>
-
-<div class="auth-title">Authenticating</div>
-<div class="auth-sub">Verifying credentials</div>
-
-<div class="auth-dots">
-<span></span>
-<span></span>
-<span></span>
-</div>
-
-</div>
-
+    <div class="auth-card">
+        <i class="fa-solid fa-shield-halved auth-icon"></i>
+        <div class="auth-title">Authenticating</div>
+        <div class="auth-sub">Verifying credentials</div>
+        <div class="auth-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
 </div>
 
 <script src="../lockconfig.js"></script>
@@ -392,120 +383,108 @@ const api = API_URL;
 document.getElementById("user").focus();
 
 /* PASSWORD TOGGLE */
-
 function togglePass(){
+    const pass=document.getElementById("pass");
+    const icon=document.querySelector(".toggle-pass");
 
-const pass=document.getElementById("pass");
-const icon=document.querySelector(".toggle-pass");
-
-if(pass.type==="password"){
-pass.type="text";
-icon.classList.replace("fa-eye","fa-eye-slash");
-}else{
-pass.type="password";
-icon.classList.replace("fa-eye-slash","fa-eye");
-}
-
+    if(pass.type==="password"){
+        pass.type="text";
+        icon.classList.replace("fa-eye","fa-eye-slash");
+    }else{
+        pass.type="password";
+        icon.classList.replace("fa-eye-slash","fa-eye");
+    }
 }
 
 /* LOGIN */
-
 async function login(){
+    const user=document.getElementById("user").value.trim();
+    const pass=document.getElementById("pass").value.trim();
+    const err=document.getElementById("errorMsg");
 
-const user=document.getElementById("user").value.trim();
-const pass=document.getElementById("pass").value.trim();
+    err.style.display="none";
 
-const err=document.getElementById("errorMsg");
+    if(!user || !pass){
+        err.innerText="Enter User ID and Password";
+        err.style.display="block";
+        return;
+    }
 
-err.style.display="none";
+    document.getElementById("overlay").style.display="flex";
 
-if(!user || !pass){
-err.innerText="Enter User ID and Password";
-err.style.display="block";
-return;
-}
+    try{
+        const res=await fetch(api,{
+            method:"POST",
+            body:new URLSearchParams({
+                action:"login",
+                user:user,
+                pass:pass,
+                api_key: API_KEY
+            })
+        });
 
-document.getElementById("overlay").style.display="flex";
+        const data=await res.json();
 
-try{
+        if(data.status==="SUCCESS"){
 
-const res=await fetch(api,{
-method:"POST",
-body:new URLSearchParams({
-action:"login",
-user:user,
-pass:pass,
-api_key: "SCZP_SECURE_2026"
-})
-});
+            // --- WEB & APP STORAGE SEPARATION ---
+            // Identify if opened via App (WebView/Kodular) or Standard Web Browser
+            let isApp = navigator.userAgent.includes("wv") || (navigator.userAgent.includes("Android") && navigator.userAgent.includes("Version"));
+            let storage = isApp ? localStorage : sessionStorage;
 
-const data=await res.json();
+            // Save data into the correct storage
+            storage.setItem("session_token", data.token);
+            storage.setItem("lock_user", data.user);
+            storage.setItem("lock_type", data.type);
+            storage.setItem("lock_role", data.role);
+            storage.setItem("lock_name", data.name);
+            // ------------------------------------
 
-if(data.status==="SUCCESS"){
+            if(data.type=="check"){
+                window.location="../check/";
+            }
+            else if(data.type=="lock"){
+                window.location="../lock/";
+            }
+            else if(data.type=="master"){
+                window.location="../menumaster/";
+            }
 
-// --- KOD BAHARU: PENGASINGAN WEB & APP ---
-// Kenal pasti jika ini dibuka melalui App (WebView/Kodular) atau Web biasa
-let isApp = navigator.userAgent.includes("wv") || navigator.userAgent.includes("Android") && navigator.userAgent.includes("Version");
-let storage = isApp ? localStorage : sessionStorage;
+        }
+        else if(data.status==="INACTIVE"){
+            err.innerText="User ID inactive";
+            err.style.display="block";
+        }
+        else{
+            err.innerText="Invalid login credentials";
+            err.style.display="block";
+        }
 
-// Simpan data ke dalam storage yang betul
-storage.setItem("session_token", data.token);
-storage.setItem("lock_user", data.user);
-storage.setItem("lock_type", data.type);
-storage.setItem("lock_role", data.role);
-storage.setItem("lock_name", data.name);
-// ----------------------------------------
-if(data.type=="check"){
-window.location="../check/";
-}
-else if(data.type=="lock"){
-window.location="../lock/";
-}
-else if(data.type=="master"){
-window.location="../menumaster/";
-}
+    }catch(e){
+        err.innerText="System error. Please try again.";
+        err.style.display="block";
+    }
 
-}
-else if(data.status==="INACTIVE"){
-err.innerText="User ID inactive";
-err.style.display="block";
-}
-else{
-err.innerText="Invalid login credentials";
-err.style.display="block";
-}
-
-}catch(e){
-
-err.innerText="System error. Please try again.";
-err.style.display="block";
-
-}
-
-document.getElementById("overlay").style.display="none";
-
+    document.getElementById("overlay").style.display="none";
 }
 
 /* ENTER KEY */
-
 document.getElementById("pass").addEventListener("keypress",function(e){
-
-if(e.key==="Enter"){
-login();
-}
-
+    if(e.key==="Enter"){
+        login();
+    }
 });
 
-// Letak kod ini di bahagian bawah skrip fail login anda
+/* AUTO LOGIN LISTENER */
 window.addEventListener('DOMContentLoaded', (event) => {
-// --- KOD BAHARU: BACA KEDUA-DUA STORAGE ---
-const activeToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
-const userType = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_type");
-// ----------------------------------------
+    // --- READ FROM BOTH STORAGES ---
+    const activeToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
+    const userType = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_type");
+    // -------------------------------
     
-    // Kalau token wujud (user masih aktif), terus hantar ke page masing-masing
+    // If token exists (user is active), redirect to respective portal
     if (activeToken && userType) {
-        document.getElementById("overlay").style.display = "flex"; // Tunjuk loading screen (jika ada)
+        document.getElementById("overlay").style.display = "flex"; // Show authenticating screen
         
         if (userType === "check") {
             window.location = "../check/";
