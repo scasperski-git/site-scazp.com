@@ -29,7 +29,7 @@ body {
     padding: 0;
     color: #334155;
     min-height: 100vh;
-    overflow: hidden; /* Elak body dari scroll */
+    overflow: hidden; /* Prevent body scroll */
 }
 
 /* ANIMATIONS */
@@ -200,7 +200,7 @@ body.list-mode .container {
     border-bottom: 2px solid #f1f5f9;
 }
 
-/* GAYA GRID / SEBELAH-SEBELAH */
+/* GRID / SIDE-BY-SIDE STYLE */
 .form-row {
     display: flex;
     gap: 20px;
@@ -301,7 +301,7 @@ input:focus, select:focus, textarea:focus {
     40%, 60% { transform: translate3d(6px, 0, 0); }
 }
 
-/* AUDIT NOTE (UNTUK FORM) */
+/* AUDIT NOTE (FOR FORM) */
 .audit-note {
     margin-top: 16px;
     font-size: 12px;
@@ -369,7 +369,7 @@ input:focus, select:focus, textarea:focus {
     color: #0f172a;
 }
 
-/* FILTER CARD (UNTUK MY LOCKS) - KINI LEBIH KEMAS & SEBARIS */
+/* FILTER CARD (FOR MY LOCKS) */
 .filter-card {
     padding: 16px 20px;
     background: #ffffff;
@@ -447,13 +447,13 @@ table th {
 table tr:last-child td { border-bottom: none; }
 table tr:hover td { background: #f8fafc; }
 
-/* UPDATE KOLUM AMOUNT (KE-3) SUPAYA CENTER UNTUK DESKTOP */
+/* CENTER AMOUNT COLUMN (3RD) FOR DESKTOP */
 th:nth-child(3), td:nth-child(3) {
     text-align: center;
     font-weight: 600;
 }
 
-/* UPDATE KOLUM DATE (KE-4) SUPAYA JANGAN WRAP KE DUA BARIS */
+/* PREVENT DATE COLUMN (4TH) FROM WRAPPING */
 th:nth-child(4), td:nth-child(4) {
     white-space: nowrap;
 }
@@ -645,7 +645,7 @@ th:nth-child(4), td:nth-child(4) {
     }
 
     /* ==========================================
-       KOMPRESS SUCCESS PAGE (HANYA UNTUK KAD RESULT)
+       COMPRESS SUCCESS PAGE (RESULT CARD ONLY)
        ========================================== */
     #result .success-card {
         padding: 20px 16px !important; 
@@ -674,16 +674,16 @@ th:nth-child(4), td:nth-child(4) {
     #result .amount { font-size: 20px !important; } 
     
     /* ==========================================
-       KEMASKINI MY LOCKS (TABLE & FILTER) MOBILE
+       UPDATE MY LOCKS (TABLE & FILTER) MOBILE
        ========================================== */
     .filter-card {
         padding: 16px; 
         margin-bottom: 16px;
     }
 
-    /* KEMASKINI LAYOUT FILTER UNTUK MOBILE */
+    /* UPDATE FILTER LAYOUT FOR MOBILE */
     .filter-input-group {
-        flex-direction: column; /* Pecahkan input dan button ke atas-bawah */
+        flex-direction: column; 
     }
     
     .filter-input-group input {
@@ -693,11 +693,11 @@ th:nth-child(4), td:nth-child(4) {
 
     .mini-actions {
         width: 100%;
-        justify-content: center; /* Center-kan butang */
+        justify-content: center; 
     }
 
     .mini-actions .mini-btn {
-        flex: 1; /* Supaya butang saiz seimbang dan memenuhi ruang */
+        flex: 1; 
     }
 
     table th, table td {
@@ -705,7 +705,7 @@ th:nth-child(4), td:nth-child(4) {
         font-size: 11px; 
     }
     
-    /* UPDATE KOLUM AMOUNT (KE-3) SUPAYA CENTER UNTUK MOBILE */
+    /* CENTER AMOUNT COLUMN (3RD) FOR MOBILE */
     table th:nth-child(3), #lockTable td:nth-child(3) {
         text-align: center;
     }
@@ -911,14 +911,16 @@ th:nth-child(4), td:nth-child(4) {
 
 <script>
 // ==========================================
-// LOGIC BAWAH NI MAINTAIN 100% TAK SENTUH
+// INITIALIZATION & STORAGE CHECK (WEB & APP)
 // ==========================================
 
-const api = API_URL;
+const api = API_URL; // From lockconfig.js
 
-const user = localStorage.getItem("lock_user");
-const role = localStorage.getItem("lock_role");
-const token = localStorage.getItem("session_token");
+// Read from localStorage (App) or sessionStorage (Web)
+const user = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
+const role = localStorage.getItem("lock_role") || sessionStorage.getItem("lock_role");
+const token = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
+const type = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_type");
 
 window.addEventListener('DOMContentLoaded', function() {
     if (sessionStorage.getItem('active_tab') === 'list') {
@@ -935,76 +937,63 @@ function backToForm() {
     goNewLock();
 }
 
-if(!token){
-logout();
+// If no token or type (User not logged in or closed tab)
+if(!type || !token){
+    logout();
 }
 
-document.getElementById("userInfo").innerHTML =
-"User: "+(user || "-")+" | Role: "+(role || "-");
-loadUserSummary();
-setInterval(loadUserSummary,120000);
-
-const type = localStorage.getItem("lock_type");
-
-if(!type){
-window.location="../checklock-login/";
+// Page Access Protection
+if(type == "check"){
+    alert("Access denied");
+    window.location="../check/";
 }
 
-if(type=="check"){
-alert("Access denied");
-window.location="../check/";
-}
-
+// Show Master button if role is master
 if(type === "master"){
-document.getElementById("masterBtn").style.display = "flex"; 
+    document.getElementById("masterBtn").style.display = "flex"; 
 }
 
 function goMaster(){
-window.location="../menumaster/";
+    window.location="../menumaster/";
 }
 
-fetch(api+"?action=branches&token="+token+"&api_key=SCZP_SECURE_2026")
+document.getElementById("userInfo").innerHTML = "User: "+(user || "-")+" | Role: "+(role || "-");
+
+loadUserSummary();
+setInterval(loadUserSummary, 120000);
+
+// Fetch Branches
+fetch(api+"?action=branches&token="+token+"&api_key=" + API_KEY)
 .then(res=>res.json())
 .then(data=>{
 
-if(data.status=="UNAUTHORIZED"){
+    if(data.status=="UNAUTHORIZED"){
+        if(data.reason=="SESSION_REPLACED"){
+            showSessionPopup("DEVICE");
+        }
+        else{
+            showSessionPopup("EXPIRED");
+        }
+        return;
+    }
 
-if(data.reason=="SESSION_REPLACED"){
-alert("Your account has been logged in from another device.");
-}
-else{
-showSessionPopup("EXPIRED");
-return;
-}
+    var select=document.getElementById("branch");
+    select.innerHTML='<option value="">SELECT BRANCH</option>';
 
-localStorage.clear();
-sessionStorage.clear(); 
-window.location="../checklock-login/";
-return;
-
-}
-
-var select=document.getElementById("branch");
-select.innerHTML='<option value="">SELECT BRANCH</option>';
-
-data.forEach(b=>{
-var option=document.createElement("option");
-option.value=b.id;
-option.text=b.name;
-select.appendChild(option);
-});
+    data.forEach(b=>{
+        var option=document.createElement("option");
+        option.value=b.id;
+        option.text=b.name;
+        select.appendChild(option);
+    });
 
 });
 
-document.getElementById("dca_id").value =
-localStorage.getItem("lock_user") || "";
+document.getElementById("dca_id").value = user || "";
 
-document.getElementById("promise_date").min =
-new Date().toISOString().split("T")[0];
-
+document.getElementById("promise_date").min = new Date().toISOString().split("T")[0];
 
 /* ACCOUNT NO - ONLY NUMBERS */
-
 const accField = document.getElementById("acc_no");
 
 accField.addEventListener("keypress", function(e){
@@ -1029,313 +1018,235 @@ filterAccField.addEventListener("input", function(){
     this.value = this.value.replace(/\D/g,'');
 });
 
-  
 document.querySelectorAll("input[type=text]:not(#dca_id):not(#acc_no):not(#filterAcc)").forEach(el=>{
-
-el.addEventListener("input",function(){
-
-let start=this.selectionStart;
-let end=this.selectionEnd;
-
-this.value=this.value.toUpperCase();
-this.setSelectionRange(start,end);
-
-});
-
+    el.addEventListener("input",function(){
+        let start=this.selectionStart;
+        let end=this.selectionEnd;
+        this.value=this.value.toUpperCase();
+        this.setSelectionRange(start,end);
+    });
 });
 
 const amountField = document.getElementById("amount");
 
 amountField.addEventListener("input", function(){
+    let value = this.value.replace(/[^\d.]/g,'');
+    let parts = value.split(".");
 
-let value = this.value.replace(/[^\d.]/g,'');
+    if(parts.length > 2){
+        value = parts[0] + "." + parts.slice(1).join("");
+    }
 
-let parts = value.split(".");
+    if(parts[1]){
+        parts[1] = parts[1].substring(0,2);
+        value = parts[0] + "." + parts[1];
+    }
 
-if(parts.length > 2){
-value = parts[0] + "." + parts.slice(1).join("");
-}
-
-if(parts[1]){
-parts[1] = parts[1].substring(0,2);
-value = parts[0] + "." + parts[1];
-}
-
-this.value = value;
-
+    this.value = value;
 });
 
 amountField.addEventListener("blur", function(){
-
-let value = this.value.replace(/,/g,'');
-
-if(value==="") return;
-
-let num = parseFloat(value);
-
-if(!isNaN(num)){
-this.value = num.toLocaleString("en-MY",{
-minimumFractionDigits:2,
-maximumFractionDigits:2
-});
-}
-
+    let value = this.value.replace(/,/g,'');
+    if(value==="") return;
+    
+    let num = parseFloat(value);
+    if(!isNaN(num)){
+        this.value = num.toLocaleString("en-MY",{
+            minimumFractionDigits:2,
+            maximumFractionDigits:2
+        });
+    }
 });
 
 const remarkBox=document.getElementById("remarks");
 const remarkCounter=document.getElementById("remarkCounter");
 
 remarkBox.addEventListener("input",function(){
-
-if(this.value.length>100){
-this.value=this.value.substring(0,100);
-}
-
-remarkCounter.textContent=this.value.length+" / 100";
-
+    if(this.value.length>100){
+        this.value=this.value.substring(0,100);
+    }
+    remarkCounter.textContent=this.value.length+" / 100";
 });
 
 function loadUserSummary(){
+    document.getElementById("userSummary").innerText = "Today: loading...";
 
-var dca = localStorage.getItem("lock_user");
-
-document.getElementById("userSummary").innerText =
-"Today: loading...";
-
-fetch(api+"?action=dashboard&token="+token+"&dca="+dca+"&api_key=SCZP_SECURE_2026")
-.then(r=>r.json())
-.then(data=>{
-
-var total = data.total || 0;
-var amount = Number(data.amount || 0).toLocaleString("en-MY",{
-minimumFractionDigits:2,
-maximumFractionDigits:2
-});
-
-document.getElementById("userSummary").innerHTML =
-'<i class="fa fa-chart-line"></i> Today: '+total+
-' Locks | RM '+amount;
-
-})
-.catch(()=>{
-
-document.getElementById("userSummary").innerText =
-"Today: - | RM -";
-
-});
-
+    fetch(api+"?action=dashboard&token="+token+"&dca="+user+"&api_key=" + API_KEY)
+    .then(r=>r.json())
+    .then(data=>{
+        var total = data.total || 0;
+        var amount = Number(data.amount || 0).toLocaleString("en-MY",{
+            minimumFractionDigits:2,
+            maximumFractionDigits:2
+        });
+        document.getElementById("userSummary").innerHTML =
+        '<i class="fa fa-chart-line"></i> Today: '+total+' Locks | RM '+amount;
+    })
+    .catch(()=>{
+        document.getElementById("userSummary").innerText = "Today: - | RM -";
+    });
 }
 
 function showError(input,errorId){
+    input.classList.add("shake");
+    document.getElementById(errorId).style.display="block";
 
-input.classList.add("shake");
-document.getElementById(errorId).style.display="block";
+    input.scrollIntoView({ behavior:"smooth", block:"center" });
 
-input.scrollIntoView({
-behavior:"smooth",
-block:"center"
-});
-
-setTimeout(()=>{
-input.focus();
-input.classList.remove("shake");
-},400);
-
+    setTimeout(()=>{
+        input.focus();
+        input.classList.remove("shake");
+    },400);
 }
 
 document.getElementById("lockForm").addEventListener("submit",e=>{
+    e.preventDefault();
 
-e.preventDefault();
+    document.querySelectorAll(".error").forEach(e=>e.style.display="none");
 
-document.querySelectorAll(".error").forEach(e=>e.style.display="none");
+    var acc=document.getElementById("acc_no");
+    var branch=document.getElementById("branch");
+    var amount=document.getElementById("amount");
+    var category=document.getElementById("payment_category");
+    var date=document.getElementById("promise_date");
+    var dca=document.getElementById("dca_id");
+    var remarks=document.getElementById("remarks");
 
-var acc=document.getElementById("acc_no");
-var branch=document.getElementById("branch");
-var amount=document.getElementById("amount");
-var category=document.getElementById("payment_category");
-var date=document.getElementById("promise_date");
-var dca=document.getElementById("dca_id");
-var remarks=document.getElementById("remarks");
+    if(!acc.value){showError(acc,"err_acc");return;}
+    if(!branch.value){showError(branch,"err_branch");return;}
+    if(!amount.value || Number(amount.value.replace(/,/g,''))<=0){showError(amount,"err_amount");return;}
+    if(!category.value){showError(category,"err_category");return;}
+    if(!date.value){showError(date,"err_date");return;}
+    if(!dca.value){showError(dca,"err_dca");return;}
+    
+    remarks.value = remarks.value.toUpperCase();
+    if(!remarks.value){showError(remarks,"err_remarks");return;}
 
-if(!acc.value){showError(acc,"err_acc");return;}
-if(!branch.value){showError(branch,"err_branch");return;}
-if(!amount.value || Number(amount.value.replace(/,/g,''))<=0){showError(amount,"err_amount");return;}
-if(!category.value){showError(category,"err_category");return;}
-if(!date.value){showError(date,"err_date");return;}
-if(!dca.value){showError(dca,"err_dca");return;}
-remarks.value = remarks.value.toUpperCase();
-if(!remarks.value){showError(remarks,"err_remarks");return;}
+    document.getElementById("overlay").style.display="flex";
+    document.getElementById("submitBtn").disabled = true;
 
-document.getElementById("overlay").style.display="flex";
-document.getElementById("submitBtn").disabled = true;
+    var formData=new FormData(e.target);
+    var branchName=branch.selectedOptions[0].text;
+    formData.append("branch_name",branchName);
+    formData.append("token",token);
+    formData.append("user",user);
+    formData.append("api_key", API_KEY);
 
-var formData=new FormData(e.target);
+    fetch(api,{
+        method:"POST",
+        body:formData
+    })
+    .then(res=>res.text())
+    .then(data=>{
+        document.getElementById("overlay").style.display="none";
 
-var branchName=branch.selectedOptions[0].text;
-formData.append("branch_name",branchName);
+        if(data=="UNAUTHORIZED"){
+            showSessionPopup("EXPIRED");
+            return;
+        }
 
-formData.append("token",token);
-formData.append("user",user);
-formData.append("api_key","SCZP_SECURE_2026");
-
-fetch(api,{
-method:"POST",
-body:formData
-})
-.then(res=>res.text())
-.then(data=>{
-
-document.getElementById("overlay").style.display="none";
-
-if(data=="UNAUTHORIZED"){
-
-alert("Session expired. Please login again.");
-localStorage.clear();
-sessionStorage.clear(); 
-window.location="../checklock-login/";
-return;
-
-}
-
-if(data=="ACCOUNT_ALREADY_LOCKED"){
-
-document.getElementById("lockedPopup").style.display="flex";
-document.getElementById("submitBtn").disabled = false; 
-
-}
-else{
-
-showSuccess(formData);
-
-}
-
-});
-
+        if(data=="ACCOUNT_ALREADY_LOCKED"){
+            document.getElementById("lockedPopup").style.display="flex";
+            document.getElementById("submitBtn").disabled = false; 
+        }
+        else{
+            showSuccess(formData);
+        }
+    });
 });
 
 function formatDate(dateStr){
+    if(!dateStr) return "-";
+    let d = new Date(dateStr);
 
-if(!dateStr) return "-";
+    if(!isNaN(d)){
+        let day = ("0"+d.getDate()).slice(-2);
+        let monthNames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        let month = monthNames[d.getMonth()];
+        let year = d.getFullYear();
+        return day+" "+month+" "+year;
+    }
 
-let d = new Date(dateStr);
+    if(dateStr.includes("-") && dateStr.split("-")[0].length==4){
+        var p=dateStr.split("-");
+        var year=p[0];
+        var month=parseInt(p[1])-1;
+        var day=p[2];
+        var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        return day+" "+m[month]+" "+year;
+    }
 
-if(!isNaN(d)){
-
-let day = ("0"+d.getDate()).slice(-2);
-let monthNames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-let month = monthNames[d.getMonth()];
-let year = d.getFullYear();
-
-return day+" "+month+" "+year;
-
-}
-
-if(dateStr.includes("-") && dateStr.split("-")[0].length==4){
-
-var p=dateStr.split("-");
-var year=p[0];
-var month=parseInt(p[1])-1;
-var day=p[2];
-
-var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-return day+" "+m[month]+" "+year;
-
-}
-
-return dateStr;
-
+    return dateStr;
 }
 
 function logout(){
-localStorage.clear();
-sessionStorage.clear(); 
-window.location="../checklock-login/";
+    localStorage.clear();
+    sessionStorage.clear(); 
+    window.location="../checklock-login/";
 }
 
 function showSuccess(formData){
+    var acc=formData.get("acc_no");
+    var branch=document.getElementById("branch").selectedOptions[0].text;
+    var amount="RM "+formData.get("amount");
+    var category=formData.get("payment_category");
+    var promise=formatDate(formData.get("promise_date"));
+    var remarks=formData.get("remarks");
+    var dca=formData.get("dca_id");
+    var createdTime = new Date().toLocaleString("en-MY",{
+        day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit"
+    });
 
-var acc=formData.get("acc_no");
-var branch=document.getElementById("branch").selectedOptions[0].text;
-var amount="RM "+formData.get("amount");
-var category=formData.get("payment_category");
-var promise=formatDate(formData.get("promise_date"));
-var remarks=formData.get("remarks");
-var dca=formData.get("dca_id");
-var createdTime = new Date().toLocaleString("en-MY",{
-day:"2-digit",
-month:"short",
-year:"numeric",
-hour:"2-digit",
-minute:"2-digit"
-});
+    document.getElementById("formSection").style.display="none";
+    document.getElementById("lockListSection").style.display="none";
+    document.getElementById("result").style.display="block";
 
-document.getElementById("formSection").style.display="none";
+    document.getElementById("result").innerHTML=
+    "<div class='success-card'>"+
+    "<div style='margin-bottom:10px;'><span class='status-badge'>LOCK CREATED</span></div>"+
+    "<div style='font-size: 11px; color: #64748b; margin-bottom: 12px;'>Created by "+dca+" • "+createdTime+"</div>"+
+    "<div class='success-grid'>"+
+    "<div class='success-item'><b>ACCOUNT NO</b>"+acc+"</div>"+
+    "<div class='success-item'><b>LOCK AT BRANCH</b>"+branch+"</div>"+
+    "<div class='success-item'><b>LOCK AMOUNT</b><div class='amount'>"+amount+"</div></div>"+
+    "<div class='success-item'><b>PAYMENT CATEGORY</b>"+category+"</div>"+
+    "<div class='success-item'><b>PROMISE DATE</b>"+promise+"</div>"+
+    "<div class='success-item' style='grid-column: 1 / -1;'><b>DCA REMARKS</b>"+remarks+"</div>"+
+    "</div>"+
+    "<div class='audit-note' style='margin-top: auto; text-align: left; padding: 10px; font-size: 10.5px; line-height: 1.4;'>"+
+    "<i class='fa-solid fa-shield-halved' style='margin-right: 5px;'></i> <b>Audit Record:</b> This lock entry has been successfully recorded. As acknowledged during submission, the DCA bears full liability for any errors or discrepancies in the lock amount, especially concerning \"Full Payment\" and \"Under Discount\" categories."+
+    "</div>"+
+    "</div>"+
+    "<button class='new-btn' onclick='goNewLock()'><i class='fa fa-plus' style='margin-right:8px;'></i> New Lock</button>";
 
-document.getElementById("lockListSection").style.display="none";
-document.getElementById("result").style.display="block";
-
-document.getElementById("result").innerHTML=
-
-"<div class='success-card'>"+
-"<div style='margin-bottom:10px;'><span class='status-badge'>LOCK CREATED</span></div>"+
-
-"<div style='font-size: 11px; color: #64748b; margin-bottom: 12px;'>Created by "+dca+
-" • "+createdTime+"</div>"+
-
-"<div class='success-grid'>"+
-
-"<div class='success-item'><b>ACCOUNT NO</b>"+acc+"</div>"+
-"<div class='success-item'><b>LOCK AT BRANCH</b>"+branch+"</div>"+
-
-"<div class='success-item'><b>LOCK AMOUNT</b><div class='amount'>"+amount+"</div></div>"+
-"<div class='success-item'><b>PAYMENT CATEGORY</b>"+category+"</div>"+
-
-"<div class='success-item'><b>PROMISE DATE</b>"+promise+"</div>"+
-
-"<div class='success-item' style='grid-column: 1 / -1;'><b>DCA REMARKS</b>"+remarks+"</div>"+
-
-"</div>"+
-
-"<div class='audit-note' style='margin-top: auto; text-align: left; padding: 10px; font-size: 10.5px; line-height: 1.4;'>"+
-"<i class='fa-solid fa-shield-halved' style='margin-right: 5px;'></i> <b>Audit Record:</b> This lock entry has been successfully recorded. As acknowledged during submission, the DCA bears full liability for any errors or discrepancies in the lock amount, especially concerning \"Full Payment\" and \"Under Discount\" categories."+
-"</div>"+
-
-"</div>"+
-
-"<button class='new-btn' onclick='goNewLock()'><i class='fa fa-plus' style='margin-right:8px;'></i> New Lock</button>";
-
-loadUserSummary();
-  
+    loadUserSummary();  
 }
 
+// Popup UI Controller
 function showSessionPopup(type){
+    let title="Session Expired";
+    let msg="Your session has expired. Please login again.";
 
-let title="Session Expired";
-let msg="Your session has expired. Please login again.";
+    if(type==="DEVICE"){
+        title="Logged In From Another Device";
+        msg="Your account has been logged in from another device.";
+    }
 
-if(type==="DEVICE"){
-title="Logged In From Another Device";
-msg="Your account has been logged in from another device.";
-}
+    document.getElementById("sessionTitle").innerText=title;
+    document.getElementById("sessionMsg").innerText=msg;
+    document.getElementById("sessionPopup").style.display="flex";
 
-document.getElementById("sessionTitle").innerText=title;
-document.getElementById("sessionMsg").innerText=msg;
-
-document.getElementById("sessionPopup").style.display="flex";
-
-setTimeout(()=>{
-localStorage.clear();
-sessionStorage.clear(); 
-window.location="../checklock-login/";
-},3000);
-
+    setTimeout(()=>{
+        localStorage.clear();
+        sessionStorage.clear(); 
+        window.location="../checklock-login/";
+    },3000);
 }
 
 function clearError(inputId,errorId){
-document.getElementById(inputId).addEventListener("input",function(){
-document.getElementById(errorId).style.display="none";
-});
+    document.getElementById(inputId).addEventListener("input",function(){
+        document.getElementById(errorId).style.display="none";
+    });
 }
 
 clearError("acc_no","err_acc");
@@ -1347,59 +1258,45 @@ clearError("remarks","err_remarks");
    SINGLE DEVICE LOGIN & SMART PAUSE LOGIC
 ========================================= */
 
-const CHECK_INTERVAL = 60000; // Semak setiap 1 minit (60,000 ms)
+const CHECK_INTERVAL = 60000; // Check every 1 minute
 
 function verifySessionWithServer() {
-    // 1. SMART PAUSE: Jangan buat apa-apa kalau tab/app diminimize (Jimat Kuota GAS)
-    if (document.hidden) return; 
+    if (document.hidden) return; // Smart Pause active
 
-    // 2. Dapatkan token dari mana-mana storage
-    const token = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
-    const userId = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
+    const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
 
-    if (!token) {
-        triggerAutoLogout();
+    if (!currentToken) {
+        showSessionPopup("EXPIRED");
         return;
     }
 
-    // 3. Hantar semakan ke server
-    fetch(API_URL + "?action=verifyToken&token=" + token + "&user=" + userId + "&key=" + API_KEY)
+    // Use action=session to match GAS
+    fetch(API_URL + "?action=session&token=" + currentToken + "&api_key=" + API_KEY)
     .then(response => response.json())
     .then(data => {
-        // Jika server kata token dah tak wujud / bertukar
         if (data.status !== "ACTIVE") {
-            triggerAutoLogout();
+            showSessionPopup("DEVICE");
         }
     })
     .catch(error => {
-        console.log("Internet terputus / ralat pelayan. Semakan dijeda.");
+        console.log("Internet disconnected / Server error. Check paused.");
     });
 }
 
-// Jalankan semakan automatik setiap 1 minit
+// Run automatic check every 1 minute
 setInterval(verifySessionWithServer, CHECK_INTERVAL);
 
-// Semak serta-merta apabila pengguna kembali buka tab / app
+// Check immediately when tab/app is reopened
 document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
         verifySessionWithServer();
     }
 });
 
-// Fungsi untuk tendang user keluar
-function triggerAutoLogout() {
-    // Kosongkan semua jenis memori
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    // Guna popup sedia ada (showSessionPopup) jika ada, atau guna alert biasa
-    if (typeof showSessionPopup === "function") {
-        showSessionPopup("EXPIRED");
-    } else {
-        alert("Sesi tamat atau akaun dilog masuk di peranti lain. Sila log masuk semula.");
-        window.location = "../checklock-login/";
-    }
-}
+
+/* =========================================
+   MY LOCK LIST LOGIC
+========================================= */
 
 let fullData = [];
 let filteredData = [];
@@ -1412,181 +1309,147 @@ function updateNavState(activeId) {
 }
 
 async function viewMyLocks(){
+    sessionStorage.setItem('active_tab', 'list');
 
-sessionStorage.setItem('active_tab', 'list');
+    document.getElementById("formSection").style.display="none";
+    document.getElementById("result").style.display="none";
+    document.getElementById("lockListSection").style.display="block";
+    document.body.classList.add("list-mode");
 
-document.getElementById("formSection").style.display="none";
-document.getElementById("result").style.display="none";
-document.getElementById("lockListSection").style.display="block";
-document.body.classList.add("list-mode");
+    updateNavState('navMyLocks');
 
-updateNavState('navMyLocks');
+    // SHOW LOADING STATE IN TABLE ONLY
+    document.getElementById("lockTable").innerHTML = 
+    "<tr><td colspan='5' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records...</td></tr>";
 
-// PAPARKAN LOADING STATE DALAM TABLE SAHAJA
-document.getElementById("lockTable").innerHTML = 
-"<tr><td colspan='5' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records...</td></tr>";
+    // RESET PAGINATION INFO WHILE LOADING
+    document.getElementById("pageInfo").innerText = "-";
+    document.getElementById("prevBtn").disabled = true;
+    document.getElementById("nextBtn").disabled = true;
 
-// RESET INFO PAGINATION SEMENTARA LOADING
-document.getElementById("pageInfo").innerText = "-";
-document.getElementById("prevBtn").disabled = true;
-document.getElementById("nextBtn").disabled = true;
+    try{
+        const res = await fetch(api+"?action=mylocks&token="+token+"&api_key=" + API_KEY);
+        const data = await res.json();
 
-try{
+        if(data.status){
+            document.getElementById("lockTable").innerHTML =
+            "<tr><td colspan='5' style='text-align:center;padding:20px'>Access Denied</td></tr>";
+            return;
+        }
 
-const res = await fetch(api+"?action=mylocks&token="+token+"&api_key=SCZP_SECURE_2026");
-const data = await res.json();
+        fullData = data.sort((a,b)=> new Date(b.created) - new Date(a.created));
+        filteredData = fullData;
+        currentPage = 1;
 
-if(data.status){
-document.getElementById("lockTable").innerHTML =
-"<tr><td colspan='5' style='text-align:center;padding:20px'>Access Denied</td></tr>";
-return;
-}
+        renderTable();
 
-fullData = data.sort((a,b)=> new Date(b.created) - new Date(a.created));
-filteredData = fullData;
-currentPage = 1;
-
-renderTable();
-
-}catch(e){
-
-document.getElementById("lockTable").innerHTML =
-"<tr><td colspan='5' style='text-align:center;padding:20px'>Error loading data.</td></tr>";
-
-}
-
+    }catch(e){
+        document.getElementById("lockTable").innerHTML =
+        "<tr><td colspan='5' style='text-align:center;padding:20px'>Error loading data.</td></tr>";
+    }
 }
 
 function renderTable(){
+    let start = (currentPage-1)*pageSize;
+    let end = start + pageSize;
+    let pageData = filteredData.slice(start,end);
+    let html = "";
 
-let start = (currentPage-1)*pageSize;
-let end = start + pageSize;
+    pageData.forEach(d=>{
+        let amount = "RM " + Number(d.amount || 0).toLocaleString("en-MY",{
+            minimumFractionDigits:2, maximumFractionDigits:2
+        });
 
-let pageData = filteredData.slice(start,end);
+        let today = new Date();
+        today.setHours(0,0,0,0);
 
-let html = "";
+        let pDate = new Date(d.promise);
+        pDate.setHours(0,0,0,0);
 
-pageData.forEach(d=>{
+        let isOverdue = pDate < today;
+        let remark = d.remarks || "-";
+        let shortRemark = remark.length > 40 ? remark.substring(0,40)+"..." : remark;
 
-let amount = "RM " + Number(d.amount || 0).toLocaleString("en-MY",{
-minimumFractionDigits:2,
-maximumFractionDigits:2
-});
+        html += `
+        <tr style="${isOverdue ? 'background:#fef2f2;' : ''}">
+        <td>${d.acc_no}</td>
+        <td>${d.branch}</td>
+        <td>${amount}</td>
+        <td style="${isOverdue ? 'color:#ef4444;font-weight:600;' : ''}">
+        ${formatDate(d.promise)}
+        </td>
+        <td onclick="toggleRemark(this)" data-full="${remark}" data-short="${shortRemark}" style="cursor:pointer; max-width: 200px; word-break: break-word;">
 
-let today = new Date();
-today.setHours(0,0,0,0);
+        <div class="remark-text">${shortRemark}</div>
 
-let pDate = new Date(d.promise);
-pDate.setHours(0,0,0,0);
+        ${remark.length > 40 ? '<div style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic; font-weight: 500;" class="tap-hint"><i class="fa fa-hand-pointer"></i> tap to view</div>' : ''}
 
-let isOverdue = pDate < today;
+        </td>
+        </tr>
+        `;
+    });
 
-let remark = d.remarks || "-";
+    document.getElementById("lockTable").innerHTML = html || 
+    "<tr><td colspan='5' style='text-align:center;padding:40px;color:#94a3b8;'><i class='fa fa-folder-open' style='font-size:28px;margin-bottom:12px;display:block;'></i>No Record Found</td></tr>";
 
-let shortRemark = remark.length > 40 
-? remark.substring(0,40)+"..." 
-: remark;
+    let totalPage = Math.ceil(filteredData.length / pageSize) || 1;
 
-html += `
-<tr style="${isOverdue ? 'background:#fef2f2;' : ''}">
-<td>${d.acc_no}</td>
-<td>${d.branch}</td>
-<td>${amount}</td>
-<td style="${isOverdue ? 'color:#ef4444;font-weight:600;' : ''}">
-${formatDate(d.promise)}
-</td>
-<td onclick="toggleRemark(this)" data-full="${remark}" data-short="${shortRemark}" style="cursor:pointer; max-width: 200px; word-break: break-word;">
-
-<div class="remark-text">${shortRemark}</div>
-
-${remark.length > 40 ? '<div style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic; font-weight: 500;" class="tap-hint"><i class="fa fa-hand-pointer"></i> tap to view</div>' : ''}
-
-</td>
-</tr>
-`;
-
-});
-
-document.getElementById("lockTable").innerHTML = html || 
-"<tr><td colspan='5' style='text-align:center;padding:40px;color:#94a3b8;'><i class='fa fa-folder-open' style='font-size:28px;margin-bottom:12px;display:block;'></i>No Record Found</td></tr>";
-
-let totalPage = Math.ceil(filteredData.length / pageSize) || 1;
-
-document.getElementById("pageInfo").innerText =
-`Page ${currentPage} of ${totalPage}`;
-    
-document.getElementById("prevBtn").disabled = currentPage === 1;
-document.getElementById("nextBtn").disabled = currentPage === totalPage;
-
+    document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${totalPage}`;
+        
+    document.getElementById("prevBtn").disabled = currentPage === 1;
+    document.getElementById("nextBtn").disabled = currentPage === totalPage;
 }
     
 function nextPage(){
-if(currentPage * pageSize < filteredData.length){
-currentPage++;
-renderTable();
-}
+    if(currentPage * pageSize < filteredData.length){
+        currentPage++;
+        renderTable();
+    }
 }
 
 function prevPage(){
-if(currentPage > 1){
-currentPage--;
-renderTable();
-}
+    if(currentPage > 1){
+        currentPage--;
+        renderTable();
+    }
 }
 
 function applyFilter(){
+    let acc = document.getElementById("filterAcc").value.toLowerCase();
 
-let acc = document.getElementById("filterAcc").value.toLowerCase();
+    filteredData = fullData.filter(d=>{
+        let accNo = (d.acc_no || "").toString().toLowerCase();
+        return !acc || accNo.includes(acc);
+    });
 
-filteredData = fullData.filter(d=>{
-    let accNo = (d.acc_no || "").toString().toLowerCase();
-    return !acc || accNo.includes(acc);
-});
-
-currentPage = 1;
-renderTable();
-
+    currentPage = 1;
+    renderTable();
 }
 
 function resetFilter(){
-
-document.getElementById("filterAcc").value="";
-
-filteredData = fullData;
-currentPage = 1;
-
-renderTable();
-
+    document.getElementById("filterAcc").value="";
+    filteredData = fullData;
+    currentPage = 1;
+    renderTable();
 }
 
 function toggleRemark(el){
+    let full = el.getAttribute("data-full");
+    let short = el.getAttribute("data-short");
+    let textEl = el.querySelector(".remark-text");
+    let hintEl = el.querySelector(".tap-hint");
 
-let full = el.getAttribute("data-full");
-let short = el.getAttribute("data-short");
-
-let textEl = el.querySelector(".remark-text");
-let hintEl = el.querySelector(".tap-hint");
-
-if(textEl.innerText === full){
-
-textEl.innerText = short;
-
-if(hintEl) hintEl.innerHTML = "<i class='fa fa-hand-pointer'></i> tap to view";
-
-}else{
-
-textEl.innerText = full;
-
-if(hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to minimize";
-
-}
-
+    if(textEl.innerText === full){
+        textEl.innerText = short;
+        if(hintEl) hintEl.innerHTML = "<i class='fa fa-hand-pointer'></i> tap to view";
+    }else{
+        textEl.innerText = full;
+        if(hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to minimize";
+    }
 }
 
 document.getElementById("filterAcc").addEventListener("keypress",function(e){
-if(e.key === "Enter"){
-applyFilter();
-}
+    if(e.key === "Enter"){ applyFilter(); }
 });
 
 </script>
