@@ -477,25 +477,38 @@ document.getElementById("pass").addEventListener("keypress",function(e){
 
 /* AUTO LOGIN LISTENER */
 window.addEventListener('DOMContentLoaded', (event) => {
-    // --- READ FROM BOTH STORAGES ---
     const activeToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
     const userType = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_type");
-    // -------------------------------
     
-    // If token exists (user is active), redirect to respective portal
     if (activeToken && userType) {
-        document.getElementById("overlay").style.display = "flex"; // Show authenticating screen
+        document.getElementById("overlay").style.display = "flex"; 
         
-        if (userType === "check") {
-            window.location = "../check/";
-        } else if (userType === "lock") {
-            window.location = "../lock/";
-        } else if (userType === "master") {
-            window.location = "../menumaster/";
-        }
+        // SEMAK DENGAN SERVER SEBELUM REDIRECT
+        fetch(api + "?action=session&token=" + activeToken + "&api_key=" + API_KEY)
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "ACTIVE") {
+                if (userType === "check") window.location = "../check/";
+                else if (userType === "lock") window.location = "../lock/";
+                else if (userType === "master") window.location = "../menumaster/";
+            } else {
+                // Token tidak sah (ditendang oleh Desktop)
+                localStorage.clear();
+                sessionStorage.clear();
+                document.getElementById("overlay").style.display = "none";
+                const err = document.getElementById("errorMsg");
+                err.innerText = "Akaun ini telah dilog masuk di peranti lain.";
+                err.style.display = "block";
+            }
+        })
+        .catch(e => {
+            // Jika tiada internet buat sementara waktu, benarkan masuk dahulu
+            if (userType === "check") window.location = "../check/";
+            else if (userType === "lock") window.location = "../lock/";
+            else if (userType === "master") window.location = "../menumaster/";
+        });
     }
 });
-
 </script>
 
 </body>
