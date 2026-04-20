@@ -476,39 +476,44 @@ document.getElementById("pass").addEventListener("keypress",function(e){
 });
 
 /* AUTO LOGIN LISTENER */
+/* AUTO LOGIN LISTENER (FIXED) */
 window.addEventListener('DOMContentLoaded', (event) => {
+    // Baca kedua-dua storage
     const activeToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
     const userType = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_type");
     
     if (activeToken && userType) {
         document.getElementById("overlay").style.display = "flex"; 
         
-        // SEMAK DENGAN SERVER SEBELUM REDIRECT
-        fetch(api + "?action=session&token=" + activeToken + "&api_key=" + API_KEY)
+        // Guna "SCZP_SECURE_2026" secara terus supaya tak berlaku ralat API_KEY hilang
+        fetch(api + "?action=session&token=" + activeToken + "&api_key=SCZP_SECURE_2026")
         .then(res => res.json())
         .then(data => {
             if (data.status === "ACTIVE") {
+                // Token sah, teruskan ke portal
                 if (userType === "check") window.location = "../check/";
                 else if (userType === "lock") window.location = "../lock/";
                 else if (userType === "master") window.location = "../menumaster/";
             } else {
-                // Token tidak sah (ditendang oleh Desktop)
+                // Token dibatalkan oleh server (Sesi ditendang)
                 localStorage.clear();
                 sessionStorage.clear();
                 document.getElementById("overlay").style.display = "none";
                 const err = document.getElementById("errorMsg");
-                err.innerText = "Akaun ini telah dilog masuk di peranti lain.";
+                err.innerText = "Sesi tamat atau akaun dilog masuk di peranti lain.";
                 err.style.display = "block";
             }
         })
         .catch(e => {
-            // Jika tiada internet buat sementara waktu, benarkan masuk dahulu
+            // Jika berlaku ralat internet/server, sembunyikan loading dan cuba benarkan masuk
+            document.getElementById("overlay").style.display = "none";
             if (userType === "check") window.location = "../check/";
             else if (userType === "lock") window.location = "../lock/";
             else if (userType === "master") window.location = "../menumaster/";
         });
     }
 });
+    
 </script>
 
 </body>
