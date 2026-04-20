@@ -1275,13 +1275,21 @@ function verifySessionWithServer() {
     .then(response => response.json())
     .then(data => {
         if (data.status !== "ACTIVE") {
-            showSessionPopup("DEVICE");
+            // BACA PUNCA TENDANG DAN KELUARKAN POPUP YANG BETUL
+            if (data.reason === "SESSION_REPLACED") {
+                showSessionPopup("DEVICE");
+            } else {
+                showSessionPopup("EXPIRED");
+            }
         }
     })
     .catch(error => {
         console.log("Internet disconnected / Server error. Check paused.");
     });
 }
+
+// SEMAK STATUS TOKEN SERTA-MERTA APABILA MUKA SURAT DIBUKA (TAMBAHAN BAHARU)
+verifySessionWithServer();
 
 // Run automatic check every 1 minute
 setInterval(verifySessionWithServer, CHECK_INTERVAL);
