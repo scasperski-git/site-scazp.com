@@ -1343,7 +1343,63 @@ clearError("amount","err_amount");
 clearError("dca_id","err_dca");
 clearError("remarks","err_remarks");
 
-setInterval(checkSession,30000);
+/* =========================================
+   SINGLE DEVICE LOGIN & SMART PAUSE LOGIC
+========================================= */
+
+const CHECK_INTERVAL = 60000; // Semak setiap 1 minit (60,000 ms)
+
+function verifySessionWithServer() {
+    // 1. SMART PAUSE: Jangan buat apa-apa kalau tab/app diminimize (Jimat Kuota GAS)
+    if (document.hidden) return; 
+
+    // 2. Dapatkan token dari mana-mana storage
+    const token = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
+    const userId = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
+
+    if (!token) {
+        triggerAutoLogout();
+        return;
+    }
+
+    // 3. Hantar semakan ke server
+    fetch(API_URL + "?action=verifyToken&token=" + token + "&user=" + userId + "&key=" + API_KEY)
+    .then(response => response.json())
+    .then(data => {
+        // Jika server kata token dah tak wujud / bertukar
+        if (data.status !== "ACTIVE") {
+            triggerAutoLogout();
+        }
+    })
+    .catch(error => {
+        console.log("Internet terputus / ralat pelayan. Semakan dijeda.");
+    });
+}
+
+// Jalankan semakan automatik setiap 1 minit
+setInterval(verifySessionWithServer, CHECK_INTERVAL);
+
+// Semak serta-merta apabila pengguna kembali buka tab / app
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+        verifySessionWithServer();
+    }
+});
+
+// Fungsi untuk tendang user keluar
+function triggerAutoLogout() {
+    // Kosongkan semua jenis memori
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Guna popup sedia ada (showSessionPopup) jika ada, atau guna alert biasa
+    if (typeof showSessionPopup === "function") {
+        showSessionPopup("EXPIRED");
+    } else {
+        alert("Sesi tamat atau akaun dilog masuk di peranti lain. Sila log masuk semula.");
+        window.location = "../checklock-login/";
+    }
+}
 
 let fullData = [];
 let filteredData = [];
