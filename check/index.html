@@ -26,7 +26,7 @@ html {
 }
 
 body {
-    background: #1e293b; !important;
+    background: #1e293b !important;
     margin: 0;
     padding: 0;
     color: #334155;
@@ -541,12 +541,10 @@ body {
     /* Main Content Adjustments - MOBILE */
     .main-content {
         margin-left: 0;
-        /* LEBIH RAPAT KIRI DAN KANAN DI MOBILE */
         padding: 16px 8px 100px 8px; 
     }
 
     .container {
-        /* KURANGKAN PADDING DALAM KOTAK UTAMA MOBILE */
         padding: 20px 16px;
         border-radius: 16px;
     }
@@ -569,7 +567,6 @@ body {
         padding: 14px;
     }
 
-    /* KEKALKAN ROW SEBARIS UNTUK RESULT CARD DI MOBILE */
     .row {
         flex-direction: row; 
         gap: 10px; 
@@ -584,7 +581,6 @@ body {
     }
 
     .result-card, .no-lock, .loading {
-        /* KURANGKAN PADDING DALAM KOTAK RESULT UNTUK RUANG MAKSIMUM */
         padding: 16px;
     }
 }
@@ -655,63 +651,38 @@ body {
 
 <script>
 // ==========================================
-// LOGIC BAWAH NI MAINTAIN 100% TAK SENTUH
+// INITIALIZATION & STORAGE CHECK (WEB & APP)
 // ==========================================
 
-const api = API_URL;
+const api = API_URL; // From lockconfig.js
 
-const user = localStorage.getItem("lock_user");
-const role = localStorage.getItem("lock_role");
-const token = localStorage.getItem("session_token");
+// Read from localStorage (App) or sessionStorage (Web)
+const user = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
+const role = localStorage.getItem("lock_role") || sessionStorage.getItem("lock_role");
+const token = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
+const type = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_type");
 
-const type = localStorage.getItem("lock_type");
-
-if(!type){
-window.location="../checklock-login/";
+// If no token or type (User not logged in or closed tab)
+if(!type || !token){
+    logout();
 }
 
-if(type=="lock"){
-alert("Access denied");
-window.location="../lock/";
+// Page Access Protection
+if(type == "lock"){
+    alert("Access denied");
+    window.location="../lock/";
 }
 
+// Show Master button if role is master
 if(type === "master"){
-document.getElementById("masterBtn").style.display = "flex";
+    document.getElementById("masterBtn").style.display = "flex";
 }
 
-async function checkSession(){
+document.getElementById("userInfo").innerHTML = "User: "+(user || "-")+" | Role: "+(role || "-");
 
-try{
-
-const res = await fetch(api+"?action=session&token="+token+"&api_key=SCZP_SECURE_2026");
-const data = await res.json();
-
-if(data.status !== "ACTIVE"){
-
-showSessionPopup("DEVICE");
-return;
-
-localStorage.clear();
-window.location="../checklock-login/";
-
-}
-
-}catch(e){
-console.log("session check error");
-}
-
-}
-
-function goMaster(){
-window.location="../menumaster/";
-}
-
-if(!token){
-logout();
-}
-
-document.getElementById("userInfo").innerHTML =
-"User: "+(user || "-")+" | Role: "+(role || "-");
+// ==========================================
+// SEARCH & DISPLAY FUNCTIONS
+// ==========================================
 
 const input=document.getElementById("acc_no");
 const result=document.getElementById("result");
@@ -721,322 +692,217 @@ const resetBtn=document.getElementById("resetBtn");
 let isLoading=false;
 
 window.onload=()=>{
-input.focus();
+    input.focus();
 };
 
 function formatDate(dateStr){
-
-if(!dateStr) return "-";
-
-if(dateStr.includes("-") && dateStr.split("-")[0].length==4){
-
-var p=dateStr.split("-");
-var year=p[0];
-var month=parseInt(p[1])-1;
-var day=p[2];
-
-var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-return day+" "+m[month]+" "+year;
-
-}
-
-if(dateStr.includes("/")){
-
-var p=dateStr.split("/");
-
-var day=parseInt(p[0]);
-var month=parseInt(p[1])-1;
-var year=p[2];
-
-var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-return ("0"+day).slice(-2)+" "+m[month]+" "+year;
-
-}
-
-if(dateStr.includes("T")){
-
-var d=new Date(dateStr);
-
-var day=("0"+d.getDate()).slice(-2);
-var month=d.getMonth();
-var year=d.getFullYear();
-
-var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-return day+" "+m[month]+" "+year;
-
-}
-
-return dateStr;
-
+    if(!dateStr) return "-";
+    if(dateStr.includes("-") && dateStr.split("-")[0].length==4){
+        var p=dateStr.split("-");
+        var year=p[0];
+        var month=parseInt(p[1])-1;
+        var day=p[2];
+        var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        return day+" "+m[month]+" "+year;
+    }
+    if(dateStr.includes("/")){
+        var p=dateStr.split("/");
+        var day=parseInt(p[0]);
+        var month=parseInt(p[1])-1;
+        var year=p[2];
+        var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        return ("0"+day).slice(-2)+" "+m[month]+" "+year;
+    }
+    if(dateStr.includes("T")){
+        var d=new Date(dateStr);
+        var day=("0"+d.getDate()).slice(-2);
+        var month=d.getMonth();
+        var year=d.getFullYear();
+        var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        return day+" "+m[month]+" "+year;
+    }
+    return dateStr;
 }
 
 function formatDateTime(dateStr){
-
-if(!dateStr) return "-";
-
-/* format expected: dd/MM/yyyy HH:mm:ss */
-
-const parts = dateStr.split(" ");
-
-const datePart = parts[0].split("/");
-const timePart = parts[1].split(":");
-
-const day = datePart[0];
-const monthIndex = parseInt(datePart[1]) - 1;
-const year = datePart[2];
-
-const hour = timePart[0];
-const minute = timePart[1];
-
-const m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-return day+" "+m[monthIndex]+" "+year+" "+hour+":"+minute;
-
+    if(!dateStr) return "-";
+    const parts = dateStr.split(" ");
+    const datePart = parts[0].split("/");
+    const timePart = parts[1].split(":");
+    const day = datePart[0];
+    const monthIndex = parseInt(datePart[1]) - 1;
+    const year = datePart[2];
+    const hour = timePart[0];
+    const minute = timePart[1];
+    const m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return day+" "+m[monthIndex]+" "+year+" "+hour+":"+minute;
 }
 
 async function checkLock(){
+    const acc=input.value.trim();
+    if(!acc){
+        alert("Enter Account No");
+        input.focus();
+        return;
+    }
 
-const acc=input.value.trim();
+    if(isLoading) return;
+    isLoading=true;
+    checkBtn.disabled=true;
 
-if(!acc){
-alert("Enter Account No");
-input.focus();
-return;
-}
+    result.innerHTML= "<div class='loading'>Checking Lock Status<div class='spinner'></div></div>";
 
-if(isLoading) return;
+    try{
+        const res = await fetch(api+"?acc_no="+encodeURIComponent(acc)+"&token="+token+"&api_key=SCZP_SECURE_2026");
+        const data=await res.json();
 
-isLoading=true;
-checkBtn.disabled=true;
+        if(data.status=="UNAUTHORIZED"){
+            if(data.reason=="SESSION_REPLACED"){
+                showSessionPopup("DEVICE");
+            } else {
+                showSessionPopup("EXPIRED");
+            }
+            return;
+        }
 
-result.innerHTML=
-"<div class='loading'>Checking Lock Status<div class='spinner'></div></div>";
+        if(data.status==="LOCKED"){
+            const formattedDate=formatDate(data.valid);
+            const created=formatDateTime(data.created);
+            const amount = "RM " + Number(data.amount || 0).toLocaleString("en-MY",{
+                minimumFractionDigits:2,
+                maximumFractionDigits:2
+            });
 
-try{
+            const promiseDate=new Date(data.valid);
+            const today=new Date();
+            today.setHours(0,0,0,0);
+            promiseDate.setHours(0,0,0,0);
 
-const res = await fetch(api+"?acc_no="+encodeURIComponent(acc)+"&token="+token+"&api_key=SCZP_SECURE_2026");
+            let statusText="LOCKED";
+            let statusColor="#10b981"; 
 
-const data=await res.json();
+            if(today>promiseDate){
+                statusText="EXPIRED";
+                statusColor="#ef4444";
+            }
 
-if(data.status=="UNAUTHORIZED"){
+            result.innerHTML=
+            "<div class='result-card'>"+
+            "<div class='status-box'><span style='background:"+statusColor+"'>"+statusText+"</span></div>"+
+            "<div class='created-meta'>Created by "+data.dca_id+" • "+created+"</div>"+
+            "<div class='row'>"+
+            "<div class='col'><div class='label'>ACCOUNT NO</div><div class='value'>"+data.acc_no+"</div></div>"+
+            "<div class='col'><div class='label'>BRANCH</div><div class='value'>"+data.branch+"</div></div>"+
+            "</div>"+
+            "<div class='row'>"+
+            "<div class='col'><div class='label'>LOCK AMOUNT</div><div class='amount'>"+amount+"</div></div>"+
+            "<div class='col'><div class='label'>PROMISE DATE</div><div class='value'>"+formattedDate+"</div></div>"+
+            "</div>"+
+            "<div class='label'>PAYMENT CATEGORY</div><div class='value'>"+(data.category || "-")+"</div><br>"+
+            "<div class='label'>REMARKS</div><div class='remark'>"+(data.remarks || "-")+"</div>"+
+            "<div class='audit-note'><i class='fa-solid fa-circle-info' style='margin-right: 5px; color: #3b82f6;'></i> <b>Branch Notice:</b> This account is currently locked by the assigned DCA. Please proceed to collect the payment from the customer as per the stated Lock Amount and Payment Category.</div>"+
+            "</div>";
+        } else {
+            result.innerHTML= "<div class='no-lock'>NO LOCK FOUND</div>";
+        }
+    }catch(err){
+        result.innerHTML= "<div class='no-lock'>SYSTEM ERROR. TRY AGAIN.</div>";
+    }
 
-if(data.reason=="SESSION_REPLACED"){
-alert("Your account has been logged in from another device.");
-}
-else{
-showSessionPopup("EXPIRED");
-return;
-}
-
-localStorage.clear();
-window.location="../checklock-login/";
-return;
-
-}
-
-if(data.status==="LOCKED"){
-
-const formattedDate=formatDate(data.valid);
-const created=formatDateTime(data.created);
-const amount = "RM " + Number(data.amount || 0).toLocaleString("en-MY",{
-minimumFractionDigits:2,
-maximumFractionDigits:2
-});
-
-const promiseDate=new Date(data.valid);
-
-const today=new Date();
-today.setHours(0,0,0,0);
-
-promiseDate.setHours(0,0,0,0);
-
-let statusText="LOCKED";
-let statusColor="#10b981"; // Tukar green premium sikit 
-
-if(today>promiseDate){
-statusText="EXPIRED";
-statusColor="#ef4444";
-}
-
-result.innerHTML=
-
-"<div class='result-card'>"+
-
-"<div class='status-box'><span style='background:"+statusColor+"'>"+statusText+"</span></div>"+
-
-"<div class='created-meta'>Created by "+data.dca_id+
-" • "+created+"</div>"+
-
-"<div class='row'>"+
-
-"<div class='col'>"+
-"<div class='label'>ACCOUNT NO</div>"+
-"<div class='value'>"+data.acc_no+"</div>"+
-"</div>"+
-
-"<div class='col'>"+
-"<div class='label'>BRANCH</div>"+
-"<div class='value'>"+data.branch+"</div>"+
-"</div>"+
-
-"</div>"+
-
-"<div class='row'>"+
-
-"<div class='col'>"+
-"<div class='label'>LOCK AMOUNT</div>"+
-"<div class='amount'>"+amount+"</div>"+
-"</div>"+
-
-"<div class='col'>"+
-"<div class='label'>PROMISE DATE</div>"+
-"<div class='value'>"+formattedDate+"</div>"+
-"</div>"+
-
-"</div>"+
-
-"<div class='label'>PAYMENT CATEGORY</div>"+
-"<div class='value'>"+(data.category || "-")+"</div><br>"+
-
-"<div class='label'>REMARKS</div>"+
-"<div class='remark'>"+(data.remarks || "-")+"</div>"+
-
-"<div class='audit-note'>"+
-"<i class='fa-solid fa-circle-info' style='margin-right: 5px; color: #3b82f6;'></i> <b>Branch Notice:</b> This account is currently locked by the assigned DCA. Please proceed to collect the payment from the customer as per the stated Lock Amount and Payment Category."+
-"</div>"+
-
-"</div>";
-
-}
-else{
-
-result.innerHTML=
-"<div class='no-lock'>NO LOCK FOUND</div>";
-
-}
-
-}catch(err){
-
-result.innerHTML=
-"<div class='no-lock'>SYSTEM ERROR. TRY AGAIN.</div>";
-
-}
-
-checkBtn.disabled=false;
-isLoading=false;
-
+    checkBtn.disabled=false;
+    isLoading=false;
 }
 
 function newSearch(){
-
-input.value="";
-result.innerHTML="";
-checkBtn.disabled=false;
-input.focus();
-
+    input.value="";
+    result.innerHTML="";
+    checkBtn.disabled=false;
+    input.focus();
 }
 
-function showSessionPopup(type){
-
-let title="Session Expired";
-let msg="Your session has expired. Please login again.";
-
-if(type==="DEVICE"){
-title="Logged In From Another Device";
-msg="Your account has been logged in from another device.";
+// Master Navigation
+function goMaster(){
+    window.location="../menumaster/";
 }
 
-document.getElementById("sessionTitle").innerText=title;
-document.getElementById("sessionMsg").innerText=msg;
-
-document.getElementById("sessionPopup").style.display="flex";
-
-setTimeout(()=>{
-localStorage.clear();
-window.location="../checklock-login/";
-},3000);
-
-}
-
+// Logout & Clear Data
 function logout(){
-localStorage.clear();
-window.location="../checklock-login/";
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location="../checklock-login/";
 }
 
+// Event Listeners
 checkBtn.addEventListener("click",checkLock);
 resetBtn.addEventListener("click",newSearch);
 
 input.addEventListener("keypress",function(e){
-if(e.key==="Enter"){
-checkLock();
-}
+    if(e.key==="Enter"){ checkLock(); }
 });
 
 input.addEventListener("input",function(){
-this.value=this.value.replace(/[^0-9]/g,'');
+    this.value=this.value.replace(/[^0-9]/g,'');
 });
   
 /* =========================================
    SINGLE DEVICE LOGIN & SMART PAUSE LOGIC
 ========================================= */
 
-const CHECK_INTERVAL = 60000; // Semak setiap 1 minit (60,000 ms)
+const CHECK_INTERVAL = 60000; // Check every 1 minute
 
 function verifySessionWithServer() {
-    // 1. SMART PAUSE: Jangan buat apa-apa kalau tab/app diminimize (Jimat Kuota GAS)
-    if (document.hidden) return; 
+    if (document.hidden) return; // Smart Pause active
 
-    // 2. Dapatkan token dari mana-mana storage
-    const token = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
-    const userId = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
+    const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
 
-    if (!token) {
-        triggerAutoLogout();
+    if (!currentToken) {
+        showSessionPopup("EXPIRED");
         return;
     }
 
-    // 3. Hantar semakan ke server
-    fetch(API_URL + "?action=verifyToken&token=" + token + "&user=" + userId + "&key=" + API_KEY)
+    // Use action=session to match GAS
+    fetch(API_URL + "?action=session&token=" + currentToken + "&api_key=" + API_KEY)
     .then(response => response.json())
     .then(data => {
-        // Jika server kata token dah tak wujud / bertukar
         if (data.status !== "ACTIVE") {
-            triggerAutoLogout();
+            showSessionPopup("DEVICE"); // Call popup function if kicked out
         }
     })
     .catch(error => {
-        console.log("Internet terputus / ralat pelayan. Semakan dijeda.");
+        console.log("Internet disconnected. Session check paused.");
     });
 }
 
-// Jalankan semakan automatik setiap 1 minit
+// Run automatic check every 1 minute
 setInterval(verifySessionWithServer, CHECK_INTERVAL);
 
-// Semak serta-merta apabila pengguna kembali buka tab / app
+// Check immediately when tab/app is reopened
 document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
         verifySessionWithServer();
     }
 });
 
-// Fungsi untuk tendang user keluar
-function triggerAutoLogout() {
-    // Kosongkan semua jenis memori
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    // Guna popup sedia ada (showSessionPopup) jika ada, atau guna alert biasa
-    if (typeof showSessionPopup === "function") {
-        showSessionPopup("EXPIRED");
-    } else {
-        alert("Sesi tamat atau akaun dilog masuk di peranti lain. Sila log masuk semula.");
-        window.location = "../checklock-login/";
+// Popup UI Controller
+function showSessionPopup(type){
+    let title="Session Expired";
+    let msg="Your session has expired. Please login again.";
+
+    if(type==="DEVICE"){
+        title="Logged In From Another Device";
+        msg="Your account has been logged in from another device.";
     }
+
+    document.getElementById("sessionTitle").innerText=title;
+    document.getElementById("sessionMsg").innerText=msg;
+    document.getElementById("sessionPopup").style.display="flex";
+
+    setTimeout(()=>{
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location="../checklock-login/";
+    }, 3000); // Kick out after 3 seconds of popup
 }
-  
 </script>
 
 <div id="sessionPopup">
