@@ -979,47 +979,7 @@ input.addEventListener("input",function(){
 this.value=this.value.replace(/[^0-9]/g,'');
 });
   
-let lastActivity = Date.now();
-const IDLE_LIMIT = 1200000; // 20 min
-let idleTriggered = false;
-
-function updateActivity(){
-lastActivity = Date.now();
-}
-
-function checkIdle(){
-
-if(!idleTriggered && Date.now() - lastActivity > IDLE_LIMIT){
-idleTriggered = true;
-showSessionPopup("EXPIRED");
-}
-
-}
-
-setInterval(checkIdle, 5000);
-
-[
-"touchstart",
-"touchmove",
-"click",
-"scroll",
-"keydown",
-"mousemove"
-].forEach(event=>{
-document.addEventListener(event, updateActivity, {passive:true});
-});
-
-document.addEventListener("visibilitychange",()=>{
-
-if(!document.hidden){
-if(Date.now() - lastActivity > IDLE_LIMIT){
-showSessionPopup("EXPIRED");
-}
-}
-
-});
 /* SESSION MONITOR */
-
 setInterval(checkSession,30000);
   
 </script>
