@@ -861,7 +861,7 @@ function verifySessionWithServer() {
     }
 
     // Use action=session to match GAS
-fetch(API_URL + "?action=session&token=" + currentToken + "&api_key=" + API_KEY)
+fetch(api + "?action=session&token=" + currentToken + "&api_key=SCZP_SECURE_2026")
     .then(response => response.json())
     .then(data => {
         if (data.status !== "ACTIVE") {
