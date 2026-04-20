@@ -443,12 +443,18 @@ const data=await res.json();
 
 if(data.status==="SUCCESS"){
 
-localStorage.setItem("session_token",data.token);
-localStorage.setItem("lock_user",data.user);
-localStorage.setItem("lock_type",data.type);
-localStorage.setItem("lock_role",data.role);
-localStorage.setItem("lock_name",data.name);
+// --- KOD BAHARU: PENGASINGAN WEB & APP ---
+// Kenal pasti jika ini dibuka melalui App (WebView/Kodular) atau Web biasa
+let isApp = navigator.userAgent.includes("wv") || navigator.userAgent.includes("Android") && navigator.userAgent.includes("Version");
+let storage = isApp ? localStorage : sessionStorage;
 
+// Simpan data ke dalam storage yang betul
+storage.setItem("session_token", data.token);
+storage.setItem("lock_user", data.user);
+storage.setItem("lock_type", data.type);
+storage.setItem("lock_role", data.role);
+storage.setItem("lock_name", data.name);
+// ----------------------------------------
 if(data.type=="check"){
 window.location="../check/";
 }
@@ -492,8 +498,10 @@ login();
 
 // Letak kod ini di bahagian bawah skrip fail login anda
 window.addEventListener('DOMContentLoaded', (event) => {
-    const activeToken = localStorage.getItem("session_token");
-    const userType = localStorage.getItem("lock_type");
+// --- KOD BAHARU: BACA KEDUA-DUA STORAGE ---
+const activeToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
+const userType = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_type");
+// ----------------------------------------
     
     // Kalau token wujud (user masih aktif), terus hantar ke page masing-masing
     if (activeToken && userType) {
