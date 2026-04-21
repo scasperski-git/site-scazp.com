@@ -319,14 +319,14 @@ h3 i {
     text-align: center;
 }
 
-/* TABLE STYLES (NEW) */
+/* Update table-scroll supaya border tidak lari */
 .table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     border-radius: 12px;
     border: 1px solid #e2e8f0;
-    margin-top: 20px;
     background: white;
+    margin-top: 0; /* Margin dipindahkan ke masterTableContainer */
 }
 
 table {
@@ -354,7 +354,7 @@ table tr:last-child td { border-bottom: none; }
 table tr:hover td { background: #f8fafc; }
 th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 
-/* PAGINATION */
+/* Update pagination-bar mengikut stail LOCK.txt */
 .pagination-bar {
     display: flex;
     align-items: center;
@@ -563,27 +563,31 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
                     </div>
                     <div id="dashStatus" class="dash-status"></div>
 
-                    <div class="table-scroll" id="masterTableContainer" style="display:none;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>DCA</th>
-                                    <th>ACC NO</th>
-                                    <th>BRANCH</th>
-                                    <th>AMOUNT</th>
-                                    <th>PTP DATE</th>
-                                    <th>REMARKS</th>
-                                </tr>
-                            </thead>
-                            <tbody id="masterTableBody"></tbody>
-                        </table>
-                        
-                        <div class="pagination-bar">
-                            <button id="prevBtn" onclick="prevPage()" class="page-btn"><i class="fa fa-chevron-left"></i></button>
-                            <span id="pageInfo">Page 1 of 1</span>
-                            <button id="nextBtn" onclick="nextPage()" class="page-btn"><i class="fa fa-chevron-right"></i></button>
-                        </div>
-                    </div>
+<div id="masterTableContainer" style="display:none; margin-top: 20px;">
+    
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>DCA</th>
+                    <th>ACC NO</th>
+                    <th>BRANCH</th>
+                    <th>AMOUNT</th>
+                    <th>PTP DATE</th>
+                    <th>REMARKS</th>
+                </tr>
+            </thead>
+            <tbody id="masterTableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="pagination-bar">
+        <button id="prevBtn" onclick="prevPage()" class="page-btn"><i class="fa fa-chevron-left"></i></button>
+        <span id="pageInfo">Page 1 of 1</span>
+        <button id="nextBtn" onclick="nextPage()" class="page-btn"><i class="fa fa-chevron-right"></i></button>
+    </div>
+
+</div>
                 </div>
             </div>
 
