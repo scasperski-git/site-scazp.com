@@ -319,6 +319,66 @@ h3 i {
     text-align: center;
 }
 
+/* TABLE STYLES (NEW) */
+.table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    margin-top: 20px;
+    background: white;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 600px;
+}
+
+table th, table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+table th {
+    background: #f8fafc;
+    font-weight: 600;
+    font-size: 12px;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+table tr:last-child td { border-bottom: none; }
+table tr:hover td { background: #f8fafc; }
+th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
+
+/* PAGINATION */
+.pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    background: #f8fafc;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.page-btn {
+    padding: 10px 18px;
+    font-size: 13px;
+    border-radius: 8px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: #4f46e5;
+    cursor: pointer;
+}
+.page-btn:disabled { color: #94a3b8; cursor: not-allowed; }
+#pageInfo { flex: 1; text-align: center; font-weight: 600; font-size: 13px; }
+
 /* SUMMARY SECTION */
 #refreshInfo {
     font-size: 12px;
@@ -362,9 +422,7 @@ h3 i {
     line-height: 1.5;
 }
 
-#sumLock, #sumAmount {
-    font-size: 22px !important;
-}
+#sumLock, #sumAmount { font-size: 22px !important; }
 #sumLock { color: #3b82f6 !important; }
 #sumAmount { color: #10b981 !important; }
 
@@ -389,88 +447,46 @@ h3 i {
     background:white; padding:40px; border-radius:20px; text-align:center;
     box-shadow:0 25px 50px rgba(0,0,0,0.25); max-width:340px; width:90%;
 }
-.session-box i{ font-size:48px; color:#ef4444; margin-bottom:16px; }
-.session-title{ font-size:20px; font-weight:700; margin-bottom:8px; color:#0f172a; }
-.session-msg{ font-size:14px; color:#475569; margin-bottom:16px; }
-.session-count{ font-size:12px; color:#94a3b8; font-weight:500; }
 
 /* ==========================================
    MOBILE RESPONSIVE (BOTTOM NAV)
    ========================================== */
 @media (max-width: 899px) {
-    .app-layout {
-        flex-direction: column;
-    }
+    .app-layout { flex-direction: column; }
     
-    /* Header */
     .sidebar {
-        position: sticky;
-        top: 0;
-        width: 100%;
-        height: auto;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        padding: 16px 20px;
-        border-radius: 0 0 20px 20px;
-        z-index: 40;
+        position: sticky; top: 0; width: 100%; height: auto;
+        flex-direction: row; justify-content: space-between;
+        align-items: center; padding: 16px 20px;
+        border-radius: 0 0 20px 20px; z-index: 40;
     }
-
     .brand { margin-bottom: 0; font-size: 18px; }
     .brand i { font-size: 20px; }
     
-    .user-profile {
-        margin-bottom: 0; padding: 0; background: none; border: none; text-align: right;
-    }
+    .user-profile { margin-bottom: 0; padding: 0; background: none; border: none; text-align: right; }
 
-    /* Bottom Nav Menu */
     .nav-menu {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        flex-direction: row;
-        background: #ffffff;
-        padding: 12px 10px;
-        box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-        z-index: 50;
-        border-radius: 24px 24px 0 0;
-        justify-content: space-around;
-        gap: 5px;
+        position: fixed; bottom: 0; left: 0; width: 100%;
+        flex-direction: row; background: #ffffff; padding: 12px 10px;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.08); z-index: 50;
+        border-radius: 24px 24px 0 0; justify-content: space-around; gap: 5px;
     }
-
     .nav-btn {
-        flex-direction: column;
-        gap: 6px;
-        padding: 8px 4px;
-        font-size: 11px;
-        color: #64748b;
-        border-radius: 12px;
-        justify-content: center;
-        width: auto;
+        flex-direction: column; gap: 6px; padding: 8px 4px; font-size: 11px;
+        border-radius: 12px; justify-content: center; width: auto;
     }
-
     .nav-btn i { font-size: 20px; margin: 0; }
-    
     .nav-btn:hover { background: #f1f5f9; color: #4f46e5; transform: none; }
     .nav-btn.active { background: #eef2ff; color: #4f46e5; box-shadow: none; }
     .logout-btn { margin-top: 0; color: #ef4444 !important; }
 
-    /* Main Content */
-    .main-content {
-        margin-left: 0;
-        padding: 24px 16px 100px 16px; 
-    }
-
+    .main-content { margin-left: 0; padding: 24px 16px 100px 16px; }
     .page-title { display: none; }
-
     .section { padding: 20px 16px; }
-
-    .dash-grid { grid-template-columns: 1fr; gap: 12px; }
-
-    .summary-grid { grid-template-columns: 1fr; gap: 12px; }
-    
+    .dash-grid, .summary-grid { grid-template-columns: 1fr; gap: 12px; }
     .stat-number { font-size: 24px; }
+
+    table th, table td { padding: 12px 10px; font-size: 11px; }
 }
 
 </style>
@@ -510,7 +526,7 @@ h3 i {
             <div class="page-title">Master Overview</div>
 
             <div class="section dashboard">
-                <h3><i class="fa fa-chart-pie"></i> Lock Dashboard</h3>
+                <h3><i class="fa fa-chart-pie"></i> Lock Records & Dashboard</h3>
 
                 <div class="dash-grid">
                     <div>
@@ -536,21 +552,43 @@ h3 i {
                 <div class="dash-card">
                     <div class="dash-stats">
                         <div class="stat-box">
-                            <div class="stat-label">Total Lock</div>
+                            <div class="stat-label">Filtered Lock</div>
                             <div id="dashTotal" class="stat-number lock">0</div>
                         </div>
 
                         <div class="stat-box">
-                            <div class="stat-label">Total Amount</div>
+                            <div class="stat-label">Filtered Amount</div>
                             <div id="dashAmount" class="stat-number amount">RM0</div>
                         </div>
                     </div>
                     <div id="dashStatus" class="dash-status"></div>
+
+                    <div class="table-scroll" id="masterTableContainer" style="display:none;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>DCA</th>
+                                    <th>ACC NO</th>
+                                    <th>BRANCH</th>
+                                    <th>AMOUNT</th>
+                                    <th>PTP DATE</th>
+                                    <th>REMARKS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="masterTableBody"></tbody>
+                        </table>
+                        
+                        <div class="pagination-bar">
+                            <button id="prevBtn" onclick="prevPage()" class="page-btn"><i class="fa fa-chevron-left"></i></button>
+                            <span id="pageInfo">Page 1 of 1</span>
+                            <button id="nextBtn" onclick="nextPage()" class="page-btn"><i class="fa fa-chevron-right"></i></button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="section summary">
-                <h3><i class="fa fa-calendar-check"></i> Today's Summary</h3>
+                <h3><i class="fa fa-calendar-check"></i> Today's Overall Summary</h3>
 
                 <div id="refreshInfo">
                     <i class="fa-solid fa-clock-rotate-left"></i> Auto refresh every 2 min &nbsp;|&nbsp; <span id="lastUpdate">Last update: -</span>
@@ -589,10 +627,6 @@ h3 i {
 <script src="../lockconfig.js"></script>
 
 <script>
-// ==========================================
-// INITIALIZATION & STORAGE CHECK (WEB & APP)
-// ==========================================
-
 const api = API_URL;
 
 const token = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
@@ -615,7 +649,7 @@ function getTodayLocal(){
 }
   
 function loadUsers(){
-    fetch(api+"?action=users&token="+token+"&api_key=" + API_KEY)
+    fetch(api+"?action=users&token="+token+"&api_key=SCZP_SECURE_2026")
     .then(r=>r.json())
     .then(list=>{
         var select=document.getElementById("dcaFilter");
@@ -636,15 +670,13 @@ function loadUsers(){
 }
 
 function loadSummary(){
-    fetch(api+"?action=summary&token="+token+"&api_key=" + API_KEY)
+    fetch(api+"?action=summary&token="+token+"&api_key=SCZP_SECURE_2026")
     .then(r=>r.json())
     .then(data=>{
-
         document.getElementById("sumLock").innerText=data.totalLock;
         document.getElementById("sumAmount").innerText=
         "RM "+Number(data.totalAmount).toLocaleString("en-MY",{
-            minimumFractionDigits:2,
-            maximumFractionDigits:2
+            minimumFractionDigits:2, maximumFractionDigits:2
         })
 
         var userHTML="";
@@ -659,57 +691,122 @@ function loadSummary(){
         });
         document.getElementById("topBranch").innerHTML=branchHTML;
 
-        // update last refresh time
         var now=new Date();
-        var time=now.toLocaleTimeString("en-MY",{
-            hour:'2-digit', minute:'2-digit', second:'2-digit'
-        });
+        var time=now.toLocaleTimeString("en-MY",{ hour:'2-digit', minute:'2-digit', second:'2-digit' });
         document.getElementById("lastUpdate").innerText="Last update: "+time;
-
     });
 }
-  
+
+// =====================================
+// MASTER TABLE & PAGINATION LOGIC
+// =====================================
+let masterDataList = [];
+let currentPage = 1;
+const pageSize = 10;
+
+function renderTable() {
+    let start = (currentPage - 1) * pageSize;
+    let end = start + pageSize;
+    let pageData = masterDataList.slice(start, end);
+    let html = "";
+
+    pageData.forEach(d => {
+        let amount = "RM " + Number(d.amount || 0).toLocaleString("en-MY", {
+            minimumFractionDigits: 2, maximumFractionDigits: 2
+        });
+        
+        let pDate = new Date(d.promise);
+        let dateStr = isNaN(pDate) ? d.promise : pDate.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
+
+        let remark = d.remarks || "-";
+        let shortRemark = remark.length > 25 ? remark.substring(0, 25) + "..." : remark;
+
+        html += `
+        <tr>
+            <td style="font-weight:600; color:#4f46e5;">${d.dca}</td>
+            <td>${d.acc_no}</td>
+            <td>${d.branch}</td>
+            <td style="color:#10b981;">${amount}</td>
+            <td>${dateStr}</td>
+            <td title="${remark}">${shortRemark}</td>
+        </tr>
+        `;
+    });
+
+    document.getElementById("masterTableBody").innerHTML = html || 
+    "<tr><td colspan='6' style='text-align:center;padding:30px;color:#94a3b8;'>No Records Found</td></tr>";
+
+    let totalPage = Math.ceil(masterDataList.length / pageSize) || 1;
+    document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${totalPage}`;
+    document.getElementById("prevBtn").disabled = currentPage === 1;
+    document.getElementById("nextBtn").disabled = currentPage === totalPage;
+}
+
+function nextPage() {
+    if (currentPage * pageSize < masterDataList.length) {
+        currentPage++;
+        renderTable();
+    }
+}
+
+function prevPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+    }
+}
+
 function loadDashboard(){
     var btn=document.getElementById("loadBtn");
     var status=document.getElementById("dashStatus");
+    var tableContainer = document.getElementById("masterTableContainer");
 
     btn.disabled=true;
     btn.innerHTML='<div class="spinner"></div> Please wait...';
     status.innerText="Loading dashboard...";
+    
+    // Hide table while loading
+    tableContainer.style.display="none";
 
     var dca=document.getElementById("dcaFilter").value;
     var start=document.getElementById("startDate").value;
     var end=document.getElementById("endDate").value;
 
-    var url=api+"?action=dashboard&token="+token+"&api_key=" + API_KEY;
-
+    var url=api+"?action=dashboard&token="+token+"&api_key=SCZP_SECURE_2026";
     if(dca) url+="&dca="+dca;
     if(start) url+="&start="+start;
     if(end) url+="&end="+end;
 
-    // timeout protection
     var controller = new AbortController();
-    var timeout = setTimeout(()=>controller.abort(),8000);
+    var timeout = setTimeout(()=>controller.abort(), 12000);
 
     fetch(url,{signal:controller.signal})
     .then(r=>r.json())
     .then(data=>{
-if(data.status === "UNAUTHORIZED"){
+        if(data.status === "UNAUTHORIZED"){
             if(data.reason === "SESSION_REPLACED") showSessionPopup("DEVICE");
             else showSessionPopup("EXPIRED");
             return;
-        } else if(data.status){
+        } else if(data.status && data.status !== "SUCCESS"){
             status.innerText="Access denied";
             return;
         }
-        
+
+        // Update Dynamic Summary Counters
         document.getElementById("dashTotal").innerText=data.total || 0;
         document.getElementById("dashAmount").innerText =
         "RM "+Number(data.amount || 0).toLocaleString("en-MY",{
             minimumFractionDigits:2, maximumFractionDigits:2
         });
 
+        // Store List and Render Table
+        masterDataList = data.data || [];
+        currentPage = 1;
+        
         status.innerText="";
+        tableContainer.style.display="block"; // Show Table
+        renderTable();
+
     })
     .catch(err=>{
         if(err.name==="AbortError"){
@@ -730,32 +827,23 @@ if(data.status === "UNAUTHORIZED"){
 window.onload=function(){
     var today=getTodayLocal();
 
+    // Default Date to Today
     document.getElementById("startDate").value=today;
     document.getElementById("endDate").value=today;
 
-    document.getElementById("startDate").max=today;
-    document.getElementById("endDate").max=today;
-
     loadUsers();
-    loadDashboard();
+    loadDashboard(); // Will automatically load today's list & summary
     loadSummary();
 
     setInterval(function(){
         if(!document.hidden){
-            loadSummary();
+            loadSummary(); // Refresh overall background summary
         }
     },120000);
 };
 
-
-// Navigation
-function goCheck(){
-    window.location="../check/";
-}
-
-function goLock(){
-    window.location="../lock/";
-}
+function goCheck(){ window.location="../check/"; }
+function goLock(){ window.location="../lock/"; }
 
 function logout(){
     localStorage.clear();
@@ -784,61 +872,37 @@ function showSessionPopup(type){
     },3000);
 }
 
-/* =========================================
-   SINGLE DEVICE LOGIN & SMART PAUSE LOGIC
-========================================= */
-
-const CHECK_INTERVAL = 60000; // Check every 1 minute
-
+const CHECK_INTERVAL = 60000;
 function verifySessionWithServer() {
-    if (document.hidden) return; // Smart Pause active
-
+    if (document.hidden) return;
     const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
+    if (!currentToken) { showSessionPopup("EXPIRED"); return; }
 
-    if (!currentToken) {
-        showSessionPopup("EXPIRED");
-        return;
-    }
-
-    // Use action=session to match GAS
-   fetch(api + "?action=session&token=" + currentToken + "&api_key=SCZP_SECURE_2026")
+    fetch(API_URL + "?action=session&token=" + currentToken + "&api_key=SCZP_SECURE_2026")
     .then(response => response.json())
     .then(data => {
         if (data.status !== "ACTIVE") {
-            // BACA PUNCA TENDANG DAN KELUARKAN POPUP YANG BETUL
-            if (data.reason === "SESSION_REPLACED") {
-                showSessionPopup("DEVICE");
-            } else {
-                showSessionPopup("EXPIRED");
-            }
+            if (data.reason === "SESSION_REPLACED") showSessionPopup("DEVICE");
+            else showSessionPopup("EXPIRED");
         }
     })
-    .catch(error => {
-        console.log("Internet disconnected / Server error. Check paused.");
-    });
+    .catch(error => console.log("Check paused."));
 }
 
-// SEMAK STATUS TOKEN SERTA-MERTA APABILA MUKA SURAT DIBUKA (TAMBAHAN BAHARU)
 verifySessionWithServer();
-
-// Run automatic check every 1 minute
 setInterval(verifySessionWithServer, CHECK_INTERVAL);
-
-// Check immediately when tab/app is reopened
 document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-        verifySessionWithServer();
-    }
+    if (!document.hidden) verifySessionWithServer();
 });
 
 </script>
 
 <div id="sessionPopup">
     <div class="session-box">
-        <i class="fa fa-lock"></i>
-        <div class="session-title" id="sessionTitle">Session Expired</div>
-        <div class="session-msg" id="sessionMsg">Please login again.</div>
-        <div class="session-count">Redirecting to login...</div>
+        <i class="fa fa-lock" style="font-size: 48px; color: #ef4444; margin-bottom: 16px;"></i>
+        <div style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #0f172a;" id="sessionTitle">Session Expired</div>
+        <div style="font-size: 14px; color: #475569; margin-bottom: 16px;" id="sessionMsg">Please login again.</div>
+        <div style="font-size: 12px; color: #94a3b8; font-weight: 500;">Redirecting to login...</div>
     </div>
 </div>
   
