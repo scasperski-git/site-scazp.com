@@ -700,9 +700,25 @@ function loadSummary(){
 // =====================================
 // MASTER TABLE & PAGINATION LOGIC
 // =====================================
-let masterDataList = [];
+let masterDataList = []; 
 let currentPage = 1;
-const pageSize = 10;
+const pageSize = 10; 
+
+// Fungsi untuk kembangkan/tutup remark apabila ditekan
+function toggleRemark(el){
+    let full = el.getAttribute("data-full");
+    let short = el.getAttribute("data-short");
+    let textEl = el.querySelector(".remark-text");
+    let hintEl = el.querySelector(".tap-hint");
+
+    if(textEl.innerText === full){
+        textEl.innerText = short;
+        if(hintEl) hintEl.innerHTML = "<i class='fa fa-hand-pointer'></i> tap to view";
+    }else{
+        textEl.innerText = full;
+        if(hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to close";
+    }
+}
 
 function renderTable() {
     let start = (currentPage - 1) * pageSize;
@@ -710,36 +726,59 @@ function renderTable() {
     let pageData = masterDataList.slice(start, end);
     let html = "";
 
+    // Tetapkan masa hari ini ke 00:00:00 untuk perbandingan expired date yang tepat
+    let today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     pageData.forEach(d => {
-        let amount = "RM " + Number(d.amount || 0).toLocaleString("en-MY", {
-            minimumFractionDigits: 2, maximumFractionDigits: 2
-        });
+        let amount = "RM " + Number(d.amount || 0).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         
         let pDate = new Date(d.promise);
+        pDate.setHours(0, 0, 0, 0);
+        
+        // Logik tarikh expired (MERAH jika promise date lebih awal dari hari ini)
+        let isExpired = pDate < today;
+        let dateColor = isExpired ? "color: #ef4444; font-weight: 700;" : "";
+        
         let dateStr = isNaN(pDate) ? d.promise : pDate.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
 
         let remark = d.remarks || "-";
-        let shortRemark = remark.length > 25 ? remark.substring(0, 25) + "..." : remark;
+        
+        // Elakkan petikan (quotes) dari merosakkan struktur HTML
+        let safeRemark = remark.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        
+        // Tetapkan had 40 huruf seperti di Lock Portal
+        let shortRemark = remark.length > 40 ? safeRemark.substring(0, 40) + "..." : safeRemark;
+
+        // Logik remark boleh klik
+        let remarkHtml = remark.length > 40
+            ? `<div style="cursor: pointer; max-width: 200px; word-break: break-word;" onclick="toggleRemark(this)" data-full="${safeRemark}" data-short="${shortRemark}">
+                 <div class="remark-text">${shortRemark}</div>
+                 <div class="tap-hint" style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic;">
+                    <i class='fa fa-hand-pointer'></i> tap to view
+                 </div>
+               </div>`
+            : `<div style="max-width: 200px; word-break: break-word;">${safeRemark}</div>`;
 
         html += `
         <tr>
-            <td style="font-weight:600; color:#4f46e5;">${d.dca}</td>
-            <td>${d.acc_no}</td>
-            <td>${d.branch}</td>
-            <td style="color:#10b981;">${amount}</td>
-            <td>${dateStr}</td>
-            <td title="${remark}">${shortRemark}</td>
-        </tr>
-        `;
+            <td>${d.dca || "-"}</td>
+            <td style="font-weight: 600;">${d.acc_no || "-"}</td>
+            <td>${d.branch || "-"}</td>
+            <td style="text-align: center; font-weight: 600; color: #10b981;">${amount}</td>
+            <td style="${dateColor}">${dateStr}</td>
+            <td>${remarkHtml}</td>
+        </tr>`;
     });
 
-    document.getElementById("masterTableBody").innerHTML = html || 
-    "<tr><td colspan='6' style='text-align:center;padding:30px;color:#94a3b8;'>No Records Found</td></tr>";
+    document.getElementById("masterTableBody").innerHTML = html || '<tr><td colspan="6" style="text-align:center; padding: 20px;">No Records Found</td></tr>';
 
-    let totalPage = Math.ceil(masterDataList.length / pageSize) || 1;
-    document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${totalPage}`;
-    document.getElementById("prevBtn").disabled = currentPage === 1;
-    document.getElementById("nextBtn").disabled = currentPage === totalPage;
+    let totalPages = Math.ceil(masterDataList.length / pageSize) || 1;
+    document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${totalPages}`;
+    
+    // Kawalan butang muka surat
+    if(document.getElementById("prevBtn")) document.getElementById("prevBtn").disabled = currentPage === 1;
+    if(document.getElementById("nextBtn")) document.getElementById("nextBtn").disabled = currentPage === totalPages || masterDataList.length === 0;
 }
 
 function nextPage() {
