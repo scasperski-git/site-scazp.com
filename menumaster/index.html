@@ -489,6 +489,44 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     table th, table td { padding: 12px 10px; font-size: 11px; }
 }
 
+/* ========================================= */
+/* RESPONSIVE FIX UNTUK APP / MOBILE VIEW    */
+/* ========================================= */
+@media (max-width: 600px) {
+    /* Rapatkan layout utama ke dinding skrin */
+    .app-layout {
+        padding: 10px 5px !important; 
+    }
+    
+    /* Kurangkan ketebalan padding dalam kotak putih */
+    .content-box {
+        padding: 15px 10px !important; 
+        border-radius: 8px !important;
+    }
+    
+    /* Rapatkan jarak antara kotak-kotak Today Summary */
+    .top-cards {
+        gap: 10px !important; 
+    }
+    
+    /* Tajuk dashboard bagi nampak kemas sikit */
+    .header-title h2 {
+        font-size: 18px !important;
+    }
+    
+    /* Jadual: Kurangkan lengkungan border supaya maksimumkan ruang */
+    .table-scroll {
+        border-radius: 8px !important;
+        margin-top: 15px !important;
+    }
+    
+    /* Pagination bar: Rapatkan sikit */
+    .pagination-bar {
+        margin-top: 15px !important;
+        padding: 8px !important;
+    }
+}
+
 </style>
 
 </head>
