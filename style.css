@@ -1,11 +1,12 @@
 :root {
-  --bg: #09090b; /* Warna latar yang lebih gelap/premium */
+  /* Tukar tema kepada warna Emas (Gold) yang sepadan dengan logo */
+  --bg: #09090b; 
   --panel: rgba(24, 24, 27, 0.7);
   --panel-border: rgba(255, 255, 255, 0.08);
   --text: #e5e7eb;
   --muted: #a1a1aa;
-  --accent: #38bdf8;
-  --accent-glow: rgba(56, 189, 248, 0.4);
+  --accent: #d4af37; /* Gold premium */
+  --accent-glow: rgba(212, 175, 55, 0.3);
 }
 
 * {
@@ -16,7 +17,6 @@ body {
   margin: 0;
   font-family: 'Inter', sans-serif;
   background-color: var(--bg);
-  /* Tech Grid Background */
   background-image: 
     linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
@@ -25,12 +25,12 @@ body {
   line-height: 1.6;
 }
 
-/* ===== NAVBAR (GLASSMORPHISM) ===== */
+/* ===== NAVBAR ===== */
 .navbar {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(9, 9, 11, 0.7);
+  background: rgba(9, 9, 11, 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--panel-border);
@@ -39,33 +39,44 @@ body {
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 24px;
+  gap: 15px;
+  padding: 12px 24px;
   max-width: 900px;
   margin: auto;
 }
 
-/* ===== INLINE SVG LOGO ===== */
-.logo {
-  height: 40px;
-  width: 40px;
-  display: block;
-  transition: transform 0.3s ease;
+/* ===== LOGO KAU & GARISAN BERGERAK ===== */
+.logo-wrapper {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.logo:hover {
-  transform: rotate(90deg);
+.logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%; /* Membulatkan logo hitam untuk nampak kemas */
+  position: relative;
+  z-index: 2;
+  border: 1px solid rgba(212, 175, 55, 0.2);
 }
 
-.logo-hexagon {
-  stroke-dasharray: 120;
-  stroke-dashoffset: 0;
-  animation: drawLine 4s linear infinite alternate;
+.moving-line {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: calc(100% + 12px);
+  height: calc(100% + 12px);
+  z-index: 1;
+  animation: spin 3s linear infinite;
 }
 
-@keyframes drawLine {
-  0% { stroke-dashoffset: 120; }
-  100% { stroke-dashoffset: 0; }
+@keyframes spin {
+  100% { transform: rotate(360deg); }
 }
 
 .brand span {
@@ -73,13 +84,13 @@ body {
   font-size: 1.2rem;
   font-weight: 600;
   letter-spacing: 1px;
+  color: #fff;
 }
 
 /* ===== HERO ===== */
 .hero {
   padding: 100px 20px 60px;
   text-align: center;
-  position: relative;
 }
 
 .tag {
@@ -104,12 +115,18 @@ body {
   letter-spacing: -1px;
 }
 
-/* Premium Gradient Text Effect */
+/* Teks Gradient Emas */
 .gradient-text {
-  background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
+  background: linear-gradient(90deg, #bf953f, #fcf6ba, #b38728, #fbf5b7);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: shine 4s linear infinite;
+}
+
+@keyframes shine {
+  to { background-position: 200% center; }
 }
 
 .subtitle {
@@ -139,9 +156,8 @@ main {
   border-radius: 12px;
   padding: 30px;
   backdrop-filter: blur(5px);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  
   opacity: 0;
   transform: translateY(20px);
   animation: fadeUp 0.6s ease-out forwards;
@@ -149,11 +165,10 @@ main {
 
 .card-section:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  border-color: rgba(212, 175, 55, 0.3);
 }
 
-/* Staggering Animations */
 .card-section:nth-child(1) { animation-delay: 0.1s; }
 .card-section:nth-child(2) { animation-delay: 0.2s; }
 .card-section:nth-child(3) { animation-delay: 0.3s; }
@@ -176,20 +191,20 @@ h2 {
   font-size: 1.2rem;
 }
 
-/* ===== SKILLS ===== */
+/* ===== SKILLS GRID ===== */
 .skills {
   list-style: none;
   padding: 0;
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 15px;
 }
 
 .skills li {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--panel-border);
-  padding: 12px;
+  padding: 15px;
   border-radius: 8px;
   text-align: center;
   font-weight: 500;
@@ -198,10 +213,16 @@ h2 {
 }
 
 .skills li:hover {
-  background: rgba(56, 189, 248, 0.05);
+  background: rgba(212, 175, 55, 0.05);
   border-color: var(--accent);
   color: var(--accent);
   box-shadow: 0 0 15px var(--accent-glow);
+}
+
+@media (max-width: 600px) {
+  .skills {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* ===== CONTACT ===== */
@@ -212,18 +233,20 @@ h2 {
   border-left: 4px solid var(--accent);
   font-family: 'Fira Code', monospace;
   font-size: 0.95rem;
+  line-height: 1.8;
 }
 
 .email {
   color: var(--accent);
   text-decoration: none;
-  margin-left: 10px;
+  font-weight: 600;
+  display: block;
+  margin-top: 5px;
   transition: text-shadow 0.3s ease;
 }
 
 .email:hover {
   text-shadow: 0 0 10px var(--accent-glow);
-  text-decoration: underline;
 }
 
 /* ===== FOOTER ===== */
