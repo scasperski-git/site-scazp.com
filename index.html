@@ -5,25 +5,31 @@
   <title>SCAZP | Personal Site</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
   <header class="navbar">
     <div class="brand">
-      <img src="logo.png" alt="SCAZP Logo" class="logo">
-      <span>SCAZP | Personal Site</span>
+      <svg class="logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path class="logo-hexagon" d="M20 2L36 10V30L20 38L4 30V10L20 2Z" stroke="#38bdf8" stroke-width="2"/>
+        <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#e5e7eb" font-family="'Fira Code', monospace" font-weight="bold" font-size="16">S</text>
+      </svg>
+      <span>SCAZP</span>
     </div>
   </header>
 
   <header class="hero">
-    <p class="tag">&gt; hello_world</p>
-    <h1>Hi, I'm <span>SCAZP!</span></h1>
-    <p class="subtitle">Aspiring Developer · Tech Enthusiast</p>
+    <div class="hero-content">
+      <p class="tag">&gt; hello_world<span class="cursor">_</span></p>
+      <h1>Hi, I'm <span class="gradient-text">SCAZP!</span></h1>
+      <p class="subtitle">Aspiring Developer <span class="dot">·</span> Tech Enthusiast</p>
+    </div>
   </header>
 
   <main>
-    <section>
-      <h2>About</h2>
+    <section class="card-section">
+      <h2><span class="icon">&lt;/&gt;</span> About</h2>
       <p class="about-text">
         <span class="about-strong">
           Built to learn 📚 | Built to grow 🌱
@@ -34,29 +40,27 @@
       </p>
     </section>
 
-    <section>
-      <h2>Skills</h2>
+    <section class="card-section">
+      <h2><span class="icon">⚡</span> Skills</h2>
       <ul class="skills">
         <li>HTML & CSS</li>
-        <li>Basic JavaScript</li>
+        <li>JavaScript</li>
         <li>Git & GitHub</li>
         <li>Learning Everyday 🚀</li>
       </ul>
     </section>
 
-    <section>
-      <h2>Contact</h2>
-      <p>
-        Email:
-        <a href="mailto:ceo@scazp.com" class="email">
-          ceo@scazp.com
-        </a>
+    <section class="card-section">
+      <h2><span class="icon">✉️</span> Contact</h2>
+      <p class="contact-box">
+        Initiate connection:
+        <a href="mailto:ceo@scazp.com" class="email">ceo@scazp.com</a>
       </p>
     </section>
   </main>
 
   <footer>
-    <p>© 2026 scazp.com</p>
+    <p>© 2026 scazp.com · Designed for the future.</p>
   </footer>
 
 </body>
