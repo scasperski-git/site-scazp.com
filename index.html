@@ -11,17 +11,27 @@
 
   <header class="navbar">
     <div class="brand">
-      <svg class="logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path class="logo-hexagon" d="M20 2L36 10V30L20 38L4 30V10L20 2Z" stroke="#38bdf8" stroke-width="2"/>
-        <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#e5e7eb" font-family="'Fira Code', monospace" font-weight="bold" font-size="16">S</text>
-      </svg>
+      <div class="logo-wrapper">
+        <img src="logo.jpg" alt="SCAZP Logo" class="logo-img">
+        
+        <svg class="moving-line" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="48" stroke="url(#gold-gradient)" stroke-width="2.5" fill="none" stroke-dasharray="100 200" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="gold-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#bf953f" />
+              <stop offset="50%" stop-color="#fcf6ba" />
+              <stop offset="100%" stop-color="#b38728" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
       <span>SCAZP</span>
     </div>
   </header>
 
   <header class="hero">
     <div class="hero-content">
-      <p class="tag">&gt; hello_world<span class="cursor">_</span></p>
+      <p class="tag">&gt; system_ready<span class="cursor">_</span></p>
       <h1>Hi, I'm <span class="gradient-text">SCAZP!</span></h1>
       <p class="subtitle">Aspiring Developer <span class="dot">·</span> Tech Enthusiast</p>
     </div>
@@ -45,15 +55,15 @@
       <ul class="skills">
         <li>HTML & CSS</li>
         <li>JavaScript</li>
-        <li>Git & GitHub</li>
-        <li>Learning Everyday 🚀</li>
+        <li>Google Apps Script</li>
+        <li>UI Optimization</li>
       </ul>
     </section>
 
     <section class="card-section">
-      <h2><span class="icon">✉️</span> Contact</h2>
+      <h2><span class="icon">✉️</span> Reach Out</h2>
       <p class="contact-box">
-        Initiate connection:
+        For inquiries, please reply directly to this email:
         <a href="mailto:ceo@scazp.com" class="email">ceo@scazp.com</a>
       </p>
     </section>
