@@ -192,6 +192,7 @@ h2 {
 }
 
 /* ===== SKILLS GRID ===== */
+/* ===== SKILLS GRID ===== */
 .skills {
   list-style: none;
   padding: 0;
@@ -210,13 +211,49 @@ h2 {
   font-weight: 500;
   font-size: 0.95rem;
   transition: all 0.3s ease;
+  
+  /* Animasi auto-select berjalan selama 4 saat total */
+  animation: autoSelect 4s infinite;
 }
 
+/* Susun masa (delay) supaya menyala giliran satu per satu (selang 1 saat) */
+.skills li:nth-child(1) { animation-delay: 0s; }
+.skills li:nth-child(2) { animation-delay: 1s; }
+.skills li:nth-child(3) { animation-delay: 2s; }
+.skills li:nth-child(4) { animation-delay: 3s; }
+
+/* Bila user letak mouse kat kawasan skills, auto-animasi berhenti (pause) kejap */
+.skills:hover li {
+  animation-play-state: paused;
+}
+
+/* Hover manual masih kekal dan override animasi */
 .skills li:hover {
-  background: rgba(212, 175, 55, 0.05);
-  border-color: var(--accent);
-  color: var(--accent);
-  box-shadow: 0 0 15px var(--accent-glow);
+  background: rgba(212, 175, 55, 0.05) !important;
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+  box-shadow: 0 0 15px var(--accent-glow) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Keyframes untuk efek menyala gilir-gilir */
+@keyframes autoSelect {
+  0%, 20% {
+    /* Waktu kotak ni tengah 'kena select' */
+    background: rgba(212, 175, 55, 0.05);
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 15px var(--accent-glow);
+    transform: translateY(-2px);
+  }
+  25%, 100% {
+    /* Waktu kotak ni normal / gelap balik */
+    background: rgba(255, 255, 255, 0.03);
+    border-color: var(--panel-border);
+    color: var(--text); /* Pastikan warna teks kembali kepada asal */
+    box-shadow: none;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 600px) {
