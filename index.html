@@ -4,16 +4,18 @@
   <meta charset="UTF-8">
   <title>SCAZP | Personal Site</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Personal portfolio of SCAZP - Aspiring Developer & Tech Enthusiast">
   <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<header class="navbar">
+  <header class="navbar">
     <div class="brand">
       <div class="logo-wrapper">
-        <img src="logo.png" alt="SCAZP Logo" class="logo-img">
-        
+        <img src="logo.png" alt="SCAZP Logo" class="logo-img" onerror="this.style.display='none'">
         <svg class="moving-line" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
           <circle cx="50" cy="50" r="48" stroke="url(#gold-gradient)" stroke-width="2.5" fill="none" stroke-dasharray="100 200" stroke-linecap="round"/>
           <defs>
@@ -29,44 +31,42 @@
     </div>
   </header>
 
-  <header class="hero">
-    <div class="hero-content">
-      <p class="tag">&gt; system_ready<span class="cursor">_</span></p>
-      <h1>Hi, I'm <span class="gradient-text">SCAZP!</span></h1>
-      <p class="subtitle">Aspiring Developer <span class="dot">·</span> Tech Enthusiast</p>
-    </div>
-  </header>
-
   <main>
-    <section class="card-section">
-      <h2><span class="icon">&lt;/&gt;</span> About</h2>
-      <p class="about-text">
-        <span class="about-strong">
-          Built to learn 📚 | Built to grow 🌱
-        </span><br>
-        <span class="about-light">
-          Turning curiosity into usable code, one commit at a time.
-        </span>
-      </p>
+    <section class="hero">
+      <div class="hero-content">
+        <p class="tag">&gt; system_ready<span class="cursor">_</span></p>
+        <h1>Hi, I'm <span class="gradient-text">SCAZP!</span></h1>
+        <p class="subtitle">Aspiring Developer <span class="dot">·</span> Tech Enthusiast</p>
+      </div>
     </section>
 
-    <section class="card-section">
-      <h2><span class="icon">⚡</span> Skills</h2>
-      <ul class="skills">
-        <li>HTML & CSS</li>
-        <li>JavaScript</li>
-        <li>Google Apps Script</li>
-        <li>UI Optimization</li>
-      </ul>
-    </section>
+    <div class="content-wrapper">
+      <section class="card-section">
+        <h2><span class="icon">&lt;/&gt;</span> About</h2>
+        <p class="about-text">
+          <span class="about-strong">Built to learn 📚 | Built to grow 🌱</span>
+          <span class="about-light">Turning curiosity into usable code, one commit at a time.</span>
+        </p>
+      </section>
 
-    <section class="card-section">
-      <h2><span class="icon">✉️</span> Reach Out</h2>
-      <p class="contact-box">
-        For inquiries, please reply directly to this email:
-        <a href="mailto:ceo@scazp.com" class="email">ceo@scazp.com</a>
-      </p>
-    </section>
+      <section class="card-section">
+        <h2><span class="icon">⚡</span> Skills</h2>
+        <ul class="skills">
+          <li>HTML & CSS</li>
+          <li>JavaScript</li>
+          <li>Google Apps Script</li>
+          <li>UI Optimization</li>
+        </ul>
+      </section>
+
+      <section class="card-section">
+        <h2><span class="icon">✉️</span> Reach Out</h2>
+        <div class="contact-box">
+          <p>For inquiries, please reply directly to this email:</p>
+          <a href="mailto:ceo@scazp.com" class="email">ceo@scazp.com</a>
+        </div>
+      </section>
+    </div>
   </main>
 
   <footer>
