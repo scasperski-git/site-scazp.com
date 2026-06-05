@@ -150,6 +150,25 @@ body {
     color: #ef4444 !important;
 }
 
+.paid-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 12px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    transition: all 0.3s ease;
+}
+.paid-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+}
+
 /* ===== MAIN CONTENT ===== */
 .main-content {
     flex: 1;
@@ -765,7 +784,7 @@ async function checkLock(){
             return;
         }
 
-        if(data.status==="LOCKED"){
+        if(data.status === "LOCK" || data.status === "PAID"){
             const formattedDate=formatDate(data.valid);
             const created=formatDateTime(data.created);
             const amount = "RM " + Number(data.amount || 0).toLocaleString("en-MY",{
@@ -778,12 +797,19 @@ async function checkLock(){
             today.setHours(0,0,0,0);
             promiseDate.setHours(0,0,0,0);
 
-            let statusText="LOCKED";
-            let statusColor="#10b981"; 
+            let isPaid = (data.status === "PAID");
+            let statusText = isPaid ? "ALREADY PAID" : "LOCKED";
+            let statusColor = isPaid ? "#10b981" : "#f59e0b"; // Hijau jika PAID, Oren jika LOCK
 
-            if(today>promiseDate){
-                statusText="EXPIRED";
-                statusColor="#ef4444";
+            if(!isPaid && today > promiseDate){
+                statusText = "EXPIRED";
+                statusColor = "#ef4444";
+            }
+
+            // Butang "Tick PAID" hanya keluar jika masih "LOCK"
+            let actionButton = "";
+            if(data.status === "LOCK") {
+                actionButton = `<button class='paid-btn' onclick="markAsPaid('${data.acc_no}')"><i class='fa-solid fa-check-circle'></i> Mark as PAID</button>`;
             }
 
             result.innerHTML=
@@ -800,17 +826,52 @@ async function checkLock(){
             "</div>"+
             "<div class='label'>PAYMENT CATEGORY</div><div class='value'>"+(data.category || "-")+"</div><br>"+
             "<div class='label'>REMARKS</div><div class='remark'>"+(data.remarks || "-")+"</div>"+
-            "<div class='audit-note'><i class='fa-solid fa-circle-info' style='margin-right: 5px; color: #3b82f6;'></i> <b>Branch Notice:</b> This account is currently locked by the assigned DCA. Please proceed to collect the payment from the customer as per the stated Lock Amount and Payment Category.</div>"+
+            actionButton + // Masukkan butang di sini
             "</div>";
         } else {
             result.innerHTML= "<div class='no-lock'>NO LOCK FOUND</div>";
         }
+        
     }catch(err){
         result.innerHTML= "<div class='no-lock'>SYSTEM ERROR. TRY AGAIN.</div>";
     }
 
     checkBtn.disabled=false;
     isLoading=false;
+}
+
+    async function markAsPaid(acc) {
+    if(!confirm("Are you sure you want to mark Account " + acc + " as PAID?")) return;
+
+    checkBtn.disabled = true;
+    result.innerHTML = "<div class='loading'>Updating to PAID...<div class='spinner'></div></div>";
+
+    try {
+        const formData = new URLSearchParams({
+            action: "mark_paid",
+            acc_no: acc,
+            token: token,
+            api_key: "SCZP_SECURE_2026"
+        });
+
+        const res = await fetch(api, {
+            method: "POST",
+            body: formData
+        });
+        const textResponse = await res.text();
+
+        if(textResponse === "PAID_SUCCESS") {
+            alert("Account " + acc + " successfully marked as PAID!");
+            input.value = acc; // Letak semula acc no
+            checkLock(); // Refresh paparan secara automatik
+        } else {
+            alert("Failed to mark as PAID. Please try again.");
+            checkLock();
+        }
+    } catch (err) {
+        alert("System error. Check your connection.");
+        checkBtn.disabled = false;
+    }
 }
 
 function newSearch(){
