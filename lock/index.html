@@ -1482,69 +1482,50 @@ function applyFilter(){
 }
 
 function exportToExcel() {
-
     if(filteredData.length === 0) {
-
         alert("Tiada data untuk diexport!");
-
         return;
-
     }
 
-
-
-    let csvContent = "data:text/csv;charset=utf-8,";
-
+    // Tambah \uFEFF (Byte Order Mark) supaya Excel baca format UTF-8 dengan betul
+    let csvContent = "\uFEFF"; 
     // Header Excel
-
-    csvContent += "ACC NO,BRANCH,AMOUNT,STATUS,PTP DATE,REMARKS,CREATED DATE\n";
-
-
+    csvContent += "ACC NO,BRANCH,AMOUNT,STATUS,PTP DATE,REMARKS,CREATED DATE\r\n";
 
     filteredData.forEach(function(row) {
-
         let amt = Number(row.amount || 0).toFixed(2);
-
         let ptp = formatDate(row.promise);
-
         let created = formatDate(row.created);
-
         
-
         // Gantikan koma dalam remark supaya Excel tak keliru column
-
         let safeRemark = (row.remarks || "").replace(/,/g, " "); 
-
         
+        // PENYELESAIAN 0 HILANG:
+        // Balut acc_no dengan ="" supaya Excel terjemahkannya sebagai Teks
+        let safeAccNo = `="${row.acc_no}"`; 
 
-        let dataString = `${row.acc_no},${row.branch},${amt},${row.status},${ptp},"${safeRemark}",${created}`;
-
+        let dataString = `${safeAccNo},${row.branch},${amt},${row.status},${ptp},"${safeRemark}",${created}`;
         csvContent += dataString + "\r\n";
-
     });
 
-
-
-    var encodedUri = encodeURI(csvContent);
-
-    var link = document.createElement("a");
-
-    link.setAttribute("href", encodedUri);
-
+    // PENYELESAIAN EXPORT: Guna Blob supaya download lebih stabil dan tidak terpotong
+    let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    let link = document.createElement("a");
     
-
-    // Nama fail Excel akan tunjuk tarikh dan jenis tab
-
+    // Cipta URL untuk blob tersebut
+    let url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    
+    // Nama fail Excel
     let fileName = `MyLocks_${currentViewStatus}_${new Date().toISOString().slice(0,10)}.csv`;
-
     link.setAttribute("download", fileName);
-
+    
     document.body.appendChild(link);
-
     link.click();
-
+    
+    // Bersihkan DOM selepas download
     document.body.removeChild(link);
-
+    URL.revokeObjectURL(url);
 }
     
 function resetFilter(){
