@@ -1488,7 +1488,6 @@ function exportToExcel() {
     }
 
     let csvContent = "data:text/csv;charset=utf-8,";
-    // Header Excel
     csvContent += "ACC NO,BRANCH,AMOUNT,STATUS,PTP DATE,REMARKS,CREATED DATE\n";
 
     filteredData.forEach(function(row) {
@@ -1496,19 +1495,19 @@ function exportToExcel() {
         let ptp = formatDate(row.promise);
         let created = formatDate(row.created);
         
-        // Gantikan koma dalam remark supaya Excel tak keliru column
         let safeRemark = (row.remarks || "").replace(/,/g, " "); 
-        let safeAccNo = "'" + row.acc_no;
         
-        let dataString = `${row.acc_no},${row.branch},${amt},${row.status},${ptp},"${safeRemark}",${created}`;
+        // PENTING: Gunakan variable 'safeAccNo' di sini
+        let safeAccNo = "'" + row.acc_no; 
+        
+        // Pastikan 'safeAccNo' digunakan, BUKAN 'row.acc_no'
+        let dataString = `${safeAccNo},${row.branch},${amt},${row.status},${ptp},"${safeRemark}",${created}`;
         csvContent += dataString + "\r\n";
     });
 
     var encodedUri = encodeURI(csvContent);
     var link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    
-    // Nama fail Excel akan tunjuk tarikh dan jenis tab
     let fileName = `MyLocks_${currentViewStatus}_${new Date().toISOString().slice(0,10)}.csv`;
     link.setAttribute("download", fileName);
     document.body.appendChild(link);
