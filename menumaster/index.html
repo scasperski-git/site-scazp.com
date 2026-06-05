@@ -557,6 +557,11 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
                         </div>
 
                         <div class="stat-box">
+                            <div class="stat-label">Filtered Paid</div> <!-- KOTAK BARU -->
+                            <div id="dashPaid" class="stat-number" style="color:#10b981;">0</div>
+                        </div>
+
+                        <div class="stat-box">
                             <div class="stat-label">Filtered Amount</div>
                             <div id="dashAmount" class="stat-number amount">RM0</div>
                         </div>
@@ -573,6 +578,7 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
                     <th>ACC NO</th>
                     <th>BRANCH</th>
                     <th>AMOUNT</th>
+                    <th>STATUS</th>
                     <th>PTP DATE</th>
                     <th>REMARKS</th>
                 </tr>
@@ -764,12 +770,17 @@ function renderTable() {
                </div>`
             : `<div style="max-width: 200px; word-break: break-word;">${safeRemark}</div>`;
 
+        let statusBadge = d.status === "PAID" 
+            ? `<span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span>`
+            : `<span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span>`;
+
         html += `
         <tr>
             <td>${d.dca || "-"}</td>
             <td style="font-weight: 600;">${d.acc_no || "-"}</td>
             <td>${d.branch || "-"}</td>
             <td style="text-align: center; font-weight: 600; color: #10b981;">${amount}</td>
+            <td>${statusBadge}</td>
             <td style="${dateColor}">${dateStr}</td>
             <td>${remarkHtml}</td>
         </tr>`;
@@ -837,6 +848,7 @@ function loadDashboard(){
 
         // Update Dynamic Summary Counters
         document.getElementById("dashTotal").innerText=data.total || 0;
+        document.getElementById("dashPaid").innerText = data.totalPaid || 0;
         document.getElementById("dashAmount").innerText =
         "RM "+Number(data.amount || 0).toLocaleString("en-MY",{
             minimumFractionDigits:2, maximumFractionDigits:2
