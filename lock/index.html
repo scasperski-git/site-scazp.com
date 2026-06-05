@@ -1072,16 +1072,21 @@ remarkBox.addEventListener("input",function(){
 function loadUserSummary(){
     document.getElementById("userSummary").innerText = "Today: loading...";
 
-    fetch(api+"?action=dashboard&token="+token+"&dca="+user+"&api_key=" + API_KEY)
+    // 1. Tetapkan tarikh hari ini untuk filter Today
+    let d = new Date();
+    let today = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0');
+    let timestamp = new Date().getTime(); // Anti-cache
+
+    // 2. Tambahkan &start, &end dan &t di dalam URL
+    fetch(api+"?action=dashboard&token="+token+"&dca="+user+"&start="+today+"&end="+today+"&api_key=" + API_KEY + "&t=" + timestamp)
     .then(r=>r.json())
     .then(data=>{
         var total = data.total || 0;
-        var paid = data.totalPaid || 0; // <-- Tangkap jumlah PAID
+        var paid = data.totalPaid || 0; 
         var amount = Number(data.amount || 0).toLocaleString("en-MY",{
             minimumFractionDigits:2, maximumFractionDigits:2
         });
         
-        // PAPARKAN BERAPA LOCK & BERAPA PAID
         document.getElementById("userSummary").innerHTML =
         '<i class="fa fa-chart-line"></i> Today: '+total+' Locks | '+paid+' Paid | RM '+amount;
     })
@@ -1338,15 +1343,16 @@ async function viewMyLocks(){
     document.getElementById("prevBtn").disabled = true;
     document.getElementById("nextBtn").disabled = true;
 
-    try{
-        const res = await fetch(api+"?action=mylocks&token="+token+"&api_key=" + API_KEY);
+try{
+        let timestamp = new Date().getTime(); // Anti-cache ditambah
+        const res = await fetch(api+"?action=mylocks&token="+token+"&api_key=" + API_KEY + "&t=" + timestamp);
         const data = await res.json();
 
-if(data.status === "UNAUTHORIZED"){
+        if(data.status === "UNAUTHORIZED"){
             if(data.reason === "SESSION_REPLACED") showSessionPopup("DEVICE");
             else showSessionPopup("EXPIRED");
             return;
-        } else if(data.status){
+        } else if(data.status === "ACCESS_DENIED"){
             document.getElementById("lockTable").innerHTML =
             "<tr><td colspan='6' style='text-align:center;padding:20px'>Access Denied</td></tr>";
             return;
