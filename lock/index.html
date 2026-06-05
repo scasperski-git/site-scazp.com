@@ -1472,7 +1472,10 @@ function applyFilter(){
         let status = (d.status || "").toString().toUpperCase();
         
         let matchAcc = (!acc || accNo.includes(acc));
-        let matchStatus = (status === currentViewStatus);
+        
+        // JIKA ADA CARIAN: Abaikan sekatan tab (cari semua status LOCK & PAID)
+        // JIKA TIADA CARIAN: Ikut tab semasa (LOCK atau PAID)
+        let matchStatus = acc ? true : (status === currentViewStatus);
         
         return matchAcc && matchStatus;
     });
