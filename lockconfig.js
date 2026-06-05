@@ -1,2 +1,2 @@
 const API_KEY = "SCZP_SECURE_2026";
-const API_URL="https://script.google.com/macros/s/AKfycbwjA7tKJt4E0Ps-GEMBGN3r9uIECsSBTFvdOo8xDsS4EByXqwokk5odnbMY67eb45Pe/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbxXcE-2GrXTxHZzqE1yocxzEN-_YBfBEkTlTozrk0A7zuSiHe_AcooipxYzfO3UKiM0/exec";
