@@ -858,6 +858,7 @@ th:nth-child(4), td:nth-child(4) {
                                 <th>ACC NO</th>
                                 <th>BRANCH</th>
                                 <th>AMOUNT</th>
+                                <th>STATUS</th>
                                 <th>PTP DATE</th>
                                 <th>REMARK</th>
                             </tr>
@@ -1075,12 +1076,14 @@ function loadUserSummary(){
     .then(r=>r.json())
     .then(data=>{
         var total = data.total || 0;
+        var paid = data.totalPaid || 0; // <-- Tangkap jumlah PAID
         var amount = Number(data.amount || 0).toLocaleString("en-MY",{
-            minimumFractionDigits:2,
-            maximumFractionDigits:2
+            minimumFractionDigits:2, maximumFractionDigits:2
         });
+        
+        // PAPARKAN BERAPA LOCK & BERAPA PAID
         document.getElementById("userSummary").innerHTML =
-        '<i class="fa fa-chart-line"></i> Today: '+total+' Locks | RM '+amount;
+        '<i class="fa fa-chart-line"></i> Today: '+total+' Locks | '+paid+' Paid | RM '+amount;
     })
     .catch(()=>{
         document.getElementById("userSummary").innerText = "Today: - | RM -";
@@ -1328,7 +1331,7 @@ async function viewMyLocks(){
 
     // SHOW LOADING STATE IN TABLE ONLY
     document.getElementById("lockTable").innerHTML = 
-    "<tr><td colspan='5' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records...</td></tr>";
+    "<tr><td colspan='6' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records...</td></tr>";
 
     // RESET PAGINATION INFO WHILE LOADING
     document.getElementById("pageInfo").innerText = "-";
@@ -1345,7 +1348,7 @@ if(data.status === "UNAUTHORIZED"){
             return;
         } else if(data.status){
             document.getElementById("lockTable").innerHTML =
-            "<tr><td colspan='5' style='text-align:center;padding:20px'>Access Denied</td></tr>";
+            "<tr><td colspan='6' style='text-align:center;padding:20px'>Access Denied</td></tr>";
             return;
         }
 
@@ -1357,7 +1360,7 @@ if(data.status === "UNAUTHORIZED"){
 
     }catch(e){
         document.getElementById("lockTable").innerHTML =
-        "<tr><td colspan='5' style='text-align:center;padding:20px'>Error loading data.</td></tr>";
+        "<tr><td colspan='6' style='text-align:center;padding:20px'>Error loading data.</td></tr>";
     }
 }
 
@@ -1382,13 +1385,22 @@ function renderTable(){
         let remark = d.remarks || "-";
         let shortRemark = remark.length > 40 ? remark.substring(0,40)+"..." : remark;
 
+        // Buat design badge untuk status
+    let statusBadge = d.status === "PAID" 
+        ? `<span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700; letter-spacing:0.5px;">PAID</span>`
+        : `<span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700; letter-spacing:0.5px;">LOCK</span>`;
+
+    // Pastikan background merah OVERDUE hanya untuk akaun yang masih LOCK
+    let isRowOverdue = (isOverdue && d.status !== "PAID");
+
         html += `
-        <tr style="${isOverdue ? 'background:#fef2f2;' : ''}">
-        <td>${d.acc_no}</td>
-        <td>${d.branch}</td>
-        <td>${amount}</td>
-        <td style="${isOverdue ? 'color:#ef4444;font-weight:600;' : ''}">
-        ${formatDate(d.promise)}
+    <tr style="${isRowOverdue ? 'background:#fef2f2;' : ''}">
+    <td>${d.acc_no}</td>
+    <td>${d.branch}</td>
+    <td>${amount}</td>
+    <td>${statusBadge}</td> <!-- MASUKKAN BADGE DI SINI -->
+    <td style="${isRowOverdue ? 'color:#ef4444;font-weight:600;' : ''}">
+    ${formatDate(d.promise)}
         </td>
         <td onclick="toggleRemark(this)" data-full="${remark}" data-short="${shortRemark}" style="cursor:pointer; max-width: 200px; word-break: break-word;">
 
@@ -1402,7 +1414,7 @@ function renderTable(){
     });
 
     document.getElementById("lockTable").innerHTML = html || 
-    "<tr><td colspan='5' style='text-align:center;padding:40px;color:#94a3b8;'><i class='fa fa-folder-open' style='font-size:28px;margin-bottom:12px;display:block;'></i>No Record Found</td></tr>";
+    "<tr><td colspan='6' style='text-align:center;padding:40px;color:#94a3b8;'><i class='fa fa-folder-open' style='font-size:28px;margin-bottom:12px;display:block;'></i>No Record Found</td></tr>";
 
     let totalPage = Math.ceil(filteredData.length / pageSize) || 1;
 
