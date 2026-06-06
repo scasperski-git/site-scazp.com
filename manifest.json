@@ -3,6 +3,7 @@
   "short_name": "LockPortal",
   "description": "Secure Lock Management Portal",
   "start_url": "/checklock-login/",
+  "scope": "/", 
   "display": "standalone",
   "background_color": "#1e293b",
   "theme_color": "#1e293b",
