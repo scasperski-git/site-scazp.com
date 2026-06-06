@@ -729,6 +729,34 @@ th:nth-child(4), td:nth-child(4) {
     }
 }
 
+    /* ===== BUTTON EXPORT EXCEL ===== */
+.btn-export {
+    background: #1e293b;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-export:hover {
+    background: #334155;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-export:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+    
 </style>
 </head>
 
@@ -845,7 +873,6 @@ th:nth-child(4), td:nth-child(4) {
                 <div class="tab-container">
                     <button id="tabActive" class="tab-btn active" onclick="switchView('LOCK')">Active Locks</button>
                     <button id="tabPaid" class="tab-btn" onclick="switchView('PAID')">Paid History</button>
-                    <button class="export-btn" onclick="exportToExcel()"><i class="fa fa-file-excel"></i> Export</button>
                 </div>
                 
                 <div class="filter-card">
@@ -857,6 +884,16 @@ th:nth-child(4), td:nth-child(4) {
                         </div>
                     </div>
                 </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 10px;">
+        <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
+            <i class="fa fa-list-check" style="color: #4f46e5; margin-right: 5px;"></i> My Records
+        </div>
+        
+        <button class="btn-export" onclick="exportToExcel()">
+            <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Excel
+        </button>
+    </div>
 
                 <div class="table-scroll">
                     <table style="min-width: 500px;">
