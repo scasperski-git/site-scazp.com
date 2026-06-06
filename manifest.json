@@ -2,7 +2,7 @@
   "name": "Lock Portal System",
   "short_name": "LockPortal",
   "description": "Secure Lock Management Portal",
-  "start_url": "/",
+  "start_url": "https://scazp.com/checklock-login/",
   "display": "standalone",
   "background_color": "#1e293b",
   "theme_color": "#1e293b",
