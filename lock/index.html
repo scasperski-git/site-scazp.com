@@ -1547,7 +1547,7 @@ function exportToExcel() {
     XLSX.utils.book_append_sheet(workbook, worksheet, "MyLocks");
 
     // 4. Namakan fail dan muat turun secara automatik
-    let fileName = `MyLocks_${currentViewStatus}_${new Date().toISOString().slice(0,10)}.xlsx`;
+    let fileName = `MyLocks_${user}_${currentViewStatus}_${new Date().toISOString().slice(0,10)}.xlsx`;
     XLSX.writeFile(workbook, fileName);
 }
     
