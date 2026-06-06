@@ -278,6 +278,32 @@ body.list-mode .container {
     color: #1e293b;
 }
 
+/* ===== TAB STYLES ===== */
+.tab-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+    background: #4f46e5;
+    color: white;
+    border-color: #4f46e5;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
 /* ===== TABLE STYLES (NEW) ===== */
 .filter-card {
     padding: 16px 20px;
@@ -581,15 +607,10 @@ th:nth-child(4), td:nth-child(4) {
             <div id="listSection" style="display:none;">
                 <div class="form-title" style="margin-bottom: 15px;">All Records</div>
 
-                <div class="filter-card">
-                    <div class="filter-input-group">
-                        <input type="text" id="filterAcc" placeholder="Search Account No" autocomplete="off" inputmode="numeric" maxlength="10">
-                        <div class="mini-actions">
-                            <button onclick="applyFilter()" class="mini-btn search"><i class="fa fa-search"></i> Search</button>
-                            <button onclick="resetFilter()" class="mini-btn clear"><i class="fa fa-xmark"></i> Clear</button>
-                        </div>
-                    </div>
-                </div>
+<div class="tab-container">
+    <button id="tabActive" class="tab-btn active" onclick="switchView('LOCK')">Active Locks</button>
+    <button id="tabPaid" class="tab-btn" onclick="switchView('PAID')">Paid History</button>
+</div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 10px;">
                     <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
@@ -809,6 +830,27 @@ let fullData = [];
 let filteredData = [];
 let currentPage = 1;
 const pageSize = 10;
+let currentViewStatus = "LOCK"; // Default paparan adalah LOCK
+
+function switchView(viewType) {
+    currentViewStatus = viewType;
+    
+    // Ubah warna butang aktif
+    document.getElementById("tabActive").classList.remove("active");
+    document.getElementById("tabPaid").classList.remove("active");
+    
+    if(viewType === "LOCK") document.getElementById("tabActive").classList.add("active");
+    if(viewType === "PAID") document.getElementById("tabPaid").classList.add("active");
+    
+    // Filter data mengikut status (LOCK atau PAID)
+    filteredData = fullData.filter(d => {
+        let status = (d.status || "").toString().toUpperCase();
+        return status === currentViewStatus;
+    });
+
+    currentPage = 1;
+    renderTable();
+}
 
 async function viewRecords(){
     document.getElementById("searchSection").style.display="none";
@@ -817,7 +859,7 @@ async function viewRecords(){
     updateNavState('navViewRecords');
 
     document.getElementById("lockTable").innerHTML = 
-    "<tr><td colspan='6' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records...</td></tr>";
+    "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records...</td></tr>";
 
     document.getElementById("pageInfo").innerText = "-";
     document.getElementById("prevBtn").disabled = true;
@@ -825,8 +867,6 @@ async function viewRecords(){
 
     try{
         let timestamp = new Date().getTime(); 
-        
-        // Panggil action=dashboard dan dca=ALL tanpa perlu set tarikh
         const res = await fetch(api+"?action=dashboard&token="+token+"&dca=ALL&api_key=SCZP_SECURE_2026&t=" + timestamp);
         const json = await res.json(); 
 
@@ -835,22 +875,21 @@ async function viewRecords(){
             else showSessionPopup("EXPIRED");
             return;
         } else if(json.status === "ACCESS_DENIED"){
-            document.getElementById("lockTable").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:20px'>Access Denied</td></tr>";
+            document.getElementById("lockTable").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px'>Access Denied</td></tr>";
             return;
         }
 
-        // Susun data dari yang terbaru ke lama
         fullData = (json.data || []).sort((a,b)=> new Date(b.created) - new Date(a.created));
-        filteredData = fullData;
-        currentPage = 1;
-
-        renderTable();
+        
+        // Panggil logik tab di sini untuk filter awal
+        switchView("LOCK");
 
     }catch(e){
-        document.getElementById("lockTable").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:20px'>Error loading data.</td></tr>";
+        document.getElementById("lockTable").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px'>Error loading data.</td></tr>";
     }
 }
 
+// Fungsi baca remark penuh
 function toggleRemark(el){
     let full = el.getAttribute("data-full");
     let short = el.getAttribute("data-short");
@@ -885,7 +924,6 @@ function renderTable() {
         let dateColor = isExpired ? "color: #ef4444; font-weight: 700;" : "";
         let rowBg = isExpired ? "background: #fef2f2;" : "";
         
-        // Parsing Date yang kebal untuk masalah T dan Z
         let dateStr = isNaN(pDate) ? d.promise : pDate.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
 
         let remark = d.remarks || "-";
@@ -910,14 +948,15 @@ function renderTable() {
             <td>${d.dca || "-"}</td>
             <td style="font-weight: 600;">${d.acc_no || "-"}</td>
             <td>${d.branch || "-"}</td>
-            <td style="text-align: center; font-weight: 600; color: #10b981;">${amount}</td>
+            <!-- WARNA AMOUNT DITUKAR KEPADA HITAM (#0f172a) & BOLD (700) -->
+            <td style="text-align: center; font-weight: 700; color: #0f172a;">${amount}</td>
             <td>${statusBadge}</td>
             <td style="${dateColor}">${dateStr}</td>
             <td>${remarkHtml}</td>
         </tr>`;
     });
 
-    document.getElementById("lockTable").innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding: 40px; color:#94a3b8;">No Records Found</td></tr>';
+    document.getElementById("lockTable").innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding: 40px; color:#94a3b8;"><i class="fa fa-folder-open" style="font-size:28px;margin-bottom:12px;display:block;"></i>No Records Found</td></tr>';
 
     let totalPage = Math.ceil(filteredData.length / pageSize) || 1;
     document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${totalPage}`;
@@ -929,31 +968,8 @@ function renderTable() {
 function nextPage(){ if(currentPage * pageSize < filteredData.length){ currentPage++; renderTable(); } }
 function prevPage(){ if(currentPage > 1){ currentPage--; renderTable(); } }
 
-function applyFilter(){
-    let acc = document.getElementById("filterAcc").value.toLowerCase();
-    filteredData = fullData.filter(d=>{
-        let accNo = (d.acc_no || "").toString().toLowerCase();
-        return (!acc || accNo.includes(acc));
-    });
-    currentPage = 1;
-    renderTable();
-}
-
-function resetFilter(){
-    document.getElementById("filterAcc").value="";
-    filteredData = fullData;
-    currentPage = 1;
-    renderTable();
-}
-
-document.getElementById("filterAcc").addEventListener("keypress",function(e){ if(e.key === "Enter"){ applyFilter(); } });
-document.getElementById("filterAcc").addEventListener("input",function(){ this.value=this.value.replace(/[^0-9]/g,''); });
-
 function exportToExcel() {
-    if(filteredData.length === 0) {
-        alert("Tiada data untuk diexport!");
-        return;
-    }
+    if(filteredData.length === 0) { alert("Tiada data untuk diexport!"); return; }
 
     let excelData = filteredData.map(row => {
         let pDate = new Date(row.promise);
@@ -961,37 +977,29 @@ function exportToExcel() {
 
         return {
             "DCA ID": row.dca || "-",
-            "ACC NO": row.acc_no || "-",
-            "BRANCH": row.branch || "-",
+            "ACC NO": row.acc_no, 
+            "BRANCH": row.branch,
             "AMOUNT (RM)": Number(row.amount || 0), 
-            "STATUS": row.status || "-",
-            "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate,
+            "STATUS": row.status,
+            "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate, 
             "REMARKS": row.remarks || "-",
             "CREATED TIME": isNaN(cDate.getTime()) ? row.created : cDate
         };
     });
 
     let worksheet = XLSX.utils.json_to_sheet(excelData, { cellDates: true });
-
     let range = XLSX.utils.decode_range(worksheet['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-        // Kolum F adalah PTP DATE (Indeks 5)
         let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 5});
-        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') {
-            worksheet[ptpCellRef].z = 'd-mmm-yyyy'; 
-        }
-
-        // Kolum H adalah CREATED TIME (Indeks 7)
+        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') { worksheet[ptpCellRef].z = 'd-mmm-yyyy'; }
         let createdCellRef = XLSX.utils.encode_cell({r: R, c: 7});
-        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') {
-            worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; 
-        }
+        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') { worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; }
     }
 
     let workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Check_Records");
-
-    let fileName = `CheckRecords_${user}_${new Date().toISOString().slice(0,10)}.xlsx`;
+    // TAMBAHAN: Nama fail membezakan LOCK dan PAID
+    let fileName = `CheckRecords_${user}_${currentViewStatus}_${new Date().toISOString().slice(0,10)}.xlsx`;
     XLSX.writeFile(workbook, fileName);
 }
 // Master Navigation
