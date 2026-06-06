@@ -490,6 +490,34 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     table th, table td { padding: 12px 10px; font-size: 11px; }
 }
 
+/* ===== BUTTON EXPORT EXCEL ===== */
+.btn-export {
+    background: #1e293b;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-export:hover {
+    background: #334155; /* Warna latar sedikit cerah bila di-hover */
+    transform: translateY(-2px); /* Efek butang terangkat sedikit */
+    box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4); /* Efek glow hijau emerald */
+}
+
+.btn-export:active {
+    transform: translateY(0); /* Efek butang ditekan ke bawah */
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
 </style>
 
 </head>
@@ -571,12 +599,12 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 
 <div id="masterTableContainer" style="display:none; margin-top: 20px;">
     
-    <!-- Bar Tajuk & Butang Export Baru -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
             <i class="fa fa-list-check" style="color: #4f46e5; margin-right: 5px;"></i> Filtered Records
         </div>
-        <button onclick="exportMasterExcel()" style="background: #1e293b; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; gap: 8px; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        
+        <button class="btn-export" onclick="exportMasterExcel()">
             <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Excel
         </button>
     </div>
