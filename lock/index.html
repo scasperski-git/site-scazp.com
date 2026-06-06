@@ -1529,15 +1529,21 @@ function exportToExcel() {
     }
 
     // 1. Sediakan data dan susun nama lajur (column)
-    let excelData = filteredData.map(row => ({
-        "ACC NO": row.acc_no, // SheetJS kekalkan '0' di depan asalkan ia string
-        "BRANCH": row.branch,
-        "AMOUNT": Number(row.amount || 0), // Excel akan baca ini sebagai nombor sebenar
-        "STATUS": row.status,
-        "PTP DATE": formatDate(row.promise),
-        "REMARKS": row.remarks || "",
-        "CREATED DATE": formatDate(row.created)
-    }));
+    let excelData = filteredData.map(row => {
+        // Format Created Time supaya ada waktu dan minit macam di Master
+        let cDate = new Date(row.created);
+        let createdStr = isNaN(cDate) ? row.created : cDate.toLocaleDateString('en-GB', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'});
+
+        return {
+            "ACC NO": row.acc_no, 
+            "BRANCH": row.branch,
+            "AMOUNT": Number(row.amount || 0), 
+            "STATUS": row.status,
+            "PTP DATE": formatDate(row.promise), // PTP kekal tarikh sahaja
+            "REMARKS": row.remarks || "",
+            "CREATED TIME": createdStr // <--- Tukar dari CREATED DATE ke CREATED TIME
+        };
+    });
 
     // 2. Tukar format JSON tadi kepada format 'Worksheet' Excel
     let worksheet = XLSX.utils.json_to_sheet(excelData);
