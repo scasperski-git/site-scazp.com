@@ -381,6 +381,35 @@ AUTH OVERLAY
 
 <script>
 
+// =========================================
+// CUSTOM PWA INSTALL BUTTON LOGIC
+// =========================================
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Halang Chrome dari tunjuk prompt automatik yang kadang-kadang lambat
+    e.preventDefault();
+    // Simpan event supaya kita boleh trigger bila-bila masa
+    deferredPrompt = e;
+    
+    // Tunjukkan butang install yang anda boleh buat di HTML (contoh butang ID: installAppBtn)
+    const installBtn = document.getElementById('installAppBtn');
+    if(installBtn) {
+        installBtn.style.display = 'block';
+        
+        installBtn.addEventListener('click', async () => {
+            // Tunjuk prompt install
+            deferredPrompt.prompt();
+            // Tunggu respon pengguna (Accept / Dismiss)
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                installBtn.style.display = 'none';
+            }
+            deferredPrompt = null;
+        });
+    }
+});
+
 const api = API_URL;
 
 document.getElementById("user").focus();
