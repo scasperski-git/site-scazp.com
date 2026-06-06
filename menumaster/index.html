@@ -949,19 +949,14 @@ function logout(){
 // EXPORT MASTER TO EXCEL
 // =====================================
 function exportMasterExcel() {
-    // Pastikan ada data sebelum export
     if (!masterDataList || masterDataList.length === 0) {
         alert("Tiada rekod untuk diexport berdasarkan filter semasa.");
         return;
     }
 
-    // Susun format data untuk dipaparkan dalam Excel
     let excelData = masterDataList.map(row => {
         let pDate = new Date(row.promise);
-        let dateStr = isNaN(pDate) ? row.promise : pDate.toLocaleDateString('en-GB', {day: '2-digit', month: 'short', year: 'numeric'});
-        
         let cDate = new Date(row.created);
-        let createdStr = isNaN(cDate) ? row.created : cDate.toLocaleDateString('en-GB', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'});
 
         return {
             "DCA ID": row.dca || "-",
@@ -969,18 +964,32 @@ function exportMasterExcel() {
             "BRANCH": row.branch || "-",
             "AMOUNT (RM)": Number(row.amount || 0), 
             "STATUS": row.status || "-",
-            "PTP DATE": dateStr,
+            "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate,
             "REMARKS": row.remarks || "-",
-            "CREATED TIME": createdStr
+            "CREATED TIME": isNaN(cDate.getTime()) ? row.created : cDate
         };
     });
 
-    // Proses ke SheetJS
-    let worksheet = XLSX.utils.json_to_sheet(excelData);
+    let worksheet = XLSX.utils.json_to_sheet(excelData, { cellDates: true });
+
+    let range = XLSX.utils.decode_range(worksheet['!ref']);
+    for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+        // Kolum F adalah PTP DATE (Indeks 5)
+        let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 5});
+        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') {
+            worksheet[ptpCellRef].z = 'd-mmm-yyyy'; // Hasil: 6-Jun-2026
+        }
+
+        // Kolum H adalah CREATED TIME (Indeks 7)
+        let createdCellRef = XLSX.utils.encode_cell({r: R, c: 7});
+        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') {
+            worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; // Hasil: 6-Jun-2026 03:30 PM
+        }
+    }
+
     let workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Master_Records");
 
-    // Tetapkan nama fail dinamik berdasarkan filter DCA dan tarikh hari ini
     let dcaFilterName = document.getElementById("dcaFilter").options[document.getElementById("dcaFilter").selectedIndex].text.replace(/\s+/g, '_');
     let todayDate = new Date().toISOString().slice(0,10);
     let fileName = `MasterReport_${user}_${dcaFilterName}_${todayDate}.xlsx`;
