@@ -1528,31 +1528,47 @@ function exportToExcel() {
         return;
     }
 
-    // 1. Sediakan data dan susun nama lajur (column)
+    // 1. Sediakan data dengan menukar rentetan (string) tarikh kepada Objek Date sebenar untuk Excel
     let excelData = filteredData.map(row => {
-        // Format Created Time supaya ada waktu dan minit macam di Master
+        let pDate = new Date(row.promise);
         let cDate = new Date(row.created);
-        let createdStr = isNaN(cDate) ? row.created : cDate.toLocaleDateString('en-GB', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'});
 
         return {
             "ACC NO": row.acc_no, 
             "BRANCH": row.branch,
             "AMOUNT": Number(row.amount || 0), 
             "STATUS": row.status,
-            "PTP DATE": formatDate(row.promise), // PTP kekal tarikh sahaja
+            "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate, 
             "REMARKS": row.remarks || "",
-            "CREATED TIME": createdStr // <--- Tukar dari CREATED DATE ke CREATED TIME
+            "CREATED TIME": isNaN(cDate.getTime()) ? row.created : cDate
         };
     });
 
-    // 2. Tukar format JSON tadi kepada format 'Worksheet' Excel
+    // 2. Tukar format JSON kepada Worksheet
     let worksheet = XLSX.utils.json_to_sheet(excelData);
 
-    // 3. Cipta 'Workbook' (Fail Excel) baru dan masukkan 'Worksheet' tadi
+    // 3. TAMBAHAN UTAMA: Paksa Excel gunakan format format paparan dd/mm/yyyy supaya sorting tak berterabur
+    // Ambil julat (range) data dalam sheet
+    let range = XLSX.utils.decode_range(worksheet['!ref']);
+    for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+        // Kolum E adalah PTP DATE (Indeks 4)
+        let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 4});
+        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') {
+            worksheet[ptpCellRef].z = 'dd/mm/yyyy'; 
+        }
+
+        // Kolum G adalah CREATED TIME (Indeks 6)
+        let createdCellRef = XLSX.utils.encode_cell({r: R, c: 6});
+        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') {
+            worksheet[createdCellRef].z = 'dd/mm/yyyy hh:mm'; 
+        }
+    }
+
+    // 4. Cipta Workbook baru dan masukkan Worksheet tadi
     let workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "MyLocks");
 
-    // 4. Namakan fail dan muat turun secara automatik
+    // 5. Namakan fail dan muat turun secara automatik
     let fileName = `MyLocks_${user}_${currentViewStatus}_${new Date().toISOString().slice(0,10)}.xlsx`;
     XLSX.writeFile(workbook, fileName);
 }
