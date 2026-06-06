@@ -518,6 +518,46 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
 }
 
+/* ===== TAB STYLES ===== */
+.tab-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+    background: #f8fafc;
+    color: #4f46e5;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+.tab-btn.active {
+    background: #4f46e5;
+    color: white;
+    border-color: #4f46e5;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.tab-btn.active:hover {
+    background: #4338ca;
+    color: white;
+    transform: translateY(-2px);
+}
+
 </style>
 
 </head>
@@ -598,6 +638,13 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
                     <div id="dashStatus" class="dash-status"></div>
 
 <div id="masterTableContainer" style="display:none; margin-top: 20px;">
+
+    <!-- KOD TAB BARU -->
+    <div class="tab-container">
+        <button id="tabActive" class="tab-btn" onclick="switchView('LOCK')">Active Locks</button>
+        <button id="tabPaid" class="tab-btn" onclick="switchView('PAID')">Paid History</button>
+        <button id="tabAll" class="tab-btn active" onclick="switchView('ALL')">View All</button>
+    </div>
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
@@ -749,11 +796,36 @@ function loadSummary(){
 // =====================================
 // MASTER TABLE & PAGINATION LOGIC
 // =====================================
+// =====================================
+// MASTER TABLE & PAGINATION LOGIC
+// =====================================
 let masterDataList = []; 
+let filteredMasterData = []; // Variabel baru untuk data tab
+let currentViewStatus = "ALL"; // Default tab untuk Master
 let currentPage = 1;
 const pageSize = 10; 
 
-// Fungsi untuk kembangkan/tutup remark apabila ditekan
+function switchView(viewType) {
+    currentViewStatus = viewType;
+    
+    document.getElementById("tabActive").classList.remove("active");
+    document.getElementById("tabPaid").classList.remove("active");
+    document.getElementById("tabAll").classList.remove("active");
+    
+    if(viewType === "LOCK") document.getElementById("tabActive").classList.add("active");
+    if(viewType === "PAID") document.getElementById("tabPaid").classList.add("active");
+    if(viewType === "ALL") document.getElementById("tabAll").classList.add("active");
+    
+    filteredMasterData = masterDataList.filter(d => {
+        if(currentViewStatus === "ALL") return true;
+        let status = (d.status || "").toString().toUpperCase();
+        return status === currentViewStatus;
+    });
+
+    currentPage = 1;
+    renderTable();
+}
+
 function toggleRemark(el){
     let full = el.getAttribute("data-full");
     let short = el.getAttribute("data-short");
@@ -772,10 +844,9 @@ function toggleRemark(el){
 function renderTable() {
     let start = (currentPage - 1) * pageSize;
     let end = start + pageSize;
-    let pageData = masterDataList.slice(start, end);
+    let pageData = filteredMasterData.slice(start, end);
     let html = "";
 
-    // Tetapkan masa hari ini ke 00:00:00 untuk perbandingan expired date yang tepat
     let today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -785,21 +856,16 @@ function renderTable() {
         let pDate = new Date(d.promise);
         pDate.setHours(0, 0, 0, 0);
         
-        // Logik tarikh expired (MERAH jika promise date lebih awal dari hari ini)
-        let isExpired = pDate < today;
+        let isExpired = pDate < today && d.status !== "PAID";
         let dateColor = isExpired ? "color: #ef4444; font-weight: 700;" : "";
+        let rowBg = isExpired ? "background: #fef2f2;" : "";
         
         let dateStr = isNaN(pDate) ? d.promise : pDate.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
 
         let remark = d.remarks || "-";
-        
-        // Elakkan petikan (quotes) dari merosakkan struktur HTML
         let safeRemark = remark.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-        
-        // Tetapkan had 40 huruf seperti di Lock Portal
         let shortRemark = remark.length > 40 ? safeRemark.substring(0, 40) + "..." : safeRemark;
 
-        // Logik remark boleh klik
         let remarkHtml = remark.length > 40
             ? `<div style="cursor: pointer; max-width: 200px; word-break: break-word;" onclick="toggleRemark(this)" data-full="${safeRemark}" data-short="${shortRemark}">
                  <div class="remark-text">${shortRemark}</div>
@@ -814,29 +880,28 @@ function renderTable() {
             : `<span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span>`;
 
         html += `
-        <tr>
+        <tr style="${rowBg}">
             <td>${d.dca || "-"}</td>
             <td style="font-weight: 600;">${d.acc_no || "-"}</td>
             <td>${d.branch || "-"}</td>
-            <td style="text-align: center; font-weight: 600; color: #10b981;">${amount}</td>
+            <td style="text-align: center; font-weight: 700; color: #0f172a;">${amount}</td>
             <td>${statusBadge}</td>
             <td style="${dateColor}">${dateStr}</td>
             <td>${remarkHtml}</td>
         </tr>`;
     });
 
-    document.getElementById("masterTableBody").innerHTML = html || '<tr><td colspan="6" style="text-align:center; padding: 20px;">No Records Found</td></tr>';
+    document.getElementById("masterTableBody").innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding: 40px; color:#94a3b8;"><i class="fa fa-folder-open" style="font-size:28px;margin-bottom:12px;display:block;"></i>No Records Found</td></tr>';
 
-    let totalPages = Math.ceil(masterDataList.length / pageSize) || 1;
+    let totalPages = Math.ceil(filteredMasterData.length / pageSize) || 1;
     document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${totalPages}`;
     
-    // Kawalan butang muka surat
     if(document.getElementById("prevBtn")) document.getElementById("prevBtn").disabled = currentPage === 1;
-    if(document.getElementById("nextBtn")) document.getElementById("nextBtn").disabled = currentPage === totalPages || masterDataList.length === 0;
+    if(document.getElementById("nextBtn")) document.getElementById("nextBtn").disabled = currentPage === totalPages || filteredMasterData.length === 0;
 }
 
 function nextPage() {
-    if (currentPage * pageSize < masterDataList.length) {
+    if (currentPage * pageSize < filteredMasterData.length) {
         currentPage++;
         renderTable();
     }
@@ -899,7 +964,7 @@ function loadDashboard(){
         
         status.innerText="";
         tableContainer.style.display="block"; // Show Table
-        renderTable();
+        switchView("ALL");
 
     })
     .catch(err=>{
@@ -949,12 +1014,12 @@ function logout(){
 // EXPORT MASTER TO EXCEL
 // =====================================
 function exportMasterExcel() {
-    if (!masterDataList || masterDataList.length === 0) {
+    if (!filteredMasterData || filteredMasterData.length === 0) {
         alert("Tiada rekod untuk diexport berdasarkan filter semasa.");
         return;
     }
 
-    let excelData = masterDataList.map(row => {
+    let excelData = filteredMasterData.map(row => {
         let pDate = new Date(row.promise);
         let cDate = new Date(row.created);
 
