@@ -1554,13 +1554,13 @@ function exportToExcel() {
         // Kolum E adalah PTP DATE (Indeks 4)
         let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 4});
         if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') {
-            worksheet[ptpCellRef].z = 'dd/mm/yyyy'; 
+            worksheet[ptpCellRef].z = 'dd-mmm-yyyy'; 
         }
 
         // Kolum G adalah CREATED TIME (Indeks 6)
         let createdCellRef = XLSX.utils.encode_cell({r: R, c: 6});
         if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') {
-            worksheet[createdCellRef].z = 'dd/mm/yyyy hh:mm'; 
+            worksheet[createdCellRef].z = 'dd-mmm-yyyy hh:mm'; 
         }
     }
 
