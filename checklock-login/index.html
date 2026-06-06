@@ -459,18 +459,12 @@ async function login(){
 
         if(data.status==="SUCCESS"){
 
-            // --- WEB & APP STORAGE SEPARATION ---
-            // Identify if opened via App (WebView/Kodular) or Standard Web Browser
-            let isApp = navigator.userAgent.includes("wv") || (navigator.userAgent.includes("Android") && navigator.userAgent.includes("Version"));
-            let storage = isApp ? localStorage : sessionStorage;
-
-            // Save data into the correct storage
-            storage.setItem("session_token", data.token);
-            storage.setItem("lock_user", data.user);
-            storage.setItem("lock_type", data.type);
-            storage.setItem("lock_role", data.role);
-            storage.setItem("lock_name", data.name);
-            // ------------------------------------
+// Paksa guna localStorage supaya sesi tak hilang bila app ditutup
+localStorage.setItem("session_token", data.token);
+localStorage.setItem("lock_user", data.user);
+localStorage.setItem("lock_type", data.type);
+localStorage.setItem("lock_role", data.role);
+localStorage.setItem("lock_name", data.name);
 
             if(data.type=="check"){
                 window.location="../check/";
