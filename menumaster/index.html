@@ -12,6 +12,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1e293b">
+<link rel="apple-touch-icon" href="/icon-192.png">
 
 <style>
 
@@ -1131,6 +1134,14 @@ setInterval(verifySessionWithServer, CHECK_INTERVAL);
 document.addEventListener("visibilitychange", () => {
     if (!document.hidden) verifySessionWithServer();
 });
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('Service Worker Berjaya Didaftar', reg))
+      .catch(err => console.log('Pendaftaran Service Worker Gagal', err));
+  });
+}
 </script>
 
 <div id="sessionPopup">
