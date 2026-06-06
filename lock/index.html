@@ -1544,7 +1544,7 @@ function exportToExcel() {
         };
     });
 
-    let worksheet = XLSX.utils.json_to_sheet(excelData);
+    let worksheet = XLSX.utils.json_to_sheet(excelData, { cellDates: true });
 
     let range = XLSX.utils.decode_range(worksheet['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
