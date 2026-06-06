@@ -279,6 +279,7 @@ body.list-mode .container {
 }
 
 /* ===== TAB STYLES ===== */
+/* ===== TAB STYLES ===== */
 .tab-container {
     display: flex;
     gap: 10px;
@@ -297,11 +298,27 @@ body.list-mode .container {
     transition: all 0.3s ease;
 }
 
+/* Efek bila mouse lalu di atas butang (Hover) */
+.tab-btn:hover {
+    background: #f8fafc;
+    color: #4f46e5; /* Teks bertukar biru */
+    border-color: #cbd5e1;
+    transform: translateY(-2px); /* Butang naik sikit */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
 .tab-btn.active {
     background: #4f46e5;
     color: white;
     border-color: #4f46e5;
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+/* Efek hover khusus untuk butang yang sedang aktif */
+.tab-btn.active:hover {
+    background: #4338ca;
+    color: white;
+    transform: translateY(-2px);
 }
 
 /* ===== TABLE STYLES (NEW) ===== */
@@ -610,6 +627,7 @@ th:nth-child(4), td:nth-child(4) {
 <div class="tab-container">
     <button id="tabActive" class="tab-btn active" onclick="switchView('LOCK')">Active Locks</button>
     <button id="tabPaid" class="tab-btn" onclick="switchView('PAID')">Paid History</button>
+    <button id="tabAll" class="tab-btn" onclick="switchView('ALL')">View All</button>
 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 10px;">
@@ -835,15 +853,20 @@ let currentViewStatus = "LOCK"; // Default paparan adalah LOCK
 function switchView(viewType) {
     currentViewStatus = viewType;
     
-    // Ubah warna butang aktif
+    // 1. Buang warna aktif dari semua butang
     document.getElementById("tabActive").classList.remove("active");
     document.getElementById("tabPaid").classList.remove("active");
+    document.getElementById("tabAll").classList.remove("active");
     
+    // 2. Beri warna aktif kepada butang yang ditekan
     if(viewType === "LOCK") document.getElementById("tabActive").classList.add("active");
     if(viewType === "PAID") document.getElementById("tabPaid").classList.add("active");
+    if(viewType === "ALL") document.getElementById("tabAll").classList.add("active");
     
-    // Filter data mengikut status (LOCK atau PAID)
+    // 3. Filter data mengikut status (LOCK, PAID, atau ALL)
     filteredData = fullData.filter(d => {
+        if(currentViewStatus === "ALL") return true; // Tunjuk semua data
+        
         let status = (d.status || "").toString().toUpperCase();
         return status === currentViewStatus;
     });
