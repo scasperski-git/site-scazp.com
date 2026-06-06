@@ -11,6 +11,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1e293b">
+<link rel="apple-touch-icon" href="/icon-192.png">
 
 <style>
 
@@ -513,6 +516,14 @@ window.addEventListener('DOMContentLoaded', (event) => {
         });
     }
 });
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('Service Worker Berjaya Didaftar', reg))
+      .catch(err => console.log('Pendaftaran Service Worker Gagal', err));
+  });
+}
     
 </script>
 
