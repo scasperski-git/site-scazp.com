@@ -983,7 +983,7 @@ function exportMasterExcel() {
     // Tetapkan nama fail dinamik berdasarkan filter DCA dan tarikh hari ini
     let dcaFilterName = document.getElementById("dcaFilter").options[document.getElementById("dcaFilter").selectedIndex].text.replace(/\s+/g, '_');
     let todayDate = new Date().toISOString().slice(0,10);
-    let fileName = `MasterReport_${dcaFilterName}_${todayDate}.xlsx`;
+    let fileName = `MasterReport_${user}_${dcaFilterName}_${todayDate}.xlsx`;
 
     XLSX.writeFile(workbook, fileName);
 }
