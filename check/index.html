@@ -824,20 +824,22 @@ async function viewRecords(){
 
     try{
         let timestamp = new Date().getTime(); 
-        // Menggunakan endpoint mylocks untuk mendapatkan senarai
-        const res = await fetch(api+"?action=mylocks&token="+token+"&api_key=SCZP_SECURE_2026&t=" + timestamp);
-        const data = await res.json();
+        
+        // Panggil action=dashboard dan dca=ALL tanpa perlu set tarikh
+        const res = await fetch(api+"?action=dashboard&token="+token+"&dca=ALL&api_key=SCZP_SECURE_2026&t=" + timestamp);
+        const json = await res.json(); 
 
-        if(data.status === "UNAUTHORIZED"){
-            if(data.reason === "SESSION_REPLACED") showSessionPopup("DEVICE");
+        if(json.status === "UNAUTHORIZED"){
+            if(json.reason === "SESSION_REPLACED") showSessionPopup("DEVICE");
             else showSessionPopup("EXPIRED");
             return;
-        } else if(data.status === "ACCESS_DENIED"){
+        } else if(json.status === "ACCESS_DENIED"){
             document.getElementById("lockTable").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:20px'>Access Denied</td></tr>";
             return;
         }
 
-        fullData = data.sort((a,b)=> new Date(b.created) - new Date(a.created));
+        // Susun data dari yang terbaru ke lama
+        fullData = (json.data || []).sort((a,b)=> new Date(b.created) - new Date(a.created));
         filteredData = fullData;
         currentPage = 1;
 
