@@ -356,7 +356,7 @@ table tr:last-child td { border-bottom: none; }
 table tr:hover td { background: #f8fafc; }
 
 /* CENTER AMOUNT COLUMN */
-th:nth-child(3), td:nth-child(3) {
+th:nth-child(4), td:nth-child(4) {
     text-align: center;
     font-weight: 600;
 }
@@ -601,21 +601,22 @@ th:nth-child(4), td:nth-child(4) {
                     </button>
                 </div>
 
-                <div class="table-scroll">
-                    <table style="min-width: 500px;">
-                        <thead>
-                            <tr>
-                                <th>ACC NO</th>
-                                <th>BRANCH</th>
-                                <th>AMOUNT</th>
-                                <th>STATUS</th>
-                                <th>PTP DATE</th>
-                                <th>CREATED TIME</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lockTable"></tbody>
-                    </table>
-                </div>
+<div class="table-scroll">
+    <table style="min-width: 600px;">
+        <thead>
+            <tr>
+                <th>DCA</th>
+                <th>ACC NO</th>
+                <th>BRANCH</th>
+                <th>AMOUNT</th>
+                <th>STATUS</th>
+                <th>PTP DATE</th>
+                <th>REMARKS</th>
+            </tr>
+        </thead>
+        <tbody id="lockTable"></tbody>
+    </table>
+</div>
 
                 <div class="pagination-bar">
                     <button id="prevBtn" onclick="prevPage()" class="page-btn"><i class="fa fa-chevron-left"></i></button>
@@ -850,46 +851,79 @@ async function viewRecords(){
     }
 }
 
-function renderTable(){
-    let start = (currentPage-1)*pageSize;
+function toggleRemark(el){
+    let full = el.getAttribute("data-full");
+    let short = el.getAttribute("data-short");
+    let textEl = el.querySelector(".remark-text");
+    let hintEl = el.querySelector(".tap-hint");
+
+    if(textEl.innerText === full){
+        textEl.innerText = short;
+        if(hintEl) hintEl.innerHTML = "<i class='fa fa-hand-pointer'></i> tap to view";
+    }else{
+        textEl.innerText = full;
+        if(hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to close";
+    }
+}
+
+function renderTable() {
+    let start = (currentPage - 1) * pageSize;
     let end = start + pageSize;
-    let pageData = filteredData.slice(start,end);
+    let pageData = filteredData.slice(start, end);
     let html = "";
 
-    pageData.forEach(d=>{
-        let amount = "RM " + Number(d.amount || 0).toLocaleString("en-MY",{ minimumFractionDigits:2, maximumFractionDigits:2 });
-        let pDate = new Date(d.promise); pDate.setHours(0,0,0,0);
-        let today = new Date(); today.setHours(0,0,0,0);
-        let isOverdue = pDate < today;
+    let today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    pageData.forEach(d => {
+        let amount = "RM " + Number(d.amount || 0).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        
+        let pDate = new Date(d.promise);
+        pDate.setHours(0, 0, 0, 0);
+        
+        let isExpired = pDate < today && d.status !== "PAID";
+        let dateColor = isExpired ? "color: #ef4444; font-weight: 700;" : "";
+        let rowBg = isExpired ? "background: #fef2f2;" : "";
+        
+        // Parsing Date yang kebal untuk masalah T dan Z
+        let dateStr = isNaN(pDate) ? d.promise : pDate.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
+
+        let remark = d.remarks || "-";
+        let safeRemark = remark.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        let shortRemark = remark.length > 40 ? safeRemark.substring(0, 40) + "..." : safeRemark;
+
+        let remarkHtml = remark.length > 40
+            ? `<div style="cursor: pointer; max-width: 200px; word-break: break-word;" onclick="toggleRemark(this)" data-full="${safeRemark}" data-short="${shortRemark}">
+                 <div class="remark-text">${shortRemark}</div>
+                 <div class="tap-hint" style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic;">
+                    <i class='fa fa-hand-pointer'></i> tap to view
+                 </div>
+               </div>`
+            : `<div style="max-width: 200px; word-break: break-word;">${safeRemark}</div>`;
 
         let statusBadge = d.status === "PAID" 
             ? `<span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span>`
             : `<span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span>`;
 
-        let isRowOverdue = (isOverdue && d.status !== "PAID");
-
-        // Format created time display
-        let cDate = new Date(d.created);
-        let createdDisplay = isNaN(cDate) ? d.created : cDate.toLocaleDateString('en-GB', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'});
-
         html += `
-        <tr style="${isRowOverdue ? 'background:#fef2f2;' : ''}">
-            <td>${d.acc_no}</td>
-            <td>${d.branch}</td>
-            <td>${amount}</td>
+        <tr style="${rowBg}">
+            <td>${d.dca || "-"}</td>
+            <td style="font-weight: 600;">${d.acc_no || "-"}</td>
+            <td>${d.branch || "-"}</td>
+            <td style="text-align: center; font-weight: 600; color: #10b981;">${amount}</td>
             <td>${statusBadge}</td>
-            <td style="${isRowOverdue ? 'color:#ef4444;font-weight:600;' : ''}">${formatDate(d.promise)}</td>
-            <td style="font-size:11px; color:#64748b;">${createdDisplay}</td>
+            <td style="${dateColor}">${dateStr}</td>
+            <td>${remarkHtml}</td>
         </tr>`;
     });
 
-    document.getElementById("lockTable").innerHTML = html || "<tr><td colspan='6' style='text-align:center;padding:40px;color:#94a3b8;'>No Record Found</td></tr>";
+    document.getElementById("lockTable").innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding: 40px; color:#94a3b8;">No Records Found</td></tr>';
 
     let totalPage = Math.ceil(filteredData.length / pageSize) || 1;
     document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${totalPage}`;
-        
+    
     document.getElementById("prevBtn").disabled = currentPage === 1;
-    document.getElementById("nextBtn").disabled = currentPage === totalPage;
+    document.getElementById("nextBtn").disabled = currentPage === totalPage || filteredData.length === 0;
 }
 
 function nextPage(){ if(currentPage * pageSize < filteredData.length){ currentPage++; renderTable(); } }
@@ -916,37 +950,50 @@ document.getElementById("filterAcc").addEventListener("keypress",function(e){ if
 document.getElementById("filterAcc").addEventListener("input",function(){ this.value=this.value.replace(/[^0-9]/g,''); });
 
 function exportToExcel() {
-    if(filteredData.length === 0) { alert("Tiada data untuk diexport!"); return; }
+    if(filteredData.length === 0) {
+        alert("Tiada data untuk diexport!");
+        return;
+    }
 
     let excelData = filteredData.map(row => {
         let pDate = new Date(row.promise);
         let cDate = new Date(row.created);
 
         return {
-            "ACC NO": row.acc_no, 
-            "BRANCH": row.branch,
-            "AMOUNT": Number(row.amount || 0), 
-            "STATUS": row.status,
-            "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate, 
+            "DCA ID": row.dca || "-",
+            "ACC NO": row.acc_no || "-",
+            "BRANCH": row.branch || "-",
+            "AMOUNT (RM)": Number(row.amount || 0), 
+            "STATUS": row.status || "-",
+            "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate,
+            "REMARKS": row.remarks || "-",
             "CREATED TIME": isNaN(cDate.getTime()) ? row.created : cDate
         };
     });
 
     let worksheet = XLSX.utils.json_to_sheet(excelData, { cellDates: true });
+
     let range = XLSX.utils.decode_range(worksheet['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-        let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 4});
-        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') { worksheet[ptpCellRef].z = 'd-mmm-yyyy'; }
-        let createdCellRef = XLSX.utils.encode_cell({r: R, c: 5});
-        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') { worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; }
+        // Kolum F adalah PTP DATE (Indeks 5)
+        let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 5});
+        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') {
+            worksheet[ptpCellRef].z = 'd-mmm-yyyy'; 
+        }
+
+        // Kolum H adalah CREATED TIME (Indeks 7)
+        let createdCellRef = XLSX.utils.encode_cell({r: R, c: 7});
+        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') {
+            worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; 
+        }
     }
 
     let workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Check_Records");
+
     let fileName = `CheckRecords_${user}_${new Date().toISOString().slice(0,10)}.xlsx`;
     XLSX.writeFile(workbook, fileName);
 }
-
 // Master Navigation
 function goMaster(){ window.location="../menumaster/"; }
 
