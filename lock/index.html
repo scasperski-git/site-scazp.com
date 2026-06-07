@@ -1571,10 +1571,11 @@ function exportToExcel() {
 }
     
 function resetFilter(){
-    document.getElementById("filterAcc").value="";
-    filteredData = fullData;
-    currentPage = 1;
-    renderTable();
+    // 1. Kosongkan kotak carian
+    document.getElementById("filterAcc").value = "";
+    
+    // 2. Biar applyFilter uruskan tapisan supaya ia ikut tab (LOCK/PAID) yang sedang aktif
+    applyFilter();
 }
 
 function toggleRemark(el){
