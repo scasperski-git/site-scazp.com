@@ -870,9 +870,10 @@ th:nth-child(4), td:nth-child(4) {
             <div id="lockListSection" style="display:none;">
                 <div class="form-title" style="margin-bottom: 15px;">My Lock List</div>
 
-                <div class="tab-container">
+<div class="tab-container">
                     <button id="tabActive" class="tab-btn active" onclick="switchView('LOCK')">Active Locks</button>
                     <button id="tabPaid" class="tab-btn" onclick="switchView('PAID')">Paid History</button>
+                    <button id="tabAll" class="tab-btn" onclick="switchView('ALL')">View All</button>
                 </div>
                 
                 <div class="filter-card">
@@ -1367,12 +1368,15 @@ let currentViewStatus = "LOCK"; // Default paparan adalah LOCK sahaja
 function switchView(viewType) {
     currentViewStatus = viewType;
     
-    // Ubah warna butang
+    // 1. Buang warna aktif dari semua butang
     document.getElementById("tabActive").classList.remove("active");
     document.getElementById("tabPaid").classList.remove("active");
+    document.getElementById("tabAll").classList.remove("active");
     
+    // 2. Beri warna aktif kepada butang yang ditekan
     if(viewType === "LOCK") document.getElementById("tabActive").classList.add("active");
     if(viewType === "PAID") document.getElementById("tabPaid").classList.add("active");
+    if(viewType === "ALL") document.getElementById("tabAll").classList.add("active");
     
     applyFilter(); // Panggil applyFilter untuk kemaskini jadual
 }
@@ -1512,9 +1516,12 @@ function applyFilter(){
         
         let matchAcc = (!acc || accNo.includes(acc));
         
-        // JIKA ADA CARIAN: Abaikan sekatan tab (cari semua status LOCK & PAID)
-        // JIKA TIADA CARIAN: Ikut tab semasa (LOCK atau PAID)
-        let matchStatus = acc ? true : (status === currentViewStatus);
+        // JIKA TAB ALL: Tunjuk semua tanpa kira status
+        // JIKA TAB LAIN: Ikut tab semasa (LOCK atau PAID), KECUALI jika ada carian nombor akaun
+        let matchStatus = true;
+        if(currentViewStatus !== "ALL"){
+             matchStatus = acc ? true : (status === currentViewStatus);
+        }
         
         return matchAcc && matchStatus;
     });
