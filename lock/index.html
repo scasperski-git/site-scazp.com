@@ -155,7 +155,7 @@ body {
 
 .logout-btn { 
     margin-top: auto;
-    color: #fca5a5;
+    color: #fca5a5; 
 }
 .logout-btn:hover {
     background: rgba(239, 68, 68, 0.15);
@@ -168,7 +168,7 @@ body {
     margin-left: 280px; 
     padding: 0; 
     display: block;
-    height: 100vh;
+    height: 100vh; 
     overflow: hidden;
 }
 
@@ -224,7 +224,7 @@ label {
     font-weight: 600;
     color: #475569;
     display: block;
-    margin-top: 10px;
+    margin-top: 10px; 
     margin-bottom: 4px;
 }
 
@@ -271,37 +271,6 @@ input:focus, select:focus, textarea:focus {
 .submit-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
-}
-
-.tab-container {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.tab-btn {
-    flex: 1;
-    padding: 12px;
-    border: 1px solid #e2e8f0;
-    background: white;
-    color: #64748b;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-.tab-btn:hover {
-    background: #f8fafc;
-    color: #4f46e5;
-    border-color: #cbd5e1;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-}
-.tab-btn.active {
-    background: #4f46e5;
-    color: white;
-    border-color: #4f46e5;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 
 #submitBtn {
@@ -479,8 +448,16 @@ table th {
 table tr:last-child td { border-bottom: none; }
 table tr:hover td { background: #f8fafc; }
 
-th:nth-child(3), td:nth-child(3) { text-align: center; font-weight: 600; }
-th:nth-child(4), td:nth-child(4) { white-space: nowrap; }
+/* CENTER AMOUNT COLUMN (3RD) FOR DESKTOP */
+th:nth-child(3), td:nth-child(3) {
+    text-align: center;
+    font-weight: 600;
+}
+
+/* PREVENT DATE COLUMN (4TH) FROM WRAPPING */
+th:nth-child(4), td:nth-child(4) {
+    white-space: nowrap;
+}
 
 /* PAGINATION */
 .pagination-bar {
@@ -523,143 +500,263 @@ th:nth-child(4), td:nth-child(4) { white-space: nowrap; }
 #overlay, #sessionPopup, #lockedPopup {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
-    display: none; align-items: center; justify-content: center; z-index: 9999;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
 }
 
 .loader-box, .session-box {
-    background: white; padding: 40px; border-radius: 20px; text-align: center;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.25); max-width: 340px; width: 90%;
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+    max-width: 340px;
+    width: 90%;
 }
 .spinner {
-    width: 45px; height: 45px; border: 4px solid #f1f5f9;
-    border-top: 4px solid #4f46e5; border-radius: 50%;
-    animation: spin 1s linear infinite; margin: 20px auto 0;
+    width: 45px; height: 45px;
+    border: 4px solid #f1f5f9;
+    border-top: 4px solid #4f46e5;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto 0;
 }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
 .popup-close-btn {
-    width: 100%; padding: 14px; background: #f59e0b; color: white;
-    border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
-    cursor: pointer; transition: all 0.3s ease;
+    width: 100%;
+    padding: 14px;
+    background: #f59e0b; 
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
-.popup-close-btn:hover { background: #d97706; }
-
-/* ===== BUTTON EXPORT EXCEL ===== */
-.btn-export {
-    background: #1e293b; color: white; border: none; padding: 8px 16px; border-radius: 8px;
-    font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
-    display: flex; gap: 8px; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+.popup-close-btn:hover {
+    background: #d97706;
 }
-.btn-export:hover { background: #334155; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4); }
-.btn-export:active { transform: translateY(0); box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2); }
-
-/* ===== PREMIUM TOAST NOTIFICATION ===== */
-.toast-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 10000;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.toast {
-    background: #ffffff;
-    color: #334155;
-    padding: 16px 20px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.02);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 13px;
-    font-weight: 500;
-    min-width: 280px;
-    max-width: 380px;
-    border-left: 4px solid #cbd5e1;
-    transform: translateX(120%);
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.toast.show { transform: translateX(0); }
-.toast i { font-size: 16px; }
-.toast-success { border-left-color: #10b981; }
-.toast-success i { color: #10b981; }
-.toast-error { border-left-color: #ef4444; }
-.toast-error i { color: #ef4444; }
-.toast-warning { border-left-color: #f59e0b; }
-.toast-warning i { color: #f59e0b; }
 
 /* ==========================================
    MOBILE RESPONSIVE (COMPACT HEADER + BOTTOM NAV)
    ========================================== */
 @media (max-width: 899px) {
-    body { overflow: visible; }
-    .app-layout { flex-direction: column; height: auto; }
-    .sidebar {
-        position: relative; width: 100%; height: auto; flex-direction: row; 
-        justify-content: space-between; align-items: center; padding: 12px 16px; 
-        border-radius: 0 0 16px 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); z-index: 40;
+    body {
+        overflow: visible; 
     }
+
+    .app-layout {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        flex-direction: row; 
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px; 
+        border-radius: 0 0 16px 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        z-index: 40;
+    }
+
     .brand { margin-bottom: 0; font-size: 18px; }
     .brand i { font-size: 20px; }
-    .user-profile { margin-bottom: 0; text-align: right; background: transparent; border: none; padding: 0; }
+    
+    .user-profile {
+        margin-bottom: 0;
+        text-align: right; 
+        background: transparent;
+        border: none;
+        padding: 0;
+    }
+
     #userInfo { font-size: 12px; }
     #userSummary { font-size: 10px; margin-top: 2px; padding: 2px 8px; }
 
     .nav-menu {
-        position: fixed; bottom: 0; left: 0; width: 100%; flex-direction: row;
-        background: #ffffff; padding: 12px 10px; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); z-index: 50;
-        border-radius: 24px 24px 0 0; justify-content: space-around; gap: 5px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        flex-direction: row;
+        background: #ffffff;
+        padding: 12px 10px;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+        z-index: 50;
+        border-radius: 24px 24px 0 0;
+        justify-content: space-around;
+        gap: 5px;
     }
-    .nav-btn { flex-direction: column; gap: 6px; padding: 8px 4px; font-size: 11px; color: #64748b; border-radius: 12px; justify-content: center; }
+
+    .nav-btn {
+        flex-direction: column;
+        gap: 6px;
+        padding: 8px 4px;
+        font-size: 11px;
+        color: #64748b;
+        border-radius: 12px;
+        justify-content: center;
+    }
+
     .nav-btn i { font-size: 20px; }
-    .nav-btn:hover { transform: none; background: #f1f5f9; color: #4f46e5; }
-    .nav-btn.active { background: #eef2ff; color: #4f46e5; box-shadow: none; }
+
+    .nav-btn:hover {
+        transform: none;
+        background: #f1f5f9;
+        color: #4f46e5;
+    }
+
+    .nav-btn.active {
+        background: #eef2ff;
+        color: #4f46e5;
+        box-shadow: none;
+    }
+
     .logout-btn { margin-top: 0; color: #ef4444; }
 
-    .main-content { margin-left: 0; padding: 16px 15px 90px 15px; height: auto; overflow: visible; }
-    .container { height: auto; min-height: auto; padding: 20px 16px; border-radius: 16px; overflow-y: visible; }
-    .form-row { flex-direction: column; gap: 0; }
-
-    /* COMPRESS SUCCESS PAGE */
-    #result .success-card {
-        padding: 20px 16px !important; min-height: calc(100vh - 230px); 
-        display: flex; flex-direction: column; justify-content: flex-start;
+    /* Adjust Main Content & form for Mobile */
+    .main-content {
+        margin-left: 0;
+        padding: 16px 15px 90px 15px; 
+        height: auto; 
+        overflow: visible;
     }
+
+    .container {
+        height: auto;
+        min-height: auto;
+        padding: 20px 16px; 
+        border-radius: 16px;
+        overflow-y: visible;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    /* ==========================================
+       COMPRESS SUCCESS PAGE (RESULT CARD ONLY)
+       ========================================== */
+    #result .success-card {
+        padding: 20px 16px !important; 
+        min-height: calc(100vh - 230px); 
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start; 
+    }
+    
     #result .success-card > div:nth-child(1) { margin-bottom: 10px !important; }
     #result .success-card > div:nth-child(1) .status-badge { font-size: 16px !important; padding: 10px 24px !important; }
     #result .success-card > div:nth-child(2) { margin-bottom: 12px !important; font-size: 11px !important; }
+
     #result .success-grid { 
-        grid-template-columns: repeat(2, 1fr) !important; gap: 12px 10px !important; 
-        padding: 14px !important; margin-top: 0 !important; margin-bottom: auto !important; 
-        flex: none !important; align-content: flex-start;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px 10px !important; 
+        padding: 14px !important; 
+        margin-top: 0 !important;
+        margin-bottom: auto !important; 
+        flex: none !important; 
+        align-content: flex-start; 
     }
+    
     #result .success-item { font-size: 13px !important; }
     #result .success-item b { font-size: 11px !important; margin-bottom: 4px !important; }
     #result .amount { font-size: 20px !important; } 
     
-    .filter-card { padding: 16px; margin-bottom: 16px; }
-    .filter-input-group { flex-direction: column; }
-    .filter-input-group input { width: 100%; margin-bottom: 12px; }
-    .mini-actions { width: 100%; justify-content: center; }
-    .mini-actions .mini-btn { flex: 1; }
+    /* ==========================================
+       UPDATE MY LOCKS (TABLE & FILTER) MOBILE
+       ========================================== */
+    .filter-card {
+        padding: 16px; 
+        margin-bottom: 16px;
+    }
 
-    table th, table td { padding: 14px 10px; font-size: 11px; }
-    table th:nth-child(3), #lockTable td:nth-child(3) { text-align: center; }
-    #lockTable td:nth-child(3) { font-size: 13px; font-weight: 700; color: #0f172a; }
+    /* UPDATE FILTER LAYOUT FOR MOBILE */
+    .filter-input-group {
+        flex-direction: column; 
+    }
+    
+    .filter-input-group input {
+        width: 100%;
+        margin-bottom: 12px;
+    }
 
-    .new-btn { margin-top: 20px !important; width: 100% !important; padding: 16px !important; font-size: 15px !important; }
+    .mini-actions {
+        width: 100%;
+        justify-content: center; 
+    }
+
+    .mini-actions .mini-btn {
+        flex: 1; 
+    }
+
+    table th, table td {
+        padding: 14px 10px; 
+        font-size: 11px; 
+    }
+    
+    /* CENTER AMOUNT COLUMN (3RD) FOR MOBILE */
+    table th:nth-child(3), #lockTable td:nth-child(3) {
+        text-align: center;
+    }
+
+    #lockTable td:nth-child(3) {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .new-btn {
+        margin-top: 20px !important; 
+        width: 100% !important; 
+        padding: 16px !important; 
+        font-size: 15px !important;
+    }
     
     @media (max-width: 380px) {
         .nav-btn span { display: none; }
     }
-
-    /* Toast Mobile layout */
-    .toast-container { top: 10px; left: 50%; right: auto; transform: translateX(-50%); width: calc(100% - 32px); }
-    .toast { min-width: 100%; transform: translateY(-150%); }
-    .toast.show { transform: translateY(0); }
 }
+
+    /* ===== BUTTON EXPORT EXCEL ===== */
+.btn-export {
+    background: #1e293b;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-export:hover {
+    background: #334155;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-export:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+    
 </style>
 </head>
 
@@ -689,7 +786,7 @@ th:nth-child(4), td:nth-child(4) { white-space: nowrap; }
             <button id="masterBtn" class="nav-btn" onclick="goMaster()" style="display:none">
                 <i class="fa-solid fa-crown"></i> <span>Master</span>
             </button>
-        
+            
             <button class="nav-btn logout-btn" onclick="logout()">
                 <i class="fa fa-right-from-bracket"></i> <span>Logout</span>
             </button>
@@ -700,50 +797,49 @@ th:nth-child(4), td:nth-child(4) { white-space: nowrap; }
         <div class="container">
 
             <div id="formSection">
-                 <div class="form-title">Create New Lock</div>
+                <div class="form-title">Create New Lock</div>
                 <form id="lockForm" autocomplete="off" novalidate>
 
                     <div class="form-row">
                         <div class="form-group">
-                             <label>Account No</label>
+                            <label>Account No</label>
                             <input type="text" id="acc_no" name="acc_no" autocomplete="off" inputmode="numeric" maxlength="10" placeholder="ENTER ACCOUNT NO">
                             <div class="error" id="err_acc"><i class="fa-solid fa-circle-exclamation"></i> Account No required</div>
                         </div>
-  
                         <div class="form-group">
                             <label>Branch</label>
                             <select id="branch" name="branch_id" required>
-                                 <option value="">SELECT BRANCH</option>
+                                <option value="">SELECT BRANCH</option>
                                 <option value="" disabled>Loading branch list...</option>
                             </select>
-                             <div class="error" id="err_branch"><i class="fa-solid fa-circle-exclamation"></i> Please select branch</div>
+                            <div class="error" id="err_branch"><i class="fa-solid fa-circle-exclamation"></i> Please select branch</div>
                         </div>
                     </div>
 
                     <div class="form-row">
-                         <div class="form-group">
+                        <div class="form-group">
                             <label>Lock Amount</label>
                             <input type="text" id="amount" name="amount" autocomplete="off" inputmode="numeric" placeholder="0.00">
                             <div class="error" id="err_amount"><i class="fa-solid fa-circle-exclamation"></i> Amount required</div>
                         </div>
                         <div class="form-group">
                             <label>Payment Category</label>
-                             <select id="payment_category" name="payment_category" required>
+                            <select id="payment_category" name="payment_category" required>
                                 <option value="">SELECT PAYMENT CATEGORY</option>
                                 <option>PARTIAL PAYMENT</option>
-                                 <option>FULL PAYMENT</option>
+                                <option>FULL PAYMENT</option>
                                 <option>UNDER DISCOUNT</option>
                             </select>
-                             <div class="error" id="err_category"><i class="fa-solid fa-circle-exclamation"></i> Payment category required</div>
+                            <div class="error" id="err_category"><i class="fa-solid fa-circle-exclamation"></i> Payment category required</div>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                             <label>Promise Date</label>
+                            <label>Promise Date</label>
                             <input type="date" id="promise_date" name="promise_date" min="">
                             <div class="error" id="err_date"><i class="fa-solid fa-circle-exclamation"></i> Promise date required</div>
-                         </div>
+                        </div>
                         <div class="form-group">
                             <label>DCA ID</label>
                             <input type="text" id="dca_id" name="dca_id" readonly>
@@ -751,20 +847,19 @@ th:nth-child(4), td:nth-child(4) { white-space: nowrap; }
                         </div>
                     </div>
 
-                     <div class="form-group full-width">
+                    <div class="form-group full-width">
                         <label>Remarks</label>
                         <textarea id="remarks" name="remarks" autocomplete="off" maxlength="100" placeholder="ENTER REMARKS"></textarea>
                         <div id="remarkCounter">0 / 100</div>
-                         <div class="error" id="err_remarks"><i class="fa-solid fa-circle-exclamation"></i> Remarks required</div>
+                        <div class="error" id="err_remarks"><i class="fa-solid fa-circle-exclamation"></i> Remarks required</div>
                     </div>
 
                     <button type="submit" id="submitBtn" class="submit-btn">
                         <i class="fa-solid fa-lock" style="margin-right: 8px;"></i> Submit Lock
-                     </button>
+                    </button>
 
                     <div class="audit-note">
-                        <i class="fa-solid fa-shield-halved" style="margin-right: 5px;"></i> <b>Audit Note:</b> Please verify your entry carefully. [cite: 448]
-                        By submitting this lock, the DCA agrees to bear full liability for any discrepancies or mistakes made in the lock amount, especially concerning "Full Payment" and "Under Discount" categories. [cite: 449]
+                        <i class="fa-solid fa-shield-halved" style="margin-right: 5px;"></i> <b>Audit Note:</b> Please verify your entry carefully. By submitting this lock, the DCA agrees to bear full liability for any discrepancies or mistakes made in the lock amount, especially concerning "Full Payment" and "Under Discount" categories.
                     </div>
 
                 </form>
@@ -775,62 +870,60 @@ th:nth-child(4), td:nth-child(4) { white-space: nowrap; }
             <div id="lockListSection" style="display:none;">
                 <div class="form-title" style="margin-bottom: 15px;">My Lock List</div>
 
-                 <div class="tab-container">
+                <div class="tab-container">
                     <button id="tabActive" class="tab-btn active" onclick="switchView('LOCK')">Active Locks</button>
                     <button id="tabPaid" class="tab-btn" onclick="switchView('PAID')">Paid History</button>
                 </div>
                 
-                 <div class="filter-card">
+                <div class="filter-card">
                     <div class="filter-input-group">
                         <input type="text" id="filterAcc" placeholder="Search Account No" autocomplete="off" inputmode="numeric" maxlength="10">
                         <div class="mini-actions">
-                             <button onclick="applyFilter()" class="mini-btn search"><i class="fa fa-search"></i> Search</button>
+                            <button onclick="applyFilter()" class="mini-btn search"><i class="fa fa-search"></i> Search</button>
                             <button onclick="resetFilter()" class="mini-btn clear"><i class="fa fa-xmark"></i> Clear</button>
                         </div>
                     </div>
-                 </div>
+                </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 10px;">
-                    <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
-                        <i class="fa fa-list-check" style="color: #4f46e5; margin-right: 5px;"></i> My Records
-                    </div>
-                    
-                    <button class="btn-export" onclick="exportToExcel()">
-                        <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Excel
-                    </button>
-                </div>
+        <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
+            <i class="fa fa-list-check" style="color: #4f46e5; margin-right: 5px;"></i> My Records
+        </div>
+        
+        <button class="btn-export" onclick="exportToExcel()">
+            <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Excel
+        </button>
+    </div>
 
                 <div class="table-scroll">
                     <table style="min-width: 500px;">
-                         <thead>
+                        <thead>
                             <tr>
                                 <th>ACC NO</th>
-                                 <th>BRANCH</th>
+                                <th>BRANCH</th>
                                 <th>AMOUNT</th>
                                 <th>STATUS</th>
-                                 <th>PTP DATE</th>
+                                <th>PTP DATE</th>
                                 <th>REMARK</th>
                             </tr>
                         </thead>
-                         <tbody id="lockTable"></tbody>
+                        <tbody id="lockTable"></tbody>
                     </table>
                 </div>
 
                 <div class="pagination-bar">
                     <button id="prevBtn" onclick="prevPage()" class="page-btn"><i class="fa fa-chevron-left"></i></button>
-                     <span id="pageInfo"></span>
+                    <span id="pageInfo"></span>
                     <button id="nextBtn" onclick="nextPage()" class="page-btn"><i class="fa fa-chevron-right"></i></button>
                 </div>
 
                 <button class="new-btn" onclick="backToForm()"><i class="fa-solid fa-arrow-left" style="margin-right: 8px;"></i> Back</button>
             </div>
 
-         </div>
+        </div>
     </main>
 
 </div>
-
-<div id="toastContainer" class="toast-container"></div>
 
 <div id="overlay">
     <div class="loader-box">
@@ -852,7 +945,7 @@ th:nth-child(4), td:nth-child(4) { white-space: nowrap; }
     <div class="session-box">
         <i class="fa fa-triangle-exclamation" style="font-size: 48px; color: #f59e0b; margin-bottom: 16px;"></i>
         <div style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #0f172a;">Account Locked</div>
-        <div style="font-size: 14px; color: #475569; margin-bottom: 24px; line-height: 1.5;">An active lock already exists for this account. Please check your 'My Locks' list to view the details. [cite: 470]</div>
+        <div style="font-size: 14px; color: #475569; margin-bottom: 24px; line-height: 1.5;">An active lock already exists for this account. Please check your 'My Locks' list to view the details.</div>
         <button class="popup-close-btn" onclick="document.getElementById('lockedPopup').style.display='none'">
             <i class="fa fa-times" style="margin-right: 5px;"></i> Close
         </button>
@@ -863,34 +956,12 @@ th:nth-child(4), td:nth-child(4) { white-space: nowrap; }
 
 <script>
 // ==========================================
-// TOAST CONTROLLER SYSTEM (TAMBAHAN BARU)
-// ==========================================
-function showToast(message, type = "success", duration = 4000) {
-    const container = document.getElementById("toastContainer");
-    if (!container) return;
-
-    const toast = document.createElement("div");
-    toast.className = `toast toast-${type}`;
-
-    let icon = "fa-circle-check";
-    if (type === "error") icon = "fa-circle-xmark";
-    if (type === "warning") icon = "fa-triangle-exclamation";
-
-    toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
-    container.appendChild(toast);
-
-    setTimeout(() => toast.classList.add("show"), 50);
-
-    setTimeout(() => {
-        toast.classList.remove("show");
-        toast.addEventListener("transitionend", () => toast.remove());
-    }, duration);
-}
-
-// ==========================================
 // INITIALIZATION & STORAGE CHECK (WEB & APP)
 // ==========================================
-const api = API_URL; 
+
+const api = API_URL; // From lockconfig.js
+
+// Read from localStorage (App) or sessionStorage (Web)
 const user = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
 const role = localStorage.getItem("lock_role") || sessionStorage.getItem("lock_role");
 const token = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
@@ -911,17 +982,24 @@ function backToForm() {
     goNewLock();
 }
 
+// If no token or type (User not logged in or closed tab)
 if(!type || !token){
     logout();
 }
 
+// Page Access Protection
 if(type == "check"){
-    showToast("Access denied! Redirecting to check module.", "error");
-    setTimeout(() => { window.location="../check/"; }, 1500);
+    alert("Access denied");
+    window.location="../check/";
 }
 
+// Show Master button if role is master
 if(type === "master"){
-    document.getElementById("masterBtn").style.display = "flex";
+    document.getElementById("masterBtn").style.display = "flex"; 
+}
+
+function goMaster(){
+    window.location="../menumaster/";
 }
 
 document.getElementById("userInfo").innerHTML = "User: "+(user || "-")+" | Role: "+(role || "-");
@@ -933,9 +1011,14 @@ setInterval(loadUserSummary, 120000);
 fetch(api+"?action=branches&token="+token+"&api_key=" + API_KEY)
 .then(res=>res.json())
 .then(data=>{
+
     if(data.status=="UNAUTHORIZED"){
-        if(data.reason=="SESSION_REPLACED"){ showSessionPopup("DEVICE"); }
-        else{ showSessionPopup("EXPIRED"); }
+        if(data.reason=="SESSION_REPLACED"){
+            showSessionPopup("DEVICE");
+        }
+        else{
+            showSessionPopup("EXPIRED");
+        }
         return;
     }
 
@@ -948,21 +1031,37 @@ fetch(api+"?action=branches&token="+token+"&api_key=" + API_KEY)
         option.text=b.name;
         select.appendChild(option);
     });
-}).catch(() => {
-    showToast("Failed to load branch options metadata.", "error");
+
 });
 
 document.getElementById("dca_id").value = user || "";
+
 document.getElementById("promise_date").min = new Date().toISOString().split("T")[0];
 
 /* ACCOUNT NO - ONLY NUMBERS */
 const accField = document.getElementById("acc_no");
-accField.addEventListener("keypress", function(e){ if(!/[0-9]/.test(e.key)){ e.preventDefault(); } });
-accField.addEventListener("input", function(){ this.value = this.value.replace(/\D/g,''); });
+
+accField.addEventListener("keypress", function(e){
+    if(!/[0-9]/.test(e.key)){
+        e.preventDefault();
+    }
+});
+
+accField.addEventListener("input", function(){
+    this.value = this.value.replace(/\D/g,'');
+});
 
 const filterAccField = document.getElementById("filterAcc");
-filterAccField.addEventListener("keypress", function(e){ if(!/[0-9]/.test(e.key)){ e.preventDefault(); } });
-filterAccField.addEventListener("input", function(){ this.value = this.value.replace(/\D/g,''); });
+
+filterAccField.addEventListener("keypress", function(e){
+    if(!/[0-9]/.test(e.key)){
+        e.preventDefault();
+    }
+});
+
+filterAccField.addEventListener("input", function(){
+    this.value = this.value.replace(/\D/g,'');
+});
 
 document.querySelectorAll("input[type=text]:not(#dca_id):not(#acc_no):not(#filterAcc)").forEach(el=>{
     el.addEventListener("input",function(){
@@ -974,46 +1073,66 @@ document.querySelectorAll("input[type=text]:not(#dca_id):not(#acc_no):not(#filte
 });
 
 const amountField = document.getElementById("amount");
+
 amountField.addEventListener("input", function(){
     let value = this.value.replace(/[^\d.]/g,'');
     let parts = value.split(".");
-    if(parts.length > 2){ value = parts[0] + "." + parts.slice(1).join(""); }
+
+    if(parts.length > 2){
+        value = parts[0] + "." + parts.slice(1).join("");
+    }
+
     if(parts[1]){
         parts[1] = parts[1].substring(0,2);
         value = parts[0] + "." + parts[1];
     }
+
     this.value = value;
 });
 
 amountField.addEventListener("blur", function(){
     let value = this.value.replace(/,/g,'');
     if(value==="") return;
+    
     let num = parseFloat(value);
     if(!isNaN(num)){
-        this.value = num.toLocaleString("en-MY",{ minimumFractionDigits:2, maximumFractionDigits:2 });
+        this.value = num.toLocaleString("en-MY",{
+            minimumFractionDigits:2,
+            maximumFractionDigits:2
+        });
     }
 });
 
 const remarkBox=document.getElementById("remarks");
 const remarkCounter=document.getElementById("remarkCounter");
+
 remarkBox.addEventListener("input",function(){
-    if(this.value.length>100){ this.value=this.value.substring(0,100); }
+    if(this.value.length>100){
+        this.value=this.value.substring(0,100);
+    }
     remarkCounter.textContent=this.value.length+" / 100";
 });
 
 function loadUserSummary(){
+    document.getElementById("userSummary").innerText = "Today: loading...";
+
+    // 1. Tetapkan tarikh hari ini untuk filter Today
     let d = new Date();
     let today = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0');
-    let timestamp = new Date().getTime();
+    let timestamp = new Date().getTime(); // Anti-cache
 
+    // 2. Tambahkan &start, &end dan &t di dalam URL
     fetch(api+"?action=dashboard&token="+token+"&dca="+user+"&start="+today+"&end="+today+"&api_key=" + API_KEY + "&t=" + timestamp)
     .then(r=>r.json())
     .then(data=>{
         var total = data.total || 0;
         var paid = data.totalPaid || 0; 
-        var amount = Number(data.amount || 0).toLocaleString("en-MY",{ minimumFractionDigits:2, maximumFractionDigits:2 });
-         
-        document.getElementById("userSummary").innerHTML = '<i class="fa fa-chart-line"></i> Today: '+total+' Locks | '+paid+' Paid | RM '+amount;
+        var amount = Number(data.amount || 0).toLocaleString("en-MY",{
+            minimumFractionDigits:2, maximumFractionDigits:2
+        });
+        
+        document.getElementById("userSummary").innerHTML =
+        '<i class="fa fa-chart-line"></i> Today: '+total+' Locks | '+paid+' Paid | RM '+amount;
     })
     .catch(()=>{
         document.getElementById("userSummary").innerText = "Today: - | RM -";
@@ -1023,7 +1142,9 @@ function loadUserSummary(){
 function showError(input,errorId){
     input.classList.add("shake");
     document.getElementById(errorId).style.display="block";
+
     input.scrollIntoView({ behavior:"smooth", block:"center" });
+
     setTimeout(()=>{
         input.focus();
         input.classList.remove("shake");
@@ -1032,6 +1153,7 @@ function showError(input,errorId){
 
 document.getElementById("lockForm").addEventListener("submit",e=>{
     e.preventDefault();
+
     document.querySelectorAll(".error").forEach(e=>e.style.display="none");
 
     var acc=document.getElementById("acc_no");
@@ -1042,15 +1164,15 @@ document.getElementById("lockForm").addEventListener("submit",e=>{
     var dca=document.getElementById("dca_id");
     var remarks=document.getElementById("remarks");
 
-    if(!acc.value){showError(acc,"err_acc"); showToast("Account number input missing!", "warning"); return;}
-    if(!branch.value){showError(branch,"err_branch"); showToast("Please select a target branch!", "warning"); return;}
-    if(!amount.value || Number(amount.value.replace(/,/g,''))<=0){showError(amount,"err_amount"); showToast("Valid lock amount required!", "warning"); return;}
-    if(!category.value){showError(category,"err_category"); showToast("Payment classification missing!", "warning"); return;}
-    if(!date.value){showError(date,"err_date"); showToast("PTP Promise date required!", "warning"); return;}
-    if(!dca.value){showError(dca,"err_dca"); return;}
+    if(!acc.value){showError(acc,"err_acc");return;}
+    if(!branch.value){showError(branch,"err_branch");return;}
+    if(!amount.value || Number(amount.value.replace(/,/g,''))<=0){showError(amount,"err_amount");return;}
+    if(!category.value){showError(category,"err_category");return;}
+    if(!date.value){showError(date,"err_date");return;}
+    if(!dca.value){showError(dca,"err_dca");return;}
     
     remarks.value = remarks.value.toUpperCase();
-    if(!remarks.value){showError(remarks,"err_remarks"); showToast("DCA action remarks are compulsory!", "warning"); return;}
+    if(!remarks.value){showError(remarks,"err_remarks");return;}
 
     document.getElementById("overlay").style.display="flex";
     document.getElementById("submitBtn").disabled = true;
@@ -1062,33 +1184,33 @@ document.getElementById("lockForm").addEventListener("submit",e=>{
     formData.append("user",user);
     formData.append("api_key", API_KEY);
 
-    fetch(api,{ method:"POST", body:formData })
+    fetch(api,{
+        method:"POST",
+        body:formData
+    })
     .then(res=>res.text())
     .then(data=>{
         document.getElementById("overlay").style.display="none";
+
         if(data=="UNAUTHORIZED"){
             showSessionPopup("EXPIRED");
             return;
         }
+
         if(data=="ACCOUNT_ALREADY_LOCKED"){
             document.getElementById("lockedPopup").style.display="flex";
             document.getElementById("submitBtn").disabled = false; 
-            showToast("Transaction rejected: Account is already locked.", "error");
         }
         else{
-            showToast("New sheet lock successfully registered.", "success");
             showSuccess(formData);
         }
-    }).catch(() => {
-        document.getElementById("overlay").style.display="none";
-        document.getElementById("submitBtn").disabled = false; 
-        showToast("Network dispatch error. Submission aborted.", "error");
     });
 });
 
 function formatDate(dateStr){
     if(!dateStr) return "-";
     let d = new Date(dateStr);
+
     if(!isNaN(d)){
         let day = ("0"+d.getDate()).slice(-2);
         let monthNames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -1096,17 +1218,22 @@ function formatDate(dateStr){
         let year = d.getFullYear();
         return day+" "+month+" "+year;
     }
+
     if(dateStr.includes("-") && dateStr.split("-")[0].length==4){
         var p=dateStr.split("-");
-        var year=p[0]; var month=parseInt(p[1])-1; var day=p[2];
+        var year=p[0];
+        var month=parseInt(p[1])-1;
+        var day=p[2];
         var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
         return day+" "+m[month]+" "+year;
     }
+
     return dateStr;
 }
 
 function logout(){
-    localStorage.clear(); sessionStorage.clear(); 
+    localStorage.clear();
+    sessionStorage.clear(); 
     window.location="../checklock-login/";
 }
 
@@ -1139,8 +1266,7 @@ function showSuccess(formData){
     "<div class='success-item' style='grid-column: 1 / -1;'><b>DCA REMARKS</b>"+remarks+"</div>"+
     "</div>"+
     "<div class='audit-note' style='margin-top: auto; text-align: left; padding: 10px; font-size: 10.5px; line-height: 1.4;'>"+
-    "<i class='fa-solid fa-shield-halved' style='margin-right: 5px;'></i> <b>Audit Record:</b> This lock entry has been successfully recorded.<br>"+
-    "As acknowledged during submission, the DCA bears full liability for any errors or discrepancies in the lock amount, especially concerning \"Full Payment\" and \"Under Discount\" categories."+
+    "<i class='fa-solid fa-shield-halved' style='margin-right: 5px;'></i> <b>Audit Record:</b> This lock entry has been successfully recorded. As acknowledged during submission, the DCA bears full liability for any errors or discrepancies in the lock amount, especially concerning \"Full Payment\" and \"Under Discount\" categories."+
     "</div>"+
     "</div>"+
     "<button class='new-btn' onclick='goNewLock()'><i class='fa fa-plus' style='margin-right:8px;'></i> New Lock</button>";
@@ -1148,9 +1274,11 @@ function showSuccess(formData){
     loadUserSummary();  
 }
 
+// Popup UI Controller
 function showSessionPopup(type){
     let title="Session Expired";
     let msg="Your session has expired. Please login again.";
+
     if(type==="DEVICE"){
         title="Logged In From Another Device";
         msg="Your account has been logged in from another device.";
@@ -1160,12 +1288,19 @@ function showSessionPopup(type){
     document.getElementById("sessionMsg").innerText=msg;
     document.getElementById("sessionPopup").style.display="flex";
 
-    setTimeout(()=>{ localStorage.clear(); sessionStorage.clear(); window.location="../checklock-login/"; },3000);
+    setTimeout(()=>{
+        localStorage.clear();
+        sessionStorage.clear(); 
+        window.location="../checklock-login/";
+    },3000);
 }
 
 function clearError(inputId,errorId){
-    document.getElementById(inputId).addEventListener("input",function(){ document.getElementById(errorId).style.display="none"; });
+    document.getElementById(inputId).addEventListener("input",function(){
+        document.getElementById(errorId).style.display="none";
+    });
 }
+
 clearError("acc_no","err_acc");
 clearError("amount","err_amount");
 clearError("dca_id","err_dca");
@@ -1174,44 +1309,72 @@ clearError("remarks","err_remarks");
 /* =========================================
    SINGLE DEVICE LOGIN & SMART PAUSE LOGIC
 ========================================= */
-const CHECK_INTERVAL = 60000;
-function verifySessionWithServer() {
-    if (document.hidden) return;
-    const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
-    if (!currentToken) { showSessionPopup("EXPIRED"); return; }
 
+const CHECK_INTERVAL = 60000; // Check every 1 minute
+
+function verifySessionWithServer() {
+    if (document.hidden) return; // Smart Pause active
+
+    const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
+
+    if (!currentToken) {
+        showSessionPopup("EXPIRED");
+        return;
+    }
+
+    // Use action=session to match GAS
     fetch(api + "?action=session&token=" + currentToken + "&api_key=SCZP_SECURE_2026")
     .then(response => response.json())
     .then(data => {
         if (data.status !== "ACTIVE") {
-            if (data.reason === "SESSION_REPLACED") { showSessionPopup("DEVICE"); } 
-            else { showSessionPopup("EXPIRED"); }
+            // BACA PUNCA TENDANG DAN KELUARKAN POPUP YANG BETUL
+            if (data.reason === "SESSION_REPLACED") {
+                showSessionPopup("DEVICE");
+            } else {
+                showSessionPopup("EXPIRED");
+            }
         }
-    }).catch(() => { console.log("Context structural check paused."); });
+    })
+    .catch(error => {
+        console.log("Internet disconnected / Server error. Check paused.");
+    });
 }
 
+// SEMAK STATUS TOKEN SERTA-MERTA APABILA MUKA SURAT DIBUKA (TAMBAHAN BAHARU)
 verifySessionWithServer();
+
+// Run automatic check every 1 minute
 setInterval(verifySessionWithServer, CHECK_INTERVAL);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) verifySessionWithServer(); });
+
+// Check immediately when tab/app is reopened
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+        verifySessionWithServer();
+    }
+});
+
 
 /* =========================================
    MY LOCK LIST LOGIC
 ========================================= */
+
 let fullData = [];
 let filteredData = [];
 let currentPage = 1;
 const pageSize = 5;
-let currentViewStatus = "LOCK"; 
+let currentViewStatus = "LOCK"; // Default paparan adalah LOCK sahaja
 
 function switchView(viewType) {
     currentViewStatus = viewType;
+    
+    // Ubah warna butang
     document.getElementById("tabActive").classList.remove("active");
     document.getElementById("tabPaid").classList.remove("active");
     
     if(viewType === "LOCK") document.getElementById("tabActive").classList.add("active");
     if(viewType === "PAID") document.getElementById("tabPaid").classList.add("active");
     
-    applyFilter();
+    applyFilter(); // Panggil applyFilter untuk kemaskini jadual
 }
 
 function updateNavState(activeId) {
@@ -1221,20 +1384,25 @@ function updateNavState(activeId) {
 
 async function viewMyLocks(){
     sessionStorage.setItem('active_tab', 'list');
+
     document.getElementById("formSection").style.display="none";
     document.getElementById("result").style.display="none";
     document.getElementById("lockListSection").style.display="block";
     document.body.classList.add("list-mode");
+
     updateNavState('navMyLocks');
 
+    // SHOW LOADING STATE IN TABLE ONLY
     document.getElementById("lockTable").innerHTML = 
     "<tr><td colspan='6' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records...</td></tr>";
+
+    // RESET PAGINATION INFO WHILE LOADING
     document.getElementById("pageInfo").innerText = "-";
     document.getElementById("prevBtn").disabled = true;
     document.getElementById("nextBtn").disabled = true;
 
-    try{
-        let timestamp = new Date().getTime();
+try{
+        let timestamp = new Date().getTime(); // Anti-cache ditambah
         const res = await fetch(api+"?action=mylocks&token="+token+"&api_key=" + API_KEY + "&t=" + timestamp);
         const data = await res.json();
 
@@ -1243,18 +1411,20 @@ async function viewMyLocks(){
             else showSessionPopup("EXPIRED");
             return;
         } else if(data.status === "ACCESS_DENIED"){
-            document.getElementById("lockTable").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:20px'>Access Denied</td></tr>";
+            document.getElementById("lockTable").innerHTML =
+            "<tr><td colspan='6' style='text-align:center;padding:20px'>Access Denied</td></tr>";
             return;
         }
 
         fullData = data.sort((a,b)=> new Date(b.created) - new Date(a.created));
         filteredData = fullData;
         currentPage = 1;
-        showToast("Personal log sync completed.", "success");
+
         switchView("LOCK");
+
     }catch(e){
-        showToast("Error parsing individual history grid.", "error");
-        document.getElementById("lockTable").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:20px'>Error loading data.</td></tr>";
+        document.getElementById("lockTable").innerHTML =
+        "<tr><td colspan='6' style='text-align:center;padding:20px'>Error loading data.</td></tr>";
     }
 }
 
@@ -1265,9 +1435,13 @@ function renderTable(){
     let html = "";
 
     pageData.forEach(d=>{
-        let amount = "RM " + Number(d.amount || 0).toLocaleString("en-MY",{ minimumFractionDigits:2, maximumFractionDigits:2 });
+        let amount = "RM " + Number(d.amount || 0).toLocaleString("en-MY",{
+            minimumFractionDigits:2, maximumFractionDigits:2
+        });
+
         let today = new Date();
         today.setHours(0,0,0,0);
+
         let pDate = new Date(d.promise);
         pDate.setHours(0,0,0,0);
 
@@ -1275,92 +1449,130 @@ function renderTable(){
         let remark = d.remarks || "-";
         let shortRemark = remark.length > 40 ? remark.substring(0,40)+"..." : remark;
 
-        let statusBadge = d.status === "PAID" 
-            ? `<span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700; letter-spacing:0.5px;">PAID</span>`
-            : `<span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700; letter-spacing:0.5px;">LOCK</span>`;
+        // Buat design badge untuk status
+    let statusBadge = d.status === "PAID" 
+        ? `<span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700; letter-spacing:0.5px;">PAID</span>`
+        : `<span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700; letter-spacing:0.5px;">LOCK</span>`;
 
-        let isRowOverdue = (isOverdue && d.status !== "PAID");
+    // Pastikan background merah OVERDUE hanya untuk akaun yang masih LOCK
+    let isRowOverdue = (isOverdue && d.status !== "PAID");
 
         html += `
-        <tr style="${isRowOverdue ? 'background:#fef2f2;' : ''}">
-        <td>${d.acc_no}</td>
-        <td>${d.branch}</td>
-        <td>${amount}</td>
-        <td>${statusBadge}</td>
-        <td style="${isRowOverdue ? 'color:#ef4444;font-weight:600;' : ''}">
-        ${formatDate(d.promise)}
+    <tr style="${isRowOverdue ? 'background:#fef2f2;' : ''}">
+    <td>${d.acc_no}</td>
+    <td>${d.branch}</td>
+    <td>${amount}</td>
+    <td>${statusBadge}</td> <!-- MASUKKAN BADGE DI SINI -->
+    <td style="${isRowOverdue ? 'color:#ef4444;font-weight:600;' : ''}">
+    ${formatDate(d.promise)}
         </td>
         <td onclick="toggleRemark(this)" data-full="${remark}" data-short="${shortRemark}" style="cursor:pointer; max-width: 200px; word-break: break-word;">
+
         <div class="remark-text">${shortRemark}</div>
+
         ${remark.length > 40 ? '<div style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic; font-weight: 500;" class="tap-hint"><i class="fa fa-hand-pointer"></i> tap to view</div>' : ''}
+
         </td>
         </tr>
         `;
     });
 
-    document.getElementById("lockTable").innerHTML = html || "<tr><td colspan='6' style='text-align:center;padding:40px;color:#94a3b8;'><i class='fa fa-folder-open' style='font-size:28px;margin-bottom:12px;display:block;'></i>No Record Found</td></tr>";
+    document.getElementById("lockTable").innerHTML = html || 
+    "<tr><td colspan='6' style='text-align:center;padding:40px;color:#94a3b8;'><i class='fa fa-folder-open' style='font-size:28px;margin-bottom:12px;display:block;'></i>No Record Found</td></tr>";
 
     let totalPage = Math.ceil(filteredData.length / pageSize) || 1;
+
     document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${totalPage}`;
+        
     document.getElementById("prevBtn").disabled = currentPage === 1;
     document.getElementById("nextBtn").disabled = currentPage === totalPage;
 }
     
-function nextPage(){ if(currentPage * pageSize < filteredData.length){ currentPage++; renderTable(); } }
-function prevPage(){ if(currentPage > 1){ currentPage--; renderTable(); } }
+function nextPage(){
+    if(currentPage * pageSize < filteredData.length){
+        currentPage++;
+        renderTable();
+    }
+}
+
+function prevPage(){
+    if(currentPage > 1){
+        currentPage--;
+        renderTable();
+    }
+}
 
 function applyFilter(){
     let acc = document.getElementById("filterAcc").value.toLowerCase();
+
     filteredData = fullData.filter(d=>{
         let accNo = (d.acc_no || "").toString().toLowerCase();
         let status = (d.status || "").toString().toUpperCase();
+        
         let matchAcc = (!acc || accNo.includes(acc));
+        
+        // JIKA ADA CARIAN: Abaikan sekatan tab (cari semua status LOCK & PAID)
+        // JIKA TIADA CARIAN: Ikut tab semasa (LOCK atau PAID)
         let matchStatus = acc ? true : (status === currentViewStatus);
+        
         return matchAcc && matchStatus;
     });
+
     currentPage = 1;
     renderTable();
 }
 
 function exportToExcel() {
-    if(filteredData.length === 0) { showToast("No row matrices found to export!", "warning"); return; }
+    if(filteredData.length === 0) {
+        alert("Tiada data untuk diexport!");
+        return;
+    }
 
     let excelData = filteredData.map(row => {
         let pDate = new Date(row.promise);
         let cDate = new Date(row.created);
+
         return {
             "ACC NO": row.acc_no, 
             "BRANCH": row.branch,
             "AMOUNT": Number(row.amount || 0), 
             "STATUS": row.status,
+            // Hantar objek Date sebenar supaya Excel boleh sort dengan betul
             "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate, 
             "REMARKS": row.remarks || "",
             "CREATED TIME": isNaN(cDate.getTime()) ? row.created : cDate
         };
     });
+
     let worksheet = XLSX.utils.json_to_sheet(excelData, { cellDates: true });
 
     let range = XLSX.utils.decode_range(worksheet['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+        // Kolum E adalah PTP DATE (Indeks 4)
         let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 4});
-        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') { worksheet[ptpCellRef].z = 'd-mmm-yyyy'; }
+        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') {
+            worksheet[ptpCellRef].z = 'd-mmm-yyyy'; // Hasil: 6-Jun-2026
+        }
+
+        // Kolum G adalah CREATED TIME (Indeks 6)
         let createdCellRef = XLSX.utils.encode_cell({r: R, c: 6});
-        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') { worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; }
+        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') {
+            worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; // Hasil: 6-Jun-2026 03:30 PM
+        }
     }
 
     let workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "MyLocks");
+
     let fileName = `MyLocks_${user}_${currentViewStatus}_${new Date().toISOString().slice(0,10)}.xlsx`;
     XLSX.writeFile(workbook, fileName);
-    showToast("Excel sheet downloaded.", "success");
 }
     
 function resetFilter(){
     document.getElementById("filterAcc").value="";
     filteredData = fullData;
     currentPage = 1;
-    switchView(currentViewStatus);
-    showToast("Data log filter reset.", "success");
+    renderTable();
 }
 
 function toggleRemark(el){
@@ -1378,7 +1590,10 @@ function toggleRemark(el){
     }
 }
 
-document.getElementById("filterAcc").addEventListener("keypress",function(e){ if(e.key === "Enter"){ applyFilter(); } });
+document.getElementById("filterAcc").addEventListener("keypress",function(e){
+    if(e.key === "Enter"){ applyFilter(); }
+});
+
 </script>
 
 </body>
