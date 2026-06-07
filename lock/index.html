@@ -1450,11 +1450,12 @@ function renderTable(){
         let shortRemark = remark.length > 40 ? remark.substring(0,40)+"..." : remark;
 
         // Buat design badge untuk status
-    let statusBadge = d.status === "PAID" 
-        ? `<span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700; letter-spacing:0.5px;">PAID</span>`
-        : `<span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700; letter-spacing:0.5px;">LOCK</span>`;
-
-    // Pastikan background merah OVERDUE hanya untuk akaun yang masih LOCK
+// GANTIKAN KOD statusBadge KEPADA KOD DI BAWAH INI
+        let statusBadge = d.status === "PAID" 
+            ? `<div style="text-align:left;"><span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span><span style="display:block; font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">by ${d.paid_by || '-'}</span></div>`
+            : `<div style="text-align:left;"><span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span></div>`;
+    
+        // Pastikan background merah OVERDUE hanya untuk akaun yang masih LOCK
     let isRowOverdue = (isOverdue && d.status !== "PAID");
 
         html += `
@@ -1537,6 +1538,7 @@ function exportToExcel() {
             "BRANCH": row.branch,
             "AMOUNT": Number(row.amount || 0), 
             "STATUS": row.status,
+            "PAID BY": row.paid_by || "-", // <-- TAMBAH BARIS INI
             // Hantar objek Date sebenar supaya Excel boleh sort dengan betul
             "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate, 
             "REMARKS": row.remarks || "",
