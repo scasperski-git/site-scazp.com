@@ -785,6 +785,8 @@ async function checkLock(){
             let statusText = isPaid ? "ALREADY PAID" : "LOCKED";
             let statusColor = isPaid ? "#10b981" : "#f59e0b"; 
 
+            let paidByInfo = (isPaid && data.paid_by) ? `<div style='font-size: 11px; color: #64748b; margin-top: 6px; font-weight: 600;'>Verified by: ${data.paid_by}</div>` : "";
+
             if(!isPaid && today > promiseDate){ statusText = "EXPIRED"; statusColor = "#ef4444"; }
 
             let actionButton = "";
@@ -794,7 +796,7 @@ async function checkLock(){
 
             result.innerHTML=
             "<div class='result-card'>"+
-            "<div class='status-box'><span style='background:"+statusColor+"'>"+statusText+"</span></div>"+
+            "<div class='status-box'><span style='background:"+statusColor+"'>"+statusText+"</span>"+paidByInfo+"</div>"+
             "<div class='created-meta'>Created by "+data.dca_id+" • "+created+"</div>"+
             "<div class='row'><div class='col'><div class='label'>ACCOUNT NO</div><div class='value'>"+data.acc_no+"</div></div>"+
             "<div class='col'><div class='label'>BRANCH</div><div class='value'>"+data.branch+"</div></div></div>"+
@@ -963,8 +965,8 @@ function renderTable() {
             : `<div style="max-width: 200px; word-break: break-word;">${safeRemark}</div>`;
 
         let statusBadge = d.status === "PAID" 
-            ? `<span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span>`
-            : `<span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span>`;
+            ? `<div style="text-align:left;"><span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span><span style="display:block; font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">by ${d.paid_by || '-'}</span></div>`
+            : `<div style="text-align:left;"><span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span></div>`;
 
         html += `
         <tr style="${rowBg}">
@@ -1004,6 +1006,7 @@ function exportToExcel() {
             "BRANCH": row.branch,
             "AMOUNT (RM)": Number(row.amount || 0), 
             "STATUS": row.status,
+            "PAID BY": row.paid_by || "-", // <-- TAMBAH BARIS INI
             "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate, 
             "REMARKS": row.remarks || "-",
             "CREATED TIME": isNaN(cDate.getTime()) ? row.created : cDate
