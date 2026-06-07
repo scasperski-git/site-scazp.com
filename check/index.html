@@ -116,7 +116,7 @@ body {
     cursor: pointer;
     background: transparent;
     color: #cbd5e1;
-    display: flex;
+    display: flex; 
     align-items: center;
     justify-content: flex-start;
     gap: 12px;
@@ -144,7 +144,7 @@ body {
 
 .logout-btn { 
     margin-top: auto;
-    color: #fca5a5 !important;
+    color: #fca5a5 !important; 
 }
 .logout-btn:hover {
     background: rgba(239, 68, 68, 0.15);
@@ -279,6 +279,7 @@ body.list-mode .container {
 }
 
 /* ===== TAB STYLES ===== */
+/* ===== TAB STYLES ===== */
 .tab-container {
     display: flex;
     gap: 10px;
@@ -297,11 +298,12 @@ body.list-mode .container {
     transition: all 0.3s ease;
 }
 
+/* Efek bila mouse lalu di atas butang (Hover) */
 .tab-btn:hover {
     background: #f8fafc;
-    color: #4f46e5;
+    color: #4f46e5; /* Teks bertukar biru */
     border-color: #cbd5e1;
-    transform: translateY(-2px);
+    transform: translateY(-2px); /* Butang naik sikit */
     box-shadow: 0 4px 8px rgba(0,0,0,0.05);
 }
 
@@ -312,13 +314,14 @@ body.list-mode .container {
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 
+/* Efek hover khusus untuk butang yang sedang aktif */
 .tab-btn.active:hover {
     background: #4338ca;
     color: white;
     transform: translateY(-2px);
 }
 
-/* ===== TABLE STYLES ===== */
+/* ===== TABLE STYLES (NEW) ===== */
 .filter-card {
     padding: 16px 20px;
     background: #ffffff;
@@ -395,9 +398,13 @@ table th {
 table tr:last-child td { border-bottom: none; }
 table tr:hover td { background: #f8fafc; }
 
+/* CENTER AMOUNT COLUMN */
 th:nth-child(4), td:nth-child(4) {
     text-align: center;
     font-weight: 600;
+}
+/* PREVENT DATE COLUMN FROM WRAPPING */
+th:nth-child(4), td:nth-child(4) {
     white-space: nowrap;
 }
 
@@ -424,6 +431,7 @@ th:nth-child(4), td:nth-child(4) {
 .page-btn:disabled { color: #94a3b8; cursor: not-allowed; }
 #pageInfo { flex: 1; text-align: center; font-weight: 600; font-size: 13px; }
 
+/* ===== BUTTON EXPORT EXCEL ===== */
 .btn-export {
     background: #1e293b;
     color: white;
@@ -449,6 +457,7 @@ th:nth-child(4), td:nth-child(4) {
     box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
 }
 
+/* JS INJECTED RESULT CARD (EXISTING) */
 .result-card {
     margin-top: 24px;
     padding: 24px;
@@ -461,12 +470,10 @@ th:nth-child(4), td:nth-child(4) {
 }
 .status-box { text-align: center; margin-bottom: 16px; }
 .status-box span {
-    display: inline-block; padding: 8px 24px;
-    color: white;
+    display: inline-block; padding: 8px 24px; color: white;
     font-weight: 700; font-size: 14px; border-radius: 30px; letter-spacing: 1px;
 }
-.created-meta { font-size: 12px; color: #64748b; text-align: center; margin-bottom: 24px;
-    padding-bottom: 16px; border-bottom: 1px dashed #e2e8f0; }
+.created-meta { font-size: 12px; color: #64748b; text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px dashed #e2e8f0; }
 .row { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 16px; }
 .col { flex: 1; word-break: break-word; }
 .label { font-weight: 600; color: #64748b; font-size: 11px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -501,47 +508,12 @@ th:nth-child(4), td:nth-child(4) {
 .session-box i { font-size: 48px; color: #ef4444; margin-bottom: 16px; }
 .session-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #0f172a; }
 
-/* ===== PREMIUM TOAST NOTIFICATION ===== */
-.toast-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 10000;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.toast {
-    background: #ffffff;
-    color: #334155;
-    padding: 16px 20px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.02);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 13px;
-    font-weight: 500;
-    min-width: 280px;
-    max-width: 380px;
-    border-left: 4px solid #cbd5e1;
-    transform: translateX(120%);
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.toast.show { transform: translateX(0); }
-.toast i { font-size: 16px; }
-.toast-success { border-left-color: #10b981; }
-.toast-success i { color: #10b981; }
-.toast-error { border-left-color: #ef4444; }
-.toast-error i { color: #ef4444; }
-.toast-warning { border-left-color: #f59e0b; }
-.toast-warning i { color: #f59e0b; }
-
 /* ==========================================
    MOBILE RESPONSIVE (BOTTOM NAV STYLE)
    ========================================== */
 @media (max-width: 899px) {
     .app-layout { flex-direction: column; }
+    
     .sidebar {
         position: sticky; top: 0; width: 100%; height: auto; flex-direction: row; 
         justify-content: space-between; align-items: center; padding: 45px 20px 16px 20px;
@@ -550,11 +522,12 @@ th:nth-child(4), td:nth-child(4) {
     .brand { margin-bottom: 0; font-size: 18px; }
     .brand i { font-size: 20px; }
     .user-profile { margin-bottom: 0; text-align: right; background: transparent; border: none; padding: 0; }
+    #userInfo { font-size: 12px; }
 
     .nav-menu {
         position: fixed; bottom: 0; left: 0; width: 100%; flex-direction: row;
-        background: #ffffff; padding: 12px 10px; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); z-index: 50;
-        border-radius: 24px 24px 0 0; justify-content: space-around; gap: 5px;
+        background: #ffffff; padding: 12px 10px; box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+        z-index: 50; border-radius: 24px 24px 0 0; justify-content: space-around; gap: 5px;
     }
     .nav-btn {
         flex-direction: column; gap: 6px; padding: 8px 4px; font-size: 11px;
@@ -565,11 +538,13 @@ th:nth-child(4), td:nth-child(4) {
     .nav-btn i { font-size: 20px; margin: 0; width: auto; }
     .nav-btn:hover { transform: none; background: #f1f5f9; color: #4f46e5; }
     .nav-btn.active { background: #eef2ff; color: #4f46e5; box-shadow: none; }
+    #navCheckLock, #navViewRecords { display: flex !important; }
     .logout-btn { margin-top: 0; color: #ef4444 !important; background: transparent; }
 
     .main-content { margin-left: 0; padding: 16px 8px 100px 8px; }
     .container { padding: 20px 16px; border-radius: 16px; }
 
+    /* Fix Search Filter Mobile */
     .search-bar-row, .filter-input-group { flex-direction: column; gap: 16px; }
     .search-bar-row input, .filter-input-group input { width: 100%; flex: none; }
     .button-group, .mini-actions { flex-direction: column; width: 100%; }
@@ -579,14 +554,8 @@ th:nth-child(4), td:nth-child(4) {
     .value { font-size: 13px; }
     .amount { font-size: 20px; }
     .result-card, .no-lock, .loading { padding: 16px; }
+    
     table th, table td { padding: 14px 10px; font-size: 11px; }
-
-    /* Toast Mobile alignment */
-    .toast-container {
-        top: 10px; left: 50%; right: auto; transform: translateX(-50%); width: calc(100% - 32px);
-    }
-    .toast { min-width: 100%; transform: translateY(-150%); }
-    .toast.show { transform: translateY(0); }
 }
 </style>
 
@@ -613,7 +582,7 @@ th:nth-child(4), td:nth-child(4) {
             <button class="nav-btn" id="navViewRecords" onclick="viewRecords()">
                 <i class="fa fa-list-check"></i> <span>View Records</span>
             </button>
-           
+            
             <button id="masterBtn" class="nav-btn" onclick="goMaster()" style="display:none">
                 <i class="fa-solid fa-crown"></i> <span>Master Menu</span>
             </button>
@@ -655,11 +624,11 @@ th:nth-child(4), td:nth-child(4) {
             <div id="listSection" style="display:none;">
                 <div class="form-title" style="margin-bottom: 15px;">All Records</div>
 
-                <div class="tab-container">
-                    <button id="tabActive" class="tab-btn active" onclick="switchView('LOCK')">Active Locks</button>
-                    <button id="tabPaid" class="tab-btn" onclick="switchView('PAID')">Paid History</button>
-                    <button id="tabAll" class="tab-btn" onclick="switchView('ALL')">View All</button>
-                </div>
+<div class="tab-container">
+    <button id="tabActive" class="tab-btn active" onclick="switchView('LOCK')">Active Locks</button>
+    <button id="tabPaid" class="tab-btn" onclick="switchView('PAID')">Paid History</button>
+    <button id="tabAll" class="tab-btn" onclick="switchView('ALL')">View All</button>
+</div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 10px;">
                     <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
@@ -671,22 +640,22 @@ th:nth-child(4), td:nth-child(4) {
                     </button>
                 </div>
 
-                <div class="table-scroll">
-                    <table style="min-width: 600px;">
-                        <thead>
-                            <tr>
-                                <th>DCA</th>
-                                <th>ACC NO</th>
-                                <th>BRANCH</th>
-                                <th>AMOUNT</th>
-                                <th>STATUS</th>
-                                <th>PTP DATE</th>
-                                <th>REMARKS</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lockTable"></tbody>
-                    </table>
-                </div>
+<div class="table-scroll">
+    <table style="min-width: 600px;">
+        <thead>
+            <tr>
+                <th>DCA</th>
+                <th>ACC NO</th>
+                <th>BRANCH</th>
+                <th>AMOUNT</th>
+                <th>STATUS</th>
+                <th>PTP DATE</th>
+                <th>REMARKS</th>
+            </tr>
+        </thead>
+        <tbody id="lockTable"></tbody>
+    </table>
+</div>
 
                 <div class="pagination-bar">
                     <button id="prevBtn" onclick="prevPage()" class="page-btn"><i class="fa fa-chevron-left"></i></button>
@@ -700,49 +669,14 @@ th:nth-child(4), td:nth-child(4) {
 
 </div>
 
-<div id="toastContainer" class="toast-container"></div>
-
-<div id="sessionPopup">
-    <div class="session-box">
-        <i class="fa fa-lock"></i>
-        <div class="session-title" id="sessionTitle">Session Expired</div>
-        <div class="session-msg" id="sessionMsg">Please login again.</div>
-        <div class="session-count">Redirecting to login...</div>
-    </div>
-</div>
-
 <script src="../lockconfig.js"></script>
 
 <script>
 // ==========================================
-// TOAST CONTROLLER SYSTEM (TAMBAHAN BARU)
-// ==========================================
-function showToast(message, type = "success", duration = 4000) {
-    const container = document.getElementById("toastContainer");
-    if (!container) return;
-
-    const toast = document.createElement("div");
-    toast.className = `toast toast-${type}`;
-
-    let icon = "fa-circle-check";
-    if (type === "error") icon = "fa-circle-xmark";
-    if (type === "warning") icon = "fa-triangle-exclamation";
-
-    toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
-    container.appendChild(toast);
-
-    setTimeout(() => toast.classList.add("show"), 50);
-
-    setTimeout(() => {
-        toast.classList.remove("show");
-        toast.addEventListener("transitionend", () => toast.remove());
-    }, duration);
-}
-
-// ==========================================
 // INITIALIZATION & STORAGE CHECK
 // ==========================================
-const api = API_URL;
+
+const api = API_URL; 
 const user = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
 const role = localStorage.getItem("lock_role") || sessionStorage.getItem("lock_role");
 const token = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
@@ -751,8 +685,8 @@ const type = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_t
 if(!type || !token){ logout(); }
 
 if(type == "lock"){
-    showToast("Access denied! Redirecting...", "error");
-    setTimeout(() => { window.location="../lock/"; }, 1500);
+    alert("Access denied");
+    window.location="../lock/";
 }
 
 if(type === "master"){
@@ -764,6 +698,7 @@ document.getElementById("userInfo").innerHTML = "User: "+(user || "-")+" | Role:
 // ==========================================
 // NAVIGATION (TAB SWITCHING)
 // ==========================================
+
 function updateNavState(activeId) {
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById(activeId).classList.add('active');
@@ -779,6 +714,7 @@ function goCheckLock() {
 // ==========================================
 // SECTION 1: SEARCH & DISPLAY FUNCTIONS
 // ==========================================
+
 const input=document.getElementById("acc_no");
 const result=document.getElementById("result");
 const checkBtn=document.getElementById("checkBtn");
@@ -790,8 +726,7 @@ window.onload=()=>{ input.focus(); };
 function formatDate(dateStr){
     if(!dateStr) return "-";
     if(dateStr.includes("-") && dateStr.split("-")[0].length==4){
-        var p=dateStr.split("-");
-        var year=p[0]; var month=parseInt(p[1])-1; var day=p[2];
+        var p=dateStr.split("-"); var year=p[0]; var month=parseInt(p[1])-1; var day=p[2];
         var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
         return day+" "+m[month]+" "+year;
     }
@@ -801,8 +736,7 @@ function formatDate(dateStr){
         return ("0"+day).slice(-2)+" "+m[month]+" "+year;
     }
     if(dateStr.includes("T")){
-        var d=new Date(dateStr);
-        var day=("0"+d.getDate()).slice(-2); var month=d.getMonth(); var year=d.getFullYear();
+        var d=new Date(dateStr); var day=("0"+d.getDate()).slice(-2); var month=d.getMonth(); var year=d.getFullYear();
         var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
         return day+" "+m[month]+" "+year;
     }
@@ -814,8 +748,7 @@ function formatDateTime(dateStr){
     const parts = dateStr.split(" ");
     if(parts.length < 2) return dateStr;
     const datePart = parts[0].split("/"); const timePart = parts[1].split(":");
-    const day = datePart[0]; const monthIndex = parseInt(datePart[1]) - 1;
-    const year = datePart[2];
+    const day = datePart[0]; const monthIndex = parseInt(datePart[1]) - 1; const year = datePart[2];
     const hour = timePart[0]; const minute = timePart[1];
     const m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
     return day+" "+m[monthIndex]+" "+year+" "+hour+":"+minute;
@@ -823,12 +756,9 @@ function formatDateTime(dateStr){
 
 async function checkLock(){
     const acc=input.value.trim();
-    if(!acc){ 
-        showToast("Enter Account No before searching!", "warning");
-        input.focus(); 
-        return; 
-    }
+    if(!acc){ alert("Enter Account No"); input.focus(); return; }
     if(isLoading) return;
+    
     isLoading=true; checkBtn.disabled=true;
     result.innerHTML= "<div class='loading'>Checking Lock Status<div class='spinner'></div></div>";
 
@@ -843,7 +773,6 @@ async function checkLock(){
         }
 
         if(data.status === "LOCK" || data.status === "PAID"){
-            showToast("Record retrieved successfully.", "success");
             const formattedDate=formatDate(data.valid);
             const created=formatDateTime(data.created);
             const amount = "RM " + Number(data.amount || 0).toLocaleString("en-MY",{ minimumFractionDigits:2, maximumFractionDigits:2 });
@@ -875,41 +804,35 @@ async function checkLock(){
             "<div class='label'>REMARKS</div><div class='remark'>"+(data.remarks || "-")+"</div>"+
             actionButton + "</div>";
         } else {
-            showToast("No active lock found for this account number.", "warning");
             result.innerHTML= "<div class='no-lock'>NO LOCK FOUND</div>";
         }
-    }catch(err){ 
-        showToast("System error failed to reach database.", "error");
-        result.innerHTML= "<div class='no-lock'>SYSTEM ERROR. TRY AGAIN.</div>"; 
-    }
+    }catch(err){ result.innerHTML= "<div class='no-lock'>SYSTEM ERROR. TRY AGAIN.</div>"; }
 
     checkBtn.disabled=false; isLoading=false;
 }
 
 async function markAsPaid(acc) {
     if(!confirm("Are you sure you want to mark Account " + acc + " as PAID?")) return;
+
     checkBtn.disabled = true;
     result.innerHTML = "<div class='loading'>Updating to PAID...<div class='spinner'></div></div>";
+
     try {
         const formData = new URLSearchParams({ action: "mark_paid", acc_no: acc, token: token, api_key: "SCZP_SECURE_2026" });
         const res = await fetch(api, { method: "POST", body: formData });
         const textResponse = await res.text();
+
         if(textResponse === "PAID_SUCCESS") {
-            showToast("Account " + acc + " successfully marked as PAID!", "success");
+            alert("Account " + acc + " successfully marked as PAID!");
             input.value = acc; checkLock(); 
         } else {
-            showToast("Failed to update status. Record state might have changed.", "error");
-            checkLock();
+            alert("Failed to mark as PAID. Please try again."); checkLock();
         }
-    } catch (err) { 
-        showToast("System connection error. Update aborted.", "error");
-        checkBtn.disabled = false;
-    }
+    } catch (err) { alert("System error. Check your connection."); checkBtn.disabled = false; }
 }
 
 function newSearch(){
     input.value=""; result.innerHTML=""; checkBtn.disabled=false; input.focus();
-    showToast("Search field cleared.", "success");
 }
 
 checkBtn.addEventListener("click",checkLock);
@@ -920,27 +843,34 @@ input.addEventListener("input",function(){ this.value=this.value.replace(/[^0-9]
 // ==========================================
 // SECTION 2: VIEW RECORDS & EXPORT LOGIC
 // ==========================================
+
 let fullData = [];
 let filteredData = [];
 let currentPage = 1;
 const pageSize = 10;
-let currentViewStatus = "LOCK";
+let currentViewStatus = "LOCK"; // Default paparan adalah LOCK
 
 function switchView(viewType) {
     currentViewStatus = viewType;
+    
+    // 1. Buang warna aktif dari semua butang
     document.getElementById("tabActive").classList.remove("active");
     document.getElementById("tabPaid").classList.remove("active");
     document.getElementById("tabAll").classList.remove("active");
     
+    // 2. Beri warna aktif kepada butang yang ditekan
     if(viewType === "LOCK") document.getElementById("tabActive").classList.add("active");
     if(viewType === "PAID") document.getElementById("tabPaid").classList.add("active");
     if(viewType === "ALL") document.getElementById("tabAll").classList.add("active");
     
+    // 3. Filter data mengikut status (LOCK, PAID, atau ALL)
     filteredData = fullData.filter(d => {
-        if(currentViewStatus === "ALL") return true;
+        if(currentViewStatus === "ALL") return true; // Tunjuk semua data
+        
         let status = (d.status || "").toString().toUpperCase();
         return status === currentViewStatus;
     });
+
     currentPage = 1;
     renderTable();
 }
@@ -950,6 +880,7 @@ async function viewRecords(){
     document.getElementById("listSection").style.display="block";
     document.body.classList.add("list-mode");
     updateNavState('navViewRecords');
+
     document.getElementById("lockTable").innerHTML = 
     "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records...</td></tr>";
 
@@ -958,28 +889,30 @@ async function viewRecords(){
     document.getElementById("nextBtn").disabled = true;
 
     try{
-        let timestamp = new Date().getTime();
+        let timestamp = new Date().getTime(); 
         const res = await fetch(api+"?action=dashboard&token="+token+"&dca=ALL&api_key=SCZP_SECURE_2026&t=" + timestamp);
-        const json = await res.json();
+        const json = await res.json(); 
+
         if(json.status === "UNAUTHORIZED"){
             if(json.reason === "SESSION_REPLACED") showSessionPopup("DEVICE");
             else showSessionPopup("EXPIRED");
             return;
         } else if(json.status === "ACCESS_DENIED"){
-            showToast("Access Denied to database logs.", "error");
             document.getElementById("lockTable").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px'>Access Denied</td></tr>";
             return;
         }
 
         fullData = (json.data || []).sort((a,b)=> new Date(b.created) - new Date(a.created));
-        showToast("Database records synced.", "success");
+        
+        // Panggil logik tab di sini untuk filter awal
         switchView("LOCK");
+
     }catch(e){
-        showToast("Error pulling data grid structure.", "error");
         document.getElementById("lockTable").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px'>Error loading data.</td></tr>";
     }
 }
 
+// Fungsi baca remark penuh
 function toggleRemark(el){
     let full = el.getAttribute("data-full");
     let short = el.getAttribute("data-short");
@@ -1006,12 +939,14 @@ function renderTable() {
 
     pageData.forEach(d => {
         let amount = "RM " + Number(d.amount || 0).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        
         let pDate = new Date(d.promise);
         pDate.setHours(0, 0, 0, 0);
         
         let isExpired = pDate < today && d.status !== "PAID";
         let dateColor = isExpired ? "color: #ef4444; font-weight: 700;" : "";
         let rowBg = isExpired ? "background: #fef2f2;" : "";
+        
         let dateStr = isNaN(pDate) ? d.promise : pDate.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
 
         let remark = d.remarks || "-";
@@ -1036,6 +971,7 @@ function renderTable() {
             <td>${d.dca || "-"}</td>
             <td style="font-weight: 600;">${d.acc_no || "-"}</td>
             <td>${d.branch || "-"}</td>
+            <!-- WARNA AMOUNT DITUKAR KEPADA HITAM (#0f172a) & BOLD (700) -->
             <td style="text-align: center; font-weight: 700; color: #0f172a;">${amount}</td>
             <td>${statusBadge}</td>
             <td style="${dateColor}">${dateStr}</td>
@@ -1056,10 +992,7 @@ function nextPage(){ if(currentPage * pageSize < filteredData.length){ currentPa
 function prevPage(){ if(currentPage > 1){ currentPage--; renderTable(); } }
 
 function exportToExcel() {
-    if(filteredData.length === 0) { 
-        showToast("No data rows available to export!", "warning");
-        return; 
-    }
+    if(filteredData.length === 0) { alert("Tiada data untuk diexport!"); return; }
 
     let excelData = filteredData.map(row => {
         let pDate = new Date(row.promise);
@@ -1088,13 +1021,14 @@ function exportToExcel() {
 
     let workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Check_Records");
+    // TAMBAHAN: Nama fail membezakan LOCK dan PAID
     let fileName = `CheckRecords_${user}_${currentViewStatus}_${new Date().toISOString().slice(0,10)}.xlsx`;
     XLSX.writeFile(workbook, fileName);
-    showToast("Excel spreadsheet downloaded.", "success");
 }
-
+// Master Navigation
 function goMaster(){ window.location="../menumaster/"; }
 
+// Logout & Clear Data
 function logout(){
     localStorage.clear(); sessionStorage.clear();
     window.location="../checklock-login/";
@@ -1103,7 +1037,9 @@ function logout(){
 /* =========================================
    SINGLE DEVICE LOGIN & SMART PAUSE LOGIC
 ========================================= */
+
 const CHECK_INTERVAL = 60000;
+
 function verifySessionWithServer() {
     if (document.hidden) return; 
     const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
@@ -1123,6 +1059,7 @@ verifySessionWithServer();
 setInterval(verifySessionWithServer, CHECK_INTERVAL);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) verifySessionWithServer(); });
 
+// Popup UI Controller
 function showSessionPopup(type){
     let title="Session Expired";
     let msg="Your session has expired. Please login again.";
@@ -1135,6 +1072,15 @@ function showSessionPopup(type){
     setTimeout(()=>{ localStorage.clear(); sessionStorage.clear(); window.location="../checklock-login/"; }, 3000);
 }
 </script>
+
+<div id="sessionPopup">
+    <div class="session-box">
+        <i class="fa fa-lock"></i>
+        <div class="session-title" id="sessionTitle">Session Expired</div>
+        <div class="session-msg" id="sessionMsg">Please login again.</div>
+        <div class="session-count">Redirecting to login...</div>
+    </div>
+</div>
 
 </body>
 </html>
