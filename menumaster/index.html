@@ -920,9 +920,10 @@ function renderTable() {
                </div>`
             : `<div style="max-width: 200px; word-break: break-word;">${safeRemark}</div>`;
 
+// GANTIKAN KOD statusBadge KEPADA KOD DI BAWAH INI
         let statusBadge = d.status === "PAID" 
-            ? `<span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span>`
-            : `<span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span>`;
+            ? `<div style="text-align:left;"><span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span><span style="display:block; font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">by ${d.paid_by || '-'}</span></div>`
+            : `<div style="text-align:left;"><span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span></div>`;
 
         html += `
         <tr style="${rowBg}">
@@ -1043,6 +1044,7 @@ function generateExcel(dataArray, filePrefix) {
             "BRANCH": row.branch,
             "AMOUNT (RM)": Number(row.amount || 0), 
             "STATUS": row.status,
+            "PAID BY": row.paid_by || "-", // <-- TAMBAH BARIS INI
             "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate, 
             "REMARKS": row.remarks || "-",
             "CREATED TIME": isNaN(cDate.getTime()) ? row.created : cDate
