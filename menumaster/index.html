@@ -629,6 +629,18 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
     font-size: 11px; 
 }
 
+/* GRID 3 KOTAK UNTUK SUMMARY */
+.summary-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 899px) {
+    .summary-grid-3 { grid-template-columns: 1fr; gap: 12px; }
+}
+
 </style>
 
 </head>
@@ -672,15 +684,20 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
                     <i class="fa-solid fa-clock-rotate-left"></i> Auto refresh every 2 min &nbsp;|&nbsp; <span id="lastUpdate">Last update: -</span>
                 </div>
 
-                <div class="summary-grid">
+<div class="summary-grid-3">
                     <div class="box-card">
-                        <div>Total Lock</div>
+                        <div>Total Active Lock</div>
                         <div id="sumLock">0</div>
                     </div>
 
                     <div class="box-card">
-                        <div>Total Lock Amount</div>
-                        <div id="sumAmount">RM0</div>
+                        <div>Total Mark Paid</div>
+                        <div id="sumPaid" style="font-size: 22px; font-weight: 700; color: #10b981;">0</div>
+                    </div>
+
+                    <div class="box-card">
+                        <div>Total Lock Amount (RM)</div>
+                        <div id="sumAmount" style="font-size: 22px; font-weight: 700; color: #8b5cf6;">RM0</div>
                     </div>
                 </div>
 
@@ -841,6 +858,7 @@ function loadSummary(){
     .then(r=>r.json())
     .then(data=>{
         document.getElementById("sumLock").innerText=data.totalLock;
+        document.getElementById("sumPaid").innerText=data.totalPaid || 0;
         document.getElementById("sumAmount").innerText=
         "RM "+Number(data.totalAmount).toLocaleString("en-MY",{
             minimumFractionDigits:2, maximumFractionDigits:2
@@ -1289,6 +1307,8 @@ function initTableUpgrades() {
 
 // Initialize upgrades automatically when the DOM is ready
 window.addEventListener('DOMContentLoaded', initTableUpgrades);
+
+
 </script>
 
 <div id="sessionPopup">
