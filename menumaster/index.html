@@ -854,13 +854,19 @@ function loadUsers(){
 }
 
 function loadSummary(){
-    fetch(api+"?action=summary&token="+token+"&api_key=SCZP_SECURE_2026")
+    // 🔥 CACHE BUSTER: Tambah masa (timestamp) supaya Google tak simpan memori lama
+    let timestamp = new Date().getTime(); 
+    
+    fetch(api+"?action=summary&token="+token+"&api_key=SCZP_SECURE_2026&t=" + timestamp)
     .then(r=>r.json())
     .then(data=>{
-        document.getElementById("sumLock").innerText=data.totalLock;
+        document.getElementById("sumLock").innerText=data.totalLock || 0;
+        
+        // Kemaskini jumlah Mark Paid
         document.getElementById("sumPaid").innerText=data.totalPaid || 0;
+
         document.getElementById("sumAmount").innerText=
-        "RM "+Number(data.totalAmount).toLocaleString("en-MY",{
+        "RM "+Number(data.totalAmount || 0).toLocaleString("en-MY",{
             minimumFractionDigits:2, maximumFractionDigits:2
         });
 
@@ -879,6 +885,9 @@ function loadSummary(){
         var now=new Date();
         var time=now.toLocaleTimeString("en-MY",{ hour:'2-digit', minute:'2-digit', second:'2-digit' });
         document.getElementById("lastUpdate").innerText="Last update: "+time;
+    })
+    .catch(err => {
+        console.log("Error loading summary:", err);
     });
 }
 
