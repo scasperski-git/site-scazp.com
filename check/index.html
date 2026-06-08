@@ -1154,17 +1154,23 @@ function sortTableData(colId) {
         if (colId === 'amount') {
             valA = parseFloat(valA) || 0;
             valB = parseFloat(valB) || 0;
+            if (valA < valB) return currentSort.dir === 'asc' ? -1 : 1;
+            if (valA > valB) return currentSort.dir === 'asc' ? 1 : -1;
+            return 0;
         } else if (colId === 'promise' || colId === 'created') {
             valA = new Date(valA).getTime() || 0;
             valB = new Date(valB).getTime() || 0;
+            if (valA < valB) return currentSort.dir === 'asc' ? -1 : 1;
+            if (valA > valB) return currentSort.dir === 'asc' ? 1 : -1;
+            return 0;
         } else {
-            valA = valA.toString().toLowerCase();
-            valB = valB.toString().toLowerCase();
+            valA = valA.toString();
+            valB = valB.toString();
+            
+            // 🔥 GUNA NATURAL SORT (BACA TEKS SEBAGAI NOMBOR)
+            let comparison = valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' });
+            return currentSort.dir === 'asc' ? comparison : -comparison;
         }
-
-        if (valA < valB) return currentSort.dir === 'asc' ? -1 : 1;
-        if (valA > valB) return currentSort.dir === 'asc' ? 1 : -1;
-        return 0;
     });
 
     currentPage = 1; // Reset pagination
