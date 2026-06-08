@@ -1146,25 +1146,37 @@ function sortTableData(colId) {
     // Auto-detect target array
     let targetArray = typeof filteredTableData !== 'undefined' ? filteredTableData : (typeof filteredData !== 'undefined' ? filteredData : []);
 
-    targetArray.sort((a, b) => {
+targetArray.sort((a, b) => {
         let valA = a[colId] || "";
         let valB = b[colId] || "";
         
-        if (colId === 'amount') {
+        if (colId === 'acc_no') {
+            // 🔥 METHOD BARU: Susun ikut bilangan digit (length) dahulu, kemudian baru ikut nilai
+            let strA = valA.toString().trim();
+            let strB = valB.toString().trim();
+            
+            if (strA.length !== strB.length) {
+                // Jika panjang tak sama, yang kurang digit duduk atas
+                return currentSort.dir === 'asc' ? (strA.length - strB.length) : (strB.length - strA.length);
+            } else {
+                // Jika bilangan digit sama, baru susun nilai dari kecil ke besar macam biasa
+                return currentSort.dir === 'asc' ? strA.localeCompare(strB) : strB.localeCompare(strA);
+            }
+        } 
+        else if (colId === 'amount') {
             valA = parseFloat(valA.toString().replace(/,/g, '')) || 0;
             valB = parseFloat(valB.toString().replace(/,/g, '')) || 0;
-        } else if (colId === 'promise' || colId === 'created') {
+        } 
+        else if (colId === 'promise' || colId === 'created') {
             valA = new Date(valA).getTime() || 0;
             valB = new Date(valB).getTime() || 0;
-        } else if (colId === 'acc_no') {
-            // 🔥 FOOLPROOF METHOD: Paksa tukar jadi nombor matematik dan buang huruf kalau ada
-            valA = parseInt(valA.toString().replace(/\D/g, ''), 10) || 0;
-            valB = parseInt(valB.toString().replace(/\D/g, ''), 10) || 0;
-        } else {
+        } 
+        else {
             valA = valA.toString().toLowerCase();
             valB = valB.toString().toLowerCase();
         }
 
+        // Logic sort standard untuk kolum-kolum selain acc_no
         if (valA < valB) return currentSort.dir === 'asc' ? -1 : 1;
         if (valA > valB) return currentSort.dir === 'asc' ? 1 : -1;
         return 0;
