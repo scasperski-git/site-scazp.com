@@ -1052,12 +1052,14 @@ function generateExcel(dataArray, filePrefix) {
     });
 
     let worksheet = XLSX.utils.json_to_sheet(excelData, { cellDates: true });
-    let range = XLSX.utils.decode_range(worksheet['!ref']);
+let range = XLSX.utils.decode_range(worksheet['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-        let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 5});
-        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') { worksheet[ptpCellRef].z = 'd-mmm-yyyy'; }
-        let createdCellRef = XLSX.utils.encode_cell({r: R, c: 7});
-        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') { worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; }
+        let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 6});
+        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') { worksheet[ptpCellRef].z = 'd-mmm-yyyy';
+        }
+        let createdCellRef = XLSX.utils.encode_cell({r: R, c: 8});
+        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') { worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM';
+        }
     }
 
     let workbook = XLSX.utils.book_new();
