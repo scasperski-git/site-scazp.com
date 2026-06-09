@@ -603,45 +603,6 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
     color: #94a3b8; 
     font-size: 11px; 
 }
-
-/* ===== PREMIUM MANUAL REFRESH BUTTON ===== */
-.btn-refresh-premium {
-    background: linear-gradient(135deg, #4f46e5, #3b82f6);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
-}
-
-.btn-refresh-premium:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
-    background: linear-gradient(135deg, #4338ca, #2563eb);
-}
-
-.btn-refresh-premium:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
-}
-
-.btn-refresh-premium:disabled {
-    background: #94a3b8;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-.icon-spin {
-    animation: spin 1s linear infinite;
-}
     
 </style>
 
@@ -716,20 +677,15 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
     <button id="tabAll" class="tab-btn" onclick="switchView('ALL')">View All</button>
 </div>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 10px;">
-    <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
-        <i class="fa fa-list-check" style="color: #4f46e5; margin-right: 5px;"></i> Record List
-    </div>
-    
-    <div style="display: flex; gap: 10px;">
-        <button class="btn-refresh-premium" id="btnReloadTable" onclick="manualTableRefresh()">
-            <i class="fa-solid fa-arrows-rotate" id="reloadIcon"></i> Reload Data
-        </button>
-        <button class="btn-export" onclick="exportToExcel()">
-            <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Excel
-        </button>
-    </div>
-</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 10px;">
+                    <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
+                        <i class="fa fa-list-check" style="color: #4f46e5; margin-right: 5px;"></i> Record List
+                    </div>
+                    
+                    <button class="btn-export" onclick="exportToExcel()">
+                        <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Excel
+                    </button>
+                </div>
 
 <div class="table-scroll">
     <table style="min-width: 600px;">
@@ -972,68 +928,43 @@ function switchView(viewType) {
     renderTable();
 }
 
-// Fungsi untuk tukar paparan UI sahaja (Tidak call API)
-async function viewRecords() { // Guna nama viewRecords() untuk portal Check
-    sessionStorage.setItem('active_tab', 'list');
-    document.getElementById("formSection").style.display="none";
-    document.getElementById("result").style.display="none";
-    document.getElementById("lockListSection").style.display="block";
+async function viewRecords(){
+    document.getElementById("searchSection").style.display="none";
+    document.getElementById("listSection").style.display="block";
     document.body.classList.add("list-mode");
-    updateNavState('navViewRecords'); // Guna 'navViewRecords' untuk portal Check
+    updateNavState('navViewRecords');
 
-    // SMART CACHING IDEA: Jika data kosong, suruh user klik Reload. 
-    // Jika data dah ada (sebab dah pernah load), terus renderTable tanpa call API.
-    if(fullData.length === 0){
-        document.getElementById("lockTable").innerHTML = 
-        "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>";
-        
-        document.getElementById("pageInfo").innerText = "-";
-        document.getElementById("prevBtn").disabled = true;
-        document.getElementById("nextBtn").disabled = true;
-    } else {
-        switchView(currentViewStatus); // Render balik data lama
-    }
-}
-
-// Fungsi Khas untuk Tarik Data (Hanya berjalan bila butang diklik)
-async function manualTableRefresh() {
-    let btn = document.getElementById("btnReloadTable");
-    let icon = document.getElementById("reloadIcon");
-    
-    // Animasi Butang Premium
-    btn.disabled = true;
-    icon.classList.add("icon-spin");
-    
     document.getElementById("lockTable").innerHTML = 
-    "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
+    "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records...</td></tr>";
 
-    try {
+    document.getElementById("pageInfo").innerText = "-";
+    document.getElementById("prevBtn").disabled = true;
+    document.getElementById("nextBtn").disabled = true;
+
+    try{
         let timestamp = new Date().getTime(); 
-        
-        // PENTING: Untuk Check Portal, tukar action=mylocks kepada action=dashboard
-        const res = await fetch(api+"?action=dashboard="+token+"&api_key=SCZP_SECURE_2026&t=" + timestamp);
-        const data.data = await res.json(); // Guna 'data.data' jika Check Portal
+        const res = await fetch(api+"?action=dashboard&token="+token+"&dca=ALL&api_key=SCZP_SECURE_2026&t=" + timestamp);
+        const json = await res.json(); 
 
-        if(data.status === "UNAUTHORIZED"){
-            if(data.reason === "SESSION_REPLACED") showSessionPopup("DEVICE");
+        if(json.status === "UNAUTHORIZED"){
+            if(json.reason === "SESSION_REPLACED") showSessionPopup("DEVICE");
             else showSessionPopup("EXPIRED");
             return;
-        } else if(data.status === "ACCESS_DENIED"){
+        } else if(json.status === "ACCESS_DENIED"){
             document.getElementById("lockTable").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px'>Access Denied</td></tr>";
             return;
         }
 
-        fullData = data.sort((a,b)=> new Date(b.created) - new Date(a.created));
-        switchView(currentViewStatus);
+        fullData = (json.data || []).sort((a,b)=> new Date(b.created) - new Date(a.created));
+        
+        // Panggil logik tab di sini untuk filter awal
+        switchView("LOCK");
 
-    } catch(e) {
-        document.getElementById("lockTable").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
-    } finally {
-        // Hentikan Animasi Butang
-        btn.disabled = false;
-        icon.classList.remove("icon-spin");
+    }catch(e){
+        document.getElementById("lockTable").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px'>Error loading data.</td></tr>";
     }
 }
+
 // Fungsi baca remark penuh
 function toggleRemark(el){
     let full = el.getAttribute("data-full");
