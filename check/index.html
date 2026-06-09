@@ -684,7 +684,7 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
 
     <div style="display: flex; gap: 10px;">
     <!-- BUTANG REFRESH BARU -->
-    <button class="btn-export" style="background: #3b82f6;" onclick="onclick="viewRecords(true)">
+<button class="btn-export" style="background: #3b82f6;" onclick="viewRecords(true)">
         <i class="fa fa-arrows-rotate"></i> Refresh
     </button>
                     
@@ -934,7 +934,7 @@ function switchView(viewType) {
     renderTable();
 }
 
-async function viewRecords(){
+async function viewRecords(forceRefresh = false){
     document.getElementById("searchSection").style.display="none";
     document.getElementById("listSection").style.display="block";
     document.body.classList.add("list-mode");
