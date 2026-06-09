@@ -506,37 +506,27 @@ th:nth-child(4), td:nth-child(4) {
 }
 .status-box { text-align: center; margin-bottom: 16px; }
 .status-box span {
-    display: inline-block; padding: 8px 24px;
-    color: white;
+    display: inline-block; padding: 8px 24px; color: white;
     font-weight: 700; font-size: 14px; border-radius: 30px; letter-spacing: 1px;
 }
-.created-meta { font-size: 12px; color: #64748b; text-align: center; margin-bottom: 24px;
-    padding-bottom: 16px; border-bottom: 1px dashed #e2e8f0; }
+.created-meta { font-size: 12px; color: #64748b; text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px dashed #e2e8f0; }
 .row { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 16px; }
-.col { flex: 1;
-    word-break: break-word; }
+.col { flex: 1; word-break: break-word; }
 .label { font-weight: 600; color: #64748b; font-size: 11px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-.value { font-size: 15px;
-    font-weight: 600; color: #0f172a; }
+.value { font-size: 15px; font-weight: 600; color: #0f172a; }
 .amount { font-size: 24px; font-weight: 700; color: #0f172a; letter-spacing: 0.5px; }
-.remark { margin-top: 6px; line-height: 1.5;
-    font-size: 13px; color: #334155; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;
-}
+.remark { margin-top: 6px; line-height: 1.5; font-size: 13px; color: #334155; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
 
 .no-lock {
     margin-top: 24px; padding: 24px; background: #fef2f2; border: 1px solid #fecdd3;
-    border-radius: 16px; text-align: center;
-    font-weight: 600; color: #be123c;
+    border-radius: 16px; text-align: center; font-weight: 600; color: #be123c;
     display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%;
 }
-.no-lock::before { content: '\f071';
-    font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 24px; color: #ef4444; }
+.no-lock::before { content: '\f071'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 24px; color: #ef4444; }
 
-.loading { margin-top: 30px; text-align: center; font-weight: 600;
-    color: #475569; width: 100%; }
+.loading { margin-top: 30px; text-align: center; font-weight: 600; color: #475569; width: 100%; }
 .spinner {
-    margin: 16px auto 0; width: 40px; height: 40px;
-    border: 4px solid #f1f5f9;
+    margin: 16px auto 0; width: 40px; height: 40px; border: 4px solid #f1f5f9;
     border-top: 4px solid #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite;
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -549,12 +539,10 @@ th:nth-child(4), td:nth-child(4) {
 }
 .session-box {
     background: white; padding: 40px; border-radius: 20px; text-align: center;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.25); max-width: 340px;
-    width: 90%;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.25); max-width: 340px; width: 90%;
 }
 .session-box i { font-size: 48px; color: #ef4444; margin-bottom: 16px; }
-.session-title { font-size: 20px; font-weight: 700; margin-bottom: 8px;
-    color: #0f172a; }
+.session-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #0f172a; }
 
 /* ==========================================
    MOBILE RESPONSIVE (BOTTOM NAV STYLE)
@@ -566,26 +554,21 @@ th:nth-child(4), td:nth-child(4) {
         position: sticky;
         top: 0; width: 100%; height: auto; flex-direction: row; 
         justify-content: space-between; align-items: center; padding: 12px 16px;
-        border-radius: 0 0 16px 16px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08); z-index: 40;
+        border-radius: 0 0 16px 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); z-index: 40;
     }
 
     .brand { margin-bottom: 0; font-size: 18px; }
     .brand i { font-size: 20px; }
-    .user-profile { margin-bottom: 0; text-align: right;
-        background: transparent; border: none; padding: 0; }
+    .user-profile { margin-bottom: 0; text-align: right; background: transparent; border: none; padding: 0; }
     #userInfo { font-size: 12px; }
 
     .nav-menu {
-        position: fixed; bottom: 0; left: 0;
-        width: 100%; flex-direction: row;
+        position: fixed; bottom: 0; left: 0; width: 100%; flex-direction: row;
         background: #ffffff; padding: 12px 10px; box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-        z-index: 50;
-        border-radius: 24px 24px 0 0; justify-content: space-around; gap: 5px;
+        z-index: 50; border-radius: 24px 24px 0 0; justify-content: space-around; gap: 5px;
     }
     .nav-btn {
-        flex-direction: column;
-        gap: 6px; padding: 8px 4px; font-size: 11px;
+        flex-direction: column; gap: 6px; padding: 8px 4px; font-size: 11px;
         color: #64748b; border-radius: 12px; justify-content: center; width: auto;
         height: auto; background: transparent;
     }
@@ -617,17 +600,16 @@ th:nth-child(4), td:nth-child(4) {
    TABLE UPGRADES: STICKY, ZEBRA, SORT, RESIZE
    ========================================== */
 .table-scroll { 
-    max-height: 60vh;
-    /* Adjust height to trigger sticky scroll */
+    max-height: 60vh; /* Adjust height to trigger sticky scroll */
     overflow-y: auto; 
-    overflow-x: auto;
+    overflow-x: auto; 
 }
 
 table th { 
     position: sticky !important; 
     top: 0; 
     z-index: 10; 
-    background: #f8fafc !important;
+    background: #f8fafc !important; 
     box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
     cursor: pointer;
     user-select: none;
@@ -643,7 +625,7 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
 
 /* Column Resizer Handle */
 .resizer {
-    position: absolute;
+    position: absolute; 
     top: 0; 
     right: 0; 
     width: 6px; 
@@ -657,7 +639,7 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
 /* Sort Icons */
 .sort-icon { 
     margin-left: 6px; 
-    color: #94a3b8;
+    color: #94a3b8; 
     font-size: 11px; 
 }
     
@@ -744,7 +726,7 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
                             <i class="fa-solid fa-arrows-rotate" id="reloadIcon"></i> Reload Data
                         </button>
                         <button class="btn-export" onclick="exportToExcel()">
-                            <i class="fa fa-file-excel" style="color: #10b981;"></i> Export
+                            <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Excel
                         </button>
                     </div>
                 </div>
@@ -786,7 +768,7 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
 // INITIALIZATION & STORAGE CHECK
 // ==========================================
 
-const api = API_URL;
+const api = API_URL; 
 const user = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
 const role = localStorage.getItem("lock_role") || sessionStorage.getItem("lock_role");
 const token = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
@@ -836,8 +818,7 @@ window.onload=()=>{ input.focus(); };
 function formatDate(dateStr){
     if(!dateStr) return "-";
     if(dateStr.includes("-") && dateStr.split("-")[0].length==4){
-        var p=dateStr.split("-");
-        var year=p[0]; var month=parseInt(p[1])-1; var day=p[2];
+        var p=dateStr.split("-"); var year=p[0]; var month=parseInt(p[1])-1; var day=p[2];
         var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
         return day+" "+m[month]+" "+year;
     }
@@ -847,8 +828,7 @@ function formatDate(dateStr){
         return ("0"+day).slice(-2)+" "+m[month]+" "+year;
     }
     if(dateStr.includes("T")){
-        var d=new Date(dateStr);
-        var day=("0"+d.getDate()).slice(-2); var month=d.getMonth(); var year=d.getFullYear();
+        var d=new Date(dateStr); var day=("0"+d.getDate()).slice(-2); var month=d.getMonth(); var year=d.getFullYear();
         var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
         return day+" "+m[month]+" "+year;
     }
@@ -860,8 +840,7 @@ function formatDateTime(dateStr){
     const parts = dateStr.split(" ");
     if(parts.length < 2) return dateStr;
     const datePart = parts[0].split("/"); const timePart = parts[1].split(":");
-    const day = datePart[0]; const monthIndex = parseInt(datePart[1]) - 1;
-    const year = datePart[2];
+    const day = datePart[0]; const monthIndex = parseInt(datePart[1]) - 1; const year = datePart[2];
     const hour = timePart[0]; const minute = timePart[1];
     const m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
     return day+" "+m[monthIndex]+" "+year+" "+hour+":"+minute;
@@ -871,6 +850,7 @@ async function checkLock(){
     const acc=input.value.trim();
     if(!acc){ alert("Enter Account No"); input.focus(); return; }
     if(isLoading) return;
+
     isLoading=true; checkBtn.disabled=true;
     result.innerHTML= "<div class='loading'>Checking Lock Status<div class='spinner'></div></div>";
 
@@ -899,7 +879,6 @@ async function checkLock(){
 
             if(!isPaid && today > promiseDate){ statusText = "EXPIRED"; statusColor = "#ef4444"; }
 
-            // 1. INFO VERIFIED DI DALAM KOTAK HIJAU CAIR PREMIUM
             let paidByInfo = (isPaid && data.paid_by) 
                 ? `<div style='margin-top: 14px;'><span style='background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 6px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; display: inline-block; letter-spacing: 0.3px;'><i class='fa-solid fa-check-double' style='margin-right: 4px;'></i> Verified Paid by ${data.paid_by}</span></div>` 
                 : "";
@@ -909,7 +888,6 @@ async function checkLock(){
                 actionButton = `<button class='paid-btn' onclick="markAsPaid('${data.acc_no}')"><i class='fa-solid fa-check-circle'></i> Mark as PAID</button>`;
             }
 
-            // 2. KEMBALIKAN CREATED BY DAN SUSUN DENGAN KEMAS
             result.innerHTML=
             "<div class='result-card'>"+
             "<div class='status-box'><span style='background:"+statusColor+"'>"+statusText+"</span>"+paidByInfo+"</div>"+
@@ -931,6 +909,7 @@ async function checkLock(){
 
 async function markAsPaid(acc) {
     if(!confirm("Are you sure you want to mark Account " + acc + " as PAID?")) return;
+
     checkBtn.disabled = true;
     result.innerHTML = "<div class='loading'>Updating to PAID...<div class='spinner'></div></div>";
 
@@ -943,8 +922,7 @@ async function markAsPaid(acc) {
             alert("Account " + acc + " successfully marked as PAID!");
             input.value = acc; checkLock(); 
         } else {
-            alert("Failed to mark as PAID. Please try again.");
-            checkLock();
+            alert("Failed to mark as PAID. Please try again."); checkLock();
         }
     } catch (err) { alert("System error. Check your connection."); checkBtn.disabled = false; }
 }
@@ -966,24 +944,21 @@ let fullData = [];
 let filteredData = [];
 let currentPage = 1;
 const pageSize = 10;
-let currentViewStatus = "LOCK"; // Default paparan adalah LOCK
+let currentViewStatus = "LOCK"; 
 
 function switchView(viewType) {
     currentViewStatus = viewType;
-
-    // 1. Buang warna aktif dari semua butang
+    
     document.getElementById("tabActive").classList.remove("active");
     document.getElementById("tabPaid").classList.remove("active");
     document.getElementById("tabAll").classList.remove("active");
-
-    // 2. Beri warna aktif kepada butang yang ditekan
+    
     if(viewType === "LOCK") document.getElementById("tabActive").classList.add("active");
     if(viewType === "PAID") document.getElementById("tabPaid").classList.add("active");
     if(viewType === "ALL") document.getElementById("tabAll").classList.add("active");
     
-    // 3. Filter data mengikut status (LOCK, PAID, atau ALL)
     filteredData = fullData.filter(d => {
-        if(currentViewStatus === "ALL") return true; // Tunjuk semua data
+        if(currentViewStatus === "ALL") return true; 
         
         let status = (d.status || "").toString().toUpperCase();
         return status === currentViewStatus;
@@ -993,7 +968,6 @@ function switchView(viewType) {
     renderTable();
 }
 
-// Tukar logik viewRecords supaya menggunakan Smart Caching
 async function viewRecords() {
     document.getElementById("searchSection").style.display="none";
     document.getElementById("listSection").style.display="block";
@@ -1002,7 +976,7 @@ async function viewRecords() {
 
     if(fullData.length === 0){
         document.getElementById("lockTable").innerHTML = 
-        "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>";
+        "<tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>";
         
         document.getElementById("pageInfo").innerText = "-";
         document.getElementById("prevBtn").disabled = true;
@@ -1012,7 +986,6 @@ async function viewRecords() {
     }
 }
 
-// Logik Manual Reload untuk Portal Check
 async function manualTableRefresh() {
     let btn = document.getElementById("btnReloadTable");
     let icon = document.getElementById("reloadIcon");
@@ -1042,14 +1015,13 @@ async function manualTableRefresh() {
         switchView(currentViewStatus);
 
     } catch(e) {
-        document.getElementById("lockTable").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
+        document.getElementById("lockTable").innerHTML = "<tr><td colspan='8' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
     } finally {
         btn.disabled = false;
         icon.classList.remove("icon-spin");
     }
 }
 
-// Fungsi baca remark penuh
 function toggleRemark(el){
     let full = el.getAttribute("data-full");
     let short = el.getAttribute("data-short");
@@ -1086,6 +1058,23 @@ function renderTable() {
         
         let dateStr = isNaN(pDate) ? d.promise : pDate.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
 
+        // Format Created Date & Time (Premium Style)
+        let cDate = new Date(d.created);
+        let createdStr = "-";
+        if (!isNaN(cDate.getTime())) {
+            let day = ("0" + cDate.getDate()).slice(-2);
+            let mths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+            let mth = mths[cDate.getMonth()];
+            let yr = cDate.getFullYear();
+            let hr = cDate.getHours();
+            let min = ("0" + cDate.getMinutes()).slice(-2);
+            let ampm = hr >= 12 ? 'PM' : 'AM';
+            hr = hr % 12; hr = hr ? hr : 12; 
+            createdStr = `${day} ${mth} ${yr} <span style="display:block; font-size:10px; color:#94a3b8; font-weight:600; margin-top:2px;">${hr}:${min} ${ampm}</span>`;
+        } else {
+            createdStr = d.created || "-";
+        }
+
         let remark = d.remarks || "-";
         let safeRemark = remark.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         let shortRemark = remark.length > 40 ? safeRemark.substring(0, 40) + "..." : safeRemark;
@@ -1103,24 +1092,7 @@ function renderTable() {
             ? `<div style="text-align:left;"><span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span><span style="display:block; font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">by ${d.paid_by || '-'}</span></div>`
             : `<div style="text-align:left;"><span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span></div>`;
 
-        // Format Created Date & Time (Premium Style)
-        let cDate = new Date(d.created);
-        let createdStr = "-";
-        if (!isNaN(cDate.getTime())) {
-            let day = ("0" + cDate.getDate()).slice(-2);
-            let mths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-            let mth = mths[cDate.getMonth()];
-            let yr = cDate.getFullYear();
-            let hr = cDate.getHours();
-            let min = ("0" + cDate.getMinutes()).slice(-2);
-            let ampm = hr >= 12 ? 'PM' : 'AM';
-            hr = hr % 12; hr = hr ? hr : 12; 
-            createdStr = `${day} ${mth} ${yr} <span style="display:block; font-size:10px; color:#94a3b8; font-weight:600; margin-top:2px;">${hr}:${min} ${ampm}</span>`;
-        } else {
-            createdStr = d.created || "-";
-        }
-        
-html += `
+        html += `
         <tr style="${rowBg}">
             <td>${d.dca || "-"}</td>
             <td style="font-weight: 600;">${d.acc_no || "-"}</td>
@@ -1128,8 +1100,10 @@ html += `
             <td style="text-align: center; font-weight: 700; color: #0f172a;">${amount}</td>
             <td>${statusBadge}</td>
             <td style="${dateColor}">${dateStr}</td>
-            <td>${createdStr}</td> <td>${remarkHtml}</td>
+            <td>${createdStr}</td>
+            <td>${remarkHtml}</td>
         </tr>`;
+    });
 
     document.getElementById("lockTable").innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding: 40px; color:#94a3b8;"><i class="fa fa-folder-open" style="font-size:28px;margin-bottom:12px;display:block;"></i>No Records Found</td></tr>';
 
@@ -1156,7 +1130,7 @@ function exportToExcel() {
             "BRANCH": row.branch,
             "AMOUNT (RM)": Number(row.amount || 0), 
             "STATUS": row.status,
-            "PAID BY": row.paid_by || "-", // <-- TAMBAH BARIS INI
+            "PAID BY": row.paid_by || "-",
             "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate, 
             "REMARKS": row.remarks || "-",
             "CREATED TIME": isNaN(cDate.getTime()) ? row.created : cDate
@@ -1167,14 +1141,15 @@ function exportToExcel() {
     let range = XLSX.utils.decode_range(worksheet['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
         let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 6});
-        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') { worksheet[ptpCellRef].z = 'd-mmm-yyyy'; }
+        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') { worksheet[ptpCellRef].z = 'd-mmm-yyyy';
+        }
         let createdCellRef = XLSX.utils.encode_cell({r: R, c: 8});
-        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') { worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; }
+        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') { worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM';
+        }
     }
 
     let workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Check_Records");
-    // TAMBAHAN: Nama fail membezakan LOCK dan PAID
     let fileName = `CheckRecords_${user}_${currentViewStatus}_${new Date().toISOString().slice(0,10)}.xlsx`;
     XLSX.writeFile(workbook, fileName);
 }
@@ -1193,6 +1168,7 @@ function logout(){
 ========================================= */
 
 const CHECK_INTERVAL = 60000;
+
 function verifySessionWithServer() {
     if (document.hidden) return; 
     const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
@@ -1229,6 +1205,7 @@ function showSessionPopup(type){
    TABLE UPGRADES JS: SORTING & RESIZING
    ========================================== */
 let currentSort = { col: null, dir: 'asc' };
+
 function sortTableData(colId) {
     if (currentSort.col === colId) {
         currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
@@ -1237,28 +1214,23 @@ function sortTableData(colId) {
         currentSort.dir = 'asc';
     }
 
-    // Reset and Update Icons
     document.querySelectorAll('th .sort-icon').forEach(icon => icon.className = 'fa fa-sort sort-icon');
     const th = document.querySelector(`th[data-sort="${colId}"]`);
     if (th) th.querySelector('.sort-icon').className = currentSort.dir === 'asc' ? 'fa fa-sort-up sort-icon' : 'fa fa-sort-down sort-icon';
-    
-    // Auto-detect target array
+
     let targetArray = typeof filteredTableData !== 'undefined' ? filteredTableData : (typeof filteredData !== 'undefined' ? filteredData : []);
-    
+
     targetArray.sort((a, b) => {
         let valA = a[colId] || "";
         let valB = b[colId] || "";
         
         if (colId === 'acc_no') {
-            // 🔥 METHOD BARU: Susun ikut bilangan digit (length) dahulu, kemudian baru ikut nilai
             let strA = valA.toString().trim();
             let strB = valB.toString().trim();
             
             if (strA.length !== strB.length) {
-                // Jika panjang tak sama, yang kurang digit duduk atas
                 return currentSort.dir === 'asc' ? (strA.length - strB.length) : (strB.length - strA.length);
             } else {
-                // Jika bilangan digit sama, baru susun nilai dari kecil ke besar macam biasa
                 return currentSort.dir === 'asc' ? strA.localeCompare(strB) : strB.localeCompare(strA);
             }
         } 
@@ -1275,12 +1247,11 @@ function sortTableData(colId) {
             valB = valB.toString().toLowerCase();
         }
 
-        // Logic sort standard untuk kolum-kolum selain acc_no
         if (valA < valB) return currentSort.dir === 'asc' ? -1 : 1;
         if (valA > valB) return currentSort.dir === 'asc' ? 1 : -1;
         return 0;
     });
-    
+
     currentPage = 1; 
     renderTable(); 
 }
@@ -1293,14 +1264,13 @@ function initTableUpgrades() {
 
         let x, w;
 
-        // --- Column Resizing Logic ---
         const mouseDownHandler = function(e) {
             x = e.clientX;
             w = th.offsetWidth;
             document.addEventListener('mousemove', mouseMoveHandler);
             document.addEventListener('mouseup', mouseUpHandler);
             resizer.classList.add('resizing');
-            e.stopPropagation(); // Prevents click sort from firing
+            e.stopPropagation(); 
         };
 
         const mouseMoveHandler = function(e) {
@@ -1316,10 +1286,8 @@ function initTableUpgrades() {
         };
 
         resizer.addEventListener('mousedown', mouseDownHandler);
-        
-        // --- Column Sorting Logic ---
+
         th.addEventListener('click', (e) => {
-            // Ignore click if user was grabbing the resizer
             if (e.target.classList.contains('resizer')) return;
             
             const sortCol = th.getAttribute('data-sort');
@@ -1328,8 +1296,8 @@ function initTableUpgrades() {
     });
 }
 
-// Initialize upgrades automatically when the DOM is ready
 window.addEventListener('DOMContentLoaded', initTableUpgrades);
+    
 </script>
 
 <div id="sessionPopup">
