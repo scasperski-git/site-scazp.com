@@ -987,19 +987,14 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
                 </div>
 
                 <!-- 3. TAJUK MY RECORDS BERSAMA BUTANG EXCEL -->
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 10px;">
                     <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
                         <i class="fa fa-list-check" style="color: #4f46e5; margin-right: 5px;"></i> My Records
                     </div>
                     
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn-export-small" onclick="viewMyLocks(true)" style="background: #3b82f6;">
-                            <i class="fa fa-sync"></i> Refresh
-                        </button>
-                        <button class="btn-export" onclick="exportToExcel()">
-                            <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Excel
-                        </button>
-                    </div>
+                    <button class="btn-export" onclick="exportToExcel()">
+                        <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Excel
+                    </button>
                 </div>
 
                 <!-- 4. JADUAL KEKAL DI BAWAH -->
@@ -1471,9 +1466,9 @@ let filteredData = [];
 let currentPage = 1;
 const pageSize = 5;
 let currentViewStatus = "LOCK"; // Default paparan adalah LOCK sahaja
-let isTableLoaded = false; // <-- KITA TAMBAH INI
 
 function switchView(viewType) {
+    currentViewStatus = viewType;
     
     // 1. Buang warna aktif dari semua butang
     document.getElementById("tabActive").classList.remove("active");
@@ -1493,7 +1488,7 @@ function updateNavState(activeId) {
     document.getElementById(activeId).classList.add('active');
 }
 
-async function viewMyLocks(forceRefresh = false){
+async function viewMyLocks(){
     sessionStorage.setItem('active_tab', 'list');
 
     document.getElementById("formSection").style.display="none";
@@ -1502,12 +1497,6 @@ async function viewMyLocks(forceRefresh = false){
     document.body.classList.add("list-mode");
 
     updateNavState('navMyLocks');
-
-    // <-- LOGIK JIMAT KUOTA BERMULA DI SINI -->
-    if(isTableLoaded && forceRefresh === false) {
-        switchView(currentViewStatus); 
-        return; 
-    }
 
     // SHOW LOADING STATE IN TABLE ONLY
     document.getElementById("lockTable").innerHTML = 
@@ -1536,7 +1525,6 @@ try{
         fullData = data.sort((a,b)=> new Date(b.created) - new Date(a.created));
         filteredData = fullData;
         currentPage = 1;
-        isTableLoaded = true; // <-- TAMBAH BARIS INI
 
         switchView("LOCK");
 
