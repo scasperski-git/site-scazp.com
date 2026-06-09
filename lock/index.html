@@ -31,7 +31,6 @@ body {
     color: #334155;
     min-height: 100vh;
     overflow: hidden;
-    /* Prevent body scroll */
 }
 
 /* ANIMATIONS */
@@ -163,7 +162,6 @@ body {
     color: #ef4444;
 }
 
-/* EFEK ANIMASI SLIDE & FADE UNTUK PERTUKARAN TAB */
 #formSection, #lockListSection {
     animation: slideUpFade 0.4s ease forwards;
 }
@@ -173,7 +171,6 @@ body {
     flex: 1;
     margin-left: 280px; 
     padding: 24px 40px 40px 40px;
-    /* Jarak untuk nampak kotak terapung */
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -195,12 +192,10 @@ body {
     transition: max-width 0.4s ease;
 }
 
-/* List Mode override */
 body.list-mode .container {
     max-width: 100%;
 }
 
-/* FORM BODY */
 .form-title {
     font-size: 20px;
     font-weight: 600;
@@ -210,7 +205,6 @@ body.list-mode .container {
     border-bottom: 2px solid #f1f5f9;
 }
 
-/* GRID / SIDE-BY-SIDE STYLE */
 .form-row {
     display: flex;
     gap: 20px;
@@ -227,7 +221,6 @@ body.list-mode .container {
     width: 100%;
 }
 
-/* LABELS & INPUTS */
 label {
     font-size: 13px;
     font-weight: 600;
@@ -262,7 +255,6 @@ input:focus, select:focus, textarea:focus {
     outline: none;
 }
 
-/* SUBMIT BUTTON */
 .submit-btn {
     width: 100%;
     padding: 14px;
@@ -287,7 +279,6 @@ input:focus, select:focus, textarea:focus {
 }
 #submitBtn:hover { animation: none; }
 
-/* ERROR STATES */
 .error {
     color: #ef4444;
     font-size: 12px;
@@ -311,7 +302,6 @@ input:focus, select:focus, textarea:focus {
     40%, 60% { transform: translate3d(6px, 0, 0); }
 }
 
-/* AUDIT NOTE (FOR FORM) */
 .audit-note {
     margin-top: 16px;
     font-size: 12px;
@@ -323,7 +313,6 @@ input:focus, select:focus, textarea:focus {
     line-height: 1.5;
 }
 
-/* REMARK COUNTER */
 #remarkCounter {
     font-size: 11px;
     color: #94a3b8;
@@ -333,7 +322,6 @@ input:focus, select:focus, textarea:focus {
     font-weight: 500;
 }
 
-/* SUCCESS CARD */
 .success-card {
     padding: 30px 25px;
     border-radius: 16px;
@@ -379,7 +367,6 @@ input:focus, select:focus, textarea:focus {
     color: #0f172a;
 }
 
-/* ===== TAB STYLES ===== */
 .tab-container {
     display: flex;
     gap: 10px;
@@ -419,7 +406,6 @@ input:focus, select:focus, textarea:focus {
     transform: translateY(-2px);
 }
 
-/* FILTER CARD (FOR MY LOCKS) */
 .filter-card {
     padding: 16px 20px;
     background: #ffffff;
@@ -465,7 +451,6 @@ input:focus, select:focus, textarea:focus {
 .mini-btn.clear { background: #64748b; }
 .mini-btn.clear:hover { background: #475569; }
 
-/* TABLE STYLES */
 .table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -503,12 +488,11 @@ th:nth-child(3), td:nth-child(3) {
     font-weight: 600;
 }
 
-/* PREVENT DATE COLUMN (4TH) FROM WRAPPING */
-th:nth-child(4), td:nth-child(4) {
+/* PREVENT DATE COLUMN (4TH & 5TH) FROM WRAPPING */
+th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) {
     white-space: nowrap;
 }
 
-/* PAGINATION */
 .pagination-bar {
     display: flex;
     align-items: center;
@@ -545,7 +529,6 @@ th:nth-child(4), td:nth-child(4) {
     font-weight: 600;
 }
 
-/* OVERLAYS & POPUPS */
 #overlay, #sessionPopup, #lockedPopup {
     position: fixed;
     top: 0; left: 0; width: 100%;
@@ -741,7 +724,6 @@ th:nth-child(4), td:nth-child(4) {
 
     .logout-btn { margin-top: 0; color: #ef4444; }
 
-    /* Adjust Main Content & form for Mobile */
     .main-content {
         margin-left: 0;
         padding: 16px 15px 90px 15px; 
@@ -762,7 +744,6 @@ th:nth-child(4), td:nth-child(4) {
         gap: 0;
     }
 
-    /* COMPRESS SUCCESS PAGE (RESULT CARD ONLY) */
     #result .success-card {
         padding: 20px 16px !important;
         min-height: calc(100vh - 230px); 
@@ -789,7 +770,6 @@ th:nth-child(4), td:nth-child(4) {
     #result .success-item b { font-size: 11px !important; margin-bottom: 4px !important; }
     #result .amount { font-size: 20px !important; } 
     
-    /* UPDATE MY LOCKS (TABLE & FILTER) MOBILE */
     .filter-card {
         padding: 16px;
         margin-bottom: 16px;
@@ -818,7 +798,6 @@ th:nth-child(4), td:nth-child(4) {
         font-size: 11px; 
     }
     
-    /* CENTER AMOUNT COLUMN (3RD) FOR MOBILE */
     table th:nth-child(3), #lockTable td:nth-child(3) {
         text-align: center;
     }
@@ -863,12 +842,10 @@ table th {
 
 table th:hover { background: #f1f5f9 !important; }
 
-/* Zebra Striping */
 table tbody tr:nth-child(even) { background-color: #f8fafc; }
 table tbody tr:nth-child(odd) { background-color: #ffffff; }
 table tbody tr:hover td { background-color: #e2e8f0; } 
 
-/* Column Resizer Handle */
 .resizer {
     position: absolute;
     top: 0; 
@@ -881,7 +858,6 @@ table tbody tr:hover td { background-color: #e2e8f0; }
 }
 .resizer:hover, .resizer.resizing { border-right: 2px solid #4f46e5; }
 
-/* Sort Icons */
 .sort-icon { 
     margin-left: 6px; 
     color: #94a3b8;
@@ -1041,6 +1017,7 @@ table tbody tr:hover td { background-color: #e2e8f0; }
         <th data-sort="amount">AMOUNT <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
         <th data-sort="status">STATUS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
         <th data-sort="promise">PTP DATE <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+        <th data-sort="created">CREATED <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
         <th data-sort="remarks">REMARK <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
     </tr>
 </thead>
@@ -1098,7 +1075,6 @@ table tbody tr:hover td { background-color: #e2e8f0; }
 
 const api = API_URL; 
 
-// Read from localStorage (App) or sessionStorage (Web)
 const user = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
 const role = localStorage.getItem("lock_role") || sessionStorage.getItem("lock_role");
 const token = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
@@ -1119,18 +1095,15 @@ function backToForm() {
     goNewLock();
 }
 
-// If no token or type (User not logged in or closed tab)
 if(!type || !token){
     logout();
 }
 
-// Page Access Protection
 if(type == "check"){
     alert("Access denied");
     window.location="../check/";
 }
 
-// Show Master button if role is master
 if(type === "master"){
     document.getElementById("masterBtn").style.display = "flex";
 }
@@ -1144,7 +1117,6 @@ document.getElementById("userInfo").innerHTML = "User: "+(user || "-")+" | Role:
 loadUserSummary();
 setInterval(loadUserSummary, 120000);
 
-// Fetch Branches
 fetch(api+"?action=branches&token="+token+"&api_key=" + API_KEY)
 .then(res=>res.json())
 .then(data=>{
@@ -1175,7 +1147,6 @@ document.getElementById("dca_id").value = user || "";
 
 document.getElementById("promise_date").min = new Date().toISOString().split("T")[0];
 
-/* ACCOUNT NO - ONLY NUMBERS */
 const accField = document.getElementById("acc_no");
 accField.addEventListener("keypress", function(e){
     if(!/[0-9]/.test(e.key)){
@@ -1406,7 +1377,6 @@ function showSuccess(formData){
     loadUserSummary();  
 }
 
-// Popup UI Controller
 function showSessionPopup(type){
     let title="Session Expired";
     let msg="Your session has expired. Please login again.";
@@ -1508,7 +1478,6 @@ function updateNavState(activeId) {
     document.getElementById(activeId).classList.add('active');
 }
 
-// LOGIK BARU UNTUK UI TAB
 async function viewMyLocks() {
     sessionStorage.setItem('active_tab', 'list');
 
@@ -1521,7 +1490,7 @@ async function viewMyLocks() {
 
     if(fullData.length === 0) {
         document.getElementById("lockTable").innerHTML = 
-        "<tr><td colspan='6' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>";
+        "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>";
         
         document.getElementById("pageInfo").innerText = "-";
         document.getElementById("prevBtn").disabled = true;
@@ -1531,7 +1500,6 @@ async function viewMyLocks() {
     }
 }
 
-// FUNGSI MANUAL REFRESH BUTTON
 async function manualTableRefresh() {
     let btn = document.getElementById("btnReloadTable");
     let icon = document.getElementById("reloadIcon");
@@ -1540,7 +1508,7 @@ async function manualTableRefresh() {
     icon.classList.add("icon-spin");
     
     document.getElementById("lockTable").innerHTML = 
-    "<tr><td colspan='6' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
+    "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
 
     try {
         let timestamp = new Date().getTime(); 
@@ -1553,7 +1521,7 @@ async function manualTableRefresh() {
             else showSessionPopup("EXPIRED");
             return;
         } else if(data.status === "ACCESS_DENIED"){
-            document.getElementById("lockTable").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:20px'>Access Denied</td></tr>";
+            document.getElementById("lockTable").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px'>Access Denied</td></tr>";
             return;
         }
 
@@ -1561,7 +1529,7 @@ async function manualTableRefresh() {
         switchView(currentViewStatus);
 
     } catch(e) {
-        document.getElementById("lockTable").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
+        document.getElementById("lockTable").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
     } finally {
         btn.disabled = false;
         icon.classList.remove("icon-spin");
@@ -1596,15 +1564,31 @@ function renderTable(){
     
         let isRowOverdue = (isOverdue && d.status !== "PAID");
 
+        // Format Created Date & Time (Premium Style)
+        let cDate = new Date(d.created);
+        let createdStr = "-";
+        if (!isNaN(cDate.getTime())) {
+            let day = ("0" + cDate.getDate()).slice(-2);
+            let mths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+            let mth = mths[cDate.getMonth()];
+            let yr = cDate.getFullYear();
+            let hr = cDate.getHours();
+            let min = ("0" + cDate.getMinutes()).slice(-2);
+            let ampm = hr >= 12 ? 'PM' : 'AM';
+            hr = hr % 12; hr = hr ? hr : 12; 
+            createdStr = `${day} ${mth} ${yr} <span style="display:block; font-size:10px; color:#94a3b8; font-weight:600; margin-top:2px;">${hr}:${min} ${ampm}</span>`;
+        } else {
+            createdStr = d.created || "-";
+        }
+
         html += `
         <tr style="${isRowOverdue ? 'background:#fef2f2;' : ''}">
         <td>${d.acc_no}</td>
         <td>${d.branch}</td>
         <td>${amount}</td>
         <td>${statusBadge}</td>
-        <td style="${isRowOverdue ? 'color:#ef4444;font-weight:600;' : ''}">
-        ${formatDate(d.promise)}
-        </td>
+        <td style="${isRowOverdue ? 'color:#ef4444;font-weight:600;' : ''}">${formatDate(d.promise)}</td>
+        <td>${createdStr}</td>
         <td onclick="toggleRemark(this)" data-full="${remark}" data-short="${shortRemark}" style="cursor:pointer; max-width: 200px; word-break: break-word;">
         <div class="remark-text">${shortRemark}</div>
         ${remark.length > 40 ? '<div style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic; font-weight: 500;" class="tap-hint"><i class="fa fa-hand-pointer"></i> tap to view</div>' : ''}
@@ -1614,7 +1598,7 @@ function renderTable(){
     });
 
     document.getElementById("lockTable").innerHTML = html || 
-    "<tr><td colspan='6' style='text-align:center;padding:40px;color:#94a3b8;'><i class='fa fa-folder-open' style='font-size:28px;margin-bottom:12px;display:block;'></i>No Record Found</td></tr>";
+    "<tr><td colspan='7' style='text-align:center;padding:40px;color:#94a3b8;'><i class='fa fa-folder-open' style='font-size:28px;margin-bottom:12px;display:block;'></i>No Record Found</td></tr>";
 
     let totalPage = Math.ceil(filteredData.length / pageSize) || 1;
 
