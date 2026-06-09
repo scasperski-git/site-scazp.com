@@ -435,13 +435,17 @@ table th, table td {
 }
 
 table th {
-    background: #f8fafc;
-    font-weight: 600;
-    font-size: 12px;
-    color: #64748b;
-    text-transform: uppercase;
+    position: sticky !important; 
+    top: 0; 
+    z-index: 10; 
+    background: #f8fafc !important; 
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
 }
 
+table th:hover { background: #f1f5f9 !important; }
 table tr:last-child td { border-bottom: none; }
 table tr:hover td { background: #f8fafc; }
 th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
@@ -475,12 +479,24 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 #refreshInfo {
     font-size: 12px;
     color: #64748b;
-    font-weight: 500;
+    font-weight: 600;
     margin-bottom: 16px;
-    background: #f1f5f9;
+    background: #f8fafc;
     display: inline-block;
-    padding: 6px 12px;
+    padding: 8px 16px;
     border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+#refreshInfo:hover {
+    background: #e2e8f0;
+    color: #4f46e5;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
 .summary-grid {
@@ -518,7 +534,7 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 #sumLock { color: #3b82f6 !important; }
 #sumAmount { color: #10b981 !important; }
 
-/* SPINNER */
+/* SPINNER & ICON SPIN */
 .spinner{
     width: 18px; height: 18px;
     border: 3px solid rgba(255,255,255,0.3);
@@ -527,7 +543,46 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     animation: spin 0.8s linear infinite;
 }
 
+.icon-spin {
+    animation: spin 1s linear infinite;
+}
+
 @keyframes spin{ 100%{transform:rotate(360deg)} }
+
+/* PREMIUM MANUAL REFRESH BUTTON FOR LIVE TABLE */
+.btn-refresh-premium {
+    background: linear-gradient(135deg, #4f46e5, #3b82f6);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+}
+
+.btn-refresh-premium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, #4338ca, #2563eb);
+}
+
+.btn-refresh-premium:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.btn-refresh-premium:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
 
 /* SESSION POPUP */
 #sessionPopup{
@@ -538,6 +593,31 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 .session-box{
     background:white; padding:40px; border-radius:20px; text-align:center;
     box-shadow:0 25px 50px rgba(0,0,0,0.25); max-width:340px; width:90%;
+}
+
+/* Zebra Striping & Table Upgrades */
+.table-scroll { 
+    max-height: 60vh;
+    overflow-y: auto; 
+}
+table tbody tr:nth-child(even) { background-color: #f8fafc; }
+table tbody tr:nth-child(odd) { background-color: #ffffff; }
+table tbody tr:hover td { background-color: #e2e8f0; }
+
+.resizer {
+    position: absolute; 
+    top: 0; right: 0; width: 6px; 
+    cursor: col-resize; user-select: none; height: 100%; 
+    border-right: 1px solid #cbd5e1;
+}
+.resizer:hover, .resizer.resizing { border-right: 2px solid #4f46e5; }
+
+/* GRID 3 KOTAK UNTUK SUMMARY */
+.summary-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
 }
 
 /* ==========================================
@@ -575,93 +655,11 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     .main-content { margin-left: 0; padding: 24px 16px 100px 16px; }
     .page-title { font-size: 20px; }
     .section { padding: 20px 16px; }
-    .dash-grid, .summary-grid { grid-template-columns: 1fr; gap: 12px; }
+    .dash-grid, .summary-grid, .summary-grid-3 { grid-template-columns: 1fr; gap: 12px; }
     .action-row { flex-direction: column; }
     .stat-number { font-size: 24px; }
 
     table th, table td { padding: 12px 10px; font-size: 11px; }
-}
-
-/* ==========================================
-   TABLE UPGRADES: STICKY, ZEBRA, SORT, RESIZE
-   ========================================== */
-.table-scroll { 
-    max-height: 60vh; /* Adjust height to trigger sticky scroll */
-    overflow-y: auto; 
-    overflow-x: auto; 
-}
-
-table th { 
-    position: sticky !important; 
-    top: 0; 
-    z-index: 10; 
-    background: #f8fafc !important; 
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-}
-
-table th:hover { background: #f1f5f9 !important; }
-
-/* Zebra Striping */
-table tbody tr:nth-child(even) { background-color: #f8fafc; }
-table tbody tr:nth-child(odd) { background-color: #ffffff; }
-table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to override zebra */
-
-/* Column Resizer Handle */
-.resizer {
-    position: absolute; 
-    top: 0; 
-    right: 0; 
-    width: 6px; 
-    cursor: col-resize; 
-    user-select: none; 
-    height: 100%; 
-    border-right: 1px solid #cbd5e1;
-}
-.resizer:hover, .resizer.resizing { border-right: 2px solid #4f46e5; }
-
-/* Sort Icons */
-.sort-icon { 
-    margin-left: 6px; 
-    color: #94a3b8; 
-    font-size: 11px; 
-}
-
-/* GRID 3 KOTAK UNTUK SUMMARY */
-.summary-grid-3 {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
-@media (max-width: 899px) {
-    .summary-grid-3 { grid-template-columns: 1fr; gap: 12px; }
-}
-
-.refresh-btn {
-    font-size: 12px;
-    color: #64748b;
-    font-weight: 600;
-    margin-bottom: 16px;
-    background: #f8fafc;
-    display: inline-block;
-    padding: 8px 16px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-}
-
-.refresh-btn:hover {
-    background: #e2e8f0;
-    color: #4f46e5;
-    border-color: #cbd5e1;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
 </style>
@@ -703,7 +701,7 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
             <div class="section summary">
                 <h3><i class="fa fa-calendar-check"></i> Today's Overall Summary</h3>
 
-<div id="refreshInfo" onclick="manualRefresh()" class="refresh-btn">
+<div id="refreshInfo" onclick="manualRefresh()">
     <i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i> 
     <span id="refreshText">CLICK TO REFRESH</span> &nbsp;|&nbsp; 
     <span id="lastUpdate">Last update: -</span>
@@ -792,9 +790,14 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
             <div class="section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">
                     <h3 style="margin-bottom: 0; border: none; padding-bottom: 0;"><i class="fa fa-list-check"></i> View All Records</h3>
-                    <button class="btn-export-small" onclick="exportTable()">
-                        <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Table
-                    </button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-refresh-premium" id="btnReloadMaster" onclick="manualMasterRefresh()">
+                            <i class="fa-solid fa-arrows-rotate" id="masterSyncIcon"></i> Reload Data
+                        </button>
+                        <button class="btn-export-small" onclick="exportTable()">
+                            <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Table
+                        </button>
+                    </div>
                 </div>
 
                 <div class="tab-container">
@@ -817,7 +820,7 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
     </tr>
 </thead>
                         <tbody id="masterTableBody">
-                            <tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading database...</td></tr>
+                            <tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to view full database</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -879,15 +882,12 @@ function loadUsers(){
 }
 
 function loadSummary(){
-    // 🔥 CACHE BUSTER: Tambah masa (timestamp) supaya Google tak simpan memori lama
     let timestamp = new Date().getTime(); 
     
     fetch(api+"?action=summary&token="+token+"&api_key=SCZP_SECURE_2026&t=" + timestamp)
     .then(r=>r.json())
     .then(data=>{
         document.getElementById("sumLock").innerText=data.totalLock || 0;
-        
-        // Kemaskini jumlah Mark Paid
         document.getElementById("sumPaid").innerText=data.totalPaid || 0;
 
         document.getElementById("sumAmount").innerText=
@@ -917,7 +917,7 @@ function loadSummary(){
 }
 
 // =====================================
-// LIVE TABLE LOGIC (VIEW ALL RECORDS)
+// LIVE TABLE LOGIC (MANUAL REFRESH)
 // =====================================
 let liveDataList = []; 
 let filteredTableData = []; 
@@ -925,8 +925,16 @@ let currentViewStatus = "ALL";
 let currentPage = 1;
 const pageSize = 10;
 
-// Auto-Load live table on page load (tanpa had masa)
-async function loadLiveTable() {
+// MANUAL LOAD FUNCTION (MENGGANTIKAN AUTO-LOAD ASAL)
+async function manualMasterRefresh() {
+    let btn = document.getElementById("btnReloadMaster");
+    let icon = document.getElementById("masterSyncIcon");
+    
+    btn.disabled = true;
+    icon.classList.add("icon-spin");
+    
+    document.getElementById("masterTableBody").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading database from server...</td></tr>";
+
     try {
         let timestamp = new Date().getTime(); 
         const res = await fetch(api+"?action=dashboard&token="+token+"&dca=ALL&api_key=SCZP_SECURE_2026&t=" + timestamp);
@@ -942,10 +950,13 @@ async function loadLiveTable() {
         }
 
         liveDataList = (json.data || []).sort((a,b)=> new Date(b.created) - new Date(a.created));
-        switchView("ALL");
+        switchView(currentViewStatus);
 
     } catch(e) {
-        document.getElementById("masterTableBody").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px'>Error loading database.</td></tr>";
+        document.getElementById("masterTableBody").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try зgain.</td></tr>";
+    } finally {
+        btn.disabled = false;
+        icon.classList.remove("icon-spin");
     }
 }
 
@@ -960,6 +971,9 @@ function switchView(viewType) {
     if(viewType === "PAID") document.getElementById("tabPaid").classList.add("active");
     if(viewType === "ALL") document.getElementById("tabAll").classList.add("active");
     
+    // Jika data masih kosong (belum klik reload), biarkan paparan default
+    if(liveDataList.length === 0) return;
+
     filteredTableData = liveDataList.filter(d => {
         if(currentViewStatus === "ALL") return true;
         let status = (d.status || "").toString().toUpperCase();
@@ -1019,7 +1033,6 @@ function renderTable() {
                </div>`
             : `<div style="max-width: 200px; word-break: break-word;">${safeRemark}</div>`;
 
-// GANTIKAN KOD statusBadge KEPADA KOD DI BAWAH INI
         let statusBadge = d.status === "PAID" 
             ? `<div style="text-align:left;"><span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span><span style="display:block; font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">by ${d.paid_by || '-'}</span></div>`
             : `<div style="text-align:left;"><span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span></div>`;
@@ -1048,7 +1061,6 @@ function renderTable() {
 function nextPage() { if (currentPage * pageSize < filteredTableData.length) { currentPage++; renderTable(); } }
 function prevPage() { if (currentPage > 1) { currentPage--; renderTable(); } }
 
-// Eksport Jadual Live
 function exportTable() {
     if(filteredTableData.length === 0) { alert("Tiada data untuk diexport!"); return; }
     generateExcel(filteredTableData, `ViewAllRecords_${currentViewStatus}`);
@@ -1093,7 +1105,6 @@ function calculateReport(){
             return;
         }
 
-        // Update Dynamic Summary Counters
         document.getElementById("dashTotal").innerText=data.total || 0;
         document.getElementById("dashPaid").innerText = data.totalPaid || 0;
         document.getElementById("dashAmount").innerText =
@@ -1101,11 +1112,9 @@ function calculateReport(){
             minimumFractionDigits:2, maximumFractionDigits:2
         });
 
-        // Simpan data untuk diexport
         reportDataList = data.data || [];
         status.innerText="";
         
-        // Tunjukkan butang muat turun laporan
         if(reportDataList.length > 0) {
             exportBtn.style.display="flex";
         }
@@ -1123,7 +1132,6 @@ function calculateReport(){
     });
 }
 
-// Eksport Laporan Khas
 function exportReport() {
     let dcaName = document.getElementById("dcaFilter").options[document.getElementById("dcaFilter").selectedIndex].text.replace(/\s+/g, '_');
     let start = document.getElementById("startDate").value;
@@ -1131,7 +1139,6 @@ function exportReport() {
     generateExcel(reportDataList, `CustomReport_${dcaName}_${start}_to_${end}`);
 }
 
-// Fungsi utama jana Excel (dikongsi oleh Live Table & Report)
 function generateExcel(dataArray, filePrefix) {
     let excelData = dataArray.map(row => {
         let pDate = new Date(row.promise);
@@ -1143,7 +1150,7 @@ function generateExcel(dataArray, filePrefix) {
             "BRANCH": row.branch,
             "AMOUNT (RM)": Number(row.amount || 0), 
             "STATUS": row.status,
-            "PAID BY": row.paid_by || "-", // <-- TAMBAH BARIS INI
+            "PAID BY": row.paid_by || "-", 
             "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate, 
             "REMARKS": row.remarks || "-",
             "CREATED TIME": isNaN(cDate.getTime()) ? row.created : cDate
@@ -1151,14 +1158,12 @@ function generateExcel(dataArray, filePrefix) {
     });
 
     let worksheet = XLSX.utils.json_to_sheet(excelData, { cellDates: true });
-let range = XLSX.utils.decode_range(worksheet['!ref']);
+    let range = XLSX.utils.decode_range(worksheet['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
         let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 6});
-        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') { worksheet[ptpCellRef].z = 'd-mmm-yyyy';
-        }
+        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') { worksheet[ptpCellRef].z = 'd-mmm-yyyy'; }
         let createdCellRef = XLSX.utils.encode_cell({r: R, c: 8});
-        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') { worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM';
-        }
+        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') { worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; }
     }
 
     let workbook = XLSX.utils.book_new();
@@ -1175,8 +1180,7 @@ window.onload=function(){
 
     loadUsers();
     loadSummary();
-    loadLiveTable(); // Tarik jadual secara berasingan
-
+    // AUTO-LOAD LIVE TABLE TELAH DIBUANG UNTUK JIMATKAN KUOTA API GAS
 };
 
 function goCheck(){ window.location="../check/"; }
@@ -1188,7 +1192,6 @@ function logout(){
     window.location="../checklock-login/";
 }
 
-// Popup UI Controller
 function showSessionPopup(type){
     let title="Session Expired";
     let msg="Your session has expired. Please login again.";
@@ -1234,15 +1237,14 @@ function manualRefresh() {
     var icon = document.getElementById("refreshIcon");
     var text = document.getElementById("refreshText");
     
-    // Tambah animasi pusing (fa-spin) dari FontAwesome
     icon.classList.add("fa-spin");
     text.innerText = "REFRESHING...";
     
-    // Panggil fungsi untuk tarik data terkini dari server
     loadSummary();
-    loadLiveTable(); // Tarik semula data jadual 'View All Records'
+    if(liveDataList.length > 0) {
+        manualMasterRefresh(); 
+    }
     
-    // Berhenti pusing dan kembali kepada asal selepas 1.5 saat (anggaran masa API siap)
     setTimeout(function() {
         icon.classList.remove("fa-spin");
         text.innerText = "CLICK TO REFRESH";
@@ -1262,28 +1264,23 @@ function sortTableData(colId) {
         currentSort.dir = 'asc';
     }
 
-    // Reset and Update Icons
     document.querySelectorAll('th .sort-icon').forEach(icon => icon.className = 'fa fa-sort sort-icon');
     const th = document.querySelector(`th[data-sort="${colId}"]`);
     if (th) th.querySelector('.sort-icon').className = currentSort.dir === 'asc' ? 'fa fa-sort-up sort-icon' : 'fa fa-sort-down sort-icon';
 
-    // Auto-detect target array based on which page is active (Master uses filteredTableData)
     let targetArray = typeof filteredTableData !== 'undefined' ? filteredTableData : (typeof filteredData !== 'undefined' ? filteredData : []);
 
-targetArray.sort((a, b) => {
+    targetArray.sort((a, b) => {
         let valA = a[colId] || "";
         let valB = b[colId] || "";
         
         if (colId === 'acc_no') {
-            // 🔥 METHOD BARU: Susun ikut bilangan digit (length) dahulu, kemudian baru ikut nilai
             let strA = valA.toString().trim();
             let strB = valB.toString().trim();
             
             if (strA.length !== strB.length) {
-                // Jika panjang tak sama, yang kurang digit duduk atas
                 return currentSort.dir === 'asc' ? (strA.length - strB.length) : (strB.length - strA.length);
             } else {
-                // Jika bilangan digit sama, baru susun nilai dari kecil ke besar macam biasa
                 return currentSort.dir === 'asc' ? strA.localeCompare(strB) : strB.localeCompare(strA);
             }
         } 
@@ -1300,14 +1297,13 @@ targetArray.sort((a, b) => {
             valB = valB.toString().toLowerCase();
         }
 
-        // Logic sort standard untuk kolum-kolum selain acc_no
         if (valA < valB) return currentSort.dir === 'asc' ? -1 : 1;
         if (valA > valB) return currentSort.dir === 'asc' ? 1 : -1;
         return 0;
     });
 
-    currentPage = 1; // Reset pagination
-    renderTable(); // Re-render the data view
+    currentPage = 1; 
+    renderTable(); 
 }
 
 function initTableUpgrades() {
@@ -1318,14 +1314,13 @@ function initTableUpgrades() {
 
         let x, w;
 
-        // --- Column Resizing Logic ---
         const mouseDownHandler = function(e) {
             x = e.clientX;
             w = th.offsetWidth;
             document.addEventListener('mousemove', mouseMoveHandler);
             document.addEventListener('mouseup', mouseUpHandler);
             resizer.classList.add('resizing');
-            e.stopPropagation(); // Prevents click sort from firing
+            e.stopPropagation(); 
         };
 
         const mouseMoveHandler = function(e) {
@@ -1342,9 +1337,7 @@ function initTableUpgrades() {
 
         resizer.addEventListener('mousedown', mouseDownHandler);
 
-        // --- Column Sorting Logic ---
         th.addEventListener('click', (e) => {
-            // Ignore click if user was grabbing the resizer
             if (e.target.classList.contains('resizer')) return;
             
             const sortCol = th.getAttribute('data-sort');
@@ -1353,9 +1346,7 @@ function initTableUpgrades() {
     });
 }
 
-// Initialize upgrades automatically when the DOM is ready
 window.addEventListener('DOMContentLoaded', initTableUpgrades);
-
 
 </script>
 
