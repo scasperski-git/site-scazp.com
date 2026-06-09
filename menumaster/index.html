@@ -641,6 +641,29 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
     .summary-grid-3 { grid-template-columns: 1fr; gap: 12px; }
 }
 
+.refresh-btn {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    margin-bottom: 16px;
+    background: #f8fafc;
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.refresh-btn:hover {
+    background: #e2e8f0;
+    color: #4f46e5;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
 </style>
 
 </head>
@@ -680,9 +703,11 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
             <div class="section summary">
                 <h3><i class="fa fa-calendar-check"></i> Today's Overall Summary</h3>
 
-                <div id="refreshInfo">
-                    <i class="fa-solid fa-clock-rotate-left"></i> Auto refresh every 2 min &nbsp;|&nbsp; <span id="lastUpdate">Last update: -</span>
-                </div>
+<div id="refreshInfo" onclick="manualRefresh()" class="refresh-btn">
+    <i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i> 
+    <span id="refreshText">CLICK TO REFRESH</span> &nbsp;|&nbsp; 
+    <span id="lastUpdate">Last update: -</span>
+</div>
 
 <div class="summary-grid-3">
                     <div class="box-card">
@@ -1152,11 +1177,6 @@ window.onload=function(){
     loadSummary();
     loadLiveTable(); // Tarik jadual secara berasingan
 
-    setInterval(function(){
-        if(!document.hidden){
-            loadSummary(); 
-        }
-    },120000);
 };
 
 function goCheck(){ window.location="../check/"; }
@@ -1209,6 +1229,25 @@ setInterval(verifySessionWithServer, CHECK_INTERVAL);
 document.addEventListener("visibilitychange", () => {
     if (!document.hidden) verifySessionWithServer();
 });
+
+function manualRefresh() {
+    var icon = document.getElementById("refreshIcon");
+    var text = document.getElementById("refreshText");
+    
+    // Tambah animasi pusing (fa-spin) dari FontAwesome
+    icon.classList.add("fa-spin");
+    text.innerText = "REFRESHING...";
+    
+    // Panggil fungsi untuk tarik data terkini dari server
+    loadSummary();
+    loadLiveTable(); // Tarik semula data jadual 'View All Records'
+    
+    // Berhenti pusing dan kembali kepada asal selepas 1.5 saat (anggaran masa API siap)
+    setTimeout(function() {
+        icon.classList.remove("fa-spin");
+        text.innerText = "CLICK TO REFRESH";
+    }, 1500);
+}
 
 /* ==========================================
    TABLE UPGRADES JS: SORTING & RESIZING
