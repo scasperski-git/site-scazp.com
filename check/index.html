@@ -682,18 +682,22 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
                         <i class="fa fa-list-check" style="color: #4f46e5; margin-right: 5px;"></i> Record List
                     </div>
 
-    <div style="display: flex; gap: 10px;">
-    <!-- BUTANG REFRESH BARU -->
-<button class="btn-export" style="background: #3b82f6;" onclick="viewRecords(true)">
-        <i class="fa fa-arrows-rotate"></i> Refresh
-    </button>
-                    
-    <button class="btn-export" onclick="exportToExcel()">
-        <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Excel
-    </button>
-</div>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 10px;">
+                    <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
+                        <i class="fa fa-list-check" style="color: #4f46e5; margin-right: 5px;"></i> Record List
+                    </div>
 
-<div class="table-scroll">
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-export" style="background: #3b82f6;" onclick="viewRecords(true)">
+                            <i class="fa fa-arrows-rotate"></i> Refresh
+                        </button>
+                        
+                        <button class="btn-export" onclick="exportToExcel()">
+                            <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Excel
+                        </button>
+                    </div>
+                </div> <div class="table-scroll">
+                    
     <table style="min-width: 600px;">
 <thead>
     <tr>
