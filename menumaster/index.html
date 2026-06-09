@@ -821,7 +821,7 @@ table tbody tr:hover td { background-color: #e2e8f0; }
     </tr>
 </thead>
                         <tbody id="masterTableBody">
-                            <tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to view full database</td></tr>
+                            <tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to view full database</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -934,7 +934,7 @@ async function manualMasterRefresh() {
     btn.disabled = true;
     icon.classList.add("icon-spin");
     
-    document.getElementById("masterTableBody").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading database from server...</td></tr>";
+    document.getElementById("masterTableBody").innerHTML = "<tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading database from server...</td></tr>";
 
     try {
         let timestamp = new Date().getTime(); 
@@ -946,7 +946,7 @@ async function manualMasterRefresh() {
             else showSessionPopup("EXPIRED");
             return;
         } else if(json.status === "ACCESS_DENIED"){
-            document.getElementById("masterTableBody").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px'>Access Denied</td></tr>";
+            document.getElementById("masterTableBody").innerHTML = "<tr><td colspan='8' style='text-align:center;padding:20px'>Access Denied</td></tr>";
             return;
         }
 
@@ -954,7 +954,7 @@ async function manualMasterRefresh() {
         switchView(currentViewStatus);
 
     } catch(e) {
-        document.getElementById("masterTableBody").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try зgain.</td></tr>";
+        document.getElementById("masterTableBody").innerHTML = "<tr><td colspan='8' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
     } finally {
         btn.disabled = false;
         icon.classList.remove("icon-spin");
@@ -972,7 +972,6 @@ function switchView(viewType) {
     if(viewType === "PAID") document.getElementById("tabPaid").classList.add("active");
     if(viewType === "ALL") document.getElementById("tabAll").classList.add("active");
     
-    // Jika data masih kosong (belum klik reload), biarkan paparan default
     if(liveDataList.length === 0) return;
 
     filteredTableData = liveDataList.filter(d => {
@@ -1021,22 +1020,6 @@ function renderTable() {
         
         let dateStr = isNaN(pDate) ? d.promise : pDate.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
 
-        let remark = d.remarks || "-";
-        let safeRemark = remark.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-        let shortRemark = remark.length > 40 ? safeRemark.substring(0, 40) + "..." : safeRemark;
-
-        let remarkHtml = remark.length > 40
-            ? `<div style="cursor: pointer; max-width: 200px; word-break: break-word;" onclick="toggleRemark(this)" data-full="${safeRemark}" data-short="${shortRemark}">
-                 <div class="remark-text">${shortRemark}</div>
-                 <div class="tap-hint" style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic;">
-                    <i class='fa fa-hand-pointer'></i> tap to view
-                 </div>
-               </div>`
-            : `<div style="max-width: 200px; word-break: break-word;">${safeRemark}</div>`;
-
-        let statusBadge = d.status === "PAID" 
-            ? `<div style="text-align:left;"><span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span><span style="display:block; font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">by ${d.paid_by || '-'}</span></div>`
-            : `<div style="text-align:left;"><span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span></div>`;
         // Format Created Date & Time (Premium Style)
         let cDate = new Date(d.created);
         let createdStr = "-";
@@ -1053,8 +1036,25 @@ function renderTable() {
         } else {
             createdStr = d.created || "-";
         }
-        
-html += `
+
+        let remark = d.remarks || "-";
+        let safeRemark = remark.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        let shortRemark = remark.length > 40 ? safeRemark.substring(0, 40) + "..." : safeRemark;
+
+        let remarkHtml = remark.length > 40
+            ? `<div style="cursor: pointer; max-width: 200px; word-break: break-word;" onclick="toggleRemark(this)" data-full="${safeRemark}" data-short="${shortRemark}">
+                 <div class="remark-text">${shortRemark}</div>
+                 <div class="tap-hint" style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic;">
+                    <i class='fa fa-hand-pointer'></i> tap to view
+                 </div>
+               </div>`
+            : `<div style="max-width: 200px; word-break: break-word;">${safeRemark}</div>`;
+
+        let statusBadge = d.status === "PAID" 
+            ? `<div style="text-align:left;"><span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span><span style="display:block; font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">by ${d.paid_by || '-'}</span></div>`
+            : `<div style="text-align:left;"><span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span></div>`;
+
+        html += `
         <tr style="${rowBg}">
             <td>${d.dca || "-"}</td>
             <td style="font-weight: 600;">${d.acc_no || "-"}</td>
@@ -1062,11 +1062,12 @@ html += `
             <td style="text-align: center; font-weight: 700; color: #0f172a;">${amount}</td>
             <td>${statusBadge}</td>
             <td style="${dateColor}">${dateStr}</td>
-            <td>${createdStr}</td> <td>${remarkHtml}</td>
+            <td>${createdStr}</td>
+            <td>${remarkHtml}</td>
         </tr>`;
     });
 
-    document.getElementById("masterTableBody").innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding: 40px; color:#94a3b8;"><i class="fa fa-folder-open" style="font-size:28px;margin-bottom:12px;display:block;"></i>No Records Found</td></tr>';
+    document.getElementById("masterTableBody").innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding: 40px; color:#94a3b8;"><i class="fa fa-folder-open" style="font-size:28px;margin-bottom:12px;display:block;"></i>No Records Found</td></tr>';
 
     let totalPages = Math.ceil(filteredTableData.length / pageSize) || 1;
     document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${totalPages}`;
