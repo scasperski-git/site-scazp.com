@@ -759,6 +759,7 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
         <th data-sort="amount">AMOUNT <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
         <th data-sort="status">STATUS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
         <th data-sort="promise">PTP DATE <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+        <th data-sort="created">CREATED <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
         <th data-sort="remarks">REMARKS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
     </tr>
 </thead>
@@ -1020,7 +1021,7 @@ async function manualTableRefresh() {
     icon.classList.add("icon-spin");
     
     document.getElementById("lockTable").innerHTML = 
-    "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
+    "<tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
 
     try {
         let timestamp = new Date().getTime(); 
@@ -1033,7 +1034,7 @@ async function manualTableRefresh() {
             else showSessionPopup("EXPIRED");
             return;
         } else if(json.status === "ACCESS_DENIED"){
-            document.getElementById("lockTable").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px'>Access Denied</td></tr>";
+            document.getElementById("lockTable").innerHTML = "<tr><td colspan='8' style='text-align:center;padding:20px'>Access Denied</td></tr>";
             return;
         }
 
@@ -1102,7 +1103,24 @@ function renderTable() {
             ? `<div style="text-align:left;"><span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span><span style="display:block; font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">by ${d.paid_by || '-'}</span></div>`
             : `<div style="text-align:left;"><span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span></div>`;
 
-        html += `
+        // Format Created Date & Time (Premium Style)
+        let cDate = new Date(d.created);
+        let createdStr = "-";
+        if (!isNaN(cDate.getTime())) {
+            let day = ("0" + cDate.getDate()).slice(-2);
+            let mths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+            let mth = mths[cDate.getMonth()];
+            let yr = cDate.getFullYear();
+            let hr = cDate.getHours();
+            let min = ("0" + cDate.getMinutes()).slice(-2);
+            let ampm = hr >= 12 ? 'PM' : 'AM';
+            hr = hr % 12; hr = hr ? hr : 12; 
+            createdStr = `${day} ${mth} ${yr} <span style="display:block; font-size:10px; color:#94a3b8; font-weight:600; margin-top:2px;">${hr}:${min} ${ampm}</span>`;
+        } else {
+            createdStr = d.created || "-";
+        }
+        
+html += `
         <tr style="${rowBg}">
             <td>${d.dca || "-"}</td>
             <td style="font-weight: 600;">${d.acc_no || "-"}</td>
@@ -1110,11 +1128,10 @@ function renderTable() {
             <td style="text-align: center; font-weight: 700; color: #0f172a;">${amount}</td>
             <td>${statusBadge}</td>
             <td style="${dateColor}">${dateStr}</td>
-            <td>${remarkHtml}</td>
+            <td>${createdStr}</td> <td>${remarkHtml}</td>
         </tr>`;
-    });
 
-    document.getElementById("lockTable").innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding: 40px; color:#94a3b8;"><i class="fa fa-folder-open" style="font-size:28px;margin-bottom:12px;display:block;"></i>No Records Found</td></tr>';
+    document.getElementById("lockTable").innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding: 40px; color:#94a3b8;"><i class="fa fa-folder-open" style="font-size:28px;margin-bottom:12px;display:block;"></i>No Records Found</td></tr>';
 
     let totalPage = Math.ceil(filteredData.length / pageSize) || 1;
     document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${totalPage}`;
