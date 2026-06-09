@@ -30,7 +30,8 @@ body {
     padding: 0;
     color: #334155;
     min-height: 100vh;
-    overflow: hidden; /* Prevent body scroll */
+    overflow: hidden;
+    /* Prevent body scroll */
 }
 
 /* ANIMATIONS */
@@ -155,7 +156,7 @@ body {
 
 .logout-btn { 
     margin-top: auto;
-    color: #fca5a5; 
+    color: #fca5a5;
 }
 .logout-btn:hover {
     background: rgba(239, 68, 68, 0.15);
@@ -171,7 +172,8 @@ body {
 .main-content {
     flex: 1;
     margin-left: 280px; 
-    padding: 24px 40px 40px 40px; /* Jarak untuk nampak kotak terapung */
+    padding: 24px 40px 40px 40px;
+    /* Jarak untuk nampak kotak terapung */
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -181,7 +183,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: 1100px; /* KITA LEBARKAN DARI 900px KE 1100px */
+    max-width: 1100px; 
     background: #ffffff;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.03);
@@ -191,10 +193,6 @@ body {
     flex-direction: column;
     height: auto;
     transition: max-width 0.4s ease;
-}
-/* EFEK KOTAK MEMBESAR BILA BUKA MY LOCKS */
-body.list-mode .container {
-    max-width: 100%;
 }
 
 /* List Mode override */
@@ -235,7 +233,7 @@ label {
     font-weight: 600;
     color: #475569;
     display: block;
-    margin-top: 10px; 
+    margin-top: 10px;
     margin-bottom: 4px;
 }
 
@@ -550,7 +548,8 @@ th:nth-child(4), td:nth-child(4) {
 /* OVERLAYS & POPUPS */
 #overlay, #sessionPopup, #lockedPopup {
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
+    top: 0; left: 0; width: 100%;
+    height: 100%;
     background: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(4px);
     display: none;
@@ -581,7 +580,7 @@ th:nth-child(4), td:nth-child(4) {
 .popup-close-btn {
     width: 100%;
     padding: 14px;
-    background: #f59e0b; 
+    background: #f59e0b;
     color: white;
     border: none;
     border-radius: 10px;
@@ -594,12 +593,79 @@ th:nth-child(4), td:nth-child(4) {
     background: #d97706;
 }
 
+/* ===== PREMIUM MANUAL REFRESH BUTTON ===== */
+.btn-refresh-premium {
+    background: linear-gradient(135deg, #4f46e5, #3b82f6);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+}
+
+.btn-refresh-premium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, #4338ca, #2563eb);
+}
+
+.btn-refresh-premium:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.btn-refresh-premium:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.icon-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* ===== BUTTON EXPORT EXCEL ===== */
+.btn-export {
+    background: #1e293b;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-export:hover {
+    background: #334155;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-export:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
 /* ==========================================
    MOBILE RESPONSIVE (COMPACT HEADER + BOTTOM NAV)
    ========================================== */
 @media (max-width: 899px) {
     body {
-        overflow: visible; 
+        overflow: visible;
     }
 
     .app-layout {
@@ -696,15 +762,13 @@ th:nth-child(4), td:nth-child(4) {
         gap: 0;
     }
 
-    /* ==========================================
-       COMPRESS SUCCESS PAGE (RESULT CARD ONLY)
-       ========================================== */
+    /* COMPRESS SUCCESS PAGE (RESULT CARD ONLY) */
     #result .success-card {
-        padding: 20px 16px !important; 
+        padding: 20px 16px !important;
         min-height: calc(100vh - 230px); 
         display: flex;
         flex-direction: column;
-        justify-content: flex-start; 
+        justify-content: flex-start;
     }
     
     #result .success-card > div:nth-child(1) { margin-bottom: 10px !important; }
@@ -718,24 +782,21 @@ th:nth-child(4), td:nth-child(4) {
         margin-top: 0 !important;
         margin-bottom: auto !important; 
         flex: none !important; 
-        align-content: flex-start; 
+        align-content: flex-start;
     }
     
     #result .success-item { font-size: 13px !important; }
     #result .success-item b { font-size: 11px !important; margin-bottom: 4px !important; }
     #result .amount { font-size: 20px !important; } 
     
-    /* ==========================================
-       UPDATE MY LOCKS (TABLE & FILTER) MOBILE
-       ========================================== */
+    /* UPDATE MY LOCKS (TABLE & FILTER) MOBILE */
     .filter-card {
-        padding: 16px; 
+        padding: 16px;
         margin-bottom: 16px;
     }
 
-    /* UPDATE FILTER LAYOUT FOR MOBILE */
     .filter-input-group {
-        flex-direction: column; 
+        flex-direction: column;
     }
     
     .filter-input-group input {
@@ -745,15 +806,15 @@ th:nth-child(4), td:nth-child(4) {
 
     .mini-actions {
         width: 100%;
-        justify-content: center; 
+        justify-content: center;
     }
 
     .mini-actions .mini-btn {
-        flex: 1; 
+        flex: 1;
     }
 
     table th, table td {
-        padding: 14px 10px; 
+        padding: 14px 10px;
         font-size: 11px; 
     }
     
@@ -770,7 +831,7 @@ th:nth-child(4), td:nth-child(4) {
 
     .new-btn {
         margin-top: 20px !important; 
-        width: 100% !important; 
+        width: 100% !important;
         padding: 16px !important; 
         font-size: 15px !important;
     }
@@ -780,48 +841,20 @@ th:nth-child(4), td:nth-child(4) {
     }
 }
 
-    /* ===== BUTTON EXPORT EXCEL ===== */
-.btn-export {
-    background: #1e293b;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.btn-export:hover {
-    background: #334155;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
-}
-
-.btn-export:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
-}
-
 /* ==========================================
    TABLE UPGRADES: STICKY, ZEBRA, SORT, RESIZE
    ========================================== */
 .table-scroll { 
-    max-height: 60vh; /* Adjust height to trigger sticky scroll */
+    max-height: 60vh;
     overflow-y: auto; 
-    overflow-x: auto; 
+    overflow-x: auto;
 }
 
 table th { 
     position: sticky !important; 
     top: 0; 
     z-index: 10; 
-    background: #f8fafc !important; 
+    background: #f8fafc !important;
     box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
     cursor: pointer;
     user-select: none;
@@ -833,11 +866,11 @@ table th:hover { background: #f1f5f9 !important; }
 /* Zebra Striping */
 table tbody tr:nth-child(even) { background-color: #f8fafc; }
 table tbody tr:nth-child(odd) { background-color: #ffffff; }
-table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to override zebra */
+table tbody tr:hover td { background-color: #e2e8f0; } 
 
 /* Column Resizer Handle */
 .resizer {
-    position: absolute; 
+    position: absolute;
     top: 0; 
     right: 0; 
     width: 6px; 
@@ -851,47 +884,8 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
 /* Sort Icons */
 .sort-icon { 
     margin-left: 6px; 
-    color: #94a3b8; 
+    color: #94a3b8;
     font-size: 11px; 
-}
-
-/* ===== PREMIUM MANUAL REFRESH BUTTON ===== */
-.btn-refresh-premium {
-    background: linear-gradient(135deg, #4f46e5, #3b82f6);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
-}
-
-.btn-refresh-premium:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
-    background: linear-gradient(135deg, #4338ca, #2563eb);
-}
-
-.btn-refresh-premium:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
-}
-
-.btn-refresh-premium:disabled {
-    background: #94a3b8;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-.icon-spin {
-    animation: spin 1s linear infinite;
 }
     
 </style>
@@ -923,7 +917,7 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
             <button id="masterBtn" class="nav-btn" onclick="goMaster()" style="display:none">
                 <i class="fa-solid fa-crown"></i> <span>Master</span>
             </button>
-            
+        
             <button class="nav-btn logout-btn" onclick="logout()">
                 <i class="fa fa-right-from-bracket"></i> <span>Logout</span>
             </button>
@@ -1004,10 +998,9 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
 
             <div id="result"></div>
             
-<div id="lockListSection" style="display:none;">
+            <div id="lockListSection" style="display:none;">
                 <div class="form-title" style="margin-bottom: 15px;">My Lock List</div>
 
-                <!-- 1. KOTAK CARIAN DI ATAS SEKALI -->
                 <div class="filter-card">
                     <div class="filter-input-group">
                         <input type="text" id="filterAcc" placeholder="Search Account No" autocomplete="off" inputmode="numeric" maxlength="10">
@@ -1018,30 +1011,27 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
                     </div>
                 </div>
 
-                <!-- 2. TAB BUTTON SELEPAS CARIAN DAN SEBELUM TAJUK MY RECORDS -->
                 <div class="tab-container">
                     <button id="tabActive" class="tab-btn active" onclick="switchView('LOCK')">Active Locks</button>
                     <button id="tabPaid" class="tab-btn" onclick="switchView('PAID')">Paid History</button>
                     <button id="tabAll" class="tab-btn" onclick="switchView('ALL')">View All</button>
                 </div>
 
-                <!-- 3. TAJUK MY RECORDS BERSAMA BUTANG EXCEL -->
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 10px;">
-    <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
-        <i class="fa fa-list-check" style="color: #4f46e5; margin-right: 5px;"></i> Record List
-    </div>
-    
-    <div style="display: flex; gap: 10px;">
-        <button class="btn-refresh-premium" id="btnReloadTable" onclick="manualTableRefresh()">
-            <i class="fa-solid fa-arrows-rotate" id="reloadIcon"></i> Reload Data
-        </button>
-        <button class="btn-export" onclick="exportToExcel()">
-            <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Excel
-        </button>
-    </div>
-</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 10px;">
+                    <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
+                        <i class="fa fa-list-check" style="color: #4f46e5; margin-right: 5px;"></i> My Records
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-refresh-premium" id="btnReloadTable" onclick="manualTableRefresh()">
+                            <i class="fa-solid fa-arrows-rotate" id="reloadIcon"></i> Reload Data
+                        </button>
+                        <button class="btn-export" onclick="exportToExcel()">
+                            <i class="fa fa-file-excel" style="color: #10b981;"></i> Export
+                        </button>
+                    </div>
+                </div>
 
-                <!-- 4. JADUAL KEKAL DI BAWAH -->
                 <div class="table-scroll">
                     <table style="min-width: 500px;">
 <thead>
@@ -1106,7 +1096,7 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
 // INITIALIZATION & STORAGE CHECK (WEB & APP)
 // ==========================================
 
-const api = API_URL; // From lockconfig.js
+const api = API_URL; 
 
 // Read from localStorage (App) or sessionStorage (Web)
 const user = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
@@ -1142,7 +1132,7 @@ if(type == "check"){
 
 // Show Master button if role is master
 if(type === "master"){
-    document.getElementById("masterBtn").style.display = "flex"; 
+    document.getElementById("masterBtn").style.display = "flex";
 }
 
 function goMaster(){
@@ -1187,7 +1177,6 @@ document.getElementById("promise_date").min = new Date().toISOString().split("T"
 
 /* ACCOUNT NO - ONLY NUMBERS */
 const accField = document.getElementById("acc_no");
-
 accField.addEventListener("keypress", function(e){
     if(!/[0-9]/.test(e.key)){
         e.preventDefault();
@@ -1199,7 +1188,6 @@ accField.addEventListener("input", function(){
 });
 
 const filterAccField = document.getElementById("filterAcc");
-
 filterAccField.addEventListener("keypress", function(e){
     if(!/[0-9]/.test(e.key)){
         e.preventDefault();
@@ -1263,12 +1251,10 @@ remarkBox.addEventListener("input",function(){
 function loadUserSummary(){
     document.getElementById("userSummary").innerText = "Today: loading...";
 
-    // 1. Tetapkan tarikh hari ini untuk filter Today
     let d = new Date();
     let today = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0');
-    let timestamp = new Date().getTime(); // Anti-cache
+    let timestamp = new Date().getTime();
 
-    // 2. Tambahkan &start, &end dan &t di dalam URL
     fetch(api+"?action=dashboard&token="+token+"&dca="+user+"&start="+today+"&end="+today+"&api_key=" + API_KEY + "&t=" + timestamp)
     .then(r=>r.json())
     .then(data=>{
@@ -1277,7 +1263,7 @@ function loadUserSummary(){
         var amount = Number(data.amount || 0).toLocaleString("en-MY",{
             minimumFractionDigits:2, maximumFractionDigits:2
         });
-        
+       
         document.getElementById("userSummary").innerHTML =
         '<i class="fa fa-chart-line"></i> Today: '+total+' Locks | '+paid+' Paid | RM '+amount;
     })
@@ -1357,7 +1343,6 @@ document.getElementById("lockForm").addEventListener("submit",e=>{
 function formatDate(dateStr){
     if(!dateStr) return "-";
     let d = new Date(dateStr);
-
     if(!isNaN(d)){
         let day = ("0"+d.getDate()).slice(-2);
         let monthNames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -1457,10 +1442,10 @@ clearError("remarks","err_remarks");
    SINGLE DEVICE LOGIN & SMART PAUSE LOGIC
 ========================================= */
 
-const CHECK_INTERVAL = 60000; // Check every 1 minute
+const CHECK_INTERVAL = 60000;
 
 function verifySessionWithServer() {
-    if (document.hidden) return; // Smart Pause active
+    if (document.hidden) return;
 
     const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
 
@@ -1469,12 +1454,10 @@ function verifySessionWithServer() {
         return;
     }
 
-    // Use action=session to match GAS
     fetch(api + "?action=session&token=" + currentToken + "&api_key=SCZP_SECURE_2026")
     .then(response => response.json())
     .then(data => {
         if (data.status !== "ACTIVE") {
-            // BACA PUNCA TENDANG DAN KELUARKAN POPUP YANG BETUL
             if (data.reason === "SESSION_REPLACED") {
                 showSessionPopup("DEVICE");
             } else {
@@ -1487,44 +1470,37 @@ function verifySessionWithServer() {
     });
 }
 
-// SEMAK STATUS TOKEN SERTA-MERTA APABILA MUKA SURAT DIBUKA (TAMBAHAN BAHARU)
 verifySessionWithServer();
-
-// Run automatic check every 1 minute
 setInterval(verifySessionWithServer, CHECK_INTERVAL);
 
-// Check immediately when tab/app is reopened
 document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
         verifySessionWithServer();
     }
 });
 
-
 /* =========================================
-   MY LOCK LIST LOGIC
+   MY LOCK LIST LOGIC (SMART CACHE)
 ========================================= */
 
 let fullData = [];
 let filteredData = [];
 let currentPage = 1;
 const pageSize = 5;
-let currentViewStatus = "LOCK"; // Default paparan adalah LOCK sahaja
+let currentViewStatus = "LOCK"; 
 
 function switchView(viewType) {
     currentViewStatus = viewType;
-    
-    // 1. Buang warna aktif dari semua butang
+
     document.getElementById("tabActive").classList.remove("active");
     document.getElementById("tabPaid").classList.remove("active");
     document.getElementById("tabAll").classList.remove("active");
-    
-    // 2. Beri warna aktif kepada butang yang ditekan
+
     if(viewType === "LOCK") document.getElementById("tabActive").classList.add("active");
     if(viewType === "PAID") document.getElementById("tabPaid").classList.add("active");
     if(viewType === "ALL") document.getElementById("tabAll").classList.add("active");
     
-    applyFilter(); // Panggil applyFilter untuk kemaskini jadual
+    applyFilter(); 
 }
 
 function updateNavState(activeId) {
@@ -1532,54 +1508,52 @@ function updateNavState(activeId) {
     document.getElementById(activeId).classList.add('active');
 }
 
-// Fungsi untuk tukar paparan UI sahaja (Tidak call API)
-async function viewMyLocks() { // Guna nama viewRecords() untuk portal Check
+// LOGIK BARU UNTUK UI TAB
+async function viewMyLocks() {
     sessionStorage.setItem('active_tab', 'list');
+
     document.getElementById("formSection").style.display="none";
     document.getElementById("result").style.display="none";
     document.getElementById("lockListSection").style.display="block";
     document.body.classList.add("list-mode");
-    updateNavState('navMyLocks'); // Guna 'navViewRecords' untuk portal Check
 
-    // SMART CACHING IDEA: Jika data kosong, suruh user klik Reload. 
-    // Jika data dah ada (sebab dah pernah load), terus renderTable tanpa call API.
-    if(fullData.length === 0){
+    updateNavState('navMyLocks');
+
+    if(fullData.length === 0) {
         document.getElementById("lockTable").innerHTML = 
-        "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>";
+        "<tr><td colspan='6' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>";
         
         document.getElementById("pageInfo").innerText = "-";
         document.getElementById("prevBtn").disabled = true;
         document.getElementById("nextBtn").disabled = true;
     } else {
-        switchView(currentViewStatus); // Render balik data lama
+        switchView(currentViewStatus);
     }
 }
 
-// Fungsi Khas untuk Tarik Data (Hanya berjalan bila butang diklik)
+// FUNGSI MANUAL REFRESH BUTTON
 async function manualTableRefresh() {
     let btn = document.getElementById("btnReloadTable");
     let icon = document.getElementById("reloadIcon");
     
-    // Animasi Butang Premium
     btn.disabled = true;
     icon.classList.add("icon-spin");
     
     document.getElementById("lockTable").innerHTML = 
-    "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
+    "<tr><td colspan='6' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
 
     try {
         let timestamp = new Date().getTime(); 
         
-        // PENTING: Untuk Check Portal, tukar action=mylocks kepada action=dashboard
-        const res = await fetch(api+"?action=mylocks&token="+token+"&api_key=SCZP_SECURE_2026&t=" + timestamp);
-        const data = await res.json(); // Guna 'data.data' jika Check Portal
+        const res = await fetch(api+"?action=mylocks&token="+token+"&api_key=" + API_KEY + "&t=" + timestamp);
+        const data = await res.json(); 
 
         if(data.status === "UNAUTHORIZED"){
             if(data.reason === "SESSION_REPLACED") showSessionPopup("DEVICE");
             else showSessionPopup("EXPIRED");
             return;
         } else if(data.status === "ACCESS_DENIED"){
-            document.getElementById("lockTable").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px'>Access Denied</td></tr>";
+            document.getElementById("lockTable").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:20px'>Access Denied</td></tr>";
             return;
         }
 
@@ -1587,9 +1561,8 @@ async function manualTableRefresh() {
         switchView(currentViewStatus);
 
     } catch(e) {
-        document.getElementById("lockTable").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
+        document.getElementById("lockTable").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
     } finally {
-        // Hentikan Animasi Butang
         btn.disabled = false;
         icon.classList.remove("icon-spin");
     }
@@ -1613,33 +1586,28 @@ function renderTable(){
         pDate.setHours(0,0,0,0);
 
         let isOverdue = pDate < today;
+      
         let remark = d.remarks || "-";
         let shortRemark = remark.length > 40 ? remark.substring(0,40)+"..." : remark;
 
-        // Buat design badge untuk status
-// GANTIKAN KOD statusBadge KEPADA KOD DI BAWAH INI
         let statusBadge = d.status === "PAID" 
             ? `<div style="text-align:left;"><span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span><span style="display:block; font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">by ${d.paid_by || '-'}</span></div>`
             : `<div style="text-align:left;"><span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span></div>`;
     
-        // Pastikan background merah OVERDUE hanya untuk akaun yang masih LOCK
-    let isRowOverdue = (isOverdue && d.status !== "PAID");
+        let isRowOverdue = (isOverdue && d.status !== "PAID");
 
         html += `
-    <tr style="${isRowOverdue ? 'background:#fef2f2;' : ''}">
-    <td>${d.acc_no}</td>
-    <td>${d.branch}</td>
-    <td>${amount}</td>
-    <td>${statusBadge}</td> <!-- MASUKKAN BADGE DI SINI -->
-    <td style="${isRowOverdue ? 'color:#ef4444;font-weight:600;' : ''}">
-    ${formatDate(d.promise)}
+        <tr style="${isRowOverdue ? 'background:#fef2f2;' : ''}">
+        <td>${d.acc_no}</td>
+        <td>${d.branch}</td>
+        <td>${amount}</td>
+        <td>${statusBadge}</td>
+        <td style="${isRowOverdue ? 'color:#ef4444;font-weight:600;' : ''}">
+        ${formatDate(d.promise)}
         </td>
         <td onclick="toggleRemark(this)" data-full="${remark}" data-short="${shortRemark}" style="cursor:pointer; max-width: 200px; word-break: break-word;">
-
         <div class="remark-text">${shortRemark}</div>
-
         ${remark.length > 40 ? '<div style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic; font-weight: 500;" class="tap-hint"><i class="fa fa-hand-pointer"></i> tap to view</div>' : ''}
-
         </td>
         </tr>
         `;
@@ -1653,7 +1621,7 @@ function renderTable(){
     document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${totalPage}`;
         
     document.getElementById("prevBtn").disabled = currentPage === 1;
-    document.getElementById("nextBtn").disabled = currentPage === totalPage;
+    document.getElementById("nextBtn").disabled = currentPage === totalPage || filteredData.length === 0;
 }
     
 function nextPage(){
@@ -1672,15 +1640,12 @@ function prevPage(){
 
 function applyFilter(){
     let acc = document.getElementById("filterAcc").value.toLowerCase();
-
     filteredData = fullData.filter(d=>{
         let accNo = (d.acc_no || "").toString().toLowerCase();
         let status = (d.status || "").toString().toUpperCase();
         
         let matchAcc = (!acc || accNo.includes(acc));
         
-        // JIKA TAB ALL: Tunjuk semua tanpa kira status
-        // JIKA TAB LAIN: Ikut tab semasa (LOCK atau PAID), KECUALI jika ada carian nombor akaun
         let matchStatus = true;
         if(currentViewStatus !== "ALL"){
              matchStatus = acc ? true : (status === currentViewStatus);
@@ -1688,7 +1653,6 @@ function applyFilter(){
         
         return matchAcc && matchStatus;
     });
-
     currentPage = 1;
     renderTable();
 }
@@ -1708,8 +1672,7 @@ function exportToExcel() {
             "BRANCH": row.branch,
             "AMOUNT": Number(row.amount || 0), 
             "STATUS": row.status,
-            "PAID BY": row.paid_by || "-", // <-- TAMBAH BARIS INI
-            // Hantar objek Date sebenar supaya Excel boleh sort dengan betul
+            "PAID BY": row.paid_by || "-",
             "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate, 
             "REMARKS": row.remarks || "",
             "CREATED TIME": isNaN(cDate.getTime()) ? row.created : cDate
@@ -1720,13 +1683,11 @@ function exportToExcel() {
 
     let range = XLSX.utils.decode_range(worksheet['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-        // Kolum F adalah PTP DATE (Indeks 5)
         let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 5});
         if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') {
             worksheet[ptpCellRef].z = 'd-mmm-yyyy';
         }
 
-        // Kolum H adalah CREATED TIME (Indeks 7)
         let createdCellRef = XLSX.utils.encode_cell({r: R, c: 7});
         if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') {
             worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM';
@@ -1741,10 +1702,7 @@ function exportToExcel() {
 }
     
 function resetFilter(){
-    // 1. Kosongkan kotak carian
     document.getElementById("filterAcc").value = "";
-    
-    // 2. Biar applyFilter uruskan tapisan supaya ia ikut tab (LOCK/PAID) yang sedang aktif
     applyFilter();
 }
 
@@ -1780,28 +1738,23 @@ function sortTableData(colId) {
         currentSort.dir = 'asc';
     }
 
-    // Reset and Update Icons
     document.querySelectorAll('th .sort-icon').forEach(icon => icon.className = 'fa fa-sort sort-icon');
     const th = document.querySelector(`th[data-sort="${colId}"]`);
     if (th) th.querySelector('.sort-icon').className = currentSort.dir === 'asc' ? 'fa fa-sort-up sort-icon' : 'fa fa-sort-down sort-icon';
-
-    // Auto-detect target array based on which page is active (Master uses filteredTableData)
+    
     let targetArray = typeof filteredTableData !== 'undefined' ? filteredTableData : (typeof filteredData !== 'undefined' ? filteredData : []);
-
-targetArray.sort((a, b) => {
+    
+    targetArray.sort((a, b) => {
         let valA = a[colId] || "";
         let valB = b[colId] || "";
         
         if (colId === 'acc_no') {
-            // 🔥 METHOD BARU: Susun ikut bilangan digit (length) dahulu, kemudian baru ikut nilai
             let strA = valA.toString().trim();
             let strB = valB.toString().trim();
             
             if (strA.length !== strB.length) {
-                // Jika panjang tak sama, yang kurang digit duduk atas
                 return currentSort.dir === 'asc' ? (strA.length - strB.length) : (strB.length - strA.length);
             } else {
-                // Jika bilangan digit sama, baru susun nilai dari kecil ke besar macam biasa
                 return currentSort.dir === 'asc' ? strA.localeCompare(strB) : strB.localeCompare(strA);
             }
         } 
@@ -1818,14 +1771,13 @@ targetArray.sort((a, b) => {
             valB = valB.toString().toLowerCase();
         }
 
-        // Logic sort standard untuk kolum-kolum selain acc_no
         if (valA < valB) return currentSort.dir === 'asc' ? -1 : 1;
         if (valA > valB) return currentSort.dir === 'asc' ? 1 : -1;
         return 0;
     });
-
-    currentPage = 1; // Reset pagination
-    renderTable(); // Re-render the data view
+    
+    currentPage = 1; 
+    renderTable();
 }
 
 function initTableUpgrades() {
@@ -1836,14 +1788,13 @@ function initTableUpgrades() {
 
         let x, w;
 
-        // --- Column Resizing Logic ---
         const mouseDownHandler = function(e) {
             x = e.clientX;
             w = th.offsetWidth;
             document.addEventListener('mousemove', mouseMoveHandler);
             document.addEventListener('mouseup', mouseUpHandler);
             resizer.classList.add('resizing');
-            e.stopPropagation(); // Prevents click sort from firing
+            e.stopPropagation(); 
         };
 
         const mouseMoveHandler = function(e) {
@@ -1859,10 +1810,8 @@ function initTableUpgrades() {
         };
 
         resizer.addEventListener('mousedown', mouseDownHandler);
-
-        // --- Column Sorting Logic ---
+        
         th.addEventListener('click', (e) => {
-            // Ignore click if user was grabbing the resizer
             if (e.target.classList.contains('resizer')) return;
             
             const sortCol = th.getAttribute('data-sort');
@@ -1871,7 +1820,6 @@ function initTableUpgrades() {
     });
 }
 
-// Initialize upgrades automatically when the DOM is ready
 window.addEventListener('DOMContentLoaded', initTableUpgrades);
 
 </script>
