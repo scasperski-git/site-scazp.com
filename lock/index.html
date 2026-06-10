@@ -1115,7 +1115,6 @@ function goMaster(){
 document.getElementById("userInfo").innerHTML = "User: "+(user || "-")+" | Role: "+(role || "-");
 
 loadUserSummary();
-setInterval(loadUserSummary, 120000);
 
 fetch(api+"?action=branches&token="+token+"&api_key=" + API_KEY)
 .then(res=>res.json())
