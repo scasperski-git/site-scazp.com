@@ -1228,29 +1228,6 @@ function showSessionPopup(type){
     },3000);
 }
 
-const CHECK_INTERVAL = 60000;
-function verifySessionWithServer() {
-    if (document.hidden) return;
-    const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
-    if (!currentToken) { showSessionPopup("EXPIRED"); return; }
-
-    fetch(API_URL + "?action=session&token=" + currentToken + "&api_key=SCZP_SECURE_2026")
-    .then(response => response.json())
-    .then(data => {
-        if (data.status !== "ACTIVE") {
-            if (data.reason === "SESSION_REPLACED") showSessionPopup("DEVICE");
-            else showSessionPopup("EXPIRED");
-        }
-    })
-    .catch(error => console.log("Check paused."));
-}
-
-verifySessionWithServer();
-setInterval(verifySessionWithServer, CHECK_INTERVAL);
-document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) verifySessionWithServer();
-});
-
 function manualRefresh() {
     var icon = document.getElementById("refreshIcon");
     var text = document.getElementById("refreshText");
