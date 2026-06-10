@@ -1116,31 +1116,44 @@ document.getElementById("userInfo").innerHTML = "User: "+(user || "-")+" | Role:
 
 loadUserSummary();
 
-fetch(api+"?action=branches&token="+token+"&api_key=" + API_KEY)
-.then(res=>res.json())
-.then(data=>{
+function loadBranches() {
+    var select = document.getElementById("branch");
+    var cachedBranches = localStorage.getItem("branch_list");
+    var cacheTime = localStorage.getItem("branch_time");
+    var now = new Date().getTime();
+    var expiryTime = 86400000; // 24 Jam
 
-    if(data.status=="UNAUTHORIZED"){
-        if(data.reason=="SESSION_REPLACED"){
-            showSessionPopup("DEVICE");
-        }
-        else{
-            showSessionPopup("EXPIRED");
-        }
-        return;
+    if (cachedBranches && cacheTime && (now - cacheTime < expiryTime)) {
+        renderBranchDropdown(JSON.parse(cachedBranches), select);
+    } else {
+        fetch(api+"?action=branches&token="+token+"&api_key=" + API_KEY)
+        .then(res => res.json())
+        .then(data => {
+            if(data.status == "UNAUTHORIZED"){
+                if(data.reason == "SESSION_REPLACED") showSessionPopup("DEVICE");
+                else showSessionPopup("EXPIRED");
+                return;
+            }
+            
+            localStorage.setItem("branch_list", JSON.stringify(data));
+            localStorage.setItem("branch_time", now);
+            renderBranchDropdown(data, select);
+        });
     }
+}
 
-    var select=document.getElementById("branch");
-    select.innerHTML='<option value="">SELECT BRANCH</option>';
-
-    data.forEach(b=>{
-        var option=document.createElement("option");
-        option.value=b.id;
-        option.text=b.name;
+function renderBranchDropdown(data, select) {
+    select.innerHTML = '<option value="">SELECT BRANCH</option>';
+    data.forEach(b => {
+        var option = document.createElement("option");
+        option.value = b.id;
+        option.text = b.name;
         select.appendChild(option);
     });
+}
 
-});
+// Panggil fungsi untuk jalankan
+loadBranches();
 
 document.getElementById("dca_id").value = user || "";
 
