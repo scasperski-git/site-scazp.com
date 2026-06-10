@@ -862,23 +862,38 @@ function getTodayLocal(){
 }
   
 function loadUsers(){
-    fetch(api+"?action=users&token="+token+"&api_key=SCZP_SECURE_2026")
-    .then(r=>r.json())
-    .then(list=>{
-        var select=document.getElementById("dcaFilter");
-        select.innerHTML="";
+    var select = document.getElementById("dcaFilter");
+    var cachedUsers = localStorage.getItem("user_list");
+    var cacheTime = localStorage.getItem("user_time");
+    var now = new Date().getTime();
+    var expiryTime = 86400000; // 24 Jam
 
-        list.forEach(function(u){
-            var opt=document.createElement("option");
-            if(typeof u === "string"){
-                opt.value = "ALL";
-                opt.text = "ALL USER";
-            }else{
-                opt.value = u.id;
-                opt.text = u.name;
-            }
-            select.appendChild(opt);
+    if (cachedUsers && cacheTime && (now - cacheTime < expiryTime)) {
+        renderUserDropdown(JSON.parse(cachedUsers), select);
+    } else {
+        fetch(api+"?action=users&token="+token+"&api_key=SCZP_SECURE_2026")
+        .then(r => r.json())
+        .then(list => {
+            // Simpan senarai pengguna ke dalam local storage
+            localStorage.setItem("user_list", JSON.stringify(list));
+            localStorage.setItem("user_time", now);
+            renderUserDropdown(list, select);
         });
+    }
+}
+
+function renderUserDropdown(list, select) {
+    select.innerHTML = "";
+    list.forEach(function(u){
+        var opt = document.createElement("option");
+        if(typeof u === "string"){
+            opt.value = "ALL";
+            opt.text = "ALL USER";
+        } else {
+            opt.value = u.id;
+            opt.text = u.name;
+        }
+        select.appendChild(opt);
     });
 }
 
