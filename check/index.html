@@ -950,7 +950,7 @@ async function checkLock(){
             let actionButton = "";
             if (data.status === "LOCK") {
                 // Hantar docId ke butang supaya fungsi markAsPaid tahu rekod mana nak dikemas kini
-                actionButton = `<button class='paid-btn' onclick="markAsPaid('${docId}', '${data.acc_no}')"><i class='fa-solid fa-check-circle'></i> Mark as PAID</button>`;
+                actionButton = `<button class='paid-btn' onclick="markAsPaid('${docId}', '${data.acc_no}', '${data.dca_id}')"><i class='fa-solid fa-check-circle'></i> Mark as PAID</button>`;
             }
 
             result.innerHTML =
@@ -974,8 +974,8 @@ async function checkLock(){
 
     checkBtn.disabled = false; isLoading = false;
 }
-// Terima docId dan acc_no dari parameter butang
-async function markAsPaid(docId, acc) {
+// TUKAR DEFINISI FUNGSI
+async function markAsPaid(docId, acc, originalDcaId) { // Tambah parameter originalDcaId
     if(!confirm("Are you sure you want to mark Account " + acc + " as PAID?")) return;
     
     checkBtn.disabled = true;
@@ -998,24 +998,23 @@ async function markAsPaid(docId, acc) {
 
         // --- Selepas status berjaya di-update kepada PAID dalam Firestore ---
 try {
-    // Ambil ID DCA asal yang buat lock daripada data baris tersebut (cth: record.dca_id)
-    var originalDcaId = record.dca_id; 
 
-    fetch(API_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-            action: "trigger_notif",
-            title: "Akaun Dah PAID! ✅",
-            body: "Akaun " + record.acc_no + " yang anda lock telah disahkan PAID oleh Kaunter Semakan.",
-            filter_type: "user_id",
-            filter_value: originalDcaId, // Khusus dihantar kepada ID DCA itu sahaja!
-            api_key: API_KEY
-        })
-    });
-} catch (e) {
-    console.log("Gagal hantar push notification:", e);
+fetch(API_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+                action: "trigger_notif",
+                title: "Akaun Dah PAID! ✅",
+                body: "Akaun " + acc + " yang anda lock telah disahkan PAID oleh Kaunter Semakan.",
+                filter_type: "user_id",
+                filter_value: originalDcaId, // Sekarang nilai ini sah
+                api_key: API_KEY
+            })
+        });
+    } catch (e) {
+        console.log("Gagal hantar push notification:", e);
+    }
 }
         
     } catch (err) { 
