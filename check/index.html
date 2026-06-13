@@ -645,6 +645,34 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
     
 </style>
 
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // Letakkan config dari Firebase Console (Project Settings) di sini
+  const firebaseConfig = {
+    apiKey: "AIzaSyDKiYl8462c8ZanXc4oXIfa-_9su3E89Wk",
+    authDomain: "lockcheck-e0160.firebaseapp.com",
+    projectId: "lockcheck-e0160",
+    storageBucket: "lockcheck-e0160.firebasestorage.app",
+    messagingSenderId: "912034602664",
+    appId: "1:912034602664:web:f23b971b67a0ef1df8ac9d",
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Jadikan pembolehubah ini global supaya boleh diguna dalam blok <script> biasa
+  window.db = db;
+  window.collection = collection;
+  window.query = query;
+  window.where = where;
+  window.getDocs = getDocs;
+  window.updateDoc = updateDoc;
+  window.doc = doc;
+</script>
+
 </head>
 
 <body>
