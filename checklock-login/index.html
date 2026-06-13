@@ -438,17 +438,18 @@ async function login(){
 
         if(data.status==="SUCCESS"){
 
-            // 🔥 SEKAT DAN SET TAG KE ONESIGNAL (MENGGUNAKAN ONESIGNALDEFERRED YANG BETUL)
-            try {
-                window.OneSignalDeferred = window.OneSignalDeferred || [];
-                window.OneSignalDeferred.push(async function(OneSignal) {
-                    console.log("Menghantar tag ke OneSignal...");
-                    await OneSignal.sendTags({
-                        "role": data.type,   // Auto tag: 'lock', 'check', atau 'master'
-                        "user_id": data.user // Auto tag: ID Staf (cth: BARAKAH)
-                    });
-                    console.log("Tag berjaya disimpan!");
-                });
+// KOD BARU
+window.OneSignalDeferred.push(async function(OneSignal) {
+    console.log("Menghantar tag ke OneSignal...");
+    // v16 wajib guna OneSignal.User.addTags
+    OneSignal.User.addTags({
+        "role": data.type,   
+        "user_id": data.user 
+    });
+    // Jadikan amalan yang baik untuk set juga Login ID
+    OneSignal.login(data.user);
+    console.log("Tag berjaya disimpan!");
+});
             } catch(errNotif) {
                 console.error("Gagal hubungi OneSignal SDK:", errNotif);
             }
