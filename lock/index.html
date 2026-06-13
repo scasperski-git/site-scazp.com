@@ -12,6 +12,17 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
+<!-- 🔥 SDK ONESIGNAL VERSI TERKINI (V16) -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "d32d45b5-121e-42ca-9310-f8d029e9bd57",
+    });
+  });
+</script>
+    
 <style>
 
 /* ===== BASE & TYPOGRAPHY ===== */
