@@ -881,7 +881,7 @@ table tbody tr:hover td { background-color: #e2e8f0; }
     appId: "1:912034602664:web:f23b971b67a0ef1df8ac9d",
   };
 
-const app = initializeApp(firebaseConfig);
+  const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
   // Set global variables untuk digunakan dalam script biasa
@@ -891,6 +891,19 @@ const app = initializeApp(firebaseConfig);
   window.query = query;
   window.where = where;
   window.getDocs = getDocs;
+
+  // ========================================================
+  // INI KOD BARU YANG KAU KENA TAMBAH (SUSUN BALIK FLOW)
+  // ========================================================
+  window.addEventListener('DOMContentLoaded', () => {
+      // Bagi masa 800ms untuk Firebase binding settle dulu, baru panggil summary
+      setTimeout(() => {
+          console.log("Memulakan tarikan data summary awal...");
+          if (typeof loadUserSummary === "function") {
+              loadUserSummary(); 
+          }
+      }, 800);
+  });
 </script>
     
 </head>
@@ -1142,8 +1155,6 @@ function goMaster(){
 
 document.getElementById("userInfo").innerHTML = "User: "+(user || "-")+" | Role: "+(role || "-");
 
-loadUserSummary();
-
 function loadBranches() {
     var select = document.getElementById("branch");
     var cachedBranches = localStorage.getItem("branch_list");
@@ -1259,46 +1270,68 @@ remarkBox.addEventListener("input",function(){
     remarkCounter.textContent=this.value.length+" / 100";
 });
 
-async function loadUserSummary(){
-    document.getElementById("userSummary").innerText = "Today: loading...";
+async function loadUserSummary() {
+    const user = localStorage.getItem("username");
+    if (!user) {
+        console.log("Summary ditangguhkan: Username tiada dalam localStorage");
+        return;
+    }
+
+    // Pastikan Firebase DB sudah wujud
+    if (!window.db || !window.query || !window.where || !window.collection || !window.getDocs) {
+        console.log("Firebase belum sedia, cuba lagi dalam 1 saat...");
+        setTimeout(loadUserSummary, 1000);
+        return;
+    }
 
     try {
-        let d = new Date();
-        // Set masa ke 12:00 tengah malam hari ini sebagai tanda permulaan hari
-        let todayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString();
+        // Set tarikh hari ini (Zon Masa Malaysia / Tempatan)
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
 
+        const todayEnd = new Date();
+        todayEnd.setHours(23, 59, 59, 999);
+
+        // Query Firebase: Ambil kes hari ini untuk DCA ini sahaja
         const q = window.query(
-            window.collection(window.db, "LOCK_DATA"), 
-            window.where("dca_id", "==", user)
+            window.collection(window.db, "LOCK_DATA"),
+            window.where("dca_id", "==", user),
+            window.where("created_at", ">=", todayStart.toISOString())
         );
+
         const querySnapshot = await window.getDocs(q);
 
-        var total = 0;
-        var paid = 0; 
-        var totalAmount = 0;
+        let totalLocksToday = 0;
+        let totalPaidToday = 0;
 
         querySnapshot.forEach((doc) => {
-            let row = doc.data();
-            // Hanya kira rekod yang dicipta bermula hari ini dan ke atas
-            if(row.created_at >= todayStart) {
-                total++;
-                totalAmount += Number(row.amount || 0);
-                if(row.status === "PAID") {
-                    paid++;
+            const data = doc.data();
+            const status = (data.status || "").toUpperCase().trim();
+            
+            // Double check tarikh dalam julat hari ini (safety net)
+            const createdAt = data.created_at ? new Date(data.created_at) : null;
+            if (createdAt && createdAt >= todayStart && createdAt <= todayEnd) {
+                totalLocksToday++;
+                if (status === "PAID") {
+                    totalPaidToday++;
                 }
             }
         });
 
-        var amountFormatted = Number(totalAmount).toLocaleString("en-MY",{
-            minimumFractionDigits:2, maximumFractionDigits:2
-        });
-       
-        document.getElementById("userSummary").innerHTML =
-        '<i class="fa fa-chart-line"></i> Today: ' + total + ' Locks | ' + paid + ' Paid | RM ' + amountFormatted;
+        // Kemas kini UI Card Dashboard
+        const totalLockElem = document.getElementById("totalLockToday");
+        const totalPaidElem = document.getElementById("totalPaidToday");
 
-    } catch (err) {
-        console.error("Error User Summary: ", err);
-        document.getElementById("userSummary").innerText = "Today: - | RM -";
+        if (totalLockElem) totalLockElem.innerText = totalLocksToday;
+        if (totalPaidElem) totalPaidElem.innerText = totalPaidToday;
+
+        console.log(`Summary berjaya dikemaskini untuk ${user}: Lock (${totalLocksToday}), Paid (${totalPaidToday})`);
+
+    } catch (error) {
+        console.error("Ralat loadUserSummary: ", error);
+        // Jika sangkut ralat Index Firebase, paparkan 0 dan bukannya - -
+        if (document.getElementById("totalLockToday")) document.getElementById("totalLockToday").innerText = "0";
+        if (document.getElementById("totalPaidToday")) document.getElementById("totalPaidToday").innerText = "0";
     }
 }
 
