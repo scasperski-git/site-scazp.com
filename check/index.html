@@ -1067,35 +1067,42 @@ async function manualTableRefresh() {
     
     btn.disabled = true;
     icon.classList.add("icon-spin");
-    
     document.getElementById("lockTable").innerHTML = 
-    "<tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
-
+    "<tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records directly from Firestore...</td></tr>";
+    
     try {
-        let timestamp = new Date().getTime(); 
+        // Ambil terus dari Firestore (Tak perlu lalu GAS API yang lembap tu)
+        const q = window.query(window.collection(window.db, "LOCK_DATA"));
+        const querySnapshot = await window.getDocs(q);
         
-        const res = await fetch(api+"?action=dashboard&token="+token+"&dca=ALL&api_key=SCZP_SECURE_2026&t=" + timestamp);
-        const json = await res.json(); 
+        fullData = [];
+        querySnapshot.forEach((doc) => {
+            let rowData = doc.data();
+            fullData.push({
+                dca: rowData.dca_id,
+                acc_no: rowData.acc_no,
+                branch: rowData.branch_name,
+                amount: rowData.amount,
+                status: rowData.status,
+                promise: rowData.promise_date,
+                created: rowData.created_at,
+                remarks: rowData.remarks,
+                paid_by: rowData.paid_by || ""
+            });
+        });
 
-        if(json.status === "UNAUTHORIZED"){
-            if(json.reason === "SESSION_REPLACED") showSessionPopup("DEVICE");
-            else showSessionPopup("EXPIRED");
-            return;
-        } else if(json.status === "ACCESS_DENIED"){
-            document.getElementById("lockTable").innerHTML = "<tr><td colspan='8' style='text-align:center;padding:20px'>Access Denied</td></tr>";
-            return;
-        }
-
-        fullData = (json.data || []).sort((a,b)=> new Date(b.created) - new Date(a.created));
+        // Susun rekod paling terbaharu di atas
+        fullData.sort((a,b)=> new Date(b.created) - new Date(a.created));
         switchView(currentViewStatus);
-
     } catch(e) {
+        console.error("Firestore Error: ", e);
         document.getElementById("lockTable").innerHTML = "<tr><td colspan='8' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
     } finally {
         btn.disabled = false;
         icon.classList.remove("icon-spin");
     }
 }
+
 
 function toggleRemark(el){
     let full = el.getAttribute("data-full");
