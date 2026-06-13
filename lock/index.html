@@ -865,6 +865,34 @@ table tbody tr:hover td { background-color: #e2e8f0; }
 }
     
 </style>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // Letakkan config dari Firebase Console (Project Settings) di sini
+  const firebaseConfig = {
+    apiKey: "AIzaSyDKiYl8462c8ZanXc4oXIfa-_9su3E89Wk",
+    authDomain: "lockcheck-e0160.firebaseapp.com",
+    projectId: "lockcheck-e0160",
+    storageBucket: "lockcheck-e0160.firebasestorage.app",
+    messagingSenderId: "912034602664",
+    appId: "1:912034602664:web:f23b971b67a0ef1df8ac9d",
+  };
+
+const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Set global variables untuk digunakan dalam script biasa
+  window.db = db;
+  window.collection = collection;
+  window.addDoc = addDoc;
+  window.query = query;
+  window.where = where;
+  window.getDocs = getDocs;
+</script>
+    
 </head>
 
 <body>
@@ -1267,60 +1295,93 @@ function showError(input,errorId){
     },400);
 }
 
-document.getElementById("lockForm").addEventListener("submit",e=>{
+document.getElementById("lockForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    document.querySelectorAll(".error").forEach(e=>e.style.display="none");
+    // Sembunyikan semua mesej error asal
+    document.querySelectorAll(".error").forEach(el => el.style.display = "none");
 
-    var acc=document.getElementById("acc_no");
-    var branch=document.getElementById("branch");
-    var amount=document.getElementById("amount");
-    var category=document.getElementById("payment_category");
-    var date=document.getElementById("promise_date");
-    var dca=document.getElementById("dca_id");
-    var remarks=document.getElementById("remarks");
+    var acc = document.getElementById("acc_no");
+    var branch = document.getElementById("branch");
+    var amount = document.getElementById("amount");
+    var category = document.getElementById("payment_category");
+    var date = document.getElementById("promise_date");
+    var dca = document.getElementById("dca_id");
+    var remarks = document.getElementById("remarks");
 
-    if(!acc.value){showError(acc,"err_acc");return;}
-    if(!branch.value){showError(branch,"err_branch");return;}
-    if(!amount.value || Number(amount.value.replace(/,/g,''))<=0){showError(amount,"err_amount");return;}
-    if(!category.value){showError(category,"err_category");return;}
-    if(!date.value){showError(date,"err_date");return;}
-    if(!dca.value){showError(dca,"err_dca");return;}
+    // Validasi input borang sedia ada
+    if(!acc.value){ showError(acc, "err_acc"); return; }
+    if(!branch.value){ showError(branch, "err_branch"); return; }
+    if(!amount.value || Number(amount.value.replace(/,/g, '')) <= 0){ showError(amount, "err_amount"); return; }
+    if(!category.value){ showError(category, "err_category"); return; }
+    if(!date.value){ showError(date, "err_date"); return; }
+    if(!dca.value){ showError(dca, "err_dca"); return; }
     
     remarks.value = remarks.value.toUpperCase();
-    if(!remarks.value){showError(remarks,"err_remarks");return;}
+    if(!remarks.value){ showError(remarks, "err_remarks"); return; }
 
-    document.getElementById("overlay").style.display="flex";
+    // Paparkan animasi loading premium sedia ada
+    document.getElementById("overlay").style.display = "flex";
     document.getElementById("submitBtn").disabled = true;
 
-    var formData=new FormData(e.target);
-    var branchName=branch.selectedOptions[0].text;
-    formData.append("branch_name",branchName);
-    formData.append("token",token);
-    formData.append("user",user);
-    formData.append("api_key", API_KEY);
+    try {
+        const inputAccNo = acc.value.trim();
+        
+        // 1. SEMAK SAMA ADA AKAUN SUDAH DI-LOCK (Elak Race Condition)
+        const q = window.query(
+            window.collection(window.db, "LOCK_DATA"), 
+            window.where("acc_no", "==", inputAccNo),
+            window.where("status", "==", "LOCK")
+        );
+        const querySnapshot = await window.getDocs(q);
 
-    fetch(api,{
-        method:"POST",
-        body:formData
-    })
-    .then(res=>res.text())
-    .then(data=>{
-        document.getElementById("overlay").style.display="none";
-
-        if(data=="UNAUTHORIZED"){
-            showSessionPopup("EXPIRED");
+        if (!querySnapshot.empty) {
+            // Jika ada lock aktif, paparkan popup amaran asal sistem anda
+            document.getElementById("overlay").style.display = "none";
+            document.getElementById("lockedPopup").style.display = "flex";
+            document.getElementById("submitBtn").disabled = false;
             return;
         }
 
-        if(data=="ACCOUNT_ALREADY_LOCKED"){
-            document.getElementById("lockedPopup").style.display="flex";
-            document.getElementById("submitBtn").disabled = false; 
-        }
-        else{
-            showSuccess(formData);
-        }
-    });
+        // Ambil teks nama cawangan yang dipilih
+        var branchName = branch.selectedOptions[0].text;
+        // Bersihkan koma pada amaun untuk disimpan sebagai jenis data 'number'
+        var cleanAmount = parseFloat(amount.value.replace(/,/g, '')) || 0;
+
+        // 2. TEMBAK DATA MASUK KE FIREBASE
+        await window.addDoc(window.collection(window.db, "LOCK_DATA"), {
+            acc_no: inputAccNo,
+            branch_name: branchName,
+            amount: cleanAmount,
+            payment_category: category.value,
+            promise_date: date.value, // Menyimpan format YYYY-MM-DD
+            dca_id: dca.value,
+            remarks: remarks.value,
+            status: "LOCK",
+            created_at: new Date().toISOString() // Format ISO String standard masa nyata
+        });
+
+        // Tutup loading animation
+        document.getElementById("overlay").style.display = "none";
+
+        // Bina objek data olok-olok (Mock FormData) untuk dihantar ke fungsi paparan sukses asal anda
+        var mockFormData = new Map();
+        mockFormData.set("acc_no", inputAccNo);
+        mockFormData.set("amount", amount.value);
+        mockFormData.set("payment_category", category.value);
+        mockFormData.set("promise_date", date.value);
+        mockFormData.set("remarks", remarks.value);
+        mockFormData.set("dca_id", dca.value);
+
+        // Panggil fungsi asal untuk paparkan kad sukses premium sistem anda
+        showSuccess(mockFormData);
+
+    } catch (err) {
+        console.error("Firebase Error semasa Create Lock: ", err);
+        alert("System error. Gagal menyimpan data lock.");
+        document.getElementById("overlay").style.display = "none";
+        document.getElementById("submitBtn").disabled = false;
+    }
 });
 
 function formatDate(dateStr){
