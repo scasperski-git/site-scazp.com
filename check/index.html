@@ -14,17 +14,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
-<!-- 🔥 SDK ONESIGNAL VERSI TERKINI (V16) -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "d32d45b5-121e-42ca-9310-f8d029e9bd57",
-    });
-  });
-</script>
-
 <style>
 
 /* ===== BASE & TYPOGRAPHY ===== */
@@ -961,7 +950,7 @@ async function checkLock(){
             let actionButton = "";
             if (data.status === "LOCK") {
                 // Hantar docId ke butang supaya fungsi markAsPaid tahu rekod mana nak dikemas kini
-                actionButton = `<button class='paid-btn' onclick="markAsPaid('${docId}', '${data.acc_no}', '${data.dca_id}')"><i class='fa-solid fa-check-circle'></i> Mark as PAID</button>`;
+                actionButton = `<button class='paid-btn' onclick="markAsPaid('${docId}', '${data.acc_no}')"><i class='fa-solid fa-check-circle'></i> Mark as PAID</button>`;
             }
 
             result.innerHTML =
@@ -985,8 +974,8 @@ async function checkLock(){
 
     checkBtn.disabled = false; isLoading = false;
 }
-// TUKAR DEFINISI FUNGSI
-async function markAsPaid(docId, acc, originalDcaId) { // Tambah parameter originalDcaId
+// Terima docId dan acc_no dari parameter butang
+async function markAsPaid(docId, acc) {
     if(!confirm("Are you sure you want to mark Account " + acc + " as PAID?")) return;
     
     checkBtn.disabled = true;
@@ -1006,27 +995,6 @@ async function markAsPaid(docId, acc, originalDcaId) { // Tambah parameter origi
         alert("Account " + acc + " successfully marked as PAID!");
         input.value = acc; 
         checkLock(); // Segarkan kembali paparan secara automatik
-
-        // --- Selepas status berjaya di-update kepada PAID dalam Firestore ---
-try {
-
-fetch(API_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams({
-                action: "trigger_notif",
-                title: "Akaun Dah PAID! ✅",
-                body: "Akaun " + acc + " yang anda lock telah disahkan PAID oleh Kaunter Semakan.",
-                filter_type: "user_id",
-                filter_value: originalDcaId, // Sekarang nilai ini sah
-                api_key: API_KEY
-            })
-        });
-    } catch (e) {
-        console.log("Gagal hantar push notification:", e);
-    }
-}
         
     } catch (err) { 
         console.error("Firebase Update Error: ", err);
