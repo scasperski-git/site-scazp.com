@@ -1110,13 +1110,14 @@ function toggleRemark(el){
     let textEl = el.querySelector(".remark-text");
     let hintEl = el.querySelector(".tap-hint");
 
-    // Tukar logik: kalau skrin tengah tunjuk short, baru buka full
-    if(textEl.innerText === short){
-        textEl.innerText = full;
-        if(hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to close";
-    }else{
+    if(!textEl) return; // Mengelakkan error kalau element tak jumpa
+
+    if(textEl.innerText === full){
         textEl.innerText = short;
         if(hintEl) hintEl.innerHTML = "<i class='fa fa-hand-pointer'></i> tap to view";
+    }else{
+        textEl.innerText = full;
+        if(hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to close"; // Sesuai dengan spesifikasi CHECK.txt
     }
 }
 
@@ -1159,7 +1160,7 @@ function renderTable() {
             createdStr = d.created || "-";
         }
 
-        let remark = d.remarks || "-";
+                let remark = d.remarks || "-";
         let safeRemark = remark.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         let shortRemark = remark.length > 40 ? safeRemark.substring(0, 40) + "..." : safeRemark;
 
