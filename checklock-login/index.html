@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
+<!-- 🔥 SDK ONESIGNAL VERSI TERKINI (V16) -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -437,19 +438,20 @@ async function login(){
 
         if(data.status==="SUCCESS"){
 
-            // 🔥 AUTOMATIK SET TAG KE ONESIGNAL SEMASA LOGIN
-    try {
-        if (typeof OneSignal !== "undefined") {
-            OneSignal.push(function() {
-                OneSignal.sendTags({
-                    "role": data.type,   // Auto tag: 'lock', 'check', atau 'master'
-                    "user_id": data.user // Auto tag: ID Staf (cth: BARAKAH)
+            // 🔥 SEKAT DAN SET TAG KE ONESIGNAL (MENGGUNAKAN ONESIGNALDEFERRED YANG BETUL)
+            try {
+                window.OneSignalDeferred = window.OneSignalDeferred || [];
+                window.OneSignalDeferred.push(async function(OneSignal) {
+                    console.log("Menghantar tag ke OneSignal...");
+                    await OneSignal.sendTags({
+                        "role": data.type,   // Auto tag: 'lock', 'check', atau 'master'
+                        "user_id": data.user // Auto tag: ID Staf (cth: BARAKAH)
+                    });
+                    console.log("Tag berjaya disimpan!");
                 });
-            });
-        }
-    } catch(err) {
-        console.error("Gagal hubungi OneSignal SDK:", err);
-    }
+            } catch(errNotif) {
+                console.error("Gagal hubungi OneSignal SDK:", errNotif);
+            }
 
             // --- WEB & APP STORAGE SEPARATION ---
             // Identify if opened via App (WebView/Kodular) or Standard Web Browser
@@ -499,7 +501,6 @@ document.getElementById("pass").addEventListener("keypress",function(e){
     }
 });
 
-/* AUTO LOGIN LISTENER */
 /* AUTO LOGIN LISTENER (FIXED) */
 window.addEventListener('DOMContentLoaded', (event) => {
     // Baca kedua-dua storage
