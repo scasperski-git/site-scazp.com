@@ -12,17 +12,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<!-- 🔥 SDK ONESIGNAL VERSI TERKINI (V16) -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "d32d45b5-121e-42ca-9310-f8d029e9bd57",
-    });
-  });
-</script>
-
 <style>
 
 * {
@@ -388,6 +377,7 @@ AUTH OVERLAY
 <script src="../lockconfig.js"></script>
 
 <script>
+
 const api = API_URL;
 
 document.getElementById("user").focus();
@@ -437,25 +427,12 @@ async function login(){
 
         if(data.status==="SUCCESS"){
 
-            // BLOK ONESIGNAL DENGAN TRY-CATCH YANG BETUL
-            try {
-                window.OneSignalDeferred.push(async function(OneSignal) {
-                    console.log("Menghantar tag ke OneSignal...");
-                    OneSignal.User.addTags({
-                        "role": data.type,   
-                        "user_id": data.user 
-                    });
-                    OneSignal.login(data.user);
-                    console.log("Tag berjaya disimpan!");
-                });
-            } catch(errNotif) {
-                console.error("Gagal hubungi OneSignal SDK:", errNotif);
-            }
-
             // --- WEB & APP STORAGE SEPARATION ---
+            // Identify if opened via App (WebView/Kodular) or Standard Web Browser
             let isApp = navigator.userAgent.includes("wv") || (navigator.userAgent.includes("Android") && navigator.userAgent.includes("Version"));
             let storage = isApp ? localStorage : sessionStorage;
 
+            // Save data into the correct storage
             storage.setItem("session_token", data.token);
             storage.setItem("lock_user", data.user);
             storage.setItem("lock_type", data.type);
@@ -463,18 +440,15 @@ async function login(){
             storage.setItem("lock_name", data.name);
             // ------------------------------------
 
-            // SETTIMEOUT UNTUK BERI MASA ONESIGNAL HANTAR TAG SEBELUM REDIRECT
-            setTimeout(() => {
-                if(data.type=="check"){
-                    window.location="../check/";
-                }
-                else if(data.type=="lock"){
-                    window.location="../lock/";
-                }
-                else if(data.type=="master"){
-                    window.location="../menumaster/";
-                }
-            }, 500);
+            if(data.type=="check"){
+                window.location="../check/";
+            }
+            else if(data.type=="lock"){
+                window.location="../lock/";
+            }
+            else if(data.type=="master"){
+                window.location="../menumaster/";
+            }
 
         }
         else if(data.status==="INACTIVE"){
@@ -502,21 +476,26 @@ document.getElementById("pass").addEventListener("keypress",function(e){
 });
 
 /* AUTO LOGIN LISTENER */
+/* AUTO LOGIN LISTENER (FIXED) */
 window.addEventListener('DOMContentLoaded', (event) => {
+    // Baca kedua-dua storage
     const activeToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
     const userType = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_type");
     
     if (activeToken && userType) {
         document.getElementById("overlay").style.display = "flex"; 
         
-        fetch(api + "?action=session&token=" + activeToken + "&api_key=" + API_KEY)
+        // Guna "SCZP_SECURE_2026" secara terus supaya tak berlaku ralat API_KEY hilang
+        fetch(api + "?action=session&token=" + activeToken + "&api_key=SCZP_SECURE_2026")
         .then(res => res.json())
         .then(data => {
             if (data.status === "ACTIVE") {
+                // Token sah, teruskan ke portal
                 if (userType === "check") window.location = "../check/";
                 else if (userType === "lock") window.location = "../lock/";
                 else if (userType === "master") window.location = "../menumaster/";
             } else {
+                // Token dibatalkan oleh server (Sesi ditendang)
                 localStorage.clear();
                 sessionStorage.clear();
                 document.getElementById("overlay").style.display = "none";
@@ -526,6 +505,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             }
         })
         .catch(e => {
+            // Jika berlaku ralat internet/server, sembunyikan loading dan cuba benarkan masuk
             document.getElementById("overlay").style.display = "none";
             if (userType === "check") window.location = "../check/";
             else if (userType === "lock") window.location = "../lock/";
@@ -533,6 +513,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
         });
     }
 });
+    
 </script>
 
 </body>
