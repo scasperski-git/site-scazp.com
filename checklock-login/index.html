@@ -12,6 +12,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "d32d45b5-121e-42ca-9310-f8d029e9bd57",
+    });
+  });
+</script>
+
 <style>
 
 * {
@@ -426,6 +436,20 @@ async function login(){
         const data=await res.json();
 
         if(data.status==="SUCCESS"){
+
+            // 🔥 AUTOMATIK SET TAG KE ONESIGNAL SEMASA LOGIN
+    try {
+        if (typeof OneSignal !== "undefined") {
+            OneSignal.push(function() {
+                OneSignal.sendTags({
+                    "role": data.type,   // Auto tag: 'lock', 'check', atau 'master'
+                    "user_id": data.user // Auto tag: ID Staf (cth: BARAKAH)
+                });
+            });
+        }
+    } catch(err) {
+        console.error("Gagal hubungi OneSignal SDK:", err);
+    }
 
             // --- WEB & APP STORAGE SEPARATION ---
             // Identify if opened via App (WebView/Kodular) or Standard Web Browser
