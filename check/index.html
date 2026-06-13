@@ -995,6 +995,28 @@ async function markAsPaid(docId, acc) {
         alert("Account " + acc + " successfully marked as PAID!");
         input.value = acc; 
         checkLock(); // Segarkan kembali paparan secara automatik
+
+        // --- Selepas status berjaya di-update kepada PAID dalam Firestore ---
+try {
+    // Ambil ID DCA asal yang buat lock daripada data baris tersebut (cth: record.dca_id)
+    var originalDcaId = record.dca_id; 
+
+    fetch(API_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+            action: "trigger_notif",
+            title: "Akaun Dah PAID! ✅",
+            body: "Akaun " + record.acc_no + " yang anda lock telah disahkan PAID oleh Kaunter Semakan.",
+            filter_type: "user_id",
+            filter_value: originalDcaId, // Khusus dihantar kepada ID DCA itu sahaja!
+            api_key: API_KEY
+        })
+    });
+} catch (e) {
+    console.log("Gagal hantar push notification:", e);
+}
         
     } catch (err) { 
         console.error("Firebase Update Error: ", err);
@@ -1067,35 +1089,29 @@ async function manualTableRefresh() {
     
     btn.disabled = true;
     icon.classList.add("icon-spin");
-    document.getElementById("lockTable").innerHTML = 
-    "<tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records directly from Firestore...</td></tr>";
     
-    try {
-        // Ambil terus dari Firestore (Tak perlu lalu GAS API yang lembap tu)
-        const q = window.query(window.collection(window.db, "LOCK_DATA"));
-        const querySnapshot = await window.getDocs(q);
-        
-        fullData = [];
-        querySnapshot.forEach((doc) => {
-            let rowData = doc.data();
-            fullData.push({
-                dca: rowData.dca_id,
-                acc_no: rowData.acc_no,
-                branch: rowData.branch_name,
-                amount: rowData.amount,
-                status: rowData.status,
-                promise: rowData.promise_date,
-                created: rowData.created_at,
-                remarks: rowData.remarks,
-                paid_by: rowData.paid_by || ""
-            });
-        });
+    document.getElementById("lockTable").innerHTML = 
+    "<tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
 
-        // Susun rekod paling terbaharu di atas
-        fullData.sort((a,b)=> new Date(b.created) - new Date(a.created));
+    try {
+        let timestamp = new Date().getTime(); 
+        
+        const res = await fetch(api+"?action=dashboard&token="+token+"&dca=ALL&api_key=SCZP_SECURE_2026&t=" + timestamp);
+        const json = await res.json(); 
+
+        if(json.status === "UNAUTHORIZED"){
+            if(json.reason === "SESSION_REPLACED") showSessionPopup("DEVICE");
+            else showSessionPopup("EXPIRED");
+            return;
+        } else if(json.status === "ACCESS_DENIED"){
+            document.getElementById("lockTable").innerHTML = "<tr><td colspan='8' style='text-align:center;padding:20px'>Access Denied</td></tr>";
+            return;
+        }
+
+        fullData = (json.data || []).sort((a,b)=> new Date(b.created) - new Date(a.created));
         switchView(currentViewStatus);
+
     } catch(e) {
-        console.error("Firestore Error: ", e);
         document.getElementById("lockTable").innerHTML = "<tr><td colspan='8' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
     } finally {
         btn.disabled = false;
@@ -1103,24 +1119,20 @@ async function manualTableRefresh() {
     }
 }
 
-
 function toggleRemark(el){
     let full = el.getAttribute("data-full");
     let short = el.getAttribute("data-short");
     let textEl = el.querySelector(".remark-text");
     let hintEl = el.querySelector(".tap-hint");
 
-    if(!textEl) return; // Mengelakkan error kalau element tak jumpa
-
     if(textEl.innerText === full){
         textEl.innerText = short;
         if(hintEl) hintEl.innerHTML = "<i class='fa fa-hand-pointer'></i> tap to view";
     }else{
         textEl.innerText = full;
-        if(hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to close"; // Sesuai dengan spesifikasi CHECK.txt
+        if(hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to close";
     }
 }
-
 
 function renderTable() {
     let start = (currentPage - 1) * pageSize;
@@ -1160,7 +1172,7 @@ function renderTable() {
             createdStr = d.created || "-";
         }
 
-                let remark = d.remarks || "-";
+        let remark = d.remarks || "-";
         let safeRemark = remark.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         let shortRemark = remark.length > 40 ? safeRemark.substring(0, 40) + "..." : safeRemark;
 
