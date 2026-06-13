@@ -1271,14 +1271,14 @@ remarkBox.addEventListener("input",function(){
 });
 
 async function loadUserSummary() {
-    // Tukar kepada 'lock_user' supaya sama dengan data sesi log masuk kau
-    const user = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user"); 
+    // 1. Ambil kunci sesi pengguna yang betul
+    const user = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
     if (!user) {
-        console.log("Summary ditangguhkan: Username tiada dalam localStorage");
+        console.log("Summary ditangguhkan: Username tiada dalam sesi");
         return;
     }
 
-    // Pastikan Firebase DB sudah wujud
+    // 2. Pastikan Firebase DB sudah sedia
     if (!window.db || !window.query || !window.where || !window.collection || !window.getDocs) {
         console.log("Firebase belum sedia, cuba lagi dalam 1 saat...");
         setTimeout(loadUserSummary, 1000);
@@ -1286,14 +1286,14 @@ async function loadUserSummary() {
     }
 
     try {
-        // Set tarikh hari ini (Zon Masa Malaysia / Tempatan)
+        // Set julat masa hari ini mengikut zon tempatan
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
 
         const todayEnd = new Date();
         todayEnd.setHours(23, 59, 59, 999);
 
-        // Query Firebase: Ambil kes hari ini untuk DCA ini sahaja
+        // 3. Query Firebase: Ambil kes hari ini untuk DCA ini sahaja
         const q = window.query(
             window.collection(window.db, "LOCK_DATA"),
             window.where("dca_id", "==", user),
@@ -1304,35 +1304,47 @@ async function loadUserSummary() {
 
         let totalLocksToday = 0;
         let totalPaidToday = 0;
+        let totalAmountToday = 0; // Tambah pemanduan pembolehubah amaun
 
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             const status = (data.status || "").toUpperCase().trim();
             
-            // Double check tarikh dalam julat hari ini (safety net)
+            // Double check julat tarikh hari ini
             const createdAt = data.created_at ? new Date(data.created_at) : null;
             if (createdAt && createdAt >= todayStart && createdAt <= todayEnd) {
                 totalLocksToday++;
+                
                 if (status === "PAID") {
                     totalPaidToday++;
+                    // Ekstrak amaun dan kumpulkan jumlah (pastikan tukar ke data Number)
+                    let amnt = parseFloat(data.amount) || 0;
+                    totalAmountToday += amnt;
                 }
             }
         });
 
-        // Kemas kini UI Card Dashboard
-        const totalLockElem = document.getElementById("totalLockToday");
-        const totalPaidElem = document.getElementById("totalPaidToday");
+        // 4. Formatkan angka amaun kepada bentuk mata wang RM 0.00
+        var formattedAmount = Number(totalAmountToday).toLocaleString("en-MY", {
+            minimumFractionDigits: 2, 
+            maximumFractionDigits: 2
+        });
 
-        if (totalLockElem) totalLockElem.innerText = totalLocksToday;
-        if (totalPaidElem) totalPaidElem.innerText = totalPaidToday;
+        // 5. Kemas kini element HTML mengikut format asal kau yang ada ikon
+        const summaryElem = document.getElementById("userSummary");
+        if (summaryElem) {
+            summaryElem.innerHTML = 
+                '<i class="fa fa-chart-line"></i> Today: ' + totalLocksToday + 
+                ' Locks | ' + totalPaidToday + ' Paid | RM ' + formattedAmount;
+        }
 
-        console.log(`Summary berjaya dikemaskini untuk ${user}: Lock (${totalLocksToday}), Paid (${totalPaidToday})`);
+        console.log(`Summary Firebase sukses untuk ${user}: ${totalLocksToday} Locks, ${totalPaidToday} Paid, RM ${formattedAmount}`);
 
     } catch (error) {
-        console.error("Ralat loadUserSummary: ", error);
-        // Jika sangkut ralat Index Firebase, paparkan 0 dan bukannya - -
-        if (document.getElementById("totalLockToday")) document.getElementById("totalLockToday").innerText = "0";
-        if (document.getElementById("totalPaidToday")) document.getElementById("totalPaidToday").innerText = "0";
+        console.error("Ralat loadUserSummary Firebase: ", error);
+        if (document.getElementById("userSummary")) {
+            document.getElementById("userSummary").innerText = "Today: - | RM -";
+        }
     }
 }
 
