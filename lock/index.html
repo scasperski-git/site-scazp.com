@@ -1259,28 +1259,47 @@ remarkBox.addEventListener("input",function(){
     remarkCounter.textContent=this.value.length+" / 100";
 });
 
-function loadUserSummary(){
+async function loadUserSummary(){
     document.getElementById("userSummary").innerText = "Today: loading...";
 
-    let d = new Date();
-    let today = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0');
-    let timestamp = new Date().getTime();
+    try {
+        let d = new Date();
+        // Set masa ke 12:00 tengah malam hari ini sebagai tanda permulaan hari
+        let todayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString();
 
-    fetch(api+"?action=dashboard&token="+token+"&dca="+user+"&start="+today+"&end="+today+"&api_key=" + API_KEY + "&t=" + timestamp)
-    .then(r=>r.json())
-    .then(data=>{
-        var total = data.total || 0;
-        var paid = data.totalPaid || 0; 
-        var amount = Number(data.amount || 0).toLocaleString("en-MY",{
+        const q = window.query(
+            window.collection(window.db, "LOCK_DATA"), 
+            window.where("dca_id", "==", user)
+        );
+        const querySnapshot = await window.getDocs(q);
+
+        var total = 0;
+        var paid = 0; 
+        var totalAmount = 0;
+
+        querySnapshot.forEach((doc) => {
+            let row = doc.data();
+            // Hanya kira rekod yang dicipta bermula hari ini dan ke atas
+            if(row.created_at >= todayStart) {
+                total++;
+                totalAmount += Number(row.amount || 0);
+                if(row.status === "PAID") {
+                    paid++;
+                }
+            }
+        });
+
+        var amountFormatted = Number(totalAmount).toLocaleString("en-MY",{
             minimumFractionDigits:2, maximumFractionDigits:2
         });
        
         document.getElementById("userSummary").innerHTML =
-        '<i class="fa fa-chart-line"></i> Today: '+total+' Locks | '+paid+' Paid | RM '+amount;
-    })
-    .catch(()=>{
+        '<i class="fa fa-chart-line"></i> Today: ' + total + ' Locks | ' + paid + ' Paid | RM ' + amountFormatted;
+
+    } catch (err) {
+        console.error("Error User Summary: ", err);
         document.getElementById("userSummary").innerText = "Today: - | RM -";
-    });
+    }
 }
 
 function showError(input,errorId){
@@ -1584,24 +1603,36 @@ async function manualTableRefresh() {
     "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
 
     try {
-        let timestamp = new Date().getTime(); 
+        // Tarik terus data dari Firestore milik pengguna (user) yang sedang log masuk
+        const q = window.query(
+            window.collection(window.db, "LOCK_DATA"), 
+            window.where("dca_id", "==", user)
+        );
+        const querySnapshot = await window.getDocs(q);
         
-        const res = await fetch(api+"?action=mylocks&token="+token+"&api_key=" + API_KEY + "&t=" + timestamp);
-        const data = await res.json(); 
+        fullData = [];
+        querySnapshot.forEach((doc) => {
+            let rowData = doc.data();
+            // Masukkan data ke dalam array utama sistem anda
+            fullData.push({
+                acc_no: rowData.acc_no,
+                branch: rowData.branch_name, // Map ke field baharu
+                amount: rowData.amount,
+                status: rowData.status,
+                promise: rowData.promise_date, // Map ke field baharu
+                created: rowData.created_at,   // Map ke field baharu
+                remarks: rowData.remarks,
+                paid_by: rowData.paid_by || "-"
+            });
+        });
 
-        if(data.status === "UNAUTHORIZED"){
-            if(data.reason === "SESSION_REPLACED") showSessionPopup("DEVICE");
-            else showSessionPopup("EXPIRED");
-            return;
-        } else if(data.status === "ACCESS_DENIED"){
-            document.getElementById("lockTable").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px'>Access Denied</td></tr>";
-            return;
-        }
-
-        fullData = data.sort((a,b)=> new Date(b.created) - new Date(a.created));
+        // Susun data daripada tarikh cipta yang paling terbaru (descending)
+        fullData.sort((a, b) => new Date(b.created) - new Date(a.created));
+        
         switchView(currentViewStatus);
 
     } catch(e) {
+        console.error("Firebase Error (My Locks): ", e);
         document.getElementById("lockTable").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
     } finally {
         btn.disabled = false;
@@ -1695,17 +1726,17 @@ function prevPage(){
     }
 }
 
+// Rombak fungsi applyFilter() untuk elakkan ralat carian
 function applyFilter(){
     let acc = document.getElementById("filterAcc").value.toLowerCase();
-    filteredData = fullData.filter(d=>{
+    filteredData = fullData.filter(d => {
         let accNo = (d.acc_no || "").toString().toLowerCase();
         let status = (d.status || "").toString().toUpperCase();
         
         let matchAcc = (!acc || accNo.includes(acc));
-        
         let matchStatus = true;
         if(currentViewStatus !== "ALL"){
-             matchStatus = acc ? true : (status === currentViewStatus);
+            matchStatus = acc ? true : (status === currentViewStatus);
         }
         
         return matchAcc && matchStatus;
