@@ -875,86 +875,108 @@ function formatDateTime(dateStr){
 }
 
 async function checkLock(){
-    const acc=input.value.trim();
+    const acc = input.value.trim();
     if(!acc){ alert("Enter Account No"); input.focus(); return; }
     if(isLoading) return;
+    
+    isLoading = true; checkBtn.disabled = true;
+    result.innerHTML = "<div class='loading'>Checking Lock Status<div class='spinner'></div></div>";
 
-    isLoading=true; checkBtn.disabled=true;
-    result.innerHTML= "<div class='loading'>Checking Lock Status<div class='spinner'></div></div>";
+    try {
+        // Tarik rekod terus dari Firestore berdasarkan Nombor Akaun
+        const q = window.query(window.collection(window.db, "LOCK_DATA"), window.where("acc_no", "==", acc));
+        const querySnapshot = await window.getDocs(q);
 
-    try{
-        const res = await fetch(api+"?acc_no="+encodeURIComponent(acc)+"&token="+token+"&api_key=SCZP_SECURE_2026");
-        const data=await res.json();
-
-        if(data.status=="UNAUTHORIZED"){
-            if(data.reason=="SESSION_REPLACED") showSessionPopup("DEVICE");
-            else showSessionPopup("EXPIRED");
+        if (querySnapshot.empty) {
+            result.innerHTML = "<div class='no-lock'>NO LOCK FOUND</div>";
+            checkBtn.disabled = false; isLoading = false;
             return;
         }
 
-        if(data.status === "LOCK" || data.status === "PAID"){
-            const formattedDate=formatDate(data.valid);
-            const created=formatDateTime(data.created);
-            const amount = "RM " + Number(data.amount || 0).toLocaleString("en-MY",{ minimumFractionDigits:2, maximumFractionDigits:2 });
+        // Ambil data pertama yang sepadan dengan carian
+        let docId = "";
+        let data = null;
+        querySnapshot.forEach((doc) => {
+            docId = doc.id; // Simpan Firestore Document ID untuk kemas kini nanti
+            data = doc.data();
+        });
 
-            const promiseDate=new Date(data.valid);
-            const today=new Date();
+        if (data.status === "LOCK" || data.status === "PAID") {
+            const formattedDate = formatDate(data.promise_date);
+            const created = formatDateTime(data.created_at);
+            const amount = "RM " + Number(data.amount || 0).toLocaleString("en-MY", { minimumFractionDigits:2, maximumFractionDigits:2 });
+
+            const promiseDate = new Date(data.promise_date);
+            const today = new Date();
             today.setHours(0,0,0,0); promiseDate.setHours(0,0,0,0);
 
             let isPaid = (data.status === "PAID");
             let statusText = isPaid ? "ALREADY PAID" : "LOCKED";
             let statusColor = isPaid ? "#10b981" : "#f59e0b"; 
 
-            if(!isPaid && today > promiseDate){ statusText = "EXPIRED"; statusColor = "#ef4444"; }
+            if (!isPaid && today > promiseDate) { 
+                statusText = "EXPIRED"; statusColor = "#ef4444";
+            }
 
             let paidByInfo = (isPaid && data.paid_by) 
                 ? `<div style='margin-top: 14px;'><span style='background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 6px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; display: inline-block; letter-spacing: 0.3px;'><i class='fa-solid fa-check-double' style='margin-right: 4px;'></i> Verified Paid by ${data.paid_by}</span></div>` 
                 : "";
 
             let actionButton = "";
-            if(data.status === "LOCK") {
-                actionButton = `<button class='paid-btn' onclick="markAsPaid('${data.acc_no}')"><i class='fa-solid fa-check-circle'></i> Mark as PAID</button>`;
+            if (data.status === "LOCK") {
+                // Hantar docId ke butang supaya fungsi markAsPaid tahu rekod mana nak dikemas kini
+                actionButton = `<button class='paid-btn' onclick="markAsPaid('${docId}', '${data.acc_no}')"><i class='fa-solid fa-check-circle'></i> Mark as PAID</button>`;
             }
 
-            result.innerHTML=
-            "<div class='result-card'>"+
-            "<div class='status-box'><span style='background:"+statusColor+"'>"+statusText+"</span>"+paidByInfo+"</div>"+
-            "<div class='created-meta'>Locked by "+data.dca_id+" • "+created+"</div>"+
-            "<div class='row'><div class='col'><div class='label'>ACCOUNT NO</div><div class='value'>"+data.acc_no+"</div></div>"+
-            "<div class='col'><div class='label'>BRANCH</div><div class='value'>"+data.branch+"</div></div></div>"+
-            "<div class='row'><div class='col'><div class='label'>LOCK AMOUNT</div><div class='amount'>"+amount+"</div></div>"+
-            "<div class='col'><div class='label'>PROMISE DATE</div><div class='value'>"+formattedDate+"</div></div></div>"+
-            "<div class='label'>PAYMENT CATEGORY</div><div class='value'>"+(data.category || "-")+"</div><br>"+
-            "<div class='label'>REMARKS</div><div class='remark'>"+(data.remarks || "-")+"</div>"+
+            result.innerHTML =
+            "<div class='result-card'>" +
+            "<div class='status-box'><span style='background:"+statusColor+"'>" + statusText + "</span>" + paidByInfo + "</div>" +
+            "<div class='created-meta'>Locked by " + data.dca_id + " • " + created + "</div>" +
+            "<div class='row'><div class='col'><div class='label'>ACCOUNT NO</div><div class='value'>" + data.acc_no + "</div></div>" +
+            "<div class='col'><div class='label'>BRANCH</div><div class='value'>" + data.branch_name + "</div></div></div>" +
+            "<div class='row'><div class='col'><div class='label'>LOCK AMOUNT</div><div class='amount'>" + amount + "</div></div>" +
+            "<div class='col'><div class='label'>PROMISE DATE</div><div class='value'>" + formattedDate + "</div></div></div>" +
+            "<div class='label'>PAYMENT CATEGORY</div><div class='value'>" + (data.payment_category || "-") + "</div><br>" +
+            "<div class='label'>REMARKS</div><div class='remark'>" + (data.remarks || "-") + "</div>" +
             actionButton + "</div>";
         } else {
-            result.innerHTML= "<div class='no-lock'>NO LOCK FOUND</div>";
+            result.innerHTML = "<div class='no-lock'>NO LOCK FOUND</div>";
         }
-    }catch(err){ result.innerHTML= "<div class='no-lock'>SYSTEM ERROR. TRY AGAIN.</div>"; }
+    } catch (err) { 
+        console.error("Firebase Error: ", err);
+        result.innerHTML = "<div class='no-lock'>SYSTEM ERROR. TRY AGAIN.</div>"; 
+    }
 
-    checkBtn.disabled=false; isLoading=false;
+    checkBtn.disabled = false; isLoading = false;
 }
-
-async function markAsPaid(acc) {
+// Terima docId dan acc_no dari parameter butang
+async function markAsPaid(docId, acc) {
     if(!confirm("Are you sure you want to mark Account " + acc + " as PAID?")) return;
-
+    
     checkBtn.disabled = true;
     result.innerHTML = "<div class='loading'>Updating to PAID...<div class='spinner'></div></div>";
 
     try {
-        const formData = new URLSearchParams({ action: "mark_paid", acc_no: acc, token: token, api_key: "SCZP_SECURE_2026" });
-        const res = await fetch(api, { method: "POST", body: formData });
-        const textResponse = await res.text();
+        // Tembak tepat kepada dokumen dalam Firestore menggunakan ID uniknya
+        const lockRef = window.doc(window.db, "LOCK_DATA", docId);
+        
+        // Kemas kini status, ID staf yang menekan butang, dan timestamp
+        await window.updateDoc(lockRef, {
+            status: "PAID",
+            paid_by: user, // Pembolehubah 'user' yang diset di awal fail JS anda
+            paid_date: new Date().toISOString()
+        });
 
-        if(textResponse === "PAID_SUCCESS") {
-            alert("Account " + acc + " successfully marked as PAID!");
-            input.value = acc; checkLock(); 
-        } else {
-            alert("Failed to mark as PAID. Please try again."); checkLock();
-        }
-    } catch (err) { alert("System error. Check your connection."); checkBtn.disabled = false; }
+        alert("Account " + acc + " successfully marked as PAID!");
+        input.value = acc; 
+        checkLock(); // Segarkan kembali paparan secara automatik
+        
+    } catch (err) { 
+        console.error("Firebase Update Error: ", err);
+        alert("System error. Check your connection."); 
+        checkBtn.disabled = false;
+    }
 }
-
 function newSearch(){
     input.value=""; result.innerHTML=""; checkBtn.disabled=false; input.focus();
 }
