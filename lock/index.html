@@ -1370,6 +1370,7 @@ document.getElementById("lockForm").addEventListener("submit", async (e) => {
         // 2. TEMBAK DATA MASUK KE FIREBASE
         await window.addDoc(window.collection(window.db, "LOCK_DATA"), {
             acc_no: inputAccNo,
+            branch_id: branch.value,
             branch_name: branchName,
             amount: cleanAmount,
             payment_category: category.value,
