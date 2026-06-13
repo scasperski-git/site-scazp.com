@@ -1538,14 +1538,15 @@ clearError("amount","err_amount");
 clearError("dca_id","err_dca");
 clearError("remarks","err_remarks");
 
-/* =========================================
-   SINGLE DEVICE LOGIN & SMART PAUSE LOGIC
-========================================= */
+/* =========================================================================
+   SINGLE DEVICE LOGIN & SMART PAUSE LOGIC (WITH ACTIVITY AUTO-RESET)
+========================================================================= */
 
-const CHECK_INTERVAL = 60000;
+const CHECK_INTERVAL = 120000; // Set ke 2 minit sekali untuk jimat 50% kuota awal
+let sessionTimer = null;
 
 function verifySessionWithServer() {
-    if (document.hidden) return;
+    if (document.hidden) return; // Cuba jimat kuota jika tab tersembunyi
 
     const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
 
@@ -1570,15 +1571,36 @@ function verifySessionWithServer() {
     });
 }
 
+// Fungsi utama untuk reset semula masa semakan (Timer)
+function resetSessionTimer() {
+    // Padam timer sedia ada supaya dia tak berjalan bertindih
+    if (sessionTimer) {
+        clearInterval(sessionTimer);
+    }
+    
+    // Bina timer baharu yang akan menembak server selepas 2 minit user statik
+    sessionTimer = setInterval(verifySessionWithServer, CHECK_INTERVAL);
+}
+
+// Jalankan semakan kali pertama semasa halaman portal dibuka
 verifySessionWithServer();
-setInterval(verifySessionWithServer, CHECK_INTERVAL);
+resetSessionTimer();
+
+// Pasang pengesan aktiviti (Activity Listeners) pada skrin telefon/komputer user
+// Setiap kali mereka klik, menaip, atau gerakkan skrin, timer akan auto-reset
+['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(eventName => {
+    document.addEventListener(eventName, () => {
+        // console.log("Aktiviti dikesan, timer GAS di-reset semula!"); // Untuk tujuan testing
+        resetSessionTimer();
+    }, { passive: true });
+});
 
 document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
         verifySessionWithServer();
+        resetSessionTimer();
     }
 });
-
 /* =========================================
    MY LOCK LIST LOGIC (SMART CACHE)
 ========================================= */
