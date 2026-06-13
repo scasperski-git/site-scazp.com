@@ -1110,14 +1110,16 @@ function toggleRemark(el){
     let textEl = el.querySelector(".remark-text");
     let hintEl = el.querySelector(".tap-hint");
 
-    if(textEl.innerText === full){
-        textEl.innerText = short;
-        if(hintEl) hintEl.innerHTML = "<i class='fa fa-hand-pointer'></i> tap to view";
-    }else{
+    // Tukar logik: kalau skrin tengah tunjuk short, baru buka full
+    if(textEl.innerText === short){
         textEl.innerText = full;
         if(hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to close";
+    }else{
+        textEl.innerText = short;
+        if(hintEl) hintEl.innerHTML = "<i class='fa fa-hand-pointer'></i> tap to view";
     }
 }
+
 
 function renderTable() {
     let start = (currentPage - 1) * pageSize;
