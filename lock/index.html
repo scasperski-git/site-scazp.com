@@ -1433,6 +1433,25 @@ document.getElementById("lockForm").addEventListener("submit", async (e) => {
         // Panggil fungsi asal untuk paparkan kad sukses premium sistem anda
         showSuccess(mockFormData);
 
+        try {
+    // Panggil GAS Proxy untuk tembak notifikasi
+    fetch(API_URL, {  // API_URL ini merujuk kepada URL GAS kau dalam LOCKCONFIG.JS
+        method: "POST",
+        mode: "no-cors", // Guna no-cors jika tidak mahu ralat CORS mengganggu aliran web
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+            action: "trigger_notif",
+            title: "Lock Baru Masuk! 🔒",
+            body: "Akaun " + inputAccNo + " di-lock oleh " + localStorage.getItem("lock_user") + " sebanyak RM" + amount.value,
+            filter_type: "role",
+            filter_value: "check", // Hantar kepada role 'check' dan 'master'
+            api_key: API_KEY
+        })
+    });
+} catch (e) {
+    console.log("Gagal hantar push notification:", e);
+}
+
     } catch (err) {
         console.error("Firebase Error semasa Create Lock: ", err);
         alert("System error. Gagal menyimpan data lock.");
