@@ -12,30 +12,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "18715c13-4375-4944-b1d7-ca27bca33a0a",
-      // Kita aktifkan butang loceng kat bucu kanan bawah
-      notifyButton: {
-        enable: true,
-      },
-      allowLocalhostAsSecureOrigin: true
-    });
-
-    // Kod daftar ID & Role
-    const loggedUser = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
-    const loggedType = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_type");
-    
-    if (loggedUser) {
-        await OneSignal.login(loggedUser); 
-        await OneSignal.User.addTag("role", loggedType); 
-    }
-  });
-</script>
-    
 <style>
 
 /* ===== BASE & TYPOGRAPHY ===== */
@@ -1444,26 +1420,6 @@ document.getElementById("lockForm").addEventListener("submit", async (e) => {
 
         // Tutup loading animation
         document.getElementById("overlay").style.display = "none";
-
-// ==========================================
-        // ONESIGNAL: TEMBAK KE GAS UNTUK NOTIFIKASI
-        // ==========================================
-        try {
-            const notifHeading = "New Account Locked!";
-            const notifMessage = `${dca.value} LOCK ACCOUNT RM${cleanAmount.toFixed(2)} DI ${branchName} DAN PTP ${date.value}`;
-
-            const formData = new URLSearchParams();
-            formData.append("action", "trigger_notif");
-            formData.append("api_key", API_KEY); // SCZP_SECURE_2026
-            formData.append("title", notifHeading);
-            formData.append("body", notifMessage);
-            formData.append("filter_type", "role");
-            formData.append("filter_value", "check"); // Dalam GAS, 'check' akan automatik tembak 'master' sekali
-
-            fetch(api, { method: "POST", body: formData }).catch(e => console.log("Notif Error:", e));
-        } catch(e) { 
-            console.error("Gagal hantar push notification:", e); 
-        }
 
         // Bina objek data olok-olok (Mock FormData) untuk dihantar ke fungsi paparan sukses asal anda
         var mockFormData = new Map();
