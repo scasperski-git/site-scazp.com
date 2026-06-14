@@ -1443,6 +1443,37 @@ document.getElementById("lockForm").addEventListener("submit", async (e) => {
         // Tutup loading animation
         document.getElementById("overlay").style.display = "none";
 
+      // ==========================================
+        // ONESIGNAL: NOTIFIKASI KEPADA CHECK & MASTER
+        // ==========================================
+        try {
+            const notifHeading = "New Account Locked!";
+            const notifMessage = `${dca.value} LOCK ACCOUNT RM${cleanAmount.toFixed(2)} DI ${branchName} DAN PTP ${date.value}`;
+
+            const payload = {
+                app_id: "18715c13-4375-4944-b1d7-ca27bca33a0a",
+                headings: { "en": notifHeading },
+                contents: { "en": notifMessage },
+                // Tembak hanya pada user yang ada tag role 'check' ATAU 'master'
+                filters: [
+                    {"field": "tag", "key": "role", "relation": "=", "value": "check"},
+                    {"operator": "OR"},
+                    {"field": "tag", "key": "role", "relation": "=", "value": "master"}
+                ]
+            };
+
+            await fetch("https://onesignal.com/api/v1/notifications", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json; charset=utf-8",
+                    "Authorization": "g5uwy2nqgu55es3ebu3tsuwxc"
+                },
+                body: JSON.stringify(payload)
+            });
+        } catch(e) { 
+            console.error("Gagal hantar push notification:", e); 
+        }
+
         // Bina objek data olok-olok (Mock FormData) untuk dihantar ke fungsi paparan sukses asal anda
         var mockFormData = new Map();
         mockFormData.set("acc_no", inputAccNo);
