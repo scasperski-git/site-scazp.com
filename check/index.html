@@ -899,13 +899,14 @@ function formatDateTime(dateStr){
     return day+" "+m[monthIndex]+" "+year+" "+hour+":"+minute;
 }
 
-async function checkLock(){
-    const acc = input.value.trim();
-    if(!acc){ alert("Enter Account No"); input.focus(); return; }
-    if(isLoading) return;
-    
-    isLoading = true; checkBtn.disabled = true;
-    result.innerHTML = "<div class='loading'>Checking Lock Status<div class='spinner'></div></div>";
+// 1. TAMBAH KOD INI: Semak sesi sebelum cari data
+    verifySessionWithServer();
+    const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
+    if(!currentToken) return; // Batal pencarian jika sesi dah hilang
+    // -----------------------------------------------------
+
+    isLoading = true; checkBtn.disabled = true; [cite: 1246]
+    result.innerHTML = "<div class='loading'>Checking Lock Status<div class='spinner'></div></div>"; [cite: 1246]
 
     try {
         // Tarik rekod terus dari Firestore berdasarkan Nombor Akaun
@@ -975,11 +976,14 @@ async function checkLock(){
     checkBtn.disabled = false; isLoading = false;
 }
 // Terima docId dan acc_no dari parameter butang
-async function markAsPaid(docId, acc) {
-    if(!confirm("Are you sure you want to mark Account " + acc + " as PAID?")) return;
-    
-    checkBtn.disabled = true;
-    result.innerHTML = "<div class='loading'>Updating to PAID...<div class='spinner'></div></div>";
+// 1. TAMBAH KOD INI: Semak sesi sebelum update status ke Firebase
+    verifySessionWithServer();
+    const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
+    if(!currentToken) return; // Batal kemas kini jika sesi dah hilang
+    // -----------------------------------------------------
+
+    checkBtn.disabled = true; [cite: 1267]
+    result.innerHTML = "<div class='loading'>Updating to PAID...<div class='spinner'></div></div>"; [cite: 1267]
 
     try {
         // Tembak tepat kepada dokumen dalam Firestore menggunakan ID uniknya
@@ -1360,6 +1364,56 @@ function initTableUpgrades() {
 }
 
 window.addEventListener('DOMContentLoaded', initTableUpgrades);
+
+/* =========================================================================
+   SINGLE DEVICE LOGIN & ACTION-TRIGGERED CHECK (20 MINUTE COOLDOWN)
+========================================================================= */
+
+function verifySessionWithServer() {
+    const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
+    if (!currentToken) return;
+
+    // Tembak API Google Apps Script untuk semak token
+    fetch(api + "?action=session&token=" + currentToken + "&api_key=SCZP_SECURE_2026")
+    .then(res => res.json())
+    .then(data => {
+        if (data.status !== "ACTIVE") {
+            // Panggil popup UI sedia ada dalam CHECK.txt
+            showSessionPopup("DEVICE"); 
+        }
+    })
+    .catch(err => console.log("Connection error, skipping check..."));
+}
+
+let lastCheckTime = 0;
+const CHECK_COOLDOWN = 1200000; // 1,200,000 milisaat = 20 minit
+
+function checkSessionOnAction() {
+    const now = Date.now();
+    
+    // Hanya buat semakan jika dah lebih 20 minit dari semakan terakhir
+    if (now - lastCheckTime > CHECK_COOLDOWN) {
+        lastCheckTime = now;
+        verifySessionWithServer();
+    }
+}
+
+// Semak bila pertama kali halaman dimuatkan
+verifySessionWithServer();
+lastCheckTime = Date.now();
+
+// Kesan bila user mula klik, gerak mouse, menaip, atau sentuh skrin
+['mousedown', 'mousemove', 'keypress', 'touchstart', 'focusin', 'change'].forEach(eventName => {
+    document.addEventListener(eventName, checkSessionOnAction, { passive: true });
+});
+
+// Semak terus bila user buka semula tab dari background
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+        lastCheckTime = Date.now(); // Reset masa
+        verifySessionWithServer();
+    }
+});
     
 </script>
 
