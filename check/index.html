@@ -1013,27 +1013,19 @@ async function markAsPaid(docId, acc, lockCreatorDcaId) {
             paid_date: new Date().toISOString()
         });
 
-        // ==========================================
-        // ONESIGNAL: NOTIFIKASI KEPADA DCA ASAL
+// ==========================================
+        // ONESIGNAL: TEMBAK KE GAS UNTUK NOTIFIKASI
         // ==========================================
         try {
-            const payload = {
-                app_id: "LETAK_ONESIGNAL_APP_ID_DI_SINI",
-                headings: { "en": "Account Marked as PAID" },
-                contents: { "en": `ACCOUNT ${acc} TELAH MARK AS PAID OLEH ${user}` },
-                // Tembak direct ke External ID (DCA ID) yang buat lock tu
-                include_aliases: { "external_id": [lockCreatorDcaId] },
-                target_channel: "push"
-            };
+            const formData = new URLSearchParams();
+            formData.append("action", "trigger_notif");
+            formData.append("api_key", API_KEY); // SCZP_SECURE_2026
+            formData.append("title", "Account Marked as PAID");
+            formData.append("body", `ACCOUNT ${acc} TELAH MARK AS PAID OLEH ${user}`);
+            formData.append("filter_type", "user_id");
+            formData.append("filter_value", lockCreatorDcaId); // Target DCA ID asal
 
-            await fetch("https://onesignal.com/api/v1/notifications", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json; charset=utf-8",
-                    "Authorization": "Basic LETAK_REST_API_KEY_DI_SINI"
-                },
-                body: JSON.stringify(payload)
-            });
+            fetch(api, { method: "POST", body: formData }).catch(e => console.log("Notif Error:", e));
         } catch(e) { 
             console.error("Gagal hantar push notification:", e); 
         }
