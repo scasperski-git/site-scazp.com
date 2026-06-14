@@ -866,7 +866,6 @@ table tbody tr:hover td { background-color: #e2e8f0; }
     
 </style>
 
-<!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -1323,7 +1322,6 @@ async function loadUserSummary() {
             maximumFractionDigits: 2
         });
 
-        // SINI LOGIK KEMAS KINI BESERTA IKON DAN RM KAU SEMULA
         const summaryElem = document.getElementById("userSummary");
         if (summaryElem) {
             summaryElem.innerHTML = 
@@ -1361,10 +1359,6 @@ document.getElementById("lockForm").addEventListener("submit", async (e) => {
     // ---------------------------------------------------------
 
     // Sembunyikan semua mesej error asal
-    document.querySelectorAll(".error").forEach(el => el.style.display = "none");
-
-    var acc = document.getElementById("acc_no");
-   // Sembunyikan semua mesej error asal
     document.querySelectorAll(".error").forEach(el => el.style.display = "none");
 
     var acc = document.getElementById("acc_no");
@@ -1548,40 +1542,6 @@ clearError("amount","err_amount");
 clearError("dca_id","err_dca");
 clearError("remarks","err_remarks");
 
-/* =========================================================================
-   SINGLE DEVICE LOGIN & ACTION-TRIGGERED CHECK (2 MINUTE COOLDOWN)
-========================================================================= */
-
-let lastCheckTime = 0;
-const CHECK_COOLDOWN = 1200000; // 20 minit cooldown
-
-function checkSessionOnAction() {
-    const now = Date.now();
-    
-    // Hanya buat semakan jika dah lebih 20 minit dari semakan terakhir
-    if (now - lastCheckTime > CHECK_COOLDOWN) {
-        lastCheckTime = now;
-        verifySessionWithServer(); // Tembak server
-    }
-}
-
-// Semak bila pertama kali halaman dimuatkan
-verifySessionWithServer();
-lastCheckTime = Date.now();
-
-// Kesan bila user mula klik, gerak mouse, menaip, atau sentuh skrin
-['mousedown', 'mousemove', 'keypress', 'touchstart', 'focusin', 'change'].forEach(eventName => {
-    document.addEventListener(eventName, checkSessionOnAction, { passive: true });
-});
-
-// Semak terus bila user buka semula tab dari background
-document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-        lastCheckTime = Date.now(); // Reset masa
-        verifySessionWithServer();
-    }
-});
-    
 /* =========================================
    MY LOCK LIST LOGIC (SMART CACHE)
 ========================================= */
@@ -1699,7 +1659,7 @@ function renderTable(){
         pDate.setHours(0,0,0,0);
 
         let isOverdue = pDate < today;
-      
+       
         let remark = d.remarks || "-";
         let shortRemark = remark.length > 40 ? remark.substring(0,40)+"..." : remark;
 
@@ -1767,7 +1727,6 @@ function prevPage(){
     }
 }
 
-// Rombak fungsi applyFilter() untuk elakkan ralat carian
 function applyFilter(){
     let acc = document.getElementById("filterAcc").value.toLowerCase();
     filteredData = fullData.filter(d => {
@@ -1841,14 +1800,11 @@ function toggleRemark(el){
     let textEl = el.querySelector(".remark-text");
     let hintEl = el.querySelector(".tap-hint");
 
-    // Semak jika kotak ini sudah dibuka dengan melihat class 'is-expanded'
     if(el.classList.contains("is-expanded")){
-        // Jika sudah dibuka -> Tutup (Minimize)
         textEl.innerHTML = short;
         el.classList.remove("is-expanded");
         if(hintEl) hintEl.innerHTML = "<i class='fa fa-hand-pointer'></i> tap to view";
     } else {
-        // Jika belum dibuka -> Buka (Expand)
         textEl.innerHTML = full;
         el.classList.add("is-expanded");
         if(hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to minimize";
@@ -1955,6 +1911,56 @@ function initTableUpgrades() {
 }
 
 window.addEventListener('DOMContentLoaded', initTableUpgrades);
+
+/* =========================================================================
+   SINGLE DEVICE LOGIN & ACTION-TRIGGERED CHECK (20 MINUTE COOLDOWN)
+========================================================================= */
+
+function verifySessionWithServer() {
+    const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
+    if (!currentToken) return;
+
+    // Tembak API Google Apps Script untuk semak token
+    fetch(api + "?action=session&token=" + currentToken + "&api_key=SCZP_SECURE_2026")
+    .then(res => res.json())
+    .then(data => {
+        if (data.status !== "ACTIVE") {
+            // Panggil popup UI sedia ada
+            showSessionPopup("DEVICE"); 
+        }
+    })
+    .catch(err => console.log("Connection error, skipping check..."));
+}
+
+let lastCheckTime = 0;
+const CHECK_COOLDOWN = 1200000; // 20 minit cooldown
+
+function checkSessionOnAction() {
+    const now = Date.now();
+    
+    // Hanya buat semakan jika dah lebih 20 minit dari semakan terakhir
+    if (now - lastCheckTime > CHECK_COOLDOWN) {
+        lastCheckTime = now;
+        verifySessionWithServer(); // Tembak server
+    }
+}
+
+// Semak bila pertama kali halaman dimuatkan
+verifySessionWithServer();
+lastCheckTime = Date.now();
+
+// Kesan bila user mula klik, gerak mouse, menaip, atau sentuh skrin
+['mousedown', 'mousemove', 'keypress', 'touchstart', 'focusin', 'change'].forEach(eventName => {
+    document.addEventListener(eventName, checkSessionOnAction, { passive: true });
+});
+
+// Semak terus bila user buka semula tab dari background
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+        lastCheckTime = Date.now(); // Reset masa
+        verifySessionWithServer();
+    }
+});
 
 </script>
 
