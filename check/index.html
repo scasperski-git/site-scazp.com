@@ -1103,12 +1103,17 @@ function toggleRemark(el){
     let textEl = el.querySelector(".remark-text");
     let hintEl = el.querySelector(".tap-hint");
 
-    if(textEl.innerText === full){
-        textEl.innerText = short;
+    // Semak jika kotak ini sudah dibuka dengan melihat class 'is-expanded'
+    if(el.classList.contains("is-expanded")){
+        // Jika sudah dibuka -> Tutup (Minimize)
+        textEl.innerHTML = short;
+        el.classList.remove("is-expanded");
         if(hintEl) hintEl.innerHTML = "<i class='fa fa-hand-pointer'></i> tap to view";
-    }else{
-        textEl.innerText = full;
-        if(hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to close";
+    } else {
+        // Jika belum dibuka -> Buka (Expand)
+        textEl.innerHTML = full;
+        el.classList.add("is-expanded");
+        if(hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to minimize";
     }
 }
 
