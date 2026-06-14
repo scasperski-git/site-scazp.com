@@ -997,8 +997,8 @@ table tbody tr:hover td { background-color: #e2e8f0; }
 
                     <div class="form-group full-width">
                         <label>Remarks</label>
-                        <textarea id="remarks" name="remarks" autocomplete="off" maxlength="100" placeholder="ENTER REMARKS"></textarea>
-                        <div id="remarkCounter">0 / 100</div>
+                        <textarea id="remarks" name="remarks" autocomplete="off" maxlength="200" placeholder="ENTER REMARKS"></textarea>
+                        <div id="remarkCounter">0 / 200</div>
                         <div class="error" id="err_remarks"><i class="fa-solid fa-circle-exclamation"></i> Remarks required</div>
                     </div>
 
@@ -1264,10 +1264,10 @@ const remarkBox=document.getElementById("remarks");
 const remarkCounter=document.getElementById("remarkCounter");
 
 remarkBox.addEventListener("input",function(){
-    if(this.value.length>100){
-        this.value=this.value.substring(0,100);
+    if(this.value.length>200){
+        this.value=this.value.substring(0,200);
     }
-    remarkCounter.textContent=this.value.length+" / 100";
+    remarkCounter.textContent=this.value.length+" / 200";
 });
 
 async function loadUserSummary() {
