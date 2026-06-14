@@ -1354,7 +1354,17 @@ function showError(input,errorId){
 document.getElementById("lockForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    // 1. TAMBAH KOD INI: Semak sesi sebelum submit
+    verifySessionWithServer();
+    const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
+    if(!currentToken) return; // Hentikan fungsi jika sesi dah terbatal
+    // ---------------------------------------------------------
+
     // Sembunyikan semua mesej error asal
+    document.querySelectorAll(".error").forEach(el => el.style.display = "none");
+
+    var acc = document.getElementById("acc_no");
+   // Sembunyikan semua mesej error asal
     document.querySelectorAll(".error").forEach(el => el.style.display = "none");
 
     var acc = document.getElementById("acc_no");
@@ -1539,68 +1549,39 @@ clearError("dca_id","err_dca");
 clearError("remarks","err_remarks");
 
 /* =========================================================================
-   SINGLE DEVICE LOGIN & SMART PAUSE LOGIC (WITH ACTIVITY AUTO-RESET)
+   SINGLE DEVICE LOGIN & ACTION-TRIGGERED CHECK (2 MINUTE COOLDOWN)
 ========================================================================= */
 
-const CHECK_INTERVAL = 120000; // Set ke 2 minit sekali untuk jimat 50% kuota awal
-let sessionTimer = null;
+let lastCheckTime = 0;
+const CHECK_COOLDOWN = 1200000; // 20 minit cooldown
 
-function verifySessionWithServer() {
-    if (document.hidden) return; // Cuba jimat kuota jika tab tersembunyi
-
-    const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
-
-    if (!currentToken) {
-        showSessionPopup("EXPIRED");
-        return;
-    }
-
-    fetch(api + "?action=session&token=" + currentToken + "&api_key=SCZP_SECURE_2026")
-    .then(response => response.json())
-    .then(data => {
-        if (data.status !== "ACTIVE") {
-            if (data.reason === "SESSION_REPLACED") {
-                showSessionPopup("DEVICE");
-            } else {
-                showSessionPopup("EXPIRED");
-            }
-        }
-    })
-    .catch(error => {
-        console.log("Internet disconnected / Server error. Check paused.");
-    });
-}
-
-// Fungsi utama untuk reset semula masa semakan (Timer)
-function resetSessionTimer() {
-    // Padam timer sedia ada supaya dia tak berjalan bertindih
-    if (sessionTimer) {
-        clearInterval(sessionTimer);
-    }
+function checkSessionOnAction() {
+    const now = Date.now();
     
-    // Bina timer baharu yang akan menembak server selepas 2 minit user statik
-    sessionTimer = setInterval(verifySessionWithServer, CHECK_INTERVAL);
+    // Hanya buat semakan jika dah lebih 20 minit dari semakan terakhir
+    if (now - lastCheckTime > CHECK_COOLDOWN) {
+        lastCheckTime = now;
+        verifySessionWithServer(); // Tembak server
+    }
 }
 
-// Jalankan semakan kali pertama semasa halaman portal dibuka
+// Semak bila pertama kali halaman dimuatkan
 verifySessionWithServer();
-resetSessionTimer();
+lastCheckTime = Date.now();
 
-// Pasang pengesan aktiviti (Activity Listeners) pada skrin telefon/komputer user
-// Setiap kali mereka klik, menaip, atau gerakkan skrin, timer akan auto-reset
-['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(eventName => {
-    document.addEventListener(eventName, () => {
-        // console.log("Aktiviti dikesan, timer GAS di-reset semula!"); // Untuk tujuan testing
-        resetSessionTimer();
-    }, { passive: true });
+// Kesan bila user mula klik, gerak mouse, menaip, atau sentuh skrin
+['mousedown', 'mousemove', 'keypress', 'touchstart', 'focusin', 'change'].forEach(eventName => {
+    document.addEventListener(eventName, checkSessionOnAction, { passive: true });
 });
 
+// Semak terus bila user buka semula tab dari background
 document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
+        lastCheckTime = Date.now(); // Reset masa
         verifySessionWithServer();
-        resetSessionTimer();
     }
 });
+    
 /* =========================================
    MY LOCK LIST LOGIC (SMART CACHE)
 ========================================= */
