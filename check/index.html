@@ -23,14 +23,15 @@
       appId: "18715c13-4375-4944-b1d7-ca27bca33a0a", 
     });
 
-    // Daftarkan User ID dan Role ke OneSignal dari LocalStorage
+    // 1. Paksa browser keluar prompt minta "Allow Notifications"
+    await OneSignal.Slidedown.promptPush();
+
+    // 2. Daftarkan User ID dan Role ke OneSignal dari LocalStorage
     const loggedUser = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
     const loggedType = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_type");
     
     if (loggedUser) {
-        // Guna ID DCA sebagai External ID
         await OneSignal.login(loggedUser); 
-        // Set tag untuk beza siapa check, master, atau lock
         await OneSignal.User.addTag("role", loggedType); 
     }
   });
