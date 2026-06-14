@@ -14,19 +14,20 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
-<!-- Masukkan ini di dalam <head> -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
-      appId: "18715c13-4375-4944-b1d7-ca27bca33a0a", 
+      appId: "18715c13-4375-4944-b1d7-ca27bca33a0a",
+      // Kita aktifkan butang loceng kat bucu kanan bawah
+      notifyButton: {
+        enable: true,
+      },
+      allowLocalhostAsSecureOrigin: true
     });
 
-    // 1. Paksa browser keluar prompt minta "Allow Notifications"
-    await OneSignal.Slidedown.promptPush();
-
-    // 2. Daftarkan User ID dan Role ke OneSignal dari LocalStorage
+    // Kod daftar ID & Role
     const loggedUser = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
     const loggedType = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_type");
     
