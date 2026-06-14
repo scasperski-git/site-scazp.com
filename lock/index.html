@@ -1444,33 +1444,22 @@ document.getElementById("lockForm").addEventListener("submit", async (e) => {
         // Tutup loading animation
         document.getElementById("overlay").style.display = "none";
 
-      // ==========================================
-        // ONESIGNAL: NOTIFIKASI KEPADA CHECK & MASTER
+// ==========================================
+        // ONESIGNAL: TEMBAK KE GAS UNTUK NOTIFIKASI
         // ==========================================
         try {
             const notifHeading = "New Account Locked!";
             const notifMessage = `${dca.value} LOCK ACCOUNT RM${cleanAmount.toFixed(2)} DI ${branchName} DAN PTP ${date.value}`;
 
-            const payload = {
-                app_id: "18715c13-4375-4944-b1d7-ca27bca33a0a",
-                headings: { "en": notifHeading },
-                contents: { "en": notifMessage },
-                // Tembak hanya pada user yang ada tag role 'check' ATAU 'master'
-                filters: [
-                    {"field": "tag", "key": "role", "relation": "=", "value": "check"},
-                    {"operator": "OR"},
-                    {"field": "tag", "key": "role", "relation": "=", "value": "master"}
-                ]
-            };
+            const formData = new URLSearchParams();
+            formData.append("action", "trigger_notif");
+            formData.append("api_key", API_KEY); // SCZP_SECURE_2026
+            formData.append("title", notifHeading);
+            formData.append("body", notifMessage);
+            formData.append("filter_type", "role");
+            formData.append("filter_value", "check"); // Dalam GAS, 'check' akan automatik tembak 'master' sekali
 
-            await fetch("https://onesignal.com/api/v1/notifications", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json; charset=utf-8",
-                    "Authorization": "g5uwy2nqgu55es3ebu3tsuwxc"
-                },
-                body: JSON.stringify(payload)
-            });
+            fetch(api, { method: "POST", body: formData }).catch(e => console.log("Notif Error:", e));
         } catch(e) { 
             console.error("Gagal hantar push notification:", e); 
         }
