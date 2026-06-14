@@ -995,28 +995,6 @@ async function markAsPaid(docId, acc) {
         alert("Account " + acc + " successfully marked as PAID!");
         input.value = acc; 
         checkLock(); // Segarkan kembali paparan secara automatik
-
-        // --- Selepas status berjaya di-update kepada PAID dalam Firestore ---
-try {
-    // Ambil ID DCA asal yang buat lock daripada data baris tersebut (cth: record.dca_id)
-    var originalDcaId = record.dca_id; 
-
-    fetch(API_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-            action: "trigger_notif",
-            title: "Akaun Dah PAID! ✅",
-            body: "Akaun " + record.acc_no + " yang anda lock telah disahkan PAID oleh Kaunter Semakan.",
-            filter_type: "user_id",
-            filter_value: originalDcaId, // Khusus dihantar kepada ID DCA itu sahaja!
-            api_key: API_KEY
-        })
-    });
-} catch (e) {
-    console.log("Gagal hantar push notification:", e);
-}
         
     } catch (err) { 
         console.error("Firebase Update Error: ", err);
