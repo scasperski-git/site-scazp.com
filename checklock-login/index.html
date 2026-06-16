@@ -513,6 +513,19 @@ window.addEventListener('DOMContentLoaded', (event) => {
         });
     }
 });
+
+    // Gantikan "userid" dengan ID sebenar kotak input User ID anda dalam HTML
+const userIdField = document.getElementById("userid"); 
+
+if (userIdField) {
+    userIdField.addEventListener("input", function() {
+        // Membuang semua space (spasi) kosong secara real-time
+        this.value = this.value.replace(/\s/g, '');
+        
+        // BONUS: Kalau nak paksa ID sentiasa huruf besar (uppercase), guna kod bawah ni:
+        this.value = this.value.replace(/\s/g, '').toUpperCase();
+    });
+}
     
 </script>
 
