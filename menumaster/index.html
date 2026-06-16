@@ -1158,7 +1158,13 @@ function renderTable() {
     document.getElementById("masterTableBody").innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding: 40px; color:#94a3b8;"><i class="fa fa-folder-open" style="font-size:28px;margin-bottom:12px;display:block;"></i>No Records Found</td></tr>';
 
     let totalPages = Math.ceil(filteredTableData.length / pageSize) || 1;
-    document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${totalPages}`;
+
+    // 2. KOD 'SHOWING X TO Y' KHAS UNTUK MASTER
+    let totalItems = filteredTableData.length;
+    let startItem = totalItems === 0 ? 0 : ((currentPage - 1) * pageSize) + 1;
+    let endItem = Math.min(currentPage * pageSize, totalItems);
+
+    document.getElementById("pageInfo").innerHTML = `Showing <b>${startItem}</b> to <b>${endItem}</b> of <b>${totalItems}</b> results`;
     
     if(document.getElementById("prevBtn")) document.getElementById("prevBtn").disabled = currentPage === 1;
     if(document.getElementById("nextBtn")) document.getElementById("nextBtn").disabled = currentPage === totalPages || filteredTableData.length === 0;
