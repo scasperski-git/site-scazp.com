@@ -1209,8 +1209,12 @@ function renderTable() {
 
     document.getElementById("lockTable").innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding: 40px; color:#94a3b8;"><i class="fa fa-folder-open" style="font-size:28px;margin-bottom:12px;display:block;"></i>No Records Found</td></tr>';
 
-    let totalPage = Math.ceil(filteredData.length / pageSize) || 1;
-    document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${totalPage}`;
+    // KOD BAHARU (SHOWING X TO Y OF Z)
+    let totalItems = filteredData.length;
+    let startItem = totalItems === 0 ? 0 : ((currentPage - 1) * pageSize) + 1;
+    let endItem = Math.min(currentPage * pageSize, totalItems);
+
+    document.getElementById("pageInfo").innerHTML = `Showing <b>${startItem}</b> to <b>${endItem}</b> of <b>${totalItems}</b> results`;
     
     document.getElementById("prevBtn").disabled = currentPage === 1;
     document.getElementById("nextBtn").disabled = currentPage === totalPage || filteredData.length === 0;
