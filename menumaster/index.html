@@ -1396,25 +1396,38 @@ function generateExcel(dataArray, filePrefix) {
     }
 
 let workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "ExportData");
+    // Pastikan nama sheet di bawah ni sama dengan kod asal anda (cth: "Records", "ExportData", atau "MyLocks")
+    XLSX.utils.book_append_sheet(workbook, worksheet, "ExportData"); 
     let fileName = `${filePrefix}_${new Date().toISOString().slice(0,10)}.xlsx`;
 
-    // 1. Tukar workbook jadi format fail memori (ArrayBuffer & Blob)
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const dataBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const file = new File([dataBlob], fileName, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    // ==========================================
+    // PLAN B (BULLETPROOF): Cuba Share, Fallback Download
+    // ==========================================
+    try {
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const dataBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        
+        // Sesetengah browser PC lama akan crash pada baris 'new File' ini. Kita perangkap ralat ini.
+        const file = new File([dataBlob], fileName, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
-    // 2. Semak adakah telefon/browser support fungsi Share API
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({
-            files: [file],
-            title: 'Export Excel',
-            text: 'Excel Report Data'
-        }).catch(err => {
-            console.log("Share dibatalkan.", err);
-        });
-    } else {
-        // 3. Fallback (Kalau buka di PC, ia akan terus download macam biasa)
+        // Semak adakah peranti (seperti telefon) menyokong fungsi "Share File"
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            navigator.share({
+                files: [file],
+                title: 'Export Excel',
+                text: 'Sila pilih aplikasi untuk simpan (cth: Save to Device, WhatsApp)'
+            }).catch(err => {
+                console.log("Share dibatalkan/gagal:", err);
+                // Jika user batal share, paksa download biasa
+                XLSX.writeFile(workbook, fileName);
+            });
+        } else {
+            // Jika PC Desktop / Browser tak support Share, muat turun macam biasa
+            XLSX.writeFile(workbook, fileName);
+        }
+    } catch (error) {
+        // Jika apa-apa crash berlaku (terutamanya di Desktop), terus paksa download biasa
+        console.log("Share API error, fallback to normal download", error);
         XLSX.writeFile(workbook, fileName);
     }
 }
