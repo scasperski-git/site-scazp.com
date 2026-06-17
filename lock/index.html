@@ -1903,41 +1903,38 @@ async function applyFilter(){
 }
 
 function exportToExcel() {
-    if(filteredData.length === 0) {
-        alert("Tiada data untuk diexport!");
-        return;
-    }
+    if(filteredData.length === 0) { alert("Tiada data untuk diexport!"); return; }
 
     let excelData = filteredData.map(row => {
         let pDate = new Date(row.promise);
         let cDate = new Date(row.created);
         let eDate = row.edited_at ? new Date(row.edited_at) : "";
 
-        // Bina struktur baris secara dinamik
-        let rowObj = {};
-        
-        // Jika akaun Master, masukkan lajur DCA ID di depan
+        // 1. DATA STANDARD UNTUK SEMUA ORANG
+        let rowObj = {
+            "DCA ID": row.dca || "-",
+            "ACC NO": row.acc_no, 
+            "BRANCH": row.branch,
+            "AMOUNT (RM)": Number(row.amount || 0), 
+            "STATUS": row.status,
+            "PAID BY": row.paid_by || "-",
+            "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate, 
+            "REMARKS": row.remarks || "-",
+            "CREATED TIME": isNaN(cDate.getTime()) ? row.created : cDate
+        };
+
+        // 2. DATA RAHSIA: HANYA MASTER SAHAJA YANG AKAN DAPAT LAJUR INI
         if (type === "master") {
-            rowObj["DCA ID"] = row.dca || "-";
+            rowObj["EDITED BY"] = row.edited_by || "-";
+            rowObj["EDITED TIME"] = (eDate && !isNaN(eDate.getTime())) ? eDate : "-";
         }
-        
-        rowObj["ACC NO"] = row.acc_no; 
-        rowObj["BRANCH"] = row.branch;
-        rowObj["AMOUNT (RM)"] = Number(row.amount || 0); 
-        rowObj["STATUS"] = row.status;
-        rowObj["PAID BY"] = row.paid_by || "-";
-        rowObj["PTP DATE"] = isNaN(pDate.getTime()) ? row.promise : pDate; 
-        rowObj["REMARKS"] = row.remarks || "";
-        rowObj["CREATED TIME"] = isNaN(cDate.getTime()) ? row.created : cDate;
-        rowObj["EDITED BY"] = row.edited_by || "-";
-        rowObj["EDITED TIME"] = (eDate && !isNaN(eDate.getTime())) ? eDate : "-";
 
         return rowObj;
     });
 
     let worksheet = XLSX.utils.json_to_sheet(excelData, { cellDates: true });
     
-    // Cari index lajur secara automatik supaya tak ralat
+    // Cari index lajur untuk elak ralat (sebab lajur berubah ikut jenis akaun)
     let headers = Object.keys(excelData[0]);
     let ptpCol = headers.indexOf("PTP DATE");
     let createdCol = headers.indexOf("CREATED TIME");
@@ -1945,17 +1942,14 @@ function exportToExcel() {
 
     let range = XLSX.utils.decode_range(worksheet['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-        // Format Tarikh PTP
         if (ptpCol > -1) {
             let cell = worksheet[XLSX.utils.encode_cell({r: R, c: ptpCol})];
             if (cell && cell.t === 'd') cell.z = 'd-mmm-yyyy';
         }
-        // Format Tarikh & Masa Created
         if (createdCol > -1) {
             let cell = worksheet[XLSX.utils.encode_cell({r: R, c: createdCol})];
             if (cell && cell.t === 'd') cell.z = 'd-mmm-yyyy hh:mm AM/PM';
         }
-        // Format Tarikh & Masa Edited
         if (editedCol > -1) {
             let cell = worksheet[XLSX.utils.encode_cell({r: R, c: editedCol})];
             if (cell && cell.t === 'd') cell.z = 'd-mmm-yyyy hh:mm AM/PM';
@@ -1963,10 +1957,10 @@ function exportToExcel() {
     }
 
     let workbook = XLSX.utils.book_new();
-    // Tukar nama sheet ikut jenis akaun
-    let sheetName = type === "master" ? "AllLocks" : "MyLocks";
+    // Namakan sheet mengikut nama page (Contoh: "Check_Records" atau "MyLocks")
+    let sheetName = document.title.includes("Check") ? "Check_Records" : "MyLocks";
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-
+    
     let fileName = `${sheetName}_${user}_${currentViewStatus}_${new Date().toISOString().slice(0,10)}.xlsx`;
     XLSX.writeFile(workbook, fileName);
 }
