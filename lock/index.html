@@ -1066,11 +1066,11 @@ table tr:hover td { background: #f8fafc; }
                     </div>
                 </div>
 
-                <div class="tab-container">
-                    <button id="tabActive" class="tab-btn active" onclick="switchView('LOCK')">Active Locks</button>
-                    <button id="tabPaid" class="tab-btn" onclick="switchView('PAID')">Paid History</button>
-                    <button id="tabAll" class="tab-btn" onclick="switchView('ALL')">View All</button>
-                </div>
+<div class="tab-container">
+    <button id="tabActive" class="tab-btn" onclick="switchView('LOCK')">Active Locks</button>
+    <button id="tabPaid" class="tab-btn" onclick="switchView('PAID')">Paid History</button>
+    <button id="tabAll" class="tab-btn active" onclick="switchView('ALL')">View All</button>
+</div>
 
                 <div class="table-header-row">
                     <div class="table-header-title">
@@ -1591,7 +1591,7 @@ let fullData = [];
 let filteredData = [];
 let currentPage = 1;
 const pageSize = 10; 
-let currentViewStatus = "LOCK"; 
+let currentViewStatus = "ALL";
 
 function switchView(viewType) {
     currentViewStatus = viewType;
@@ -1640,11 +1640,12 @@ function resetLockTable() {
     fullData = [];
     filteredData = [];
     currentPage = 1;
-    currentViewStatus = "LOCK"; 
+    currentViewStatus = "ALL"; // <-- Tukar ke ALL
 
-    document.getElementById("tabActive").classList.add("active");
+    // Set UI tab View All sebagai aktif
+    document.getElementById("tabActive").classList.remove("active");
     document.getElementById("tabPaid").classList.remove("active");
-    document.getElementById("tabAll").classList.remove("active");
+    document.getElementById("tabAll").classList.add("active");
 
     let colCount = (type === "master") ? 8 : 7;
     document.getElementById("lockTable").innerHTML = 
