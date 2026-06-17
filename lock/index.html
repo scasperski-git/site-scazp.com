@@ -1194,17 +1194,15 @@ if(type == "check"){
 if(type === "master"){
     document.getElementById("masterBtn").style.display = "flex";
     
-    // 1. TUKAR TAJUK MENU SIDEBAR & KANDUNGAN KHAS UNTUK MASTER
-    setTimeout(() => {
-        let navMyLocks = document.getElementById("navMyLocks");
-        if(navMyLocks) navMyLocks.querySelector("span").innerText = "All Locks";
-        
-        let listSectionTitle = document.querySelector("#lockListSection .form-title");
-        if(listSectionTitle) listSectionTitle.innerText = "All Locks List";
-        
-        let tableHeaderTitle = document.querySelector(".table-header-title");
-        if(tableHeaderTitle) tableHeaderTitle.innerHTML = `<i class="fa fa-list-check" style="color: #4f46e5; margin-right: 5px;"></i> All Lock Records`;
-    }, 200);
+    // TUKAR TAJUK SERTA-MERTA (TANPA DELAY)
+    let navMyLocks = document.getElementById("navMyLocks");
+    if(navMyLocks) navMyLocks.querySelector("span").innerText = "All Locks";
+    
+    let listSectionTitle = document.querySelector("#lockListSection .form-title");
+    if(listSectionTitle) listSectionTitle.innerText = "All Locks List";
+    
+    let tableHeaderTitle = document.querySelector(".table-header-title");
+    if(tableHeaderTitle) tableHeaderTitle.innerHTML = `<i class="fa fa-list-check" style="color: #4f46e5; margin-right: 5px;"></i> All Lock Records`;
 }
 
 function goMaster(){
