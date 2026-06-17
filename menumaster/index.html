@@ -557,9 +557,41 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     line-height: 1.5;
 }
 
-#sumLock, #sumAmount { font-size: 22px !important; }
-#sumLock { color: #3b82f6 !important; }
-#sumAmount { color: #10b981 !important; }
+/* KOTAK SUMMARY SPLIT (LOCK & PAID) */
+.box-card-split {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    display: flex;
+    overflow: hidden;
+}
+.box-half {
+    flex: 1;
+    padding: 16px 10px;
+    text-align: center;
+}
+.box-half:first-child {
+    border-right: 1px dashed #cbd5e1;
+    background: #f8fafc;
+}
+.box-half-title {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.box-half-val {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.text-blue { color: #3b82f6; }
+.text-purple { color: #8b5cf6; }
+.text-green { color: #10b981; }
+.text-emerald { color: #059669; }
 
 /* SPINNER & ICON SPIN */
 .spinner{
@@ -823,22 +855,29 @@ const app = initializeApp(firebaseConfig);
     <span id="lastUpdate">Last update: -</span>
 </div>
 
-<div class="summary-grid-3">
-                    <div class="box-card">
-                        <div>Total Active Lock</div>
-                        <div id="sumLock">0</div>
-                    </div>
+<div class="summary-grid">
+    <div class="box-card-split">
+        <div class="box-half">
+            <div class="box-half-title">Active Lock</div>
+            <div id="sumLock" class="box-half-val text-blue">0</div>
+        </div>
+        <div class="box-half">
+            <div class="box-half-title">Lock Amount</div>
+            <div id="sumLockAmount" class="box-half-val text-purple">RM 0.00</div>
+        </div>
+    </div>
 
-                    <div class="box-card">
-                        <div>Total Mark Paid</div>
-                        <div id="sumPaid" style="font-size: 22px; font-weight: 700; color: #10b981;">0</div>
-                    </div>
-
-                    <div class="box-card">
-                        <div>Total Lock Amount (RM)</div>
-                        <div id="sumAmount" style="font-size: 22px; font-weight: 700; color: #8b5cf6;">RM0</div>
-                    </div>
-                </div>
+    <div class="box-card-split">
+        <div class="box-half">
+            <div class="box-half-title">Mark Paid</div>
+            <div id="sumPaid" class="box-half-val text-green">0</div>
+        </div>
+        <div class="box-half">
+            <div class="box-half-title">Paid Amount</div>
+            <div id="sumPaidAmount" class="box-half-val text-emerald">RM 0.00</div>
+        </div>
+    </div>
+</div>
 
                 <div class="summary-grid">
                     <div class="box-card">
@@ -1024,20 +1063,22 @@ async function loadSummary(){
         const querySnapshot = await window.getDocs(q);
 
         let totalLock = 0;
+        let totalLockAmount = 0;
         let totalPaid = 0; 
-        let totalAmount = 0;
+        let totalPaidAmount = 0;
         let userCount = {};
         let branchCount = {};
 
         querySnapshot.forEach((doc) => {
             let row = doc.data();
+            let amount = Number(row.amount) || 0;
             
-            // 1. KIRA RINGKASAN DATA UNTUK HARI INI SAHAJA
+            // 1. KIRA LOCK & AMAUN YANG MASIH AKTIF (HARI INI)
             if (row.created_at >= todayStart) {
                 if (row.status === "LOCK") {
-                    totalLock++;
+                     totalLock++;
+                     totalLockAmount += amount;
                 }
-                totalAmount += (Number(row.amount) || 0);
 
                 // Kira prestasi ejen (Top User)
                 let user = row.dca_id || "UNKNOWN";
@@ -1048,16 +1089,19 @@ async function loadSummary(){
                 branchCount[branch] = (branchCount[branch] || 0) + 1;
             }
 
-            // 2. KIRA JUMLAH AKAUN YANG DI-MARK PAID HARI INI
+            // 2. KIRA STATUS PAID & AMAUN YANG TELAH SELESAI (HARI INI)
             if (row.status === "PAID" && row.paid_date && row.paid_date >= todayStart) {
                 totalPaid++;
+                totalPaidAmount += amount;
             }
         });
 
-        // Papar pada grid 3 kotak utama di UI Master
+        // Papar pada grid UI Master yang baharu
         document.getElementById("sumLock").innerText = totalLock;
+        document.getElementById("sumLockAmount").innerText = "RM " + Number(totalLockAmount).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        
         document.getElementById("sumPaid").innerText = totalPaid;
-        document.getElementById("sumAmount").innerText = "RM " + Number(totalAmount).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById("sumPaidAmount").innerText = "RM " + Number(totalPaidAmount).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
         // Susun dan paparkan kedudukan Top 5 Ejen
         var userHTML = "";
