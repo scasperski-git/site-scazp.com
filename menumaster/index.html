@@ -1250,7 +1250,8 @@ async function manualMasterRefresh() {
                 created: rowData.created_at,
                 status: rowData.status,
                 paid_by: rowData.paid_by || "",
-                paid_date: rowData.paid_date || ""
+                paid_date: rowData.paid_date || "",
+                edited_by: rowData.edited_by || "" // <--- TAMBAH BARIS INI
             });
         });
 
@@ -1355,12 +1356,14 @@ function renderTable() {
                  </div>
                </div>`
             : `<div style="max-width: 200px; word-break: break-word;">${safeRemark}</div>`;
+        // BINA TAG EDIT JIKA ADA REKOD DIA DI-EDIT
+        let editBadge = d.edited_by ? `<div style="margin-top: 6px; display: inline-block; background: #f8fafc; border: 1px dashed #cbd5e1; color: #475569; font-size: 9px; padding: 3px 6px; border-radius: 4px; font-weight: 600;"><i class="fa fa-pen" style="font-size:8px; margin-right:3px;"></i>Edited by: ${d.edited_by}</div>` : "";
 
         let statusBadge = d.status === "PAID" 
             ? `<div style="text-align:left;"><span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span><span style="display:block; font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">by ${d.paid_by || '-'}</span></div>`
             : `<div style="text-align:left;"><span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span></div>`;
 
-        html += `
+html += `
         <tr style="${rowBg}">
             <td>${d.dca || "-"}</td>
             <td style="font-weight: 600;">${d.acc_no || "-"}</td>
@@ -1369,7 +1372,7 @@ function renderTable() {
             <td>${statusBadge}</td>
             <td style="${dateColor}">${dateStr}</td>
             <td>${createdStr}</td>
-            <td>${remarkHtml}</td>
+            <td>${remarkHtml} ${editBadge}</td> <!-- TAMBAH EDIT BADGE DI SINI -->
         </tr>`;
     });
 
@@ -1905,9 +1908,9 @@ async function saveRecord(docId) {
             promise_date: newDate,
             status: newStatus,
             payment_category: newCat,
-            remarks: newRemarks
+            remarks: newRemarks,
+            edited_by: user // <--- TAMBAH BARIS INI
         });
-
         alert("Rekod berjaya dikemas kini!");
         searchManageAcc(); 
         if(typeof manualMasterRefresh === "function") manualMasterRefresh(); 
