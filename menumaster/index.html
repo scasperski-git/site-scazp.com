@@ -1887,7 +1887,7 @@ async function searchManageAcc() {
 }
 
 async function saveRecord(docId) {
-    let newAmount = document.getElementById("input-amount-" + docId).value;
+    let newAmount = parseFloat(document.getElementById("input-amount-" + docId).value);
     let newBranch = document.getElementById("input-branch-" + docId).value; 
     let newDate = document.getElementById("input-date-" + docId).value;
     let newStatus = document.getElementById("input-status-" + docId).value;
@@ -1904,37 +1904,51 @@ async function saveRecord(docId) {
 
     try {
         const docRef = window.doc(window.db, "LOCK_DATA", docId);
-
-        // ==========================================
-        // 1. CCTV AUDIT: SIMPAN REKOD ASAL SEBELUM DITINDIH
-        // ==========================================
+        
+        // 1. BACA DATA LAMA DARI FIREBASE
         const oldSnap = await window.getDoc(docRef);
+        
         if (oldSnap.exists()) {
             let oldData = oldSnap.data();
             
-            // Tambah nota audit
-            oldData.audit_action = "EDIT_BACKUP";
-            oldData.edited_by_user = user; // ID Master yang tekan butang save
-            oldData.edited_at_time = new Date().toISOString();
-
-            // Cipta ID unik untuk sejarah (gabungan ID dokumen + timestamp)
-            let historyId = docId + "_edit_" + Date.now();
-            const historyRef = window.doc(window.db, "EDIT_HISTORY", historyId);
+            // ==========================================
+            // 2. DETEKTIF: KIRA APA YANG DIUBAH OLEH USER
+            // ==========================================
+            let changesArr = [];
+            let oldAmount = parseFloat(oldData.amount || 0);
             
-            // Hantar data asal ke koleksi EDIT_HISTORY
-            await window.setDoc(historyRef, oldData);
-        }
-        // ==========================================
+            if (oldAmount !== newAmount) changesArr.push(`Amount: RM${oldAmount} ➔ RM${newAmount}`);
+            if ((oldData.branch_name || "") !== newBranch) changesArr.push(`Branch: ${oldData.branch_name || "-"} ➔ ${newBranch}`);
+            if ((oldData.promise_date || "") !== newDate) changesArr.push(`PTP Date: ${oldData.promise_date || "-"} ➔ ${newDate}`);
+            if ((oldData.status || "") !== newStatus) changesArr.push(`Status: ${oldData.status || "-"} ➔ ${newStatus}`);
+            if ((oldData.payment_category || "") !== newCat) changesArr.push(`Category: ${oldData.payment_category || "-"} ➔ ${newCat}`);
+            if ((oldData.remarks || "") !== newRemarks) changesArr.push(`Remarks: ${oldData.remarks || "-"} ➔ ${newRemarks}`);
+            
+            // 3. JIKA ADA PERUBAHAN, BARU KITA SIMPAN KE EDIT_HISTORY
+            if (changesArr.length > 0) {
+                let changesSummary = changesArr.join(" | "); // Gabungkan nota jadi satu baris
+                
+                oldData.audit_action = "EDIT";
+                oldData.edited_by_user = user; 
+                oldData.edited_at_time = new Date().toISOString();
+                oldData.changes_made = changesSummary; // <--- INI NOTA DETEKTIF KITA!
 
-        // 2. KEMAS KINI DATA BAHARU KE JADUAL UTAMA
+                // Hantar ke Koleksi EDIT_HISTORY
+                let historyId = docId + "_edit_" + Date.now();
+                const historyRef = window.doc(window.db, "EDIT_HISTORY", historyId);
+                await window.setDoc(historyRef, oldData);
+            }
+        }
+
+        // 4. KEMAS KINI KE JADUAL UTAMA MACAM BIASA
         await window.updateDoc(docRef, {
-            amount: parseFloat(newAmount),
+            amount: newAmount,
             branch_name: newBranch, 
             promise_date: newDate,
             status: newStatus,
             payment_category: newCat,
             remarks: newRemarks,
-            edited_by: user // "Tiny Tag" untuk paparan jadual Master
+            edited_by: user // "Tiny Tag"
         });
 
         alert("Rekod berjaya dikemas kini!");
