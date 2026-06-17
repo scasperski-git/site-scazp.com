@@ -1395,10 +1395,28 @@ function generateExcel(dataArray, filePrefix) {
         if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') { worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; }
     }
 
-    let workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Records");
+let workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "ExportData");
     let fileName = `${filePrefix}_${new Date().toISOString().slice(0,10)}.xlsx`;
-    XLSX.writeFile(workbook, fileName);
+
+    // 1. Tukar workbook jadi format fail memori (ArrayBuffer & Blob)
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const dataBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const file = new File([dataBlob], fileName, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+    // 2. Semak adakah telefon/browser support fungsi Share API
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+            files: [file],
+            title: 'Export Excel',
+            text: 'Excel Report Data'
+        }).catch(err => {
+            console.log("Share dibatalkan.", err);
+        });
+    } else {
+        // 3. Fallback (Kalau buka di PC, ia akan terus download macam biasa)
+        XLSX.writeFile(workbook, fileName);
+    }
 }
   
 window.onload=function(){
