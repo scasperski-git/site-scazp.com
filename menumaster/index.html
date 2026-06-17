@@ -1904,6 +1904,29 @@ async function saveRecord(docId) {
 
     try {
         const docRef = window.doc(window.db, "LOCK_DATA", docId);
+
+        // ==========================================
+        // 1. CCTV AUDIT: SIMPAN REKOD ASAL SEBELUM DITINDIH
+        // ==========================================
+        const oldSnap = await window.getDoc(docRef);
+        if (oldSnap.exists()) {
+            let oldData = oldSnap.data();
+            
+            // Tambah nota audit
+            oldData.audit_action = "EDIT_BACKUP";
+            oldData.edited_by_user = user; // ID Master yang tekan butang save
+            oldData.edited_at_time = new Date().toISOString();
+
+            // Cipta ID unik untuk sejarah (gabungan ID dokumen + timestamp)
+            let historyId = docId + "_edit_" + Date.now();
+            const historyRef = window.doc(window.db, "EDIT_HISTORY", historyId);
+            
+            // Hantar data asal ke koleksi EDIT_HISTORY
+            await window.setDoc(historyRef, oldData);
+        }
+        // ==========================================
+
+        // 2. KEMAS KINI DATA BAHARU KE JADUAL UTAMA
         await window.updateDoc(docRef, {
             amount: parseFloat(newAmount),
             branch_name: newBranch, 
@@ -1911,18 +1934,18 @@ async function saveRecord(docId) {
             status: newStatus,
             payment_category: newCat,
             remarks: newRemarks,
-            edited_by: user // <--- TAMBAH BARIS INI
+            edited_by: user // "Tiny Tag" untuk paparan jadual Master
         });
+
         alert("Rekod berjaya dikemas kini!");
         searchManageAcc(); 
         if(typeof manualMasterRefresh === "function") manualMasterRefresh(); 
 
     } catch (error) {
-        console.error("Error Updating:", error);
+        console.error("Error Updating/Auditing:", error);
         alert("Gagal menyimpan perubahan. Sila cuba lagi.");
     }
 }
-
 // ==========================================
 // FUNGSI VERIFY DELETE & POPUP (FIREBASE VERIFIED)
 // ==========================================
