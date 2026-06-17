@@ -1395,41 +1395,10 @@ function generateExcel(dataArray, filePrefix) {
         if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') { worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; }
     }
 
-let workbook = XLSX.utils.book_new();
-    // Pastikan nama sheet di bawah ni sama dengan kod asal anda (cth: "Records", "ExportData", atau "MyLocks")
-    XLSX.utils.book_append_sheet(workbook, worksheet, "ExportData"); 
+    let workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Records"); // Nama sheet mungkin berbeza ikut fail
     let fileName = `${filePrefix}_${new Date().toISOString().slice(0,10)}.xlsx`;
-
-    // ==========================================
-    // PLAN B (BULLETPROOF): Cuba Share, Fallback Download
-    // ==========================================
-    try {
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        const dataBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        
-        // Sesetengah browser PC lama akan crash pada baris 'new File' ini. Kita perangkap ralat ini.
-        const file = new File([dataBlob], fileName, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-        // Semak adakah peranti (seperti telefon) menyokong fungsi "Share File"
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            navigator.share({
-                files: [file],
-                title: 'Export Excel',
-                text: 'Sila pilih aplikasi untuk simpan (cth: Save to Device, WhatsApp)'
-            }).catch(err => {
-                console.log("Share dibatalkan/gagal:", err);
-                // Jika user batal share, paksa download biasa
-                XLSX.writeFile(workbook, fileName);
-            });
-        } else {
-            // Jika PC Desktop / Browser tak support Share, muat turun macam biasa
-            XLSX.writeFile(workbook, fileName);
-        }
-    } catch (error) {
-        // Jika apa-apa crash berlaku (terutamanya di Desktop), terus paksa download biasa
-        console.log("Share API error, fallback to normal download", error);
-        XLSX.writeFile(workbook, fileName);
-    }
+    XLSX.writeFile(workbook, fileName);
 }
   
 window.onload=function(){
