@@ -2001,6 +2001,27 @@ async function confirmDeleteAction() {
 document.getElementById("deletePasscode").addEventListener("keypress", function(e){
     if(e.key === "Enter"){ confirmDeleteAction(); }
 });
+
+// ==========================================
+// FUNGSI TOGGLE MATA PASSCODE
+// ==========================================
+function toggleViewPasscode() {
+    let inputEl = document.getElementById("deletePasscode");
+    let iconEl = document.getElementById("togglePasscodeIcon");
+    
+    // Semak kalau ia tengah jadi titik (disc)
+    if (inputEl.style.webkitTextSecurity === "disc") {
+        inputEl.style.webkitTextSecurity = "none"; // Tunjuk nombor
+        iconEl.classList.remove("fa-eye");
+        iconEl.classList.add("fa-eye-slash"); // Tukar ikon mata berpalang
+        iconEl.style.color = "#4f46e5"; // Tukar warna biru (tanda aktif)
+    } else {
+        inputEl.style.webkitTextSecurity = "disc"; // Sembunyi jadi titik balik
+        iconEl.classList.remove("fa-eye-slash");
+        iconEl.classList.add("fa-eye"); // Tukar ikon mata biasa
+        iconEl.style.color = "#94a3b8"; // Balik warna kelabu
+    }
+}
     
 </script>
 
