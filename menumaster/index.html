@@ -1719,11 +1719,31 @@ window.addEventListener('DOMContentLoaded', initTableUpgrades);
    MANAGE RECORDS LOGIC (SEARCH, EDIT, DELETE)
 ========================================== */
 
+// 1. Fungsi Carian Tekan 'Enter'
 document.getElementById("manageSearchAcc").addEventListener("keypress", function(e){
     if(!/[0-9]/.test(e.key)){ e.preventDefault(); }
     if(e.key === "Enter"){ searchManageAcc(); }
 });
 
+// 2. KEMBALIKAN FUNGSI YANG HILANG (Clear, Enable Edit, Cancel Edit)
+function clearManageSearch() {
+    document.getElementById("manageSearchAcc").value = "";
+    document.getElementById("manageResultArea").innerHTML = "";
+}
+
+function enableEdit(docId) {
+    document.getElementById("view-" + docId).style.display = "none";
+    document.getElementById("edit-" + docId).style.display = "block";
+    document.getElementById("card-" + docId).classList.add("edit-active");
+}
+
+function cancelEdit(docId) {
+    document.getElementById("edit-" + docId).style.display = "none";
+    document.getElementById("view-" + docId).style.display = "block";
+    document.getElementById("card-" + docId).classList.remove("edit-active");
+}
+
+// 3. Fungsi Utama Carian & Paparan
 async function searchManageAcc() {
     let accNo = document.getElementById("manageSearchAcc").value.trim();
     let resultArea = document.getElementById("manageResultArea");
@@ -1741,6 +1761,13 @@ async function searchManageAcc() {
             return;
         }
 
+        // PANGGIL CACHE BRANCH LIST
+        let branchCache = localStorage.getItem("branch_list");
+        let branchList = [];
+        if(branchCache) {
+            try { branchList = JSON.parse(branchCache); } catch(e) {}
+        }
+
         let html = "";
         querySnapshot.forEach((doc) => {
             let d = doc.data();
@@ -1749,7 +1776,6 @@ async function searchManageAcc() {
             let currentAmount = Number(d.amount || 0).toFixed(2);
             let statusColor = d.status === "PAID" ? "color:#10b981;" : "color:#f59e0b;";
 
-            // TUKAR FORMAT TARIKH KEPADA 19 June 2026 UNTUK VIEW MODE
             let viewDate = "-";
             if (d.promise_date) {
                 let pDate = new Date(d.promise_date);
@@ -1760,10 +1786,21 @@ async function searchManageAcc() {
                 }
             }
 
+            // BINA DROPDOWN BRANCH DINAMIK BERDASARKAN CACHE
+            let branchOptions = `<option value="">SELECT BRANCH</option>`;
+            if(branchList.length > 0) {
+                branchList.forEach(b => {
+                    let isSelected = (d.branch_name === b.name) ? "selected" : "";
+                    branchOptions += `<option value="${b.name}" ${isSelected}>${b.name}</option>`;
+                });
+            } else {
+                // Fallback jika cache terpadam
+                branchOptions += `<option value="${d.branch_name}" selected>${d.branch_name}</option>`;
+            }
+
             html += `
             <div class="manage-card" id="card-${docId}">
                 
-                <!-- PAPARAN VIEW (NORMAL) -->
                 <div id="view-${docId}">
                     <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
                         <div>
@@ -1775,9 +1812,7 @@ async function searchManageAcc() {
 
                     <div class="manage-grid">
                         <div class="manage-item"><label>Amount</label><div class="val">RM ${currentAmount}</div></div>
-                        <!-- Papar Branch -->
                         <div class="manage-item"><label>Branch</label><div class="val">${d.branch_name || "-"}</div></div>
-                        <!-- Papar Tarikh Cantik -->
                         <div class="manage-item"><label>Promise Date</label><div class="val">${viewDate}</div></div>
                         <div class="manage-item"><label>Payment Cat.</label><div class="val">${d.payment_category || "-"}</div></div>
                         <div class="manage-item" style="grid-column: span 2;"><label>Remarks</label><div class="val" style="word-break:break-word;">${d.remarks || "-"}</div></div>
@@ -1789,7 +1824,6 @@ async function searchManageAcc() {
                     </div>
                 </div>
 
-                <!-- PAPARAN EDIT (TERSEMBUNYI PADA AWALNYA) -->
                 <div id="edit-${docId}" style="display:none;">
                     <div style="font-size:14px; font-weight:700; color:#4f46e5; margin-bottom:15px;"><i class="fa fa-pen-to-square"></i> Editing Record: ${d.acc_no}</div>
                     
@@ -1801,11 +1835,7 @@ async function searchManageAcc() {
                         <div class="manage-item">
                             <label>Branch</label>
                             <select id="input-branch-${docId}">
-                                <!-- SILA TAMBAH/UBAH NAMA CAWANGAN ANDA DI SINI JIKA PERLU -->
-                                <option value="SUBANG" ${d.branch_name === 'SUBANG' ? 'selected' : ''}>SUBANG</option>
-                                <option value="PUCHONG" ${d.branch_name === 'PUCHONG' ? 'selected' : ''}>PUCHONG</option>
-                                <option value="KLANG" ${d.branch_name === 'KLANG' ? 'selected' : ''}>KLANG</option>
-                                <option value="SHAH ALAM" ${d.branch_name === 'SHAH ALAM' ? 'selected' : ''}>SHAH ALAM</option>
+                                ${branchOptions}
                             </select>
                         </div>
                         <div class="manage-item">
@@ -1853,7 +1883,7 @@ async function searchManageAcc() {
 
 async function saveRecord(docId) {
     let newAmount = document.getElementById("input-amount-" + docId).value;
-    let newBranch = document.getElementById("input-branch-" + docId).value; // AMBIL DATA BRANCH
+    let newBranch = document.getElementById("input-branch-" + docId).value; 
     let newDate = document.getElementById("input-date-" + docId).value;
     let newStatus = document.getElementById("input-status-" + docId).value;
     let newCat = document.getElementById("input-cat-" + docId).value;
@@ -1871,7 +1901,7 @@ async function saveRecord(docId) {
         const docRef = window.doc(window.db, "LOCK_DATA", docId);
         await window.updateDoc(docRef, {
             amount: parseFloat(newAmount),
-            branch_name: newBranch, // UPDATE KE FIREBASE
+            branch_name: newBranch, 
             promise_date: newDate,
             status: newStatus,
             payment_category: newCat,
@@ -1897,8 +1927,7 @@ async function deleteRecord(docId, accNo) {
         await window.deleteDoc(docRef);
 
         alert("Rekod telah dipadam!");
-        searchManageAcc(); // Refresh kad
-        
+        searchManageAcc(); // Refresh kad secara live
         if(typeof manualMasterRefresh === "function") manualMasterRefresh(); 
 
     } catch (error) {
@@ -1906,7 +1935,6 @@ async function deleteRecord(docId, accNo) {
         alert("Gagal memadam rekod.");
     }
 }
-
 </script>
 
 <div id="sessionPopup">
