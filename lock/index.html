@@ -15,12 +15,10 @@
 <style>
 
 /* ===== NATIVE APP FEEL (BONUS) ===== */
-/* Hilangkan kelip biru bila tekan butang di skrin telefon */
 * {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* Custom Scrollbar (Nampak lebih mahal & nipis) */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -36,7 +34,6 @@
     background: #94a3b8; 
 }
 
-/* Scroll yang lebih lancar */
 html {
     scroll-behavior: smooth;
 }
@@ -60,7 +57,6 @@ body {
     overflow: hidden;
 }
 
-/* ANIMATIONS */
 @keyframes slideUpFade {
     0% { transform: translateY(20px); opacity: 0; }
     100% { transform: translateY(0); opacity: 1; }
@@ -83,7 +79,6 @@ body {
     height: 100vh;
 }
 
-/* ===== SIDEBAR ===== */
 .sidebar {
     width: 280px;
     background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
@@ -230,6 +225,26 @@ body.list-mode .container {
     margin-bottom: 20px;
     padding-bottom: 12px;
     border-bottom: 2px solid #f1f5f9;
+}
+
+/* ===== TABLE HEADER & ACTIONS (NEW) ===== */
+.table-header-row {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 16px; 
+    margin-top: 10px;
+}
+
+.table-header-title {
+    font-size: 14px; 
+    font-weight: 600; 
+    color: #1e293b;
+}
+
+.table-actions {
+    display: flex; 
+    gap: 10px;
 }
 
 .form-row {
@@ -484,6 +499,7 @@ input:focus, select:focus, textarea:focus {
     border-radius: 12px;
     border: 1px solid #e2e8f0;
     margin-top: 10px;
+    max-height: 60vh;
 }
 
 table {
@@ -499,7 +515,14 @@ table th, table td {
 }
 
 table th {
-    background: #f8fafc;
+    position: sticky !important; 
+    top: 0; 
+    z-index: 10; 
+    background: #f8fafc !important; 
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
     font-weight: 600;
     font-size: 12px;
     color: #64748b;
@@ -586,6 +609,7 @@ th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) {
     margin: 20px auto 0;
 }
 @keyframes spin { 100% { transform: rotate(360deg); } }
+.icon-spin { animation: spin 1s linear infinite; }
 
 .popup-close-btn {
     width: 100%;
@@ -605,7 +629,7 @@ th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) {
 
 /* ===== PREMIUM MANUAL REFRESH BUTTON (Tukar ke warna TEAL/CYAN) ===== */
 .btn-refresh-premium {
-    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
     color: white;
     border: none;
     padding: 8px 16px;
@@ -616,32 +640,21 @@ th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     box-shadow: 0 4px 6px rgba(14, 165, 233, 0.2);
 }
-
 .btn-refresh-premium:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(14, 165, 233, 0.4);
-    background: linear-gradient(135deg, #0284c7, #0369a1);
+    background: linear-gradient(135deg, #0284c7, #0369a1) !important;
 }
+.btn-refresh-premium:active { transform: translateY(0); box-shadow: none; }
+.btn-refresh-premium:disabled { background: #94a3b8 !important; cursor: not-allowed; transform: none; box-shadow: none; }
 
-.btn-refresh-premium:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(14, 165, 233, 0.2);
-}
-
-.btn-refresh-premium:disabled {
-    background: #94a3b8;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-
-/* ===== BUTTON EXPORT EXCEL (Tukar ke warna HIJAU EXCEL) ===== */
+/* ===== BUTTON EXPORT EXCEL (HIJAU EXCEL) ===== */
 .btn-export, .btn-export-small {
-    background: linear-gradient(135deg, #22c55e, #16a34a);
+    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
     color: white;
     border: none;
     padding: 8px 16px;
@@ -651,21 +664,41 @@ th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) {
     cursor: pointer;
     transition: all 0.3s ease;
     display: inline-flex;
+    justify-content: center;
     gap: 8px;
     align-items: center;
     box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);
 }
-
 .btn-export:hover, .btn-export-small:hover {
-    background: linear-gradient(135deg, #16a34a, #15803d);
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(34, 197, 94, 0.4);
+    background: linear-gradient(135deg, #16a34a, #15803d) !important;
+}
+.btn-export:active, .btn-export-small:active { transform: translateY(0); box-shadow: none; }
+
+/* ===== BUTTON RESET (KELABU/SLATE) ===== */
+.btn-reset-small {
+    background: linear-gradient(135deg, #64748b, #475569) !important;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    justify-content: center;
+    gap: 8px;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(100, 116, 139, 0.2);
+}
+.btn-reset-small:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(100, 116, 139, 0.4);
+    background: linear-gradient(135deg, #475569, #334155) !important;
 }
 
-.btn-export:active, .btn-export-small:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
-}
 /* ==========================================
    MOBILE RESPONSIVE (COMPACT HEADER + BOTTOM NAV)
    ========================================== */
@@ -679,18 +712,17 @@ th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) {
         height: auto;
     }
     
-    /* ===== HEADER ATAS (TETAP & TAK GERAK) ===== */
     .sidebar {
-        position: fixed; /* Jadikan ia melekat di skrin */
+        position: fixed; 
         top: 0; left: 0; width: 100%; 
-        height: 60px; /* Tetapkan tinggi spesifik */
+        height: 60px; 
         flex-direction: row; 
         justify-content: space-between;
         align-items: center;
         padding: 10px 16px; 
         border-radius: 0 0 16px 16px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        z-index: 60; /* Pastikan ia sentiasa di atas */
+        z-index: 60; 
     }
 
     .brand { margin-bottom: 0; font-size: 18px; }
@@ -704,42 +736,40 @@ th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) {
     #userInfo { font-size: 12px; }
     #userSummary { font-size: 10px; margin-top: 2px; padding: 2px 8px; }
 
-    /* ===== MENU BAWAH (COMPACT & TETAP) ===== */
     .nav-menu {
         position: fixed; 
         bottom: 0; left: 0; width: 100%;
         flex-direction: row; 
         background: #ffffff;
-        padding: 6px 10px 8px 10px; /* Kurangkan padding supaya lebih nipis */
+        padding: 6px 10px 8px 10px; 
         box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
         z-index: 60; 
         border-radius: 20px 20px 0 0;
         justify-content: space-around; 
         gap: 5px;
-        height: 60px; /* Kunci ketinggian menu bawah */
+        height: 60px; 
     }
 
     .nav-btn {
         flex-direction: column;
-        gap: 4px; /* Kurangkan jarak ikon dan teks */
+        gap: 4px; 
         padding: 4px;
         color: #64748b;
         border-radius: 12px;
         justify-content: center;
     }
 
-    .nav-btn i { font-size: 18px; } /* Kecilkan sedikit ikon */
-    .nav-btn span { display: block; font-size: 9px; font-weight: 600; } /* Kecilkan teks */
+    .nav-btn i { font-size: 18px; } 
+    .nav-btn span { display: block; font-size: 9px; font-weight: 600; } 
 
     .nav-btn:hover { transform: none; background: #f1f5f9; color: #4f46e5; }
     .nav-btn.active { background: #eef2ff; color: #4f46e5; box-shadow: none; }
     .logout-btn { margin-top: 0; color: #ef4444; }
 
-    /* ===== KANDUNGAN TENGAH (YANG BOLEH SCROLL) ===== */
     .main-content {
         margin-left: 0;
-        margin-top: 60px; /* Tolak kandungan ke bawah supaya tak tertutup dengan header fixed */
-        padding: 16px 15px 80px 15px; /* Padding bawah 80px supaya list tak terlindung dengan nav bar */
+        margin-top: 60px; 
+        padding: 16px 15px 80px 15px; 
         height: auto; 
         overflow: visible;
     }
@@ -750,6 +780,35 @@ th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) {
         padding: 20px 16px; 
         border-radius: 16px;
         overflow-y: visible;
+    }
+
+    /* Betulkan susunan butang jadual di Mobile */
+    .table-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .table-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .table-actions button:nth-child(1) {
+        grid-column: 1 / -1;
+        justify-content: center;
+        padding: 12px;
+        font-size: 13px;
+    }
+    
+    .table-actions button:nth-child(2),
+    .table-actions button:nth-child(3) {
+        justify-content: center;
+        padding: 10px;
+        font-size: 11px; 
     }
 
     .form-row {
@@ -833,32 +892,6 @@ th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) {
     }
 }
 
-/* ==========================================
-   TABLE UPGRADES: STICKY, ZEBRA, SORT, RESIZE
-   ========================================== */
-.table-scroll { 
-    max-height: 60vh;
-    overflow-y: auto; 
-    overflow-x: auto;
-}
-
-table th { 
-    position: sticky !important; 
-    top: 0; 
-    z-index: 10; 
-    background: #f8fafc !important;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-}
-
-table th:hover { background: #f1f5f9 !important; }
-
-table tbody tr:nth-child(even) { background-color: #f8fafc; }
-table tbody tr:nth-child(odd) { background-color: #ffffff; }
-table tbody tr:hover td { background-color: #e2e8f0; } 
-
 .resizer {
     position: absolute;
     top: 0; 
@@ -883,7 +916,6 @@ table tbody tr:hover td { background-color: #e2e8f0; }
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // Letakkan config dari Firebase Console (Project Settings) di sini
   const firebaseConfig = {
     apiKey: "AIzaSyDKiYl8462c8ZanXc4oXIfa-_9su3E89Wk",
     authDomain: "lockcheck-e0160.firebaseapp.com",
@@ -896,7 +928,6 @@ table tbody tr:hover td { background-color: #e2e8f0; }
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // Set global variables untuk digunakan dalam script biasa
   window.db = db;
   window.collection = collection;
   window.addDoc = addDoc;
@@ -904,13 +935,8 @@ table tbody tr:hover td { background-color: #e2e8f0; }
   window.where = where;
   window.getDocs = getDocs;
 
-  // ========================================================
-  // INI KOD BARU YANG KAU KENA TAMBAH (SUSUN BALIK FLOW)
-  // ========================================================
   window.addEventListener('DOMContentLoaded', () => {
-      // Bagi masa 800ms untuk Firebase binding settle dulu, baru panggil summary
       setTimeout(() => {
-          console.log("Memulakan tarikan data summary awal...");
           if (typeof loadUserSummary === "function") {
               loadUserSummary(); 
           }
@@ -925,14 +951,14 @@ table tbody tr:hover td { background-color: #e2e8f0; }
 <div class="app-layout">
 
     <nav class="sidebar">
-<div class="brand">
-    <img src="../singer-logo-png-5.png" alt="Singer Logo" style="width: 28px; height: auto; object-fit: contain;"> Lock Portal
-</div>
+        <div class="brand">
+            <img src="../singer-logo-png-5.png" alt="Singer Logo" style="width: 28px; height: auto; object-fit: contain;"> Lock Portal
+        </div>
         
-<div class="user-profile">
-    <div id="userInfo"></div>
-    <div id="userSummary">Today: loading...</div>
-</div>
+        <div class="user-profile">
+            <div id="userInfo"></div>
+            <div id="userSummary">Today: loading...</div>
+        </div>
         
         <div class="nav-menu">
             <button onclick="goNewLock()" class="nav-btn active" id="navNewLock">
@@ -1046,34 +1072,37 @@ table tbody tr:hover td { background-color: #e2e8f0; }
                     <button id="tabAll" class="tab-btn" onclick="switchView('ALL')">View All</button>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 10px;">
-                    <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
+                <div class="table-header-row">
+                    <div class="table-header-title">
                         <i class="fa fa-list-check" style="color: #4f46e5; margin-right: 5px;"></i> My Records
                     </div>
                     
-                    <div style="display: flex; gap: 10px;">
+                    <div class="table-actions">
                         <button class="btn-refresh-premium" id="btnReloadTable" onclick="manualTableRefresh()">
                             <i class="fa-solid fa-arrows-rotate" id="reloadIcon"></i> Reload Data
                         </button>
-                        <button class="btn-export" onclick="exportToExcel()">
-                            <i class="fa fa-file-excel" style="color: #10b981;"></i> Export
+                        <button class="btn-export-small" onclick="exportToExcel()">
+                            <i class="fa fa-file-excel"></i> Export Excel
+                        </button>
+                        <button class="btn-reset-small" onclick="resetLockTable()">
+                            <i class="fa fa-rotate-left"></i> Reset
                         </button>
                     </div>
                 </div>
 
                 <div class="table-scroll">
                     <table style="min-width: 500px;">
-<thead>
-    <tr>
-        <th data-sort="acc_no">ACC NO <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="branch">BRANCH <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="amount">AMOUNT <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="status">STATUS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="promise">PTP DATE <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="created">CREATED <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="remarks">REMARK <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-    </tr>
-</thead>
+                        <thead>
+                            <tr>
+                                <th data-sort="acc_no">ACC NO <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="branch">BRANCH <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="amount">AMOUNT <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="status">STATUS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="promise">PTP DATE <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="created">CREATED <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="remarks">REMARK <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                            </tr>
+                        </thead>
                         <tbody id="lockTable"></tbody>
                     </table>
                 </div>
@@ -1207,7 +1236,6 @@ function renderBranchDropdown(data, select) {
 loadBranches();
 
 document.getElementById("dca_id").value = user || "";
-
 document.getElementById("promise_date").min = new Date().toISOString().split("T")[0];
 
 const accField = document.getElementById("acc_no");
@@ -1285,12 +1313,10 @@ remarkBox.addEventListener("input",function(){
 async function loadUserSummary() {
     const user = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
     if (!user) {
-        console.log("Summary ditangguhkan: Username tiada dalam sesi");
         return;
     }
 
     if (!window.db || !window.query || !window.where || !window.collection || !window.getDocs) {
-        console.log("Firebase belum sedia, cuba lagi dalam 1 saat...");
         setTimeout(loadUserSummary, 1000);
         return;
     }
@@ -1365,13 +1391,10 @@ function showError(input,errorId){
 document.getElementById("lockForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // 1. TAMBAH KOD INI: Semak sesi sebelum submit
     verifySessionWithServer();
     const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
-    if(!currentToken) return; // Hentikan fungsi jika sesi dah terbatal
-    // ---------------------------------------------------------
+    if(!currentToken) return;
 
-    // Sembunyikan semua mesej error asal
     document.querySelectorAll(".error").forEach(el => el.style.display = "none");
 
     var acc = document.getElementById("acc_no");
@@ -1382,7 +1405,6 @@ document.getElementById("lockForm").addEventListener("submit", async (e) => {
     var dca = document.getElementById("dca_id");
     var remarks = document.getElementById("remarks");
 
-    // Validasi input borang sedia ada
     if(!acc.value){ showError(acc, "err_acc"); return; }
     if(!branch.value){ showError(branch, "err_branch"); return; }
     if(!amount.value || Number(amount.value.replace(/,/g, '')) <= 0){ showError(amount, "err_amount"); return; }
@@ -1393,14 +1415,12 @@ document.getElementById("lockForm").addEventListener("submit", async (e) => {
     remarks.value = remarks.value.toUpperCase();
     if(!remarks.value){ showError(remarks, "err_remarks"); return; }
 
-    // Paparkan animasi loading premium sedia ada
     document.getElementById("overlay").style.display = "flex";
     document.getElementById("submitBtn").disabled = true;
 
     try {
         const inputAccNo = acc.value.trim();
         
-        // 1. SEMAK SAMA ADA AKAUN SUDAH DI-LOCK (Elak Race Condition)
         const q = window.query(
             window.collection(window.db, "LOCK_DATA"), 
             window.where("acc_no", "==", inputAccNo),
@@ -1409,36 +1429,30 @@ document.getElementById("lockForm").addEventListener("submit", async (e) => {
         const querySnapshot = await window.getDocs(q);
 
         if (!querySnapshot.empty) {
-            // Jika ada lock aktif, paparkan popup amaran asal sistem anda
             document.getElementById("overlay").style.display = "none";
             document.getElementById("lockedPopup").style.display = "flex";
             document.getElementById("submitBtn").disabled = false;
             return;
         }
 
-        // Ambil teks nama cawangan yang dipilih
         var branchName = branch.selectedOptions[0].text;
-        // Bersihkan koma pada amaun untuk disimpan sebagai jenis data 'number'
         var cleanAmount = parseFloat(amount.value.replace(/,/g, '')) || 0;
 
-        // 2. TEMBAK DATA MASUK KE FIREBASE
         await window.addDoc(window.collection(window.db, "LOCK_DATA"), {
             acc_no: inputAccNo,
             branch_id: branch.value,
             branch_name: branchName,
             amount: cleanAmount,
             payment_category: category.value,
-            promise_date: date.value, // Menyimpan format YYYY-MM-DD
+            promise_date: date.value, 
             dca_id: dca.value,
             remarks: remarks.value,
             status: "LOCK",
-            created_at: new Date().toISOString() // Format ISO String standard masa nyata
+            created_at: new Date().toISOString()
         });
 
-        // Tutup loading animation
         document.getElementById("overlay").style.display = "none";
 
-        // Bina objek data olok-olok (Mock FormData) untuk dihantar ke fungsi paparan sukses asal anda
         var mockFormData = new Map();
         mockFormData.set("acc_no", inputAccNo);
         mockFormData.set("amount", amount.value);
@@ -1447,7 +1461,6 @@ document.getElementById("lockForm").addEventListener("submit", async (e) => {
         mockFormData.set("remarks", remarks.value);
         mockFormData.set("dca_id", dca.value);
 
-        // Panggil fungsi asal untuk paparkan kad sukses premium sistem anda
         showSuccess(mockFormData);
 
     } catch (err) {
@@ -1562,7 +1575,7 @@ clearError("remarks","err_remarks");
 let fullData = [];
 let filteredData = [];
 let currentPage = 1;
-const pageSize = 5;
+const pageSize = 10; // Ditukar kepada 10 rekod per mukasurat
 let currentViewStatus = "LOCK"; 
 
 function switchView(viewType) {
@@ -1606,6 +1619,25 @@ async function viewMyLocks() {
     }
 }
 
+// FUNGSI RESET KERAS UNTUK JADUAL LOCK
+function resetLockTable() {
+    fullData = [];
+    filteredData = [];
+    currentPage = 1;
+    currentViewStatus = "LOCK"; // Default tab untuk ejen DCA adalah Active Locks
+
+    document.getElementById("tabActive").classList.add("active");
+    document.getElementById("tabPaid").classList.remove("active");
+    document.getElementById("tabAll").classList.remove("active");
+
+    document.getElementById("lockTable").innerHTML = 
+        "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>";
+    
+    document.getElementById("pageInfo").innerText = "-";
+    document.getElementById("prevBtn").disabled = true;
+    document.getElementById("nextBtn").disabled = true;
+}
+
 async function manualTableRefresh() {
     let btn = document.getElementById("btnReloadTable");
     let icon = document.getElementById("reloadIcon");
@@ -1617,7 +1649,6 @@ async function manualTableRefresh() {
     "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
 
     try {
-        // Tarik terus data dari Firestore milik pengguna (user) yang sedang log masuk
         const q = window.query(
             window.collection(window.db, "LOCK_DATA"), 
             window.where("dca_id", "==", user)
@@ -1627,20 +1658,18 @@ async function manualTableRefresh() {
         fullData = [];
         querySnapshot.forEach((doc) => {
             let rowData = doc.data();
-            // Masukkan data ke dalam array utama sistem anda
             fullData.push({
                 acc_no: rowData.acc_no,
-                branch: rowData.branch_name, // Map ke field baharu
+                branch: rowData.branch_name, 
                 amount: rowData.amount,
                 status: rowData.status,
-                promise: rowData.promise_date, // Map ke field baharu
-                created: rowData.created_at,   // Map ke field baharu
+                promise: rowData.promise_date, 
+                created: rowData.created_at,   
                 remarks: rowData.remarks,
                 paid_by: rowData.paid_by || "-"
             });
         });
 
-        // Susun data daripada tarikh cipta yang paling terbaru (descending)
         fullData.sort((a, b) => new Date(b.created) - new Date(a.created));
         
         switchView(currentViewStatus);
@@ -1682,7 +1711,6 @@ function renderTable(){
     
         let isRowOverdue = (isOverdue && d.status !== "PAID");
 
-        // Format Created Date & Time (Premium Style)
         let cDate = new Date(d.created);
         let createdStr = "-";
         if (!isNaN(cDate.getTime())) {
@@ -1719,7 +1747,6 @@ function renderTable(){
 
     let totalPage = Math.ceil(filteredData.length / pageSize) || 1;
 
-    // 2. KOD 'SHOWING X TO Y' YANG BARU KITA BUAT TADI
     let totalItems = filteredData.length;
     let startItem = totalItems === 0 ? 0 : ((currentPage - 1) * pageSize) + 1;
     let endItem = Math.min(currentPage * pageSize, totalItems);
@@ -1727,7 +1754,6 @@ function renderTable(){
     document.getElementById("pageInfo").innerHTML = `Showing <b>${startItem}</b> to <b>${endItem}</b> of <b>${totalItems}</b> results`;
     
     document.getElementById("prevBtn").disabled = currentPage === 1;
-    // Sekarang kod di bawah ni takkan error sebab totalPage dah wujud semula
     document.getElementById("nextBtn").disabled = currentPage === totalPage || filteredData.length === 0;
 }
     
@@ -1938,12 +1964,10 @@ function verifySessionWithServer() {
     const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
     if (!currentToken) return;
 
-    // Tembak API Google Apps Script untuk semak token
     fetch(api + "?action=session&token=" + currentToken + "&api_key=SCZP_SECURE_2026")
     .then(res => res.json())
     .then(data => {
         if (data.status !== "ACTIVE") {
-            // Panggil popup UI sedia ada
             showSessionPopup("DEVICE"); 
         }
     })
@@ -1951,31 +1975,26 @@ function verifySessionWithServer() {
 }
 
 let lastCheckTime = 0;
-const CHECK_COOLDOWN = 1200000; // 20 minit cooldown
+const CHECK_COOLDOWN = 1200000; 
 
 function checkSessionOnAction() {
     const now = Date.now();
-    
-    // Hanya buat semakan jika dah lebih 20 minit dari semakan terakhir
     if (now - lastCheckTime > CHECK_COOLDOWN) {
         lastCheckTime = now;
-        verifySessionWithServer(); // Tembak server
+        verifySessionWithServer(); 
     }
 }
 
-// Semak bila pertama kali halaman dimuatkan
 verifySessionWithServer();
 lastCheckTime = Date.now();
 
-// Kesan bila user mula klik, gerak mouse, menaip, atau sentuh skrin
 ['mousedown', 'mousemove', 'keypress', 'touchstart', 'focusin', 'change'].forEach(eventName => {
     document.addEventListener(eventName, checkSessionOnAction, { passive: true });
 });
 
-// Semak terus bila user buka semula tab dari background
 document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
-        lastCheckTime = Date.now(); // Reset masa
+        lastCheckTime = Date.now(); 
         verifySessionWithServer();
     }
 });
