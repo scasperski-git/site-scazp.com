@@ -1240,7 +1240,7 @@ async function manualMasterRefresh() {
         const querySnapshot = await window.getDocs(q);
         
         liveDataList = [];
-        querySnapshot.forEach((doc) => {
+querySnapshot.forEach((doc) => {
             let rowData = doc.data();
             liveDataList.push({
                 dca: rowData.dca_id,
@@ -1253,7 +1253,8 @@ async function manualMasterRefresh() {
                 status: rowData.status,
                 paid_by: rowData.paid_by || "",
                 paid_date: rowData.paid_date || "",
-                edited_by: rowData.edited_by || "" // <--- TAMBAH BARIS INI
+                edited_by: rowData.edited_by || "",
+                edited_at: rowData.edited_at || "" // <--- TAMBAH BARIS INI
             });
         });
 
@@ -1358,14 +1359,35 @@ function renderTable() {
                  </div>
                </div>`
             : `<div style="max-width: 200px; word-break: break-word;">${safeRemark}</div>`;
-        // BINA TAG EDIT JIKA ADA REKOD DIA DI-EDIT
-        let editBadge = d.edited_by ? `<div style="margin-top: 6px; display: inline-block; background: #f8fafc; border: 1px dashed #cbd5e1; color: #475569; font-size: 9px; padding: 3px 6px; border-radius: 4px; font-weight: 600;"><i class="fa fa-pen" style="font-size:8px; margin-right:3px;"></i>Edited by: ${d.edited_by}</div>` : "";
+
+        // ==========================================
+        // BINA TAG "EDITED BY" & FORMAT MASA 
+        // ==========================================
+        let editBadge = "";
+        if (d.edited_by) {
+            let editTime = "";
+            if (d.edited_at) {
+                let eDate = new Date(d.edited_at);
+                if (!isNaN(eDate.getTime())) {
+                    let day = eDate.getDate();
+                    let mths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                    let mth = mths[eDate.getMonth()];
+                    let yr = eDate.getFullYear();
+                    let hr = eDate.getHours();
+                    let min = ("0" + eDate.getMinutes()).slice(-2);
+                    let ampm = hr >= 12 ? 'PM' : 'AM';
+                    hr = hr % 12; hr = hr ? hr : 12; 
+                    editTime = ` &bull; ${day} ${mth} ${yr} ${hr}:${min} ${ampm}`;
+                }
+            }
+            editBadge = `<div style="margin-top: 8px; display: inline-block; background: #f8fafc; border: 1px dashed #cbd5e1; color: #475569; font-size: 10px; padding: 5px 8px; border-radius: 6px; font-weight: 600; line-height: 1.4;"><i class="fa fa-pen" style="font-size:9px; margin-right:4px;"></i>Edited by ${d.edited_by}${editTime}</div>`;
+        }
 
         let statusBadge = d.status === "PAID" 
             ? `<div style="text-align:left;"><span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span><span style="display:block; font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">by ${d.paid_by || '-'}</span></div>`
             : `<div style="text-align:left;"><span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span></div>`;
 
-html += `
+        html += `
         <tr style="${rowBg}">
             <td>${d.dca || "-"}</td>
             <td style="font-weight: 600;">${d.acc_no || "-"}</td>
@@ -1374,7 +1396,7 @@ html += `
             <td>${statusBadge}</td>
             <td style="${dateColor}">${dateStr}</td>
             <td>${createdStr}</td>
-            <td>${remarkHtml} ${editBadge}</td> <!-- TAMBAH EDIT BADGE DI SINI -->
+            <td style="vertical-align: top;">${remarkHtml} ${editBadge}</td>
         </tr>`;
     });
 
@@ -1390,7 +1412,6 @@ html += `
     if(document.getElementById("prevBtn")) document.getElementById("prevBtn").disabled = currentPage === 1;
     if(document.getElementById("nextBtn")) document.getElementById("nextBtn").disabled = currentPage === totalPages || filteredTableData.length === 0;
 }
-
 function nextPage() { if (currentPage * pageSize < filteredTableData.length) { currentPage++; renderTable(); } }
 function prevPage() { if (currentPage > 1) { currentPage--; renderTable(); } }
 
