@@ -946,6 +946,18 @@ async function checkLock(){
                 ? `<div style='margin-top: 14px;'><span style='background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 6px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; display: inline-block; letter-spacing: 0.3px;'><i class='fa-solid fa-check-double' style='margin-right: 4px;'></i> Verified Paid by ${data.paid_by}</span></div>` 
                 : "";
 
+            // =====================================
+            // BINA BLOK INFO "LOCKED BY" & "EDITED BY"
+            // =====================================
+            let metaSection = `<div class='created-meta' style='${data.edited_by ? "border-bottom:none; margin-bottom:4px; padding-bottom:0;" : ""}'>Locked by ${data.dca_id || "-"} • ${created}</div>`;
+            
+            if (data.edited_by) {
+                let editTime = data.edited_at ? formatDateTime(data.edited_at) : "";
+                let editDot = editTime ? ` • ${editTime}` : "";
+                metaSection += `<div class='created-meta' style='font-size: 11px; margin-top: 0;'><i class='fa fa-pen' style='font-size:10px; margin-right:4px;'></i>Edited by ${data.edited_by}${editDot}</div>`;
+            }
+            // =====================================
+
             let actionButton = "";
             if (data.status === "LOCK") {
                 actionButton = `<button class='paid-btn' onclick="markAsPaid('${docId}', '${data.acc_no}')"><i class='fa-solid fa-check-circle'></i> Mark as PAID</button>`;
@@ -954,7 +966,7 @@ async function checkLock(){
             result.innerHTML =
             "<div class='result-card'>" +
             "<div class='status-box'><span style='background:"+statusColor+"'>" + statusText + "</span>" + paidByInfo + "</div>" +
-            "<div class='created-meta'>Locked by " + data.dca_id + " • " + created + "</div>" +
+            metaSection + // <--- SELITKAN META SECTION DI SINI
             "<div class='row'><div class='col'><div class='label'>ACCOUNT NO</div><div class='value'>" + data.acc_no + "</div></div>" +
             "<div class='col'><div class='label'>BRANCH</div><div class='value'>" + data.branch_name + "</div></div></div>" +
             "<div class='row'><div class='col'><div class='label'>LOCK AMOUNT</div><div class='amount'>" + amount + "</div></div>" +
@@ -1106,7 +1118,9 @@ async function manualTableRefresh() {
                 remarks: rowData.remarks,
                 created: rowData.created_at,
                 status: rowData.status,
-                paid_by: rowData.paid_by || ""
+                paid_by: rowData.paid_by || "",
+                edited_by: rowData.edited_by || "",   // <--- TARIK DATA EDITED BY
+                edited_at: rowData.edited_at || ""    // <--- TARIK DATA EDITED AT
             });
         });
 
@@ -1189,6 +1203,11 @@ function renderTable() {
                </div>`
             : `<div style="max-width: 200px; word-break: break-word;">${safeRemark}</div>`;
 
+        // =====================================
+        // BINA TAG EDIT DI JADUAL (TINY TAG)
+        // =====================================
+        let editBadge = d.edited_by ? `<div style="margin-top: 6px; display: inline-block; background: #f8fafc; border: 1px dashed #cbd5e1; color: #475569; font-size: 9px; padding: 3px 6px; border-radius: 4px; font-weight: 600;"><i class="fa fa-pen" style="font-size:8px; margin-right:3px;"></i>Edited by: ${d.edited_by}</div>` : "";
+
         let statusBadge = d.status === "PAID" 
             ? `<div style="text-align:left;"><span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span><span style="display:block; font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">by ${d.paid_by || '-'}</span></div>`
             : `<div style="text-align:left;"><span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span></div>`;
@@ -1202,7 +1221,7 @@ function renderTable() {
             <td>${statusBadge}</td>
             <td style="${dateColor}">${dateStr}</td>
             <td>${createdStr}</td>
-            <td>${remarkHtml}</td>
+            <td>${remarkHtml} ${editBadge}</td>
         </tr>`;
     });
 
