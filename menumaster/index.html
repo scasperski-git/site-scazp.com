@@ -921,24 +921,31 @@ const app = initializeApp(firebaseConfig);
                     </button>
                 </div>
 
-                <div class="dash-card">
-                    <div class="dash-stats">
-                        <div class="stat-box">
-                            <div class="stat-label">Filtered Lock</div>
-                            <div id="dashTotal" class="stat-number lock">0</div>
+<div class="dash-card">
+                    <div class="summary-grid" style="margin-bottom: 0;">
+                        <div class="box-card-split">
+                            <div class="box-half">
+                                <div class="box-half-title">Filtered Lock</div>
+                                <div id="dashTotal" class="box-half-val text-blue">0</div>
+                            </div>
+                            <div class="box-half">
+                                <div class="box-half-title">Lock Amount</div>
+                                <div id="dashLockAmount" class="box-half-val text-purple">RM 0.00</div>
+                            </div>
                         </div>
 
-                        <div class="stat-box">
-                            <div class="stat-label">Filtered Paid</div>
-                            <div id="dashPaid" class="stat-number" style="color:#10b981;">0</div>
-                        </div>
-
-                        <div class="stat-box">
-                            <div class="stat-label">Filtered Amount</div>
-                            <div id="dashAmount" class="stat-number amount">RM0</div>
+                        <div class="box-card-split">
+                            <div class="box-half">
+                                <div class="box-half-title">Filtered Paid</div>
+                                <div id="dashPaid" class="box-half-val text-green">0</div>
+                            </div>
+                            <div class="box-half">
+                                <div class="box-half-title">Paid Amount</div>
+                                <div id="dashPaidAmount" class="box-half-val text-emerald">RM 0.00</div>
+                            </div>
                         </div>
                     </div>
-                    <div id="dashStatus" class="dash-status"></div>
+                    <div id="dashStatus" class="dash-status" style="margin-top: 15px;"></div>
                 </div>
             </div>
 
@@ -1368,16 +1375,31 @@ async function calculateReport(){
             return matchDca && matchDate;
         });
 
-        // Buat pengiraan ringkasan laporan hasil tapis
+// Buat pengiraan ringkasan laporan hasil tapis
         let filteredTotal = 0;
+        let filteredLockAmount = 0;
         let filteredPaid = 0;
-        let filteredAmount = 0;
+        let filteredPaidAmount = 0;
 
         reportDataList.forEach(row => {
-            if (row.status === "LOCK") filteredTotal++;
-            if (row.status === "PAID") filteredPaid++;
-            filteredAmount += (Number(row.amount) || 0);
+            let amnt = Number(row.amount) || 0;
+            
+            if (row.status === "LOCK") {
+                filteredTotal++;
+                filteredLockAmount += amnt;
+            }
+            if (row.status === "PAID") {
+                filteredPaid++;
+                filteredPaidAmount += amnt;
+            }
         });
+
+        // Kemas kini kotak analitik laporan di skrin (Split Design)
+        document.getElementById("dashTotal").innerText = filteredTotal;
+        document.getElementById("dashLockAmount").innerText = "RM " + Number(filteredLockAmount).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        
+        document.getElementById("dashPaid").innerText = filteredPaid;
+        document.getElementById("dashPaidAmount").innerText = "RM " + Number(filteredPaidAmount).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
         // Kemas kini kotak analitik filtered laporan di skrin
         document.getElementById("dashTotal").innerText = filteredTotal;
