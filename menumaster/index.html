@@ -2019,7 +2019,10 @@ document.getElementById("deletePasscode").addEventListener("keypress", function(
         <div style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #0f172a;">Verify Deletion</div>
         <div style="font-size: 13px; color: #475569; margin-bottom: 16px; line-height: 1.5;">Enter Master Passcode to permanently delete Account <b id="delPopupAcc" style="color: #ef4444;"></b></div>
         
-        <input type="tel" id="deletePasscode" placeholder="ENTER PASSCODE" autocomplete="off" inputmode="numeric" pattern="[0-9]*" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 8px; text-align: center; letter-spacing: 2px; font-weight: bold; -webkit-text-security: disc;">
+        <div style="position: relative; width: 100%; margin-bottom: 8px;">
+            <input type="tel" id="deletePasscode" placeholder="ENTER PASSCODE" autocomplete="off" inputmode="numeric" pattern="[0-9]*" style="width: 100%; padding: 12px; padding-right: 40px; border-radius: 8px; border: 1px solid #cbd5e1; text-align: center; letter-spacing: 2px; font-weight: bold; -webkit-text-security: disc; box-sizing: border-box;">
+            <i class="fa fa-eye" id="togglePasscodeIcon" onclick="toggleViewPasscode()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #94a3b8; font-size: 18px; transition: 0.3s;"></i>
+        </div>
         <div id="delError" style="display:none; color:#ef4444; margin-bottom:16px; font-size:12px; font-weight: 600;">Invalid Passcode!</div>
         
         <div style="display: flex; gap: 10px; margin-top: 10px;">
