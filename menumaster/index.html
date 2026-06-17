@@ -751,11 +751,75 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     .action-row { flex-direction: column; }
     table th, table td { padding: 12px 10px; font-size: 11px; }
 }
+
+/* ===== MANAGE RECORDS SECTION ===== */
+.manage-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    transition: all 0.3s ease;
+}
+.manage-card.edit-active {
+    border-color: #4f46e5;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.1);
+}
+.manage-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 15px;
+}
+.manage-item {
+    display: flex;
+    flex-direction: column;
+}
+.manage-item label {
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+.manage-item .val {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    padding: 8px 0;
+}
+.manage-item input, .manage-item select {
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    margin-bottom: 0;
+    font-weight: 600;
+    width: 100%;
+}
+.manage-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #e2e8f0;
+}
+.btn-m-edit { background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; flex: 1; font-weight: 600; font-size: 13px; transition: 0.3s;}
+.btn-m-edit:hover { background: #2563eb; }
+.btn-m-delete { background: #ef4444; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; flex: 1; font-weight: 600; font-size: 13px; transition: 0.3s;}
+.btn-m-delete:hover { background: #dc2626; }
+.btn-m-save { background: #10b981; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; flex: 1; font-weight: 600; font-size: 13px; transition: 0.3s;}
+.btn-m-save:hover { background: #059669; }
+.btn-m-cancel { background: #64748b; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; flex: 1; font-weight: 600; font-size: 13px; transition: 0.3s;}
+.btn-m-cancel:hover { background: #475569; }
+    
 </style>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  // KITA TAMBAH doc, updateDoc, dan deleteDoc DI SINI
+  import { getFirestore, collection, query, where, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDKiYl8462c8ZanXc4oXIfa-_9su3E89Wk",
@@ -774,6 +838,10 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
   window.query = query;
   window.where = where;
   window.getDocs = getDocs;
+  // WAJIB DAFTARKAN FUNGSI BARU INI KE WINDOW
+  window.doc = doc;
+  window.updateDoc = updateDoc;
+  window.deleteDoc = deleteDoc;
 </script>
 
 </head>
@@ -914,6 +982,22 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
                     </div>
                     <div id="dashStatus" class="dash-status" style="margin-top: 15px;"></div>
                 </div>
+            </div>
+            <div class="section">
+                <h3><i class="fa fa-pen-to-square"></i> Manage Records (Edit / Delete)</h3>
+                
+                <div class="filter-card" style="padding: 0; border: none; box-shadow: none;">
+                    <div class="filter-input-group" style="margin-bottom: 20px;">
+                        <input type="text" id="manageSearchAcc" placeholder="ENTER ACCOUNT NO" inputmode="numeric" maxlength="10" autocomplete="off" style="margin-bottom: 0;">
+                        <div class="mini-actions" style="margin-top: 10px; width: 100%; display: flex; gap: 10px;">
+                            <button class="mini-btn search" onclick="searchManageAcc()" style="flex: 1;"><i class="fa fa-search"></i> Search</button>
+                            <button class="mini-btn clear" onclick="clearManageSearch()" style="flex: 1;"><i class="fa fa-xmark"></i> Clear</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kad hasil carian akan muncul di sini -->
+                <div id="manageResultArea"></div>
             </div>
 
             <div class="section">
@@ -1587,6 +1671,195 @@ function initTableUpgrades() {
 }
 
 window.addEventListener('DOMContentLoaded', initTableUpgrades);
+
+/* ==========================================
+   MANAGE RECORDS LOGIC (SEARCH, EDIT, DELETE)
+========================================== */
+
+document.getElementById("manageSearchAcc").addEventListener("keypress", function(e){
+    if(!/[0-9]/.test(e.key)){ e.preventDefault(); }
+    if(e.key === "Enter"){ searchManageAcc(); }
+});
+
+async function searchManageAcc() {
+    let accNo = document.getElementById("manageSearchAcc").value.trim();
+    let resultArea = document.getElementById("manageResultArea");
+
+    if(!accNo) {
+        alert("Sila masukkan Nombor Akaun!");
+        return;
+    }
+
+    resultArea.innerHTML = `<div style="text-align:center; color:#64748b; padding:20px;"><i class="fa fa-spinner fa-spin" style="font-size:24px; margin-bottom:10px;"></i><br>Searching database...</div>`;
+
+    try {
+        const q = window.query(window.collection(window.db, "LOCK_DATA"), window.where("acc_no", "==", accNo));
+        const querySnapshot = await window.getDocs(q);
+
+        if (querySnapshot.empty) {
+            resultArea.innerHTML = `<div style="text-align:center; color:#ef4444; padding:20px; background:#fef2f2; border-radius:12px; border:1px solid #fecaca;"><i class="fa fa-triangle-exclamation" style="font-size:24px; margin-bottom:10px;"></i><br>No records found for account <b>${accNo}</b></div>`;
+            return;
+        }
+
+        let html = "";
+        querySnapshot.forEach((doc) => {
+            let d = doc.data();
+            let docId = doc.id; // Ini ID unik Firebase untuk Edit/Delete
+            
+            // Format data sedia ada
+            let currentAmount = Number(d.amount || 0).toFixed(2);
+            let statusColor = d.status === "PAID" ? "color:#10b981;" : "color:#f59e0b;";
+
+            html += `
+            <div class="manage-card" id="card-${docId}">
+                
+                <!-- PAPARAN VIEW (NORMAL) -->
+                <div id="view-${docId}">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
+                        <div>
+                            <span style="font-size:11px; color:#64748b; font-weight:600; display:block;">DCA: ${d.dca_id || "-"}</span>
+                            <span style="font-size:16px; font-weight:700; color:#0f172a;">${d.acc_no}</span>
+                        </div>
+                        <div style="text-align:right; font-weight:700; ${statusColor} font-size:15px;">${d.status}</div>
+                    </div>
+
+                    <div class="manage-grid">
+                        <div class="manage-item"><label>Amount</label><div class="val">RM ${currentAmount}</div></div>
+                        <div class="manage-item"><label>Promise Date</label><div class="val">${d.promise_date || "-"}</div></div>
+                        <div class="manage-item"><label>Payment Cat.</label><div class="val">${d.payment_category || "-"}</div></div>
+                        <div class="manage-item"><label>Remarks</label><div class="val" style="word-break:break-word;">${d.remarks || "-"}</div></div>
+                    </div>
+
+                    <div class="manage-actions">
+                        <button class="btn-m-edit" onclick="enableEdit('${docId}')"><i class="fa fa-pen"></i> Edit</button>
+                        <button class="btn-m-delete" onclick="deleteRecord('${docId}', '${d.acc_no}')"><i class="fa fa-trash"></i> Delete</button>
+                    </div>
+                </div>
+
+                <!-- PAPARAN EDIT (TERSEMBUNYI PADA AWALNYA) -->
+                <div id="edit-${docId}" style="display:none;">
+                    <div style="font-size:14px; font-weight:700; color:#4f46e5; margin-bottom:15px;"><i class="fa fa-pen-to-square"></i> Editing Record: ${d.acc_no}</div>
+                    
+                    <div class="manage-grid">
+                        <div class="manage-item">
+                            <label>Amount (RM)</label>
+                            <input type="number" id="input-amount-${docId}" value="${currentAmount}" step="0.01">
+                        </div>
+                        <div class="manage-item">
+                            <label>Promise Date</label>
+                            <input type="date" id="input-date-${docId}" value="${d.promise_date}">
+                        </div>
+                        <div class="manage-item">
+                            <label>Status</label>
+                            <select id="input-status-${docId}">
+                                <option value="LOCK" ${d.status === 'LOCK' ? 'selected' : ''}>LOCK</option>
+                                <option value="PAID" ${d.status === 'PAID' ? 'selected' : ''}>PAID</option>
+                            </select>
+                        </div>
+                        <div class="manage-item">
+                            <label>Payment Category</label>
+                            <select id="input-cat-${docId}">
+                                <option value="PARTIAL PAYMENT" ${d.payment_category === 'PARTIAL PAYMENT' ? 'selected' : ''}>PARTIAL PAYMENT</option>
+                                <option value="FULL PAYMENT" ${d.payment_category === 'FULL PAYMENT' ? 'selected' : ''}>FULL PAYMENT</option>
+                                <option value="UNDER DISCOUNT" ${d.payment_category === 'UNDER DISCOUNT' ? 'selected' : ''}>UNDER DISCOUNT</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="manage-item" style="margin-top:-5px;">
+                        <label>Remarks</label>
+                        <input type="text" id="input-remarks-${docId}" value="${d.remarks || ""}" oninput="this.value = this.value.toUpperCase()">
+                    </div>
+
+                    <div class="manage-actions">
+                        <button class="btn-m-save" onclick="saveRecord('${docId}')"><i class="fa fa-save"></i> Save</button>
+                        <button class="btn-m-cancel" onclick="cancelEdit('${docId}')"><i class="fa fa-times"></i> Cancel</button>
+                    </div>
+                </div>
+
+            </div>`;
+        });
+
+        resultArea.innerHTML = html;
+
+    } catch (error) {
+        console.error("Search Manage Error:", error);
+        resultArea.innerHTML = `<div style="text-align:center; color:#ef4444;">System Error. Try again.</div>`;
+    }
+}
+
+function clearManageSearch() {
+    document.getElementById("manageSearchAcc").value = "";
+    document.getElementById("manageResultArea").innerHTML = "";
+}
+
+function enableEdit(docId) {
+    document.getElementById("view-" + docId).style.display = "none";
+    document.getElementById("edit-" + docId).style.display = "block";
+    document.getElementById("card-" + docId).classList.add("edit-active");
+}
+
+function cancelEdit(docId) {
+    document.getElementById("edit-" + docId).style.display = "none";
+    document.getElementById("view-" + docId).style.display = "block";
+    document.getElementById("card-" + docId).classList.remove("edit-active");
+}
+
+async function saveRecord(docId) {
+    let newAmount = document.getElementById("input-amount-" + docId).value;
+    let newDate = document.getElementById("input-date-" + docId).value;
+    let newStatus = document.getElementById("input-status-" + docId).value;
+    let newCat = document.getElementById("input-cat-" + docId).value;
+    let newRemarks = document.getElementById("input-remarks-" + docId).value;
+
+    if (!newAmount || !newDate || !newRemarks) {
+        alert("Semua ruangan mesti diisi!");
+        return;
+    }
+
+    let confirmSave = confirm("Simpan perubahan untuk rekod ini?");
+    if (!confirmSave) return;
+
+    try {
+        const docRef = window.doc(window.db, "LOCK_DATA", docId);
+        await window.updateDoc(docRef, {
+            amount: parseFloat(newAmount),
+            promise_date: newDate,
+            status: newStatus,
+            payment_category: newCat,
+            remarks: newRemarks
+        });
+
+        alert("Rekod berjaya dikemas kini!");
+        searchManageAcc(); // Refresh kad secara automatik
+        
+        // (Optional) Jika nak pastikan dashboard refresh sekali
+        if(typeof manualMasterRefresh === "function") manualMasterRefresh(); 
+
+    } catch (error) {
+        console.error("Error Updating:", error);
+        alert("Gagal menyimpan perubahan. Sila cuba lagi.");
+    }
+}
+
+async function deleteRecord(docId, accNo) {
+    let confirmDel = confirm(`AWAS: Adakah anda pasti mahu memadam rekod untuk akaun ${accNo} secara kekal? Tindakan ini tidak boleh diundur.`);
+    if (!confirmDel) return;
+
+    try {
+        const docRef = window.doc(window.db, "LOCK_DATA", docId);
+        await window.deleteDoc(docRef);
+
+        alert("Rekod telah dipadam!");
+        searchManageAcc(); // Refresh kad
+        
+        if(typeof manualMasterRefresh === "function") manualMasterRefresh(); 
+
+    } catch (error) {
+        console.error("Error Deleting:", error);
+        alert("Gagal memadam rekod.");
+    }
+}
 
 </script>
 
