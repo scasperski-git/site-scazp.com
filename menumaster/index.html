@@ -1525,6 +1525,7 @@ function generateExcel(dataArray, filePrefix) {
     let excelData = dataArray.map(row => {
         let pDate = new Date(row.promise);
         let cDate = new Date(row.created);
+        let eDate = row.edited_at ? new Date(row.edited_at) : "";
 
         return {
             "DCA ID": row.dca || "-",
@@ -1535,7 +1536,9 @@ function generateExcel(dataArray, filePrefix) {
             "PAID BY": row.paid_by || "-", 
             "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate, 
             "REMARKS": row.remarks || "-",
-            "CREATED TIME": isNaN(cDate.getTime()) ? row.created : cDate
+            "CREATED TIME": isNaN(cDate.getTime()) ? row.created : cDate,
+            "EDITED BY": row.edited_by || "-",
+            "EDITED TIME": (eDate && !isNaN(eDate.getTime())) ? eDate : "-" // <--- TAMBAHAN UNTUK EXCEL
         };
     });
 
@@ -1544,12 +1547,17 @@ function generateExcel(dataArray, filePrefix) {
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
         let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 6});
         if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') { worksheet[ptpCellRef].z = 'd-mmm-yyyy'; }
+        
         let createdCellRef = XLSX.utils.encode_cell({r: R, c: 8});
         if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') { worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; }
+
+        // Setting format tarikh dan masa untuk Edited
+        let editedCellRef = XLSX.utils.encode_cell({r: R, c: 10});
+        if (worksheet[editedCellRef] && worksheet[editedCellRef].t === 'd') { worksheet[editedCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; }
     }
 
     let workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Records"); // Nama sheet mungkin berbeza ikut fail
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Records"); 
     let fileName = `${filePrefix}_${new Date().toISOString().slice(0,10)}.xlsx`;
     XLSX.writeFile(workbook, fileName);
 }
