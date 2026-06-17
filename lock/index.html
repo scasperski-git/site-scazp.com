@@ -1795,20 +1795,53 @@ function prevPage(){
     }
 }
 
-function applyFilter(){
+let isFetchingSearch = false; // Bendera keselamatan (elak infinite loop)
+
+async function applyFilter(){
+    // ==========================================
+    // AUTO-LOAD DATA JIKA BELUM ADA REKOD DITARIK
+    // ==========================================
+    if (fullData.length === 0 && !isFetchingSearch) {
+        isFetchingSearch = true; // Kunci sementara
+        
+        let searchBtn = document.querySelector(".mini-btn.search");
+        let originalHtml = searchBtn.innerHTML;
+        
+        // Tukar butang jadi animasi loading
+        searchBtn.innerHTML = "<i class='fa fa-spinner fa-spin'></i> Searching...";
+        searchBtn.disabled = true;
+
+        // Panggil fungsi reload dan tunggu ia siap tarik data dari Firebase
+        await manualTableRefresh(); 
+        
+        // Kembalikan butang kepada keadaan asal
+        searchBtn.innerHTML = originalHtml;
+        searchBtn.disabled = false;
+        isFetchingSearch = false; // Buka kunci
+        
+        return; // Berhenti di sini, kerana manualTableRefresh() akan automatik panggil applyFilter() semula!
+    }
+
+    // ==========================================
+    // LOGIK TAPISAN (SEARCH) MACAM BIASA
+    // ==========================================
     let acc = document.getElementById("filterAcc").value.toLowerCase();
+    
     filteredData = fullData.filter(d => {
         let accNo = (d.acc_no || "").toString().toLowerCase();
         let status = (d.status || "").toString().toUpperCase();
         
         let matchAcc = (!acc || accNo.includes(acc));
         let matchStatus = true;
+        
         if(currentViewStatus !== "ALL"){
+            // Kalau ada nombor ditaip, abaikan tab status supaya akaun tetap jumpa
             matchStatus = acc ? true : (status === currentViewStatus);
         }
         
         return matchAcc && matchStatus;
     });
+    
     currentPage = 1;
     renderTable();
 }
