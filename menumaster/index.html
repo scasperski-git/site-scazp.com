@@ -813,6 +813,51 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 .btn-m-save:hover { background: #059669; }
 .btn-m-cancel { background: #64748b; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; flex: 1; font-weight: 600; font-size: 13px; transition: 0.3s;}
 .btn-m-cancel:hover { background: #475569; }
+
+/* ===== SEARCH BAR MODERN (MANAGE RECORDS) ===== */
+.search-action-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.search-action-bar input {
+    flex: 1;
+    padding: 14px 16px;
+    font-size: 15px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #334155;
+    font-weight: 600;
+    outline: none;
+    transition: 0.3s;
+    font-family: 'Poppins', sans-serif;
+}
+.search-action-bar input:focus {
+    border-color: #4f46e5;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+.btn-search-modern {
+    background: linear-gradient(135deg, #4f46e5, #3b82f6);
+    color: white; border: none; padding: 12px 24px; border-radius: 12px; 
+    font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px; font-size: 14px;
+}
+.btn-search-modern:hover { 
+    transform: translateY(-2px); box-shadow: 0 6px 15px rgba(79,70,229,0.3); 
+}
+.btn-clear-modern {
+    background: #64748b; color: white; border: none; padding: 12px 24px; border-radius: 12px; 
+    font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px; font-size: 14px;
+}
+.btn-clear-modern:hover { 
+    background: #475569; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(100,116,139,0.2); 
+}
+
+@media (max-width: 600px) {
+    .search-action-bar { flex-direction: column; gap: 10px; }
+    .btn-search-modern, .btn-clear-modern { width: 100%; justify-content: center; padding: 14px; }
+}
     
 </style>
 
@@ -983,21 +1028,19 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
                     <div id="dashStatus" class="dash-status" style="margin-top: 15px;"></div>
                 </div>
             </div>
+<!-- ===== SECTION: MANAGE RECORDS (EDIT & DELETE) ===== -->
             <div class="section">
                 <h3><i class="fa fa-pen-to-square"></i> Manage Records (Edit / Delete)</h3>
                 
-                <div class="filter-card" style="padding: 0; border: none; box-shadow: none;">
-                    <div class="filter-input-group" style="margin-bottom: 20px;">
-                        <input type="text" id="manageSearchAcc" placeholder="ENTER ACCOUNT NO" inputmode="numeric" maxlength="10" autocomplete="off" style="margin-bottom: 0;">
-                        <div class="mini-actions" style="margin-top: 10px; width: 100%; display: flex; gap: 10px;">
-                            <button class="mini-btn search" onclick="searchManageAcc()" style="flex: 1;"><i class="fa fa-search"></i> Search</button>
-                            <button class="mini-btn clear" onclick="clearManageSearch()" style="flex: 1;"><i class="fa fa-xmark"></i> Clear</button>
-                        </div>
-                    </div>
+                <div class="search-action-bar">
+                    <input type="text" id="manageSearchAcc" placeholder="ENTER ACCOUNT NO..." inputmode="numeric" maxlength="10" autocomplete="off">
+                    <button class="btn-search-modern" onclick="searchManageAcc()"><i class="fa fa-search"></i> Search</button>
+                    <button class="btn-clear-modern" onclick="clearManageSearch()"><i class="fa fa-xmark"></i> Clear</button>
                 </div>
 
                 <!-- Kad hasil carian akan muncul di sini -->
                 <div id="manageResultArea"></div>
+            </div>
             </div>
 
             <div class="section">
@@ -1685,10 +1728,7 @@ async function searchManageAcc() {
     let accNo = document.getElementById("manageSearchAcc").value.trim();
     let resultArea = document.getElementById("manageResultArea");
 
-    if(!accNo) {
-        alert("Sila masukkan Nombor Akaun!");
-        return;
-    }
+    if(!accNo) { alert("Sila masukkan Nombor Akaun!"); return; }
 
     resultArea.innerHTML = `<div style="text-align:center; color:#64748b; padding:20px;"><i class="fa fa-spinner fa-spin" style="font-size:24px; margin-bottom:10px;"></i><br>Searching database...</div>`;
 
@@ -1704,11 +1744,21 @@ async function searchManageAcc() {
         let html = "";
         querySnapshot.forEach((doc) => {
             let d = doc.data();
-            let docId = doc.id; // Ini ID unik Firebase untuk Edit/Delete
+            let docId = doc.id; 
             
-            // Format data sedia ada
             let currentAmount = Number(d.amount || 0).toFixed(2);
             let statusColor = d.status === "PAID" ? "color:#10b981;" : "color:#f59e0b;";
+
+            // TUKAR FORMAT TARIKH KEPADA 19 June 2026 UNTUK VIEW MODE
+            let viewDate = "-";
+            if (d.promise_date) {
+                let pDate = new Date(d.promise_date);
+                if (!isNaN(pDate)) {
+                    viewDate = pDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                } else {
+                    viewDate = d.promise_date;
+                }
+            }
 
             html += `
             <div class="manage-card" id="card-${docId}">
@@ -1725,9 +1775,12 @@ async function searchManageAcc() {
 
                     <div class="manage-grid">
                         <div class="manage-item"><label>Amount</label><div class="val">RM ${currentAmount}</div></div>
-                        <div class="manage-item"><label>Promise Date</label><div class="val">${d.promise_date || "-"}</div></div>
+                        <!-- Papar Branch -->
+                        <div class="manage-item"><label>Branch</label><div class="val">${d.branch_name || "-"}</div></div>
+                        <!-- Papar Tarikh Cantik -->
+                        <div class="manage-item"><label>Promise Date</label><div class="val">${viewDate}</div></div>
                         <div class="manage-item"><label>Payment Cat.</label><div class="val">${d.payment_category || "-"}</div></div>
-                        <div class="manage-item"><label>Remarks</label><div class="val" style="word-break:break-word;">${d.remarks || "-"}</div></div>
+                        <div class="manage-item" style="grid-column: span 2;"><label>Remarks</label><div class="val" style="word-break:break-word;">${d.remarks || "-"}</div></div>
                     </div>
 
                     <div class="manage-actions">
@@ -1746,6 +1799,16 @@ async function searchManageAcc() {
                             <input type="number" id="input-amount-${docId}" value="${currentAmount}" step="0.01">
                         </div>
                         <div class="manage-item">
+                            <label>Branch</label>
+                            <select id="input-branch-${docId}">
+                                <!-- SILA TAMBAH/UBAH NAMA CAWANGAN ANDA DI SINI JIKA PERLU -->
+                                <option value="SUBANG" ${d.branch_name === 'SUBANG' ? 'selected' : ''}>SUBANG</option>
+                                <option value="PUCHONG" ${d.branch_name === 'PUCHONG' ? 'selected' : ''}>PUCHONG</option>
+                                <option value="KLANG" ${d.branch_name === 'KLANG' ? 'selected' : ''}>KLANG</option>
+                                <option value="SHAH ALAM" ${d.branch_name === 'SHAH ALAM' ? 'selected' : ''}>SHAH ALAM</option>
+                            </select>
+                        </div>
+                        <div class="manage-item">
                             <label>Promise Date</label>
                             <input type="date" id="input-date-${docId}" value="${d.promise_date}">
                         </div>
@@ -1756,7 +1819,7 @@ async function searchManageAcc() {
                                 <option value="PAID" ${d.status === 'PAID' ? 'selected' : ''}>PAID</option>
                             </select>
                         </div>
-                        <div class="manage-item">
+                        <div class="manage-item" style="grid-column: span 2;">
                             <label>Payment Category</label>
                             <select id="input-cat-${docId}">
                                 <option value="PARTIAL PAYMENT" ${d.payment_category === 'PARTIAL PAYMENT' ? 'selected' : ''}>PARTIAL PAYMENT</option>
@@ -1766,7 +1829,7 @@ async function searchManageAcc() {
                         </div>
                     </div>
                     
-                    <div class="manage-item" style="margin-top:-5px;">
+                    <div class="manage-item">
                         <label>Remarks</label>
                         <input type="text" id="input-remarks-${docId}" value="${d.remarks || ""}" oninput="this.value = this.value.toUpperCase()">
                     </div>
@@ -1788,25 +1851,9 @@ async function searchManageAcc() {
     }
 }
 
-function clearManageSearch() {
-    document.getElementById("manageSearchAcc").value = "";
-    document.getElementById("manageResultArea").innerHTML = "";
-}
-
-function enableEdit(docId) {
-    document.getElementById("view-" + docId).style.display = "none";
-    document.getElementById("edit-" + docId).style.display = "block";
-    document.getElementById("card-" + docId).classList.add("edit-active");
-}
-
-function cancelEdit(docId) {
-    document.getElementById("edit-" + docId).style.display = "none";
-    document.getElementById("view-" + docId).style.display = "block";
-    document.getElementById("card-" + docId).classList.remove("edit-active");
-}
-
 async function saveRecord(docId) {
     let newAmount = document.getElementById("input-amount-" + docId).value;
+    let newBranch = document.getElementById("input-branch-" + docId).value; // AMBIL DATA BRANCH
     let newDate = document.getElementById("input-date-" + docId).value;
     let newStatus = document.getElementById("input-status-" + docId).value;
     let newCat = document.getElementById("input-cat-" + docId).value;
@@ -1824,6 +1871,7 @@ async function saveRecord(docId) {
         const docRef = window.doc(window.db, "LOCK_DATA", docId);
         await window.updateDoc(docRef, {
             amount: parseFloat(newAmount),
+            branch_name: newBranch, // UPDATE KE FIREBASE
             promise_date: newDate,
             status: newStatus,
             payment_category: newCat,
@@ -1831,9 +1879,7 @@ async function saveRecord(docId) {
         });
 
         alert("Rekod berjaya dikemas kini!");
-        searchManageAcc(); // Refresh kad secara automatik
-        
-        // (Optional) Jika nak pastikan dashboard refresh sekali
+        searchManageAcc(); 
         if(typeof manualMasterRefresh === "function") manualMasterRefresh(); 
 
     } catch (error) {
