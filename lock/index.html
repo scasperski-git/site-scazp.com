@@ -532,14 +532,15 @@ table th {
 table tr:last-child td { border-bottom: none; }
 table tr:hover td { background: #f8fafc; }
 
-/* CENTER AMOUNT COLUMN (3RD) FOR DESKTOP */
-th:nth-child(3), td:nth-child(3) {
+/* CENTER AMOUNT COLUMN (3RD) FOR DESKTOP - ADAPTED FOR DYNAMIC COLUMNS */
+#lockTable td:nth-last-child(5), th:nth-last-child(5) {
     text-align: center;
     font-weight: 600;
 }
 
-/* PREVENT DATE COLUMN (4TH & 5TH) FROM WRAPPING */
-th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) {
+/* PREVENT DATE COLUMN FROM WRAPPING */
+#lockTable td:nth-last-child(4), th:nth-last-child(4),
+#lockTable td:nth-last-child(3), th:nth-last-child(3) {
     white-space: nowrap;
 }
 
@@ -782,7 +783,6 @@ th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) {
         overflow-y: visible;
     }
 
-    /* Betulkan susunan butang jadual di Mobile */
     .table-header-row {
         flex-direction: column;
         align-items: flex-start;
@@ -870,11 +870,11 @@ th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) {
         font-size: 11px; 
     }
     
-    table th:nth-child(3), #lockTable td:nth-child(3) {
+    table th:nth-last-child(5), #lockTable td:nth-last-child(5) {
         text-align: center;
     }
 
-    #lockTable td:nth-child(3) {
+    #lockTable td:nth-last-child(5) {
         font-size: 13px;
         font-weight: 700;
         color: #0f172a;
@@ -1092,22 +1092,22 @@ th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) {
 
                 <div class="table-scroll">
                     <table style="min-width: 500px;">
-<thead>
-    <tr>
-        <script>
-            if(localStorage.getItem("lock_type") === "master" || sessionStorage.getItem("lock_type") === "master") {
-                document.write('<th data-sort="dca">DCA ID <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>');
-            }
-        </script>
-        <th data-sort="acc_no">ACC NO <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="branch">BRANCH <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="amount">AMOUNT <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="status">STATUS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="promise">PTP DATE <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="created">CREATED <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="remarks">REMARK <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-    </tr>
-</thead>
+                        <thead>
+                            <tr>
+                                <script>
+                                    if(localStorage.getItem("lock_type") === "master" || sessionStorage.getItem("lock_type") === "master") {
+                                        document.write('<th data-sort="dca">DCA ID <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>');
+                                    }
+                                </script>
+                                <th data-sort="acc_no">ACC NO <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="branch">BRANCH <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="amount">AMOUNT <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="status">STATUS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="promise">PTP DATE <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="created">CREATED <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="remarks">REMARK <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                            </tr>
+                        </thead>
                         <tbody id="lockTable"></tbody>
                     </table>
                 </div>
@@ -1592,7 +1592,7 @@ clearError("remarks","err_remarks");
 let fullData = [];
 let filteredData = [];
 let currentPage = 1;
-const pageSize = 10; // Ditukar kepada 10 rekod per mukasurat
+const pageSize = 10; 
 let currentViewStatus = "LOCK"; 
 
 function switchView(viewType) {
@@ -1625,8 +1625,9 @@ async function viewMyLocks() {
     updateNavState('navMyLocks');
 
     if(fullData.length === 0) {
+        let colCount = (type === "master") ? 8 : 7;
         document.getElementById("lockTable").innerHTML = 
-        "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>";
+        `<tr><td colspan='${colCount}' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>`;
         
         document.getElementById("pageInfo").innerText = "-";
         document.getElementById("prevBtn").disabled = true;
@@ -1641,14 +1642,15 @@ function resetLockTable() {
     fullData = [];
     filteredData = [];
     currentPage = 1;
-    currentViewStatus = "LOCK"; // Default tab untuk ejen DCA adalah Active Locks
+    currentViewStatus = "LOCK"; 
 
     document.getElementById("tabActive").classList.add("active");
     document.getElementById("tabPaid").classList.remove("active");
     document.getElementById("tabAll").classList.remove("active");
 
+    let colCount = (type === "master") ? 8 : 7;
     document.getElementById("lockTable").innerHTML = 
-        "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>";
+        `<tr><td colspan='${colCount}' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>`;
     
     document.getElementById("pageInfo").innerText = "-";
     document.getElementById("prevBtn").disabled = true;
@@ -1662,8 +1664,9 @@ async function manualTableRefresh() {
     btn.disabled = true;
     icon.classList.add("icon-spin");
     
+    let colCount = (type === "master") ? 8 : 7;
     document.getElementById("lockTable").innerHTML = 
-    "<tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
+    `<tr><td colspan='${colCount}' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>`;
 
     try {
         // LOGIK KUASA MASTER: JIKA MASTER, TARIK SEMUA DATA TANPA FILTER DCA ID
@@ -1683,7 +1686,7 @@ async function manualTableRefresh() {
         querySnapshot.forEach((doc) => {
             let rowData = doc.data();
             fullData.push({
-                dca: rowData.dca_id || "-", // Simpan ID Ejen
+                dca: rowData.dca_id || "-", 
                 acc_no: rowData.acc_no,
                 branch: rowData.branch_name, 
                 amount: rowData.amount,
@@ -1703,7 +1706,7 @@ async function manualTableRefresh() {
 
     } catch(e) {
         console.error("Firebase Error (My Locks): ", e);
-        document.getElementById("lockTable").innerHTML = "<tr><td colspan='8' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
+        document.getElementById("lockTable").innerHTML = `<tr><td colspan='${colCount}' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>`;
     } finally {
         btn.disabled = false;
         icon.classList.remove("icon-spin");
@@ -1777,8 +1780,12 @@ function renderTable(){
             editBadge = `<div style="margin-top: 8px; display: inline-block; background: #f8fafc; border: 1px dashed #cbd5e1; color: #475569; font-size: 10px; padding: 5px 8px; border-radius: 6px; font-weight: 600; line-height: 1.4;"><i class="fa fa-pen" style="font-size:9px; margin-right:4px;"></i>Edited by ${d.edited_by}${editTime}</div>`;
         }
 
+        // CONDITIONAL CELL: JIKA MASTER, KELUARKAN KOTAK DCA ID DI AWAL BARIS
+        let dcaCell = (type === "master") ? `<td>${d.dca || "-"}</td>` : "";
+
         html += `
         <tr style="${isRowOverdue ? 'background:#fef2f2;' : ''}">
+        ${dcaCell}
         <td>${d.acc_no}</td>
         <td>${d.branch}</td>
         <td>${amount}</td>
@@ -1788,12 +1795,14 @@ function renderTable(){
         <td onclick="toggleRemark(this)" data-full="${remark}" data-short="${shortRemark}" style="cursor:pointer; max-width: 250px; word-break: break-word; vertical-align: top;">
         <div class="remark-text">${shortRemark}</div>
         ${remark.length > 40 ? '<div style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic; font-weight: 500;" class="tap-hint"><i class="fa fa-hand-pointer"></i> tap to view</div>' : ''}
-        ${editBadge} </td>
+        ${editBadge} 
+        </td>
         </tr>
         `;
     });
 
-    document.getElementById("lockTable").innerHTML = html || "<tr><td colspan='7' style='text-align:center;padding:40px;color:#94a3b8;'><i class='fa fa-folder-open' style='font-size:28px;margin-bottom:12px;display:block;'></i>No Record Found</td></tr>";
+    let colCount = (type === "master") ? 8 : 7;
+    document.getElementById("lockTable").innerHTML = html || `<tr style="background: transparent;"><td colspan="${colCount}" style="text-align:center; padding:40px; color:#94a3b8; border-bottom: none;"><i class="fa fa-folder-open" style="font-size:28px; margin-bottom:12px; display:block;"></i>No Record Found</td></tr>`;
 
     let totalPage = Math.ceil(filteredData.length / pageSize) || 1;
     let totalItems = filteredData.length;
