@@ -1952,8 +1952,11 @@ async function confirmDeleteAction() {
     
     if(!pass) return;
 
+    // Simpan nilai akaun untuk alert sebelum memori dikosongkan
+    let deletedAcc = pendingDeleteAcc;
+
     try {
-        // 1. Tarik passcode rahsia dari Firebase (Koleksi SETTINGS)
+        // 1. Tarik passcode rahsia dari Firebase
         const q = window.query(window.collection(window.db, "SETTINGS"), window.where("type", "==", "security"));
         const querySnapshot = await window.getDocs(q);
         
@@ -1962,7 +1965,7 @@ async function confirmDeleteAction() {
             dbPasscode = doc.data().passcode;
         });
 
-        // 2. Semak jika tiada setting dalam database atau kod laluan SALAH
+        // 2. Semak jika kod laluan SALAH
         if (!dbPasscode || pass !== dbPasscode) {
             document.getElementById("delError").style.display = "block";
             inputEl.classList.add("shake"); 
@@ -1972,15 +1975,21 @@ async function confirmDeleteAction() {
             return;
         }
 
-        // 3. Jika kod laluan BETUL, teruskan pemadaman ke Firebase
+        // 3. Jika password BETUL: Padam dari Firebase
         const docRef = window.doc(window.db, "LOCK_DATA", pendingDeleteDocId);
         await window.deleteDoc(docRef);
 
-        alert(`Rekod untuk akaun ${pendingDeleteAcc} telah berjaya dipadam secara kekal.`);
+        // 4. TUTUP POP-UP CUSTOM TERLEBIH DAHULU!
         closeDeletePopup();
-        searchManageAcc(); // Refresh senarai kad carian
         
+        // Refresh jadual di latar belakang
+        searchManageAcc(); 
         if(typeof manualMasterRefresh === "function") manualMasterRefresh(); 
+
+        // 5. Beri browser masa 100ms untuk proses penutupan animasi, baru keluar Alert
+        setTimeout(() => {
+            alert(`Rekod untuk akaun ${deletedAcc} telah berjaya dipadam secara kekal.`);
+        }, 100);
 
     } catch (error) {
         console.error("Error Deleting:", error);
