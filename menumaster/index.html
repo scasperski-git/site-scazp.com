@@ -863,8 +863,8 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  // KITA TAMBAH doc, updateDoc, dan deleteDoc DI SINI
-  import { getFirestore, collection, query, where, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  // KITA TAMBAH getDoc dan setDoc DI SINI
+  import { getFirestore, collection, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDKiYl8462c8ZanXc4oXIfa-_9su3E89Wk",
@@ -883,10 +883,12 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
   window.query = query;
   window.where = where;
   window.getDocs = getDocs;
-  // WAJIB DAFTARKAN FUNGSI BARU INI KE WINDOW
   window.doc = doc;
   window.updateDoc = updateDoc;
   window.deleteDoc = deleteDoc;
+  // DAFTARKAN FUNGSI BARU KE WINDOW
+  window.getDoc = getDoc;
+  window.setDoc = setDoc;
 </script>
 
 </head>
@@ -1978,24 +1980,41 @@ async function confirmDeleteAction() {
             return;
         }
 
-        // 3. Jika password BETUL: Padam dari Firebase
+        // 3. JIKA PASSWORD BETUL: MULA PROSES PEMINDAHAN (AUDIT TRAIL)
         const docRef = window.doc(window.db, "LOCK_DATA", pendingDeleteDocId);
+        
+        // a) Baca data asal yang nak didelete tu dulu
+        const docSnap = await window.getDoc(docRef);
+        
+        if (docSnap.exists()) {
+            let auditData = docSnap.data();
+            
+            // b) Tambah "Cap Jari" siapa yang delete dan bila ia didelete
+            auditData.deleted_by = user; // Ambil dari session login (pemadam)
+            auditData.deleted_at = new Date().toISOString();
+
+            // c) Hantar salinan data ini ke Collection rahsia bernama 'DELETED_RECORDS'
+            const trashRef = window.doc(window.db, "DELETED_RECORDS", pendingDeleteDocId);
+            await window.setDoc(trashRef, auditData);
+        }
+
+        // 4. SETELAH SELAMAT DICOPY, BARU KITA DELETE REKOD ASAL!
         await window.deleteDoc(docRef);
 
-        // 4. TUTUP POP-UP CUSTOM TERLEBIH DAHULU!
+        // 5. TUTUP POP-UP CUSTOM TERLEBIH DAHULU
         closeDeletePopup();
         
         // Refresh jadual di latar belakang
         searchManageAcc(); 
         if(typeof manualMasterRefresh === "function") manualMasterRefresh(); 
 
-        // 5. Beri browser masa 100ms untuk proses penutupan animasi, baru keluar Alert
+        // 6. Alert penyamaran
         setTimeout(() => {
             alert(`Rekod untuk akaun ${deletedAcc} telah berjaya dipadam secara kekal.`);
         }, 100);
 
     } catch (error) {
-        console.error("Error Deleting:", error);
+        console.error("Error Deleting/Auditing:", error);
         alert("Gagal memadam rekod. Sila semak sambungan internet.");
     }
 }
