@@ -1940,7 +1940,7 @@ async function saveRecord(docId) {
             }
         }
 
-        // 4. KEMAS KINI KE JADUAL UTAMA MACAM BIASA
+// 4. KEMAS KINI KE JADUAL UTAMA MACAM BIASA
         await window.updateDoc(docRef, {
             amount: newAmount,
             branch_name: newBranch, 
@@ -1948,7 +1948,8 @@ async function saveRecord(docId) {
             status: newStatus,
             payment_category: newCat,
             remarks: newRemarks,
-            edited_by: user // "Tiny Tag"
+            edited_by: user, // "Tiny Tag"
+            edited_at: new Date().toISOString() // <--- WAJIB TAMBAH BARIS INI
         });
 
         alert("Rekod berjaya dikemas kini!");
