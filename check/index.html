@@ -1287,8 +1287,10 @@ function exportToExcel() {
     let excelData = filteredData.map(row => {
         let pDate = new Date(row.promise);
         let cDate = new Date(row.created);
+        let eDate = row.edited_at ? new Date(row.edited_at) : "";
 
-        return {
+        // 1. DATA STANDARD UNTUK SEMUA ORANG
+        let rowObj = {
             "DCA ID": row.dca || "-",
             "ACC NO": row.acc_no, 
             "BRANCH": row.branch,
@@ -1299,22 +1301,49 @@ function exportToExcel() {
             "REMARKS": row.remarks || "-",
             "CREATED TIME": isNaN(cDate.getTime()) ? row.created : cDate
         };
+
+        // 2. DATA RAHSIA: HANYA MASTER SAHAJA YANG AKAN DAPAT LAJUR INI
+        if (type === "master") {
+            rowObj["EDITED BY"] = row.edited_by || "-";
+            rowObj["EDITED TIME"] = (eDate && !isNaN(eDate.getTime())) ? eDate : "-";
+        }
+
+        return rowObj;
     });
 
     let worksheet = XLSX.utils.json_to_sheet(excelData, { cellDates: true });
+    
+    // Cari index lajur untuk elak ralat (sebab lajur berubah ikut jenis akaun)
+    let headers = Object.keys(excelData[0]);
+    let ptpCol = headers.indexOf("PTP DATE");
+    let createdCol = headers.indexOf("CREATED TIME");
+    let editedCol = headers.indexOf("EDITED TIME");
+
     let range = XLSX.utils.decode_range(worksheet['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-        let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 6});
-        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') { worksheet[ptpCellRef].z = 'd-mmm-yyyy'; }
-        let createdCellRef = XLSX.utils.encode_cell({r: R, c: 8});
-        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') { worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; }
+        if (ptpCol > -1) {
+            let cell = worksheet[XLSX.utils.encode_cell({r: R, c: ptpCol})];
+            if (cell && cell.t === 'd') cell.z = 'd-mmm-yyyy';
+        }
+        if (createdCol > -1) {
+            let cell = worksheet[XLSX.utils.encode_cell({r: R, c: createdCol})];
+            if (cell && cell.t === 'd') cell.z = 'd-mmm-yyyy hh:mm AM/PM';
+        }
+        if (editedCol > -1) {
+            let cell = worksheet[XLSX.utils.encode_cell({r: R, c: editedCol})];
+            if (cell && cell.t === 'd') cell.z = 'd-mmm-yyyy hh:mm AM/PM';
+        }
     }
 
     let workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Check_Records");
-    let fileName = `CheckRecords_${user}_${currentViewStatus}_${new Date().toISOString().slice(0,10)}.xlsx`;
+    // Namakan sheet mengikut nama page (Contoh: "Check_Records" atau "MyLocks")
+    let sheetName = document.title.includes("Check") ? "Check_Records" : "MyLocks";
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+    
+    let fileName = `${sheetName}_${user}_${currentViewStatus}_${new Date().toISOString().slice(0,10)}.xlsx`;
     XLSX.writeFile(workbook, fileName);
 }
+
 
 function goMaster(){ window.location="../menumaster/"; }
 
