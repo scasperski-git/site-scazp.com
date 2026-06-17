@@ -587,6 +587,51 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     background: linear-gradient(135deg, #16a34a, #15803d) !important;
 }
 
+/* ===== BUTTON RESET (KELABU/SLATE) ===== */
+.btn-reset {
+    background: linear-gradient(135deg, #64748b, #475569) !important;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 6px rgba(100, 116, 139, 0.2);
+    flex: 1; /* Supaya saiznya seimbang dalam row */
+}
+.btn-reset:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(100, 116, 139, 0.4);
+    background: linear-gradient(135deg, #475569, #334155) !important;
+}
+
+.btn-reset-small {
+    background: linear-gradient(135deg, #64748b, #475569) !important;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(100, 116, 139, 0.2);
+}
+.btn-reset-small:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(100, 116, 139, 0.4);
+    background: linear-gradient(135deg, #475569, #334155) !important;
+}
+
 #sessionPopup{
     position:fixed; top:0; left:0; width:100%; height:100%;
     background:rgba(15, 23, 42, 0.6); backdrop-filter:blur(4px);
@@ -783,12 +828,15 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
                     </div>
                 </div>
 
-                <div class="action-row">
+<div class="action-row">
                     <button class="load-btn" id="loadBtn" onclick="calculateReport()">
                         <i class="fa fa-calculator"></i> Generate Analytics
                     </button>
                     <button class="btn-export" id="exportReportBtn" onclick="exportReport()" style="display:none; flex: 1;">
                         <i class="fa fa-file-excel"></i> Download Report
+                    </button>
+                    <button class="btn-reset" onclick="resetAnalytics()">
+                        <i class="fa fa-rotate-left"></i> Reset
                     </button>
                 </div>
 
@@ -821,7 +869,7 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
             </div>
 
             <div class="section">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">
                     <h3 style="margin-bottom: 0; border: none; padding-bottom: 0;"><i class="fa fa-list-check"></i> View All Records</h3>
                     <div style="display: flex; gap: 10px;">
                         <button class="btn-refresh-premium" id="btnReloadMaster" onclick="manualMasterRefresh()">
@@ -829,6 +877,9 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
                         </button>
                         <button class="btn-export-small" onclick="exportTable()">
                             <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Table
+                        </button>
+                        <button class="btn-reset-small" onclick="resetMasterTable()">
+                            <i class="fa fa-rotate-left"></i> Reset
                         </button>
                     </div>
                 </div>
@@ -1454,6 +1505,39 @@ function initTableUpgrades() {
 }
 
 window.addEventListener('DOMContentLoaded', initTableUpgrades);
+
+// =====================================
+// RESET BUTTON LOGIC
+// =====================================
+function resetAnalytics() {
+    // 1. Reset tarikh kembali kepada hari ini
+    var today = getTodayLocal();
+    document.getElementById("startDate").value = today;
+    document.getElementById("endDate").value = today;
+    
+    // 2. Reset dropdown DCA
+    if(document.getElementById("dcaFilter")) {
+        document.getElementById("dcaFilter").value = "ALL";
+    }
+    
+    // 3. Kosongkan data laporan
+    reportDataList = [];
+    
+    // 4. Reset nombor di skrin kembali ke sifar
+    document.getElementById("dashTotal").innerText = "0";
+    document.getElementById("dashLockAmount").innerText = "RM 0.00";
+    document.getElementById("dashPaid").innerText = "0";
+    document.getElementById("dashPaidAmount").innerText = "RM 0.00";
+    
+    // 5. Sembunyikan amaran dan butang export
+    document.getElementById("dashStatus").innerText = "";
+    document.getElementById("exportReportBtn").style.display = "none";
+}
+
+function resetMasterTable() {
+    // Kembali kepada tab "View All" dan muka surat pertama
+    switchView('ALL');
+}
 
 </script>
 
