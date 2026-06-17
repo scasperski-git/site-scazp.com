@@ -197,6 +197,21 @@ body{
     border: 1px solid #e2e8f0;
 }
 
+/* ===== TABLE HEADER & ACTIONS ===== */
+.table-header-row {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 20px; 
+    padding-bottom: 12px; 
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.table-actions {
+    display: flex; 
+    gap: 10px;
+}
+
 h3 {
     display: flex;
     align-items: center;
@@ -663,6 +678,35 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
         align-items: center; padding: 10px 16px;
         border-radius: 0 0 16px 16px; z-index: 60;
         box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+
+    /* Betulkan susunan butang jadual di Mobile */
+    .table-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    
+    .table-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    /* Butang Reload Data jadi besar (penuh) di atas */
+    .table-actions button:nth-child(1) {
+        grid-column: 1 / -1;
+        justify-content: center;
+        padding: 12px;
+        font-size: 13px;
+    }
+    
+    /* Butang Export & Reset separuh skrin di bawah */
+    .table-actions button:nth-child(2),
+    .table-actions button:nth-child(3) {
+        justify-content: center;
+        padding: 10px;
+        font-size: 11px; /* Kecilkan font sikit supaya muat */
     }
     .brand { margin-bottom: 0; font-size: 18px; }
     .brand i { font-size: 20px; }
@@ -869,20 +913,20 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
             </div>
 
             <div class="section">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">
-                    <h3 style="margin-bottom: 0; border: none; padding-bottom: 0;"><i class="fa fa-list-check"></i> View All Records</h3>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn-refresh-premium" id="btnReloadMaster" onclick="manualMasterRefresh()">
-                            <i class="fa-solid fa-arrows-rotate" id="masterSyncIcon"></i> Reload Data
-                        </button>
-                        <button class="btn-export-small" onclick="exportTable()">
-                            <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Table
-                        </button>
-                        <button class="btn-reset-small" onclick="resetMasterTable()">
-                            <i class="fa fa-rotate-left"></i> Reset
-                        </button>
-                    </div>
-                </div>
+                    <div class="table-header-row">
+    <h3 style="margin-bottom: 0; border: none; padding-bottom: 0;"><i class="fa fa-list-check"></i> View All Records</h3>
+    <div class="table-actions">
+        <button class="btn-refresh-premium" id="btnReloadMaster" onclick="manualMasterRefresh()">
+            <i class="fa-solid fa-arrows-rotate" id="masterSyncIcon"></i> Reload Data
+        </button>
+        <button class="btn-export-small" onclick="exportTable()">
+            <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Table
+        </button>
+        <button class="btn-reset-small" onclick="resetMasterTable()">
+            <i class="fa fa-rotate-left"></i> Reset
+        </button>
+    </div>
+</div>
 
                 <div class="tab-container">
                     <button id="tabActive" class="tab-btn" onclick="switchView('LOCK')">Active Locks</button>
