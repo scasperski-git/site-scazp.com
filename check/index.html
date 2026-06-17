@@ -1355,15 +1355,10 @@ function sortTableData(colId) {
         let valA = a[colId] || "";
         let valB = b[colId] || "";
         
-        if (colId === 'acc_no') {
-            let strA = valA.toString().trim();
-            let strB = valB.toString().trim();
-            
-            if (strA.length !== strB.length) {
-                return currentSort.dir === 'asc' ? (strA.length - strB.length) : (strB.length - strA.length);
-            } else {
-                return currentSort.dir === 'asc' ? strA.localeCompare(strB) : strB.localeCompare(strA);
-            }
+            if (colId === 'acc_no') {
+            // Tukar jadi nombor bulat (Integer) supaya susunan tepat
+            valA = parseInt(valA.toString().replace(/\D/g, '')) || 0;
+            valB = parseInt(valB.toString().replace(/\D/g, '')) || 0;
         } 
         else if (colId === 'amount') {
             valA = parseFloat(valA.toString().replace(/,/g, '')) || 0;
