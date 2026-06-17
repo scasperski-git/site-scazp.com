@@ -645,6 +645,28 @@ th:nth-child(4), td:nth-child(4) {
     .result-card, .no-lock, .loading { padding: 16px; }
     
     table th, table td { padding: 14px 10px; font-size: 11px; }
+    /* ==========================================
+       FIX JADUAL SQUISHED (HIMPIT) DI MOBILE
+       ========================================== */
+    .table-scroll table {
+        min-width: 900px !important; /* Paksa jadual memanjang supaya boleh scroll kiri/kanan */
+    }
+    
+    /* Paksa lajur terakhir (REMARKS) jadi lebar, tak kira apa pun */
+    table th:last-child, 
+    #lockTable td:last-child, 
+    #masterTableBody td:last-child {
+        min-width: 220px !important; 
+        width: 250px !important;
+        white-space: normal !important;
+    }
+    
+    /* Cantikkan sikit lencana Edited By tu di mobile supaya tak terlalu besar */
+    .remark-text + div[style*="border: 1px dashed"] {
+        display: block !important;
+        width: fit-content !important;
+        white-space: normal !important;
+    }
 }
 </style>
 
