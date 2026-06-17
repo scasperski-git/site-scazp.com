@@ -1889,38 +1889,63 @@ function exportToExcel() {
     let excelData = filteredData.map(row => {
         let pDate = new Date(row.promise);
         let cDate = new Date(row.created);
+        let eDate = row.edited_at ? new Date(row.edited_at) : "";
 
-        return {
-            "ACC NO": row.acc_no, 
-            "BRANCH": row.branch,
-            "AMOUNT": Number(row.amount || 0), 
-            "STATUS": row.status,
-            "PAID BY": row.paid_by || "-",
-            "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate, 
-            "REMARKS": row.remarks || "",
-            "CREATED TIME": isNaN(cDate.getTime()) ? row.created : cDate
-        };
+        // Bina struktur baris secara dinamik
+        let rowObj = {};
+        
+        // Jika akaun Master, masukkan lajur DCA ID di depan
+        if (type === "master") {
+            rowObj["DCA ID"] = row.dca || "-";
+        }
+        
+        rowObj["ACC NO"] = row.acc_no; 
+        rowObj["BRANCH"] = row.branch;
+        rowObj["AMOUNT (RM)"] = Number(row.amount || 0); 
+        rowObj["STATUS"] = row.status;
+        rowObj["PAID BY"] = row.paid_by || "-";
+        rowObj["PTP DATE"] = isNaN(pDate.getTime()) ? row.promise : pDate; 
+        rowObj["REMARKS"] = row.remarks || "";
+        rowObj["CREATED TIME"] = isNaN(cDate.getTime()) ? row.created : cDate;
+        rowObj["EDITED BY"] = row.edited_by || "-";
+        rowObj["EDITED TIME"] = (eDate && !isNaN(eDate.getTime())) ? eDate : "-";
+
+        return rowObj;
     });
 
     let worksheet = XLSX.utils.json_to_sheet(excelData, { cellDates: true });
+    
+    // Cari index lajur secara automatik supaya tak ralat
+    let headers = Object.keys(excelData[0]);
+    let ptpCol = headers.indexOf("PTP DATE");
+    let createdCol = headers.indexOf("CREATED TIME");
+    let editedCol = headers.indexOf("EDITED TIME");
 
     let range = XLSX.utils.decode_range(worksheet['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-        let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 5});
-        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') {
-            worksheet[ptpCellRef].z = 'd-mmm-yyyy';
+        // Format Tarikh PTP
+        if (ptpCol > -1) {
+            let cell = worksheet[XLSX.utils.encode_cell({r: R, c: ptpCol})];
+            if (cell && cell.t === 'd') cell.z = 'd-mmm-yyyy';
         }
-
-        let createdCellRef = XLSX.utils.encode_cell({r: R, c: 7});
-        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') {
-            worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM';
+        // Format Tarikh & Masa Created
+        if (createdCol > -1) {
+            let cell = worksheet[XLSX.utils.encode_cell({r: R, c: createdCol})];
+            if (cell && cell.t === 'd') cell.z = 'd-mmm-yyyy hh:mm AM/PM';
+        }
+        // Format Tarikh & Masa Edited
+        if (editedCol > -1) {
+            let cell = worksheet[XLSX.utils.encode_cell({r: R, c: editedCol})];
+            if (cell && cell.t === 'd') cell.z = 'd-mmm-yyyy hh:mm AM/PM';
         }
     }
 
     let workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "MyLocks");
+    // Tukar nama sheet ikut jenis akaun
+    let sheetName = type === "master" ? "AllLocks" : "MyLocks";
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
 
-    let fileName = `MyLocks_${user}_${currentViewStatus}_${new Date().toISOString().slice(0,10)}.xlsx`;
+    let fileName = `${sheetName}_${user}_${currentViewStatus}_${new Date().toISOString().slice(0,10)}.xlsx`;
     XLSX.writeFile(workbook, fileName);
 }
     
