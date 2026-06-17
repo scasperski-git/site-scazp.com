@@ -16,12 +16,10 @@
 <style>
 
 /* ===== NATIVE APP FEEL (BONUS) ===== */
-/* Hilangkan kelip biru bila tekan butang di skrin telefon */
 * {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* Custom Scrollbar (Nampak lebih mahal & nipis) */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -37,7 +35,6 @@
     background: #94a3b8; 
 }
 
-/* Scroll yang lebih lancar */
 html {
     scroll-behavior: smooth;
 }
@@ -55,19 +52,16 @@ body{
     color: #334155;
 }
 
-/* ANIMATIONS */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== APP LAYOUT (DESKTOP) ===== */
 .app-layout {
     display: flex;
     min-height: 100vh;
 }
 
-/* ===== SIDEBAR ===== */
 .sidebar {
     width: 280px;
     background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
@@ -171,7 +165,6 @@ body{
     color: #ef4444 !important;
 }
 
-/* ===== MAIN CONTENT ===== */
 .main-content {
     flex: 1;
     margin-left: 280px; 
@@ -195,7 +188,6 @@ body{
     gap: 10px;
 }
 
-/* ===== SECTION CARDS ===== */
 .section {
     background: #ffffff;
     border-radius: 20px;
@@ -226,7 +218,6 @@ h3 i {
     font-size: 14px;
 }
 
-/* ===== TAB STYLES ===== */
 .tab-container {
     display: flex;
     gap: 10px;
@@ -266,7 +257,6 @@ h3 i {
     transform: translateY(-2px);
 }
 
-/* DASHBOARD GRID (FILTER) */
 .dash-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -309,7 +299,6 @@ h3 i {
     box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
 }
 
-/* ACTION BUTTONS */
 .action-row {
     display: flex;
     gap: 12px;
@@ -344,54 +333,6 @@ h3 i {
     box-shadow: none;
 }
 
-.btn-export {
-    background: #10b981;
-    color: white;
-    border: none;
-    padding: 14px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-}
-
-.btn-export:hover {
-    background: #059669;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-}
-
-.btn-export-small {
-    background: #1e293b;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-.btn-export-small:hover {
-    background: #334155;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
-}
-.btn-export-small:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
-}
-
-/* DASH CARD (RESULT) */
 .dash-card {
     margin-top: 24px;
     background: linear-gradient(135deg, #f8fafc, #f1f5f9);
@@ -400,42 +341,10 @@ h3 i {
     border: 1px dashed #cbd5e1;
 }
 
-.dash-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
-
-.stat-box {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 16px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-    text-align: center;
-}
-
-.stat-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #64748b;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-}
-
-.stat-number {
-    font-weight: 700;
-    font-size: 26px;
-}
-
-.stat-number.lock { color: #3b82f6; }
-.stat-number.amount { color: #10b981; }
-
 .dash-status {
     font-size: 12px;
     font-weight: 500;
     color: #64748b;
-    margin-top: 12px;
     text-align: center;
 }
 
@@ -446,6 +355,7 @@ h3 i {
     border-radius: 12px;
     border: 1px solid #e2e8f0;
     background: white;
+    max-height: 60vh;
 }
 
 table {
@@ -474,10 +384,11 @@ table th {
 
 table th:hover { background: #f1f5f9 !important; }
 table tr:last-child td { border-bottom: none; }
-table tr:hover td { background: #f8fafc; }
+table tbody tr:nth-child(even) { background-color: #f8fafc; }
+table tbody tr:nth-child(odd) { background-color: #ffffff; }
+table tbody tr:hover td { background-color: #e2e8f0; }
 th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 
-/* PAGINATION */
 .pagination-bar {
     display: flex;
     align-items: center;
@@ -502,7 +413,6 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 .page-btn:disabled { color: #94a3b8; cursor: not-allowed; }
 #pageInfo { flex: 1; text-align: center; font-weight: 600; font-size: 13px; }
 
-/* SUMMARY SECTION */
 #refreshInfo {
     font-size: 12px;
     color: #64748b;
@@ -540,7 +450,6 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
-
 .box-card div:first-child {
     color: #64748b;
     font-size: 11px;
@@ -549,7 +458,6 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
-
 .box-card div:last-child {
     font-size: 15px;
     font-weight: 600;
@@ -593,7 +501,6 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 .text-green { color: #10b981; }
 .text-emerald { color: #059669; }
 
-/* SPINNER & ICON SPIN */
 .spinner{
     width: 18px; height: 18px;
     border: 3px solid rgba(255,255,255,0.3);
@@ -601,14 +508,10 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
-
-.icon-spin {
-    animation: spin 1s linear infinite;
-}
-
+.icon-spin { animation: spin 1s linear infinite; }
 @keyframes spin{ 100%{transform:rotate(360deg)} }
 
-/* ===== PREMIUM MANUAL REFRESH BUTTON (Tukar ke warna TEAL/CYAN) ===== */
+/* ===== BUTTON REFRESH (TEAL/CYAN) ===== */
 .btn-refresh-premium {
     background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
     color: white;
@@ -624,18 +527,15 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     gap: 8px;
     box-shadow: 0 4px 6px rgba(14, 165, 233, 0.2);
 }
-
 .btn-refresh-premium:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(14, 165, 233, 0.4);
     background: linear-gradient(135deg, #0284c7, #0369a1) !important;
 }
-
 .btn-refresh-premium:active {
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(14, 165, 233, 0.2);
 }
-
 .btn-refresh-premium:disabled {
     background: #94a3b8 !important;
     cursor: not-allowed;
@@ -643,7 +543,7 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     box-shadow: none;
 }
 
-/* ===== BUTTON EXPORT EXCEL MASTER (Tukar ke warna HIJAU EXCEL) ===== */
+/* ===== BUTTON EXPORT EXCEL (HIJAU EXCEL) ===== */
 .btn-export {
     background: linear-gradient(135deg, #22c55e, #16a34a) !important;
     color: white;
@@ -660,7 +560,6 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     gap: 8px;
     box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);
 }
-
 .btn-export:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
@@ -682,14 +581,12 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     align-items: center;
     box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);
 }
-
 .btn-export-small:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(34, 197, 94, 0.4);
     background: linear-gradient(135deg, #16a34a, #15803d) !important;
 }
 
-/* SESSION POPUP */
 #sessionPopup{
     position:fixed; top:0; left:0; width:100%; height:100%;
     background:rgba(15, 23, 42, 0.6); backdrop-filter:blur(4px);
@@ -700,15 +597,6 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     box-shadow:0 25px 50px rgba(0,0,0,0.25); max-width:340px; width:90%;
 }
 
-/* Zebra Striping & Table Upgrades */
-.table-scroll { 
-    max-height: 60vh;
-    overflow-y: auto; 
-}
-table tbody tr:nth-child(even) { background-color: #f8fafc; }
-table tbody tr:nth-child(odd) { background-color: #ffffff; }
-table tbody tr:hover td { background-color: #e2e8f0; }
-
 .resizer {
     position: absolute; 
     top: 0; right: 0; width: 6px; 
@@ -717,14 +605,6 @@ table tbody tr:hover td { background-color: #e2e8f0; }
 }
 .resizer:hover, .resizer.resizing { border-right: 2px solid #4f46e5; }
 
-/* GRID 3 KOTAK UNTUK SUMMARY */
-.summary-grid-3 {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
 /* ==========================================
    MOBILE RESPONSIVE (BOTTOM NAV) - TNG EWALLET STYLE
    ========================================== */
@@ -732,7 +612,6 @@ table tbody tr:hover td { background-color: #e2e8f0; }
     body { overflow: visible; }
     .app-layout { flex-direction: column; height: auto; }
     
-    /* ===== HEADER ATAS (TETAP & TAK GERAK) ===== */
     .sidebar {
         position: fixed; top: 0; left: 0; width: 100%; height: 60px;
         flex-direction: row; justify-content: space-between;
@@ -746,7 +625,6 @@ table tbody tr:hover td { background-color: #e2e8f0; }
     .user-profile { margin-bottom: 0; padding: 0; background: none; border: none; text-align: right; }
     #userInfo { font-size: 12px; }
 
-    /* ===== MENU BAWAH (COMPACT & TETAP) ===== */
     .nav-menu {
         position: fixed; bottom: 0; left: 0; width: 100%; height: 60px;
         flex-direction: row; background: #ffffff; padding: 6px 10px 8px 10px;
@@ -764,11 +642,10 @@ table tbody tr:hover td { background-color: #e2e8f0; }
     .nav-btn.active { background: #eef2ff; color: #4f46e5; box-shadow: none; }
     .logout-btn { margin-top: 0; color: #ef4444 !important; }
 
-    /* ===== KANDUNGAN TENGAH (YANG BOLEH SCROLL) ===== */
     .main-content { 
         margin-left: 0; 
-        margin-top: 60px; /* Tolak kandungan ke bawah supaya tak tertutup dengan header */
-        padding: 16px 15px 80px 15px; /* Padding 80px supaya list tak terlindung di bawah */
+        margin-top: 60px; 
+        padding: 16px 15px 80px 15px; 
         height: auto;
         overflow: visible;
     }
@@ -776,22 +653,17 @@ table tbody tr:hover td { background-color: #e2e8f0; }
     .page-title { font-size: 20px; }
     .section { padding: 20px 16px; }
     
-    /* Layout Master (Grid) */
-    .dash-grid, .summary-grid, .summary-grid-3 { grid-template-columns: 1fr; gap: 12px; }
+    .dash-grid, .summary-grid { grid-template-columns: 1fr; gap: 12px; }
     .action-row { flex-direction: column; }
-    .stat-number { font-size: 24px; }
-
     table th, table td { padding: 12px 10px; font-size: 11px; }
 }
-    
+
 </style>
 
-<!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // Letakkan config dari Firebase Console (Project Settings) di sini
   const firebaseConfig = {
     apiKey: "AIzaSyDKiYl8462c8ZanXc4oXIfa-_9su3E89Wk",
     authDomain: "lockcheck-e0160.firebaseapp.com",
@@ -801,10 +673,9 @@ table tbody tr:hover td { background-color: #e2e8f0; }
     appId: "1:912034602664:web:f23b971b67a0ef1df8ac9d",
   };
 
-const app = initializeApp(firebaseConfig);
+  const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // Set global variables supaya kod javascript asal di bawah boleh panggil
   window.db = db;
   window.collection = collection;
   window.query = query;
@@ -849,35 +720,35 @@ const app = initializeApp(firebaseConfig);
             <div class="section summary">
                 <h3><i class="fa fa-calendar-check"></i> Today's Overall Summary</h3>
 
-<div id="refreshInfo" onclick="manualRefresh()">
-    <i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i> 
-    <span id="refreshText">CLICK TO REFRESH</span> &nbsp;|&nbsp; 
-    <span id="lastUpdate">Last update: -</span>
-</div>
+                <div id="refreshInfo" onclick="manualRefresh()">
+                    <i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i> 
+                    <span id="refreshText">CLICK TO REFRESH</span> &nbsp;|&nbsp; 
+                    <span id="lastUpdate">Last update: -</span>
+                </div>
 
-<div class="summary-grid">
-    <div class="box-card-split">
-        <div class="box-half">
-            <div class="box-half-title">Active Lock</div>
-            <div id="sumLock" class="box-half-val text-blue">0</div>
-        </div>
-        <div class="box-half">
-            <div class="box-half-title">Lock Amount</div>
-            <div id="sumLockAmount" class="box-half-val text-purple">RM 0.00</div>
-        </div>
-    </div>
+                <div class="summary-grid">
+                    <div class="box-card-split">
+                        <div class="box-half">
+                            <div class="box-half-title">Active Lock</div>
+                            <div id="sumLock" class="box-half-val text-blue">0</div>
+                        </div>
+                        <div class="box-half">
+                            <div class="box-half-title">Lock Amount</div>
+                            <div id="sumLockAmount" class="box-half-val text-purple">RM 0.00</div>
+                        </div>
+                    </div>
 
-    <div class="box-card-split">
-        <div class="box-half">
-            <div class="box-half-title">Mark Paid</div>
-            <div id="sumPaid" class="box-half-val text-green">0</div>
-        </div>
-        <div class="box-half">
-            <div class="box-half-title">Paid Amount</div>
-            <div id="sumPaidAmount" class="box-half-val text-emerald">RM 0.00</div>
-        </div>
-    </div>
-</div>
+                    <div class="box-card-split">
+                        <div class="box-half">
+                            <div class="box-half-title">Mark Paid</div>
+                            <div id="sumPaid" class="box-half-val text-green">0</div>
+                        </div>
+                        <div class="box-half">
+                            <div class="box-half-title">Paid Amount</div>
+                            <div id="sumPaidAmount" class="box-half-val text-emerald">RM 0.00</div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="summary-grid">
                     <div class="box-card">
@@ -921,7 +792,7 @@ const app = initializeApp(firebaseConfig);
                     </button>
                 </div>
 
-<div class="dash-card">
+                <div class="dash-card">
                     <div class="summary-grid" style="margin-bottom: 0;">
                         <div class="box-card-split">
                             <div class="box-half">
@@ -970,18 +841,18 @@ const app = initializeApp(firebaseConfig);
 
                 <div class="table-scroll">
                     <table>
-<thead>
-    <tr>
-        <th data-sort="dca">DCA <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="acc_no">ACC NO <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="branch">BRANCH <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="amount">AMOUNT <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="status">STATUS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="promise">PTP DATE <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="created">CREATED <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="remarks">REMARKS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-    </tr>
-</thead>
+                        <thead>
+                            <tr>
+                                <th data-sort="dca">DCA <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="acc_no">ACC NO <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="branch">BRANCH <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="amount">AMOUNT <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="status">STATUS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="promise">PTP DATE <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="created">CREATED <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="remarks">REMARKS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                            </tr>
+                        </thead>
                         <tbody id="masterTableBody">
                             <tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to view full database</td></tr>
                         </tbody>
@@ -1028,7 +899,7 @@ function loadUsers(){
     var cachedUsers = localStorage.getItem("user_list");
     var cacheTime = localStorage.getItem("user_time");
     var now = new Date().getTime();
-    var expiryTime = 86400000; // 24 Jam
+    var expiryTime = 86400000; 
 
     if (cachedUsers && cacheTime && (now - cacheTime < expiryTime)) {
         renderUserDropdown(JSON.parse(cachedUsers), select);
@@ -1036,7 +907,6 @@ function loadUsers(){
         fetch(api+"?action=users&token="+token+"&api_key=SCZP_SECURE_2026")
         .then(r => r.json())
         .then(list => {
-            // Simpan senarai pengguna ke dalam local storage
             localStorage.setItem("user_list", JSON.stringify(list));
             localStorage.setItem("user_time", now);
             renderUserDropdown(list, select);
@@ -1062,10 +932,8 @@ function renderUserDropdown(list, select) {
 async function loadSummary(){
     try {
         let d = new Date();
-        // Set tanda masa permulaan hari ini (12:00 AM) dalam format ISO String
         let todayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString();
 
-        // Tarik semua rekod dalam pangkalan data
         const q = window.query(window.collection(window.db, "LOCK_DATA"));
         const querySnapshot = await window.getDocs(q);
 
@@ -1080,51 +948,41 @@ async function loadSummary(){
             let row = doc.data();
             let amount = Number(row.amount) || 0;
             
-            // 1. KIRA LOCK & AMAUN YANG MASIH AKTIF (HARI INI)
             if (row.created_at >= todayStart) {
                 if (row.status === "LOCK") {
                      totalLock++;
                      totalLockAmount += amount;
                 }
-
-                // Kira prestasi ejen (Top User)
                 let user = row.dca_id || "UNKNOWN";
                 userCount[user] = (userCount[user] || 0) + 1;
-
-                // Kira prestasi cawangan (Top Branch)
                 let branch = row.branch_name || "UNKNOWN";
                 branchCount[branch] = (branchCount[branch] || 0) + 1;
             }
 
-            // 2. KIRA STATUS PAID & AMAUN YANG TELAH SELESAI (HARI INI)
             if (row.status === "PAID" && row.paid_date && row.paid_date >= todayStart) {
                 totalPaid++;
                 totalPaidAmount += amount;
             }
         });
 
-        // Papar pada grid UI Master yang baharu
         document.getElementById("sumLock").innerText = totalLock;
         document.getElementById("sumLockAmount").innerText = "RM " + Number(totalLockAmount).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         
         document.getElementById("sumPaid").innerText = totalPaid;
         document.getElementById("sumPaidAmount").innerText = "RM " + Number(totalPaidAmount).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-        // Susun dan paparkan kedudukan Top 5 Ejen
         var userHTML = "";
         Object.keys(userCount).map(u => ({user: u, count: userCount[u]}))
             .sort((a, b) => b.count - a.count).slice(0, 5)
             .forEach(u => { userHTML += u.user + " (" + u.count + ")<br>"; });
         document.getElementById("topUser").innerHTML = userHTML || "NO DATA TODAY";
 
-        // Susun dan paparkan kedudukan Top 5 Cawangan
         var branchHTML = "";
         Object.keys(branchCount).map(b => ({branch: b, count: branchCount[b]}))
             .sort((a, b) => b.count - a.count).slice(0, 5)
             .forEach(b => { branchHTML += b.branch + " (" + b.count + ")<br>"; });
         document.getElementById("topBranch").innerHTML = branchHTML || "NO DATA TODAY";
 
-        // Kemas kini label masa kemas kini sistem
         var now = new Date();
         var time = now.toLocaleTimeString("en-MY", { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         document.getElementById("lastUpdate").innerText = "Last update: " + time;
@@ -1133,16 +991,13 @@ async function loadSummary(){
         console.error("Master Summary Error: ", err);
     }
 }
-// =====================================
-// LIVE TABLE LOGIC (MANUAL REFRESH)
-// =====================================
+
 let liveDataList = []; 
 let filteredTableData = []; 
-let currentViewStatus = "ALL"; 
+let currentViewStatus = "ALL";
 let currentPage = 1;
 const pageSize = 10;
 
-// MANUAL LOAD FUNCTION (MENGGANTIKAN AUTO-LOAD ASAL)
 async function manualMasterRefresh() {
     let btn = document.getElementById("btnReloadMaster");
     let icon = document.getElementById("masterSyncIcon");
@@ -1168,11 +1023,11 @@ async function manualMasterRefresh() {
                 remarks: rowData.remarks,
                 created: rowData.created_at,
                 status: rowData.status,
-                paid_by: rowData.paid_by || ""
+                paid_by: rowData.paid_by || "",
+                paid_date: rowData.paid_date || ""
             });
         });
 
-        // Susun rekod paling terbaharu di atas sekali
         liveDataList.sort((a, b) => new Date(b.created) - new Date(a.created));
         switchView(currentViewStatus);
 
@@ -1214,14 +1069,11 @@ function toggleRemark(el){
     let textEl = el.querySelector(".remark-text");
     let hintEl = el.querySelector(".tap-hint");
 
-    // Semak jika kotak ini sudah dibuka dengan melihat class 'is-expanded'
     if(el.classList.contains("is-expanded")){
-        // Jika sudah dibuka -> Tutup (Minimize)
         textEl.innerHTML = short;
         el.classList.remove("is-expanded");
         if(hintEl) hintEl.innerHTML = "<i class='fa fa-hand-pointer'></i> tap to view";
     } else {
-        // Jika belum dibuka -> Buka (Expand)
         textEl.innerHTML = full;
         el.classList.add("is-expanded");
         if(hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to minimize";
@@ -1249,7 +1101,6 @@ function renderTable() {
         
         let dateStr = isNaN(pDate) ? d.promise : pDate.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
 
-        // Format Created Date & Time (Premium Style)
         let cDate = new Date(d.created);
         let createdStr = "-";
         if (!isNaN(cDate.getTime())) {
@@ -1299,8 +1150,6 @@ function renderTable() {
     document.getElementById("masterTableBody").innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding: 40px; color:#94a3b8;"><i class="fa fa-folder-open" style="font-size:28px;margin-bottom:12px;display:block;"></i>No Records Found</td></tr>';
 
     let totalPages = Math.ceil(filteredTableData.length / pageSize) || 1;
-
-    // 2. KOD 'SHOWING X TO Y' KHAS UNTUK MASTER
     let totalItems = filteredTableData.length;
     let startItem = totalItems === 0 ? 0 : ((currentPage - 1) * pageSize) + 1;
     let endItem = Math.min(currentPage * pageSize, totalItems);
@@ -1319,9 +1168,6 @@ function exportTable() {
     generateExcel(filteredTableData, `ViewAllRecords_${currentViewStatus}`);
 }
 
-// =====================================
-// REPORT GENERATOR LOGIC
-// =====================================
 let reportDataList = [];
 
 async function calculateReport(){
@@ -1335,11 +1181,10 @@ async function calculateReport(){
     status.innerText = "Gathering analytics data...";
 
     var dca = document.getElementById("dcaFilter").value;
-    var start = document.getElementById("startDate").value; // Format: YYYY-MM-DD
-    var end = document.getElementById("endDate").value;     // Format: YYYY-MM-DD
+    var start = document.getElementById("startDate").value; 
+    var end = document.getElementById("endDate").value;     
 
     try {
-        // Tarik salinan data segar untuk penapisan laporan eksport
         const q = window.query(window.collection(window.db, "LOCK_DATA"));
         const querySnapshot = await window.getDocs(q);
         
@@ -1360,22 +1205,24 @@ async function calculateReport(){
             });
         });
 
-        // Tapis mengikut kriteria input pilihan Bos di UI
         reportDataList = allRecords.filter(row => {
-            // Penapisan 1: Ikut Nama Ejen DCA
             let matchDca = (dca === "ALL" || !dca || row.dca === dca);
             
-            // Penapisan 2: Ikut Julat Tarikh (Map mengikut logik asal mengikut status kes)
             let matchDate = true;
             if (start && end) {
-                let checkDateStr = (row.status === "PAID" && row.paid_date) ? row.paid_date.slice(0, 10) : row.created.slice(0, 10);
-                matchDate = (checkDateStr >= start && checkDateStr <= end);
+                // Diubah supaya kalis ralat jika row.created_at kosong
+                let checkDateStr = (row.status === "PAID" && row.paid_date) ? row.paid_date : row.created;
+                if(checkDateStr) {
+                    checkDateStr = checkDateStr.slice(0, 10);
+                    matchDate = (checkDateStr >= start && checkDateStr <= end);
+                } else {
+                    matchDate = false;
+                }
             }
             
             return matchDca && matchDate;
         });
 
-// Buat pengiraan ringkasan laporan hasil tapis
         let filteredTotal = 0;
         let filteredLockAmount = 0;
         let filteredPaid = 0;
@@ -1394,21 +1241,15 @@ async function calculateReport(){
             }
         });
 
-        // Kemas kini kotak analitik laporan di skrin (Split Design)
         document.getElementById("dashTotal").innerText = filteredTotal;
         document.getElementById("dashLockAmount").innerText = "RM " + Number(filteredLockAmount).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         
         document.getElementById("dashPaid").innerText = filteredPaid;
         document.getElementById("dashPaidAmount").innerText = "RM " + Number(filteredPaidAmount).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-        // Kemas kini kotak analitik filtered laporan di skrin
-        document.getElementById("dashTotal").innerText = filteredTotal;
-        document.getElementById("dashPaid").innerText = filteredPaid;
-        document.getElementById("dashAmount").innerText = "RM " + Number(filteredAmount).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
         status.innerText = "";
         if (reportDataList.length > 0) {
-            exportBtn.style.display = "flex"; // Paparkan butang download excel
+            exportBtn.style.display = "flex"; 
         } else {
             status.innerText = "No records found for selected filter.";
         }
@@ -1470,7 +1311,6 @@ window.onload=function(){
 
     loadUsers();
     loadSummary();
-    // AUTO-LOAD LIVE TABLE TELAH DIBUANG UNTUK JIMATKAN KUOTA API GAS
 };
 
 function goCheck(){ window.location="../check/"; }
