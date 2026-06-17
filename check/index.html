@@ -17,12 +17,10 @@
 <style>
 
 /* ===== NATIVE APP FEEL (BONUS) ===== */
-/* Hilangkan kelip biru bila tekan butang di skrin telefon */
 * {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* Custom Scrollbar (Nampak lebih mahal & nipis) */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -38,7 +36,6 @@
     background: #94a3b8; 
 }
 
-/* Scroll yang lebih lancar */
 html {
     scroll-behavior: smooth;
 }
@@ -61,7 +58,6 @@ body {
     min-height: 100vh;
 }
 
-/* ANIMATIONS */
 @keyframes slideUpFade {
     0% { transform: translateY(20px); opacity: 0; }
     100% { transform: translateY(0); opacity: 1; }
@@ -79,7 +75,6 @@ body {
     background: #f1f5f9;
 }
 
-/* ===== SIDEBAR ===== */
 .sidebar {
     width: 280px;
     background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
@@ -197,7 +192,6 @@ body {
     box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
 }
 
-/* ===== MAIN CONTENT ===== */
 .main-content {
     flex: 1;
     margin-left: 280px; 
@@ -218,7 +212,6 @@ body {
     transition: max-width 0.4s ease;
 }
 
-/* List Mode override */
 body.list-mode .container {
     max-width: 100%;
 }
@@ -232,7 +225,26 @@ body.list-mode .container {
     border-bottom: 2px solid #f1f5f9;
 }
 
-/* ===== INLINE SEARCH BAR (DESKTOP) ===== */
+/* ===== TABLE HEADER & ACTIONS (NEW) ===== */
+.table-header-row {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 16px; 
+    margin-top: 10px;
+}
+
+.table-header-title {
+    font-size: 14px; 
+    font-weight: 600; 
+    color: #1e293b;
+}
+
+.table-actions {
+    display: flex; 
+    gap: 10px;
+}
+
 .search-bar-row {
     display: flex;
     gap: 16px;
@@ -305,7 +317,6 @@ body.list-mode .container {
     color: #1e293b;
 }
 
-/* ===== TAB STYLES ===== */
 .tab-container {
     display: flex;
     gap: 10px;
@@ -345,58 +356,13 @@ body.list-mode .container {
     transform: translateY(-2px);
 }
 
-/* ===== TABLE STYLES (NEW) ===== */
-.filter-card {
-    padding: 16px 20px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    margin-bottom: 20px;
-}
-
-.filter-input-group {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
-}
-
-.filter-input-group input {
-    margin-bottom: 0;
-    flex: 1;
-    padding: 12px 16px;
-    border: 1px solid #cbd5e1;
-    border-radius: 12px;
-    font-size: 14px;
-    background: #f8fafc;
-}
-
-.mini-actions { display: flex; gap: 10px; }
-.mini-btn {
-    padding: 12px 20px;
-    font-size: 13px;
-    font-weight: 600;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.3s ease;
-}
-.mini-btn.search { background: #4f46e5; }
-.mini-btn.search:hover { background: #4338ca; }
-.mini-btn.clear { background: #64748b; }
-.mini-btn.clear:hover { background: #475569; }
-
 .table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     border-radius: 12px;
     border: 1px solid #e2e8f0;
     margin-top: 10px;
+    max-height: 60vh;
 }
 
 table {
@@ -412,22 +378,29 @@ table th, table td {
 }
 
 table th {
-    background: #f8fafc;
+    position: sticky !important; 
+    top: 0; 
+    z-index: 10; 
+    background: #f8fafc !important; 
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
     font-weight: 600;
     font-size: 12px;
     color: #64748b;
     text-transform: uppercase;
 }
 
-table tr:last-child td { border-bottom: none; }
-table tr:hover td { background: #f8fafc; }
+table th:hover { background: #f1f5f9 !important; }
+table tbody tr:nth-child(even) { background-color: #f8fafc; }
+table tbody tr:nth-child(odd) { background-color: #ffffff; }
+table tbody tr:hover td { background-color: #e2e8f0; } 
 
-/* CENTER AMOUNT COLUMN */
 th:nth-child(4), td:nth-child(4) {
     text-align: center;
     font-weight: 600;
 }
-/* PREVENT DATE COLUMN FROM WRAPPING */
 th:nth-child(4), td:nth-child(4) {
     white-space: nowrap;
 }
@@ -455,7 +428,7 @@ th:nth-child(4), td:nth-child(4) {
 .page-btn:disabled { color: #94a3b8; cursor: not-allowed; }
 #pageInfo { flex: 1; text-align: center; font-weight: 600; font-size: 13px; }
 
-/* ===== PREMIUM MANUAL REFRESH BUTTON (Tukar ke warna TEAL/CYAN) ===== */
+/* ===== BUTTON REFRESH (TEAL) ===== */
 .btn-refresh-premium {
     background: linear-gradient(135deg, #0ea5e9, #0284c7);
     color: white;
@@ -465,34 +438,23 @@ th:nth-child(4), td:nth-child(4) {
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     box-shadow: 0 4px 6px rgba(14, 165, 233, 0.2);
 }
-
 .btn-refresh-premium:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(14, 165, 233, 0.4);
     background: linear-gradient(135deg, #0284c7, #0369a1);
 }
+.btn-refresh-premium:active { transform: translateY(0); box-shadow: none; }
+.btn-refresh-premium:disabled { background: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
 
-.btn-refresh-premium:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(14, 165, 233, 0.2);
-}
-
-.btn-refresh-premium:disabled {
-    background: #94a3b8;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-
-/* ===== BUTTON EXPORT EXCEL (Tukar ke warna HIJAU EXCEL) ===== */
-.btn-export, .btn-export-small {
+/* ===== BUTTON EXPORT (HIJAU) ===== */
+.btn-export {
     background: linear-gradient(135deg, #22c55e, #16a34a);
     color: white;
     border: none;
@@ -503,23 +465,41 @@ th:nth-child(4), td:nth-child(4) {
     cursor: pointer;
     transition: all 0.3s ease;
     display: inline-flex;
+    justify-content: center;
     gap: 8px;
     align-items: center;
     box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);
 }
-
-.btn-export:hover, .btn-export-small:hover {
+.btn-export:hover {
     background: linear-gradient(135deg, #16a34a, #15803d);
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(34, 197, 94, 0.4);
 }
+.btn-export:active { transform: translateY(0); box-shadow: none; }
 
-.btn-export:active, .btn-export-small:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
+/* ===== BUTTON RESET (KELABU) ===== */
+.btn-reset-small {
+    background: linear-gradient(135deg, #64748b, #475569);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    justify-content: center;
+    gap: 8px;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(100, 116, 139, 0.2);
+}
+.btn-reset-small:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(100, 116, 139, 0.4);
+    background: linear-gradient(135deg, #475569, #334155);
 }
 
-/* JS INJECTED RESULT CARD (EXISTING) */
 .result-card {
     margin-top: 24px;
     padding: 24px;
@@ -556,8 +536,8 @@ th:nth-child(4), td:nth-child(4) {
     border-top: 4px solid #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite;
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.icon-spin { animation: spin 1s linear infinite; }
 
-/* SESSION POPUP */
 #sessionPopup {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none;
@@ -570,93 +550,90 @@ th:nth-child(4), td:nth-child(4) {
 .session-box i { font-size: 48px; color: #ef4444; margin-bottom: 16px; }
 .session-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #0f172a; }
 
+.resizer {
+    position: absolute; 
+    top: 0; 
+    right: 0; 
+    width: 6px; 
+    cursor: col-resize; 
+    user-select: none; 
+    height: 100%; 
+    border-right: 1px solid #cbd5e1;
+}
+.resizer:hover, .resizer.resizing { border-right: 2px solid #4f46e5; }
+.sort-icon { margin-left: 6px; color: #94a3b8; font-size: 11px; }
+
 /* ==========================================
    MOBILE RESPONSIVE (BOTTOM NAV STYLE)
    ========================================== */
 @media (max-width: 899px) {
-    body {
-        overflow: visible;
-    }
-
-    .app-layout {
-        flex-direction: column;
-        height: auto;
-    }
+    body { overflow: visible; }
+    .app-layout { flex-direction: column; height: auto; }
     
-    /* ===== HEADER ATAS (TETAP & TAK GERAK) ===== */
     .sidebar {
-        position: fixed; /* Jadikan ia melekat di skrin */
-        top: 0; left: 0; width: 100%; 
-        height: 60px; /* Tetapkan tinggi spesifik */
-        flex-direction: row; 
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 16px; 
-        border-radius: 0 0 16px 16px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        z-index: 60; /* Pastikan ia sentiasa di atas */
+        position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+        flex-direction: row; justify-content: space-between;
+        align-items: center; padding: 10px 16px; 
+        border-radius: 0 0 16px 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); z-index: 60;
     }
 
     .brand { margin-bottom: 0; font-size: 18px; }
     .brand i { font-size: 20px; }
-    
-    .user-profile {
-        margin-bottom: 0; text-align: right; 
-        background: transparent; border: none; padding: 0;
-    }
-
+    .user-profile { margin-bottom: 0; text-align: right; background: transparent; border: none; padding: 0; }
     #userInfo { font-size: 12px; }
-    #userSummary { font-size: 10px; margin-top: 2px; padding: 2px 8px; }
 
-    /* ===== MENU BAWAH (COMPACT & TETAP) ===== */
     .nav-menu {
-        position: fixed; 
-        bottom: 0; left: 0; width: 100%;
-        flex-direction: row; 
-        background: #ffffff;
-        padding: 6px 10px 8px 10px; /* Kurangkan padding supaya lebih nipis */
-        box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-        z-index: 60; 
-        border-radius: 20px 20px 0 0;
-        justify-content: space-around; 
-        gap: 5px;
-        height: 60px; /* Kunci ketinggian menu bawah */
+        position: fixed; bottom: 0; left: 0; width: 100%;
+        flex-direction: row; background: #ffffff;
+        padding: 6px 10px 8px 10px; box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+        z-index: 60; border-radius: 20px 20px 0 0; justify-content: space-around; gap: 5px; height: 60px; 
     }
-
-    .nav-btn {
-        flex-direction: column;
-        gap: 4px; /* Kurangkan jarak ikon dan teks */
-        padding: 4px;
-        color: #64748b;
-        border-radius: 12px;
-        justify-content: center;
-    }
-
-    .nav-btn i { font-size: 18px; } /* Kecilkan sedikit ikon */
-    .nav-btn span { display: block; font-size: 9px; font-weight: 600; } /* Kecilkan teks */
-
+    .nav-btn { flex-direction: column; gap: 4px; padding: 4px; color: #64748b; border-radius: 12px; justify-content: center; }
+    .nav-btn i { font-size: 18px; } 
+    .nav-btn span { display: block; font-size: 9px; font-weight: 600; } 
     .nav-btn:hover { transform: none; background: #f1f5f9; color: #4f46e5; }
     .nav-btn.active { background: #eef2ff; color: #4f46e5; box-shadow: none; }
     .logout-btn { margin-top: 0; color: #ef4444; }
 
-    /* ===== KANDUNGAN TENGAH (YANG BOLEH SCROLL) ===== */
     .main-content {
-        margin-left: 0;
-        margin-top: 60px; /* Tolak kandungan ke bawah supaya tak tertutup dengan header fixed */
-        padding: 16px 15px 80px 15px; /* Padding bawah 80px supaya list tak terlindung dengan nav bar */
-        height: auto; 
-        overflow: visible;
+        margin-left: 0; margin-top: 60px; padding: 16px 15px 80px 15px; 
+        height: auto; overflow: visible;
     }
 
     .container {
-        height: auto;
-        min-height: auto;
-        padding: 20px 16px; 
-        border-radius: 16px;
-        overflow-y: visible;
+        height: auto; min-height: auto; padding: 20px 16px; 
+        border-radius: 16px; overflow-y: visible;
     }
 
-    /* Fix Search Filter Mobile */
+    /* Betulkan susunan butang jadual di Mobile */
+    .table-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .table-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .table-actions button:nth-child(1) {
+        grid-column: 1 / -1;
+        justify-content: center;
+        padding: 12px;
+        font-size: 13px;
+    }
+    
+    .table-actions button:nth-child(2),
+    .table-actions button:nth-child(3) {
+        justify-content: center;
+        padding: 10px;
+        font-size: 11px;
+    }
+
     .search-bar-row, .filter-input-group { flex-direction: column; gap: 16px; }
     .search-bar-row input, .filter-input-group input { width: 100%; flex: none; }
     .button-group, .mini-actions { flex-direction: column; width: 100%; }
@@ -669,61 +646,12 @@ th:nth-child(4), td:nth-child(4) {
     
     table th, table td { padding: 14px 10px; font-size: 11px; }
 }
-
-/* ==========================================
-   TABLE UPGRADES: STICKY, ZEBRA, SORT, RESIZE
-   ========================================== */
-.table-scroll { 
-    max-height: 60vh; /* Adjust height to trigger sticky scroll */
-    overflow-y: auto; 
-    overflow-x: auto; 
-}
-
-table th { 
-    position: sticky !important; 
-    top: 0; 
-    z-index: 10; 
-    background: #f8fafc !important; 
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-}
-
-table th:hover { background: #f1f5f9 !important; }
-
-/* Zebra Striping */
-table tbody tr:nth-child(even) { background-color: #f8fafc; }
-table tbody tr:nth-child(odd) { background-color: #ffffff; }
-table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to override zebra */
-
-/* Column Resizer Handle */
-.resizer {
-    position: absolute; 
-    top: 0; 
-    right: 0; 
-    width: 6px; 
-    cursor: col-resize; 
-    user-select: none; 
-    height: 100%; 
-    border-right: 1px solid #cbd5e1;
-}
-.resizer:hover, .resizer.resizing { border-right: 2px solid #4f46e5; }
-
-/* Sort Icons */
-.sort-icon { 
-    margin-left: 6px; 
-    color: #94a3b8; 
-    font-size: 11px; 
-}
-    
 </style>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // Letakkan config dari Firebase Console (Project Settings) di sini
   const firebaseConfig = {
     apiKey: "AIzaSyDKiYl8462c8ZanXc4oXIfa-_9su3E89Wk",
     authDomain: "lockcheck-e0160.firebaseapp.com",
@@ -733,11 +661,9 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
     appId: "1:912034602664:web:f23b971b67a0ef1df8ac9d",
   };
 
-  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // Jadikan pembolehubah ini global supaya boleh diguna dalam blok <script> biasa
   window.db = db;
   window.collection = collection;
   window.query = query;
@@ -754,9 +680,9 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
 <div class="app-layout">
 
     <nav class="sidebar">
-<div class="brand">
-    <img src="../singer-logo-png-5.png" alt="Singer Logo" style="width: 28px; height: auto; object-fit: contain;"> Lock Portal
-</div>
+        <div class="brand">
+            <img src="../singer-logo-png-5.png" alt="Singer Logo" style="width: 28px; height: auto; object-fit: contain;"> Lock Portal
+        </div>
         
         <div class="user-profile">
             <div id="userInfo"></div>
@@ -812,44 +738,47 @@ table tbody tr:hover td { background-color: #e2e8f0; } /* Stronger hover to over
             <div id="listSection" style="display:none;">
                 <div class="form-title" style="margin-bottom: 15px;">All Records</div>
 
-<div class="tab-container">
-    <button id="tabActive" class="tab-btn active" onclick="switchView('LOCK')">Active Locks</button>
-    <button id="tabPaid" class="tab-btn" onclick="switchView('PAID')">Paid History</button>
-    <button id="tabAll" class="tab-btn" onclick="switchView('ALL')">View All</button>
-</div>
+                <div class="tab-container">
+                    <button id="tabActive" class="tab-btn active" onclick="switchView('LOCK')">Active Locks</button>
+                    <button id="tabPaid" class="tab-btn" onclick="switchView('PAID')">Paid History</button>
+                    <button id="tabAll" class="tab-btn" onclick="switchView('ALL')">View All</button>
+                </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 10px;">
-                    <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
+                <div class="table-header-row">
+                    <div class="table-header-title">
                         <i class="fa fa-list-check" style="color: #4f46e5; margin-right: 5px;"></i> Record List
                     </div>
                     
-                    <div style="display: flex; gap: 10px;">
+                    <div class="table-actions">
                         <button class="btn-refresh-premium" id="btnReloadTable" onclick="manualTableRefresh()">
                             <i class="fa-solid fa-arrows-rotate" id="reloadIcon"></i> Reload Data
                         </button>
                         <button class="btn-export" onclick="exportToExcel()">
-                            <i class="fa fa-file-excel" style="color: #10b981;"></i> Export Excel
+                            <i class="fa fa-file-excel"></i> Export Excel
+                        </button>
+                        <button class="btn-reset-small" onclick="resetCheckTable()">
+                            <i class="fa fa-rotate-left"></i> Reset
                         </button>
                     </div>
                 </div>
 
-<div class="table-scroll">
-    <table style="min-width: 600px;">
-<thead>
-    <tr>
-        <th data-sort="dca">DCA <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="acc_no">ACC NO <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="branch">BRANCH <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="amount">AMOUNT <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="status">STATUS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="promise">PTP DATE <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="created">CREATED <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-        <th data-sort="remarks">REMARKS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-    </tr>
-</thead>
-        <tbody id="lockTable"></tbody>
-    </table>
-</div>
+                <div class="table-scroll">
+                    <table style="min-width: 600px;">
+                        <thead>
+                            <tr>
+                                <th data-sort="dca">DCA <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="acc_no">ACC NO <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="branch">BRANCH <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="amount">AMOUNT <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="status">STATUS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="promise">PTP DATE <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="created">CREATED <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="remarks">REMARKS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                            </tr>
+                        </thead>
+                        <tbody id="lockTable"></tbody>
+                    </table>
+                </div>
 
                 <div class="pagination-bar">
                     <button id="prevBtn" onclick="prevPage()" class="page-btn"><i class="fa fa-chevron-left"></i></button>
@@ -888,10 +817,6 @@ if(type === "master"){
 }
 
 document.getElementById("userInfo").innerHTML = "User: "+(user || "-")+" | Role: "+(role || "-");
-
-// ==========================================
-// NAVIGATION (TAB SWITCHING)
-// ==========================================
 
 function updateNavState(activeId) {
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -940,7 +865,6 @@ function formatDate(dateStr){
 function formatDateTime(dateStr){
     if(!dateStr) return "-";
     
-    // 1. JIKA DATA FORMAT ISO FIREBASE (Mengandungi 'T')
     if(dateStr.includes("T")){
         try {
             const d = new Date(dateStr);
@@ -955,7 +879,7 @@ function formatDateTime(dateStr){
             const min = ("0" + d.getMinutes()).slice(-2);
             const ampm = hr >= 12 ? 'PM' : 'AM';
             hr = hr % 12; 
-            hr = hr ? hr : 12; // Tukar jam 0 kepada 12
+            hr = hr ? hr : 12; 
             
             return day + " " + mth + " " + yr + " " + hr + ":" + min + " " + ampm;
         } catch(e) {
@@ -963,7 +887,6 @@ function formatDateTime(dateStr){
         }
     }
     
-    // 2. KEKALKAN LOGIK ASAL (Untuk API lama yang guna format "DD/MM/YYYY HH:MM")
     const parts = dateStr.split(" ");
     if(parts.length < 2) return dateStr;
     const datePart = parts[0].split("/"); const timePart = parts[1].split(":");
@@ -978,17 +901,14 @@ async function checkLock(){
     if(!acc){ alert("Enter Account No"); input.focus(); return; }
     if(isLoading) return;
 
-    // 1. TAMBAH KOD INI: Semak sesi sebelum cari data
     verifySessionWithServer();
     const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
-    if(!currentToken) return; // Batal pencarian jika sesi dah hilang
-    // -----------------------------------------------------
+    if(!currentToken) return; 
 
     isLoading = true; checkBtn.disabled = true;
     result.innerHTML = "<div class='loading'>Checking Lock Status<div class='spinner'></div></div>";
 
     try {
-        // Tarik rekod terus dari Firestore berdasarkan Nombor Akaun
         const q = window.query(window.collection(window.db, "LOCK_DATA"), window.where("acc_no", "==", acc));
         const querySnapshot = await window.getDocs(q);
 
@@ -998,11 +918,10 @@ async function checkLock(){
             return;
         }
 
-        // Ambil data pertama yang sepadan dengan carian
         let docId = "";
         let data = null;
         querySnapshot.forEach((doc) => {
-            docId = doc.id; // Simpan Firestore Document ID untuk kemas kini nanti
+            docId = doc.id; 
             data = doc.data();
         });
 
@@ -1029,7 +948,6 @@ async function checkLock(){
 
             let actionButton = "";
             if (data.status === "LOCK") {
-                // Hantar docId ke butang supaya fungsi markAsPaid tahu rekod mana nak dikemas kini
                 actionButton = `<button class='paid-btn' onclick="markAsPaid('${docId}', '${data.acc_no}')"><i class='fa-solid fa-check-circle'></i> Mark as PAID</button>`;
             }
 
@@ -1055,33 +973,28 @@ async function checkLock(){
     checkBtn.disabled = false; isLoading = false;
 }
 
-// Terima docId dan acc_no dari parameter butang
 async function markAsPaid(docId, acc) {
     if(!confirm("Are you sure you want to mark Account " + acc + " as PAID?")) return;
 
-    // 1. TAMBAH KOD INI: Semak sesi sebelum update status ke Firebase
     verifySessionWithServer();
     const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
-    if(!currentToken) return; // Batal kemas kini jika sesi dah hilang
-    // -----------------------------------------------------
+    if(!currentToken) return; 
 
     checkBtn.disabled = true;
     result.innerHTML = "<div class='loading'>Updating to PAID...<div class='spinner'></div></div>";
 
     try {
-        // Tembak tepat kepada dokumen dalam Firestore menggunakan ID uniknya
         const lockRef = window.doc(window.db, "LOCK_DATA", docId);
         
-        // Kemas kini status, ID staf yang menekan butang, dan timestamp
         await window.updateDoc(lockRef, {
             status: "PAID",
-            paid_by: user, // Pembolehubah 'user' yang diset di awal fail JS anda
+            paid_by: user, 
             paid_date: new Date().toISOString()
         });
 
         alert("Account " + acc + " successfully marked as PAID!");
         input.value = acc; 
-        checkLock(); // Segarkan kembali paparan secara automatik
+        checkLock(); 
         
     } catch (err) { 
         console.error("Firebase Update Error: ", err);
@@ -1122,7 +1035,6 @@ function switchView(viewType) {
     
     filteredData = fullData.filter(d => {
         if(currentViewStatus === "ALL") return true; 
-        
         let status = (d.status || "").toString().toUpperCase();
         return status === currentViewStatus;
     });
@@ -1149,6 +1061,25 @@ async function viewRecords() {
     }
 }
 
+// LOGIK UNTUK RESET JADUAL TERUS KE ASAL
+function resetCheckTable() {
+    fullData = [];
+    filteredData = [];
+    currentPage = 1;
+    currentViewStatus = "ALL";
+
+    document.getElementById("tabActive").classList.remove("active");
+    document.getElementById("tabPaid").classList.remove("active");
+    document.getElementById("tabAll").classList.add("active");
+
+    document.getElementById("lockTable").innerHTML = 
+        "<tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>";
+    
+    document.getElementById("pageInfo").innerText = "-";
+    document.getElementById("prevBtn").disabled = true;
+    document.getElementById("nextBtn").disabled = true;
+}
+
 async function manualTableRefresh() {
     let btn = document.getElementById("btnReloadTable");
     let icon = document.getElementById("reloadIcon");
@@ -1160,7 +1091,6 @@ async function manualTableRefresh() {
     "<tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
 
     try {
-        // Tarik terus data dari Firestore (Sama pantas macam Master & Lock)
         const q = window.query(window.collection(window.db, "LOCK_DATA"));
         const querySnapshot = await window.getDocs(q);
         
@@ -1180,7 +1110,6 @@ async function manualTableRefresh() {
             });
         });
 
-        // Susun data daripada tarikh cipta yang paling terbaru (descending)
         fullData.sort((a,b)=> new Date(b.created) - new Date(a.created));
         switchView(currentViewStatus);
 
@@ -1199,14 +1128,11 @@ function toggleRemark(el){
     let textEl = el.querySelector(".remark-text");
     let hintEl = el.querySelector(".tap-hint");
 
-    // Semak jika kotak ini sudah dibuka dengan melihat class 'is-expanded'
     if(el.classList.contains("is-expanded")){
-        // Jika sudah dibuka -> Tutup (Minimize)
         textEl.innerHTML = short;
         el.classList.remove("is-expanded");
         if(hintEl) hintEl.innerHTML = "<i class='fa fa-hand-pointer'></i> tap to view";
     } else {
-        // Jika belum dibuka -> Buka (Expand)
         textEl.innerHTML = full;
         el.classList.add("is-expanded");
         if(hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to minimize";
@@ -1234,7 +1160,6 @@ function renderTable() {
         
         let dateStr = isNaN(pDate) ? d.promise : pDate.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
 
-        // Format Created Date & Time (Premium Style)
         let cDate = new Date(d.created);
         let createdStr = "-";
         if (!isNaN(cDate.getTime())) {
@@ -1283,10 +1208,7 @@ function renderTable() {
 
     document.getElementById("lockTable").innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding: 40px; color:#94a3b8;"><i class="fa fa-folder-open" style="font-size:28px;margin-bottom:12px;display:block;"></i>No Records Found</td></tr>';
 
-    // 1. TAMBAH/KEMBALIKAN BARIS INI: Kira jumlah mukasurat
     let totalPage = Math.ceil(filteredData.length / pageSize) || 1;
-
-    // 2. KOD 'SHOWING X TO Y' YANG BARU KITA BUAT TADI
     let totalItems = filteredData.length;
     let startItem = totalItems === 0 ? 0 : ((currentPage - 1) * pageSize) + 1;
     let endItem = Math.min(currentPage * pageSize, totalItems);
@@ -1294,7 +1216,6 @@ function renderTable() {
     document.getElementById("pageInfo").innerHTML = `Showing <b>${startItem}</b> to <b>${endItem}</b> of <b>${totalItems}</b> results`;
     
     document.getElementById("prevBtn").disabled = currentPage === 1;
-    // Sekarang kod di bawah ni takkan error sebab totalPage dah wujud semula
     document.getElementById("nextBtn").disabled = currentPage === totalPage || filteredData.length === 0;
 }
     
@@ -1325,11 +1246,9 @@ function exportToExcel() {
     let range = XLSX.utils.decode_range(worksheet['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
         let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 6});
-        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') { worksheet[ptpCellRef].z = 'd-mmm-yyyy';
-        }
+        if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') { worksheet[ptpCellRef].z = 'd-mmm-yyyy'; }
         let createdCellRef = XLSX.utils.encode_cell({r: R, c: 8});
-        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') { worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM';
-        }
+        if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') { worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; }
     }
 
     let workbook = XLSX.utils.book_new();
@@ -1338,16 +1257,13 @@ function exportToExcel() {
     XLSX.writeFile(workbook, fileName);
 }
 
-// Master Navigation
 function goMaster(){ window.location="../menumaster/"; }
 
-// Logout & Clear Data
 function logout(){
     localStorage.clear(); sessionStorage.clear();
     window.location="../checklock-login/";
 }
 
-// Popup UI Controller
 function showSessionPopup(type){
     let title="Session Expired";
     let msg="Your session has expired. Please login again.";
@@ -1360,9 +1276,6 @@ function showSessionPopup(type){
     setTimeout(()=>{ localStorage.clear(); sessionStorage.clear(); window.location="../checklock-login/"; }, 3000);
 }
 
-/* ==========================================
-   TABLE UPGRADES JS: SORTING & RESIZING
-   ========================================== */
 let currentSort = { col: null, dir: 'asc' };
 
 function sortTableData(colId) {
@@ -1448,7 +1361,6 @@ function initTableUpgrades() {
 
         th.addEventListener('click', (e) => {
             if (e.target.classList.contains('resizer')) return;
-            
             const sortCol = th.getAttribute('data-sort');
             if (sortCol) sortTableData(sortCol);
         });
@@ -1457,20 +1369,14 @@ function initTableUpgrades() {
 
 window.addEventListener('DOMContentLoaded', initTableUpgrades);
 
-/* =========================================================================
-   SINGLE DEVICE LOGIN & ACTION-TRIGGERED CHECK (20 MINUTE COOLDOWN)
-========================================================================= */
-
 function verifySessionWithServer() {
     const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
     if (!currentToken) return;
 
-    // Tembak API Google Apps Script untuk semak token
     fetch(api + "?action=session&token=" + currentToken + "&api_key=SCZP_SECURE_2026")
     .then(res => res.json())
     .then(data => {
         if (data.status !== "ACTIVE") {
-            // Panggil popup UI sedia ada dalam CHECK.txt
             showSessionPopup("DEVICE"); 
         }
     })
@@ -1478,45 +1384,31 @@ function verifySessionWithServer() {
 }
 
 let lastCheckTime = 0;
-const CHECK_COOLDOWN = 1200000; // 1,200,000 milisaat = 20 minit
+const CHECK_COOLDOWN = 1200000; 
 
 function checkSessionOnAction() {
     const now = Date.now();
-    
-    // Hanya buat semakan jika dah lebih 20 minit dari semakan terakhir
     if (now - lastCheckTime > CHECK_COOLDOWN) {
         lastCheckTime = now;
         verifySessionWithServer();
     }
 }
 
-// Semak bila pertama kali halaman dimuatkan
 verifySessionWithServer();
 lastCheckTime = Date.now();
 
-// Kesan bila user mula klik, gerak mouse, menaip, atau sentuh skrin
 ['mousedown', 'mousemove', 'keypress', 'touchstart', 'focusin', 'change'].forEach(eventName => {
     document.addEventListener(eventName, checkSessionOnAction, { passive: true });
 });
 
-// Semak terus bila user buka semula tab dari background
 document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
-        lastCheckTime = Date.now(); // Reset masa
+        lastCheckTime = Date.now(); 
         verifySessionWithServer();
     }
 });
     
 </script>
-
-<div id="sessionPopup">
-    <div class="session-box">
-        <i class="fa fa-lock"></i>
-        <div class="session-title" id="sessionTitle">Session Expired</div>
-        <div class="session-msg" id="sessionMsg">Please login again.</div>
-        <div class="session-count">Redirecting to login...</div>
-    </div>
-</div>
 
 </body>
 </html>
