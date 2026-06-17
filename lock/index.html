@@ -1666,7 +1666,9 @@ async function manualTableRefresh() {
                 promise: rowData.promise_date, 
                 created: rowData.created_at,   
                 remarks: rowData.remarks,
-                paid_by: rowData.paid_by || "-"
+                paid_by: rowData.paid_by || "-",
+                edited_by: rowData.edited_by || "", // <--- TARIK DATA EDITED
+                edited_at: rowData.edited_at || ""  // <--- TARIK MASA EDITED
             });
         });
 
@@ -1727,6 +1729,29 @@ function renderTable(){
             createdStr = d.created || "-";
         }
 
+        // ==========================================
+        // BINA TAG "EDITED BY" & FORMAT MASA
+        // ==========================================
+        let editBadge = "";
+        if (d.edited_by) {
+            let editTime = "";
+            if (d.edited_at) {
+                let eDate = new Date(d.edited_at);
+                if (!isNaN(eDate.getTime())) {
+                    let day = eDate.getDate();
+                    let mths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                    let mth = mths[eDate.getMonth()];
+                    let yr = eDate.getFullYear();
+                    let hr = eDate.getHours();
+                    let min = ("0" + eDate.getMinutes()).slice(-2);
+                    let ampm = hr >= 12 ? 'PM' : 'AM';
+                    hr = hr % 12; hr = hr ? hr : 12; 
+                    editTime = ` &bull; ${day} ${mth} ${yr} ${hr}:${min} ${ampm}`;
+                }
+            }
+            editBadge = `<div style="margin-top: 8px; display: inline-block; background: #f8fafc; border: 1px dashed #cbd5e1; color: #475569; font-size: 10px; padding: 5px 8px; border-radius: 6px; font-weight: 600; line-height: 1.4;"><i class="fa fa-pen" style="font-size:9px; margin-right:4px;"></i>Edited by ${d.edited_by}${editTime}</div>`;
+        }
+
         html += `
         <tr style="${isRowOverdue ? 'background:#fef2f2;' : ''}">
         <td>${d.acc_no}</td>
@@ -1735,10 +1760,10 @@ function renderTable(){
         <td>${statusBadge}</td>
         <td style="${isRowOverdue ? 'color:#ef4444;font-weight:600;' : ''}">${formatDate(d.promise)}</td>
         <td>${createdStr}</td>
-        <td onclick="toggleRemark(this)" data-full="${remark}" data-short="${shortRemark}" style="cursor:pointer; max-width: 200px; word-break: break-word;">
+        <td onclick="toggleRemark(this)" data-full="${remark}" data-short="${shortRemark}" style="cursor:pointer; max-width: 250px; word-break: break-word; vertical-align: top;">
         <div class="remark-text">${shortRemark}</div>
         ${remark.length > 40 ? '<div style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic; font-weight: 500;" class="tap-hint"><i class="fa fa-hand-pointer"></i> tap to view</div>' : ''}
-        </td>
+        ${editBadge} </td>
         </tr>
         `;
     });
@@ -1746,7 +1771,6 @@ function renderTable(){
     document.getElementById("lockTable").innerHTML = html || "<tr><td colspan='7' style='text-align:center;padding:40px;color:#94a3b8;'><i class='fa fa-folder-open' style='font-size:28px;margin-bottom:12px;display:block;'></i>No Record Found</td></tr>";
 
     let totalPage = Math.ceil(filteredData.length / pageSize) || 1;
-
     let totalItems = filteredData.length;
     let startItem = totalItems === 0 ? 0 : ((currentPage - 1) * pageSize) + 1;
     let endItem = Math.min(currentPage * pageSize, totalItems);
