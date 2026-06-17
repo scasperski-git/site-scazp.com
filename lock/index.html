@@ -1092,17 +1092,22 @@ th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) {
 
                 <div class="table-scroll">
                     <table style="min-width: 500px;">
-                        <thead>
-                            <tr>
-                                <th data-sort="acc_no">ACC NO <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-                                <th data-sort="branch">BRANCH <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-                                <th data-sort="amount">AMOUNT <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-                                <th data-sort="status">STATUS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-                                <th data-sort="promise">PTP DATE <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-                                <th data-sort="created">CREATED <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-                                <th data-sort="remarks">REMARK <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
-                            </tr>
-                        </thead>
+<thead>
+    <tr>
+        <script>
+            if(localStorage.getItem("lock_type") === "master" || sessionStorage.getItem("lock_type") === "master") {
+                document.write('<th data-sort="dca">DCA ID <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>');
+            }
+        </script>
+        <th data-sort="acc_no">ACC NO <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+        <th data-sort="branch">BRANCH <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+        <th data-sort="amount">AMOUNT <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+        <th data-sort="status">STATUS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+        <th data-sort="promise">PTP DATE <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+        <th data-sort="created">CREATED <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+        <th data-sort="remarks">REMARK <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+    </tr>
+</thead>
                         <tbody id="lockTable"></tbody>
                     </table>
                 </div>
@@ -1188,6 +1193,18 @@ if(type == "check"){
 
 if(type === "master"){
     document.getElementById("masterBtn").style.display = "flex";
+    
+    // 1. TUKAR TAJUK MENU SIDEBAR & KANDUNGAN KHAS UNTUK MASTER
+    setTimeout(() => {
+        let navMyLocks = document.getElementById("navMyLocks");
+        if(navMyLocks) navMyLocks.querySelector("span").innerText = "All Locks";
+        
+        let listSectionTitle = document.querySelector("#lockListSection .form-title");
+        if(listSectionTitle) listSectionTitle.innerText = "All Locks List";
+        
+        let tableHeaderTitle = document.querySelector(".table-header-title");
+        if(tableHeaderTitle) tableHeaderTitle.innerHTML = `<i class="fa fa-list-check" style="color: #4f46e5; margin-right: 5px;"></i> All Lock Records`;
+    }, 200);
 }
 
 function goMaster(){
@@ -1646,19 +1663,27 @@ async function manualTableRefresh() {
     icon.classList.add("icon-spin");
     
     document.getElementById("lockTable").innerHTML = 
-    "<tr><td colspan='7' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
+    "<tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
 
     try {
-        const q = window.query(
-            window.collection(window.db, "LOCK_DATA"), 
-            window.where("dca_id", "==", user)
-        );
+        // LOGIK KUASA MASTER: JIKA MASTER, TARIK SEMUA DATA TANPA FILTER DCA ID
+        let q;
+        if (type === "master") {
+            q = window.query(window.collection(window.db, "LOCK_DATA"));
+        } else {
+            q = window.query(
+                window.collection(window.db, "LOCK_DATA"), 
+                window.where("dca_id", "==", user)
+            );
+        }
+        
         const querySnapshot = await window.getDocs(q);
         
         fullData = [];
         querySnapshot.forEach((doc) => {
             let rowData = doc.data();
             fullData.push({
+                dca: rowData.dca_id || "-", // Simpan ID Ejen
                 acc_no: rowData.acc_no,
                 branch: rowData.branch_name, 
                 amount: rowData.amount,
@@ -1667,8 +1692,8 @@ async function manualTableRefresh() {
                 created: rowData.created_at,   
                 remarks: rowData.remarks,
                 paid_by: rowData.paid_by || "-",
-                edited_by: rowData.edited_by || "", // <--- TARIK DATA EDITED
-                edited_at: rowData.edited_at || ""  // <--- TARIK MASA EDITED
+                edited_by: rowData.edited_by || "",
+                edited_at: rowData.edited_at || ""
             });
         });
 
@@ -1678,7 +1703,7 @@ async function manualTableRefresh() {
 
     } catch(e) {
         console.error("Firebase Error (My Locks): ", e);
-        document.getElementById("lockTable").innerHTML = "<tr><td colspan='7' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
+        document.getElementById("lockTable").innerHTML = "<tr><td colspan='8' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
     } finally {
         btn.disabled = false;
         icon.classList.remove("icon-spin");
