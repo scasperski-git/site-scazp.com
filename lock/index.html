@@ -1756,7 +1756,7 @@ function renderTable(){
         let isOverdue = pDate < today;
        
         let remark = d.remarks || "-";
-        let shortRemark = remark.length > 40 ? remark.substring(0,40)+"..." : remark;
+        let shortRemark = remark.length > 60 ? remark.substring(0,60)+"..." : remark;
 
         let statusBadge = d.status === "PAID" 
             ? `<div style="text-align:left;"><span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span><span style="display:block; font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">by ${d.paid_by || '-'}</span></div>`
@@ -1817,7 +1817,7 @@ function renderTable(){
         <td>${createdStr}</td>
         <td onclick="toggleRemark(this)" data-full="${remark}" data-short="${shortRemark}" style="cursor:pointer; max-width: 250px; word-break: break-word; vertical-align: top;">
         <div class="remark-text">${shortRemark}</div>
-        ${remark.length > 40 ? '<div style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic; font-weight: 500;" class="tap-hint"><i class="fa fa-hand-pointer"></i> tap to view</div>' : ''}
+        ${remark.length > 60 ? '<div style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic; font-weight: 500;" class="tap-hint"><i class="fa fa-hand-pointer"></i> tap to view</div>' : ''}
         ${editBadge} 
         </td>
         </tr>
