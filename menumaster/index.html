@@ -1698,12 +1698,16 @@ function sortTableData(colId) {
         let valB = b[colId] || "";
         
 if (colId === 'acc_no') {
-            // Kita tukar ke nilai nombor sebenar supaya ia susun ikut nilai Matematik
-            // 022 juta -> 43 juta -> 101 juta
-            let numA = parseFloat(valA.toString().replace(/\D/g, '')) || 0;
-            let numB = parseFloat(valB.toString().replace(/\D/g, '')) || 0;
+            let strA = valA.toString().trim();
+            let strB = valB.toString().trim();
             
-            return currentSort.dir === 'asc' ? (numA - numB) : (numB - numA);
+            if (strA.length !== strB.length) {
+                // 1. Susun ikut bilangan digit dahulu (Contoh: 4 digit naik atas, 5 digit kat bawah)
+                return currentSort.dir === 'asc' ? (strA.length - strB.length) : (strB.length - strA.length);
+            } else {
+                // 2. Jika digit sama panjang, baru susun ikut urutan nombor biasa
+                return currentSort.dir === 'asc' ? strA.localeCompare(strB) : strB.localeCompare(strA);
+            }
         }
         else if (colId === 'amount') {
             valA = parseFloat(valA.toString().replace(/,/g, '')) || 0;
