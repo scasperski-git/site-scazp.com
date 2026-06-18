@@ -880,6 +880,57 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     .search-action-bar { flex-direction: column; gap: 10px; }
     .btn-search-modern, .btn-clear-modern { width: 100%; justify-content: center; padding: 14px; }
 }
+/* ==========================================
+   DESKTOP TABLE OPTIMIZATION (FIT TO SCREEN)
+   ========================================== */
+@media (min-width: 900px) {
+    /* 1. Prevent the table wrapper from forcing horizontal scroll */
+    .table-scroll {
+        overflow-x: hidden; /* Hide scrollbar on desktop */
+        width: 100%;
+    }
+
+    /* 2. Enforce fixed layout so the table respects container width */
+    .table-scroll table {
+        table-layout: fixed;
+        width: 100%;
+        min-width: unset; /* Remove the 600px min-width restriction */
+    }
+
+    /* 3. Slightly reduce font size and padding to save space */
+    .table-scroll table th, 
+    .table-scroll table td {
+        font-size: 12px;
+        padding: 10px 8px; /* Tighter padding */
+        word-wrap: break-word; /* Ensure long words break */
+    }
+
+    /* 4. Allocate specific width percentages to columns to prevent stretching */
+    /* Adjust the nth-child index based on your exact column order */
+    .table-scroll table th:nth-child(1), .table-scroll table td:nth-child(1) { width: 8%; }  /* DCA */
+    .table-scroll table th:nth-child(2), .table-scroll table td:nth-child(2) { width: 12%; } /* ACC NO */
+    .table-scroll table th:nth-child(3), .table-scroll table td:nth-child(3) { width: 15%; } /* BRANCH */
+    .table-scroll table th:nth-child(4), .table-scroll table td:nth-child(4) { width: 12%; } /* AMOUNT */
+    .table-scroll table th:nth-child(5), .table-scroll table td:nth-child(5) { width: 10%; } /* STATUS */
+    .table-scroll table th:nth-child(6), .table-scroll table td:nth-child(6) { width: 10%; } /* PTP DATE */
+    .table-scroll table th:nth-child(7), .table-scroll table td:nth-child(7) { width: 13%; } /* CREATED */
+    
+    /* 5. Handle the Remarks column strictly so it truncates instead of stretching */
+    .table-scroll table th:nth-child(8), 
+    .table-scroll table td:nth-child(8) { 
+        width: 20%; 
+        max-width: 150px; /* Force a maximum width */
+    }
+
+    /* Target the remark text container specifically */
+    .remark-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+        width: 100%;
+    }
+}
     
 </style>
 
