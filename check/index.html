@@ -396,14 +396,6 @@ table tbody tr:nth-child(even) { background-color: #f8fafc; }
 table tbody tr:nth-child(odd) { background-color: #ffffff; }
 table tbody tr:hover td { background-color: #e2e8f0; }
 
-th:nth-child(4), td:nth-child(4) { 
-    text-align: center; 
-    font-weight: 600; 
-}
-th:nth-child(4), td:nth-child(4) {
-    white-space: nowrap;
-}
-
 .pagination-bar {
     display: flex;
     align-items: center;
@@ -644,6 +636,7 @@ th:nth-child(4), td:nth-child(4) {
     .result-card, .no-lock, .loading { padding: 16px; }
     
     table th, table td { padding: 14px 10px; font-size: 11px; }
+    
     /* ==========================================
        FIX JADUAL SQUISHED (HIMPIT) DI MOBILE
        ========================================== */
@@ -668,24 +661,17 @@ th:nth-child(4), td:nth-child(4) {
     }
 }
 
-    /* ==========================================
-   TABLE COLUMN AUTO-FIT & SPACING FIX
-   ========================================== */
-/* Paksa column (termasuk BRANCH) auto-fit ngam-ngam saiz content */
-table tbody td:nth-child(1), /* DCA */
-table tbody td:nth-child(2), /* ACC NO */
-table tbody td:nth-child(3), /* BRANCH */
-table tbody td:nth-child(4), /* AMOUNT */
-table tbody td:nth-child(5), /* STATUS */
-table tbody td:nth-child(6), /* PTP DATE */
-table tbody td:nth-child(7)  /* CREATED */
-{
+/* ==========================================
+TABLE COLUMN AUTO-FIT & SPACING FIX (DYNAMIC)
+========================================== */
+/* Paksa semua column kecuali yang terakhir (REMARK) auto-fit ngam-ngam saiz content */
+table tbody td:not(:last-child) {
     white-space: nowrap !important;
     width: 1% !important; 
 }
 
-/* REMARK - Paksa dia kembang ambil semua baki ruang kosong */
-table tbody td:nth-child(8) {
+/* REMARK (lajur terakhir) - Paksa dia kembang ambil semua baki ruang kosong */
+table tbody td:last-child {
     width: auto !important;
     white-space: normal !important;
 }
@@ -814,6 +800,7 @@ table tbody td:nth-child(8) {
                                 <th data-sort="acc_no">ACC NO <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
                                 <th data-sort="branch">BRANCH <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
                                 <th data-sort="amount">AMOUNT <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="category">CATEGORY <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
                                 <th data-sort="status">STATUS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
                                 <th data-sort="promise">PTP DATE <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
                                 <th data-sort="created">CREATED <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
@@ -1010,7 +997,7 @@ async function checkLock(){
             result.innerHTML =
             "<div class='result-card'>" +
             "<div class='status-box'><span style='background:"+statusColor+"'>" + statusText + "</span>" + paidByInfo + "</div>" +
-            metaSection + // <--- SELITKAN META SECTION DI SINI
+            metaSection + 
             "<div class='row'><div class='col'><div class='label'>ACCOUNT NO</div><div class='value'>" + data.acc_no + "</div></div>" +
             "<div class='col'><div class='label'>BRANCH</div><div class='value'>" + data.branch_name + "</div></div></div>" +
             "<div class='row'><div class='col'><div class='label'>LOCK AMOUNT</div><div class='amount'>" + amount + "</div></div>" +
@@ -1107,7 +1094,7 @@ async function viewRecords() {
 
     if(fullData.length === 0){
         document.getElementById("lockTable").innerHTML = 
-        "<tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>";
+        "<tr><td colspan='9' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>";
         
         document.getElementById("pageInfo").innerText = "-";
         document.getElementById("prevBtn").disabled = true;
@@ -1122,14 +1109,14 @@ function resetCheckTable() {
     fullData = [];
     filteredData = [];
     currentPage = 1;
-    currentViewStatus = "ALL"; // <-- Tukar ke ALL
+    currentViewStatus = "ALL"; 
 
     document.getElementById("tabActive").classList.remove("active");
     document.getElementById("tabPaid").classList.remove("active");
-    document.getElementById("tabAll").classList.add("active"); // <-- Set View All sebagai aktif
+    document.getElementById("tabAll").classList.add("active"); 
 
     document.getElementById("lockTable").innerHTML = 
-        "<tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>";
+        "<tr><td colspan='9' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to fetch latest records</td></tr>";
     
     document.getElementById("pageInfo").innerText = "-";
     document.getElementById("prevBtn").disabled = true;
@@ -1144,7 +1131,7 @@ async function manualTableRefresh() {
     icon.classList.add("icon-spin");
     
     document.getElementById("lockTable").innerHTML = 
-    "<tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
+    "<tr><td colspan='9' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading records from server...</td></tr>";
 
     try {
         const q = window.query(window.collection(window.db, "LOCK_DATA"));
@@ -1158,13 +1145,14 @@ async function manualTableRefresh() {
                 acc_no: rowData.acc_no,
                 branch: rowData.branch_name,
                 amount: rowData.amount,
+                category: rowData.payment_category || "-", // <--- CATEGORY DITAMBAH DI SINI
                 promise: rowData.promise_date,
                 remarks: rowData.remarks,
                 created: rowData.created_at,
                 status: rowData.status,
                 paid_by: rowData.paid_by || "",
-                edited_by: rowData.edited_by || "",   // <--- TARIK DATA EDITED BY
-                edited_at: rowData.edited_at || ""    // <--- TARIK DATA EDITED AT
+                edited_by: rowData.edited_by || "",
+                edited_at: rowData.edited_at || "" 
             });
         });
 
@@ -1173,7 +1161,7 @@ async function manualTableRefresh() {
 
     } catch(e) {
         console.error("Firebase Error: ", e);
-        document.getElementById("lockTable").innerHTML = "<tr><td colspan='8' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
+        document.getElementById("lockTable").innerHTML = "<tr><td colspan='9' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
     } finally {
         btn.disabled = false;
         icon.classList.remove("icon-spin");
@@ -1280,6 +1268,7 @@ function renderTable() {
             <td style="font-weight: 600;">${d.acc_no || "-"}</td>
             <td>${d.branch || "-"}</td>
             <td style="text-align: center; font-weight: 700; color: #0f172a;">${amount}</td>
+            <td style="font-size: 11px; font-weight: 600;">${d.category || "-"}</td>
             <td>${statusBadge}</td>
             <td style="${dateColor}">${dateStr}</td>
             <td>${createdStr}</td>
@@ -1287,7 +1276,7 @@ function renderTable() {
         </tr>`;
     });
 
-    document.getElementById("lockTable").innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding: 40px; color:#94a3b8;"><i class="fa fa-folder-open" style="font-size:28px;margin-bottom:12px;display:block;"></i>No Records Found</td></tr>';
+    document.getElementById("lockTable").innerHTML = html || '<tr><td colspan="9" style="text-align:center; padding: 40px; color:#94a3b8;"><i class="fa fa-folder-open" style="font-size:28px;margin-bottom:12px;display:block;"></i>No Records Found</td></tr>';
 
     let totalPage = Math.ceil(filteredData.length / pageSize) || 1;
     let totalItems = filteredData.length;
@@ -1317,6 +1306,7 @@ function exportToExcel() {
             "ACC NO": row.acc_no, 
             "BRANCH": row.branch,
             "AMOUNT (RM)": Number(row.amount || 0), 
+            "CATEGORY": row.category || "-", // <--- CATEGORY EXCEL DITAMBAH DI SINI
             "STATUS": row.status,
             "PAID BY": row.paid_by || "-",
             "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate, 
