@@ -884,21 +884,22 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 /* ==========================================
    TABLE COLUMN AUTO-FIT & SPACING FIX
    ========================================== */
-/* Paksa column (termasuk BRANCH) auto-fit ngam-ngam saiz content */
+/* Paksa column (termasuk BRANCH dan CATEGORY) auto-fit ngam-ngam saiz content */
 table tbody td:nth-child(1), /* DCA */
 table tbody td:nth-child(2), /* ACC NO */
 table tbody td:nth-child(3), /* BRANCH */
 table tbody td:nth-child(4), /* AMOUNT */
-table tbody td:nth-child(5), /* STATUS */
-table tbody td:nth-child(6), /* PTP DATE */
-table tbody td:nth-child(7)  /* CREATED */
+table tbody td:nth-child(5), /* CATEGORY (BARU DITAMBAH) */
+table tbody td:nth-child(6), /* STATUS */
+table tbody td:nth-child(7), /* PTP DATE */
+table tbody td:nth-child(8)  /* CREATED */
 {
     white-space: nowrap !important;
     width: 1% !important; 
 }
 
 /* REMARK - Paksa dia kembang ambil semua baki ruang kosong */
-table tbody td:nth-child(8) {
+table tbody td:nth-child(9) {
     width: auto !important;
     white-space: normal !important;
 }
@@ -907,7 +908,6 @@ table tbody td:nth-child(8) {
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  // KITA TAMBAH getDoc dan setDoc DI SINI
   import { getFirestore, collection, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -930,7 +930,6 @@ table tbody td:nth-child(8) {
   window.doc = doc;
   window.updateDoc = updateDoc;
   window.deleteDoc = deleteDoc;
-  // DAFTARKAN FUNGSI BARU KE WINDOW
   window.getDoc = getDoc;
   window.setDoc = setDoc;
 </script>
@@ -1074,8 +1073,7 @@ table tbody td:nth-child(8) {
                     <div id="dashStatus" class="dash-status" style="margin-top: 15px;"></div>
                 </div>
             </div>
-<!-- ===== SECTION: MANAGE RECORDS (EDIT & DELETE) ===== -->
-            <div class="section">
+<div class="section">
                 <h3><i class="fa fa-pen-to-square"></i> Manage Records (Edit / Delete)</h3>
                 
 <div class="search-action-bar">
@@ -1084,7 +1082,6 @@ table tbody td:nth-child(8) {
     <button class="btn-clear-modern" onclick="clearManageSearch()"><i class="fa fa-xmark"></i> Clear</button>
 </div>
 
-                <!-- Kad hasil carian akan muncul di sini -->
                 <div id="manageResultArea"></div>
             </div>
             </div>
@@ -1119,6 +1116,7 @@ table tbody td:nth-child(8) {
                                 <th data-sort="acc_no">ACC NO <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
                                 <th data-sort="branch">BRANCH <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
                                 <th data-sort="amount">AMOUNT <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                <th data-sort="category">CATEGORY <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
                                 <th data-sort="status">STATUS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
                                 <th data-sort="promise">PTP DATE <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
                                 <th data-sort="created">CREATED <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
@@ -1126,7 +1124,7 @@ table tbody td:nth-child(8) {
                             </tr>
                         </thead>
                         <tbody id="masterTableBody">
-                            <tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to view full database</td></tr>
+                            <tr><td colspan='9' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to view full database</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1277,7 +1275,7 @@ async function manualMasterRefresh() {
     btn.disabled = true;
     icon.classList.add("icon-spin");
     
-    document.getElementById("masterTableBody").innerHTML = "<tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading database from server...</td></tr>";
+    document.getElementById("masterTableBody").innerHTML = "<tr><td colspan='9' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Loading database from server...</td></tr>";
 
     try {
         const q = window.query(window.collection(window.db, "LOCK_DATA"));
@@ -1291,6 +1289,7 @@ querySnapshot.forEach((doc) => {
                 acc_no: rowData.acc_no,
                 branch: rowData.branch_name,
                 amount: rowData.amount,
+                category: rowData.payment_category || "-", // CATEGORY MASUK SINI
                 promise: rowData.promise_date,
                 remarks: rowData.remarks,
                 created: rowData.created_at,
@@ -1298,7 +1297,7 @@ querySnapshot.forEach((doc) => {
                 paid_by: rowData.paid_by || "",
                 paid_date: rowData.paid_date || "",
                 edited_by: rowData.edited_by || "",
-                edited_at: rowData.edited_at || "" // <--- TAMBAH BARIS INI
+                edited_at: rowData.edited_at || "" 
             });
         });
 
@@ -1307,7 +1306,7 @@ querySnapshot.forEach((doc) => {
 
     } catch(e) {
         console.error("Firebase Master Table Error: ", e);
-        document.getElementById("masterTableBody").innerHTML = "<tr><td colspan='8' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
+        document.getElementById("masterTableBody").innerHTML = "<tr><td colspan='9' style='text-align:center;padding:20px;color:#ef4444;'>Error loading database. Please try again.</td></tr>";
     } finally {
         btn.disabled = false;
         icon.classList.remove("icon-spin");
@@ -1437,6 +1436,7 @@ function renderTable() {
             <td style="font-weight: 600;">${d.acc_no || "-"}</td>
             <td>${d.branch || "-"}</td>
             <td style="text-align: center; font-weight: 700; color: #0f172a;">${amount}</td>
+            <td style="font-size: 11px; font-weight: 600;">${d.category || "-"}</td>
             <td>${statusBadge}</td>
             <td style="${dateColor}">${dateStr}</td>
             <td>${createdStr}</td>
@@ -1444,7 +1444,7 @@ function renderTable() {
         </tr>`;
     });
 
-    document.getElementById("masterTableBody").innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding: 40px; color:#94a3b8;"><i class="fa fa-folder-open" style="font-size:28px;margin-bottom:12px;display:block;"></i>No Records Found</td></tr>';
+    document.getElementById("masterTableBody").innerHTML = html || '<tr><td colspan="9" style="text-align:center; padding: 40px; color:#94a3b8;"><i class="fa fa-folder-open" style="font-size:28px;margin-bottom:12px;display:block;"></i>No Records Found</td></tr>';
 
     let totalPages = Math.ceil(filteredTableData.length / pageSize) || 1;
     let totalItems = filteredTableData.length;
@@ -1492,6 +1492,7 @@ async function calculateReport(){
                 acc_no: r.acc_no,
                 branch: r.branch_name,
                 amount: r.amount,
+                category: r.payment_category || "-", // CATEGORY MASUK SINI
                 promise: r.promise_date,
                 remarks: r.remarks,
                 created: r.created_at,
@@ -1576,27 +1577,28 @@ function generateExcel(dataArray, filePrefix) {
             "ACC NO": row.acc_no, 
             "BRANCH": row.branch,
             "AMOUNT (RM)": Number(row.amount || 0), 
+            "CATEGORY": row.category || "-", // EXCEL CATEGORY MASUK SINI
             "STATUS": row.status,
             "PAID BY": row.paid_by || "-", 
             "PTP DATE": isNaN(pDate.getTime()) ? row.promise : pDate, 
             "REMARKS": row.remarks || "-",
             "CREATED TIME": isNaN(cDate.getTime()) ? row.created : cDate,
             "EDITED BY": row.edited_by || "-",
-            "EDITED TIME": (eDate && !isNaN(eDate.getTime())) ? eDate : "-" // <--- TAMBAHAN UNTUK EXCEL
+            "EDITED TIME": (eDate && !isNaN(eDate.getTime())) ? eDate : "-" 
         };
     });
 
     let worksheet = XLSX.utils.json_to_sheet(excelData, { cellDates: true });
     let range = XLSX.utils.decode_range(worksheet['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-        let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 6});
+        let ptpCellRef = XLSX.utils.encode_cell({r: R, c: 7}); // DAH ANJAK JADI 7
         if (worksheet[ptpCellRef] && worksheet[ptpCellRef].t === 'd') { worksheet[ptpCellRef].z = 'd-mmm-yyyy'; }
         
-        let createdCellRef = XLSX.utils.encode_cell({r: R, c: 8});
+        let createdCellRef = XLSX.utils.encode_cell({r: R, c: 9}); // DAH ANJAK JADI 9
         if (worksheet[createdCellRef] && worksheet[createdCellRef].t === 'd') { worksheet[createdCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; }
 
         // Setting format tarikh dan masa untuk Edited
-        let editedCellRef = XLSX.utils.encode_cell({r: R, c: 10});
+        let editedCellRef = XLSX.utils.encode_cell({r: R, c: 11}); // DAH ANJAK JADI 11
         if (worksheet[editedCellRef] && worksheet[editedCellRef].t === 'd') { worksheet[editedCellRef].z = 'd-mmm-yyyy hh:mm AM/PM'; }
     }
 
@@ -1692,7 +1694,7 @@ function resetMasterTable() {
     document.getElementById("tabAll").classList.add("active");
 
     document.getElementById("masterTableBody").innerHTML = 
-        "<tr><td colspan='8' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to view full database</td></tr>";
+        "<tr><td colspan='9' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to view full database</td></tr>";
     
     document.getElementById("pageInfo").innerText = "Page 1 of 1";
     if(document.getElementById("prevBtn")) document.getElementById("prevBtn").disabled = true;
