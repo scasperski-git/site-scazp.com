@@ -1706,7 +1706,7 @@ function sortTableData(colId) {
             } else {
                 return currentSort.dir === 'asc' ? strA.localeCompare(strB) : strB.localeCompare(strA);
             }
-        } 
+        }
         else if (colId === 'amount') {
             valA = parseFloat(valA.toString().replace(/,/g, '')) || 0;
             valB = parseFloat(valB.toString().replace(/,/g, '')) || 0;
