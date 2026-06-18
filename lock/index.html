@@ -1051,11 +1051,12 @@ table tbody td:last-child {
                         <div class="form-group">
                             <label>Payment Category</label>
                             <select id="payment_category" name="payment_category" required>
-                                <option value="">SELECT PAYMENT CATEGORY</option>
-                                <option>PARTIAL PAYMENT</option>
-                                <option>FULL PAYMENT</option>
-                                <option>UNDER DISCOUNT</option>
-                            </select>
+    <option value="">SELECT CATEGORY</option>
+    <option value="PARTIAL">PARTIAL</option>
+    <option value="FULL">FULL</option>
+    <option value="DISCOUNT">DISCOUNT</option>
+</select>
+
                             <div class="error" id="err_category"><i class="fa-solid fa-circle-exclamation"></i> Payment category required</div>
                         </div>
                     </div>
