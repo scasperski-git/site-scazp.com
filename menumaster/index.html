@@ -880,6 +880,34 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     .search-action-bar { flex-direction: column; gap: 10px; }
     .btn-search-modern, .btn-clear-modern { width: 100%; justify-content: center; padding: 14px; }
 }
+
+/* ==========================================
+   TABLE COLUMN AUTO-FIT & SPACING FIX
+   ========================================== */
+/* Paksa column pendek auto-fit ngam-ngam saiz content */
+table tbody td:nth-child(1), /* DCA */
+table tbody td:nth-child(2), /* ACC NO */
+table tbody td:nth-child(4), /* AMOUNT */
+table tbody td:nth-child(5), /* STATUS */
+table tbody td:nth-child(6), /* PTP DATE */
+table tbody td:nth-child(7)  /* CREATED */
+{
+    white-space: nowrap !important;
+    width: 1% !important; /* Trik CSS untuk force auto-fit saiz paling minimum */
+}
+
+/* BRANCH - Bagi limit sikit supaya dia turun 2 baris kalau panjang */
+table tbody td:nth-child(3) {
+    max-width: 130px; 
+    white-space: normal !important;
+    word-wrap: break-word;
+}
+
+/* REMARK - Paksa dia kembang ambil semua baki ruang kosong */
+table tbody td:nth-child(8) {
+    width: auto !important;
+    white-space: normal !important;
+}
     
 </style>
 
@@ -1402,7 +1430,7 @@ function renderTable() {
                     editTime = ` &bull; ${day} ${mth} ${yr} ${hr}:${min} ${ampm}`;
                 }
             }
-            editBadge = `<div style="margin-top: 8px; display: inline-block; background: #f8fafc; border: 1px dashed #cbd5e1; color: #475569; font-size: 10px; padding: 5px 8px; border-radius: 6px; font-weight: 600; line-height: 1.4;"><i class="fa fa-pen" style="font-size:9px; margin-right:4px;"></i>Edited by ${d.edited_by}${editTime}</div>`;
+            editBadge = `<div style="margin-top: 4px; display: inline-block; background: #f8fafc; border: 1px dashed #cbd5e1; color: #475569; font-size: 8.5px; padding: 2px 5px; border-radius: 4px; font-weight: 600; line-height: 1.2;"><i class="fa fa-pen" style="font-size:8px; margin-right:3px;"></i>Edited by ${d.edited_by}${editTime}</div>`;
         }
 
         let statusBadge = d.status === "PAID" 
