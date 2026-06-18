@@ -884,23 +884,17 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 /* ==========================================
    TABLE COLUMN AUTO-FIT & SPACING FIX
    ========================================== */
-/* Paksa column pendek auto-fit ngam-ngam saiz content */
+/* Paksa column (termasuk BRANCH) auto-fit ngam-ngam saiz content */
 table tbody td:nth-child(1), /* DCA */
 table tbody td:nth-child(2), /* ACC NO */
+table tbody td:nth-child(3), /* BRANCH */
 table tbody td:nth-child(4), /* AMOUNT */
 table tbody td:nth-child(5), /* STATUS */
 table tbody td:nth-child(6), /* PTP DATE */
 table tbody td:nth-child(7)  /* CREATED */
 {
     white-space: nowrap !important;
-    width: 1% !important; /* Trik CSS untuk force auto-fit saiz paling minimum */
-}
-
-/* BRANCH - Bagi limit sikit supaya dia turun 2 baris kalau panjang */
-table tbody td:nth-child(3) {
-    max-width: 130px; 
-    white-space: normal !important;
-    word-wrap: break-word;
+    width: 1% !important; 
 }
 
 /* REMARK - Paksa dia kembang ambil semua baki ruang kosong */
