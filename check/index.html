@@ -1239,13 +1239,13 @@ function renderTable() {
         let shortRemark = remark.length > 60 ? safeRemark.substring(0, 60) + "..." : safeRemark;
 
         let remarkHtml = remark.length > 60
-            ? `<div style="cursor: pointer; max-width: 200px; word-break: break-word;" onclick="toggleRemark(this)" data-full="${safeRemark}" data-short="${shortRemark}">
+            ? `<div style="cursor: pointer; width: 100%; word-break: break-word;" onclick="toggleRemark(this)" data-full="${safeRemark}" data-short="${shortRemark}">
                  <div class="remark-text">${shortRemark}</div>
                  <div class="tap-hint" style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic;">
                     <i class='fa fa-hand-pointer'></i> tap to view
                  </div>
                </div>`
-            : `<div style="max-width: 200px; word-break: break-word;">${safeRemark}</div>`;
+            : `<div style="width: 100%; word-break: break-word;">${safeRemark}</div>`;
 
         // ==========================================
         // BINA TAG "EDITED BY" & FORMAT MASA 
