@@ -1698,11 +1698,19 @@ function sortTableData(colId) {
         let valB = b[colId] || "";
         
 if (colId === 'acc_no') {
-            // Susun ikut nilai Matematik sebenar (Standard Excel)
-            let numA = parseFloat(valA.toString().replace(/\D/g, '')) || 0;
-            let numB = parseFloat(valB.toString().replace(/\D/g, '')) || 0;
+            let strA = valA.toString().trim();
+            let strB = valB.toString().trim();
             
-            return currentSort.dir === 'asc' ? (numA - numB) : (numB - numA);
+            // 1. Semak Panjang Digit Dahulu (Contoh: 4 digit duduk atas 5 digit)
+            if (strA.length !== strB.length) {
+                return currentSort.dir === 'asc' ? (strA.length - strB.length) : (strB.length - strA.length);
+            } 
+            // 2. Jika Panjang Digit Sama, Baru Susun Ikut Nilai Matematik
+            else {
+                let numA = parseFloat(strA.replace(/\D/g, '')) || 0;
+                let numB = parseFloat(strB.replace(/\D/g, '')) || 0;
+                return currentSort.dir === 'asc' ? (numA - numB) : (numB - numA);
+            }
         }
         else if (colId === 'amount') {
             valA = parseFloat(valA.toString().replace(/,/g, '')) || 0;
