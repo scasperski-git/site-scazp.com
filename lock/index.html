@@ -2014,12 +2014,27 @@ function sortTableData(colId) {
         let valA = a[colId] || "";
         let valB = b[colId] || "";
         
-                if (colId === 'acc_no') {
-            // Kekalkan sebagai Teks (String) supaya '0' kekal di depan
+if (colId === 'acc_no') {
             let strA = valA.toString().trim();
             let strB = valB.toString().trim();
-            return currentSort.dir === 'asc' ? strA.localeCompare(strB) : strB.localeCompare(strA);
-        } 
+
+            let aStarts0 = strA.startsWith('0');
+            let bStarts0 = strB.startsWith('0');
+
+            // 1. Paksa semua nombor bermula '0' naik ke atas
+            if (aStarts0 && !bStarts0) return currentSort.dir === 'asc' ? -1 : 1;
+            if (!aStarts0 && bStarts0) return currentSort.dir === 'asc' ? 1 : -1;
+
+            // 2. Jika sama-sama mula '0' atau sama-sama tak mula '0', susun ikut Panjang Digit
+            if (strA.length !== strB.length) {
+                return currentSort.dir === 'asc' ? (strA.length - strB.length) : (strB.length - strA.length);
+            } 
+            
+            // 3. Jika Panjang Digit sama, susun ikut Nilai Matematik (kecil ke besar)
+            let numA = parseFloat(strA.replace(/\D/g, '')) || 0;
+            let numB = parseFloat(strB.replace(/\D/g, '')) || 0;
+            return currentSort.dir === 'asc' ? (numA - numB) : (numB - numA);
+        }
 
         else if (colId === 'amount') {
             valA = parseFloat(valA.toString().replace(/,/g, '')) || 0;
