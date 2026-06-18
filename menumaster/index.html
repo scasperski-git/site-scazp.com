@@ -1371,9 +1371,9 @@ function renderTable() {
 
         let remark = d.remarks || "-";
         let safeRemark = remark.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-        let shortRemark = remark.length > 40 ? safeRemark.substring(0, 40) + "..." : safeRemark;
+        let shortRemark = remark.length > 40 ? safeRemark.substring(0, 60) + "..." : safeRemark;
 
-        let remarkHtml = remark.length > 40
+        let remarkHtml = remark.length > 60
             ? `<div style="cursor: pointer; max-width: 200px; word-break: break-word;" onclick="toggleRemark(this)" data-full="${safeRemark}" data-short="${shortRemark}">
                  <div class="remark-text">${shortRemark}</div>
                  <div class="tap-hint" style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic;">
