@@ -1943,10 +1943,11 @@ async function searchManageAcc() {
                         <div class="manage-item" style="grid-column: span 2;">
                             <label>Payment Category</label>
                             <select id="input-cat-${docId}">
-                                <option value="PARTIAL PAYMENT" ${d.payment_category === 'PARTIAL PAYMENT' ? 'selected' : ''}>PARTIAL PAYMENT</option>
-                                <option value="FULL PAYMENT" ${d.payment_category === 'FULL PAYMENT' ? 'selected' : ''}>FULL PAYMENT</option>
-                                <option value="UNDER DISCOUNT" ${d.payment_category === 'UNDER DISCOUNT' ? 'selected' : ''}>UNDER DISCOUNT</option>
-                            </select>
+    <option value="PARTIAL" ${d.payment_category === 'PARTIAL' ? 'selected' : ''}>PARTIAL</option>
+    <option value="FULL" ${d.payment_category === 'FULL' ? 'selected' : ''}>FULL</option>
+    <option value="DISCOUNT" ${d.payment_category === 'DISCOUNT' ? 'selected' : ''}>DISCOUNT</option>
+</select>
+
                         </div>
                     </div>
                     
