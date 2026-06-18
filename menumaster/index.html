@@ -1698,8 +1698,7 @@ function sortTableData(colId) {
         let valB = b[colId] || "";
         
 if (colId === 'acc_no') {
-            // Susun ikut nilai Matematik sebenar (sebiji macam logik Excel gambar di atas)
-            // Cth: 21 juta -> 43 juta -> 101 juta
+            // Susun ikut nilai Matematik sebenar (Standard Excel)
             let numA = parseFloat(valA.toString().replace(/\D/g, '')) || 0;
             let numB = parseFloat(valB.toString().replace(/\D/g, '')) || 0;
             
