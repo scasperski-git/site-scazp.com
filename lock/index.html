@@ -505,11 +505,12 @@ input:focus, select:focus, textarea:focus {
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: 11.5px; /* Asal 13px, dikecilkan supaya lebih padat */
+    min-width: 600px; 
 }
 
 table th, table td {
-    padding: 16px;
+    padding: 10px 12px; /* Asal 16px, dikurangkan untuk jimat ruang mendatar */
     border-bottom: 1px solid #e2e8f0;
     text-align: left;
 }
