@@ -1461,7 +1461,8 @@ function prevPage() { if (currentPage > 1) { currentPage--; renderTable(); } }
 
 function exportTable() {
     if(filteredTableData.length === 0) { alert("Tiada data untuk diexport!"); return; }
-    generateExcel(filteredTableData, `ViewAllRecords_${currentViewStatus}`);
+    // Tambah ${user} supaya nama fail jadi contoh: ViewAllRecords_MASTER_ALL_2026...
+    generateExcel(filteredTableData, `ViewAllRecords_${user}_${currentViewStatus}`);
 }
 
 let reportDataList = [];
@@ -1563,7 +1564,8 @@ function exportReport() {
     let dcaName = document.getElementById("dcaFilter").options[document.getElementById("dcaFilter").selectedIndex].text.replace(/\s+/g, '_');
     let start = document.getElementById("startDate").value;
     let end = document.getElementById("endDate").value;
-    generateExcel(reportDataList, `CustomReport_${dcaName}_${start}_to_${end}`);
+    // Tambah ${user} supaya nama fail jadi contoh: CustomReport_MASTER_For_ALL_USER_2026...
+    generateExcel(reportDataList, `CustomReport_${user}_For_${dcaName}_${start}_to_${end}`);
 }
 
 function generateExcel(dataArray, filePrefix) {
