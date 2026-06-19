@@ -1091,8 +1091,8 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
                     <span id="lastUpdate">Last update: -</span>
                 </div>
 
-                <div class="summary-grid">
-                    <div class="box-card-split">
+<div class="summary-grid">
+                    <div class="box-card-split kpi-box" onclick="openKpiModal('active_lock')">
                         <div class="box-half">
                             <div class="box-half-title">Active Lock</div>
                             <div id="sumLock" class="box-half-val text-blue">0</div>
@@ -1103,7 +1103,7 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
                         </div>
                     </div>
 
-                    <div class="box-card-split">
+                    <div class="box-card-split kpi-box" onclick="openKpiModal('mark_paid')">
                         <div class="box-half">
                             <div class="box-half-title">Mark Paid</div>
                             <div id="sumPaid" class="box-half-val text-green">0</div>
@@ -2273,7 +2273,7 @@ function toggleViewPasscode() {
     }
 }
 
-// Fungsi untuk buka popup berdasarkan jenis kotak yang diklik
+    // Fungsi untuk buka popup berdasarkan jenis kotak yang diklik
 function openKpiModal(type) {
     const modal = document.getElementById('kpiDetailModal');
     const title = document.getElementById('kpiModalTitle');
