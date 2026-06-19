@@ -1019,36 +1019,44 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 }
 
 /* ==========================================
-   WARNA BACKGROUND BERBEZA SETIAP SEKSYEN
+   WARNA BACKGROUND & HOVER SETIAP SEKSYEN
    ========================================== */
 
-/* 1. Today's Overall Summary (Biru Cair Premium) */
+/* Tambah efek animasi asas pada semua kotak section */
+.section {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Efek Hover untuk semua kotak (Terangkat & Bayang membesar) */
+.section:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+}
+
+/* 1. Today's Overall Summary (Kuning Jelas) */
 .section:nth-of-type(1) {
-    background: linear-gradient(135deg, #ffffff 40%, #eff6ff 100%);
-    border-color: #bfdbfe;
-    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.04);
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border-color: #fde68a;
 }
-.section:nth-of-type(1) h3 i { background: #dbeafe; color: #2563eb; }
+.section:nth-of-type(1) h3 i { background: #fde68a; color: #d97706; }
 
-/* 2. Custom Analytics & Report (Hijau Cair Premium) */
+/* 2. Custom Analytics & Report (Hijau Jelas) */
 .section:nth-of-type(2) {
-    background: linear-gradient(135deg, #ffffff 40%, #ecfdf5 100%);
-    border-color: #a7f3d0;
-    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.04);
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-color: #bbf7d0;
 }
-.section:nth-of-type(2) h3 i { background: #d1fae5; color: #059669; }
+.section:nth-of-type(2) h3 i { background: #bbf7d0; color: #15803d; }
 
-/* 3. Manage Records (Merah/Rose Cair Premium - Alert) */
+/* 3. Manage Records (Merah Jelas) */
 .section:nth-of-type(3) {
-    background: linear-gradient(135deg, #ffffff 40%, #fff1f2 100%);
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
     border-color: #fecaca;
-    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.04);
 }
-.section:nth-of-type(3) h3 i { background: #ffe4e6; color: #e11d48; }
+.section:nth-of-type(3) h3 i { background: #fecaca; color: #b91c1c; }
 
-/* 4. View All Records (Kelabu Neutral) */
+/* 4. View All Records (Kelabu/Biru Cair - Neutral) */
 .section:nth-of-type(4) {
-    background: linear-gradient(135deg, #ffffff 40%, #f8fafc 100%);
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     border-color: #e2e8f0;
 }
 .section:nth-of-type(4) h3 i { background: #e2e8f0; color: #475569; }
