@@ -245,13 +245,11 @@ body.list-mode .container {
     gap: 10px;
 }
 
-/* ===== KEMAS KINI CSS UNTUK CHECK LOCK (SEARCH & RESULT) ===== */
 .search-bar-row {
     display: flex;
     gap: 16px;
     align-items: stretch; 
     margin-bottom: 10px;
-    max-width: 600px; /* Samakan lebar dengan result card */
 }
 
 .search-bar-row input {
@@ -270,15 +268,21 @@ body.list-mode .container {
     font-weight: 600;
 }
 
+.search-bar-row input:focus {
+    background: #ffffff;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
 .button-group {
     display: flex;
     gap: 12px;
-    flex: 1; /* Bagi butang penuhkan baki ruang 600px dengan sekata */
+    flex: 1; 
 }
 
 .button-group button {
-    flex: 1; /* Butang Check & Reset bersaiz sama besar */
-    padding: 0 16px;
+    flex: 1;
+    padding: 0 20px;
     border: none;
     border-radius: 12px;
     font-size: 14px;
@@ -496,9 +500,7 @@ table tbody tr:hover td { background-color: #e2e8f0; }
     box-shadow: 0 10px 25px rgba(0,0,0,0.04);
     animation: fadeIn 0.4s ease forwards;
     width: 100%;
-    max-width: 600px; /* Samakan lebar dengan search bar */
 }
-    
 .status-box { text-align: center; margin-bottom: 16px; }
 .status-box span {
     display: inline-block; padding: 8px 24px; color: white;
@@ -515,11 +517,8 @@ table tbody tr:hover td { background-color: #e2e8f0; }
 .no-lock {
     margin-top: 24px; padding: 24px; background: #fef2f2; border: 1px solid #fecdd3;
     border-radius: 16px; text-align: center; font-weight: 600; color: #be123c;
-    display: flex; flex-direction: column; align-items: center; gap: 10px; 
-    width: 100%;
-    max-width: 600px; /* Samakan lebar dengan search bar */
+    display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%;
 }
-    
 .no-lock::before { content: '\f071'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 24px; color: #ef4444; }
 
 .loading { margin-top: 30px; text-align: center; font-weight: 600; color: #475569; width: 100%; }
