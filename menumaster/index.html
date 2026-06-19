@@ -1019,47 +1019,42 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 }
 
 /* ==========================================
-   WARNA BACKGROUND & HOVER SETIAP SEKSYEN (FIXED)
+   GAYA KORPORAT MINIMALIS (ACCENT BORDERS)
    ========================================== */
 
-/* Animasi asas untuk hover */
+/* Reset semua section ke putih bersih dengan bayang elegan */
 .section {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    /* overflow: hidden penting supaya bucu atas kotak tak tertutup oleh border */
+    border-radius: 20px; 
 }
 
-/* Efek Hover (Kotak terangkat & bayang membesar) */
+/* Efek Hover (Terangkat sikit & bayang lebih dalam bila dilalukan mouse) */
 .section:hover {
-    transform: translateY(-6px);
+    transform: translateY(-4px);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
 }
 
-/* 1. Today's Overall Summary (Kuning Jelas) */
-.section.summary {
-    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-    border-color: #fde68a;
-}
-.section.summary h3 i { background: #fde68a; color: #d97706; }
+/* 1. Today's Overall Summary (Aksen Biru Korporat) */
+.section.summary { border-top: 5px solid #3b82f6; }
+.section.summary h3 i { background: #eff6ff; color: #3b82f6; }
 
-/* 2. Custom Analytics & Report (Hijau Jelas) */
-.section.dashboard {
-    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-    border-color: #bbf7d0;
-}
-.section.dashboard h3 i { background: #bbf7d0; color: #15803d; }
+/* 2. Custom Analytics (Aksen Hijau Zamrud) */
+.section.dashboard { border-top: 5px solid #10b981; }
+.section.dashboard h3 i { background: #ecfdf5; color: #10b981; }
 
-/* 3. Manage Records (Merah Jelas) */
-.section:has(.fa-pen-to-square) {
-    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-    border-color: #fecaca;
-}
-.section:has(.fa-pen-to-square) h3 i { background: #fecaca; color: #b91c1c; }
+/* 3. Manage Records (Aksen Merah/Rose untuk Edit/Delete) */
+.section:has(.fa-pen-to-square) { border-top: 5px solid #f43f5e; }
+.section:has(.fa-pen-to-square) h3 i { background: #fff1f2; color: #f43f5e; }
 
-/* 4. View All Records (Kelabu Neutral) */
-.section:has(.fa-list-check) {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border-color: #e2e8f0;
-}
-.section:has(.fa-list-check) h3 i { background: #e2e8f0; color: #475569; }
+/* 4. View All Records (Aksen Kelabu Gelap/Hitam Eksekutif) */
+.section:has(.fa-list-check) { border-top: 5px solid #334155; }
+.section:has(.fa-list-check) h3 i { background: #f1f5f9; color: #334155; }
+
     
 </style>
 
