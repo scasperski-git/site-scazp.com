@@ -14,20 +14,6 @@
 
 <style>
 
-/* Auto-potong remark kepada 2 baris tanpa limit character */
-.remark-text {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2; /* Set had 2 baris */
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Buka semua baris bila user klik (expand) */
-.remark-text.is-expanded {
-    -webkit-line-clamp: unset;
-}
-
 /* ===== NATIVE APP FEEL (BONUS) ===== */
 * {
     -webkit-tap-highlight-color: transparent;
@@ -996,6 +982,20 @@ table tbody tr:hover td { background-color: #e2e8f0; }
         width: auto !important;
     }
 }
+
+/* Auto-potong remark kepada 2 baris tanpa limit character */
+.remark-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2; /* Set had 2 baris */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Buka semua baris bila user klik (expand) */
+.remark-text.is-expanded {
+    -webkit-line-clamp: unset;
+}
     
 </style>
 
@@ -1824,17 +1824,6 @@ function renderTable(){
         let remark = d.remarks || "-";
         let safeRemark = remark.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
-        // Kita masih periksa kalau teks panjang sikit (> 40 huruf) untuk tunjuk 'tap to view'. 
-        // Tapi kerja potong teks ke 2 baris diserahkan 100% kepada CSS.
-        let remarkHtml = remark.length > 40
-            ? `<div style="cursor: pointer; width: 100%; word-break: break-word;" onclick="toggleRemark(this)">
-                 <div class="remark-text">${safeRemark}</div>
-                 <div class="tap-hint" style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic;">
-                    <i class='fa fa-hand-pointer'></i> tap to view
-                 </div>
-               </div>`
-            : `<div class="remark-text" style="width: 100%; word-break: break-word;">${safeRemark}</div>`;
-
         let statusBadge = d.status === "PAID" 
             ? `<div style="text-align:left;"><span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span><span style="display:block; font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">by ${d.paid_by || '-'}</span></div>`
             : `<div style="text-align:left;"><span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span></div>`;
@@ -1893,9 +1882,9 @@ function renderTable(){
         <td>${statusBadge}</td>
         <td style="${isRowOverdue ? 'color:#ef4444;font-weight:600;' : ''}">${formatDate(d.promise)}</td>
         <td>${createdStr}</td>
-        <td onclick="toggleRemark(this)" data-full="${remark}" data-short="${shortRemark}" style="cursor:pointer; width: 100%; word-break: break-word; vertical-align: top;">
-        <div class="remark-text">${shortRemark}</div>
-        ${remark.length > 60 ? '<div style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic; font-weight: 500;" class="tap-hint"><i class="fa fa-hand-pointer"></i> tap to view</div>' : ''}
+        <td onclick="toggleRemark(this)" style="cursor:pointer; width: 100%; word-break: break-word; vertical-align: top;">
+        <div class="remark-text">${safeRemark}</div>
+        ${remark.length > 40 ? '<div style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic; font-weight: 500;" class="tap-hint"><i class="fa fa-hand-pointer"></i> tap to view</div>' : ''}
         ${editBadge} 
         </td>
         </tr>
