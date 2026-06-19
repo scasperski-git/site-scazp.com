@@ -250,11 +250,12 @@ body.list-mode .container {
     gap: 16px;
     align-items: stretch; 
     margin-bottom: 10px;
+    max-width: 650px; /* Hadkan lebar keseluruhan */
 }
 
 .search-bar-row input {
-    width: 280px;
-    flex: 0 0 280px;
+    width: 240px; /* Kecilkan sikit kotak input */
+    flex: 0 0 240px;
     padding: 16px 20px;
     font-size: 15px;
     border: 2px solid #e2e8f0;
@@ -268,21 +269,15 @@ body.list-mode .container {
     font-weight: 600;
 }
 
-.search-bar-row input:focus {
-    background: #ffffff;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-}
-
 .button-group {
     display: flex;
     gap: 12px;
-    flex: 1; 
+    /* Dah buang flex: 1; supaya butang tak meleret ke tepi */
 }
 
 .button-group button {
-    flex: 1;
-    padding: 0 20px;
+    /* Dah buang flex: 1; */
+    padding: 0 24px;
     border: none;
     border-radius: 12px;
     font-size: 14px;
@@ -293,6 +288,7 @@ body.list-mode .container {
     justify-content: center;
     align-items: center;
     gap: 8px;
+    white-space: nowrap; /* Teks butang tak patah */
 }
 
 .check-btn {
@@ -500,7 +496,9 @@ table tbody tr:hover td { background-color: #e2e8f0; }
     box-shadow: 0 10px 25px rgba(0,0,0,0.04);
     animation: fadeIn 0.4s ease forwards;
     width: 100%;
+    max-width: 550px; /* Hadkan saiz kotak result supaya tak lebar sangat */
 }
+    
 .status-box { text-align: center; margin-bottom: 16px; }
 .status-box span {
     display: inline-block; padding: 8px 24px; color: white;
@@ -517,8 +515,11 @@ table tbody tr:hover td { background-color: #e2e8f0; }
 .no-lock {
     margin-top: 24px; padding: 24px; background: #fef2f2; border: 1px solid #fecdd3;
     border-radius: 16px; text-align: center; font-weight: 600; color: #be123c;
-    display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%;
+    display: flex; flex-direction: column; align-items: center; gap: 10px; 
+    width: 100%;
+    max-width: 550px; /* Hadkan saiz kotak ralat juga */
 }
+    
 .no-lock::before { content: '\f071'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 24px; color: #ef4444; }
 
 .loading { margin-top: 30px; text-align: center; font-weight: 600; color: #475569; width: 100%; }
