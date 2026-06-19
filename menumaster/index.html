@@ -1733,11 +1733,6 @@ if (colId === 'acc_no') {
             
             return currentSort.dir === 'asc' ? comparison : -comparison;
         }
-            // 3. Jika Panjang Digit sama, susun ikut Nilai Matematik (kecil ke besar)
-            let numA = parseFloat(strA.replace(/\D/g, '')) || 0;
-            let numB = parseFloat(strB.replace(/\D/g, '')) || 0;
-            return currentSort.dir === 'asc' ? (numA - numB) : (numB - numA);
-        }
         else if (colId === 'amount') {
             valA = parseFloat(valA.toString().replace(/,/g, '')) || 0;
             valB = parseFloat(valB.toString().replace(/,/g, '')) || 0;
