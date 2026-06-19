@@ -2374,14 +2374,18 @@ function openKpiModal(type) {
     </div>
 </div>
 
-<div id="kpiDetailModal" class="modal-overlay" onclick="closeKpiModal(event)">
+<!-- Struktur Popup Modal (Telah Diperbaiki) -->
+<div id="kpiDetailModal" class="modal-overlay" onclick="this.style.display='none'">
+    <!-- event.stopPropagation() halang modal tertutup jika klik di dalam kotak putih -->
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <div class="modal-title" id="kpiModalTitle">Detail</div>
-            <i class="fa fa-times close-btn" onclick="closeKpiModal()"></i>
+            <!-- Butang X yang telah di-fix -->
+            <i class="fa fa-times close-btn" onclick="document.getElementById('kpiDetailModal').style.display='none'"></i>
         </div>
         <div class="modal-body" id="kpiModalBody">
-            </div>
+            <!-- Data akan di-inject ke dalam ini -->
+        </div>
     </div>
 </div>
 
