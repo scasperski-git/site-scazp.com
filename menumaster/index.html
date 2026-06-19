@@ -1017,6 +1017,41 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 .close-btn:hover {
     color: #ef4444; /* Merah bila hover */
 }
+
+/* ==========================================
+   WARNA BACKGROUND BERBEZA SETIAP SEKSYEN
+   ========================================== */
+
+/* 1. Today's Overall Summary (Biru Cair Premium) */
+.section:nth-of-type(1) {
+    background: linear-gradient(135deg, #ffffff 40%, #eff6ff 100%);
+    border-color: #bfdbfe;
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.04);
+}
+.section:nth-of-type(1) h3 i { background: #dbeafe; color: #2563eb; }
+
+/* 2. Custom Analytics & Report (Hijau Cair Premium) */
+.section:nth-of-type(2) {
+    background: linear-gradient(135deg, #ffffff 40%, #ecfdf5 100%);
+    border-color: #a7f3d0;
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.04);
+}
+.section:nth-of-type(2) h3 i { background: #d1fae5; color: #059669; }
+
+/* 3. Manage Records (Merah/Rose Cair Premium - Alert) */
+.section:nth-of-type(3) {
+    background: linear-gradient(135deg, #ffffff 40%, #fff1f2 100%);
+    border-color: #fecaca;
+    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.04);
+}
+.section:nth-of-type(3) h3 i { background: #ffe4e6; color: #e11d48; }
+
+/* 4. View All Records (Kelabu Neutral) */
+.section:nth-of-type(4) {
+    background: linear-gradient(135deg, #ffffff 40%, #f8fafc 100%);
+    border-color: #e2e8f0;
+}
+.section:nth-of-type(4) h3 i { background: #e2e8f0; color: #475569; }
     
 </style>
 
