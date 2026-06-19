@@ -2341,8 +2341,12 @@ function openKpiModal(type) {
 
     htmlContent += '</div>';
     body.innerHTML = htmlContent;
+// Paparkan modal dengan tukar display ke flex
     modal.style.display = 'flex';
-}
+    
+    // Bekukan (freeze) background di belakang
+    document.body.style.overflow = 'hidden';
+} // <--- ini adalah penutup fungsi openKpiModal
     
 </script>
 
@@ -2375,20 +2379,16 @@ function openKpiModal(type) {
 </div>
 
 <!-- Struktur Popup Modal (Telah Diperbaiki) -->
-<div id="kpiDetailModal" class="modal-overlay" onclick="this.style.display='none'">
-    <!-- event.stopPropagation() halang modal tertutup jika klik di dalam kotak putih -->
+<div id="kpiDetailModal" class="modal-overlay" onclick="this.style.display='none'; document.body.style.overflow='auto';">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <div class="modal-title" id="kpiModalTitle">Detail</div>
-            <!-- Butang X yang telah di-fix -->
-            <i class="fa fa-times close-btn" onclick="document.getElementById('kpiDetailModal').style.display='none'"></i>
+            <i class="fa fa-times close-btn" onclick="document.getElementById('kpiDetailModal').style.display='none'; document.body.style.overflow='auto';"></i>
         </div>
         <div class="modal-body" id="kpiModalBody">
-            <!-- Data akan di-inject ke dalam ini -->
-        </div>
+            </div>
     </div>
 </div>
-
   
 </body>
 </html>
