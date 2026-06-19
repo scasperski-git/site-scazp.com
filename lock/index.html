@@ -936,18 +936,51 @@ table tbody tr:hover td { background-color: #e2e8f0; }
 }
 
 /* ==========================================
-   TABLE COLUMN AUTO-FIT & SPACING FIX (DYNAMIC)
+   FIX JADUAL: FIT DALAM SKRIN 1280 (NO SCROLL)
    ========================================== */
-/* Paksa semua column kecuali yang terakhir (REMARK) auto-fit ngam-ngam saiz content */
-table tbody td:not(:last-child) {
-    white-space: nowrap !important;
-    width: 1% !important; 
-}
+@media (min-width: 900px) {
+    /* 1. Lebarkan sikit kotak utama supaya ada banyak ruang */
+    .main-content { padding: 20px !important; }
+    .container { padding: 20px 25px !important; width: 100% !important; max-width: 1200px !important; }
 
-/* REMARK (lajur terakhir) - Paksa dia kembang ambil semua baki ruang kosong */
-table tbody td:last-child {
-    width: auto !important;
-    white-space: normal !important;
+    /* 2. Reset balik width & kurangkan padding dalam jadual */
+    table {
+        min-width: 100% !important;
+        font-size: 11px !important; 
+    }
+    table th, table td {
+        padding: 8px 5px !important; /* Jimat ruang kiri-kanan */
+    }
+
+    /* 3. Batalkan semua nowrap lama */
+    table tbody td {
+        white-space: normal !important;
+    }
+
+    /* 4. Paksa column yang datanya pendek sahaja untuk lurus (nowrap) */
+    table tbody td:nth-last-child(2), /* CREATED */
+    table tbody td:nth-last-child(3), /* PTP DATE */
+    table tbody td:nth-last-child(4), /* STATUS */
+    table tbody td:nth-last-child(6), /* AMOUNT */
+    table tbody td:nth-last-child(8), /* ACC NO */
+    table tbody td:nth-last-child(9)  /* DCA ID (Kalau ada) */
+    {
+        white-space: nowrap !important;
+        width: 1% !important;
+    }
+
+    /* 5. BRANCH & CATEGORY - Benarkan teks turun 2 baris (wrap) */
+    table tbody td:nth-last-child(7), /* BRANCH */
+    table tbody td:nth-last-child(5)  /* CATEGORY */
+    {
+        min-width: 90px !important; 
+        width: 12% !important;
+    }
+
+    /* 6. REMARK - Ambil semua baki ruang yang tinggal */
+    table tbody td:last-child {
+        width: auto !important;
+    }
 }
     
 </style>
