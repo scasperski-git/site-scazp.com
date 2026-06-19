@@ -1019,47 +1019,47 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 }
 
 /* ==========================================
-   WARNA BACKGROUND & HOVER SETIAP SEKSYEN
+   WARNA BACKGROUND & HOVER SETIAP SEKSYEN (FIXED)
    ========================================== */
 
-/* Tambah efek animasi asas pada semua kotak section */
+/* Animasi asas untuk hover */
 .section {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Efek Hover untuk semua kotak (Terangkat & Bayang membesar) */
+/* Efek Hover (Kotak terangkat & bayang membesar) */
 .section:hover {
     transform: translateY(-6px);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
 }
 
 /* 1. Today's Overall Summary (Kuning Jelas) */
-.section:nth-of-type(1) {
+.section.summary {
     background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
     border-color: #fde68a;
 }
-.section:nth-of-type(1) h3 i { background: #fde68a; color: #d97706; }
+.section.summary h3 i { background: #fde68a; color: #d97706; }
 
 /* 2. Custom Analytics & Report (Hijau Jelas) */
-.section:nth-of-type(2) {
+.section.dashboard {
     background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
     border-color: #bbf7d0;
 }
-.section:nth-of-type(2) h3 i { background: #bbf7d0; color: #15803d; }
+.section.dashboard h3 i { background: #bbf7d0; color: #15803d; }
 
 /* 3. Manage Records (Merah Jelas) */
-.section:nth-of-type(3) {
+.section:has(.fa-pen-to-square) {
     background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
     border-color: #fecaca;
 }
-.section:nth-of-type(3) h3 i { background: #fecaca; color: #b91c1c; }
+.section:has(.fa-pen-to-square) h3 i { background: #fecaca; color: #b91c1c; }
 
-/* 4. View All Records (Kelabu/Biru Cair - Neutral) */
-.section:nth-of-type(4) {
+/* 4. View All Records (Kelabu Neutral) */
+.section:has(.fa-list-check) {
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     border-color: #e2e8f0;
 }
-.section:nth-of-type(4) h3 i { background: #e2e8f0; color: #475569; }
+.section:has(.fa-list-check) h3 i { background: #e2e8f0; color: #475569; }
     
 </style>
 
