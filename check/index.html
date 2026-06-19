@@ -708,6 +708,18 @@ table tbody tr:hover td { background-color: #e2e8f0; }
         width: auto !important;
     }
 }
+
+/* Auto-potong remark kepada 2 baris tanpa limit character */
+.remark-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.remark-text.is-expanded {
+    -webkit-line-clamp: unset;
+}
     
 </style>
 
@@ -1202,18 +1214,16 @@ async function manualTableRefresh() {
 }
 
 function toggleRemark(el){
-    let full = el.getAttribute("data-full");
-    let short = el.getAttribute("data-short");
     let textEl = el.querySelector(".remark-text");
     let hintEl = el.querySelector(".tap-hint");
 
-    if(el.classList.contains("is-expanded")){
-        textEl.innerHTML = short;
-        el.classList.remove("is-expanded");
+    if(!textEl) return;
+
+    if(textEl.classList.contains("is-expanded")){
+        textEl.classList.remove("is-expanded");
         if(hintEl) hintEl.innerHTML = "<i class='fa fa-hand-pointer'></i> tap to view";
     } else {
-        textEl.innerHTML = full;
-        el.classList.add("is-expanded");
+        textEl.classList.add("is-expanded");
         if(hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to minimize";
     }
 }
@@ -1255,18 +1265,17 @@ function renderTable() {
             createdStr = d.created || "-";
         }
 
-        let remark = d.remarks || "-";
+let remark = d.remarks || "-";
         let safeRemark = remark.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-        let shortRemark = remark.length > 60 ? safeRemark.substring(0, 60) + "..." : safeRemark;
 
-        let remarkHtml = remark.length > 60
-            ? `<div style="cursor: pointer; width: 100%; word-break: break-word;" onclick="toggleRemark(this)" data-full="${safeRemark}" data-short="${shortRemark}">
-                 <div class="remark-text">${shortRemark}</div>
+        let remarkHtml = remark.length > 40
+            ? `<div style="cursor: pointer; width: 100%; word-break: break-word;" onclick="toggleRemark(this)">
+                 <div class="remark-text">${safeRemark}</div>
                  <div class="tap-hint" style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic;">
                     <i class='fa fa-hand-pointer'></i> tap to view
                  </div>
                </div>`
-            : `<div style="width: 100%; word-break: break-word;">${safeRemark}</div>`;
+            : `<div class="remark-text" style="width: 100%; word-break: break-word;">${safeRemark}</div>`;
 
         // ==========================================
         // BINA TAG "EDITED BY" & FORMAT MASA 
