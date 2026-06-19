@@ -2085,22 +2085,11 @@ if (colId === 'acc_no') {
             let strA = valA.toString().trim();
             let strB = valB.toString().trim();
 
-            let aStarts0 = strA.startsWith('0');
-            let bStarts0 = strB.startsWith('0');
-
-            // 1. Paksa semua nombor bermula '0' naik ke atas
-            if (aStarts0 && !bStarts0) return currentSort.dir === 'asc' ? -1 : 1;
-            if (!aStarts0 && bStarts0) return currentSort.dir === 'asc' ? 1 : -1;
-
-            // 2. Jika sama-sama mula '0' atau sama-sama tak mula '0', susun ikut Panjang Digit
-            if (strA.length !== strB.length) {
-                return currentSort.dir === 'asc' ? (strA.length - strB.length) : (strB.length - strA.length);
-            } 
+            // Gunakan fungsi "Natural Sort" JavaScript
+            // Dia akan automatik baca apa-apa yang nampak macam nombor sebagai nilai nombor sebenar
+            let comparison = strA.localeCompare(strB, undefined, { numeric: true, sensitivity: 'base' });
             
-            // 3. Jika Panjang Digit sama, susun ikut Nilai Matematik (kecil ke besar)
-            let numA = parseFloat(strA.replace(/\D/g, '')) || 0;
-            let numB = parseFloat(strB.replace(/\D/g, '')) || 0;
-            return currentSort.dir === 'asc' ? (numA - numB) : (numB - numA);
+            return currentSort.dir === 'asc' ? comparison : -comparison;
         }
 
         else if (colId === 'amount') {
