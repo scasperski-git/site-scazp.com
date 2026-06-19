@@ -15,15 +15,18 @@
 
 <style>
 
-/* Potong automatik ikut lebar skrin user (Maksimum 2 baris) */
+/* Auto-potong remark kepada 2 baris tanpa limit character */
 .remark-text {
     display: -webkit-box;
     -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2; /* Set had 2 baris */
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.remark-text:not(.is-expanded) {
-    -webkit-line-clamp: 2; /* Tetapkan had 2 baris */
+
+/* Buka semua baris bila user klik (expand) */
+.remark-text.is-expanded {
+    -webkit-line-clamp: unset;
 }
 
 /* ===== NATIVE APP FEEL (BONUS) ===== */
@@ -1376,11 +1379,13 @@ function toggleRemark(el){
     let textEl = el.querySelector(".remark-text");
     let hintEl = el.querySelector(".tap-hint");
 
+    if(!textEl) return;
+
     if(textEl.classList.contains("is-expanded")){
-        textEl.classList.remove("is-expanded");
+        textEl.classList.remove("is-expanded"); // Kembali ke 2 baris
         if(hintEl) hintEl.innerHTML = "<i class='fa fa-hand-pointer'></i> tap to view";
     } else {
-        textEl.classList.add("is-expanded");
+        textEl.classList.add("is-expanded"); // Tunjuk semua baris
         if(hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to minimize";
     }
 }
@@ -1425,8 +1430,8 @@ function renderTable() {
 let remark = d.remarks || "-";
         let safeRemark = remark.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
-        // Cukup sekadar periksa kalau teks panjang sikit (contoh > 40 huruf), kita letak fungsi 'tap to view'. 
-        // Tapi potongan sebenar akan dibuat 100% secara automatik oleh CSS ikut resolusi.
+        // Kita masih periksa kalau teks panjang sikit (> 40 huruf) untuk tunjuk 'tap to view'. 
+        // Tapi kerja potong teks ke 2 baris diserahkan 100% kepada CSS.
         let remarkHtml = remark.length > 40
             ? `<div style="cursor: pointer; width: 100%; word-break: break-word;" onclick="toggleRemark(this)">
                  <div class="remark-text">${safeRemark}</div>
