@@ -1018,41 +1018,36 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     color: #ef4444; /* Merah bila hover */
 }
 
-/* ==========================================
-   GAYA KORPORAT MINIMALIS (ACCENT BORDERS)
-   ========================================== */
-
-/* Reset semua section ke putih bersih dengan bayang elegan */
+/* STAIL 3: GARIS PENDEK MINIMALIS DI ATAS KIRI */
 .section {
     background: #ffffff;
     border: 1px solid #e2e8f0;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
+    border-radius: 16px; 
     position: relative;
-    /* overflow: hidden penting supaya bucu atas kotak tak tertutup oleh border */
-    border-radius: 20px; 
+    overflow: hidden;
 }
-
-/* Efek Hover (Terangkat sikit & bayang lebih dalam bila dilalukan mouse) */
 .section:hover {
     transform: translateY(-4px);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
 }
+/* Garisan pendek di sudut atas kiri */
+.section::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 90px; height: 5px;
+    border-bottom-right-radius: 4px; /* kasi bucu garisan bulat sikit */
+}
 
-/* 1. Today's Overall Summary (Aksen Biru Korporat) */
-.section.summary { border-top: 5px solid #3b82f6; }
+.section.summary::before { background: #3b82f6; }
 .section.summary h3 i { background: #eff6ff; color: #3b82f6; }
 
-/* 2. Custom Analytics (Aksen Hijau Zamrud) */
-.section.dashboard { border-top: 5px solid #10b981; }
+.section.dashboard::before { background: #10b981; }
 .section.dashboard h3 i { background: #ecfdf5; color: #10b981; }
 
-/* 3. Manage Records (Aksen Merah/Rose untuk Edit/Delete) */
-.section:has(.fa-pen-to-square) { border-top: 5px solid #f43f5e; }
+.section:has(.fa-pen-to-square)::before { background: #f43f5e; }
 .section:has(.fa-pen-to-square) h3 i { background: #fff1f2; color: #f43f5e; }
 
-/* 4. View All Records (Aksen Kelabu Gelap/Hitam Eksekutif) */
-.section:has(.fa-list-check) { border-top: 5px solid #334155; }
+.section:has(.fa-list-check)::before { background: #334155; }
 .section:has(.fa-list-check) h3 i { background: #f1f5f9; color: #334155; }
 
     
