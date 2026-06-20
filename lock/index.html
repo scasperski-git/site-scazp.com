@@ -311,6 +311,14 @@ input:focus, select:focus, textarea:focus {
     margin-top: 10px;
 }
 
+.submit-btn:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    animation: none; /* Matikan efek glow */
+}
+
 .submit-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
@@ -1354,12 +1362,17 @@ accField.addEventListener("keypress", function(e){
 let accCheckTimeout; // Pembolehubah untuk fungsi Debounce
 const warnAccBox = document.getElementById("warn_acc");
 
+let accCheckTimeout; // Pembolehubah untuk fungsi Debounce
+const warnAccBox = document.getElementById("warn_acc");
+const lockSubmitBtn = document.getElementById("submitBtn"); // Kenal pasti butang submit
+
 accField.addEventListener("input", function() {
     // 1. Benarkan nombor sahaja
     this.value = this.value.replace(/\D/g,'');
     
-    // 2. Sembunyikan amaran ketika pengguna sedang menaip
+    // 2. Sembunyikan amaran & hidupkan semula butang jika pengguna sedang menaip
     if(warnAccBox) warnAccBox.style.display = "none";
+    if(lockSubmitBtn) lockSubmitBtn.disabled = false;
     
     // 3. Batalkan timer lama jika pengguna masih menaip
     clearTimeout(accCheckTimeout);
@@ -1370,12 +1383,14 @@ accField.addEventListener("input", function() {
     if(currentAcc.length > 4) {
         accCheckTimeout = setTimeout(async () => {
             try {
-                // Tunjuk indikator sedang memeriksa
+                // Tunjuk indikator sedang memeriksa & matikan sementara butang
                 warnAccBox.innerHTML = `<i class="fa fa-spinner fa-spin"></i> Checking status...`;
                 warnAccBox.style.color = "#64748b";
                 warnAccBox.style.background = "#f8fafc";
                 warnAccBox.style.borderColor = "#cbd5e1";
                 warnAccBox.style.display = "block";
+                
+                if(lockSubmitBtn) lockSubmitBtn.disabled = true; // Disable ketika proses loading
 
                 // Tanya Firebase jika ada status LOCK untuk akaun ini
                 const q = window.query(
@@ -1392,18 +1407,23 @@ accField.addEventListener("input", function() {
                         lockedBy = doc.data().dca_id || "another DCA";
                     });
                     
-                    // Paparkan mesej amaran (Idea 1)
+                    // Paparkan mesej amaran
                     warnAccBox.innerHTML = `<i class="fa-solid fa-lock" style="margin-right: 4px;"></i> Alert: This account is currently locked by <b>${lockedBy}</b>`;
                     warnAccBox.style.color = "#d97706";
                     warnAccBox.style.background = "#fffbeb";
                     warnAccBox.style.borderColor = "#fcd34d";
+                    
+                    // KEKALKAN butang disable supaya borang tak boleh dihantar
+                    if(lockSubmitBtn) lockSubmitBtn.disabled = true; 
                 } else {
-                    // Jika tiada, sembunyikan semula kotak amaran
+                    // Jika tiada (akaun clear), sembunyikan amaran & HIDUPKAN semula butang
                     warnAccBox.style.display = "none";
+                    if(lockSubmitBtn) lockSubmitBtn.disabled = false;
                 }
             } catch (err) {
                 console.error("Error checking live account status:", err);
                 warnAccBox.style.display = "none";
+                if(lockSubmitBtn) lockSubmitBtn.disabled = false; // Fallback jika error server
             }
         }, 800); // 800ms tunggu selepas pengguna berhenti menaip
     }
