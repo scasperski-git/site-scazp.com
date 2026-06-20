@@ -86,59 +86,30 @@
         .metric-value { font-size: 15px; font-weight: bold; }
         .metric-input { width: 100%; box-sizing: border-box; background-color: var(--bg-input); border: 1px solid rgba(255,255,255,0.15); color: var(--accent-gold); padding: 6px; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; }
 
-        /* DataTables Custom Dark Mode CSS - UBAH SUAI RUANGAN SEARCH */
-        .table-container { background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); padding: 20px; overflow-x: auto; margin-top: 20px; }
-        table.dataTable { width: 100% !important; border-collapse: collapse; font-size: 13px; color: var(--text-main); }
-        table.dataTable thead th { background-color: rgba(0,0,0,0.4); color: var(--accent-gold); border-bottom: 1px solid var(--border-color); padding: 15px 12px; white-space: nowrap; text-align: center; font-size: 12px;}
-        table.dataTable tbody td { padding: 15px 12px; border-bottom: 1px solid var(--border-color); background-color: transparent !important; white-space: nowrap; text-align: center; }
+        /* DataTables Custom Dark Mode CSS - DIUBAH SUAI UNTUK FIT SCREEN */
+        .table-container { background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); padding: 15px; overflow-x: auto; margin-top: 20px; }
+        table.dataTable { width: 100% !important; border-collapse: collapse; color: var(--text-main); }
+        
+        /* Saiz fon dan padding dikurangkan supaya muat */
+        table.dataTable thead th { background-color: rgba(0,0,0,0.4); color: var(--accent-gold); border-bottom: 1px solid var(--border-color); padding: 10px 6px; white-space: normal; text-align: center; font-size: 11px; vertical-align: middle;}
+        table.dataTable tbody td { padding: 10px 6px; border-bottom: 1px solid var(--border-color); background-color: transparent !important; white-space: nowrap; text-align: center; font-size: 12px;}
         table.dataTable tbody tr:hover { background-color: rgba(255,255,255,0.03) !important; }
         
-        /* GAYA BARU: KETENGAHKAN DAN BESARKAN SEARCH BAR */
-        div.dataTables_wrapper div.dataTables_filter {
-            text-align: center;
-            float: none;
-            margin-bottom: 30px;
-        }
-        div.dataTables_wrapper div.dataTables_filter label {
-            font-size: 16px;
-            font-weight: bold;
-            color: var(--accent-gold);
-        }
-        div.dataTables_wrapper div.dataTables_filter input {
-            width: 100%;
-            max-width: 400px;
-            padding: 12px 20px;
-            font-size: 16px;
-            border-radius: 30px;
-            border: 2px solid var(--accent-gold);
-            background-color: var(--bg-main);
-            color: white;
-            margin-left: 15px;
-            outline: none;
-            transition: box-shadow 0.3s;
-        }
-        div.dataTables_wrapper div.dataTables_filter input:focus {
-            box-shadow: 0 0 15px var(--accent-glow);
-        }
+        div.dataTables_wrapper div.dataTables_filter { text-align: center; float: none; margin-bottom: 30px; }
+        div.dataTables_wrapper div.dataTables_filter label { font-size: 16px; font-weight: bold; color: var(--accent-gold); }
+        div.dataTables_wrapper div.dataTables_filter input { width: 100%; max-width: 400px; padding: 12px 20px; font-size: 16px; border-radius: 30px; border: 2px solid var(--accent-gold); background-color: var(--bg-main); color: white; margin-left: 15px; outline: none; transition: box-shadow 0.3s; }
+        div.dataTables_wrapper div.dataTables_filter input:focus { box-shadow: 0 0 15px var(--accent-glow); }
 
         .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: var(--text-muted) !important; font-size: 12px; margin-bottom: 15px; }
         .dataTables_wrapper .dataTables_paginate .paginate_button { color: var(--text-muted) !important; }
         .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: var(--accent-gold) !important; color: #000 !important; border: none; font-weight: bold;}
 
         /* Badge Laporan & Status Amaran */
-        .val-badge { padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: inline-block; min-width: 50px; text-align: center; font-size: 12px;}
-        .val-gold { color: var(--accent-gold); font-weight: bold; font-size: 14px;}
+        .val-badge { padding: 3px 6px; border-radius: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: inline-block; min-width: 40px; text-align: center; font-size: 11px;}
+        .val-gold { color: var(--accent-gold); font-weight: bold; font-size: 13px;}
         
         .alert-red {
-            background-color: rgba(239, 68, 68, 0.15);
-            color: var(--danger);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 11px;
-            display: inline-block;
-            animation: pulse 2s infinite;
+            background-color: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px 8px; border-radius: 6px; font-weight: bold; font-size: 10px; display: inline-block; animation: pulse 2s infinite;
         }
         
         @keyframes pulse {
@@ -230,13 +201,13 @@
                     <thead>
                         <tr>
                             <th style="text-align: left;">Nama Agensi DCA</th>
-                            <th>Jum. Lokasi (Loc)</th>
+                            <th>Jum. Caw.</th>
                             <th>Total A/C</th>
                             <th>Jumlah OSB (RM)</th>
                             <th style="border-left: 1px solid var(--border-color); color: #fff;">KITARAN 1 <br><span style="font-size:10px; color:var(--text-muted);">(A/C | Kutipan)</span></th>
                             <th style="border-left: 1px solid var(--border-color); color: #fff;">KITARAN 2 <br><span style="font-size:10px; color:var(--text-muted);">(A/C | Kutipan)</span></th>
                             <th style="border-left: 1px solid var(--border-color); color: #fff;">KITARAN 3 <br><span style="font-size:10px; color:var(--text-muted);">(A/C | Kutipan)</span></th>
-                            <th style="border-left: 1px solid var(--accent-gold);">TOTAL KUTIPAN (RM)</th>
+                            <th style="border-left: 1px solid var(--accent-gold);">TOTAL KUTIPAN <br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
                             <th style="color:var(--success);">% PRESTASI</th>
                         </tr>
                     </thead>
@@ -253,13 +224,13 @@
         // KONFIGURASI FIRESTORE
         // ==========================================
         const firebaseConfig = {
-  apiKey: "AIzaSyA0PO0Tqv8IzN5YxYNuXO1ZSMFruKiK9Pg",
-  authDomain: "dca-performance.firebaseapp.com",
-  projectId: "dca-performance",
-  storageBucket: "dca-performance.firebasestorage.app",
-  messagingSenderId: "581375097218",
-  appId: "1:581375097218:web:feb9b0c8773bd33d56779b"
-};
+            apiKey: "GANTIKAN_DENGAN_API_KEY_ANDA",
+            authDomain: "PROJEK_ANDA.firebaseapp.com",
+            projectId: "dca-performance",
+            storageBucket: "PROJEK_ANDA.appspot.com",
+            messagingSenderId: "ID_ANDA",
+            appId: "APP_ID_ANDA"
+        };
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -390,16 +361,15 @@
         }
 
         // ==========================================
-        // ADMIN: IDEA BERNAS - JANA LAPORAN GROUP BY DCA
+        // ADMIN: JANA LAPORAN GROUP BY DCA
         // ==========================================
         function getStatusCellHtml(currentDateStr, cycleConfigDate, cycleAmount, cycleAc) {
-            // Logik Amaran Merah: Jika tarikh hari ini melepasi/sama dengan tarikh kitaran, dan jumlah kutipan DCA = 0
             if (cycleConfigDate && currentDateStr >= cycleConfigDate && cycleAmount === 0) {
                 return `<span class="alert-red">BELUM HANTAR</span>`;
             } else if (cycleAmount > 0) {
                 return `<span class="val-badge">${cycleAc}</span> | <span class="val-gold">RM ${cycleAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>`;
             } else {
-                return `<span style="color:var(--text-muted); font-size:12px;">Menunggu</span>`;
+                return `<span style="color:var(--text-muted); font-size:11px;">Menunggu</span>`;
             }
         }
 
@@ -416,7 +386,6 @@
                 let submissionsDict = {};
                 submissionsSnap.forEach(doc => { submissionsDict[doc.id] = doc.data(); });
 
-                // Dapatkan tarikh semasa & tarikh tetapan untuk conditional formatting (Merah)
                 const todayStr = new Date().toISOString().split('T')[0];
                 const c1Date = document.getElementById('admin-cycle-1').value;
                 const c2Date = document.getElementById('admin-cycle-2').value;
@@ -426,7 +395,6 @@
                 let grandTotalOsb = 0;
                 let grandTotalCollection = 0;
 
-                // 1. KUMPULKAN SEMUA REKOD MENGIKUT NAMA DCA
                 assignmentsSnap.forEach(doc => {
                     const task = doc.data();
                     const locCode = doc.id;
@@ -447,7 +415,6 @@
                     dcaGroupMap[dcaName].total_osb += osb;
                     grandTotalOsb += osb;
 
-                    // Jumlahkan Kutipan Kitaran
                     const c1rm = sub.cycle_1?.collection_amount || 0;
                     const c2rm = sub.cycle_2?.collection_amount || 0;
                     const c3rm = sub.cycle_3?.collection_amount || 0;
@@ -469,7 +436,6 @@
                 tbody.innerHTML = '';
                 let dcaCount = 0;
 
-                // 2. BINA BARIS JADUAL UNTUK SETIAP AGENSI DCA SAHAJA
                 for (const [dcaName, data] of Object.entries(dcaGroupMap)) {
                     dcaCount++;
                     
@@ -477,33 +443,33 @@
                     const c2_html = getStatusCellHtml(todayStr, c2Date, data.c2_rm, data.c2_ac);
                     const c3_html = getStatusCellHtml(todayStr, c3Date, data.c3_rm, data.c3_ac);
 
+                    // Tambahan A/C Paying keseluruhan untuk agensi tersebut
+                    const totalAcPaying = data.c1_ac + data.c2_ac + data.c3_ac;
                     const dcaPct = data.total_osb > 0 ? ((data.total_rm / data.total_osb) * 100).toFixed(2) : "0.00";
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td style="font-weight: bold; color: var(--accent-gold); text-align: left; font-size: 14px;">${dcaName}</td>
-                        <td>${data.total_locs} Cawangan</td>
+                        <td style="font-weight: bold; color: var(--accent-gold); text-align: left; font-size: 13px;">${dcaName}</td>
+                        <td>${data.total_locs} Caw.</td>
                         <td>${data.total_ac.toLocaleString()}</td>
                         <td style="font-weight: 500;">${data.total_osb.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                         <td style="border-left: 1px solid var(--border-color);">${c1_html}</td>
                         <td style="border-left: 1px solid var(--border-color);">${c2_html}</td>
                         <td style="border-left: 1px solid var(--border-color);">${c3_html}</td>
-                        <td style="border-left: 1px solid var(--accent-gold); font-weight:bold; color: var(--text-main); font-size: 14px;">
-                            ${data.total_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}
+                        <td style="border-left: 1px solid var(--accent-gold); color: var(--text-main);">
+                            <span class="val-badge">${totalAcPaying}</span> | <span style="font-weight:bold; color: var(--success); font-size: 14px;">${data.total_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                         </td>
-                        <td style="font-weight: bold; color: var(--success); font-size: 14px;">${dcaPct}%</td>
+                        <td style="font-weight: bold; color: var(--success); font-size: 13px;">${dcaPct}%</td>
                     `;
                     tbody.appendChild(tr);
                 }
 
-                // Kemas Kini Nilai pada Kad KPI
                 let percentVal = grandTotalOsb > 0 ? (grandTotalCollection / grandTotalOsb) * 100 : 0;
                 document.getElementById('kpi-osb').textContent = `RM ${grandTotalOsb.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                 document.getElementById('kpi-collection').textContent = `RM ${grandTotalCollection.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                 document.getElementById('kpi-percent').textContent = `${percentVal.toFixed(2)}%`;
                 document.getElementById('kpi-pending').textContent = dcaCount;
 
-                // Aktifkan DataTables dengan Search Bar yang lebih cantik
                 $('#report-table').DataTable({
                     "pageLength": 10,
                     "language": {
@@ -513,7 +479,7 @@
                         "paginate": { "next": "Seterusnya", "previous": "Sebelumnya" }
                     },
                     "scrollX": true,
-                    "order": [[ 7, "desc" ]] // Sort automatik dari kutipan paling tinggi
+                    "order": [[ 7, "desc" ]]
                 });
 
             } catch (error) {
