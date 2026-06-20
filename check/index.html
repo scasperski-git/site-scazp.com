@@ -1590,8 +1590,15 @@ function startSessionListener() {
     });
 }
 
-// Terus jalankan listener sebaik sahaja portal dibuka
-startSessionListener();
+// Tunggu 1 saat untuk pastikan enjin Firebase siap sedia, baru pasang CCTV
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        if(typeof startSessionListener === "function") {
+            startSessionListener();
+            console.log("CCTV Sesi Aktif!");
+        }
+    }, 1000); 
+});
 
 /* =========================================================================
    FUNGSI CCTV: RAKAM AKTIVITI KE FIREBASE
