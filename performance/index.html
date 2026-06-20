@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal & Dashboard DCA | scazp.com</title>
     
-    <!-- Pustaka jQuery & DataTables untuk Carian & Susunan Jadual -->
+    <!-- Pustaka jQuery & DataTables -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -34,7 +34,6 @@
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 20px; }
         .container { max-width: 1250px; margin: 0 auto; }
 
-        /* Navigasi Tab */
         .tab-menu { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; overflow-x: auto; }
         .tab-btn { background: transparent; color: var(--text-muted); border: none; padding: 10px 20px; font-size: 15px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: all 0.3s; white-space: nowrap; }
         .tab-btn:hover { color: var(--text-main); background-color: rgba(255,255,255,0.05); }
@@ -48,7 +47,6 @@
         .header h1 { color: var(--accent-gold); margin: 0; font-size: 24px; letter-spacing: 1px; }
         .header p { color: var(--text-muted); font-size: 13px; margin-top: 5px; }
 
-        /* Panel Kawalan (Admin / DCA) */
         .control-panel { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; margin-bottom: 25px; }
         .panel-title { color: var(--accent-gold); font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px; }
         label.panel-label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
@@ -62,7 +60,6 @@
         .grid-3 { display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; }
         @media (min-width: 768px) { .grid-3 { grid-template-columns: repeat(3, 1fr); } .container-portal { max-width: 850px; margin: 0 auto; } }
 
-        /* Kotak KPI (Dashboard) */
         .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
         @media (min-width: 768px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
         .kpi-card { background-color: var(--bg-card); padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; text-align: center; }
@@ -72,12 +69,10 @@
         .green { color: var(--success); }
         .red { color: var(--danger); }
 
-        /* Butang */
         .btn-action { background-color: var(--success); color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; width: 100%; }
         .btn-gold { background-color: var(--accent-gold); color: #000; }
         .btn-action:hover { opacity: 0.8; }
 
-        /* Kad Tugasan DCA */
         .region-section-title { color: var(--accent-gold); font-size: 13px; text-transform: uppercase; margin: 35px 0 15px 0; padding-left: 8px; border-left: 3px solid var(--accent-gold); }
         .loc-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; margin-bottom: 18px; transition: all 0.25s ease; }
         .loc-card.active-focus { border-color: var(--accent-gold); box-shadow: 0 0 15px var(--accent-glow); }
@@ -91,20 +86,66 @@
         .metric-value { font-size: 15px; font-weight: bold; }
         .metric-input { width: 100%; box-sizing: border-box; background-color: var(--bg-input); border: 1px solid rgba(255,255,255,0.15); color: var(--accent-gold); padding: 6px; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; }
 
-        /* DataTables Custom Dark Mode CSS */
+        /* DataTables Custom Dark Mode CSS - UBAH SUAI RUANGAN SEARCH */
         .table-container { background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); padding: 20px; overflow-x: auto; margin-top: 20px; }
-        table.dataTable { width: 100% !important; border-collapse: collapse; font-size: 12px; color: var(--text-main); }
-        table.dataTable thead th { background-color: rgba(0,0,0,0.4); color: var(--accent-gold); border-bottom: 1px solid var(--border-color); padding: 12px; white-space: nowrap; text-align: left;}
-        table.dataTable tbody td { padding: 12px; border-bottom: 1px solid var(--border-color); background-color: transparent !important; white-space: nowrap; }
+        table.dataTable { width: 100% !important; border-collapse: collapse; font-size: 13px; color: var(--text-main); }
+        table.dataTable thead th { background-color: rgba(0,0,0,0.4); color: var(--accent-gold); border-bottom: 1px solid var(--border-color); padding: 15px 12px; white-space: nowrap; text-align: center; font-size: 12px;}
+        table.dataTable tbody td { padding: 15px 12px; border-bottom: 1px solid var(--border-color); background-color: transparent !important; white-space: nowrap; text-align: center; }
         table.dataTable tbody tr:hover { background-color: rgba(255,255,255,0.03) !important; }
-        .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: var(--text-muted) !important; font-size: 12px; margin-bottom: 15px; }
-        .dataTables_wrapper .dataTables_filter input { background-color: var(--bg-main); border: 1px solid var(--border-color); color: white; padding: 5px; border-radius: 4px; margin-left: 8px; }
-        .dataTables_wrapper .dataTables_paginate .paginate_button { color: var(--text-muted) !important; }
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: var(--accent-gold) !important; color: #000 !important; border: none; }
+        
+        /* GAYA BARU: KETENGAHKAN DAN BESARKAN SEARCH BAR */
+        div.dataTables_wrapper div.dataTables_filter {
+            text-align: center;
+            float: none;
+            margin-bottom: 30px;
+        }
+        div.dataTables_wrapper div.dataTables_filter label {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--accent-gold);
+        }
+        div.dataTables_wrapper div.dataTables_filter input {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 30px;
+            border: 2px solid var(--accent-gold);
+            background-color: var(--bg-main);
+            color: white;
+            margin-left: 15px;
+            outline: none;
+            transition: box-shadow 0.3s;
+        }
+        div.dataTables_wrapper div.dataTables_filter input:focus {
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
 
-        /* Badge Laporan */
-        .val-badge { padding: 3px 6px; border-radius: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: inline-block; min-width: 60px; text-align: center; }
-        .val-gold { color: var(--accent-gold); font-weight: bold; }
+        .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: var(--text-muted) !important; font-size: 12px; margin-bottom: 15px; }
+        .dataTables_wrapper .dataTables_paginate .paginate_button { color: var(--text-muted) !important; }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: var(--accent-gold) !important; color: #000 !important; border: none; font-weight: bold;}
+
+        /* Badge Laporan & Status Amaran */
+        .val-badge { padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: inline-block; min-width: 50px; text-align: center; font-size: 12px;}
+        .val-gold { color: var(--accent-gold); font-weight: bold; font-size: 14px;}
+        
+        .alert-red {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 11px;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
 
         #toast { visibility: hidden; min-width: 250px; background-color: var(--success); color: #fff; text-align: center; border-radius: 6px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 13px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
@@ -115,16 +156,12 @@
 <body>
 
     <div class="container">
-        
-        <!-- MENU NAVIGASI -->
         <div class="tab-menu">
             <button class="tab-btn active" onclick="switchTab('portal')">Kemas Kini Prestasi (DCA)</button>
             <button class="tab-btn" onclick="switchTab('dashboard')">Dashboard Rumusan (Admin)</button>
         </div>
 
-        <!-- ============================================== -->
-        <!-- VIEW 1: PORTAL DCA (USER VIEW)                 -->
-        <!-- ============================================== -->
+        <!-- VIEW 1: PORTAL DCA -->
         <div id="view-portal" class="view-section active">
             <div class="container-portal">
                 <div class="header">
@@ -137,55 +174,35 @@
                 <div class="control-panel">
                     <div class="panel-title">Pemilihan Tugasan & Kitaran</div>
                     <label class="panel-label">Pilih Kitaran Semasa</label>
-                    <select id="dca-cycle-select" onchange="fetchAndRenderDcaTasks()">
-                        <option value="">-- Memuat turun tetapan kitaran... --</option>
-                    </select>
-
+                    <select id="dca-cycle-select" onchange="fetchAndRenderDcaTasks()"><option value="">-- Memuat turun tetapan kitaran... --</option></select>
                     <label class="panel-label" style="margin-top: 10px;">Pilih Nama Agensi DCA</label>
-                    <select id="dca-select" onchange="fetchAndRenderDcaTasks()">
-                        <option value="">-- Memuat turun senarai agensi... --</option>
-                    </select>
+                    <select id="dca-select" onchange="fetchAndRenderDcaTasks()"><option value="">-- Memuat turun senarai agensi... --</option></select>
                 </div>
 
-                <div id="portal-display">
-                    <div style="text-align:center; color: var(--text-muted); padding: 30px;">Sila pilih Kitaran & Nama Agensi untuk mula mengemas kini.</div>
-                </div>
+                <div id="portal-display"><div style="text-align:center; color: var(--text-muted); padding: 30px;">Sila pilih Kitaran & Nama Agensi untuk mula mengemas kini.</div></div>
             </div>
         </div>
 
-        <!-- ============================================== -->
-        <!-- VIEW 2: DASHBOARD ADMIN (SUPER ADMIN VIEW)     -->
-        <!-- ============================================== -->
+        <!-- VIEW 2: DASHBOARD ADMIN -->
         <div id="view-dashboard" class="view-section">
             <div class="header">
                 <div>
                     <h1>PAPAN PEMUKA ADMIN</h1>
-                    <p>Kawalan tetapan kitaran, muat naik pangkalan data, dan rumusan prestasi.</p>
+                    <p>Rumusan prestasi agensi peringkat eksekutif (Dikumpulkan mengikut DCA).</p>
                 </div>
             </div>
 
             <div class="grid-3">
-                <!-- Panel 1: Tetapan Kitaran -->
                 <div class="control-panel" style="grid-column: span 2;">
                     <div class="panel-title">1. Tetapan Tarikh Kitaran (Cycle Configuration)</div>
                     <div class="grid-3">
-                        <div>
-                            <label class="panel-label">Kitaran 1 (Cth: 7hb/10hb)</label>
-                            <input type="date" id="admin-cycle-1">
-                        </div>
-                        <div>
-                            <label class="panel-label">Kitaran 2 (Cth: 20hb)</label>
-                            <input type="date" id="admin-cycle-2">
-                        </div>
-                        <div>
-                            <label class="panel-label">Kitaran 3 (Cth: Akhir Bulan)</label>
-                            <input type="date" id="admin-cycle-3">
-                        </div>
+                        <div><label class="panel-label">Kitaran 1</label><input type="date" id="admin-cycle-1"></div>
+                        <div><label class="panel-label">Kitaran 2</label><input type="date" id="admin-cycle-2"></div>
+                        <div><label class="panel-label">Kitaran 3</label><input type="date" id="admin-cycle-3"></div>
                     </div>
                     <button class="btn-action btn-gold" style="width: auto;" onclick="saveCycleSettings()">Simpan Tetapan Kitaran</button>
                 </div>
 
-                <!-- Panel 2: Upload Excel -->
                 <div class="control-panel">
                     <div class="panel-title">2. Muat Naik Data Agihan (Excel)</div>
                     <label class="panel-label">Muat Naik Fail 'Assignments'</label>
@@ -193,60 +210,40 @@
                 </div>
             </div>
 
-            <!-- Panel 3: Action Header -->
             <div class="control-panel" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div>
-                    <div class="panel-title" style="margin-bottom: 5px; border: none;">3. Rumusan Keseluruhan Prestasi DCA</div>
-                    <p style="margin:0; font-size:12px; color:var(--text-muted);">Laporan ini merangkumi hasil untuk semua kitaran yang ditetapkan di atas.</p>
+                    <div class="panel-title" style="margin-bottom: 5px; border: none;">3. Rumusan Keseluruhan Peringkat Agensi</div>
+                    <p style="margin:0; font-size:12px; color:var(--text-muted);">Data diringkaskan dan dikumpulkan berdasarkan Nama DCA secara automatik.</p>
                 </div>
                 <button class="btn-action" style="width: auto; background-color: var(--success);" onclick="generateFullReport()">Jana & Muat Semula Jadual</button>
             </div>
 
-            <!-- 4 Kotak KPI Utama -->
             <div class="kpi-grid">
-                <div class="kpi-card">
-                    <h3>Total OSB Keseluruhan</h3>
-                    <div class="kpi-value" id="kpi-osb">RM 0.00</div>
-                </div>
-                <div class="kpi-card">
-                    <h3>Jumlah Kutipan Semasa</h3>
-                    <div class="kpi-value green" id="kpi-collection">RM 0.00</div>
-                </div>
-                <div class="kpi-card">
-                    <h3>% Kutipan Semasa</h3>
-                    <div class="kpi-value gold" id="kpi-percent">0.00%</div>
-                </div>
-                <div class="kpi-card">
-                    <h3>DCA Belum Hantar</h3>
-                    <div class="kpi-value red" id="kpi-pending">0</div>
-                </div>
+                <div class="kpi-card"><h3>Total OSB Keseluruhan</h3><div class="kpi-value" id="kpi-osb">RM 0.00</div></div>
+                <div class="kpi-card"><h3>Jumlah Kutipan Semasa</h3><div class="kpi-value green" id="kpi-collection">RM 0.00</div></div>
+                <div class="kpi-card"><h3>% Kutipan Keseluruhan</h3><div class="kpi-value gold" id="kpi-percent">0.00%</div></div>
+                <div class="kpi-card"><h3>Agensi DCA (Aktif)</h3><div class="kpi-value" id="kpi-pending" style="color:var(--text-main);">0</div></div>
             </div>
 
-            <!-- Jadual DataTables -->
             <div class="table-container">
                 <table id="report-table" class="display nowrap">
                     <thead>
                         <tr>
-                            <th>Nama DCA</th>
-                            <th>Region</th>
-                            <th>Area</th>
-                            <th>Loc Code</th>
+                            <th style="text-align: left;">Nama Agensi DCA</th>
+                            <th>Jum. Lokasi (Loc)</th>
                             <th>Total A/C</th>
-                            <th>OSB (RM)</th>
+                            <th>Jumlah OSB (RM)</th>
                             <th style="border-left: 1px solid var(--border-color); color: #fff;">KITARAN 1 <br><span style="font-size:10px; color:var(--text-muted);">(A/C | Kutipan)</span></th>
                             <th style="border-left: 1px solid var(--border-color); color: #fff;">KITARAN 2 <br><span style="font-size:10px; color:var(--text-muted);">(A/C | Kutipan)</span></th>
                             <th style="border-left: 1px solid var(--border-color); color: #fff;">KITARAN 3 <br><span style="font-size:10px; color:var(--text-muted);">(A/C | Kutipan)</span></th>
                             <th style="border-left: 1px solid var(--accent-gold);">TOTAL KUTIPAN (RM)</th>
+                            <th style="color:var(--success);">% PRESTASI</th>
                         </tr>
                     </thead>
-                    <tbody id="table-body">
-                        <!-- Data dimasukkan oleh JS -->
-                    </tbody>
+                    <tbody id="table-body"></tbody>
                 </table>
             </div>
-
         </div>
-
     </div>
 
     <div id="toast">Operasi Berjaya Dilaksanakan!</div>
@@ -263,14 +260,11 @@
   messagingSenderId: "581375097218",
   appId: "1:581375097218:web:feb9b0c8773bd33d56779b"
 };
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // INITIAL LOAD
-        window.onload = function() {
-            listenToDcaList();
-            fetchCycleSettings();
-        };
+        window.onload = function() { listenToDcaList(); fetchCycleSettings(); };
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -285,14 +279,10 @@
         }
 
         function showToast(msg) {
-            const toast = document.getElementById("toast");
-            toast.textContent = msg; toast.className = "show";
+            const toast = document.getElementById("toast"); toast.textContent = msg; toast.className = "show";
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // ==========================================
-        // ADMIN: TETAPAN KITARAN (CYCLES)
-        // ==========================================
         async function fetchCycleSettings() {
             try {
                 const docSnap = await db.collection("settings").doc("cycles").get();
@@ -301,7 +291,6 @@
 
                 if (docSnap.exists) {
                     const data = docSnap.data();
-                    
                     document.getElementById('admin-cycle-1').value = data.cycle_1 || '';
                     document.getElementById('admin-cycle-2').value = data.cycle_2 || '';
                     document.getElementById('admin-cycle-3').value = data.cycle_3 || '';
@@ -310,174 +299,114 @@
                     if(data.cycle_2) dcaCycleSelect.innerHTML += `<option value="cycle_2">Kitaran 2 (${data.cycle_2})</option>`;
                     if(data.cycle_3) dcaCycleSelect.innerHTML += `<option value="cycle_3">Kitaran 3 (${data.cycle_3})</option>`;
                 }
-            } catch (e) {
-                console.error("Ralat tetapan:", e);
-            }
+            } catch (e) { console.error("Ralat tetapan:", e); }
         }
 
         async function saveCycleSettings() {
-            const c1 = document.getElementById('admin-cycle-1').value;
-            const c2 = document.getElementById('admin-cycle-2').value;
-            const c3 = document.getElementById('admin-cycle-3').value;
-
+            const c1 = document.getElementById('admin-cycle-1').value; const c2 = document.getElementById('admin-cycle-2').value; const c3 = document.getElementById('admin-cycle-3').value;
             if(!c1 || !c2 || !c3) { alert("Sila isikan ketiga-tiga tarikh kitaran."); return; }
-
             try {
-                await db.collection("settings").doc("cycles").set({
-                    cycle_1: c1, cycle_2: c2, cycle_3: c3, updated_at: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                showToast("Tetapan Kitaran Berjaya Disimpan!");
-                fetchCycleSettings(); 
+                await db.collection("settings").doc("cycles").set({ cycle_1: c1, cycle_2: c2, cycle_3: c3, updated_at: firebase.firestore.FieldValue.serverTimestamp() });
+                showToast("Tetapan Kitaran Berjaya Disimpan!"); fetchCycleSettings(); 
             } catch (e) { alert("Ralat menyimpan tetapan: " + e.message); }
         }
 
-        // ==========================================
-        // ADMIN: UPLOAD EXCEL
-        // ==========================================
         async function uploadExcelToFirestore(input) {
-            const file = input.files[0];
-            if (!file) return;
-
+            const file = input.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = async function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                
+                const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, { type: 'array' });
+                const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
                 if (jsonData.length === 0) return;
                 showToast("Memuat naik data ke Firestore...");
-                
-                const batch = db.batch();
-                let count = 0;
-
+                const batch = db.batch(); let count = 0;
                 jsonData.forEach(row => {
                     const locCodeRaw = row['LOC CODE'];
                     if (locCodeRaw) {
                         const cleanLocCode = Math.floor(locCodeRaw).toString();
-                        const docRef = db.collection("assignments").doc(cleanLocCode);
-                        batch.set(docRef, {
-                            dca_name: row['DCA NAME'] || 'TIADA NAMA',
-                            region: row['REGION'] || 'TIADA REGION',
-                            area: row['AREA'] || 'TIADA AREA',
-                            loc_name: row['LOC NAME'] || 'TIADA NAMA LOC',
-                            total_ac_assigned: parseInt(row['TOTAL A/C ASSIGNED']) || 0,
-                            total_osb_assigned: parseFloat(row['TOTAL OSB ASSIGNED']) || 0
-                        }, { merge: true });
-                        count++;
+                        batch.set(db.collection("assignments").doc(cleanLocCode), {
+                            dca_name: row['DCA NAME'] || 'TIADA NAMA', region: row['REGION'] || '', area: row['AREA'] || '', loc_name: row['LOC NAME'] || '',
+                            total_ac_assigned: parseInt(row['TOTAL A/C ASSIGNED']) || 0, total_osb_assigned: parseFloat(row['TOTAL OSB ASSIGNED']) || 0
+                        }, { merge: true }); count++;
                     }
                 });
                 try { await batch.commit(); showToast(`${count} rekod berjaya di muat naik!`); input.value = ""; } 
                 catch (error) { alert("Ralat muat naik data."); }
-            };
-            reader.readAsArrayBuffer(file);
+            }; reader.readAsArrayBuffer(file);
         }
 
-        // ==========================================
-        // PORTAL DCA: KEMAS KINI PRESTASI
-        // ==========================================
         function listenToDcaList() {
-            const dcaSelect = document.getElementById('dca-select');
             db.collection("assignments").onSnapshot((snapshot) => {
-                dcaSelect.innerHTML = '<option value="">-- Sila Pilih Agensi DCA --</option>';
+                const dcaSelect = document.getElementById('dca-select'); dcaSelect.innerHTML = '<option value="">-- Sila Pilih Agensi DCA --</option>';
                 if (snapshot.empty) return;
-                let dcaSet = new Set();
-                snapshot.forEach(doc => { if (doc.data().dca_name) dcaSet.add(doc.data().dca_name); });
+                let dcaSet = new Set(); snapshot.forEach(doc => { if (doc.data().dca_name) dcaSet.add(doc.data().dca_name); });
                 Array.from(dcaSet).sort().forEach(dcaName => { dcaSelect.innerHTML += `<option value="${dcaName}">${dcaName}</option>`; });
             });
         }
 
         async function fetchAndRenderDcaTasks() {
-            const selectedDca = document.getElementById('dca-select').value;
-            const selectedCycle = document.getElementById('dca-cycle-select').value;
+            const selectedDca = document.getElementById('dca-select').value; const selectedCycle = document.getElementById('dca-cycle-select').value;
             const displayArea = document.getElementById('portal-display');
-            
-            if (!selectedDca || !selectedCycle) { 
-                displayArea.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 30px;">Sila pilih Kitaran & Nama Agensi untuk mula mengemas kini.</div>'; 
-                return; 
-            }
-
-            displayArea.innerHTML = '<div style="text-align:center; padding: 30px;">Menarik data dari Cloud...</div>';
-
+            if (!selectedDca || !selectedCycle) { displayArea.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 30px;">Sila pilih Kitaran & Nama Agensi.</div>'; return; }
+            displayArea.innerHTML = '<div style="text-align:center; padding: 30px;">Menarik data...</div>';
             try {
-                const querySnapshot = await db.collection("assignments").where("dca_name", "==", selectedDca).get();
-                displayArea.innerHTML = ''; 
+                const querySnapshot = await db.collection("assignments").where("dca_name", "==", selectedDca).get(); displayArea.innerHTML = ''; 
                 if (querySnapshot.empty) { displayArea.innerHTML = '<div style="text-align:center;">Tiada rekod.</div>'; return; }
-
                 let groupedByRegion = {};
                 querySnapshot.forEach((doc) => {
                     let task = doc.data(); task.loc_code = doc.id;
-                    if (!groupedByRegion[task.region]) groupedByRegion[task.region] = [];
-                    groupedByRegion[task.region].push(task);
+                    if (!groupedByRegion[task.region]) groupedByRegion[task.region] = []; groupedByRegion[task.region].push(task);
                 });
-
                 for (const region in groupedByRegion) {
-                    const regionHeader = document.createElement('div');
-                    regionHeader.className = 'region-section-title';
-                    regionHeader.textContent = `REGION: ${region}`;
-                    displayArea.appendChild(regionHeader);
-
+                    const regionHeader = document.createElement('div'); regionHeader.className = 'region-section-title'; regionHeader.textContent = `REGION: ${region}`; displayArea.appendChild(regionHeader);
                     groupedByRegion[region].forEach(task => {
-                        const card = document.createElement('div');
-                        card.className = 'loc-card';
-                        card.setAttribute('onclick', 'highlightCard(this)');
-
+                        const card = document.createElement('div'); card.className = 'loc-card'; card.setAttribute('onclick', 'highlightCard(this)');
                         card.innerHTML = `
-                            <div class="loc-header">
-                                <div class="loc-title">LOC ${task.loc_code} - ${task.loc_name}</div>
-                                <div class="loc-subtitle">${task.region} | ${task.area}</div>
-                            </div>
+                            <div class="loc-header"><div class="loc-title">LOC ${task.loc_code} - ${task.loc_name}</div><div class="loc-subtitle">${task.region} | ${task.area}</div></div>
                             <div class="metrics-grid">
-                                <div class="metric-box"><label>Total A/C Assigned</label><div class="metric-value">${task.total_ac_assigned}</div></div>
-                                <div class="metric-box"><label>Total OSB Assigned</label><div class="metric-value">RM ${Number(task.total_osb_assigned).toLocaleString()}</div></div>
+                                <div class="metric-box"><label>A/C Assigned</label><div class="metric-value">${task.total_ac_assigned}</div></div>
+                                <div class="metric-box"><label>OSB Assigned</label><div class="metric-value">RM ${Number(task.total_osb_assigned).toLocaleString()}</div></div>
                                 <div class="metric-box"><label>A/C Paying (${selectedCycle.replace('_',' ').toUpperCase()})</label><input type="number" class="metric-input" id="ac-${task.loc_code}" placeholder="0" onfocus="event.stopPropagation()"></div>
                                 <div class="metric-box"><label>Kutipan (${selectedCycle.replace('_',' ').toUpperCase()})</label><input type="number" class="metric-input" id="coll-${task.loc_code}" placeholder="0.00" onfocus="event.stopPropagation()"></div>
                             </div>
                             <button class="btn-action" style="margin-top:15px;" onclick="submitPerformance('${task.loc_code}', event)">Hantar Laporan Kitaran Ini</button>
-                        `;
-                        displayArea.appendChild(card);
+                        `; displayArea.appendChild(card);
                     });
                 }
             } catch (error) { displayArea.innerHTML = `<div>Ralat: ${error.message}</div>`; }
         }
 
-        function highlightCard(el) {
-            document.querySelectorAll('.loc-card').forEach(c => c.classList.remove('active-focus'));
-            el.classList.add('active-focus');
-        }
+        function highlightCard(el) { document.querySelectorAll('.loc-card').forEach(c => c.classList.remove('active-focus')); el.classList.add('active-focus'); }
 
         async function submitPerformance(locCode, event) {
             event.stopPropagation();
-            const cycle = document.getElementById('dca-cycle-select').value;
-            const acPaying = document.getElementById(`ac-${locCode}`).value;
-            const collResult = document.getElementById(`coll-${locCode}`).value;
-
+            const cycle = document.getElementById('dca-cycle-select').value; const acPaying = document.getElementById(`ac-${locCode}`).value; const collResult = document.getElementById(`coll-${locCode}`).value;
             if (!acPaying || !collResult) { alert("Sila isi nilai."); return; }
-
             try {
-                await db.collection("submissions").doc(locCode).set({
-                    [cycle]: {
-                        ac_paying: parseInt(acPaying),
-                        collection_amount: parseFloat(collResult),
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    }
-                }, { merge: true });
-
+                await db.collection("submissions").doc(locCode).set({ [cycle]: { ac_paying: parseInt(acPaying), collection_amount: parseFloat(collResult), timestamp: firebase.firestore.FieldValue.serverTimestamp() } }, { merge: true });
                 showToast(`Prestasi ${cycle} LOC ${locCode} berjaya dihantar!`);
                 document.getElementById(`ac-${locCode}`).value = ""; document.getElementById(`coll-${locCode}`).value = "";
             } catch (e) { alert("Gagal hantar: " + e.message); }
         }
 
         // ==========================================
-        // ADMIN: JANA LAPORAN DATATABLES & KPI
+        // ADMIN: IDEA BERNAS - JANA LAPORAN GROUP BY DCA
         // ==========================================
+        function getStatusCellHtml(currentDateStr, cycleConfigDate, cycleAmount, cycleAc) {
+            // Logik Amaran Merah: Jika tarikh hari ini melepasi/sama dengan tarikh kitaran, dan jumlah kutipan DCA = 0
+            if (cycleConfigDate && currentDateStr >= cycleConfigDate && cycleAmount === 0) {
+                return `<span class="alert-red">BELUM HANTAR</span>`;
+            } else if (cycleAmount > 0) {
+                return `<span class="val-badge">${cycleAc}</span> | <span class="val-gold">RM ${cycleAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>`;
+            } else {
+                return `<span style="color:var(--text-muted); font-size:12px;">Menunggu</span>`;
+            }
+        }
+
         async function generateFullReport() {
             const tbody = document.getElementById('table-body');
-            
-            if ($.fn.DataTable.isDataTable('#report-table')) {
-                $('#report-table').DataTable().destroy();
-            }
-            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">Menarik & Memadankan Data Dari Pangkalan Data...</td></tr>';
+            if ($.fn.DataTable.isDataTable('#report-table')) { $('#report-table').DataTable().destroy(); }
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px;">Mengumpulkan & Merumuskan Data Dari Pangkalan Data...</td></tr>';
 
             try {
                 const assignmentsSnap = await db.collection("assignments").get();
@@ -487,90 +416,109 @@
                 let submissionsDict = {};
                 submissionsSnap.forEach(doc => { submissionsDict[doc.id] = doc.data(); });
 
-                tbody.innerHTML = '';
+                // Dapatkan tarikh semasa & tarikh tetapan untuk conditional formatting (Merah)
+                const todayStr = new Date().toISOString().split('T')[0];
+                const c1Date = document.getElementById('admin-cycle-1').value;
+                const c2Date = document.getElementById('admin-cycle-2').value;
+                const c3Date = document.getElementById('admin-cycle-3').value;
 
-                // Pembolehubah untuk KPI
-                let totalOsbValue = 0;
-                let totalCollectionValue = 0;
-                let pendingLocCount = 0;
+                let dcaGroupMap = {};
+                let grandTotalOsb = 0;
+                let grandTotalCollection = 0;
 
+                // 1. KUMPULKAN SEMUA REKOD MENGIKUT NAMA DCA
                 assignmentsSnap.forEach(doc => {
                     const task = doc.data();
                     const locCode = doc.id;
+                    const dcaName = task.dca_name || "UNKNOWN";
                     const sub = submissionsDict[locCode] || {};
 
-                    // Tambah KPI OSB
-                    totalOsbValue += parseFloat(task.total_osb_assigned || 0);
-
-                    // Kira Jumlah Kutipan Keseluruhan untuk Loc Code ini
-                    const totalRm = (sub.cycle_1?.collection_amount || 0) + (sub.cycle_2?.collection_amount || 0) + (sub.cycle_3?.collection_amount || 0);
-                    
-                    // Tambah KPI Kutipan
-                    totalCollectionValue += totalRm;
-
-                    // Jika tiada langsung rekod untuk mana-mana kitaran, kira sebagai 'Belum Hantar'
-                    if (!sub.cycle_1 && !sub.cycle_2 && !sub.cycle_3) {
-                        pendingLocCount++;
+                    if (!dcaGroupMap[dcaName]) {
+                        dcaGroupMap[dcaName] = {
+                            total_locs: 0, total_ac: 0, total_osb: 0,
+                            c1_ac: 0, c1_rm: 0, c2_ac: 0, c2_rm: 0, c3_ac: 0, c3_rm: 0, total_rm: 0
+                        };
                     }
 
-                    const c1_ac = sub.cycle_1?.ac_paying ?? "-";
-                    const c1_rm = sub.cycle_1?.collection_amount ? sub.cycle_1.collection_amount.toLocaleString(undefined, {minimumFractionDigits: 2}) : "-";
+                    dcaGroupMap[dcaName].total_locs += 1;
+                    dcaGroupMap[dcaName].total_ac += (parseInt(task.total_ac_assigned) || 0);
                     
-                    const c2_ac = sub.cycle_2?.ac_paying ?? "-";
-                    const c2_rm = sub.cycle_2?.collection_amount ? sub.cycle_2.collection_amount.toLocaleString(undefined, {minimumFractionDigits: 2}) : "-";
+                    const osb = parseFloat(task.total_osb_assigned) || 0;
+                    dcaGroupMap[dcaName].total_osb += osb;
+                    grandTotalOsb += osb;
+
+                    // Jumlahkan Kutipan Kitaran
+                    const c1rm = sub.cycle_1?.collection_amount || 0;
+                    const c2rm = sub.cycle_2?.collection_amount || 0;
+                    const c3rm = sub.cycle_3?.collection_amount || 0;
+
+                    dcaGroupMap[dcaName].c1_ac += sub.cycle_1?.ac_paying || 0;
+                    dcaGroupMap[dcaName].c1_rm += c1rm;
                     
-                    const c3_ac = sub.cycle_3?.ac_paying ?? "-";
-                    const c3_rm = sub.cycle_3?.collection_amount ? sub.cycle_3.collection_amount.toLocaleString(undefined, {minimumFractionDigits: 2}) : "-";
+                    dcaGroupMap[dcaName].c2_ac += sub.cycle_2?.ac_paying || 0;
+                    dcaGroupMap[dcaName].c2_rm += c2rm;
+                    
+                    dcaGroupMap[dcaName].c3_ac += sub.cycle_3?.ac_paying || 0;
+                    dcaGroupMap[dcaName].c3_rm += c3rm;
+
+                    const totalRmForLoc = c1rm + c2rm + c3rm;
+                    dcaGroupMap[dcaName].total_rm += totalRmForLoc;
+                    grandTotalCollection += totalRmForLoc;
+                });
+
+                tbody.innerHTML = '';
+                let dcaCount = 0;
+
+                // 2. BINA BARIS JADUAL UNTUK SETIAP AGENSI DCA SAHAJA
+                for (const [dcaName, data] of Object.entries(dcaGroupMap)) {
+                    dcaCount++;
+                    
+                    const c1_html = getStatusCellHtml(todayStr, c1Date, data.c1_rm, data.c1_ac);
+                    const c2_html = getStatusCellHtml(todayStr, c2Date, data.c2_rm, data.c2_ac);
+                    const c3_html = getStatusCellHtml(todayStr, c3Date, data.c3_rm, data.c3_ac);
+
+                    const dcaPct = data.total_osb > 0 ? ((data.total_rm / data.total_osb) * 100).toFixed(2) : "0.00";
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td style="font-weight: 600; color: var(--accent-gold);">${task.dca_name}</td>
-                        <td>${task.region}</td>
-                        <td>${task.area}</td>
-                        <td>${locCode}</td>
-                        <td style="text-align:center;">${task.total_ac_assigned}</td>
-                        <td>${Number(task.total_osb_assigned).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                        
-                        <td style="border-left: 1px solid var(--border-color); text-align:center;">
-                            <span class="val-badge">${c1_ac}</span> | <span class="val-gold">${c1_rm}</span>
+                        <td style="font-weight: bold; color: var(--accent-gold); text-align: left; font-size: 14px;">${dcaName}</td>
+                        <td>${data.total_locs} Cawangan</td>
+                        <td>${data.total_ac.toLocaleString()}</td>
+                        <td style="font-weight: 500;">${data.total_osb.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td style="border-left: 1px solid var(--border-color);">${c1_html}</td>
+                        <td style="border-left: 1px solid var(--border-color);">${c2_html}</td>
+                        <td style="border-left: 1px solid var(--border-color);">${c3_html}</td>
+                        <td style="border-left: 1px solid var(--accent-gold); font-weight:bold; color: var(--text-main); font-size: 14px;">
+                            ${data.total_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}
                         </td>
-                        <td style="border-left: 1px solid var(--border-color); text-align:center;">
-                            <span class="val-badge">${c2_ac}</span> | <span class="val-gold">${c2_rm}</span>
-                        </td>
-                        <td style="border-left: 1px solid var(--border-color); text-align:center;">
-                            <span class="val-badge">${c3_ac}</span> | <span class="val-gold">${c3_rm}</span>
-                        </td>
-                        
-                        <td style="border-left: 1px solid var(--accent-gold); font-weight:bold; color: var(--success);">
-                            ${totalRm > 0 ? totalRm.toLocaleString(undefined, {minimumFractionDigits: 2}) : "-"}
-                        </td>
+                        <td style="font-weight: bold; color: var(--success); font-size: 14px;">${dcaPct}%</td>
                     `;
                     tbody.appendChild(tr);
-                });
+                }
 
                 // Kemas Kini Nilai pada Kad KPI
-                let percentVal = totalOsbValue > 0 ? (totalCollectionValue / totalOsbValue) * 100 : 0;
-                
-                document.getElementById('kpi-osb').textContent = `RM ${totalOsbValue.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                document.getElementById('kpi-collection').textContent = `RM ${totalCollectionValue.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                let percentVal = grandTotalOsb > 0 ? (grandTotalCollection / grandTotalOsb) * 100 : 0;
+                document.getElementById('kpi-osb').textContent = `RM ${grandTotalOsb.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                document.getElementById('kpi-collection').textContent = `RM ${grandTotalCollection.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                 document.getElementById('kpi-percent').textContent = `${percentVal.toFixed(2)}%`;
-                document.getElementById('kpi-pending').textContent = pendingLocCount;
+                document.getElementById('kpi-pending').textContent = dcaCount;
 
-                // Aktifkan DataTables
+                // Aktifkan DataTables dengan Search Bar yang lebih cantik
                 $('#report-table').DataTable({
-                    "pageLength": 25,
+                    "pageLength": 10,
                     "language": {
-                        "search": "Cari Rekod:",
+                        "search": "CARI REKOD AGENSI:",
                         "lengthMenu": "Papar _MENU_ rekod",
-                        "info": "Memaparkan _START_ hingga _END_ dari _TOTAL_ rekod",
+                        "info": "Memaparkan _START_ hingga _END_ dari _TOTAL_ agensi",
                         "paginate": { "next": "Seterusnya", "previous": "Sebelumnya" }
                     },
-                    "scrollX": true
+                    "scrollX": true,
+                    "order": [[ 7, "desc" ]] // Sort automatik dari kutipan paling tinggi
                 });
 
             } catch (error) {
                 console.error("Ralat Dashboard:", error);
-                tbody.innerHTML = `<tr><td colspan="10" style="color:red; text-align:center;">Ralat: ${error.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" style="color:red; text-align:center;">Ralat: ${error.message}</td></tr>`;
             }
         }
     </script>
