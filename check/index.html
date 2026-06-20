@@ -1111,9 +1111,40 @@ function newSearch(){
 
 checkBtn.addEventListener("click",checkLock);
 resetBtn.addEventListener("click",newSearch);
-input.addEventListener("keypress",function(e){ if(e.key==="Enter"){ checkLock(); } });
-input.addEventListener("input",function(){ this.value=this.value.replace(/[^0-9]/g,''); });
+let liveCheckTimeout; // Timer untuk elak spam database
 
+// Fungsi untuk tangkap butang Enter (jika pengguna tak sabar tunggu 0.8s)
+input.addEventListener("keypress", function(e) { 
+    if(e.key === "Enter"){ 
+        clearTimeout(liveCheckTimeout); // Batal auto-check
+        checkLock(); 
+    } 
+});
+
+// Fungsi "Live Validation" / Auto-Search
+input.addEventListener("input", function() { 
+    // 1. Paksa masukkan nombor sahaja
+    this.value = this.value.replace(/[^0-9]/g,''); 
+    
+    // 2. Batalkan carian automatik yang lama setiap kali ditekan butang baru
+    clearTimeout(liveCheckTimeout);
+
+    let currentAcc = this.value.trim();
+
+    // 3. Jika pengguna padamkan semula kotak ke kosong, bersihkan result di bawah
+    if(currentAcc === "") {
+        result.innerHTML = "";
+        return;
+    }
+
+    // 4. Jika nombor akaun lebih dari 4 digit, kita auto-cetuskan fungsi checkLock()
+    if(currentAcc.length > 4) {
+        liveCheckTimeout = setTimeout(() => {
+            // Panggil fungsi checkLock() secara automatik!
+            checkLock(); 
+        }, 800); // Tunggu 800ms selepas berhenti menaip
+    }
+});
 // ==========================================
 // SECTION 2: VIEW RECORDS & EXPORT LOGIC
 // ==========================================
