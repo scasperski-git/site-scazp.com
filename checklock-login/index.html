@@ -502,26 +502,14 @@ async function login(){
 
 if(data.status === "SUCCESS") {
             
-// ==========================================
-            // LANGKAH TAMBAHAN: BUANG SESI LAMA (SINGLE DEVICE LOGIN)
-            // ==========================================
-            const qOldSession = window.query(
-                window.collection(window.db, "ACTIVE_SESSIONS"),
-                window.where("user", "==", data.user)
-            );
-            const oldSessionsSnap = await window.getDocs(qOldSession);
-            
-            // GUNA for...of SUPAYA SISTEM TUNGGU (AWAIT) PROSES DELETE SELESAI
-            for (const docSnap of oldSessionsSnap.docs) {
-                await window.deleteDoc(window.doc(window.db, "ACTIVE_SESSIONS", docSnap.id));
-            }
-
-            // 2. CIPTA TOKEN DAN SIMPAN SESI BARU KE FIREBASE
             const sessionToken = generateSessionToken();
             const expireDate = new Date();
             expireDate.setHours(expireDate.getHours() + 24); // Sesi 24 jam
 
-            await window.addDoc(window.collection(window.db, "ACTIVE_SESSIONS"), {
+            // ==========================================
+            // KITA GUNA setDoc UNTUK TIMPA (OVERWRITE) SESI LAMA SECARA AUTOMATIK
+            // ==========================================
+            await window.setDoc(window.doc(window.db, "ACTIVE_SESSIONS", data.user), {
                 token: sessionToken,
                 user: data.user,
                 type: data.type,
@@ -529,7 +517,7 @@ if(data.status === "SUCCESS") {
                 expire_at: expireDate.toISOString()
             });
 
-            // 3. TULIS LOG KE FIREBASE SYSTEM_LOGS
+            // TULIS LOG KE FIREBASE SYSTEM_LOGS
             await window.addDoc(window.collection(window.db, "SYSTEM_LOGS"), {
                 timestamp: new Date().toISOString(),
                 user_id: data.user,
@@ -540,7 +528,7 @@ if(data.status === "SUCCESS") {
                 details: "User logged in via Firebase session"
             });
 
-            // 4. SIMPAN KE STORAGE BROWSER
+            // SIMPAN KE STORAGE BROWSER
             let isApp = navigator.userAgent.includes("wv") || (navigator.userAgent.includes("Android") && navigator.userAgent.includes("Version"));
             let storage = isApp ? localStorage : sessionStorage;
 
@@ -550,7 +538,7 @@ if(data.status === "SUCCESS") {
             storage.setItem("lock_role", data.role);
             storage.setItem("lock_name", data.name);
 
-            // 5. HALA PENGGUNA KE PORTAL
+            // HALA PENGGUNA KE PORTAL
             if(data.type == "check") window.location="../check/";
             else if(data.type == "lock") window.location="../lock/";
             else if(data.type == "master") window.location="../menumaster/";
