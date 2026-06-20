@@ -367,26 +367,29 @@ body.list-mode .container {
     transform: translateY(-2px);
 }
 
-/* ===== STANDARDIZED DESKTOP TABLE STYLES (DARI MASTER) ===== */
+/* ==========================================
+   PREMIUM TABLE STYLES (VIEW RECORDS)
+   ========================================== */
 .table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    border-radius: 12px;
+    border-radius: 16px; /* Bucu lebih bulat */
     border: 1px solid #e2e8f0;
     background: white;
     max-height: 60vh;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03); /* Bayang eksklusif */
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 11.5px; /* Dikecilkan supaya lebih padat */
+    font-size: 12px; 
     min-width: 600px;
 }
 
 table th, table td {
-    padding: 10px 12px; /* Dikurangkan untuk jimat ruang mendatar */
-    border-bottom: 1px solid #e2e8f0;
+    padding: 14px 16px; /* Ruang lebih selesa */
+    border-bottom: 1px solid #f1f5f9; /* Garisan pembahagi sangat lembut */
     text-align: left;
 }
 
@@ -395,17 +398,36 @@ table th {
     top: 0; 
     z-index: 10; 
     background: #f8fafc !important;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
+    color: #475569;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0; /* Penegasan antara header & data */
     cursor: pointer;
     user-select: none;
     white-space: nowrap;
 }
 
-table th:hover { background: #f1f5f9 !important; }
+table th:hover { 
+    background: #f1f5f9 !important; 
+    color: #0f172a; 
+}
+
 table tr:last-child td { border-bottom: none; }
-table tbody tr:nth-child(even) { background-color: #f8fafc; }
-table tbody tr:nth-child(odd) { background-color: #ffffff; }
-table tbody tr:hover td { background-color: #e2e8f0; }
+
+table tbody tr { 
+    transition: all 0.2s ease; 
+    background-color: #ffffff;
+}
+
+/* Efek baris melompat sikit bila di-hover */
+table tbody tr:hover { 
+    background-color: #f8fafc; 
+    transform: translateY(-1px); 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
+    z-index: 1; 
+    position: relative;
+}
 
 .pagination-bar {
     display: flex;
@@ -1314,9 +1336,17 @@ let remark = d.remarks || "-";
             editBadge = `<div style="margin-top: 4px; display: inline-block; background: #f8fafc; border: 1px dashed #cbd5e1; color: #475569; font-size: 8.5px; padding: 2px 5px; border-radius: 4px; font-weight: 600; line-height: 1.2;"><i class="fa fa-pen" style="font-size:8px; margin-right:3px;"></i>Edited by ${d.edited_by}${editTime}</div>`;
         }
 
+// ==========================================
+        // MODERN SOFT BADGE UNTUK STATUS
+        // ==========================================
         let statusBadge = d.status === "PAID" 
-            ? `<div style="text-align:left;"><span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span><span style="display:block; font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">by ${d.paid_by || '-'}</span></div>`
-            : `<div style="text-align:left;"><span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span></div>`;
+            ? `<div style="text-align:left;">
+                 <span style="background:#ecfdf5; color:#059669; border: 1px solid #6ee7b7; padding:6px 12px; border-radius:8px; font-size:10px; font-weight:700; letter-spacing:0.5px;">PAID</span>
+                 <span style="display:block; font-size:9px; color:#94a3b8; font-weight:600; margin-top:8px; text-transform:uppercase;">by ${d.paid_by || '-'}</span>
+               </div>`
+            : `<div style="text-align:left;">
+                 <span style="background:#fffbeb; color:#d97706; border: 1px solid #fcd34d; padding:6px 12px; border-radius:8px; font-size:10px; font-weight:700; letter-spacing:0.5px;">LOCK</span>
+               </div>`;
 
         html += `
         <tr style="${rowBg}">
