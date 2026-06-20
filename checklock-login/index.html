@@ -330,6 +330,33 @@ AUTH OVERLAY
 
 </style>
 
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, query, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDKiYl8462c8ZanXc4oXIfa-_9su3E89Wk",
+    authDomain: "lockcheck-e0160.firebaseapp.com",
+    projectId: "lockcheck-e0160",
+    storageBucket: "lockcheck-e0160.firebasestorage.app",
+    messagingSenderId: "912034602664",
+    appId: "1:912034602664:web:f23b971b67a0ef1df8ac9d",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  window.db = db;
+  window.collection = collection;
+  window.addDoc = addDoc;
+  window.query = query;
+  window.where = where;
+  window.getDocs = getDocs;
+  window.deleteDoc = deleteDoc;
+  window.doc = doc;
+</script>
+
 </head>
 
 <body>
@@ -434,8 +461,12 @@ if (passField) {
 }
 
 /* ==========================================
-   FUNGSI LOGIN DENGAN BUTTON LOADING STATE
+   FUNGSI LOGIN DENGAN FIREBASE SESSION & LOG
    ========================================== */
+function generateSessionToken() {
+    return 'scazp_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+}
+
 async function login(){
     const user = document.getElementById("user").value.trim();
     const pass = document.getElementById("pass").value.trim();
@@ -447,67 +478,130 @@ async function login(){
     if(!user || !pass){
         err.innerText="Enter User ID and Password";
         err.style.display="block";
-        
-        // Goncang butang jika kosong
         loginBtn.classList.add("shake");
         setTimeout(() => loginBtn.classList.remove("shake"), 400);
         return;
     }
 
-    // Tukar butang jadi animasi loading
     const originalBtnText = loginBtn.innerHTML;
     loginBtn.innerHTML = "<i class='fa fa-circle-notch fa-spin'></i> Authenticating...";
     loginBtn.disabled = true;
     loginBtn.style.opacity = "0.8";
-
-    // Paparkan overlay (pilihan, jika anda masih mahu kekalkan skrin putih)
     document.getElementById("overlay").style.display="flex";
 
-    try{
-        const res=await fetch(api,{
-            method:"POST",
-            body:new URLSearchParams({
-                action:"login",
-                user:user,
-                pass:pass,
-                api_key: API_KEY
+    try {
+        // 1. SAHKAN KATA LALUAN DENGAN GOOGLE SHEETS
+        const res = await fetch(api, {
+            method: "POST",
+            body: new URLSearchParams({
+                action: "login", user: user, pass: pass, api_key: API_KEY
             })
         });
 
-        const data=await res.json();
+        const data = await res.json();
 
-        if(data.status==="SUCCESS"){
+        if(data.status === "SUCCESS") {
+            // 2. CIPTA TOKEN DAN SIMPAN SESI KE FIREBASE
+            const sessionToken = generateSessionToken();
+            const expireDate = new Date();
+            expireDate.setHours(expireDate.getHours() + 24); // Sesi 24 jam
+
+            await window.addDoc(window.collection(window.db, "ACTIVE_SESSIONS"), {
+                token: sessionToken,
+                user: data.user,
+                type: data.type,
+                role: data.role,
+                expire_at: expireDate.toISOString()
+            });
+
+            // 3. TULIS LOG KE FIREBASE SYSTEM_LOGS
+            await window.addDoc(window.collection(window.db, "SYSTEM_LOGS"), {
+                timestamp: new Date().toISOString(),
+                user_id: data.user,
+                role: data.role,
+                action: "LOGIN",
+                status: "SUCCESS",
+                acc_no: "-",
+                details: "User logged in via Firebase session"
+            });
+
+            // 4. SIMPAN KE STORAGE BROWSER
             let isApp = navigator.userAgent.includes("wv") || (navigator.userAgent.includes("Android") && navigator.userAgent.includes("Version"));
             let storage = isApp ? localStorage : sessionStorage;
 
-            storage.setItem("session_token", data.token);
+            storage.setItem("session_token", sessionToken);
             storage.setItem("lock_user", data.user);
             storage.setItem("lock_type", data.type);
             storage.setItem("lock_role", data.role);
             storage.setItem("lock_name", data.name);
 
-            if(data.type=="check") window.location="../check/";
-            else if(data.type=="lock") window.location="../lock/";
-            else if(data.type=="master") window.location="../menumaster/";
+            // 5. HALA PENGGUNA KE PORTAL
+            if(data.type == "check") window.location="../check/";
+            else if(data.type == "lock") window.location="../lock/";
+            else if(data.type == "master") window.location="../menumaster/";
         }
-        else if(data.status==="INACTIVE"){
+        else if(data.status === "INACTIVE"){
             err.innerText="User ID inactive";
             err.style.display="block";
             resetLoginBtn(loginBtn, originalBtnText);
         }
-        else{
+        else {
             err.innerText="Invalid login credentials";
             err.style.display="block";
             resetLoginBtn(loginBtn, originalBtnText);
         }
 
-    }catch(e){
+    } catch(e) {
+        console.error(e);
         err.innerText="System error. Please try again.";
         err.style.display="block";
         resetLoginBtn(loginBtn, originalBtnText);
     }
 }
 
+/* ==========================================
+   SEMAKAN AUTO-LOGIN (FIREBASE)
+   ========================================== */
+window.addEventListener('DOMContentLoaded', async (event) => {
+    const activeToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
+    const userType = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_type");
+    
+    if (activeToken && userType) {
+        document.getElementById("overlay").style.display = "flex"; 
+        
+        try {
+            // Semak Sesi Terus Ke Firebase
+            const q = window.query(window.collection(window.db, "ACTIVE_SESSIONS"), window.where("token", "==", activeToken));
+            const querySnapshot = await window.getDocs(q);
+            
+            let isValid = false;
+            querySnapshot.forEach((doc) => {
+                let sessionData = doc.data();
+                if (new Date(sessionData.expire_at) > new Date()) {
+                    isValid = true;
+                } else {
+                    // Buang sesi yang dah luput
+                    window.deleteDoc(window.doc(window.db, "ACTIVE_SESSIONS", doc.id));
+                }
+            });
+
+            if (isValid) {
+                if (userType === "check") window.location = "../check/";
+                else if (userType === "lock") window.location = "../lock/";
+                else if (userType === "master") window.location = "../menumaster/";
+            } else {
+                localStorage.clear();
+                sessionStorage.clear();
+                document.getElementById("overlay").style.display = "none";
+                const err = document.getElementById("errorMsg");
+                err.innerText = "Your session has expired. Please login again.";
+                err.style.display = "block";
+            }
+        } catch(e) {
+            document.getElementById("overlay").style.display = "none";
+        }
+    }
+});
 // Fungsi untuk kembalikan butang ke asal jika gagal login
 function resetLoginBtn(btn, text) {
     document.getElementById("overlay").style.display="none";
