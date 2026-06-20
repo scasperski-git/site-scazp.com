@@ -62,6 +62,16 @@
         .grid-3 { display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; }
         @media (min-width: 768px) { .grid-3 { grid-template-columns: repeat(3, 1fr); } .container-portal { max-width: 850px; margin: 0 auto; } }
 
+        /* Kotak KPI (Dashboard) */
+        .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
+        @media (min-width: 768px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
+        .kpi-card { background-color: var(--bg-card); padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; text-align: center; }
+        .kpi-card h3 { display: block; font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin: 0 0 10px 0; }
+        .kpi-value { font-size: 24px; font-weight: bold; color: #FFF; }
+        .gold { color: var(--accent-gold); }
+        .green { color: var(--success); }
+        .red { color: var(--danger); }
+
         /* Butang */
         .btn-action { background-color: var(--success); color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; width: 100%; }
         .btn-gold { background-color: var(--accent-gold); color: #000; }
@@ -183,13 +193,33 @@
                 </div>
             </div>
 
-            <!-- Panel 3: Generate Report -->
+            <!-- Panel 3: Action Header -->
             <div class="control-panel" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div>
                     <div class="panel-title" style="margin-bottom: 5px; border: none;">3. Rumusan Keseluruhan Prestasi DCA</div>
                     <p style="margin:0; font-size:12px; color:var(--text-muted);">Laporan ini merangkumi hasil untuk semua kitaran yang ditetapkan di atas.</p>
                 </div>
                 <button class="btn-action" style="width: auto; background-color: var(--success);" onclick="generateFullReport()">Jana & Muat Semula Jadual</button>
+            </div>
+
+            <!-- 4 Kotak KPI Utama -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <h3>Total OSB Keseluruhan</h3>
+                    <div class="kpi-value" id="kpi-osb">RM 0.00</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>Jumlah Kutipan Semasa</h3>
+                    <div class="kpi-value green" id="kpi-collection">RM 0.00</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>% Kutipan Semasa</h3>
+                    <div class="kpi-value gold" id="kpi-percent">0.00%</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>DCA Belum Hantar</h3>
+                    <div class="kpi-value red" id="kpi-pending">0</div>
+                </div>
             </div>
 
             <!-- Jadual DataTables -->
@@ -233,11 +263,8 @@
   messagingSenderId: "581375097218",
   appId: "1:581375097218:web:feb9b0c8773bd33d56779b"
 };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
-        let dataTableInstance = null; // Simpan rujukan jadual
 
         // INITIAL LOAD
         window.onload = function() {
@@ -275,12 +302,10 @@
                 if (docSnap.exists) {
                     const data = docSnap.data();
                     
-                    // Masukkan ke input form Admin
                     document.getElementById('admin-cycle-1').value = data.cycle_1 || '';
                     document.getElementById('admin-cycle-2').value = data.cycle_2 || '';
                     document.getElementById('admin-cycle-3').value = data.cycle_3 || '';
 
-                    // Masukkan ke Dropdown DCA
                     if(data.cycle_1) dcaCycleSelect.innerHTML += `<option value="cycle_1">Kitaran 1 (${data.cycle_1})</option>`;
                     if(data.cycle_2) dcaCycleSelect.innerHTML += `<option value="cycle_2">Kitaran 2 (${data.cycle_2})</option>`;
                     if(data.cycle_3) dcaCycleSelect.innerHTML += `<option value="cycle_3">Kitaran 3 (${data.cycle_3})</option>`;
@@ -302,7 +327,7 @@
                     cycle_1: c1, cycle_2: c2, cycle_3: c3, updated_at: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 showToast("Tetapan Kitaran Berjaya Disimpan!");
-                fetchCycleSettings(); // Refresh dropdown
+                fetchCycleSettings(); 
             } catch (e) { alert("Ralat menyimpan tetapan: " + e.message); }
         }
 
@@ -430,7 +455,6 @@
             if (!acPaying || !collResult) { alert("Sila isi nilai."); return; }
 
             try {
-                // Simpan data sebagai field di dalam document submisssions mengikut cycle ID
                 await db.collection("submissions").doc(locCode).set({
                     [cycle]: {
                         ac_paying: parseInt(acPaying),
@@ -445,36 +469,50 @@
         }
 
         // ==========================================
-        // ADMIN: JANA LAPORAN DATATABLES
+        // ADMIN: JANA LAPORAN DATATABLES & KPI
         // ==========================================
         async function generateFullReport() {
             const tbody = document.getElementById('table-body');
             
-            // Wajib 'destroy' jadual lama sebelum isi data baru (Keperluan DataTables)
             if ($.fn.DataTable.isDataTable('#report-table')) {
                 $('#report-table').DataTable().destroy();
             }
             tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">Menarik & Memadankan Data Dari Pangkalan Data...</td></tr>';
 
             try {
-                // 1. Tarik semua maklumat agihan (Master Data)
                 const assignmentsSnap = await db.collection("assignments").get();
                 if (assignmentsSnap.empty) { tbody.innerHTML = ''; return; }
 
-                // 2. Tarik semua maklumat penyerahan (Submissions) serentak untuk kelajuan
                 const submissionsSnap = await db.collection("submissions").get();
                 let submissionsDict = {};
                 submissionsSnap.forEach(doc => { submissionsDict[doc.id] = doc.data(); });
 
                 tbody.innerHTML = '';
 
-                // 3. Cantumkan data dan bina baris jadual
+                // Pembolehubah untuk KPI
+                let totalOsbValue = 0;
+                let totalCollectionValue = 0;
+                let pendingLocCount = 0;
+
                 assignmentsSnap.forEach(doc => {
                     const task = doc.data();
                     const locCode = doc.id;
                     const sub = submissionsDict[locCode] || {};
 
-                    // Dapatkan nilai Kitaran 1, 2, 3 jika wujud (Jika tiada, letak sengkang "-")
+                    // Tambah KPI OSB
+                    totalOsbValue += parseFloat(task.total_osb_assigned || 0);
+
+                    // Kira Jumlah Kutipan Keseluruhan untuk Loc Code ini
+                    const totalRm = (sub.cycle_1?.collection_amount || 0) + (sub.cycle_2?.collection_amount || 0) + (sub.cycle_3?.collection_amount || 0);
+                    
+                    // Tambah KPI Kutipan
+                    totalCollectionValue += totalRm;
+
+                    // Jika tiada langsung rekod untuk mana-mana kitaran, kira sebagai 'Belum Hantar'
+                    if (!sub.cycle_1 && !sub.cycle_2 && !sub.cycle_3) {
+                        pendingLocCount++;
+                    }
+
                     const c1_ac = sub.cycle_1?.ac_paying ?? "-";
                     const c1_rm = sub.cycle_1?.collection_amount ? sub.cycle_1.collection_amount.toLocaleString(undefined, {minimumFractionDigits: 2}) : "-";
                     
@@ -483,9 +521,6 @@
                     
                     const c3_ac = sub.cycle_3?.ac_paying ?? "-";
                     const c3_rm = sub.cycle_3?.collection_amount ? sub.cycle_3.collection_amount.toLocaleString(undefined, {minimumFractionDigits: 2}) : "-";
-
-                    // Kira Jumlah Kutipan Keseluruhan untuk Loc Code ini
-                    const totalRm = (sub.cycle_1?.collection_amount || 0) + (sub.cycle_2?.collection_amount || 0) + (sub.cycle_3?.collection_amount || 0);
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
@@ -513,7 +548,15 @@
                     tbody.appendChild(tr);
                 });
 
-                // 4. Aktifkan DataTables
+                // Kemas Kini Nilai pada Kad KPI
+                let percentVal = totalOsbValue > 0 ? (totalCollectionValue / totalOsbValue) * 100 : 0;
+                
+                document.getElementById('kpi-osb').textContent = `RM ${totalOsbValue.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                document.getElementById('kpi-collection').textContent = `RM ${totalCollectionValue.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                document.getElementById('kpi-percent').textContent = `${percentVal.toFixed(2)}%`;
+                document.getElementById('kpi-pending').textContent = pendingLocCount;
+
+                // Aktifkan DataTables
                 $('#report-table').DataTable({
                     "pageLength": 25,
                     "language": {
