@@ -396,20 +396,65 @@ function togglePass(){
     }
 }
 
-/* LOGIN */
+/* ==========================================
+   SMART UX: AUTO-UPPERCASE & ENTER KEY NAV
+   ========================================== */
+const userIdField = document.getElementById("user"); 
+const passField = document.getElementById("pass");
+
+if (userIdField) {
+    userIdField.addEventListener("input", function() {
+        // Buang jarak (space) dan paksa huruf besar automatik
+        this.value = this.value.replace(/\s/g, '').toUpperCase();
+    });
+
+    // Tekan Enter di User ID -> Lompat ke Password
+    userIdField.addEventListener("keypress", function(e){
+        if(e.key === "Enter"){
+            e.preventDefault();
+            passField.focus();
+        }
+    });
+}
+
+// Tekan Enter di Password -> Terus Login
+if (passField) {
+    passField.addEventListener("keypress", function(e){
+        if(e.key === "Enter"){
+            e.preventDefault();
+            login();
+        }
+    });
+}
+
+/* ==========================================
+   FUNGSI LOGIN DENGAN BUTTON LOADING STATE
+   ========================================== */
 async function login(){
-    const user=document.getElementById("user").value.trim();
-    const pass=document.getElementById("pass").value.trim();
-    const err=document.getElementById("errorMsg");
+    const user = document.getElementById("user").value.trim();
+    const pass = document.getElementById("pass").value.trim();
+    const err = document.getElementById("errorMsg");
+    const loginBtn = document.querySelector("button");
 
     err.style.display="none";
 
     if(!user || !pass){
         err.innerText="Enter User ID and Password";
         err.style.display="block";
+        
+        // Goncang butang jika kosong
+        loginBtn.classList.add("shake");
+        setTimeout(() => loginBtn.classList.remove("shake"), 400);
         return;
     }
 
+    // Tukar butang jadi animasi loading
+    const originalBtnText = loginBtn.innerHTML;
+    loginBtn.innerHTML = "<i class='fa fa-circle-notch fa-spin'></i> Authenticating...";
+    loginBtn.disabled = true;
+    loginBtn.style.opacity = "0.8";
+
+    // Paparkan overlay (pilihan, jika anda masih mahu kekalkan skrin putih)
     document.getElementById("overlay").style.display="flex";
 
     try{
@@ -426,105 +471,45 @@ async function login(){
         const data=await res.json();
 
         if(data.status==="SUCCESS"){
-
-            // --- WEB & APP STORAGE SEPARATION ---
-            // Identify if opened via App (WebView/Kodular) or Standard Web Browser
             let isApp = navigator.userAgent.includes("wv") || (navigator.userAgent.includes("Android") && navigator.userAgent.includes("Version"));
             let storage = isApp ? localStorage : sessionStorage;
 
-            // Save data into the correct storage
             storage.setItem("session_token", data.token);
             storage.setItem("lock_user", data.user);
             storage.setItem("lock_type", data.type);
             storage.setItem("lock_role", data.role);
             storage.setItem("lock_name", data.name);
-            // ------------------------------------
 
-            if(data.type=="check"){
-                window.location="../check/";
-            }
-            else if(data.type=="lock"){
-                window.location="../lock/";
-            }
-            else if(data.type=="master"){
-                window.location="../menumaster/";
-            }
-
+            if(data.type=="check") window.location="../check/";
+            else if(data.type=="lock") window.location="../lock/";
+            else if(data.type=="master") window.location="../menumaster/";
         }
         else if(data.status==="INACTIVE"){
             err.innerText="User ID inactive";
             err.style.display="block";
+            resetLoginBtn(loginBtn, originalBtnText);
         }
         else{
             err.innerText="Invalid login credentials";
             err.style.display="block";
+            resetLoginBtn(loginBtn, originalBtnText);
         }
 
     }catch(e){
         err.innerText="System error. Please try again.";
         err.style.display="block";
+        resetLoginBtn(loginBtn, originalBtnText);
     }
-
-    document.getElementById("overlay").style.display="none";
 }
 
-/* ENTER KEY */
-document.getElementById("pass").addEventListener("keypress",function(e){
-    if(e.key==="Enter"){
-        login();
-    }
-});
-
-/* AUTO LOGIN LISTENER */
-/* AUTO LOGIN LISTENER (FIXED) */
-window.addEventListener('DOMContentLoaded', (event) => {
-    // Baca kedua-dua storage
-    const activeToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
-    const userType = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_type");
-    
-    if (activeToken && userType) {
-        document.getElementById("overlay").style.display = "flex"; 
-        
-        // Guna "SCZP_SECURE_2026" secara terus supaya tak berlaku ralat API_KEY hilang
-        fetch(api + "?action=session&token=" + activeToken + "&api_key=SCZP_SECURE_2026")
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "ACTIVE") {
-                // Token sah, teruskan ke portal
-                if (userType === "check") window.location = "../check/";
-                else if (userType === "lock") window.location = "../lock/";
-                else if (userType === "master") window.location = "../menumaster/";
-            } else {
-                // Token dibatalkan oleh server (Sesi ditendang)
-                localStorage.clear();
-                sessionStorage.clear();
-                document.getElementById("overlay").style.display = "none";
-                const err = document.getElementById("errorMsg");
-                err.innerText = "Your session has expired. Please login again.";
-                err.style.display = "block";
-            }
-        })
-        .catch(e => {
-            // Jika berlaku ralat internet/server, sembunyikan loading dan cuba benarkan masuk
-            document.getElementById("overlay").style.display = "none";
-            if (userType === "check") window.location = "../check/";
-            else if (userType === "lock") window.location = "../lock/";
-            else if (userType === "master") window.location = "../menumaster/";
-        });
-    }
-});
-
-    // Gantikan "userid" dengan ID sebenar kotak input User ID anda dalam HTML
-const userIdField = document.getElementById("userid"); 
-
-if (userIdField) {
-    userIdField.addEventListener("input", function() {
-        // Membuang semua space (spasi) kosong secara real-time
-        this.value = this.value.replace(/\s/g, '');
-        
-        // BONUS: Kalau nak paksa ID sentiasa huruf besar (uppercase), guna kod bawah ni:
-        this.value = this.value.replace(/\s/g, '').toUpperCase();
-    });
+// Fungsi untuk kembalikan butang ke asal jika gagal login
+function resetLoginBtn(btn, text) {
+    document.getElementById("overlay").style.display="none";
+    btn.innerHTML = text;
+    btn.disabled = false;
+    btn.style.opacity = "1";
+    btn.classList.add("shake");
+    setTimeout(() => btn.classList.remove("shake"), 400);
 }
     
 </script>
