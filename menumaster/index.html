@@ -1054,7 +1054,7 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, setDoc, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDKiYl8462c8ZanXc4oXIfa-_9su3E89Wk",
@@ -1078,7 +1078,8 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
   window.deleteDoc = deleteDoc;
   window.getDoc = getDoc;
   window.setDoc = setDoc;
-  window.onSnapshot = onSnapshot; // <--- WAJIB TAMBAH INI
+  window.onSnapshot = onSnapshot;
+  window.addDoc = addDoc;
 </script>
 
 </head>
@@ -2184,6 +2185,9 @@ async function saveRecord(docId) {
             edited_at: new Date().toISOString() // <--- WAJIB TAMBAH BARIS INI
         });
 
+        // REKOD CCTV DI LATAR BELAKANG
+        systemLog("EDIT_RECORD", "SUCCESS", oldSnap.exists() ? oldSnap.data().acc_no : docId, "Edited existing record");
+
         alert("Rekod berjaya dikemas kini!");
         searchManageAcc(); 
         if(typeof manualMasterRefresh === "function") manualMasterRefresh(); 
@@ -2270,6 +2274,9 @@ async function confirmDeleteAction() {
 
         // 4. SETELAH SELAMAT DICOPY, BARU KITA DELETE REKOD ASAL!
         await window.deleteDoc(docRef);
+
+        // REKOD CCTV
+        systemLog("DELETE_RECORD", "SUCCESS", deletedAcc, "Deleted record permanently");
 
         // 5. TUTUP POP-UP CUSTOM TERLEBIH DAHULU
         closeDeletePopup();
@@ -2466,7 +2473,6 @@ startSessionListener();
     </div>
 </div>
 
-<!-- Struktur Popup Modal (Telah Diperbaiki) -->
 <div id="kpiDetailModal" class="modal-overlay" onclick="this.style.display='none'; document.body.style.overflow='auto';">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
