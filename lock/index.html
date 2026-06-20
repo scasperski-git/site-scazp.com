@@ -1087,7 +1087,7 @@ table tbody tr:hover td { background-color: #e2e8f0; }
                             <input type="text" id="acc_no" name="acc_no" autocomplete="off" inputmode="numeric" maxlength="10" placeholder="ENTER ACCOUNT NO">
                             <div class="error" id="err_acc"><i class="fa-solid fa-circle-exclamation"></i> Account No required</div>
                             <!-- KOTAK AMARAN BARU -->
-                            <div id="warn_acc" style="display:none; color: #d97706; font-size: 11px; font-weight: 600; margin-top: -6px; margin-bottom: 10px; background: #fffbeb; padding: 8px 12px; border-radius: 8px; border: 1px dashed #fcd34d; animation: fadeIn 0.3s ease;"></div>
+                            <div id="warn_acc" style="display:none; color: #b91c1c; font-size: 11px; font-weight: 600; margin-top: -6px; margin-bottom: 10px; background: #fef2f2; padding: 8px 12px; border-radius: 8px; border: 1px dashed #fca5a5; animation: fadeIn 0.3s ease;"></div>
                         </div>
                         <div class="form-group">
                             <label>Branch</label>
@@ -1361,9 +1361,6 @@ accField.addEventListener("keypress", function(e){
 
 let accCheckTimeout; // Pembolehubah untuk fungsi Debounce
 const warnAccBox = document.getElementById("warn_acc");
-
-let accCheckTimeout; // Pembolehubah untuk fungsi Debounce
-const warnAccBox = document.getElementById("warn_acc");
 const lockSubmitBtn = document.getElementById("submitBtn"); // Kenal pasti butang submit
 
 accField.addEventListener("input", function() {
@@ -1407,11 +1404,11 @@ accField.addEventListener("input", function() {
                         lockedBy = doc.data().dca_id || "another DCA";
                     });
                     
-                    // Paparkan mesej amaran
+                    // Paparkan mesej amaran (TEMA MERAH GARANG)
                     warnAccBox.innerHTML = `<i class="fa-solid fa-lock" style="margin-right: 4px;"></i> Alert: This account is currently locked by <b>${lockedBy}</b>`;
-                    warnAccBox.style.color = "#d97706";
-                    warnAccBox.style.background = "#fffbeb";
-                    warnAccBox.style.borderColor = "#fcd34d";
+                    warnAccBox.style.color = "#b91c1c";      // Teks Merah Pekat
+                    warnAccBox.style.background = "#fef2f2"; // Latar Merah Cair
+                    warnAccBox.style.borderColor = "#fca5a5"; // Garisan Merah Terang
                     
                     // KEKALKAN butang disable supaya borang tak boleh dihantar
                     if(lockSubmitBtn) lockSubmitBtn.disabled = true; 
