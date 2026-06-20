@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal & Dashboard DCA | scazp.com</title>
     
+    <!-- Pustaka jQuery & DataTables -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
+    <!-- Pustaka Membaca & Menulis Excel (SheetJS) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
+    <!-- Pustaka Firebase Core & Firestore -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
@@ -56,7 +59,12 @@
         select:disabled { opacity: 0.7; cursor: not-allowed; border-color: var(--success); color: var(--success); font-weight: bold; }
 
         .grid-2 { display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; }
-        @media (min-width: 768px) { .grid-2 { grid-template-columns: repeat(2, 1fr); } .container-portal { max-width: 850px; margin: 0 auto; } }
+        .grid-3 { display: grid; grid-template-columns: repeat(1, 1fr); gap: 10px; }
+        @media (min-width: 768px) { 
+            .grid-2 { grid-template-columns: repeat(2, 1fr); } 
+            .grid-3 { grid-template-columns: repeat(3, 1fr); }
+            .container-portal { max-width: 850px; margin: 0 auto; } 
+        }
 
         .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
         @media (min-width: 768px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
@@ -132,6 +140,9 @@
             <button class="tab-btn" onclick="switchTab('dashboard')">Dashboard Rumusan (Admin)</button>
         </div>
 
+        <!-- ============================================== -->
+        <!-- VIEW 1: PORTAL DCA -->
+        <!-- ============================================== -->
         <div id="view-portal" class="view-section active">
             <div class="container-portal">
                 <div class="header">
@@ -157,11 +168,14 @@
             </div>
         </div>
 
+        <!-- ============================================== -->
+        <!-- VIEW 2: DASHBOARD ADMIN -->
+        <!-- ============================================== -->
         <div id="view-dashboard" class="view-section">
             <div class="header">
                 <div>
                     <h1>PAPAN PEMUKA ADMIN</h1>
-                    <p>Fokus Bulan Semasa: Memaparkan kitaran untuk bulan ini & Prestasi Keseluruhan.</p>
+                    <p>Fokus Bulan Semasa: Memaparkan kitaran mengikut bulan, penapis agensi & wilayah.</p>
                 </div>
             </div>
 
@@ -195,20 +209,44 @@
                 </div>
             </div>
 
-            <div class="control-panel" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                <div>
-                    <div class="panel-title" style="margin-bottom: 5px; border: none;">3. Rumusan Keseluruhan Peringkat Agensi</div>
-                    <p style="margin:0; font-size:12px; color:var(--text-muted);">Jadual menapis kitaran berdasarkan bulan semasa. Klik (+) untuk butiran penuh lokasi.</p>
+            <div class="control-panel" style="padding-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <div class="panel-title" style="margin-bottom: 5px; border: none;">3. Tapisan Laporan Lanjutan (Multi-Filter)</div>
+                        <p style="margin:0; font-size:12px; color:var(--text-muted);">Pilih kombinasi penapis di bawah dan jana jadual untuk semakan khusus.</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-action btn-outline" style="width: auto;" onclick="exportRawToExcel()">&#8595; Eksport Excel</button>
+                        <button class="btn-action" style="width: auto; background-color: var(--success);" onclick="generateFullReport()">Jana Jadual</button>
+                    </div>
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn-action btn-outline" style="width: auto;" onclick="exportRawToExcel()">&#8595; Eksport Excel (Raw Data)</button>
-                    <button class="btn-action" style="width: auto; background-color: var(--success);" onclick="generateFullReport()">Jana & Muat Semula Jadual</button>
+
+                <!-- FILTER ROW -->
+                <div class="grid-3" style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
+                    <div>
+                        <label class="panel-label">Pilih Bulan</label>
+                        <select id="filter-month" onchange="generateFullReport()">
+                            <option value="">-- Semua Bulan --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="panel-label">Pilih Agensi DCA</label>
+                        <select id="filter-dca" onchange="generateFullReport()">
+                            <option value="">-- Semua Agensi --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="panel-label">Pilih Wilayah</label>
+                        <select id="filter-region" onchange="generateFullReport()">
+                            <option value="">-- Semua Wilayah --</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
             <div class="kpi-grid">
-                <div class="kpi-card"><h3>Total OSB Keseluruhan</h3><div class="kpi-value" id="kpi-osb">RM 0.00</div></div>
-                <div class="kpi-card"><h3>Kutipan Bulan Semasa</h3><div class="kpi-value green" id="kpi-collection">RM 0.00</div></div>
+                <div class="kpi-card"><h3>Total OSB (Hasil Tapisan)</h3><div class="kpi-value" id="kpi-osb">RM 0.00</div></div>
+                <div class="kpi-card"><h3>Kutipan Bulan Terpilih</h3><div class="kpi-value green" id="kpi-collection">RM 0.00</div></div>
                 <div class="kpi-card"><h3>% Prestasi Keseluruhan</h3><div class="kpi-value gold" id="kpi-percent">0.00%</div></div>
                 <div class="kpi-card"><h3>Agensi DCA (Aktif)</h3><div class="kpi-value" id="kpi-pending" style="color:var(--text-main);">0</div></div>
             </div>
@@ -251,6 +289,7 @@
         window.onload = function() { 
             listenToDcaList(); 
             fetchActiveCycles();
+            populateDashboardFilters();
             addPhaseInput("20"); addPhaseInput("EOM"); addPhaseInput("10");
         };
 
@@ -343,11 +382,15 @@
             try {
                 const docSnap = await db.collection("settings").doc("active_cycles").get();
                 const dcaCycleSelect = document.getElementById('dca-cycle-select');
+                const fMonth = document.getElementById('filter-month');
+                
                 dcaCycleSelect.innerHTML = '<option value="">-- Mencari kitaran aktif... --</option>';
+                fMonth.innerHTML = '<option value="">-- Semua Bulan --</option>';
 
                 if (docSnap.exists) {
                     window.activeCycles = docSnap.data().list || [];
                     
+                    // 1. Auto-Detect untuk Portal DCA
                     const todayStr = new Date().toISOString().split('T')[0];
                     let activeCycle = window.activeCycles.find(c => c.date >= todayStr);
                     if(!activeCycle && window.activeCycles.length > 0) activeCycle = window.activeCycles[window.activeCycles.length - 1]; 
@@ -357,8 +400,51 @@
                     } else {
                         dcaCycleSelect.innerHTML = '<option value="">-- Tiada Kitaran Aktif --</option>';
                     }
+
+                    // 2. Bina Dropdown Bulan untuk Filter Dashboard
+                    let monthSet = new Map();
+                    window.activeCycles.forEach(c => {
+                        let d = new Date(c.date);
+                        let monthKey = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+                        let monthLabel = d.toLocaleDateString('ms-MY', { month: 'long', year: 'numeric' }).toUpperCase();
+                        if(!monthSet.has(monthKey)) monthSet.set(monthKey, monthLabel);
+                    });
+                    
+                    monthSet.forEach((label, key) => {
+                        fMonth.innerHTML += `<option value="${key}">${label}</option>`;
+                    });
+
+                    // Set Default ke Bulan Semasa jika wujud dalam senarai
+                    let currentMonthKey = `${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}`;
+                    if(monthSet.has(currentMonthKey)) {
+                        fMonth.value = currentMonthKey;
+                    }
                 }
             } catch (e) { console.error("Ralat tarik kitaran:", e); }
+        }
+
+        // ==========================================
+        // BINA DROPDOWN DCA & REGION UNTUK DASHBOARD FILTER
+        // ==========================================
+        function populateDashboardFilters() {
+            db.collection("assignments").onSnapshot((snapshot) => {
+                const fDca = document.getElementById('filter-dca');
+                const fReg = document.getElementById('filter-region');
+                
+                fDca.innerHTML = '<option value="">-- Semua Agensi --</option>';
+                fReg.innerHTML = '<option value="">-- Semua Wilayah --</option>';
+
+                if (snapshot.empty) return;
+                
+                let dcaSet = new Set(), regSet = new Set();
+                snapshot.forEach(doc => { 
+                    if(doc.data().dca_name) dcaSet.add(doc.data().dca_name);
+                    if(doc.data().region) regSet.add(doc.data().region);
+                });
+                
+                Array.from(dcaSet).sort().forEach(d => fDca.innerHTML += `<option value="${d}">${d}</option>`);
+                Array.from(regSet).sort().forEach(r => fReg.innerHTML += `<option value="${r}">${r}</option>`);
+            });
         }
 
         // ==========================================
@@ -447,7 +533,7 @@
         }
 
         // ==========================================
-        // ADMIN: DASHBOARD (BULAN SEMASA)
+        // ADMIN: DASHBOARD FILTER & JANA LAPORAN
         // ==========================================
         function getStatusCellHtml(currentDateStr, cycleConfigDate, cycleAmount, cycleAc) {
             if (cycleConfigDate && currentDateStr >= cycleConfigDate && cycleAmount === 0) {
@@ -469,7 +555,7 @@
             window.currentMonthCycles.forEach((c, idx) => {
                 thead += `<th style="text-align:right;">KUTIPAN C${idx+1} (RM)</th>`;
             });
-            thead += `<th style="text-align:right; color:var(--accent-gold);">TOTAL BULAN INI (RM)</th></tr>`;
+            thead += `<th style="text-align:right; color:var(--accent-gold);">TOTAL BULAN (RM)</th></tr>`;
             html += `<thead>${thead}</thead><tbody>`;
             
             locList.forEach(loc => {
@@ -499,14 +585,21 @@
                 alert("Sila Jana Garis Masa Kitaran di langkah 1 terlebih dahulu."); return;
             }
 
-            const today = new Date();
-            const currMonth = today.getMonth();
-            const currYear = today.getFullYear();
-            
-            window.currentMonthCycles = window.activeCycles.filter(c => {
-                const d = new Date(c.date);
-                return d.getMonth() === currMonth && d.getFullYear() === currYear;
-            });
+            // Get Filter Values
+            const fMonthVal = document.getElementById('filter-month').value;
+            const fDcaVal = document.getElementById('filter-dca').value;
+            const fRegVal = document.getElementById('filter-region').value;
+
+            // Filter Columns to Show
+            if(fMonthVal) {
+                const [y, m] = fMonthVal.split('-');
+                window.currentMonthCycles = window.activeCycles.filter(c => {
+                    const d = new Date(c.date);
+                    return d.getFullYear() == parseInt(y) && (d.getMonth() + 1) == parseInt(m);
+                });
+            } else {
+                window.currentMonthCycles = window.activeCycles; // Show all if no month selected
+            }
 
             let wrapper = document.getElementById('table-wrapper');
             let tableHtml = `<table id="report-table" class="display nowrap"><thead><tr>
@@ -524,7 +617,7 @@
             }
             
             tableHtml += `
-                <th style="border-left: 1px solid var(--accent-gold);">TOTAL BULAN SEMASA<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
+                <th style="border-left: 1px solid var(--accent-gold);">TOTAL BULAN PAPARAN<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
                 <th style="border-left: 1px solid var(--success);">TOTAL KESELURUHAN<br><span style="font-size:10px; color:var(--text-muted);">(Semua Bulan)</span></th>
                 <th style="color:var(--success);">% PRESTASI</th>
             </tr></thead><tbody id="table-body"><tr><td colspan="15" style="text-align:center;">Mengumpulkan Data...</td></tr></tbody></table>`;
@@ -549,10 +642,15 @@
 
                 assignmentsSnap.forEach(doc => {
                     const task = doc.data(); const locCode = doc.id; const dcaName = task.dca_name || "UNKNOWN";
+                    
+                    // APPLY DCA & REGION FILTERS (Mengabaikan rekod jika tidak sepadan)
+                    if (fDcaVal && dcaName !== fDcaVal) return;
+                    if (fRegVal && task.region !== fRegVal) return;
+
                     const sub = submissionsDict[locCode] || {};
 
                     if (!dcaGroupMap[dcaName]) {
-                        dcaGroupMap[dcaName] = { total_locs: 0, total_ac: 0, total_osb: 0, month_ac: 0, month_rm: 0, grand_rm: 0, cycle_data: {} };
+                        dcaGroupMap[dcaName] = { total_locs: 0, total_ac: 0, total_osb: 0, month_ac: 0, month_rm: 0, grand_ac: 0, grand_rm: 0, cycle_data: {} };
                         window.dcaDetailsMap[dcaName] = [];
                     }
 
@@ -572,14 +670,14 @@
                         "Total OSB Assigned": osb
                     };
                     
-                    // Kira Keseluruhan (Untuk Excel Raw Data & Pengiraan Grand Total)
-                    window.activeCycles.forEach((c, idx) => {
+                    // Keseluruhan untuk Excel & Table
+                    window.activeCycles.forEach((c) => {
                         let cAc = sub[c.id]?.ac_paying || 0;
                         let cRm = sub[c.id]?.collection_amount || 0;
                         locGrandAc += cAc;
                         locGrandRm += cRm;
                         
-                        let cycleHeader = `Kitaran ${idx + 1} (${c.label})`;
+                        let cycleHeader = `Kitaran (${c.label})`;
                         excelRow[`${cycleHeader} - A/C Paying`] = cAc;
                         excelRow[`${cycleHeader} - Kutipan RM`] = cRm;
                     });
@@ -588,7 +686,7 @@
                     excelRow["Total Kutipan (Keseluruhan RM)"] = locGrandRm;
                     window.rawExcelData.push(excelRow);
 
-                    // Kira Bulan Semasa sahaja untuk paparan jadual luar
+                    // Pengiraan Bulan Paparan Semasa sahaja untuk jadual luar
                     window.currentMonthCycles.forEach(c => {
                         let cAc = sub[c.id]?.ac_paying || 0;
                         let cRm = sub[c.id]?.collection_amount || 0;
@@ -601,19 +699,20 @@
                         dcaGroupMap[dcaName].cycle_data[c.id].rm += cRm;
                     });
 
-                    // Group Data
+                    // Pengumpulan Kumpulan DCA
                     dcaGroupMap[dcaName].total_locs += 1;
                     dcaGroupMap[dcaName].total_ac += ac;
                     dcaGroupMap[dcaName].total_osb += osb;
                     dcaGroupMap[dcaName].month_ac += locMonthAc;
                     dcaGroupMap[dcaName].month_rm += locMonthRm;
+                    dcaGroupMap[dcaName].grand_ac += locGrandAc;
                     dcaGroupMap[dcaName].grand_rm += locGrandRm;
                     
                     grandTotalOsb += osb;
                     grandTotalCurrentMonthCollection += locMonthRm;
                     grandTotalAllCollection += locGrandRm;
 
-                    // Simpan ke DetailsMap
+                    // Simpan ke DetailsMap Child Row
                     window.dcaDetailsMap[dcaName].push({
                         region: task.region, area: task.area, loc_code: locCode, loc_name: task.loc_name,
                         ac: ac, osb: osb, totalMonthRm: locMonthRm, cycleVals: locCycleVals
@@ -645,15 +744,15 @@
                         <td style="border-left: 1px solid var(--accent-gold); color: var(--text-main);">
                             <span class="val-badge">${data.month_ac}</span> | <span style="font-weight:bold; color: var(--accent-gold); font-size: 14px;">${data.month_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                         </td>
-                        <td style="border-left: 1px solid var(--success); font-weight:bold; color: var(--success); font-size: 14px;">
-                            ${data.grand_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}
+                        <td style="border-left: 1px solid var(--success); color: var(--text-main);">
+                            <span class="val-badge">${data.grand_ac}</span> | <span style="font-weight:bold; color: var(--success); font-size: 14px;">${data.grand_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                         </td>
                         <td style="font-weight: bold; color: var(--success); font-size: 13px;">${dcaPct}%</td>
                     `;
                     tbody.appendChild(tr);
                 }
 
-                // Kemas Kini KPI (Tunjuk Bulan Semasa & Keseluruhan)
+                // Kemas Kini KPI berpandukan hasil tapisan
                 let percentVal = grandTotalOsb > 0 ? (grandTotalAllCollection / grandTotalOsb) * 100 : 0;
                 document.getElementById('kpi-osb').textContent = `RM ${grandTotalOsb.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                 document.getElementById('kpi-collection').textContent = `RM ${grandTotalCurrentMonthCollection.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
@@ -682,7 +781,7 @@
         }
 
         // ==========================================
-        // FUNGSI EKSPORT EXCEL DINAMIK & KEMAS
+        // FUNGSI EKSPORT EXCEL DINAMIK & KEMAS (DENGAN A/C)
         // ==========================================
         function exportRawToExcel() {
             if (!window.rawExcelData || window.rawExcelData.length === 0) { alert("Sila Jana Laporan terlebih dahulu!"); return; }
