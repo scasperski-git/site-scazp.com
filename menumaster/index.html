@@ -2379,6 +2379,79 @@ function openKpiModal(type) {
     // Bekukan (freeze) background di belakang
     document.body.style.overflow = 'hidden';
 } // <--- ini adalah penutup fungsi openKpiModal
+
+/* =========================================================================
+   FUNGSI CCTV: RAKAM AKTIVITI KE FIREBASE
+========================================================================= */
+async function systemLog(action, status, accNo, details) {
+    try {
+        await window.addDoc(window.collection(window.db, "SYSTEM_LOGS"), {
+            timestamp: new Date().toISOString(),
+            user_id: user || "-",
+            role: role || "-",
+            action: action,
+            status: status,
+            acc_no: accNo || "-",
+            details: details || "-"
+        });
+    } catch (e) {
+        console.error("Gagal merakam CCTV:", e);
+    }
+}
+
+/* =========================================================================
+   SEMAKAN SESI REAL-TIME DARI FIREBASE (SIFAR PENGGUNAAN KUOTA GAS)
+========================================================================= */
+async function verifySessionWithServer() {
+    const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
+    if (!currentToken) return;
+
+    try {
+        const q = window.query(window.collection(window.db, "ACTIVE_SESSIONS"), window.where("token", "==", currentToken));
+        const querySnapshot = await window.getDocs(q);
+        
+        let isValid = false;
+        querySnapshot.forEach((doc) => {
+            let sessionData = doc.data();
+            if (new Date(sessionData.expire_at) > new Date()) {
+                isValid = true;
+            }
+        });
+
+        if (!isValid) {
+            showSessionPopup("DEVICE"); 
+        }
+    } catch (err) {
+        console.log("Firebase connection paused or offline, skipping check...");
+    }
+}
+
+let lastCheckTime = 0;
+const CHECK_COOLDOWN = 1200000; // 20 minit cooldown
+
+function checkSessionOnAction() {
+    const now = Date.now();
+    if (now - lastCheckTime > CHECK_COOLDOWN) {
+        lastCheckTime = now;
+        verifySessionWithServer(); 
+    }
+}
+
+// Semak bila pertama kali halaman dimuatkan
+verifySessionWithServer();
+lastCheckTime = Date.now();
+
+// Kesan bila user mula klik, gerak mouse, menaip, atau sentuh skrin
+['mousedown', 'mousemove', 'keypress', 'touchstart', 'focusin', 'change'].forEach(eventName => {
+    document.addEventListener(eventName, checkSessionOnAction, { passive: true });
+});
+
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+        lastCheckTime = Date.now(); 
+        verifySessionWithServer();
+    }
+});
     
 </script>
 
