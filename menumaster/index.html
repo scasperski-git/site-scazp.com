@@ -2401,28 +2401,32 @@ async function systemLog(action, status, accNo, details) {
 }
 
 /* =========================================================================
-   SEMAKAN SESI REAL-TIME DARI FIREBASE (INSTANT KICK-OUT)
+   SEMAKAN SESI REAL-TIME DARI FIREBASE (INSTANT KICK-OUT YANG KEBAL)
 ========================================================================= */
 function startSessionListener() {
     const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
-    if (!currentToken) return;
-
-    // Pasang "CCTV" yang merenung tepat pada token peranti ini
-    const q = window.query(window.collection(window.db, "ACTIVE_SESSIONS"), window.where("token", "==", currentToken));
+    const currentUser = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
     
-    // onSnapshot akan sentiasa bersedia. Jika berlaku perubahan, ia bertindak serta-merta!
-    window.onSnapshot(q, (snapshot) => {
-        if (snapshot.empty) {
-            // Jika token ghaib (didelete oleh peranti baru yang login), terus tendang!
+    if (!currentToken || !currentUser) return;
+
+    // Dengar TERUS pada dokumen User ID tersebut, tak perlu buat carian (query) lagi!
+    const docRef = window.doc(window.db, "ACTIVE_SESSIONS", currentUser);
+    
+    window.onSnapshot(docRef, (docSnap) => {
+        if (!docSnap.exists()) {
+            // Jika dokumen dipadam
             showSessionPopup("DEVICE");
         } else {
-            // Semak juga jika masa sesi dah tamat (24 jam)
-            snapshot.forEach((doc) => {
-                let sessionData = doc.data();
-                if (new Date(sessionData.expire_at) < new Date()) {
-                    showSessionPopup("EXPIRED");
-                }
-            });
+            let sessionData = docSnap.data();
+            
+            // JIKA TOKEN BERUBAH (Sebab peranti lain login dan overwrite token ini)
+            if (sessionData.token !== currentToken) {
+                showSessionPopup("DEVICE");
+            }
+            // JIKA MASA SESI LUPUT
+            else if (new Date(sessionData.expire_at) < new Date()) {
+                showSessionPopup("EXPIRED");
+            }
         }
     }, (error) => {
         console.log("Sistem terputus hubungan sementara dari Firebase...");
