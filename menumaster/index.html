@@ -2427,7 +2427,7 @@ async function verifySessionWithServer() {
 }
 
 let lastCheckTime = 0;
-const CHECK_COOLDOWN = 1200000; // 20 minit cooldown
+const CHECK_COOLDOWN = 15000; // 15,000 milisaat = 15 SAAT (Sangat pantas detect double login)
 
 function checkSessionOnAction() {
     const now = Date.now();
