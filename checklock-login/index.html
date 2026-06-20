@@ -565,48 +565,47 @@ async function login(){
 /* ==========================================
    SEMAKAN AUTO-LOGIN (FIREBASE MENGGUNAKAN DOC ID)
    ========================================== */
-window.addEventListener('DOMContentLoaded', async (event) => {
-    const activeToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
-    const userType = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_type");
-    const activeUser = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
-    
-    if (activeToken && userType && activeUser) {
-        document.getElementById("overlay").style.display = "flex"; 
+window.addEventListener('DOMContentLoaded', (event) => {
+    setTimeout(async () => {
+        const activeToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
+        const userType = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_type");
+        const activeUser = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
         
-        try {
-            // Semak Sesi Terus Ke Firebase menggunakan Doc ID (User ID)
-            const docRef = window.doc(window.db, "ACTIVE_SESSIONS", activeUser);
-            const docSnap = await window.getDoc(docRef);
+        if (activeToken && userType && activeUser) {
+            document.getElementById("overlay").style.display = "flex"; 
             
-            let isValid = false;
-            
-            if (docSnap.exists()) {
-                let sessionData = docSnap.data();
-                // Pastikan token yang tersimpan di browser SAMA dengan token di Firebase
-                if (sessionData.token === activeToken && new Date(sessionData.expire_at) > new Date()) {
-                    isValid = true;
-                } else if (new Date(sessionData.expire_at) <= new Date()) {
-                    // Buang sesi yang dah luput
-                    window.deleteDoc(docRef);
+            try {
+                const docRef = window.doc(window.db, "ACTIVE_SESSIONS", activeUser);
+                const docSnap = await window.getDoc(docRef);
+                
+                let isValid = false;
+                
+                if (docSnap.exists()) {
+                    let sessionData = docSnap.data();
+                    if (sessionData.token === activeToken && new Date(sessionData.expire_at) > new Date()) {
+                        isValid = true;
+                    } else if (new Date(sessionData.expire_at) <= new Date()) {
+                        window.deleteDoc(docRef);
+                    }
                 }
-            }
 
-            if (isValid) {
-                if (userType === "check") window.location = "../check/";
-                else if (userType === "lock") window.location = "../lock/";
-                else if (userType === "master") window.location = "../menumaster/";
-            } else {
-                localStorage.clear();
-                sessionStorage.clear();
+                if (isValid) {
+                    if (userType === "check") window.location = "../check/";
+                    else if (userType === "lock") window.location = "../lock/";
+                    else if (userType === "master") window.location = "../menumaster/";
+                } else {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    document.getElementById("overlay").style.display = "none";
+                    const err = document.getElementById("errorMsg");
+                    err.innerText = "Your session has expired. Please login again.";
+                    err.style.display = "block";
+                }
+            } catch(e) {
                 document.getElementById("overlay").style.display = "none";
-                const err = document.getElementById("errorMsg");
-                err.innerText = "Your session has expired. Please login again.";
-                err.style.display = "block";
             }
-        } catch(e) {
-            document.getElementById("overlay").style.display = "none";
         }
-    }
+    }, 1000); // <-- TUNGGU 1 SAAT
 });
 
 // Fungsi untuk kembalikan butang ke asal jika gagal login
