@@ -330,10 +330,9 @@ AUTH OVERLAY
 
 </style>
 
-<!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, query, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDKiYl8462c8ZanXc4oXIfa-_9su3E89Wk",
@@ -350,11 +349,10 @@ AUTH OVERLAY
   window.db = db;
   window.collection = collection;
   window.addDoc = addDoc;
-  window.query = query;
-  window.where = where;
-  window.getDocs = getDocs;
-  window.deleteDoc = deleteDoc;
   window.doc = doc;
+  window.setDoc = setDoc;
+  window.getDoc = getDoc;
+  window.deleteDoc = deleteDoc;
 </script>
 
 </head>
@@ -500,7 +498,7 @@ async function login(){
 
         const data = await res.json();
 
-if(data.status === "SUCCESS") {
+        if(data.status === "SUCCESS") {
             
             const sessionToken = generateSessionToken();
             const expireDate = new Date();
@@ -508,6 +506,7 @@ if(data.status === "SUCCESS") {
 
             // ==========================================
             // KITA GUNA setDoc UNTUK TIMPA (OVERWRITE) SESI LAMA SECARA AUTOMATIK
+            // Doc ID kini adalah User ID itu sendiri. Tiada lagi duplicate token!
             // ==========================================
             await window.setDoc(window.doc(window.db, "ACTIVE_SESSIONS", data.user), {
                 token: sessionToken,
@@ -564,30 +563,33 @@ if(data.status === "SUCCESS") {
 }
 
 /* ==========================================
-   SEMAKAN AUTO-LOGIN (FIREBASE)
+   SEMAKAN AUTO-LOGIN (FIREBASE MENGGUNAKAN DOC ID)
    ========================================== */
 window.addEventListener('DOMContentLoaded', async (event) => {
     const activeToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
     const userType = localStorage.getItem("lock_type") || sessionStorage.getItem("lock_type");
+    const activeUser = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
     
-    if (activeToken && userType) {
+    if (activeToken && userType && activeUser) {
         document.getElementById("overlay").style.display = "flex"; 
         
         try {
-            // Semak Sesi Terus Ke Firebase
-            const q = window.query(window.collection(window.db, "ACTIVE_SESSIONS"), window.where("token", "==", activeToken));
-            const querySnapshot = await window.getDocs(q);
+            // Semak Sesi Terus Ke Firebase menggunakan Doc ID (User ID)
+            const docRef = window.doc(window.db, "ACTIVE_SESSIONS", activeUser);
+            const docSnap = await window.getDoc(docRef);
             
             let isValid = false;
-            querySnapshot.forEach((doc) => {
-                let sessionData = doc.data();
-                if (new Date(sessionData.expire_at) > new Date()) {
+            
+            if (docSnap.exists()) {
+                let sessionData = docSnap.data();
+                // Pastikan token yang tersimpan di browser SAMA dengan token di Firebase
+                if (sessionData.token === activeToken && new Date(sessionData.expire_at) > new Date()) {
                     isValid = true;
-                } else {
+                } else if (new Date(sessionData.expire_at) <= new Date()) {
                     // Buang sesi yang dah luput
-                    window.deleteDoc(window.doc(window.db, "ACTIVE_SESSIONS", doc.id));
+                    window.deleteDoc(docRef);
                 }
-            });
+            }
 
             if (isValid) {
                 if (userType === "check") window.location = "../check/";
@@ -606,6 +608,7 @@ window.addEventListener('DOMContentLoaded', async (event) => {
         }
     }
 });
+
 // Fungsi untuk kembalikan butang ke asal jika gagal login
 function resetLoginBtn(btn, text) {
     document.getElementById("overlay").style.display="none";
