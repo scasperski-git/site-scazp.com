@@ -51,14 +51,14 @@
         .panel-title { color: var(--accent-gold); font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px; }
         label.panel-label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
         
-        input[type="date"], input[type="text"], select, input[type="file"] {
+        input[type="date"], select, input[type="file"] {
             width: 100%; padding: 10px; background-color: var(--bg-main); border: 1px solid var(--border-color);
             color: var(--text-main); border-radius: 6px; font-size: 14px; margin-bottom: 15px; box-sizing: border-box; color-scheme: dark;
         }
         select:focus, input:focus { border-color: var(--accent-gold); outline: none; }
 
-        .grid-2 { display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; }
-        @media (min-width: 768px) { .grid-2 { grid-template-columns: repeat(2, 1fr); } .container-portal { max-width: 850px; margin: 0 auto; } }
+        .grid-3 { display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; }
+        @media (min-width: 768px) { .grid-3 { grid-template-columns: repeat(3, 1fr); } .container-portal { max-width: 850px; margin: 0 auto; } }
 
         .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
         @media (min-width: 768px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
@@ -72,7 +72,6 @@
         .btn-action { background-color: var(--success); color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; width: 100%; transition: opacity 0.2s; }
         .btn-gold { background-color: var(--accent-gold); color: #000; }
         .btn-outline { background-color: transparent; border: 1px solid var(--success); color: var(--success); }
-        .btn-danger-outline { background-color: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 10px; border-radius: 6px; cursor: pointer;}
         .btn-outline:hover { background-color: rgba(16, 185, 129, 0.1); }
         .btn-action:hover { opacity: 0.8; }
 
@@ -92,8 +91,8 @@
         /* DataTables Custom CSS */
         .table-container { background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); padding: 15px; overflow-x: auto; margin-top: 20px; }
         table.dataTable { width: 100% !important; border-collapse: collapse; color: var(--text-main); }
-        table.dataTable thead th { background-color: rgba(0,0,0,0.4); color: var(--accent-gold); border-bottom: 1px solid var(--border-color); padding: 12px 10px; white-space: normal; text-align: center; font-size: 12px; vertical-align: middle;}
-        table.dataTable tbody td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); background-color: transparent !important; white-space: nowrap; text-align: center; font-size: 13px;}
+        table.dataTable thead th { background-color: rgba(0,0,0,0.4); color: var(--accent-gold); border-bottom: 1px solid var(--border-color); padding: 10px 6px; white-space: normal; text-align: center; font-size: 11px; vertical-align: middle;}
+        table.dataTable tbody td { padding: 10px 6px; border-bottom: 1px solid var(--border-color); background-color: transparent !important; white-space: nowrap; text-align: center; font-size: 12px;}
         table.dataTable tbody tr:hover { background-color: rgba(255,255,255,0.03) !important; }
         
         div.dataTables_wrapper div.dataTables_filter { text-align: center; float: none; margin-bottom: 30px; }
@@ -109,13 +108,14 @@
         tr.shown td.details-control { color: var(--danger); transform: rotate(45deg); transition: 0.3s;}
         
         table.sub-table { width: 100%; background-color: rgba(0,0,0,0.3); border-radius: 8px; margin: 10px 0; border: 1px solid rgba(255,255,255,0.05); }
-        table.sub-table th { background-color: rgba(0,0,0,0.5); color: var(--text-muted); font-size: 11px; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: left;}
-        table.sub-table td { padding: 10px; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.02); color: var(--text-main); text-align: left;}
+        table.sub-table th { background-color: rgba(0,0,0,0.5); color: var(--text-muted); font-size: 10px; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        table.sub-table td { padding: 8px; font-size: 11px; border-bottom: 1px solid rgba(255,255,255,0.02); color: var(--text-main); }
         table.sub-table tr:last-child td { border-bottom: none; }
 
-        /* Kitaran Preview CSS */
-        .timeline-preview { background-color: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-top: 15px; display: none;}
-        .timeline-item { display: inline-block; background-color: var(--accent-gold); color: #000; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; margin: 5px; }
+        .val-badge { padding: 3px 6px; border-radius: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: inline-block; min-width: 40px; text-align: center; font-size: 11px;}
+        .val-gold { color: var(--accent-gold); font-weight: bold; font-size: 13px;}
+        .alert-red { background-color: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px 8px; border-radius: 6px; font-weight: bold; font-size: 10px; display: inline-block; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
         #toast { visibility: hidden; min-width: 250px; background-color: var(--success); color: #fff; text-align: center; border-radius: 6px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 13px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
@@ -131,9 +131,7 @@
             <button class="tab-btn" onclick="switchTab('dashboard')">Dashboard Rumusan (Admin)</button>
         </div>
 
-        <!-- ============================================== -->
         <!-- VIEW 1: PORTAL DCA -->
-        <!-- ============================================== -->
         <div id="view-portal" class="view-section active">
             <div class="container-portal">
                 <div class="header">
@@ -146,22 +144,16 @@
                 <div class="control-panel">
                     <div class="panel-title">Pemilihan Tugasan & Kitaran</div>
                     <label class="panel-label">Pilih Kitaran Semasa</label>
-                    <select id="dca-cycle-select" onchange="fetchAndRenderDcaTasks()">
-                        <option value="">-- Memuat turun kitaran... --</option>
-                    </select>
+                    <select id="dca-cycle-select" onchange="fetchAndRenderDcaTasks()"><option value="">-- Memuat turun tetapan kitaran... --</option></select>
                     <label class="panel-label" style="margin-top: 10px;">Pilih Nama Agensi DCA</label>
-                    <select id="dca-select" onchange="fetchAndRenderDcaTasks()">
-                        <option value="">-- Memuat turun senarai agensi... --</option>
-                    </select>
+                    <select id="dca-select" onchange="fetchAndRenderDcaTasks()"><option value="">-- Memuat turun senarai agensi... --</option></select>
                 </div>
 
                 <div id="portal-display"><div style="text-align:center; color: var(--text-muted); padding: 30px;">Sila pilih Kitaran & Nama Agensi untuk mula mengemas kini.</div></div>
             </div>
         </div>
 
-        <!-- ============================================== -->
         <!-- VIEW 2: DASHBOARD ADMIN -->
-        <!-- ============================================== -->
         <div id="view-dashboard" class="view-section">
             <div class="header">
                 <div>
@@ -170,34 +162,17 @@
                 </div>
             </div>
 
-            <div class="grid-2">
-                <!-- Panel 1: Tetapan Kitaran Dinamik -->
-                <div class="control-panel">
-                    <div class="panel-title">1. Enjin Automasi Tarikh Kitaran</div>
-                    <div style="display: flex; gap: 15px;">
-                        <div style="flex: 1;"><label class="panel-label">Start Date</label><input type="date" id="admin-start-date"></div>
-                        <div style="flex: 1;"><label class="panel-label">End Date</label><input type="date" id="admin-end-date"></div>
+            <div class="grid-3">
+                <div class="control-panel" style="grid-column: span 2;">
+                    <div class="panel-title">1. Tetapan Tarikh Kitaran (Cycle Configuration)</div>
+                    <div class="grid-3">
+                        <div><label class="panel-label">Kitaran 1</label><input type="date" id="admin-cycle-1"></div>
+                        <div><label class="panel-label">Kitaran 2</label><input type="date" id="admin-cycle-2"></div>
+                        <div><label class="panel-label">Kitaran 3</label><input type="date" id="admin-cycle-3"></div>
                     </div>
-                    
-                    <label class="panel-label" style="margin-top: 10px;">Pola Fasa (Contoh: 20, EOM, 10)</label>
-                    <div id="phase-container">
-                        <!-- Inputs added by JS -->
-                    </div>
-                    
-                    <div style="display:flex; gap:10px; margin-top:15px;">
-                        <button class="btn-action btn-outline" style="width: auto; padding: 6px 15px;" onclick="addPhaseInput()">+ Tambah Fasa</button>
-                        <button class="btn-action btn-gold" style="width: auto; padding: 6px 15px;" onclick="previewCycles()">Jana Garis Masa</button>
-                    </div>
-
-                    <!-- Tempat Preview Tarikh Sebelum Simpan -->
-                    <div id="timeline-preview" class="timeline-preview">
-                        <label class="panel-label">Pratonton Kitaran Yang Dijana:</label>
-                        <div id="timeline-badges"></div>
-                        <button class="btn-action" style="margin-top:15px;" id="btn-save-cycles" onclick="saveCyclesToDB()" disabled>Simpan Ke Pangkalan Data</button>
-                    </div>
+                    <button class="btn-action btn-gold" style="width: auto;" onclick="saveCycleSettings()">Simpan Tetapan Kitaran</button>
                 </div>
 
-                <!-- Panel 2: Upload Excel -->
                 <div class="control-panel">
                     <div class="panel-title">2. Muat Naik Data Agihan (Excel)</div>
                     <label class="panel-label">Muat Naik Fail 'Assignments'</label>
@@ -227,11 +202,14 @@
                 <table id="report-table" class="display nowrap">
                     <thead>
                         <tr>
-                            <th style="width: 20px;"></th> <!-- Expand Icon -->
+                            <th style="width: 20px;"></th> <!-- Column for Expand Icon -->
                             <th style="text-align: left;">Nama Agensi DCA</th>
                             <th>Jum. Caw.</th>
                             <th>Total A/C</th>
                             <th>Jumlah OSB (RM)</th>
+                            <th style="border-left: 1px solid var(--border-color); color: #fff;">KITARAN 1 <br><span style="font-size:10px; color:var(--text-muted);">(A/C | Kutipan)</span></th>
+                            <th style="border-left: 1px solid var(--border-color); color: #fff;">KITARAN 2 <br><span style="font-size:10px; color:var(--text-muted);">(A/C | Kutipan)</span></th>
+                            <th style="border-left: 1px solid var(--border-color); color: #fff;">KITARAN 3 <br><span style="font-size:10px; color:var(--text-muted);">(A/C | Kutipan)</span></th>
                             <th style="border-left: 1px solid var(--accent-gold);">TOTAL KUTIPAN <br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
                             <th style="color:var(--success);">% PRESTASI</th>
                         </tr>
@@ -260,20 +238,11 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
+        // Pembolehubah Global untuk simpan data Raw bagi Excel dan Expandable Rows
         window.dcaDetailsMap = {};
         window.rawExcelData = [];
-        window.generatedCycles = []; // Simpanan sementara sebelum dihantar ke DB
-        window.activeCycles = []; // Senarai rasmi dari DB
 
-        window.onload = function() { 
-            listenToDcaList(); 
-            fetchActiveCycles();
-            
-            // Masukkan 3 fasa default ke dalam container UI
-            addPhaseInput("20");
-            addPhaseInput("EOM");
-            addPhaseInput("10");
-        };
+        window.onload = function() { listenToDcaList(); fetchCycleSettings(); };
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -292,124 +261,34 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // ==========================================
-        // ADMIN: ENJIN KITARAN DINAMIK
-        // ==========================================
-        function addPhaseInput(defaultVal = "") {
-            const container = document.getElementById('phase-container');
-            const div = document.createElement('div');
-            div.style = "display: flex; gap: 10px; margin-bottom: 5px;";
-            div.innerHTML = `
-                <input type="text" class="phase-val" value="${defaultVal}" placeholder="Cth: 15 atau EOM" style="margin-bottom:0;">
-                <button class="btn-danger-outline" onclick="this.parentElement.remove()">X</button>
-            `;
-            container.appendChild(div);
-        }
-
-        function previewCycles() {
-            const startStr = document.getElementById('admin-start-date').value;
-            const endStr = document.getElementById('admin-end-date').value;
-            
-            if(!startStr || !endStr) { alert("Sila isikan Start Date dan End Date."); return; }
-
-            const phaseInputs = document.querySelectorAll('.phase-val');
-            let rules = [];
-            phaseInputs.forEach(input => { if(input.value.trim() !== "") rules.push(input.value.trim().toUpperCase()); });
-            
-            if(rules.length === 0) { alert("Sila masukkan sekurang-kurangnya 1 Pola Fasa."); return; }
-
-            let start = new Date(startStr);
-            let end = new Date(endStr);
-            
-            if(start >= end) { alert("End Date mesti lebih ke hadapan dari Start Date."); return; }
-
-            let currentDate = new Date(start.getFullYear(), start.getMonth(), 1);
-            let rawDates = [];
-
-            while (currentDate <= end) {
-                let year = currentDate.getFullYear();
-                let month = currentDate.getMonth();
-
-                rules.forEach(rule => {
-                    let d;
-                    if (rule === 'EOM') {
-                        d = new Date(year, month + 1, 0); // Dapatkan hari terakhir bulan
-                    } else {
-                        let dayNum = parseInt(rule);
-                        if(!isNaN(dayNum)) d = new Date(year, month, dayNum);
-                    }
-                    
-                    if (d && d >= start && d <= end) {
-                        rawDates.push(d.getTime());
-                    }
-                });
-                currentDate.setMonth(currentDate.getMonth() + 1);
-            }
-            
-            // Wajib pastikan End Date berada di penghujung
-            rawDates.push(end.getTime());
-
-            // Buang duplikasi dan susun mengikut tarikh
-            let uniqueDates = [...new Set(rawDates)].sort((a,b) => a - b);
-
-            window.generatedCycles = [];
-            const badgesDiv = document.getElementById('timeline-badges');
-            badgesDiv.innerHTML = '';
-
-            for(let i=0; i<uniqueDates.length; i++) {
-                let d = new Date(uniqueDates[i]);
-                // Penyelarasan format tarikh tempatan bagi mengelakkan ralat zon waktu
-                let tzOffset = d.getTimezoneOffset() * 60000;
-                let localISOTime = (new Date(d - tzOffset)).toISOString().split('T')[0];
-                
-                let label = d.toLocaleDateString('ms-MY', { day: 'numeric', month: 'short', year: 'numeric' });
-                
-                window.generatedCycles.push({
-                    id: `cycle_${i+1}`,
-                    date: localISOTime,
-                    label: label
-                });
-
-                badgesDiv.innerHTML += `<div class="timeline-item">Kitaran ${i+1}: ${label}</div>`;
-            }
-
-            document.getElementById('timeline-preview').style.display = 'block';
-            document.getElementById('btn-save-cycles').disabled = false;
-        }
-
-        async function saveCyclesToDB() {
-            if(window.generatedCycles.length === 0) return;
+        async function fetchCycleSettings() {
             try {
-                await db.collection("settings").doc("active_cycles").set({
-                    list: window.generatedCycles,
-                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                showToast("Garis Masa Kitaran Berjaya Disimpan!");
-                document.getElementById('timeline-preview').style.display = 'none';
-                fetchActiveCycles(); // Refresh sistem
-            } catch (error) {
-                alert("Gagal simpan: " + error.message);
-            }
-        }
-
-        async function fetchActiveCycles() {
-            try {
-                const docSnap = await db.collection("settings").doc("active_cycles").get();
+                const docSnap = await db.collection("settings").doc("cycles").get();
                 const dcaCycleSelect = document.getElementById('dca-cycle-select');
                 dcaCycleSelect.innerHTML = '<option value="">-- Pilih Kitaran --</option>';
 
                 if (docSnap.exists) {
-                    window.activeCycles = docSnap.data().list || [];
-                    window.activeCycles.forEach(c => {
-                        dcaCycleSelect.innerHTML += `<option value="${c.id}">${c.id.toUpperCase()} - ${c.label}</option>`;
-                    });
+                    const data = docSnap.data();
+                    document.getElementById('admin-cycle-1').value = data.cycle_1 || '';
+                    document.getElementById('admin-cycle-2').value = data.cycle_2 || '';
+                    document.getElementById('admin-cycle-3').value = data.cycle_3 || '';
+
+                    if(data.cycle_1) dcaCycleSelect.innerHTML += `<option value="cycle_1">Kitaran 1 (${data.cycle_1})</option>`;
+                    if(data.cycle_2) dcaCycleSelect.innerHTML += `<option value="cycle_2">Kitaran 2 (${data.cycle_2})</option>`;
+                    if(data.cycle_3) dcaCycleSelect.innerHTML += `<option value="cycle_3">Kitaran 3 (${data.cycle_3})</option>`;
                 }
-            } catch (e) { console.error("Ralat tarik kitaran:", e); }
+            } catch (e) { console.error("Ralat tetapan:", e); }
         }
 
-        // ==========================================
-        // ADMIN: UPLOAD EXCEL
-        // ==========================================
+        async function saveCycleSettings() {
+            const c1 = document.getElementById('admin-cycle-1').value; const c2 = document.getElementById('admin-cycle-2').value; const c3 = document.getElementById('admin-cycle-3').value;
+            if(!c1 || !c2 || !c3) { alert("Sila isikan ketiga-tiga tarikh kitaran."); return; }
+            try {
+                await db.collection("settings").doc("cycles").set({ cycle_1: c1, cycle_2: c2, cycle_3: c3, updated_at: firebase.firestore.FieldValue.serverTimestamp() });
+                showToast("Tetapan Kitaran Berjaya Disimpan!"); fetchCycleSettings(); 
+            } catch (e) { alert("Ralat menyimpan tetapan: " + e.message); }
+        }
+
         async function uploadExcelToFirestore(input) {
             const file = input.files[0]; if (!file) return;
             const reader = new FileReader();
@@ -434,9 +313,6 @@
             }; reader.readAsArrayBuffer(file);
         }
 
-        // ==========================================
-        // PORTAL DCA
-        // ==========================================
         function listenToDcaList() {
             db.collection("assignments").onSnapshot((snapshot) => {
                 const dcaSelect = document.getElementById('dca-select'); dcaSelect.innerHTML = '<option value="">-- Sila Pilih Agensi DCA --</option>';
@@ -447,15 +323,10 @@
         }
 
         async function fetchAndRenderDcaTasks() {
-            const selectedDca = document.getElementById('dca-select').value; 
-            const selectedCycleId = document.getElementById('dca-cycle-select').value;
+            const selectedDca = document.getElementById('dca-select').value; const selectedCycle = document.getElementById('dca-cycle-select').value;
             const displayArea = document.getElementById('portal-display');
-            
-            if (!selectedDca || !selectedCycleId) { displayArea.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 30px;">Sila pilih Kitaran & Nama Agensi.</div>'; return; }
-            
-            const selectedCycleObj = window.activeCycles.find(c => c.id === selectedCycleId);
+            if (!selectedDca || !selectedCycle) { displayArea.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 30px;">Sila pilih Kitaran & Nama Agensi.</div>'; return; }
             displayArea.innerHTML = '<div style="text-align:center; padding: 30px;">Menarik data...</div>';
-            
             try {
                 const querySnapshot = await db.collection("assignments").where("dca_name", "==", selectedDca).get(); displayArea.innerHTML = ''; 
                 if (querySnapshot.empty) { displayArea.innerHTML = '<div style="text-align:center;">Tiada rekod.</div>'; return; }
@@ -464,7 +335,6 @@
                     let task = doc.data(); task.loc_code = doc.id;
                     if (!groupedByRegion[task.region]) groupedByRegion[task.region] = []; groupedByRegion[task.region].push(task);
                 });
-                
                 for (const region in groupedByRegion) {
                     const regionHeader = document.createElement('div'); regionHeader.className = 'region-section-title'; regionHeader.textContent = `REGION: ${region}`; displayArea.appendChild(regionHeader);
                     groupedByRegion[region].forEach(task => {
@@ -474,10 +344,10 @@
                             <div class="metrics-grid">
                                 <div class="metric-box"><label>A/C Assigned</label><div class="metric-value">${task.total_ac_assigned}</div></div>
                                 <div class="metric-box"><label>OSB Assigned</label><div class="metric-value">RM ${Number(task.total_osb_assigned).toLocaleString()}</div></div>
-                                <div class="metric-box"><label>A/C Paying (${selectedCycleObj.label})</label><input type="number" class="metric-input" id="ac-${task.loc_code}" placeholder="0" onfocus="event.stopPropagation()"></div>
-                                <div class="metric-box"><label>Kutipan (${selectedCycleObj.label})</label><input type="number" class="metric-input" id="coll-${task.loc_code}" placeholder="0.00" onfocus="event.stopPropagation()"></div>
+                                <div class="metric-box"><label>A/C Paying (${selectedCycle.replace('_',' ').toUpperCase()})</label><input type="number" class="metric-input" id="ac-${task.loc_code}" placeholder="0" onfocus="event.stopPropagation()"></div>
+                                <div class="metric-box"><label>Kutipan (${selectedCycle.replace('_',' ').toUpperCase()})</label><input type="number" class="metric-input" id="coll-${task.loc_code}" placeholder="0.00" onfocus="event.stopPropagation()"></div>
                             </div>
-                            <button class="btn-action" style="margin-top:15px;" onclick="submitPerformance('${task.loc_code}', '${selectedCycleId}', event)">Hantar Laporan Kitaran Ini</button>
+                            <button class="btn-action" style="margin-top:15px;" onclick="submitPerformance('${task.loc_code}', event)">Hantar Laporan Kitaran Ini</button>
                         `; displayArea.appendChild(card);
                     });
                 }
@@ -486,13 +356,13 @@
 
         function highlightCard(el) { document.querySelectorAll('.loc-card').forEach(c => c.classList.remove('active-focus')); el.classList.add('active-focus'); }
 
-        async function submitPerformance(locCode, cycleId, event) {
+        async function submitPerformance(locCode, event) {
             event.stopPropagation();
-            const acPaying = document.getElementById(`ac-${locCode}`).value; const collResult = document.getElementById(`coll-${locCode}`).value;
+            const cycle = document.getElementById('dca-cycle-select').value; const acPaying = document.getElementById(`ac-${locCode}`).value; const collResult = document.getElementById(`coll-${locCode}`).value;
             if (!acPaying || !collResult) { alert("Sila isi nilai."); return; }
             try {
-                await db.collection("submissions").doc(locCode).set({ [cycleId]: { ac_paying: parseInt(acPaying), collection_amount: parseFloat(collResult), timestamp: firebase.firestore.FieldValue.serverTimestamp() } }, { merge: true });
-                showToast(`Prestasi LOC ${locCode} berjaya dihantar!`);
+                await db.collection("submissions").doc(locCode).set({ [cycle]: { ac_paying: parseInt(acPaying), collection_amount: parseFloat(collResult), timestamp: firebase.firestore.FieldValue.serverTimestamp() } }, { merge: true });
+                showToast(`Prestasi ${cycle} LOC ${locCode} berjaya dihantar!`);
                 document.getElementById(`ac-${locCode}`).value = ""; document.getElementById(`coll-${locCode}`).value = "";
             } catch (e) { alert("Gagal hantar: " + e.message); }
         }
@@ -500,12 +370,23 @@
         // ==========================================
         // ADMIN: LAPORAN DASHBOARD & EKSPORT EXCEL
         // ==========================================
+        function getStatusCellHtml(currentDateStr, cycleConfigDate, cycleAmount, cycleAc) {
+            if (cycleConfigDate && currentDateStr >= cycleConfigDate && cycleAmount === 0) {
+                return `<span class="alert-red">BELUM HANTAR</span>`;
+            } else if (cycleAmount > 0) {
+                return `<span class="val-badge">${cycleAc}</span> | <span class="val-gold">RM ${cycleAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>`;
+            } else {
+                return `<span style="color:var(--text-muted); font-size:11px;">Menunggu</span>`;
+            }
+        }
+
+        // Format HTML untuk sub-jadual (Bila butang '+' ditekan)
         function formatChildRow(dcaName) {
             const locList = window.dcaDetailsMap[dcaName];
             if(!locList) return '<div>Tiada butiran ditemui.</div>';
 
             let html = '<table class="sub-table" cellpadding="5" cellspacing="0" border="0">';
-            html += '<thead><tr><th>REGION</th><th>AREA</th><th>LOC CODE</th><th>NAMA LOKASI</th><th style="text-align:center;">TOTAL A/C</th><th style="text-align:right;">OSB (RM)</th><th style="text-align:center;">KUTIPAN A/C</th><th style="text-align:right; color:var(--accent-gold);">TOTAL KUTIPAN (RM)</th></tr></thead><tbody>';
+            html += '<thead><tr><th>REGION</th><th>AREA</th><th>LOC CODE</th><th>NAMA LOKASI</th><th>TOTAL A/C</th><th>OSB (RM)</th><th>KUTIPAN C1 (RM)</th><th>KUTIPAN C2 (RM)</th><th>KUTIPAN C3 (RM)</th><th style="color:var(--accent-gold);">TOTAL (RM)</th></tr></thead><tbody>';
             
             locList.forEach(loc => {
                 html += `<tr>
@@ -515,7 +396,9 @@
                     <td>${loc.loc_name}</td>
                     <td style="text-align:center;">${loc.ac}</td>
                     <td style="text-align:right;">${loc.osb.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-                    <td style="text-align:center;">${loc.totalAc}</td>
+                    <td style="text-align:right; color:${loc.c1rm > 0 ? 'var(--success)' : 'var(--text-muted)'};">${loc.c1rm > 0 ? loc.c1rm.toLocaleString(undefined, {minimumFractionDigits:2}) : '-'}</td>
+                    <td style="text-align:right; color:${loc.c2rm > 0 ? 'var(--success)' : 'var(--text-muted)'};">${loc.c2rm > 0 ? loc.c2rm.toLocaleString(undefined, {minimumFractionDigits:2}) : '-'}</td>
+                    <td style="text-align:right; color:${loc.c3rm > 0 ? 'var(--success)' : 'var(--text-muted)'};">${loc.c3rm > 0 ? loc.c3rm.toLocaleString(undefined, {minimumFractionDigits:2}) : '-'}</td>
                     <td style="text-align:right; font-weight:bold; color:var(--accent-gold);">${loc.totalRm.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
                 </tr>`;
             });
@@ -525,25 +408,27 @@
 
         async function generateFullReport() {
             const tbody = document.getElementById('table-body');
+            
+            // Padam table event listener lama untuk elak conflict bila dirender semula
             $('#report-table tbody').off('click', 'td.details-control');
             if ($.fn.DataTable.isDataTable('#report-table')) { $('#report-table').DataTable().destroy(); }
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Mengumpulkan & Merumuskan Data Dari Pangkalan Data...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">Mengumpulkan & Merumuskan Data Dari Pangkalan Data...</td></tr>';
 
             window.dcaDetailsMap = {};
             window.rawExcelData = [];
 
             try {
-                if(window.activeCycles.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:red;">Sila Jana Garis Masa Kitaran di langkah 1 terlebih dahulu.</td></tr>';
-                    return;
-                }
-
                 const assignmentsSnap = await db.collection("assignments").get();
                 if (assignmentsSnap.empty) { tbody.innerHTML = ''; return; }
 
                 const submissionsSnap = await db.collection("submissions").get();
                 let submissionsDict = {};
                 submissionsSnap.forEach(doc => { submissionsDict[doc.id] = doc.data(); });
+
+                const todayStr = new Date().toISOString().split('T')[0];
+                const c1Date = document.getElementById('admin-cycle-1').value;
+                const c2Date = document.getElementById('admin-cycle-2').value;
+                const c3Date = document.getElementById('admin-cycle-3').value;
 
                 let dcaGroupMap = {};
                 let grandTotalOsb = 0;
@@ -556,53 +441,53 @@
                     const sub = submissionsDict[locCode] || {};
 
                     if (!dcaGroupMap[dcaName]) {
-                        dcaGroupMap[dcaName] = { total_locs: 0, total_ac: 0, total_osb: 0, total_collected_ac: 0, total_rm: 0 };
+                        dcaGroupMap[dcaName] = {
+                            total_locs: 0, total_ac: 0, total_osb: 0,
+                            c1_ac: 0, c1_rm: 0, c2_ac: 0, c2_rm: 0, c3_ac: 0, c3_rm: 0, total_rm: 0
+                        };
                         window.dcaDetailsMap[dcaName] = [];
                     }
 
                     const osb = parseFloat(task.total_osb_assigned) || 0;
                     const ac = parseInt(task.total_ac_assigned) || 0;
                     
-                    let locTotalAc = 0;
-                    let locTotalRm = 0;
+                    const c1rm = sub.cycle_1?.collection_amount || 0;
+                    const c2rm = sub.cycle_2?.collection_amount || 0;
+                    const c3rm = sub.cycle_3?.collection_amount || 0;
                     
-                    // Objek Dinamik untuk Excel Export
-                    let excelRow = {
-                        "DCA Name": dcaName, "Region": task.region, "Area": task.area, "Loc Code": locCode, "Loc Name": task.loc_name,
-                        "Total A/C Assigned": ac, "Total OSB Assigned": osb
-                    };
+                    const c1ac = sub.cycle_1?.ac_paying || 0;
+                    const c2ac = sub.cycle_2?.ac_paying || 0;
+                    const c3ac = sub.cycle_3?.ac_paying || 0;
 
-                    // Kira hasil untuk semua kitaran yang aktif dalam database
-                    window.activeCycles.forEach(cycle => {
-                        let cAc = sub[cycle.id]?.ac_paying || 0;
-                        let cRm = sub[cycle.id]?.collection_amount || 0;
-                        
-                        locTotalAc += cAc;
-                        locTotalRm += cRm;
-                        
-                        // Masukkan ke dalam lajur Excel dinamik
-                        excelRow[`${cycle.label} A/C`] = cAc;
-                        excelRow[`${cycle.label} RM`] = cRm;
-                    });
+                    const totalRmForLoc = c1rm + c2rm + c3rm;
 
-                    excelRow["Total A/C Paying"] = locTotalAc;
-                    excelRow["Total Collection (RM)"] = locTotalRm;
-                    window.rawExcelData.push(excelRow);
-
-                    // Pengumpulan Data (Group)
+                    // Pengiraan Kumpulan (Group)
                     dcaGroupMap[dcaName].total_locs += 1;
                     dcaGroupMap[dcaName].total_ac += ac;
                     dcaGroupMap[dcaName].total_osb += osb;
-                    dcaGroupMap[dcaName].total_collected_ac += locTotalAc;
-                    dcaGroupMap[dcaName].total_rm += locTotalRm;
+                    dcaGroupMap[dcaName].c1_ac += c1ac; dcaGroupMap[dcaName].c1_rm += c1rm;
+                    dcaGroupMap[dcaName].c2_ac += c2ac; dcaGroupMap[dcaName].c2_rm += c2rm;
+                    dcaGroupMap[dcaName].c3_ac += c3ac; dcaGroupMap[dcaName].c3_rm += c3rm;
+                    dcaGroupMap[dcaName].total_rm += totalRmForLoc;
                     
                     grandTotalOsb += osb;
-                    grandTotalCollection += locTotalRm;
+                    grandTotalCollection += totalRmForLoc;
 
-                    // Simpan Butiran untuk Child Row Sub-Table
+                    // Simpan Butiran untuk Sub-Table
                     window.dcaDetailsMap[dcaName].push({
                         region: task.region, area: task.area, loc_code: locCode, loc_name: task.loc_name,
-                        ac: ac, osb: osb, totalAc: locTotalAc, totalRm: locTotalRm
+                        ac: ac, osb: osb, c1rm: c1rm, c2rm: c2rm, c3rm: c3rm, totalRm: totalRmForLoc
+                    });
+
+                    // Simpan Data Flat untuk Excel Export
+                    window.rawExcelData.push({
+                        "DCA Name": dcaName, "Region": task.region, "Area": task.area, "Loc Code": locCode, "Loc Name": task.loc_name,
+                        "Total A/C Assigned": ac, "Total OSB Assigned": osb,
+                        "Cycle 1 A/C Paying": c1ac, "Cycle 1 Collection": c1rm,
+                        "Cycle 2 A/C Paying": c2ac, "Cycle 2 Collection": c2rm,
+                        "Cycle 3 A/C Paying": c3ac, "Cycle 3 Collection": c3rm,
+                        "Total A/C Paying": (c1ac + c2ac + c3ac),
+                        "Total Collection": totalRmForLoc
                     });
                 });
 
@@ -611,9 +496,16 @@
 
                 for (const [dcaName, data] of Object.entries(dcaGroupMap)) {
                     dcaCount++;
+                    
+                    const c1_html = getStatusCellHtml(todayStr, c1Date, data.c1_rm, data.c1_ac);
+                    const c2_html = getStatusCellHtml(todayStr, c2Date, data.c2_rm, data.c2_ac);
+                    const c3_html = getStatusCellHtml(todayStr, c3Date, data.c3_rm, data.c3_ac);
+
+                    const totalAcPaying = data.c1_ac + data.c2_ac + data.c3_ac;
                     const dcaPct = data.total_osb > 0 ? ((data.total_rm / data.total_osb) * 100).toFixed(2) : "0.00";
 
                     const tr = document.createElement('tr');
+                    // Data-dca attribute diletakkan supaya fungsi klik boleh ambil nama DCA
                     tr.setAttribute('data-dca', dcaName);
                     tr.innerHTML = `
                         <td class="details-control">&#x2295;</td>
@@ -621,8 +513,11 @@
                         <td>${data.total_locs} Caw.</td>
                         <td>${data.total_ac.toLocaleString()}</td>
                         <td style="font-weight: 500;">${data.total_osb.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td style="border-left: 1px solid var(--border-color);">${c1_html}</td>
+                        <td style="border-left: 1px solid var(--border-color);">${c2_html}</td>
+                        <td style="border-left: 1px solid var(--border-color);">${c3_html}</td>
                         <td style="border-left: 1px solid var(--accent-gold); color: var(--text-main);">
-                            <span class="val-badge">${data.total_collected_ac}</span> | <span style="font-weight:bold; color: var(--success); font-size: 14px;">${data.total_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                            <span class="val-badge">${totalAcPaying}</span> | <span style="font-weight:bold; color: var(--success); font-size: 14px;">${data.total_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                         </td>
                         <td style="font-weight: bold; color: var(--success); font-size: 13px;">${dcaPct}%</td>
                     `;
@@ -636,6 +531,7 @@
                 document.getElementById('kpi-percent').textContent = `${percentVal.toFixed(2)}%`;
                 document.getElementById('kpi-pending').textContent = dcaCount;
 
+                // Init DataTables
                 const table = $('#report-table').DataTable({
                     "pageLength": 10,
                     "language": {
@@ -645,41 +541,50 @@
                         "paginate": { "next": "Seterusnya", "previous": "Sebelumnya" }
                     },
                     "scrollX": true,
-                    "order": [[ 5, "desc" ]], // Susun dari Kutipan Tertinggi
-                    "columns": [ { "orderable": false }, null, null, null, null, null, null ]
+                    "order": [[ 8, "desc" ]], // Susun dari Kutipan Tertinggi
+                    "columns": [
+                        { "orderable": false }, // Disable susunan pada column '+' ikon
+                        null, null, null, null, null, null, null, null, null
+                    ]
                 });
 
-                // Child Row Event Listener
+                // Event Listener untuk butang Expand (+)
                 $('#report-table tbody').on('click', 'td.details-control', function () {
                     const tr = $(this).closest('tr');
                     const row = table.row(tr);
 
                     if (row.child.isShown()) {
-                        row.child.hide(); tr.removeClass('shown'); $(this).html('&#x2295;'); 
+                        row.child.hide();
+                        tr.removeClass('shown');
+                        $(this).html('&#x2295;'); // Tukar ke icon Plus
                     } else {
-                        row.child(formatChildRow(tr.data('dca'))).show(); tr.addClass('shown'); $(this).html('&#x2296;');
+                        const dcaName = tr.data('dca');
+                        row.child(formatChildRow(dcaName)).show();
+                        tr.addClass('shown');
+                        $(this).html('&#x2296;'); // Tukar ke icon Minus
                     }
                 });
 
             } catch (error) {
                 console.error("Ralat Dashboard:", error);
-                tbody.innerHTML = `<tr><td colspan="7" style="color:red; text-align:center;">Ralat: ${error.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" style="color:red; text-align:center;">Ralat: ${error.message}</td></tr>`;
             }
         }
 
-        // ==========================================
-        // FUNGSI EKSPORT EXCEL DINAMIK
-        // ==========================================
+        // Fungsi Eksport Excel (Raw Data)
         function exportRawToExcel() {
             if (!window.rawExcelData || window.rawExcelData.length === 0) {
-                alert("Sila Jana Laporan terlebih dahulu sebelum mengeksport ke Excel!"); return;
+                alert("Sila Jana Laporan terlebih dahulu sebelum mengeksport ke Excel!");
+                return;
             }
             showToast("Sedang menjana fail Excel...");
             
+            // Hasilkan Workbook baru menggunakan SheetJS
             const worksheet = XLSX.utils.json_to_sheet(window.rawExcelData);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Raw DCA Performance");
             
+            // Nama fail ditetapkan dengan tarikh hari ini
             const dateStr = new Date().toISOString().split('T')[0];
             XLSX.writeFile(workbook, `DCA_Performance_Raw_${dateStr}.xlsx`);
         }
