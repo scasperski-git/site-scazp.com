@@ -736,7 +736,7 @@ table tbody tr:hover td { background-color: #e2e8f0; }
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDKiYl8462c8ZanXc4oXIfa-_9su3E89Wk",
@@ -755,8 +755,12 @@ table tbody tr:hover td { background-color: #e2e8f0; }
   window.query = query;
   window.where = where;
   window.getDocs = getDocs;
-  window.updateDoc = updateDoc;
   window.doc = doc;
+  window.updateDoc = updateDoc;
+  window.deleteDoc = deleteDoc;
+  window.getDoc = getDoc;
+  window.setDoc = setDoc;
+  window.onSnapshot = onSnapshot; // <--- WAJIB TAMBAH INI
 </script>
 
 </head>
@@ -1558,57 +1562,36 @@ function initTableUpgrades() {
 window.addEventListener('DOMContentLoaded', initTableUpgrades);
 
 /* =========================================================================
-   SEMAKAN SESI REAL-TIME DARI FIREBASE (SIFAR PENGGUNAAN KUOTA GAS)
+   SEMAKAN SESI REAL-TIME DARI FIREBASE (INSTANT KICK-OUT)
 ========================================================================= */
-async function verifySessionWithServer() {
+function startSessionListener() {
     const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
     if (!currentToken) return;
 
-    try {
-        const q = window.query(window.collection(window.db, "ACTIVE_SESSIONS"), window.where("token", "==", currentToken));
-        const querySnapshot = await window.getDocs(q);
-        
-        let isValid = false;
-        querySnapshot.forEach((doc) => {
-            let sessionData = doc.data();
-            if (new Date(sessionData.expire_at) > new Date()) {
-                isValid = true;
-            }
-        });
-
-        if (!isValid) {
-            showSessionPopup("DEVICE"); 
-        }
-    } catch (err) {
-        console.log("Firebase connection paused or offline, skipping check...");
-    }
-}
+    // Pasang "CCTV" yang merenung tepat pada token peranti ini
+    const q = window.query(window.collection(window.db, "ACTIVE_SESSIONS"), window.where("token", "==", currentToken));
     
-let lastCheckTime = 0;
-const CHECK_COOLDOWN = 1200000; 
-
-function checkSessionOnAction() {
-    const now = Date.now();
-    if (now - lastCheckTime > CHECK_COOLDOWN) {
-        lastCheckTime = now;
-        verifySessionWithServer();
-    }
+    // onSnapshot akan sentiasa bersedia. Jika berlaku perubahan, ia bertindak serta-merta!
+    window.onSnapshot(q, (snapshot) => {
+        if (snapshot.empty) {
+            // Jika token ghaib (didelete oleh peranti baru yang login), terus tendang!
+            showSessionPopup("DEVICE");
+        } else {
+            // Semak juga jika masa sesi dah tamat (24 jam)
+            snapshot.forEach((doc) => {
+                let sessionData = doc.data();
+                if (new Date(sessionData.expire_at) < new Date()) {
+                    showSessionPopup("EXPIRED");
+                }
+            });
+        }
+    }, (error) => {
+        console.log("Sistem terputus hubungan sementara dari Firebase...");
+    });
 }
 
-verifySessionWithServer();
-lastCheckTime = Date.now();
-
-['mousedown', 'mousemove', 'keypress', 'touchstart', 'focusin', 'change'].forEach(eventName => {
-    document.addEventListener(eventName, checkSessionOnAction, { passive: true });
-});
-
-document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-        lastCheckTime = Date.now(); 
-        verifySessionWithServer();
-    }
-});
-
+// Terus jalankan listener sebaik sahaja portal dibuka
+startSessionListener();
 /* =========================================================================
    FUNGSI CCTV: RAKAM AKTIVITI KE FIREBASE
 ========================================================================= */
