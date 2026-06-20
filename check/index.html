@@ -253,10 +253,13 @@ body.list-mode .container {
     gap: 12px;
     align-items: center;
     margin-bottom: 24px;
-    background: #f8fafc; /* Latar kelabu lembut menyatukan input & butang */
+    background: #f8fafc;
     padding: 8px;
     border-radius: 16px;
-    border: 1px solid #e2e8f0;
+    /* Kita tukar border kelabu ke biru korporat yang sangat cair */
+    border: 1px solid #dbeafe; 
+    /* Tambah bayang lembut warna biru */
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.05);
 }
 
 .search-bar-row input {
@@ -1047,8 +1050,11 @@ async function checkLock(){
                 actionButton = `<button class='paid-btn' onclick="markAsPaid('${docId}', '${data.acc_no}')"><i class='fa-solid fa-check-circle'></i> Mark as PAID</button>`;
             }
 
+            // =====================================
+            // BINA KAD HASIL CARIAN DENGAN BORDER DINAMIK
+            // =====================================
             result.innerHTML =
-            "<div class='result-card'>" +
+            "<div class='result-card' style='border: 1px solid " + statusColor + "40; border-top: 4px solid " + statusColor + "; box-shadow: 0 10px 25px " + statusColor + "15;'>" +
             "<div class='status-box'><span style='background:"+statusColor+"'>" + statusText + "</span>" + paidByInfo + "</div>" +
             metaSection + 
             "<div class='row'><div class='col'><div class='label'>ACCOUNT NO</div><div class='value'>" + data.acc_no + "</div></div>" +
