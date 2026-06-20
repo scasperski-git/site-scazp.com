@@ -1009,7 +1009,7 @@ table tbody tr:hover td { background-color: #e2e8f0; }
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, setDoc, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDKiYl8462c8ZanXc4oXIfa-_9su3E89Wk",
@@ -1033,7 +1033,8 @@ const app = initializeApp(firebaseConfig);
   window.deleteDoc = deleteDoc;
   window.getDoc = getDoc;
   window.setDoc = setDoc;
-  window.onSnapshot = onSnapshot; // <--- WAJIB TAMBAH INI
+  window.onSnapshot = onSnapshot;
+  window.addDoc = addDoc; // <--- WAJIB UNTUK SYSTEM LOG & CREATE LOCK
 
   window.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
@@ -1091,7 +1092,6 @@ const app = initializeApp(firebaseConfig);
                             <label>Account No</label>
                             <input type="text" id="acc_no" name="acc_no" autocomplete="off" inputmode="numeric" maxlength="10" placeholder="ENTER ACCOUNT NO">
                             <div class="error" id="err_acc"><i class="fa-solid fa-circle-exclamation"></i> Account No required</div>
-                            <!-- KOTAK AMARAN BARU -->
                             <div id="warn_acc" style="display:none; color: #b91c1c; font-size: 11px; font-weight: 600; margin-top: -6px; margin-bottom: 10px; background: #fef2f2; padding: 8px 12px; border-radius: 8px; border: 1px dashed #fca5a5; animation: fadeIn 0.3s ease;"></div>
                         </div>
                         <div class="form-group">
@@ -1573,7 +1573,6 @@ function showError(input,errorId){
 document.getElementById("lockForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    verifySessionWithServer();
     const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
     if(!currentToken) return;
 
@@ -1632,6 +1631,9 @@ document.getElementById("lockForm").addEventListener("submit", async (e) => {
             status: "LOCK",
             created_at: new Date().toISOString()
         });
+        
+        // Panggil System Log untuk merekodkan CCTV
+        systemLog("NEW_LOCK", "SUCCESS", inputAccNo, "Amount: RM " + cleanAmount);
 
         document.getElementById("overlay").style.display = "none";
 
