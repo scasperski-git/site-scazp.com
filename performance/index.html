@@ -3,33 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DCA Collection Portal | scazp.com</title>
+    <title>DCA Portal - Excel Importer | scazp.com</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
     <style>
-        /* CSS Variables untuk Tema Gelap Premium */
         :root {
-            --bg-main: #0B0F19;      /* Hitam kebiruan sangat gelap */
-            --bg-card: #151C2C;      /* Latar kotak */
-            --bg-input: #0B0F19;     /* Latar input */
-            --text-main: #F3F4F6;    /* Kelabu cerah */
-            --text-muted: #9CA3AF;   /* Kelabu malap */
-            --accent-gold: #D4AF37;  /* Emas premium */
-            --accent-glow: rgba(212, 175, 55, 0.4);
-            --success: #10B981;      /* Hijau submit */
+            --bg-main: #0B0F19;
+            --bg-card: #151C2C;
+            --bg-input: #0B0F19;
+            --text-main: #F3F4F6;
+            --text-muted: #9CA3AF;
+            --accent-gold: #D4AF37;
+            --accent-glow: rgba(212, 175, 55, 0.3);
+            --success: #10B981;
+            --border-color: rgba(255,255,255,0.08);
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background-color: var(--bg-main);
             color: var(--text-main);
             margin: 0;
             padding: 20px;
         }
 
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
         .header {
             text-align: center;
             margin-bottom: 30px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
         .header h1 {
@@ -39,67 +44,114 @@
             letter-spacing: 1px;
         }
 
-        .header p {
+        /* Seksyen Admin - Muat Naik Excel */
+        .admin-section {
+            background-color: var(--bg-card);
+            border: 1px dashed var(--accent-gold);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .file-input-wrapper {
+            margin-top: 10px;
+        }
+
+        input[type="file"] {
             color: var(--text-muted);
             font-size: 14px;
-            margin-top: 5px;
         }
 
-        /* Container setiap LOC CODE */
+        /* Dropdown Pilihan DCA */
+        .dca-selector-section {
+            margin-bottom: 25px;
+            display: none; /* Hanya muncul selepas excel di-upload */
+        }
+
+        label.section-label {
+            display: block;
+            font-size: 14px;
+            color: var(--accent-gold);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        select:focus {
+            border-color: var(--accent-gold);
+        }
+
+        /* Pembahagi Kategori Region */
+        .region-divider {
+            color: var(--accent-gold);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin: 30px 0 15px 0;
+            padding-left: 5px;
+            border-left: 3px solid var(--accent-gold);
+        }
+
+        /* Kad Tugasan Loc Code */
         .loc-card {
             background-color: var(--bg-card);
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 20px;
-            margin-bottom: 25px;
-            transition: all 0.3s ease;
-            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.25s ease;
         }
 
-        /* Animasi Highlight */
         .loc-card.active-focus {
             border-color: var(--accent-gold);
-            box-shadow: 0 0 20px var(--accent-glow);
-            transform: translateY(-2px);
+            box-shadow: 0 0 15px var(--accent-glow);
         }
 
         .loc-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .loc-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            color: var(--accent-gold);
+            color: #FFFFFF;
         }
 
         .loc-subtitle {
             font-size: 12px;
             color: var(--text-muted);
+            margin-top: 2px;
         }
 
         /* Grid 4 Kotak (Mobile Friendly) */
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 kotak sebaris untuk mobile */
-            gap: 15px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
         }
 
         @media (min-width: 768px) {
             .metrics-grid {
-                grid-template-columns: repeat(4, 1fr); /* 4 kotak sebaris untuk PC */
+                grid-template-columns: repeat(4, 1fr);
             }
         }
 
         .metric-box {
-            background-color: rgba(0,0,0,0.3);
-            padding: 15px;
+            background-color: rgba(0,0,0,0.25);
+            padding: 12px;
             border-radius: 8px;
             text-align: center;
-            border: 1px solid transparent;
         }
 
         .metric-box label {
@@ -107,12 +159,11 @@
             font-size: 11px;
             text-transform: uppercase;
             color: var(--text-muted);
-            margin-bottom: 8px;
-            letter-spacing: 0.5px;
+            margin-bottom: 6px;
         }
 
         .metric-value {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: var(--text-main);
         }
@@ -121,14 +172,13 @@
             width: 100%;
             box-sizing: border-box;
             background-color: var(--bg-input);
-            border: 1px solid var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.2);
             color: var(--accent-gold);
-            padding: 8px;
+            padding: 6px;
             border-radius: 4px;
             text-align: center;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
-            transition: border-color 0.2s;
         }
 
         .metric-input:focus {
@@ -141,20 +191,14 @@
             background-color: var(--success);
             color: white;
             border: none;
-            padding: 12px;
-            margin-top: 20px;
+            padding: 10px;
+            margin-top: 15px;
             border-radius: 6px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
-            transition: opacity 0.2s;
         }
 
-        .btn-submit:hover {
-            opacity: 0.8;
-        }
-
-        /* Notifikasi */
         #toast {
             visibility: hidden;
             min-width: 250px;
@@ -168,131 +212,204 @@
             left: 50%;
             bottom: 30px;
             transform: translateX(-50%);
-            font-size: 14px;
         }
-        #toast.show {
-            visibility: visible;
-            animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>PORTAL PRESTASI DCA</h1>
-        <p>Penyerahan Kutipan Berkelompok (Batching)</p>
-    </div>
-
-    <div id="data-container">
-        
-        <div class="loc-card" onclick="highlightCard(this)">
-            <div class="loc-header">
-                <div>
-                    <div class="loc-title">LOC 2059 - KEMAMAN COLL AGY</div>
-                    <div class="loc-subtitle">MIDEAST | KUANTAN AREA</div>
-                </div>
-            </div>
-            
-            <div class="metrics-grid">
-                <div class="metric-box">
-                    <label>A/C Assigned</label>
-                    <div class="metric-value">617</div>
-                </div>
-                <div class="metric-box">
-                    <label>OSB Assigned (RM)</label>
-                    <div class="metric-value">100,000</div>
-                </div>
-                
-                <div class="metric-box">
-                    <label>A/C Paying</label>
-                    <input type="number" class="metric-input" id="ac-paying-2059" placeholder="0">
-                </div>
-                <div class="metric-box">
-                    <label>Collection Result</label>
-                    <input type="number" class="metric-input" id="coll-result-2059" placeholder="0.00">
-                </div>
-            </div>
-            
-            <button class="btn-submit" onclick="submitData('2059')">Hantar Laporan</button>
+    <div class="container">
+        <div class="header">
+            <h1>PORTAL PRESTASI DCA</h1>
+            <p>Pengurusan Dinamik Berasaskan Pangkalan Data Fail Excel</p>
         </div>
 
-        <div class="loc-card" onclick="highlightCard(this)">
-            <div class="loc-header">
-                <div>
-                    <div class="loc-title">LOC 2007 - KUANTAN BKT UBI</div>
-                    <div class="loc-subtitle">MIDEAST | KUANTAN AREA</div>
-                </div>
+        <div class="admin-section">
+            <label class="section-label" style="margin-bottom: 2px;">Langkah 1: Muat Naik Fail Ringkasan Tugasan (.xlsx)</label>
+            <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 15px 0;">Sistem akan membaca lajur data secara automatik</p>
+            <div class="file-input-wrapper">
+                <input type="file" id="excel-file" accept=".xlsx, .xls" onchange="handleExcelUpload(this)">
             </div>
-            
-            <div class="metrics-grid">
-                <div class="metric-box">
-                    <label>A/C Assigned</label>
-                    <div class="metric-value">55</div>
-                </div>
-                <div class="metric-box">
-                    <label>OSB Assigned (RM)</label>
-                    <div class="metric-value">150,000</div>
-                </div>
-                <div class="metric-box">
-                    <label>A/C Paying</label>
-                    <input type="number" class="metric-input" id="ac-paying-2007" placeholder="0">
-                </div>
-                <div class="metric-box">
-                    <label>Collection Result</label>
-                    <input type="number" class="metric-input" id="coll-result-2007" placeholder="0.00">
-                </div>
-            </div>
-            
-            <button class="btn-submit" onclick="submitData('2007')">Hantar Laporan</button>
         </div>
 
+        <div class="dca-selector-section" id="selector-area">
+            <label class="section-label">Langkah 2: Pilih Nama DCA Anda</label>
+            <select id="dca-select" onchange="renderDcaTasks()">
+                <option value="">-- Sila Pilih Agensi DCA --</option>
+            </select>
+        </div>
+
+        <div id="portal-display"></div>
     </div>
 
-    <div id="toast">Data berjaya dihantar ke pangkalan data!</div>
+    <div id="toast">Data prestasi berjaya direkodkan!</div>
 
     <script>
-        // Fungsi untuk auto-highlight kotak LOC bila diklik/diisi
+        // Pembolehubah Global untuk menyimpan data mentah dari Excel
+        let rawDatabase = [];
+
+        // Mengendalikan fail yang dimuat naik
+        function handleExcelUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                // Ambil helaian pertama (Sheet1)
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                // Tukar data baris menjadi objek JSON
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                
+                if(jsonData.length === 0) {
+                    alert("Fail Excel kosong atau tidak sah.");
+                    return;
+                }
+
+                rawDatabase = jsonData;
+                console.log("Database berjaya dibina dari Excel:", rawDatabase);
+
+                // Ekstrak nama DCA yang unik untuk dimasukkan ke dalam dropdown
+                populateDcaDropdown();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Memasukkan senarai unik DCA ke dalam elemen pilihan (Select Dropdown)
+        function populateDcaDropdown() {
+            const dcaSelect = document.getElementById('dca-select');
+            
+            // Set semula dropdown paparan
+            dcaSelect.innerHTML = '<option value="">-- Sila Pilih Agensi DCA --</option>';
+
+            // Dapatkan senarai unik DCA Name menggunakan Set
+            const uniqueDcas = [...new Set(rawDatabase.map(item => item['DCA NAME']))].filter(Boolean);
+
+            uniqueDcas.forEach(dca => {
+                const option = document.createElement('option');
+                option.value = dca;
+                option.textContent = dca;
+                dcaSelect.appendChild(option);
+            });
+
+            // Tampilkan bahagian pemilihan DCA
+            document.getElementById('selector-area').style.display = 'block';
+            alert("Fail Excel berjaya diproses! Sila pilih nama DCA di Langkah 2.");
+        }
+
+        // Membina struktur antaramuka tugasan yang disusun mengikut Region
+        function renderDcaTasks() {
+            const selectedDca = document.getElementById('dca-select').value;
+            const displayArea = document.getElementById('portal-display');
+            displayArea.innerHTML = ''; // Kosongkan paparan sedia ada
+
+            if (!selectedDca) return;
+
+            // Tapis data pangkalan data mengikut nama DCA yang dipilih sahaja
+            const filteredData = rawDatabase.filter(item => item['DCA NAME'] === selectedDca);
+
+            // Kumpulkan data mengikut kumpulan nama REGION
+            const groupedByRegion = {};
+            filteredData.forEach(item => {
+                const region = item['REGION'] || 'UNKNOWN REGION';
+                if (!groupedByRegion[region]) {
+                    groupedByRegion[region] = [];
+                }
+                groupedByRegion[region].push(item);
+            });
+
+            // Susun dan paparkan data mengikut turutan Region
+            for (const region in groupedByRegion) {
+                // Bina pengepala bahagian wilayah (Region Header)
+                const regionHeader = document.createElement('div');
+                regionHeader.className = 'region-divider';
+                regionHeader.textContent = `REGION: ${region}`;
+                displayArea.appendChild(regionHeader);
+
+                // Paparkan senarai Loc Code di bawah wilayah ini
+                groupedByRegion[region].forEach(task => {
+                    const locCode = task['LOC CODE'];
+                    const locName = task['LOC NAME'] || '';
+                    const areaName = task['AREA'] || '';
+                    const acAssigned = task['TOTAL A/C ASSIGNED'] || 0;
+                    const osbAssigned = task['TOTAL OSB ASSIGNED'] || 0;
+
+                    const card = document.createElement('div');
+                    card.className = 'loc-card';
+                    card.setAttribute('onclick', 'highlightCard(this)');
+
+                    card.innerHTML = `
+                        <div class="loc-header">
+                            <div class="loc-title">LOC ${locCode} - ${locName}</div>
+                            <div class="loc-subtitle">${region} | ${areaName}</div>
+                        </div>
+                        <div class="metrics-grid">
+                            <div class="metric-box">
+                                <label>A/C Assigned</label>
+                                <div class="metric-value">${acAssigned}</div>
+                            </div>
+                            <div class="metric-box">
+                                <label>OSB Assigned</label>
+                                <div class="metric-value">RM ${Number(osbAssigned).toLocaleString()}</div>
+                            </div>
+                            <div class="metric-box">
+                                <label>A/C Paying</label>
+                                <input type="number" class="metric-input" id="ac-paying-${locCode}" placeholder="0" onfocus="stopPropagationEvent(event)">
+                            </div>
+                            <div class="metric-box">
+                                <label>Collection Result</label>
+                                <input type="number" class="metric-input" id="coll-result-${locCode}" placeholder="0.00" onfocus="stopPropagationEvent(event)">
+                            </div>
+                        </div>
+                        <button class="btn-submit" onclick="submitData('${locCode}', event)">Hantar Laporan</button>
+                    `;
+                    displayArea.appendChild(card);
+                });
+            }
+        }
+
         function highlightCard(element) {
-            // Buang kelas aktif dari semua kotak
             const cards = document.querySelectorAll('.loc-card');
             cards.forEach(card => card.classList.remove('active-focus'));
-            
-            // Tambah kelas aktif pada kotak yang sedang diklik
             element.classList.add('active-focus');
         }
 
-        // Fungsi Simulasi Hantar Data (Untuk dihubungkan dengan Firebase nanti)
-        function submitData(locCode) {
-            event.stopPropagation(); // Elakkan kotak tertutup/trigger highlight dua kali
+        function stopPropagationEvent(e) {
+            e.stopPropagation();
+        }
+
+        function submitData(locCode, event) {
+            event.stopPropagation();
             
             const acPaying = document.getElementById(`ac-paying-${locCode}`).value;
             const collResult = document.getElementById(`coll-result-${locCode}`).value;
 
             if(!acPaying || !collResult) {
-                alert("Sila isi jumlah A/C Paying dan Collection Result sebelum menghantar.");
+                alert("Sila isi nilai ruangan A/C Paying dan Collection Result sebelum menghantar laporan.");
                 return;
             }
 
-            // SIMULASI STRUKTUR JSON FIREBASE
+            // Struktur JSON yang sedia untuk dihantar ke Firebase Realtime Database
             const payload = {
                 locCode: locCode,
                 totalAcPaying: parseInt(acPaying),
                 collectionResult: parseFloat(collResult),
-                timestamp: new Date().toISOString()
+                submissionDate: new Date().toISOString().split('T')[0],
+                timestamp: new Date().getTime()
             };
 
-            console.log(`Mengemaskini Firebase untuk LOC ${locCode}:`, payload);
+            console.log(`Menghantar ke Firebase Path: /submissions/${locCode}`, payload);
             
-            // Tunjuk Notifikasi Berjaya
-            showToast();
-        }
-
-        function showToast() {
-            const x = document.getElementById("toast");
-            x.className = "show";
-            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+            // Paparan Notifikasi Kejayaan
+            const toast = document.getElementById("toast");
+            toast.className = "show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
         }
     </script>
 </body>
