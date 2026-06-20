@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
-    <!-- Pustaka Membaca Excel (SheetJS) -->
+    <!-- Pustaka Membaca & Menulis Excel (SheetJS) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
     <!-- Pustaka Firebase Core & Firestore -->
@@ -69,8 +69,10 @@
         .green { color: var(--success); }
         .red { color: var(--danger); }
 
-        .btn-action { background-color: var(--success); color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; width: 100%; }
+        .btn-action { background-color: var(--success); color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; width: 100%; transition: opacity 0.2s; }
         .btn-gold { background-color: var(--accent-gold); color: #000; }
+        .btn-outline { background-color: transparent; border: 1px solid var(--success); color: var(--success); }
+        .btn-outline:hover { background-color: rgba(16, 185, 129, 0.1); }
         .btn-action:hover { opacity: 0.8; }
 
         .region-section-title { color: var(--accent-gold); font-size: 13px; text-transform: uppercase; margin: 35px 0 15px 0; padding-left: 8px; border-left: 3px solid var(--accent-gold); }
@@ -86,11 +88,9 @@
         .metric-value { font-size: 15px; font-weight: bold; }
         .metric-input { width: 100%; box-sizing: border-box; background-color: var(--bg-input); border: 1px solid rgba(255,255,255,0.15); color: var(--accent-gold); padding: 6px; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; }
 
-        /* DataTables Custom Dark Mode CSS - DIUBAH SUAI UNTUK FIT SCREEN */
+        /* DataTables Custom CSS */
         .table-container { background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); padding: 15px; overflow-x: auto; margin-top: 20px; }
         table.dataTable { width: 100% !important; border-collapse: collapse; color: var(--text-main); }
-        
-        /* Saiz fon dan padding dikurangkan supaya muat */
         table.dataTable thead th { background-color: rgba(0,0,0,0.4); color: var(--accent-gold); border-bottom: 1px solid var(--border-color); padding: 10px 6px; white-space: normal; text-align: center; font-size: 11px; vertical-align: middle;}
         table.dataTable tbody td { padding: 10px 6px; border-bottom: 1px solid var(--border-color); background-color: transparent !important; white-space: nowrap; text-align: center; font-size: 12px;}
         table.dataTable tbody tr:hover { background-color: rgba(255,255,255,0.03) !important; }
@@ -99,24 +99,23 @@
         div.dataTables_wrapper div.dataTables_filter label { font-size: 16px; font-weight: bold; color: var(--accent-gold); }
         div.dataTables_wrapper div.dataTables_filter input { width: 100%; max-width: 400px; padding: 12px 20px; font-size: 16px; border-radius: 30px; border: 2px solid var(--accent-gold); background-color: var(--bg-main); color: white; margin-left: 15px; outline: none; transition: box-shadow 0.3s; }
         div.dataTables_wrapper div.dataTables_filter input:focus { box-shadow: 0 0 15px var(--accent-glow); }
-
         .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: var(--text-muted) !important; font-size: 12px; margin-bottom: 15px; }
         .dataTables_wrapper .dataTables_paginate .paginate_button { color: var(--text-muted) !important; }
         .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: var(--accent-gold) !important; color: #000 !important; border: none; font-weight: bold;}
 
-        /* Badge Laporan & Status Amaran */
+        /* CSS untuk fungsi Expandable Child Row */
+        td.details-control { cursor: pointer; color: var(--accent-gold); font-size: 18px; font-weight: bold; width: 30px; text-align: center;}
+        tr.shown td.details-control { color: var(--danger); transform: rotate(45deg); transition: 0.3s;}
+        
+        table.sub-table { width: 100%; background-color: rgba(0,0,0,0.3); border-radius: 8px; margin: 10px 0; border: 1px solid rgba(255,255,255,0.05); }
+        table.sub-table th { background-color: rgba(0,0,0,0.5); color: var(--text-muted); font-size: 10px; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        table.sub-table td { padding: 8px; font-size: 11px; border-bottom: 1px solid rgba(255,255,255,0.02); color: var(--text-main); }
+        table.sub-table tr:last-child td { border-bottom: none; }
+
         .val-badge { padding: 3px 6px; border-radius: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: inline-block; min-width: 40px; text-align: center; font-size: 11px;}
         .val-gold { color: var(--accent-gold); font-weight: bold; font-size: 13px;}
-        
-        .alert-red {
-            background-color: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px 8px; border-radius: 6px; font-weight: bold; font-size: 10px; display: inline-block; animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
+        .alert-red { background-color: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px 8px; border-radius: 6px; font-weight: bold; font-size: 10px; display: inline-block; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
         #toast { visibility: hidden; min-width: 250px; background-color: var(--success); color: #fff; text-align: center; border-radius: 6px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 13px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
@@ -184,9 +183,12 @@
             <div class="control-panel" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div>
                     <div class="panel-title" style="margin-bottom: 5px; border: none;">3. Rumusan Keseluruhan Peringkat Agensi</div>
-                    <p style="margin:0; font-size:12px; color:var(--text-muted);">Data diringkaskan dan dikumpulkan berdasarkan Nama DCA secara automatik.</p>
+                    <p style="margin:0; font-size:12px; color:var(--text-muted);">Klik logo (+) pada jadual untuk lihat pecahan lokasi. Muat turun raw data untuk Pivot Table.</p>
                 </div>
-                <button class="btn-action" style="width: auto; background-color: var(--success);" onclick="generateFullReport()">Jana & Muat Semula Jadual</button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-action btn-outline" style="width: auto;" onclick="exportRawToExcel()">&#8595; Eksport Excel (Raw Data)</button>
+                    <button class="btn-action" style="width: auto; background-color: var(--success);" onclick="generateFullReport()">Jana & Muat Semula Jadual</button>
+                </div>
             </div>
 
             <div class="kpi-grid">
@@ -200,6 +202,7 @@
                 <table id="report-table" class="display nowrap">
                     <thead>
                         <tr>
+                            <th style="width: 20px;"></th> <!-- Column for Expand Icon -->
                             <th style="text-align: left;">Nama Agensi DCA</th>
                             <th>Jum. Caw.</th>
                             <th>Total A/C</th>
@@ -234,6 +237,10 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        
+        // Pembolehubah Global untuk simpan data Raw bagi Excel dan Expandable Rows
+        window.dcaDetailsMap = {};
+        window.rawExcelData = [];
 
         window.onload = function() { listenToDcaList(); fetchCycleSettings(); };
 
@@ -361,7 +368,7 @@
         }
 
         // ==========================================
-        // ADMIN: JANA LAPORAN GROUP BY DCA
+        // ADMIN: LAPORAN DASHBOARD & EKSPORT EXCEL
         // ==========================================
         function getStatusCellHtml(currentDateStr, cycleConfigDate, cycleAmount, cycleAc) {
             if (cycleConfigDate && currentDateStr >= cycleConfigDate && cycleAmount === 0) {
@@ -373,10 +380,42 @@
             }
         }
 
+        // Format HTML untuk sub-jadual (Bila butang '+' ditekan)
+        function formatChildRow(dcaName) {
+            const locList = window.dcaDetailsMap[dcaName];
+            if(!locList) return '<div>Tiada butiran ditemui.</div>';
+
+            let html = '<table class="sub-table" cellpadding="5" cellspacing="0" border="0">';
+            html += '<thead><tr><th>REGION</th><th>AREA</th><th>LOC CODE</th><th>NAMA LOKASI</th><th>TOTAL A/C</th><th>OSB (RM)</th><th>KUTIPAN C1 (RM)</th><th>KUTIPAN C2 (RM)</th><th>KUTIPAN C3 (RM)</th><th style="color:var(--accent-gold);">TOTAL (RM)</th></tr></thead><tbody>';
+            
+            locList.forEach(loc => {
+                html += `<tr>
+                    <td>${loc.region}</td>
+                    <td>${loc.area}</td>
+                    <td style="font-weight:bold; color:var(--accent-gold);">${loc.loc_code}</td>
+                    <td>${loc.loc_name}</td>
+                    <td style="text-align:center;">${loc.ac}</td>
+                    <td style="text-align:right;">${loc.osb.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                    <td style="text-align:right; color:${loc.c1rm > 0 ? 'var(--success)' : 'var(--text-muted)'};">${loc.c1rm > 0 ? loc.c1rm.toLocaleString(undefined, {minimumFractionDigits:2}) : '-'}</td>
+                    <td style="text-align:right; color:${loc.c2rm > 0 ? 'var(--success)' : 'var(--text-muted)'};">${loc.c2rm > 0 ? loc.c2rm.toLocaleString(undefined, {minimumFractionDigits:2}) : '-'}</td>
+                    <td style="text-align:right; color:${loc.c3rm > 0 ? 'var(--success)' : 'var(--text-muted)'};">${loc.c3rm > 0 ? loc.c3rm.toLocaleString(undefined, {minimumFractionDigits:2}) : '-'}</td>
+                    <td style="text-align:right; font-weight:bold; color:var(--accent-gold);">${loc.totalRm.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            return html;
+        }
+
         async function generateFullReport() {
             const tbody = document.getElementById('table-body');
+            
+            // Padam table event listener lama untuk elak conflict bila dirender semula
+            $('#report-table tbody').off('click', 'td.details-control');
             if ($.fn.DataTable.isDataTable('#report-table')) { $('#report-table').DataTable().destroy(); }
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px;">Mengumpulkan & Merumuskan Data Dari Pangkalan Data...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">Mengumpulkan & Merumuskan Data Dari Pangkalan Data...</td></tr>';
+
+            window.dcaDetailsMap = {};
+            window.rawExcelData = [];
 
             try {
                 const assignmentsSnap = await db.collection("assignments").get();
@@ -406,31 +445,50 @@
                             total_locs: 0, total_ac: 0, total_osb: 0,
                             c1_ac: 0, c1_rm: 0, c2_ac: 0, c2_rm: 0, c3_ac: 0, c3_rm: 0, total_rm: 0
                         };
+                        window.dcaDetailsMap[dcaName] = [];
                     }
 
-                    dcaGroupMap[dcaName].total_locs += 1;
-                    dcaGroupMap[dcaName].total_ac += (parseInt(task.total_ac_assigned) || 0);
-                    
                     const osb = parseFloat(task.total_osb_assigned) || 0;
-                    dcaGroupMap[dcaName].total_osb += osb;
-                    grandTotalOsb += osb;
-
+                    const ac = parseInt(task.total_ac_assigned) || 0;
+                    
                     const c1rm = sub.cycle_1?.collection_amount || 0;
                     const c2rm = sub.cycle_2?.collection_amount || 0;
                     const c3rm = sub.cycle_3?.collection_amount || 0;
-
-                    dcaGroupMap[dcaName].c1_ac += sub.cycle_1?.ac_paying || 0;
-                    dcaGroupMap[dcaName].c1_rm += c1rm;
                     
-                    dcaGroupMap[dcaName].c2_ac += sub.cycle_2?.ac_paying || 0;
-                    dcaGroupMap[dcaName].c2_rm += c2rm;
-                    
-                    dcaGroupMap[dcaName].c3_ac += sub.cycle_3?.ac_paying || 0;
-                    dcaGroupMap[dcaName].c3_rm += c3rm;
+                    const c1ac = sub.cycle_1?.ac_paying || 0;
+                    const c2ac = sub.cycle_2?.ac_paying || 0;
+                    const c3ac = sub.cycle_3?.ac_paying || 0;
 
                     const totalRmForLoc = c1rm + c2rm + c3rm;
+
+                    // Pengiraan Kumpulan (Group)
+                    dcaGroupMap[dcaName].total_locs += 1;
+                    dcaGroupMap[dcaName].total_ac += ac;
+                    dcaGroupMap[dcaName].total_osb += osb;
+                    dcaGroupMap[dcaName].c1_ac += c1ac; dcaGroupMap[dcaName].c1_rm += c1rm;
+                    dcaGroupMap[dcaName].c2_ac += c2ac; dcaGroupMap[dcaName].c2_rm += c2rm;
+                    dcaGroupMap[dcaName].c3_ac += c3ac; dcaGroupMap[dcaName].c3_rm += c3rm;
                     dcaGroupMap[dcaName].total_rm += totalRmForLoc;
+                    
+                    grandTotalOsb += osb;
                     grandTotalCollection += totalRmForLoc;
+
+                    // Simpan Butiran untuk Sub-Table
+                    window.dcaDetailsMap[dcaName].push({
+                        region: task.region, area: task.area, loc_code: locCode, loc_name: task.loc_name,
+                        ac: ac, osb: osb, c1rm: c1rm, c2rm: c2rm, c3rm: c3rm, totalRm: totalRmForLoc
+                    });
+
+                    // Simpan Data Flat untuk Excel Export
+                    window.rawExcelData.push({
+                        "DCA Name": dcaName, "Region": task.region, "Area": task.area, "Loc Code": locCode, "Loc Name": task.loc_name,
+                        "Total A/C Assigned": ac, "Total OSB Assigned": osb,
+                        "Cycle 1 A/C Paying": c1ac, "Cycle 1 Collection": c1rm,
+                        "Cycle 2 A/C Paying": c2ac, "Cycle 2 Collection": c2rm,
+                        "Cycle 3 A/C Paying": c3ac, "Cycle 3 Collection": c3rm,
+                        "Total A/C Paying": (c1ac + c2ac + c3ac),
+                        "Total Collection": totalRmForLoc
+                    });
                 });
 
                 tbody.innerHTML = '';
@@ -443,12 +501,14 @@
                     const c2_html = getStatusCellHtml(todayStr, c2Date, data.c2_rm, data.c2_ac);
                     const c3_html = getStatusCellHtml(todayStr, c3Date, data.c3_rm, data.c3_ac);
 
-                    // Tambahan A/C Paying keseluruhan untuk agensi tersebut
                     const totalAcPaying = data.c1_ac + data.c2_ac + data.c3_ac;
                     const dcaPct = data.total_osb > 0 ? ((data.total_rm / data.total_osb) * 100).toFixed(2) : "0.00";
 
                     const tr = document.createElement('tr');
+                    // Data-dca attribute diletakkan supaya fungsi klik boleh ambil nama DCA
+                    tr.setAttribute('data-dca', dcaName);
                     tr.innerHTML = `
+                        <td class="details-control">&#x2295;</td>
                         <td style="font-weight: bold; color: var(--accent-gold); text-align: left; font-size: 13px;">${dcaName}</td>
                         <td>${data.total_locs} Caw.</td>
                         <td>${data.total_ac.toLocaleString()}</td>
@@ -464,13 +524,15 @@
                     tbody.appendChild(tr);
                 }
 
+                // Kemas Kini KPI
                 let percentVal = grandTotalOsb > 0 ? (grandTotalCollection / grandTotalOsb) * 100 : 0;
                 document.getElementById('kpi-osb').textContent = `RM ${grandTotalOsb.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                 document.getElementById('kpi-collection').textContent = `RM ${grandTotalCollection.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                 document.getElementById('kpi-percent').textContent = `${percentVal.toFixed(2)}%`;
                 document.getElementById('kpi-pending').textContent = dcaCount;
 
-                $('#report-table').DataTable({
+                // Init DataTables
+                const table = $('#report-table').DataTable({
                     "pageLength": 10,
                     "language": {
                         "search": "CARI REKOD AGENSI:",
@@ -479,13 +541,52 @@
                         "paginate": { "next": "Seterusnya", "previous": "Sebelumnya" }
                     },
                     "scrollX": true,
-                    "order": [[ 7, "desc" ]]
+                    "order": [[ 8, "desc" ]], // Susun dari Kutipan Tertinggi
+                    "columns": [
+                        { "orderable": false }, // Disable susunan pada column '+' ikon
+                        null, null, null, null, null, null, null, null, null
+                    ]
+                });
+
+                // Event Listener untuk butang Expand (+)
+                $('#report-table tbody').on('click', 'td.details-control', function () {
+                    const tr = $(this).closest('tr');
+                    const row = table.row(tr);
+
+                    if (row.child.isShown()) {
+                        row.child.hide();
+                        tr.removeClass('shown');
+                        $(this).html('&#x2295;'); // Tukar ke icon Plus
+                    } else {
+                        const dcaName = tr.data('dca');
+                        row.child(formatChildRow(dcaName)).show();
+                        tr.addClass('shown');
+                        $(this).html('&#x2296;'); // Tukar ke icon Minus
+                    }
                 });
 
             } catch (error) {
                 console.error("Ralat Dashboard:", error);
-                tbody.innerHTML = `<tr><td colspan="9" style="color:red; text-align:center;">Ralat: ${error.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" style="color:red; text-align:center;">Ralat: ${error.message}</td></tr>`;
             }
+        }
+
+        // Fungsi Eksport Excel (Raw Data)
+        function exportRawToExcel() {
+            if (!window.rawExcelData || window.rawExcelData.length === 0) {
+                alert("Sila Jana Laporan terlebih dahulu sebelum mengeksport ke Excel!");
+                return;
+            }
+            showToast("Sedang menjana fail Excel...");
+            
+            // Hasilkan Workbook baru menggunakan SheetJS
+            const worksheet = XLSX.utils.json_to_sheet(window.rawExcelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Raw DCA Performance");
+            
+            // Nama fail ditetapkan dengan tarikh hari ini
+            const dateStr = new Date().toISOString().split('T')[0];
+            XLSX.writeFile(workbook, `DCA_Performance_Raw_${dateStr}.xlsx`);
         }
     </script>
 </body>
