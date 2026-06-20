@@ -500,8 +500,23 @@ async function login(){
 
         const data = await res.json();
 
-        if(data.status === "SUCCESS") {
-            // 2. CIPTA TOKEN DAN SIMPAN SESI KE FIREBASE
+if(data.status === "SUCCESS") {
+            
+            // ==========================================
+            // LANGKAH TAMBAHAN: BUANG SESI LAMA (SINGLE DEVICE LOGIN)
+            // ==========================================
+            const qOldSession = window.query(
+                window.collection(window.db, "ACTIVE_SESSIONS"),
+                window.where("user", "==", data.user)
+            );
+            const oldSessionsSnap = await window.getDocs(qOldSession);
+            // Loop dan delete semua token lama untuk user ini
+            oldSessionsSnap.forEach((docSnap) => {
+                window.deleteDoc(window.doc(window.db, "ACTIVE_SESSIONS", docSnap.id));
+            });
+            // ==========================================
+
+            // 2. CIPTA TOKEN DAN SIMPAN SESI BARU KE FIREBASE
             const sessionToken = generateSessionToken();
             const expireDate = new Date();
             expireDate.setHours(expireDate.getHours() + 24); // Sesi 24 jam
@@ -540,6 +555,7 @@ async function login(){
             else if(data.type == "lock") window.location="../lock/";
             else if(data.type == "master") window.location="../menumaster/";
         }
+    
         else if(data.status === "INACTIVE"){
             err.innerText="User ID inactive";
             err.style.display="block";
