@@ -2230,31 +2230,29 @@ function initTableUpgrades() {
 window.addEventListener('DOMContentLoaded', initTableUpgrades);
 
 /* =========================================================================
-   SINGLE DEVICE LOGIN & ACTION-TRIGGERED CHECK (20 MINUTE COOLDOWN)
+   SEMAKAN SESI REAL-TIME DARI FIREBASE (SIFAR PENGGUNAAN KUOTA GAS)
 ========================================================================= */
-
-function verifySessionWithServer() {
+async function verifySessionWithServer() {
     const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
     if (!currentToken) return;
 
-    fetch(api + "?action=session&token=" + currentToken + "&api_key=SCZP_SECURE_2026")
-    .then(res => res.json())
-    .then(data => {
-        if (data.status !== "ACTIVE") {
+    try {
+        const q = window.query(window.collection(window.db, "ACTIVE_SESSIONS"), window.where("token", "==", currentToken));
+        const querySnapshot = await window.getDocs(q);
+        
+        let isValid = false;
+        querySnapshot.forEach((doc) => {
+            let sessionData = doc.data();
+            if (new Date(sessionData.expire_at) > new Date()) {
+                isValid = true;
+            }
+        });
+
+        if (!isValid) {
             showSessionPopup("DEVICE"); 
         }
-    })
-    .catch(err => console.log("Connection error, skipping check..."));
-}
-
-let lastCheckTime = 0;
-const CHECK_COOLDOWN = 1200000; 
-
-function checkSessionOnAction() {
-    const now = Date.now();
-    if (now - lastCheckTime > CHECK_COOLDOWN) {
-        lastCheckTime = now;
-        verifySessionWithServer(); 
+    } catch (err) {
+        console.log("Firebase connection paused or offline, skipping check...");
     }
 }
 
@@ -2272,6 +2270,25 @@ document.addEventListener("visibilitychange", () => {
     }
 });
 
+/* =========================================================================
+   FUNGSI CCTV: RAKAM AKTIVITI KE FIREBASE
+========================================================================= */
+async function systemLog(action, status, accNo, details) {
+    try {
+        await window.addDoc(window.collection(window.db, "SYSTEM_LOGS"), {
+            timestamp: new Date().toISOString(),
+            user_id: user || "-",
+            role: role || "-",
+            action: action,
+            status: status,
+            acc_no: accNo || "-",
+            details: details || "-"
+        });
+    } catch (e) {
+        console.error("Gagal merakam CCTV:", e);
+    }
+}
+    
 </script>
 
 </body>
