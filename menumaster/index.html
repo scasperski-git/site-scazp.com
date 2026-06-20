@@ -2143,51 +2143,35 @@ async function saveRecord(docId) {
             let oldData = oldSnap.data();
             
             // ==========================================
-            // 2. DETEKTIF: KIRA APA YANG DIUBAH OLEH USER (VERSI KALIS RALAT)
+            // 2. DETEKTIF: KIRA APA YANG DIUBAH OLEH USER
             // ==========================================
             let changesArr = [];
             let oldAmount = parseFloat(oldData.amount || 0);
-            let newAmountClean = parseFloat(newAmount || 0);
             
-            if (oldAmount !== newAmountClean) changesArr.push(`Amount: RM${oldAmount} ➔ RM${newAmountClean}`);
+            if (oldAmount !== newAmount) changesArr.push(`Amount: RM${oldAmount} ➔ RM${newAmount}`);
+            if ((oldData.branch_name || "") !== newBranch) changesArr.push(`Branch: ${oldData.branch_name || "-"} ➔ ${newBranch}`);
+            if ((oldData.promise_date || "") !== newDate) changesArr.push(`PTP Date: ${oldData.promise_date || "-"} ➔ ${newDate}`);
+            if ((oldData.status || "") !== newStatus) changesArr.push(`Status: ${oldData.status || "-"} ➔ ${newStatus}`);
+            if ((oldData.payment_category || "") !== newCat) changesArr.push(`Category: ${oldData.payment_category || "-"} ➔ ${newCat}`);
+            if ((oldData.remarks || "") !== newRemarks) changesArr.push(`Remarks: ${oldData.remarks || "-"} ➔ ${newRemarks}`);
             
-            let oldBranch = (oldData.branch_name || "").trim();
-            if (oldBranch !== newBranch.trim()) changesArr.push(`Branch: ${oldBranch || "-"} ➔ ${newBranch}`);
-            
-            let oldPTP = (oldData.promise_date || "").trim();
-            if (oldPTP !== newDate.trim()) changesArr.push(`PTP Date: ${oldPTP || "-"} ➔ ${newDate}`);
-            
-            let oldStatus = (oldData.status || "").trim();
-            if (oldStatus !== newStatus.trim()) changesArr.push(`Status: ${oldStatus || "-"} ➔ ${newStatus}`);
-            
-            let oldCat = (oldData.payment_category || "").trim();
-            if (oldCat !== newCat.trim()) changesArr.push(`Category: ${oldCat || "-"} ➔ ${newCat}`);
-            
-            let oldRemarks = (oldData.remarks || "").trim();
-            if (oldRemarks !== newRemarks.trim()) changesArr.push(`Remarks: ${oldRemarks || "-"} ➔ ${newRemarks}`);
-            
-            // 3. JIKA ADA PERUBAHAN, SIMPAN KE EDIT_HISTORY
+            // 3. JIKA ADA PERUBAHAN, BARU KITA SIMPAN KE EDIT_HISTORY
             if (changesArr.length > 0) {
-                let changesSummary = changesArr.join(" | "); 
+                let changesSummary = changesArr.join(" | "); // Gabungkan nota jadi satu baris
                 
-                // Gunakan objek klon (auditData) supaya Firebase tak tolak jika ada data 'undefined'
-                let auditData = { ...oldData };
-                auditData.audit_action = "EDIT";
-                auditData.edited_by_user = user || "UNKNOWN"; 
-                auditData.edited_at_time = new Date().toISOString();
-                auditData.changes_made = changesSummary; 
+                oldData.audit_action = "EDIT";
+                oldData.edited_by_user = user; 
+                oldData.edited_at_time = new Date().toISOString();
+                oldData.changes_made = changesSummary; // <--- INI NOTA DETEKTIF KITA!
 
+                // Hantar ke Koleksi EDIT_HISTORY
                 let historyId = docId + "_edit_" + Date.now();
                 const historyRef = window.doc(window.db, "EDIT_HISTORY", historyId);
-                
-                // Tangkap error secara senyap jika fungsi audit gagal supaya proses tak sangkut
-                await window.setDoc(historyRef, auditData).catch(err => {
-                    console.error("Gagal simpan log audit: ", err);
-                });
+                await window.setDoc(historyRef, oldData);
             }
         }
 
-        // 4. KEMAS KINI KE JADUAL UTAMA MACAM BIASA
+// 4. KEMAS KINI KE JADUAL UTAMA MACAM BIASA
         await window.updateDoc(docRef, {
             amount: newAmount,
             branch_name: newBranch, 
@@ -2195,8 +2179,8 @@ async function saveRecord(docId) {
             status: newStatus,
             payment_category: newCat,
             remarks: newRemarks,
-            edited_by: user || "UNKNOWN", // Elak ralat 'undefined'
-            edited_at: new Date().toISOString()
+            edited_by: user, // "Tiny Tag"
+            edited_at: new Date().toISOString() // <--- WAJIB TAMBAH BARIS INI
         });
 
         alert("Rekod berjaya dikemas kini!");
