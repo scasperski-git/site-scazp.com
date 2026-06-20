@@ -736,7 +736,7 @@ table tbody tr:hover td { background-color: #e2e8f0; }
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, setDoc, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDKiYl8462c8ZanXc4oXIfa-_9su3E89Wk",
@@ -760,7 +760,8 @@ table tbody tr:hover td { background-color: #e2e8f0; }
   window.deleteDoc = deleteDoc;
   window.getDoc = getDoc;
   window.setDoc = setDoc;
-  window.onSnapshot = onSnapshot; // <--- WAJIB TAMBAH INI
+  window.onSnapshot = onSnapshot;
+  window.addDoc = addDoc;
 </script>
 
 </head>
@@ -992,10 +993,6 @@ async function checkLock(){
     if(!acc){ alert("Enter Account No"); input.focus(); return; }
     if(isLoading) return;
 
-    verifySessionWithServer();
-    const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
-    if(!currentToken) return; 
-
     isLoading = true; checkBtn.disabled = true;
     result.innerHTML = "<div class='loading'>Checking Lock Status<div class='spinner'></div></div>";
 
@@ -1082,10 +1079,6 @@ async function checkLock(){
 async function markAsPaid(docId, acc) {
     if(!confirm("Are you sure you want to mark Account " + acc + " as PAID?")) return;
 
-    verifySessionWithServer();
-    const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
-    if(!currentToken) return; 
-
     checkBtn.disabled = true;
     result.innerHTML = "<div class='loading'>Updating to PAID...<div class='spinner'></div></div>";
 
@@ -1097,6 +1090,9 @@ async function markAsPaid(docId, acc) {
             paid_by: user, 
             paid_date: new Date().toISOString()
         });
+
+        // Rekod CCTV di latar belakang tanpa ganggu proses pengguna
+        systemLog("MARK_PAID", "SUCCESS", acc, "Marked account as PAID");
 
         alert("Account " + acc + " successfully marked as PAID!");
         input.value = acc; 
@@ -1562,28 +1558,32 @@ function initTableUpgrades() {
 window.addEventListener('DOMContentLoaded', initTableUpgrades);
 
 /* =========================================================================
-   SEMAKAN SESI REAL-TIME DARI FIREBASE (INSTANT KICK-OUT)
+   SEMAKAN SESI REAL-TIME DARI FIREBASE (INSTANT KICK-OUT YANG KEBAL)
 ========================================================================= */
 function startSessionListener() {
     const currentToken = localStorage.getItem("session_token") || sessionStorage.getItem("session_token");
-    if (!currentToken) return;
-
-    // Pasang "CCTV" yang merenung tepat pada token peranti ini
-    const q = window.query(window.collection(window.db, "ACTIVE_SESSIONS"), window.where("token", "==", currentToken));
+    const currentUser = localStorage.getItem("lock_user") || sessionStorage.getItem("lock_user");
     
-    // onSnapshot akan sentiasa bersedia. Jika berlaku perubahan, ia bertindak serta-merta!
-    window.onSnapshot(q, (snapshot) => {
-        if (snapshot.empty) {
-            // Jika token ghaib (didelete oleh peranti baru yang login), terus tendang!
+    if (!currentToken || !currentUser) return;
+
+    // Dengar TERUS pada dokumen User ID tersebut
+    const docRef = window.doc(window.db, "ACTIVE_SESSIONS", currentUser);
+    
+    window.onSnapshot(docRef, (docSnap) => {
+        if (!docSnap.exists()) {
+            // Jika dokumen dipadam
             showSessionPopup("DEVICE");
         } else {
-            // Semak juga jika masa sesi dah tamat (24 jam)
-            snapshot.forEach((doc) => {
-                let sessionData = doc.data();
-                if (new Date(sessionData.expire_at) < new Date()) {
-                    showSessionPopup("EXPIRED");
-                }
-            });
+            let sessionData = docSnap.data();
+            
+            // JIKA TOKEN BERUBAH (Sebab peranti lain login dan overwrite token ini)
+            if (sessionData.token !== currentToken) {
+                showSessionPopup("DEVICE");
+            }
+            // JIKA MASA SESI LUPUT
+            else if (new Date(sessionData.expire_at) < new Date()) {
+                showSessionPopup("EXPIRED");
+            }
         }
     }, (error) => {
         console.log("Sistem terputus hubungan sementara dari Firebase...");
@@ -1592,6 +1592,7 @@ function startSessionListener() {
 
 // Terus jalankan listener sebaik sahaja portal dibuka
 startSessionListener();
+
 /* =========================================================================
    FUNGSI CCTV: RAKAM AKTIVITI KE FIREBASE
 ========================================================================= */
@@ -1612,6 +1613,15 @@ async function systemLog(action, status, accNo, details) {
 }
     
 </script>
+
+<div id="sessionPopup">
+    <div class="session-box">
+        <i class="fa fa-lock" style="font-size: 48px; color: #ef4444; margin-bottom: 16px;"></i>
+        <div style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #0f172a;" id="sessionTitle">Session Expired</div>
+        <div style="font-size: 14px; color: #475569; margin-bottom: 16px;" id="sessionMsg">Please login again.</div>
+        <div style="font-size: 12px; color: #94a3b8; font-weight: 500;">Redirecting to login...</div>
+    </div>
+</div>
 
 </body>
 </html>
