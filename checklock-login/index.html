@@ -502,7 +502,7 @@ async function login(){
 
 if(data.status === "SUCCESS") {
             
-            // ==========================================
+// ==========================================
             // LANGKAH TAMBAHAN: BUANG SESI LAMA (SINGLE DEVICE LOGIN)
             // ==========================================
             const qOldSession = window.query(
@@ -510,11 +510,11 @@ if(data.status === "SUCCESS") {
                 window.where("user", "==", data.user)
             );
             const oldSessionsSnap = await window.getDocs(qOldSession);
-            // Loop dan delete semua token lama untuk user ini
-            oldSessionsSnap.forEach((docSnap) => {
-                window.deleteDoc(window.doc(window.db, "ACTIVE_SESSIONS", docSnap.id));
-            });
-            // ==========================================
+            
+            // GUNA for...of SUPAYA SISTEM TUNGGU (AWAIT) PROSES DELETE SELESAI
+            for (const docSnap of oldSessionsSnap.docs) {
+                await window.deleteDoc(window.doc(window.db, "ACTIVE_SESSIONS", docSnap.id));
+            }
 
             // 2. CIPTA TOKEN DAN SIMPAN SESI BARU KE FIREBASE
             const sessionToken = generateSessionToken();
