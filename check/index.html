@@ -245,44 +245,53 @@ body.list-mode .container {
     gap: 10px;
 }
 
+/* ==========================================
+   MODERN SEARCH BAR (CHECK LOCK)
+   ========================================== */
 .search-bar-row {
     display: flex;
-    gap: 16px;
-    align-items: stretch; 
-    margin-bottom: 10px;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 24px;
+    background: #f8fafc; /* Latar kelabu lembut menyatukan input & butang */
+    padding: 8px;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
 }
 
 .search-bar-row input {
-    width: 280px;
-    flex: 0 0 280px;
+    flex: 1; /* MEMANJANG: Ambil semua baki ruang kosong */
+    width: 100%;
     padding: 16px 20px;
-    font-size: 15px;
-    border: 2px solid #e2e8f0;
+    font-size: 16px;
+    border: 2px solid transparent; 
     border-radius: 12px;
     outline: none;
     transition: 0.3s;
-    background: #f8fafc;
+    background: #ffffff;
     color: #1e293b;
-    text-align: center;
+    text-align: left; /* Teks ke kiri lebih kemas untuk input memanjang */
     letter-spacing: 1px;
     font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 
 .search-bar-row input:focus {
-    background: #ffffff;
     border-color: #3b82f6;
+    background: #ffffff;
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
 }
 
 .button-group {
     display: flex;
-    gap: 12px;
-    flex: 1; 
+    gap: 8px;
+    flex: none; /* MENGECIL: Butang tidak lagi mengembang memanjang */
 }
 
 .button-group button {
-    flex: 1;
-    padding: 0 20px;
+    flex: none; /* Elakkan butang dari ditarik lebar */
+    padding: 0 24px;
+    height: 56px; /* Selaraskan tinggi butang dengan kotak input */
     border: none;
     border-radius: 12px;
     font-size: 14px;
@@ -294,7 +303,6 @@ body.list-mode .container {
     align-items: center;
     gap: 8px;
 }
-
 .check-btn {
     background: linear-gradient(135deg, #4f46e5, #3b82f6);
     color: white;
