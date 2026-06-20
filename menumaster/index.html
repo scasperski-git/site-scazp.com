@@ -1018,31 +1018,35 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
     color: #ef4444; /* Merah bila hover */
 }
 
-/* STAIL 1: GARIS TEPI KIRI */
+/* STAIL 2: GARIS KECERUNAN (GRADIENT) DI ATAS */
 .section {
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    /* Kita pindahkan garisan tebal ke kiri */
-    border-left: 6px solid transparent; 
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     border-radius: 16px; 
+    position: relative;
+    overflow: hidden; /* Penting supaya warna tak terkeluar bucu */
 }
 .section:hover {
     transform: translateY(-4px);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
 }
+/* Bina garisan atas menggunakan pseudo-element supaya border-radius tak rosak */
+.section::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px;
+}
 
-.section.summary { border-left-color: #3b82f6; }
+.section.summary::before { background: linear-gradient(90deg, #1e3a8a, #3b82f6, #93c5fd); }
 .section.summary h3 i { background: #eff6ff; color: #3b82f6; }
 
-.section.dashboard { border-left-color: #10b981; }
+.section.dashboard::before { background: linear-gradient(90deg, #064e3b, #10b981, #6ee7b7); }
 .section.dashboard h3 i { background: #ecfdf5; color: #10b981; }
 
-.section:has(.fa-pen-to-square) { border-left-color: #f43f5e; }
+.section:has(.fa-pen-to-square)::before { background: linear-gradient(90deg, #881337, #f43f5e, #fda4af); }
 .section:has(.fa-pen-to-square) h3 i { background: #fff1f2; color: #f43f5e; }
 
-.section:has(.fa-list-check) { border-left-color: #334155; }
+.section:has(.fa-list-check)::before { background: linear-gradient(90deg, #0f172a, #475569, #cbd5e1); }
 .section:has(.fa-list-check) h3 i { background: #f1f5f9; color: #334155; }
 
     
