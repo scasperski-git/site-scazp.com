@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DCA Performance Portal | Firestore</title>
+    <title>Portal & Dashboard DCA | scazp.com</title>
     
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
@@ -20,6 +20,7 @@
             --accent-gold: #D4AF37;
             --accent-glow: rgba(212, 175, 55, 0.25);
             --success: #10B981;
+            --danger: #EF4444;
             --border-color: rgba(255,255,255,0.06);
         }
 
@@ -32,15 +33,68 @@
         }
 
         .container {
-            max-width: 850px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
+        /* Navigasi Tab */
+        .tab-menu {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            padding: 10px 20px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        .tab-btn.active {
+            color: #000;
+            background-color: var(--accent-gold);
+        }
+
+        /* Paparan Utama */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .header {
-            text-align: center;
+            text-align: left;
             margin-bottom: 30px;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .header h1 {
@@ -56,6 +110,7 @@
             margin-top: 5px;
         }
 
+        /* Gaya Khusus Portal DCA */
         .admin-panel {
             background-color: var(--bg-card);
             border: 1px dashed var(--accent-gold);
@@ -65,10 +120,6 @@
             text-align: center;
         }
 
-        .user-panel {
-            margin-bottom: 25px;
-        }
-
         label.panel-label {
             display: block;
             font-size: 13px;
@@ -76,7 +127,6 @@
             color: var(--accent-gold);
             margin-bottom: 8px;
             font-weight: 600;
-            letter-spacing: 0.5px;
         }
 
         select {
@@ -89,17 +139,15 @@
             font-size: 15px;
             outline: none;
             cursor: pointer;
+            margin-bottom: 20px;
         }
 
-        select:focus {
-            border-color: var(--accent-gold);
-        }
+        select:focus { border-color: var(--accent-gold); }
 
         .region-section-title {
             color: var(--accent-gold);
             font-size: 13px;
             text-transform: uppercase;
-            letter-spacing: 1px;
             margin: 35px 0 15px 0;
             padding-left: 8px;
             border-left: 3px solid var(--accent-gold);
@@ -119,52 +167,58 @@
             box-shadow: 0 0 15px var(--accent-glow);
         }
 
-        .loc-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: #FFFFFF;
-        }
+        .loc-title { font-size: 15px; font-weight: 600; color: #FFFFFF; }
+        .loc-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
 
-        .loc-subtitle {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 3px;
-        }
-
+        /* Grid Khusus */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
             margin-top: 15px;
         }
-
-        @media (min-width: 768px) {
-            .metrics-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
         }
 
-        .metric-box {
+        @media (min-width: 768px) {
+            .metrics-grid, .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+            .container-portal { max-width: 850px; margin: 0 auto; }
+        }
+
+        .metric-box, .kpi-card {
             background-color: rgba(0,0,0,0.2);
             padding: 12px;
             border-radius: 8px;
             text-align: center;
         }
+        
+        .kpi-card {
+            background-color: var(--bg-card);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
 
-        .metric-box label {
+        .metric-box label, .kpi-card h3 {
             display: block;
             font-size: 10px;
             text-transform: uppercase;
             color: var(--text-muted);
             margin-bottom: 6px;
-            letter-spacing: 0.3px;
         }
 
-        .metric-value {
-            font-size: 15px;
-            font-weight: bold;
-            color: var(--text-main);
-        }
+        .kpi-card h3 { font-size: 12px; margin-bottom: 10px; }
+
+        .metric-value { font-size: 15px; font-weight: bold; }
+        .kpi-value { font-size: 24px; font-weight: bold; color: #FFF; }
+        
+        .gold { color: var(--accent-gold); }
+        .green { color: var(--success); }
+        .red { color: var(--danger); }
 
         .metric-input {
             width: 100%;
@@ -179,76 +233,156 @@
             font-weight: bold;
         }
 
-        .metric-input:focus {
-            outline: none;
-            border-color: var(--accent-gold);
-        }
+        .metric-input:focus { outline: none; border-color: var(--accent-gold); }
 
-        .btn-submit {
-            width: 100%;
+        .btn-action {
             background-color: var(--success);
             color: white;
             border: none;
-            padding: 10px;
-            margin-top: 15px;
+            padding: 10px 15px;
             border-radius: 6px;
             font-weight: bold;
             font-size: 13px;
             cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
         }
 
-        #toast {
-            visibility: hidden;
-            min-width: 250px;
-            background-color: var(--success);
-            color: #fff;
-            text-align: center;
+        .btn-generate {
+            background-color: var(--accent-gold);
+            color: #000;
+            width: auto;
+            margin-top: 0;
+        }
+
+        .date-input {
+            background-color: var(--bg-main);
+            border: 1px solid var(--accent-gold);
+            color: var(--text-main);
+            padding: 9px 15px;
             border-radius: 6px;
-            padding: 16px;
-            position: fixed;
-            z-index: 10;
-            left: 50%;
-            bottom: 30px;
-            transform: translateX(-50%);
-            font-size: 13px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            font-family: inherit;
+            font-size: 14px;
+            color-scheme: dark;
+        }
+
+        /* Gaya Jadual Dashboard */
+        .table-container {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background-color: rgba(0,0,0,0.4); color: var(--accent-gold); padding: 15px; text-align: left; white-space: nowrap; }
+        td { padding: 15px; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+        tr:hover { background-color: rgba(255,255,255,0.02); }
+
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .status-submitted { background-color: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .status-pending { background-color: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+        
+        .no-record { text-align: center; padding: 30px; color: var(--text-muted); font-size: 14px; }
+        
+        /* Toast */
+        #toast {
+            visibility: hidden; min-width: 250px; background-color: var(--success); color: #fff;
+            text-align: center; border-radius: 6px; padding: 16px; position: fixed; z-index: 10;
+            left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 13px;
         }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-        
-        .no-record {
-            text-align: center;
-            padding: 30px;
-            color: var(--text-muted);
-            font-size: 14px;
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="header">
-            <h1>PORTAL PRESTASI DCA (FIRESTORE)</h1>
-            <p>Sistem Pengurusan Kompilasi Prestasi Atas Talian</p>
+        
+        <div class="tab-menu">
+            <button class="tab-btn active" onclick="switchTab('portal')">Kemas Kini Prestasi (DCA)</button>
+            <button class="tab-btn" onclick="switchTab('dashboard')">Dashboard Rumusan (Admin)</button>
         </div>
 
-        <div class="admin-panel">
-            <label class="panel-label" style="margin-bottom: 2px;">Panel Admin: Muat Naik Fail Agihan Tugas ke Firestore</label>
-            <p style="font-size: 11px; color: var(--text-muted); margin: 0 0 15px 0;">Data akan ditulis ke koleksi 'assignments'</p>
-            <input type="file" id="excel-file" accept=".xlsx, .xls" onchange="uploadExcelToFirestore(this)">
+        <div id="view-portal" class="view-section active">
+            <div class="container-portal">
+                <div class="header" style="justify-content: center; text-align: center;">
+                    <div>
+                        <h1>BORANG PENYERAHAN DCA</h1>
+                        <p>Kemas kini kutipan mengikut kitaran bulanan</p>
+                    </div>
+                </div>
+
+                <div class="admin-panel">
+                    <label class="panel-label">Panel Admin: Muat Naik Fail Agihan Tugas ke Firestore</label>
+                    <input type="file" id="excel-file" accept=".xlsx, .xls" onchange="uploadExcelToFirestore(this)" style="font-size: 13px; color: var(--text-muted);">
+                </div>
+
+                <label class="panel-label">Pilih Nama DCA Untuk Kemas Kini</label>
+                <select id="dca-select" onchange="fetchAndRenderDcaTasks()">
+                    <option value="">-- Memuat turun senarai agensi... --</option>
+                </select>
+
+                <div id="portal-display">
+                    <div class="no-record">Sila pilih nama agensi DCA untuk melihat senarai tugasan.</div>
+                </div>
+            </div>
         </div>
 
-        <div class="user-panel">
-            <label class="panel-label">Pilih Nama DCA Sila Semak Tugasan</label>
-            <select id="dca-select" onchange="fetchAndRenderDcaTasks()">
-                <option value="">-- Memuat turun senarai agensi... --</option>
-            </select>
+        <div id="view-dashboard" class="view-section">
+            <div class="header">
+                <div>
+                    <h1>PAPAN PEMUKA PRESTASI</h1>
+                    <p>Pemantauan Serahan Laporan Kutipan Keseluruhan</p>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="date" id="report-date" class="date-input">
+                    <button class="btn-action btn-generate" onclick="generateReport()">Jana Laporan Keseluruhan</button>
+                </div>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <h3>Total OSB Keseluruhan</h3>
+                    <div class="kpi-value" id="kpi-osb">RM 0.00</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>Jumlah Kutipan Semasa</h3>
+                    <div class="kpi-value green" id="kpi-collection">RM 0.00</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>% Kutipan Semasa</h3>
+                    <div class="kpi-value gold" id="kpi-percent">0.00%</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>DCA Belum Hantar</h3>
+                    <div class="kpi-value red" id="kpi-pending">0</div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="report-table">
+                    <thead>
+                        <tr>
+                            <th>Nama DCA</th>
+                            <th>Region / Area</th>
+                            <th>Loc Code</th>
+                            <th>OSB Assigned (RM)</th>
+                            <th style="text-align: center;">A/C Paying</th>
+                            <th>Kutipan (RM)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <tr>
+                            <td colspan="7" class="no-record">Sila pilih tarikh dan klik 'Jana Laporan Keseluruhan'</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <div id="portal-display">
-            <div class="no-record">Sila pilih nama agensi DCA untuk melihat senarai tugasan.</div>
-        </div>
     </div>
 
     <div id="toast">Operasi Berjaya Dilaksanakan!</div>
@@ -270,12 +404,38 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // RUN MASA MULA-MULA BUKA
         window.onload = function() {
-            listenToDcaList();
+            listenToDcaList(); // Tarik senarai DCA untuk View Portal
+            
+            // Set tarikh default untuk Dashboard ke hari ini mengikut zon waktu lokal
+            const today = new Date();
+            today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+            document.getElementById('report-date').value = today.toISOString().split('T')[0];
         };
 
         // ==========================================
-        // FUNGSI ADMIN: EXCEL -> FIRESTORE BATCH WRITE
+        // FUNGSI NAVIGASI TAB (SPA)
+        // ==========================================
+        function switchTab(tabId) {
+            // Reset butang
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            // Sembunyikan semua view
+            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+
+            // Aktifkan tab yang ditekan
+            if (tabId === 'portal') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('view-portal').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('view-dashboard').classList.add('active');
+                // Boleh letak auto-generate kalau bos nak, tapi saya biarkan manual tekan butang
+            }
+        }
+
+        // ==========================================
+        // FUNGSI PORTAL: ADMIN EXCEL UPLOAD
         // ==========================================
         async function uploadExcelToFirestore(input) {
             const file = input.files[0];
@@ -285,8 +445,7 @@
             reader.onload = async function(e) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
                 
                 if (jsonData.length === 0) {
@@ -295,8 +454,6 @@
                 }
 
                 showToast("Sedang memuat naik data ke Firestore...");
-
-                // Guna Firestore Batch untuk tulis data pukal dengan selamat
                 const batch = db.batch();
                 let count = 0;
 
@@ -313,7 +470,7 @@
                             loc_name: row['LOC NAME'] || 'TIADA NAMA LOC',
                             total_ac_assigned: parseInt(row['TOTAL A/C ASSIGNED']) || 0,
                             total_osb_assigned: parseFloat(row['TOTAL OSB ASSIGNED']) || 0
-                        }, { merge: true }); // Merge: Kemas kini jika wujud, cipta baru jika tiada
+                        }, { merge: true });
                         count++;
                     }
                 });
@@ -323,82 +480,50 @@
                     showToast(`${count} rekod tugasan berjaya ditulis ke Firestore!`);
                     input.value = ""; 
                 } catch (error) {
-                    console.error("Gagal menyimpan ke Firestore:", error);
-                    alert("Ralat sambungan: Gagal menyimpan data ke Firestore.");
+                    console.error("Gagal simpan:", error);
+                    alert("Ralat sambungan: Gagal menyimpan data.");
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
         // ==========================================
-        // FUNGSI PORTAL: TARIK SENARAI UNIK DCA
+        // FUNGSI PORTAL: BINA BORANG DCA
         // ==========================================
         function listenToDcaList() {
             const dcaSelect = document.getElementById('dca-select');
-            
-            // Guna onSnapshot untuk kemas kini masa nyata (real-time)
             db.collection("assignments").onSnapshot((snapshot) => {
                 dcaSelect.innerHTML = '<option value="">-- Sila Pilih Agensi DCA --</option>';
-                
-                if (snapshot.empty) {
-                    dcaSelect.innerHTML = '<option value="">-- Tiada rekod. Sila upload Excel --</option>';
-                    return;
-                }
+                if (snapshot.empty) return;
 
                 let dcaSet = new Set();
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.dca_name) dcaSet.add(data.dca_name);
-                });
+                snapshot.forEach(doc => { if (doc.data().dca_name) dcaSet.add(doc.data().dca_name); });
 
-                let sortedDcas = Array.from(dcaSet).sort();
-                sortedDcas.forEach(dcaName => {
+                Array.from(dcaSet).sort().forEach(dcaName => {
                     const option = document.createElement('option');
-                    option.value = dcaName;
-                    option.textContent = dcaName;
+                    option.value = dcaName; option.textContent = dcaName;
                     dcaSelect.appendChild(option);
                 });
-            }, (error) => {
-                console.error("Ralat membaca Firestore: ", error);
             });
         }
 
-        // ==========================================
-        // FUNGSI PORTAL: FILTER REKOD IKUT DCA (FIRESTORE QUERY)
-        // ==========================================
         async function fetchAndRenderDcaTasks() {
             const selectedDca = document.getElementById('dca-select').value;
             const displayArea = document.getElementById('portal-display');
-            
-            if (!selectedDca) {
-                displayArea.innerHTML = '<div class="no-record">Sila pilih nama agensi DCA.</div>';
-                return;
-            }
+            if (!selectedDca) { displayArea.innerHTML = '<div class="no-record">Sila pilih nama agensi DCA.</div>'; return; }
 
-            displayArea.innerHTML = '<div class="no-record">Sedang menarik data dari Firestore...</div>';
+            displayArea.innerHTML = '<div class="no-record">Menarik data dari Cloud...</div>';
 
             try {
-                // Query Firestore: Where dca_name == selectedDca
-                const querySnapshot = await db.collection("assignments")
-                                              .where("dca_name", "==", selectedDca)
-                                              .get();
-                
+                const querySnapshot = await db.collection("assignments").where("dca_name", "==", selectedDca).get();
                 displayArea.innerHTML = ''; 
-
-                if (querySnapshot.empty) {
-                    displayArea.innerHTML = '<div class="no-record">Tiada rekod tugasan ditemui.</div>';
-                    return;
-                }
+                if (querySnapshot.empty) { displayArea.innerHTML = '<div class="no-record">Tiada rekod.</div>'; return; }
 
                 let groupedByRegion = {};
-                
                 querySnapshot.forEach((doc) => {
-                    let taskItem = doc.data();
-                    taskItem.loc_code = doc.id; // Guna Document ID sebagai LOC CODE
-                    const region = taskItem.region;
-                    
-                    if (!groupedByRegion[region]) groupedByRegion[region] = [];
-                    groupedByRegion[region].push(taskItem);
+                    let task = doc.data(); task.loc_code = doc.id;
+                    if (!groupedByRegion[task.region]) groupedByRegion[task.region] = [];
+                    groupedByRegion[task.region].push(task);
                 });
 
                 for (const region in groupedByRegion) {
@@ -418,87 +543,119 @@
                                 <div class="loc-subtitle">${task.region} | ${task.area}</div>
                             </div>
                             <div class="metrics-grid">
-                                <div class="metric-box">
-                                    <label>A/C Assigned</label>
-                                    <div class="metric-value">${task.total_ac_assigned}</div>
-                                </div>
-                                <div class="metric-box">
-                                    <label>OSB Assigned</label>
-                                    <div class="metric-value">RM ${Number(task.total_osb_assigned).toLocaleString()}</div>
-                                </div>
-                                <div class="metric-box">
-                                    <label>A/C Paying</label>
-                                    <input type="number" class="metric-input" id="ac-paying-${task.loc_code}" placeholder="0" onfocus="stopPropagationEvent(event)">
-                                </div>
-                                <div class="metric-box">
-                                    <label>Collection Result</label>
-                                    <input type="number" class="metric-input" id="coll-result-${task.loc_code}" placeholder="0.00" onfocus="stopPropagationEvent(event)">
-                                </div>
+                                <div class="metric-box"><label>A/C Assigned</label><div class="metric-value">${task.total_ac_assigned}</div></div>
+                                <div class="metric-box"><label>OSB Assigned</label><div class="metric-value">RM ${Number(task.total_osb_assigned).toLocaleString()}</div></div>
+                                <div class="metric-box"><label>A/C Paying</label><input type="number" class="metric-input" id="ac-${task.loc_code}" placeholder="0" onfocus="event.stopPropagation()"></div>
+                                <div class="metric-box"><label>Collection</label><input type="number" class="metric-input" id="coll-${task.loc_code}" placeholder="0.00" onfocus="event.stopPropagation()"></div>
                             </div>
-                            <button class="btn-submit" onclick="submitPerformance('${task.loc_code}', event)">Hantar Laporan</button>
+                            <button class="btn-action" onclick="submitPerformance('${task.loc_code}', event)">Hantar Laporan</button>
                         `;
                         displayArea.appendChild(card);
                     });
                 }
-            } catch (error) {
-                console.error("Ralat Query:", error);
-                displayArea.innerHTML = `<div class="no-record">Ralat menarik data: ${error.message}</div>`;
-            }
+            } catch (error) { displayArea.innerHTML = `<div class="no-record">Ralat: ${error.message}</div>`; }
         }
 
-        function highlightCard(element) {
-            const cards = document.querySelectorAll('.loc-card');
-            cards.forEach(card => card.classList.remove('active-focus'));
-            element.classList.add('active-focus');
+        function highlightCard(el) {
+            document.querySelectorAll('.loc-card').forEach(c => c.classList.remove('active-focus'));
+            el.classList.add('active-focus');
         }
 
-        function stopPropagationEvent(e) {
-            e.stopPropagation();
-        }
-
-        // ==========================================
-        // FUNGSI SUBMIT: TULIS REKOD PRESTASI
-        // ==========================================
         async function submitPerformance(locCode, event) {
             event.stopPropagation();
-            
-            const acPaying = document.getElementById(`ac-paying-${locCode}`).value;
-            const collResult = document.getElementById(`coll-result-${locCode}`).value;
+            const acPaying = document.getElementById(`ac-${locCode}`).value;
+            const collResult = document.getElementById(`coll-${locCode}`).value;
 
-            if (!acPaying || !collResult) {
-                alert("Sila masukkan nilai ruangan A/C Paying dan Collection Result.");
-                return;
-            }
+            if (!acPaying || !collResult) { alert("Sila isi nilai."); return; }
 
-            const dateKey = new Date().toISOString().split('T')[0];
+            // Guna date picker dashboard punya tarikh supaya seragam, atau guna hari ini jika kosong
+            let dateKey = document.getElementById('report-date').value;
+            if(!dateKey) dateKey = new Date().toISOString().split('T')[0];
 
             try {
-                // Laluan: submissions / [LOC_CODE] / records / [TARIKH]
-                await db.collection("submissions")
-                        .doc(locCode)
-                        .collection("records")
-                        .doc(dateKey)
-                        .set({
-                            ac_paying: parseInt(acPaying),
-                            collection_amount: parseFloat(collResult),
-                            submitted_at: firebase.firestore.FieldValue.serverTimestamp()
-                        }, { merge: true });
+                await db.collection("submissions").doc(locCode).collection("records").doc(dateKey).set({
+                    ac_paying: parseInt(acPaying),
+                    collection_amount: parseFloat(collResult),
+                    submitted_at: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
 
-                showToast(`Prestasi LOC ${locCode} berjaya dihantar!`);
-                document.getElementById(`ac-paying-${locCode}`).value = "";
-                document.getElementById(`coll-result-${locCode}`).value = "";
-                
-            } catch (error) {
-                console.error("Gagal simpan rekod:", error);
-                alert("Gagal menghantar laporan: " + error.message);
-            }
+                showToast(`LOC ${locCode} berjaya dihantar!`);
+                document.getElementById(`ac-${locCode}`).value = ""; document.getElementById(`coll-${locCode}`).value = "";
+            } catch (e) { alert("Gagal hantar: " + e.message); }
         }
 
-        function showToast(message) {
+        // ==========================================
+        // FUNGSI DASHBOARD: JANA RUMUSAN
+        // ==========================================
+        async function generateReport() {
+            const selectedDate = document.getElementById('report-date').value;
+            const tbody = document.getElementById('table-body');
+            
+            if (!selectedDate) { alert("Pilih tarikh."); return; }
+
+            tbody.innerHTML = '<tr><td colspan="7" class="no-record" style="color:var(--accent-gold);">Memproses padanan data dari Cloud...</td></tr>';
+
+            try {
+                const assignmentsSnap = await db.collection("assignments").get();
+                if (assignmentsSnap.empty) { tbody.innerHTML = '<tr><td colspan="7" class="no-record">Tiada rekod agihan tugas.</td></tr>'; return; }
+
+                let masterData = [];
+                assignmentsSnap.forEach(doc => { masterData.push({ id: doc.id, ...doc.data() }); });
+
+                const reportPromises = masterData.map(async (task) => {
+                    const recordSnap = await db.collection("submissions").doc(task.id).collection("records").doc(selectedDate).get();
+                    if (recordSnap.exists) { return { ...task, submission: recordSnap.data(), status: 'SUBMITTED' }; } 
+                    else { return { ...task, submission: null, status: 'PENDING' }; }
+                });
+
+                const finalReportData = await Promise.all(reportPromises);
+                finalReportData.sort((a, b) => a.dca_name.localeCompare(b.dca_name));
+                renderTableAndKPI(finalReportData);
+
+            } catch (error) { tbody.innerHTML = `<tr><td colspan="7" class="no-record red">Ralat: ${error.message}</td></tr>`; }
+        }
+
+        function renderTableAndKPI(data) {
+            const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
+            let tOsb = 0, tColl = 0, tPending = 0;
+
+            data.forEach(item => {
+                tOsb += parseFloat(item.total_osb_assigned || 0);
+                let acP = "-", collText = "-", badge = `<span class="status-badge status-pending">Belum Hantar</span>`;
+
+                if (item.status === 'SUBMITTED') {
+                    const amt = parseFloat(item.submission.collection_amount || 0);
+                    tColl += amt; acP = item.submission.ac_paying;
+                    collText = `RM ${amt.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                    badge = `<span class="status-badge status-submitted">Telah Dihantar</span>`;
+                } else { tPending++; }
+
+                const osbText = `RM ${parseFloat(item.total_osb_assigned || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight: 600; color: var(--accent-gold);">${item.dca_name}</td>
+                    <td>${item.region} | ${item.area}</td>
+                    <td>${item.id}</td>
+                    <td>${osbText}</td>
+                    <td style="text-align: center;">${acP}</td>
+                    <td style="font-weight: bold; color: ${item.status === 'SUBMITTED' ? 'var(--success)' : 'inherit'}">${collText}</td>
+                    <td>${badge}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            let pct = tOsb > 0 ? (tColl / tOsb) * 100 : 0;
+            document.getElementById('kpi-osb').textContent = `RM ${tOsb.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            document.getElementById('kpi-collection').textContent = `RM ${tColl.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            document.getElementById('kpi-percent').textContent = `${pct.toFixed(2)}%`;
+            document.getElementById('kpi-pending').textContent = tPending;
+        }
+
+        function showToast(msg) {
             const toast = document.getElementById("toast");
-            toast.textContent = message;
-            toast.className = "show";
-            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+            toast.textContent = msg; toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
     </script>
 </body>
