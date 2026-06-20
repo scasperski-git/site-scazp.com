@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DCA Collection Portal | scazp.com</title>
+    <style>
+        /* CSS Variables untuk Tema Gelap Premium */
+        :root {
+            --bg-main: #0B0F19;      /* Hitam kebiruan sangat gelap */
+            --bg-card: #151C2C;      /* Latar kotak */
+            --bg-input: #0B0F19;     /* Latar input */
+            --text-main: #F3F4F6;    /* Kelabu cerah */
+            --text-muted: #9CA3AF;   /* Kelabu malap */
+            --accent-gold: #D4AF37;  /* Emas premium */
+            --accent-glow: rgba(212, 175, 55, 0.4);
+            --success: #10B981;      /* Hijau submit */
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .header h1 {
+            color: var(--accent-gold);
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        /* Container setiap LOC CODE */
+        .loc-card {
+            background-color: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        /* Animasi Highlight */
+        .loc-card.active-focus {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 20px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .loc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .loc-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--accent-gold);
+        }
+
+        .loc-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Grid 4 Kotak (Mobile Friendly) */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 kotak sebaris untuk mobile */
+            gap: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: repeat(4, 1fr); /* 4 kotak sebaris untuk PC */
+            }
+        }
+
+        .metric-box {
+            background-color: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid transparent;
+        }
+
+        .metric-box label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        .metric-input {
+            width: 100%;
+            box-sizing: border-box;
+            background-color: var(--bg-input);
+            border: 1px solid var(--text-muted);
+            color: var(--accent-gold);
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            transition: border-color 0.2s;
+        }
+
+        .metric-input:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 12px;
+            margin-top: 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.8;
+        }
+
+        /* Notifikasi */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: var(--success);
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 14px;
+        }
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>PORTAL PRESTASI DCA</h1>
+        <p>Penyerahan Kutipan Berkelompok (Batching)</p>
+    </div>
+
+    <div id="data-container">
+        
+        <div class="loc-card" onclick="highlightCard(this)">
+            <div class="loc-header">
+                <div>
+                    <div class="loc-title">LOC 2059 - KEMAMAN COLL AGY</div>
+                    <div class="loc-subtitle">MIDEAST | KUANTAN AREA</div>
+                </div>
+            </div>
+            
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <label>A/C Assigned</label>
+                    <div class="metric-value">617</div>
+                </div>
+                <div class="metric-box">
+                    <label>OSB Assigned (RM)</label>
+                    <div class="metric-value">100,000</div>
+                </div>
+                
+                <div class="metric-box">
+                    <label>A/C Paying</label>
+                    <input type="number" class="metric-input" id="ac-paying-2059" placeholder="0">
+                </div>
+                <div class="metric-box">
+                    <label>Collection Result</label>
+                    <input type="number" class="metric-input" id="coll-result-2059" placeholder="0.00">
+                </div>
+            </div>
+            
+            <button class="btn-submit" onclick="submitData('2059')">Hantar Laporan</button>
+        </div>
+
+        <div class="loc-card" onclick="highlightCard(this)">
+            <div class="loc-header">
+                <div>
+                    <div class="loc-title">LOC 2007 - KUANTAN BKT UBI</div>
+                    <div class="loc-subtitle">MIDEAST | KUANTAN AREA</div>
+                </div>
+            </div>
+            
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <label>A/C Assigned</label>
+                    <div class="metric-value">55</div>
+                </div>
+                <div class="metric-box">
+                    <label>OSB Assigned (RM)</label>
+                    <div class="metric-value">150,000</div>
+                </div>
+                <div class="metric-box">
+                    <label>A/C Paying</label>
+                    <input type="number" class="metric-input" id="ac-paying-2007" placeholder="0">
+                </div>
+                <div class="metric-box">
+                    <label>Collection Result</label>
+                    <input type="number" class="metric-input" id="coll-result-2007" placeholder="0.00">
+                </div>
+            </div>
+            
+            <button class="btn-submit" onclick="submitData('2007')">Hantar Laporan</button>
+        </div>
+
+    </div>
+
+    <div id="toast">Data berjaya dihantar ke pangkalan data!</div>
+
+    <script>
+        // Fungsi untuk auto-highlight kotak LOC bila diklik/diisi
+        function highlightCard(element) {
+            // Buang kelas aktif dari semua kotak
+            const cards = document.querySelectorAll('.loc-card');
+            cards.forEach(card => card.classList.remove('active-focus'));
+            
+            // Tambah kelas aktif pada kotak yang sedang diklik
+            element.classList.add('active-focus');
+        }
+
+        // Fungsi Simulasi Hantar Data (Untuk dihubungkan dengan Firebase nanti)
+        function submitData(locCode) {
+            event.stopPropagation(); // Elakkan kotak tertutup/trigger highlight dua kali
+            
+            const acPaying = document.getElementById(`ac-paying-${locCode}`).value;
+            const collResult = document.getElementById(`coll-result-${locCode}`).value;
+
+            if(!acPaying || !collResult) {
+                alert("Sila isi jumlah A/C Paying dan Collection Result sebelum menghantar.");
+                return;
+            }
+
+            // SIMULASI STRUKTUR JSON FIREBASE
+            const payload = {
+                locCode: locCode,
+                totalAcPaying: parseInt(acPaying),
+                collectionResult: parseFloat(collResult),
+                timestamp: new Date().toISOString()
+            };
+
+            console.log(`Mengemaskini Firebase untuk LOC ${locCode}:`, payload);
+            
+            // Tunjuk Notifikasi Berjaya
+            showToast();
+        }
+
+        function showToast() {
+            const x = document.getElementById("toast");
+            x.className = "show";
+            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+        }
+    </script>
+</body>
+</html>
