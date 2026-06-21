@@ -127,9 +127,6 @@
             <button class="tab-btn" onclick="switchTab('admin')">Tetapan Batch (Admin)</button>
         </div>
 
-        <!-- ============================================== -->
-        <!-- VIEW 1: PORTAL DCA -->
-        <!-- ============================================== -->
         <div id="view-portal" class="view-section active">
             <div class="container-portal">
                 <div class="header">
@@ -149,9 +146,6 @@
             </div>
         </div>
 
-        <!-- ============================================== -->
-        <!-- VIEW 2: DASHBOARD LAPORAN -->
-        <!-- ============================================== -->
         <div id="view-dashboard" class="view-section">
             <div class="header" style="text-align:left;">
                 <h1>PAPAN PEMUKA LAPORAN</h1>
@@ -194,7 +188,6 @@
                 <div class="kpi-card"><h3>Agensi DCA (Aktif)</h3><div class="kpi-value" id="kpi-pending" style="color:var(--text-main);">0</div></div>
             </div>
 
-            <!-- TAJUK BESAR DINAMIK -->
             <h2 id="dashboard-dynamic-title" style="text-align:center; color:var(--accent-gold); margin: 35px 0 15px 0; font-size:20px; text-transform:uppercase;">
                 SILA PILIH BATCH DAN TEKAN JANA JADUAL
             </h2>
@@ -207,9 +200,6 @@
             </div>
         </div>
 
-        <!-- ============================================== -->
-        <!-- VIEW 3: TETAPAN (ADMIN) -->
-        <!-- ============================================== -->
         <div id="view-admin" class="view-section">
             <div class="header" style="text-align:left;">
                 <h1>TETAPAN BATCH & KITARAN</h1>
@@ -577,7 +567,6 @@
             }
         }
 
-        // FUNGSI CHILD ROW DITUKAR UNTUK PAPAR RUMUSAN MENGIKUT BULAN
         function formatChildRow(dcaName, activeMonths) {
             const locList = window.dcaDetailsMap[dcaName];
             if(!locList) return '<div>Tiada butiran ditemui.</div>';
@@ -656,7 +645,7 @@
             
             tableHtml += `
                 <th style="border-left: 1px solid var(--accent-gold);">TOTAL PAPARAN JADUAL<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
-                <th style="border-left: 1px solid var(--success);">TOTAL KESELURUHAN BATCH<br><span style="font-size:10px; color:var(--text-muted);">(Semua Bulan)</span></th>
+                <th style="border-left: 1px solid var(--success);">TOTAL KESELURUHAN BATCH<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
                 <th style="color:var(--success);">% PRESTASI BATCH</th>
             </tr></thead><tbody id="table-body"><tr><td colspan="15" style="text-align:center;">Mengumpulkan Data...</td></tr></tbody></table>`;
             wrapper.innerHTML = tableHtml;
@@ -692,14 +681,13 @@
                     
                     let locViewAc = 0, locViewRm = 0, locGrandRm = 0, locGrandAc = 0;
                     let locCycleVals = {};
-                    let locMonthTotals = {}; // Simpan Total A/C & RM mengikut bulan untuk Child Row
+                    let locMonthTotals = {}; 
 
                     let excelRow = {
                         "Batch": batchName, "Paparan Filter": displayMonthName, "DCA Name": dcaName, "Region": task.region, "Area": task.area,
                         "Loc Code": locCode, "Loc Name": task.loc_name, "Total A/C Assigned": ac, "Total OSB Assigned": osb
                     };
                     
-                    // KIRA UNTUK SEMUA BULAN & CHILD ROW
                     window.dashboardActiveBatch.months.forEach(m => {
                         let mAc = 0, mRm = 0;
                         m.cycles.forEach(c => {
@@ -713,7 +701,6 @@
                         locMonthTotals[m.month_idx] = { ac: mAc, rm: mRm };
                     });
 
-                    // KIRA UNTUK LAJUR DINAMIK (Ikut Filter)
                     activeCyclesForReport.forEach(c => {
                         let dbKey = `m${c.parentMonthIdx}_${c.id}`;
                         let cAc = batchSub[dbKey]?.ac_paying || 0;
@@ -739,14 +726,12 @@
                     excelRow["Total Kutipan (Keseluruhan Batch RM)"] = locGrandRm;
                     window.rawExcelData.push(excelRow);
 
-                    // Group Data
                     dcaGroupMap[dcaName].total_locs += 1; dcaGroupMap[dcaName].total_ac += ac; dcaGroupMap[dcaName].total_osb += osb;
                     dcaGroupMap[dcaName].view_ac += locViewAc; dcaGroupMap[dcaName].view_rm += locViewRm;
                     dcaGroupMap[dcaName].grand_ac += locGrandAc; dcaGroupMap[dcaName].grand_rm += locGrandRm;
                     
                     grandTotalOsb += osb; grandTotalCurrentMonthCollection += locViewRm; grandTotalAllCollection += locGrandRm;
 
-                    // Simpan ke DetailsMap Child Row
                     window.dcaDetailsMap[dcaName].push({
                         region: task.region, area: task.area, loc_code: locCode, loc_name: task.loc_name,
                         ac: ac, osb: osb, viewAc: locViewAc, viewRm: locViewRm, monthTotals: locMonthTotals
@@ -786,14 +771,13 @@
                     tbody.appendChild(tr);
                 }
 
-                // Kemas Kini KPI
                 let percentVal = grandTotalOsb > 0 ? (grandTotalAllCollection / grandTotalOsb) * 100 : 0;
                 document.getElementById('kpi-osb').textContent = `RM ${grandTotalOsb.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                 document.getElementById('kpi-collection').textContent = `RM ${grandTotalCurrentMonthCollection.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                 document.getElementById('kpi-percent').textContent = `${percentVal.toFixed(2)}%`;
                 document.getElementById('kpi-pending').textContent = dcaCount;
 
-                let sortTarget = 5 + activeCyclesForReport.length + 1; // Susun by Grand Total Batch
+                let sortTarget = 5 + activeCyclesForReport.length + 1; 
 
                 const table = $('#report-table').DataTable({
                     "pageLength": 10,
@@ -805,6 +789,8 @@
                     "columnDefs": [ { "orderable": false, "targets": 0 } ]
                 });
                 
+                let childRowConfig = activeCyclesForReport.map(c => ({ id: `${c.parentMonthIdx}_${c.id}`, label: c.label }));
+                
                 $('#report-table tbody').on('click', 'td.details-control', function () {
                     const tr = $(this).closest('tr'); const row = table.row(tr);
                     if (row.child.isShown()) { row.child.hide(); tr.removeClass('shown'); $(this).html('&#x2295;'); 
@@ -815,16 +801,22 @@
         }
 
         // ==========================================
-        // 6. EKSPORT EXCEL
+        // 6. FUNGSI EKSPORT EXCEL DENGAN TIMESTAMPS (JAM-MINIT-SAAT)
         // ==========================================
         function exportRawToExcel() {
             if (!window.rawExcelData || window.rawExcelData.length === 0) { alert("Sila Jana Laporan terlebih dahulu!"); return; }
             showToast("Sedang menjana fail Excel...");
+            
             const worksheet = XLSX.utils.json_to_sheet(window.rawExcelData);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Raw DCA Performance");
-            const dateStr = new Date().toISOString().split('T')[0];
-            XLSX.writeFile(workbook, `DCA_Performance_${window.dashboardActiveBatch.batch_name}_${dateStr}.xlsx`);
+            
+            // Format masa unik (Jam-Minit-Saat) untuk elak replace bertindih
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+            
+            XLSX.writeFile(workbook, `DCA_Performance_${window.dashboardActiveBatch.batch_name}_${dateStr}_${timeStr}.xlsx`);
         }
     </script>
 </body>
