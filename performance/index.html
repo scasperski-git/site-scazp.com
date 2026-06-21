@@ -323,13 +323,13 @@
         // FIRESTORE CORE FRAMEWORK ENVIRONMENT
         // ==========================================
         const firebaseConfig = {
-    apiKey: "AIzaSyA0PO0Tqv8IzN5YxYNuXO1ZSMFruKiK9Pg",
-  authDomain: "dca-performance.firebaseapp.com",
-  projectId: "dca-performance",
-  storageBucket: "dca-performance.firebasestorage.app",
-  messagingSenderId: "581375097218",
-  appId: "1:581375097218:web:feb9b0c8773bd33d56779b"
-};
+            apiKey: "AIzaSyA0PO0Tqv8IzN5YxYNuXO1ZSMFruKiK9Pg",
+            authDomain: "dca-performance.firebaseapp.com",
+            projectId: "dca-performance",
+            storageBucket: "dca-performance.firebasestorage.app",
+            messagingSenderId: "581375097218",
+            appId: "1:581375097218:web:feb9b0c8773bd33d56779b"
+        };
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -340,11 +340,32 @@
         window.dashboardActiveBatch = null;
         window.dcaDetailsMap = {};
         window.rawExcelData = [];
+        window.activeMonthsForChildRows = [];
 
         window.onload = function() { 
             fetchBatchesList();
             populateDcaList(); 
         };
+
+        // GLOBAL CHILD ROW EXPAND CLICK DELEGATION
+        $(document).ready(function() {
+            $(document).off('click', '#report-table tbody td.details-control').on('click', '#report-table tbody td.details-control', function () {
+                const tr = $(this).closest('tr');
+                const table = $('#report-table').DataTable();
+                const row = table.row(tr);
+
+                if (row.child.isShown()) {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                    $(this).html('&#x2295;'); 
+                } else {
+                    let dcaName = tr.data('dca');
+                    row.child(formatChildRow(dcaName, window.activeMonthsForChildRows || [])).show();
+                    tr.addClass('shown');
+                    $(this).html('&#x2296;');
+                }
+            });
+        });
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -367,9 +388,6 @@
             setTimeout(() => { toast.classList.remove("show"); }, 3000);
         }
 
-        // ==========================================
-        // 1. ADMIN: BATCH REGISTRATION PIPELINE
-        // ==========================================
         async function saveBatchSetup() {
             const batchName = document.getElementById('setup-batch-name').value.trim();
             if(!batchName) { alert("Please type a valid Batch Code identifier."); return; }
@@ -405,7 +423,6 @@
                 await db.collection("batches").doc(batchName).set(batchData);
                 showToast("Collection Batch successfully stored in cloud!");
                 
-                // Clear Setup Controls
                 document.getElementById('setup-batch-name').value = "";
                 document.getElementById('setup-start-date').value = "";
                 document.getElementById('setup-end-date').value = "";
@@ -452,8 +469,8 @@
 
             let html = '';
             window.allBatches.forEach(b => {
-                let startStr = b.start_date ? new Date(b.start_date).toLocaleDateString('en-US', {day:'numeric', month:'short', year:'numeric'}) : '-';
-                let endStr = b.end_date ? new Date(b.end_date).toLocaleDateString('en-US', {day:'numeric', month:'short', year:'numeric'}) : '-';
+                let startStr = b.start_date ? new Date(b.start_date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : '-';
+                let endStr = b.end_date ? new Date(b.end_date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : '-';
                 let totalCycles = 0;
                 b.months.forEach(m => totalCycles += m.cycles.length);
                 
@@ -479,7 +496,6 @@
             document.getElementById('setup-start-date').value = b.start_date || '';
             document.getElementById('setup-end-date').value = b.end_date || '';
             
-            // Clear prior fasa records
             for(let i=1; i<=4; i++) {
                 document.getElementById(`m${i}-name`).value = "";
                 for(let j=1; j<=4; j++) {
@@ -509,9 +525,6 @@
             } catch (e) { alert("Deletion protocol errored out: " + e.message); }
         }
 
-        // ==========================================
-        // 2. PORTAL DCA: ENGINE INTELLIGENT AUTO-DETECT
-        // ==========================================
         function autoDetectDcaPortal() {
             const titleEl = document.getElementById('dca-active-batch-title');
             const subEl = document.getElementById('dca-active-cycle-subtitle');
@@ -544,15 +557,15 @@
                 }
 
                 if(foundCycle) {
-                    let cDateStr = new Date(foundCycle.date).toLocaleDateString('en-US', {day:'numeric', month:'short', year:'numeric'});
+                    let cDateStr = new Date(foundCycle.date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
                     window.activeDcaCycle = { 
                         monthIdx: foundMonth.month_idx, 
                         cycleId: foundCycle.id, 
                         cycleLabel: foundCycle.label,
                         dateLabel: cDateStr,
-                        label: `${foundMonth.month_name} (${foundCycle.label} - ${cDateStr})` 
+                        label: `${foundCycle.label} (${cDateStr})` 
                     };
-                    subEl.innerHTML = `ACTIVE TIMELINE: <span style="color:#FFF;">${foundMonth.month_name.toUpperCase()}</span> &nbsp;|&nbsp; CUT-OFF SYSTEM WINDOW: <span style="color:#FFF;">${foundCycle.label} (${cDateStr})</span>`;
+                    subEl.innerHTML = `ACTIVE TIMELINE: <span style="color:#FFF;">${foundMonth.month_name.toUpperCase()}</span> &nbsp;|&nbsp; SUBMISSION DATE: <span style="color:#FFF;">${foundCycle.label} (${cDateStr})</span>`;
                     checkLockAndRenderPortal();
                 } else {
                     subEl.innerHTML = `System Error: No configuration matrix loop covers today's date context parameters.`;
@@ -564,9 +577,6 @@
             }
         }
 
-        // ==========================================
-        // 3. SECURE FORM LOCKING MECHANISM & RENDERING
-        // ==========================================
         async function checkLockAndRenderPortal() {
             const selectedDca = document.getElementById('dca-select').value;
             const lockContainer = document.getElementById('portal-lock-container');
@@ -580,14 +590,17 @@
                 return;
             }
 
-            // Check if submission lock document is active in Firestore
             const lockId = `${window.activeBatchName}_m${window.activeDcaCycle.monthIdx}_${window.activeDcaCycle.cycleId}_${selectedDca}`;
             try {
                 const lockSnap = await db.collection("submission_locks").doc(lockId).get();
                 if (lockSnap.exists) {
-                    // DCA has submitted for this cycle - Lockout Interface Enforced
                     let logData = lockSnap.data();
-                    let formattedDateTime = logData.submitted_at ? new Date(logData.submitted_at.seconds * 1000).toLocaleString('en-US') : 'N/A';
+                    
+                    // FIXED: STABLE DATE FALLBACK ENGINE
+                    let subDate = logData.submitted_at;
+                    let dateObj = (subDate && typeof subDate.toDate === 'function') ? subDate.toDate() : (subDate ? new Date(subDate) : new Date());
+                    if (isNaN(dateObj.getTime())) dateObj = new Date();
+                    let formattedDateTime = dateObj.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase();
                     
                     lockContainer.innerHTML = `
                         <div class="lock-banner">
@@ -598,7 +611,6 @@
                     lockContainer.style.display = 'block';
                     mainDisplayWrapper.style.display = 'none';
                 } else {
-                    // Portal open for write entries
                     lockContainer.style.display = 'none';
                     mainDisplayWrapper.style.display = 'block';
                     fetchAndRenderDcaTasks();
@@ -647,7 +659,6 @@
                     });
                 }
                 
-                // SINGLE GLOBAL TRANSMISSION BUTTON (SPACE REDUCTION AND BATCH INTEGRITY)
                 htmlStructure += `<button class="btn-global-submit" id="btn-global-portal-submit" onclick="executeGlobalBatchSubmission()">Finalize and Submit Overall Performance Report</button>`;
                 displayArea.innerHTML = htmlStructure;
 
@@ -672,14 +683,13 @@
                     card.style.borderColor = "var(--danger)";
                 } else {
                     card.style.borderColor = "var(--border-color)";
-                    dataPack.push({ locCode: locCode, ac: parseInt(acAc = acVal), rm: parseFloat(rmVal) });
+                    dataPack.push({ locCode: locCode, ac: parseInt(acVal), rm: parseFloat(rmVal) });
                 }
             });
 
             if(!validationPass) { alert("Submission Blocked: Ensure all numeric metrics (A/C Paying and Collection RM) are fully populated."); return; }
             if(!confirm(`Pre-Submission Verification:\nAre you certain you want to transmit performance data for all locations across ${window.activeDcaCycle.label}? This action locks input rights.`)) return;
 
-            // Inception of Atomic Batch Writing into Firestore
             const firestoreBatch = db.batch();
             const dbFieldKey = `m${window.activeDcaCycle.monthIdx}_${window.activeDcaCycle.cycleId}`;
 
@@ -692,7 +702,6 @@
                 }, { merge: true });
             });
 
-            // Write the Tracking Constraint Lock Document
             const lockId = `${window.activeBatchName}_m${window.activeDcaCycle.monthIdx}_${window.activeDcaCycle.cycleId}_${selectedDca}`;
             let lockRef = db.collection("submission_locks").doc(lockId);
             firestoreBatch.set(lockRef, {
@@ -715,9 +724,6 @@
             }
         }
 
-        // ==========================================
-        // 4. ADMIN CORRECTION REQUEST RESUBMISSION ENJIN 
-        // ==========================================
         async function populateUnlockDcaDropdown() {
             const bName = document.getElementById('unlock-batch-select').value;
             const unlockDcaSelect = document.getElementById('unlock-dca-select');
@@ -757,9 +763,6 @@
             } catch (error) { alert("Override fault: " + error.message); }
         }
 
-        // ==========================================
-        // 5. ADMIN: MULTI-LEVEL FILTRATION REPORT GENERATION
-        // ==========================================
         function updateDashboardMonthFilter() {
             const batchName = document.getElementById('filter-batch').value;
             const fMonth = document.getElementById('filter-month');
@@ -827,6 +830,41 @@
             });
         }
 
+        function formatChildRow(dcaName, activeMonths) {
+            const locList = window.dcaDetailsMap[dcaName];
+            if(!locList) return '<div>No inner rows identified.</div>';
+
+            let html = '<table class="sub-table" cellpadding="5" cellspacing="0" border="0">';
+            let thead = `<tr><th style="text-align:left;">REGION</th><th style="text-align:left;">AREA</th><th style="text-align:left;">LOC CODE</th><th style="text-align:left;">LOCATION NAME</th><th style="text-align:center;">TOTAL A/C</th><th style="text-align:right;">OSB (RM)</th>`;
+            
+            activeMonths.forEach(m => { 
+                thead += `<th style="text-align:center;">${m.month_name.toUpperCase()}<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>`; 
+            });
+            thead += `<th style="text-align:center; color:var(--accent-gold);">TOTAL DISPLAYED SCOPE<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th></tr>`;
+            html += `<thead>${thead}</thead><tbody>`;
+            
+            locList.forEach(loc => {
+                let monthHtml = '';
+                activeMonths.forEach(m => {
+                    let val = loc.monthTotals[m.month_idx] || {ac:0, rm:0};
+                    if(val.rm > 0 || val.ac > 0) {
+                        monthHtml += `<td style="text-align:center;"><span class="val-badge">${val.ac}</span> | <span style="font-weight:bold; color:var(--success);">RM ${val.rm.toLocaleString(undefined, {minimumFractionDigits:2})}</span></td>`;
+                    } else {
+                        monthHtml += `<td style="text-align:center; color:var(--text-muted);">-</td>`;
+                    }
+                });
+
+                html += `<tr>
+                    <td style="text-align:left;">${loc.region}</td><td style="text-align:left;">${loc.area}</td><td style="text-align:left; font-weight:bold; color:var(--accent-gold);">${loc.loc_code}</td><td style="text-align:left;">${loc.loc_name}</td>
+                    <td style="text-align:center;">${loc.ac}</td><td style="text-align:right;">RM ${loc.osb.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                    ${monthHtml}
+                    <td style="text-align:center; font-weight:bold; color:var(--accent-gold);"><span class="val-badge">${loc.viewAc}</span> | <span>RM ${loc.viewRm.toLocaleString(undefined, {minimumFractionDigits:2})}</span></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            return html;
+        }
+
         async function generateFullReport() {
             if(!window.dashboardActiveBatch) { alert("Please complete Step 1: Select Active Collection Batch."); return; }
             const monthIdxStr = document.getElementById('filter-month').value;
@@ -857,16 +895,16 @@
                 monthConfig.cycles.forEach(c => activeCyclesForReport.push({ ...c, parentMonthIdx: monthConfig.month_idx }));
             }
 
-            // ASSIGN CENTRALIZED DYNAMIC BIG TITLE TEXT
+            window.activeMonthsForChildRows = activeMonthsForReport; // CACHE GLOBAL ACCESSIBLE MATRICES
+
             titleEl.innerHTML = `VIEWING MONTH BLOCK: <span style="color:#FFF;">${displayMonthName.toUpperCase()}</span> &nbsp;&nbsp;|&nbsp;&nbsp; TARGET MATRIX: <span style="color:#FFF;">${displayDcaName.toUpperCase()}</span>`;
 
-            // DEPLOY INTEGRATED MATRIX TABLE
             let wrapper = document.getElementById('table-wrapper');
             let tableHtml = `<table id="report-table" class="display nowrap"><thead><tr>
                 <th style="width: 20px;"></th><th style="text-align: left;">DCA Agency Identifier</th><th>Total Branch Counts</th><th>Total A/C Vol</th><th>Total Assigned OSB (RM)</th>`;
                 
             activeCyclesForReport.forEach(c => {
-                let cDateStr = new Date(c.date).toLocaleDateString('en-US', {day:'numeric', month:'short'});
+                let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'});
                 tableHtml += `<th style="border-left: 1px solid var(--border-color); color: #fff;">${c.label} <br><span style="font-size:10px; color:var(--text-muted);">${cDateStr}</span></th>`;
             });
             
@@ -910,6 +948,12 @@
                     let locCycleVals = {};
                     let locMonthTotals = {}; 
 
+                    // CRITICAL STABILITY LOGIC RE-DEPLOYED
+                    let excelRow = {
+                        "Batch": batchName, "Display Filter": displayMonthName, "DCA Name": dcaName, "Region": task.region, "Area": task.area,
+                        "Loc Code": locCode, "Loc Name": task.loc_name, "Total A/C Assigned": ac, "Total OSB Assigned": osb
+                    };
+
                     window.dashboardActiveBatch.months.forEach(m => {
                         let mAc = 0, mRm = 0;
                         m.cycles.forEach(c => {
@@ -936,7 +980,7 @@
                         dcaGroupMap[dcaName].cycle_data[uniqueCycleKey].ac += cAc;
                         dcaGroupMap[dcaName].cycle_data[uniqueCycleKey].rm += cRm;
                         
-                        let cDateStr = new Date(c.date).toLocaleDateString('en-US', {day:'numeric', month:'short'});
+                        let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'});
                         excelRow[`${c.label} (${cDateStr}) - A/C Paying`] = cAc;
                         excelRow[`${c.label} (${cDateStr}) - Collection RM`] = cRm;
                     });
@@ -947,7 +991,6 @@
                     excelRow["Total Collection (Grand Overall Batch RM)"] = locGrandRm;
                     window.rawExcelData.push(excelRow);
 
-                    // Group Mapping Math
                     dcaGroupMap[dcaName].total_locs += 1; dcaGroupMap[dcaName].total_ac += ac; dcaGroupMap[dcaName].total_osb += osb;
                     dcaGroupMap[dcaName].view_ac += locViewAc; dcaGroupMap[dcaName].view_rm += locViewRm;
                     dcaGroupMap[dcaName].grand_ac += locGrandAc; dcaGroupMap[dcaName].grand_rm += locGrandRm;
@@ -998,7 +1041,6 @@
                     tbody.appendChild(tr);
                 }
 
-                // Metric KPI Update Engine
                 let percentVal = grandTotalOsb > 0 ? (grandTotalAllCollection / grandTotalOsb) * 100 : 0;
                 document.getElementById('kpi-osb').textContent = `RM ${grandTotalOsb.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                 document.getElementById('kpi-collection').textContent = `RM ${grandTotalCurrentMonthCollection.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
@@ -1016,19 +1058,10 @@
                     "order": [[ sortTarget, "desc" ]],
                     "columnDefs": [ { "orderable": false, "targets": 0 } ]
                 });
-                
-                $('#report-table tbody').on('click', 'td.details-control', function () {
-                    const tr = $(this).closest('tr'); const row = table.row(tr);
-                    if (row.child.isShown()) { row.child.hide(); tr.removeClass('shown'); $(this).html('&#x2295;'); 
-                    } else { row.child(formatChildRow(tr.data('dca'), activeMonthsForReport)).show(); tr.addClass('shown'); $(this).html('&#x2296;'); }
-                });
 
             } catch (error) { console.error("Dashboard compilation halted:", error); tbody.innerHTML = `<tr><td colspan="15" style="color:red; text-align:center;">Fatal Inception: ${error.message}</td></tr>`; }
         }
 
-        // ==========================================
-        // 6. EXCEL LOG OVERRIDE PIPELINE WITH CAP TIMESTAMPS
-        // ==========================================
         function exportRawToExcel() {
             if (!window.rawExcelData || window.rawExcelData.length === 0) { alert("Command rejected: Perform a verification query run prior to Excel output extraction."); return; }
             showToast("Structuring master spreadsheet data block...");
