@@ -474,7 +474,7 @@ function generateSessionToken() {
 }
 
 async function login(){
-    const user = document.getElementById("user").value.trim();
+    const user = document.getElementById("user").value.trim().toUpperCase();
     const pass = document.getElementById("pass").value.trim();
     const err = document.getElementById("errorMsg");
     const loginBtn = document.querySelector("button");
@@ -496,71 +496,73 @@ async function login(){
     document.getElementById("overlay").style.display="flex";
 
     try {
-        // 1. SAHKAN KATA LALUAN DENGAN GOOGLE SHEETS
-        const res = await fetch(api, {
-            method: "POST",
-            body: new URLSearchParams({
-                action: "login", user: user, pass: pass, api_key: API_KEY
-            })
-        });
+        // SEMAK TERUS PADA DOKUMEN USERS DI FIREBASE (LEBIH LAJU!)
+        const userRef = window.doc(window.db, "USERS", user);
+        const userSnap = await window.getDoc(userRef);
 
-        const data = await res.json();
-
-        if(data.status === "SUCCESS") {
-            
-            const sessionToken = generateSessionToken();
-            const expireDate = new Date();
-            expireDate.setHours(expireDate.getHours() + 24); // Sesi 24 jam
-
-            // ==========================================
-            // KITA GUNA setDoc UNTUK TIMPA (OVERWRITE) SESI LAMA SECARA AUTOMATIK
-            // Doc ID kini adalah User ID itu sendiri. Tiada lagi duplicate token!
-            // ==========================================
-            await window.setDoc(window.doc(window.db, "ACTIVE_SESSIONS", data.user), {
-                token: sessionToken,
-                user: data.user,
-                type: data.type,
-                role: data.role,
-                expire_at: expireDate.toISOString()
-            });
-
-            // TULIS LOG KE FIREBASE SYSTEM_LOGS
-            await window.addDoc(window.collection(window.db, "SYSTEM_LOGS"), {
-                timestamp: new Date().toISOString(),
-                user_id: data.user,
-                role: data.role,
-                action: "LOGIN",
-                status: "SUCCESS",
-                acc_no: "-",
-                details: "User logged in via Firebase session"
-            });
-
-            // SIMPAN KE STORAGE BROWSER
-            let isApp = navigator.userAgent.includes("wv") || (navigator.userAgent.includes("Android") && navigator.userAgent.includes("Version"));
-            let storage = isApp ? localStorage : sessionStorage;
-
-            storage.setItem("session_token", sessionToken);
-            storage.setItem("lock_user", data.user);
-            storage.setItem("lock_type", data.type);
-            storage.setItem("lock_role", data.role);
-            storage.setItem("lock_name", data.name);
-
-            // HALA PENGGUNA KE PORTAL
-            if(data.type == "check") window.location="../check/";
-            else if(data.type == "lock") window.location="../lock/";
-            else if(data.type == "master") window.location="../menumaster/";
-        }
-    
-        else if(data.status === "INACTIVE"){
-            err.innerText="User ID inactive";
-            err.style.display="block";
-            resetLoginBtn(loginBtn, originalBtnText);
-        }
-        else {
+        if (!userSnap.exists()) {
             err.innerText="Invalid login credentials";
             err.style.display="block";
             resetLoginBtn(loginBtn, originalBtnText);
+            return;
         }
+
+        const userData = userSnap.data();
+
+        // Semak Kata Laluan
+        if (userData.password !== pass) {
+            err.innerText="Invalid login credentials";
+            err.style.display="block";
+            resetLoginBtn(loginBtn, originalBtnText);
+            return;
+        }
+
+        // Semak Status ACTIVE / INACTIVE
+        if (userData.status !== "ACTIVE") {
+            err.innerText="User ID inactive";
+            err.style.display="block";
+            resetLoginBtn(loginBtn, originalBtnText);
+            return;
+        }
+
+        // LULUS: TIMPA SESI LAMA (SINGLE DEVICE LOGIN)
+        const sessionToken = generateSessionToken();
+        const expireDate = new Date();
+        expireDate.setHours(expireDate.getHours() + 24);
+
+        await window.setDoc(window.doc(window.db, "ACTIVE_SESSIONS", user), {
+            token: sessionToken,
+            user: user,
+            type: userData.type,
+            role: userData.role,
+            expire_at: expireDate.toISOString()
+        });
+
+        // TULIS LOG CCTV KE SYSTEM_LOGS
+        await window.addDoc(window.collection(window.db, "SYSTEM_LOGS"), {
+            timestamp: new Date().toISOString(),
+            user_id: user,
+            role: userData.role,
+            action: "LOGIN",
+            status: "SUCCESS",
+            acc_no: "-",
+            details: "Logged in via Firebase (Fast Sync)"
+        });
+
+        // SIMPAN KE STORAGE BROWSER
+        let isApp = navigator.userAgent.includes("wv") || (navigator.userAgent.includes("Android") && navigator.userAgent.includes("Version"));
+        let storage = isApp ? localStorage : sessionStorage;
+
+        storage.setItem("session_token", sessionToken);
+        storage.setItem("lock_user", user);
+        storage.setItem("lock_type", userData.type);
+        storage.setItem("lock_role", userData.role);
+        storage.setItem("lock_name", userData.name);
+
+        // HALA PENGGUNA KE PORTAL
+        if(userData.type == "check") window.location="../check/";
+        else if(userData.type == "lock") window.location="../lock/";
+        else if(userData.type == "master") window.location="../menumaster/";
 
     } catch(e) {
         console.error(e);
