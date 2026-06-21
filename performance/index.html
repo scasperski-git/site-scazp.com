@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal & Dashboard DCA | scazp.com</title>
     
-    <!-- Pustaka jQuery & DataTables -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
-    <!-- Pustaka Membaca & Menulis Excel (SheetJS) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
-    <!-- Pustaka Firebase Core & Firestore -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
@@ -140,9 +137,6 @@
             <button class="tab-btn" onclick="switchTab('dashboard')">Dashboard Rumusan (Admin)</button>
         </div>
 
-        <!-- ============================================== -->
-        <!-- VIEW 1: PORTAL DCA -->
-        <!-- ============================================== -->
         <div id="view-portal" class="view-section active">
             <div class="container-portal">
                 <div class="header">
@@ -168,9 +162,6 @@
             </div>
         </div>
 
-        <!-- ============================================== -->
-        <!-- VIEW 2: DASHBOARD ADMIN -->
-        <!-- ============================================== -->
         <div id="view-dashboard" class="view-section">
             <div class="header">
                 <div>
@@ -181,7 +172,7 @@
 
             <div class="grid-2">
                 <div class="control-panel">
-                    <div class="panel-title">1. Enjin Automasi Tarikh Kitaran</div>
+                    <div class="panel-title">1. Enjin Automasi Tarikh Kitaran (Crossover)</div>
                     <div style="display: flex; gap: 15px;">
                         <div style="flex: 1;"><label class="panel-label">Start Date</label><input type="date" id="admin-start-date"></div>
                         <div style="flex: 1;"><label class="panel-label">End Date</label><input type="date" id="admin-end-date"></div>
@@ -221,7 +212,6 @@
                     </div>
                 </div>
 
-                <!-- FILTER ROW -->
                 <div class="grid-3" style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
                     <div>
                         <label class="panel-label">Pilih Bulan</label>
@@ -269,7 +259,7 @@
         // KONFIGURASI FIRESTORE
         // ==========================================
         const firebaseConfig = {
-    apiKey: "AIzaSyA0PO0Tqv8IzN5YxYNuXO1ZSMFruKiK9Pg",
+            apiKey: "AIzaSyA0PO0Tqv8IzN5YxYNuXO1ZSMFruKiK9Pg",
   authDomain: "dca-performance.firebaseapp.com",
   projectId: "dca-performance",
   storageBucket: "dca-performance.firebasestorage.app",
@@ -311,7 +301,7 @@
         }
 
         // ==========================================
-        // ADMIN: ENJIN KITARAN DINAMIK
+        // ADMIN: ENJIN KITARAN DINAMIK (CROSSOVER LOGIC)
         // ==========================================
         function addPhaseInput(defaultVal = "") {
             const container = document.getElementById('phase-container');
@@ -328,30 +318,72 @@
             const startStr = document.getElementById('admin-start-date').value;
             const endStr = document.getElementById('admin-end-date').value;
             if(!startStr || !endStr) { alert("Sila isikan Start Date dan End Date."); return; }
+            
             const phaseInputs = document.querySelectorAll('.phase-val');
             let rules = [];
             phaseInputs.forEach(input => { if(input.value.trim() !== "") rules.push(input.value.trim().toUpperCase()); });
             if(rules.length === 0) { alert("Sila masukkan pola fasa."); return; }
 
-            let start = new Date(startStr); let end = new Date(endStr);
-            if(start >= end) { alert("End Date mesti lebih ke hadapan."); return; }
+            let start = new Date(startStr); start.setHours(0,0,0,0);
+            let end = new Date(endStr); end.setHours(0,0,0,0);
+            
+            if(start >= end) { alert("End Date mesti lebih ke hadapan dari Start Date."); return; }
 
-            let currentDate = new Date(start.getFullYear(), start.getMonth(), 1);
+            let currentYear = start.getFullYear();
+            let currentMonth = start.getMonth();
+            let prevDay = 0;
             let rawDates = [];
+            let stop = false;
+            let loops = 0;
 
-            while (currentDate <= end) {
-                let year = currentDate.getFullYear(); let month = currentDate.getMonth();
-                rules.forEach(rule => {
-                    let d;
-                    if (rule === 'EOM') { d = new Date(year, month + 1, 0); } 
-                    else { let dayNum = parseInt(rule); if(!isNaN(dayNum)) d = new Date(year, month, dayNum); }
-                    if (d && d >= start && d <= end) rawDates.push(d.getTime());
-                });
-                currentDate.setMonth(currentDate.getMonth() + 1);
+            // Logik Algoritma Lompatan Bulan (Crossover)
+            while (!stop && loops < 100) {
+                for (let i = 0; i < rules.length; i++) {
+                    let rule = rules[i];
+                    let targetDay;
+
+                    if (rule === 'EOM') {
+                        targetDay = new Date(currentYear, currentMonth + 1, 0).getDate();
+                    } else {
+                        targetDay = parseInt(rule);
+                        if (isNaN(targetDay)) continue;
+                    }
+
+                    // Pengesanan Nilai Mengecil -> Lompat ke Bulan Seterusnya
+                    if (targetDay < prevDay) {
+                        currentMonth++;
+                        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+                        if (rule === 'EOM') targetDay = new Date(currentYear, currentMonth + 1, 0).getDate();
+                    }
+
+                    // Pastikan hari tak lebih had bulanan (cth: Feb)
+                    let maxDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                    let actualDay = Math.min(targetDay, maxDaysInMonth);
+
+                    let d = new Date(currentYear, currentMonth, actualDay);
+                    d.setHours(0,0,0,0);
+
+                    // Tapis Permulaan Lewat (Abaikan jika sebelum Start Date)
+                    if (d < start) {
+                        prevDay = targetDay; 
+                        continue;
+                    }
+
+                    // Override End of Assignment (Tutup tepat pada End Date)
+                    if (d >= end) {
+                        rawDates.push(end.getTime());
+                        stop = true;
+                        break;
+                    } else {
+                        rawDates.push(d.getTime());
+                    }
+
+                    prevDay = targetDay;
+                }
+                loops++;
             }
-            rawDates.push(end.getTime());
-            let uniqueDates = [...new Set(rawDates)].sort((a,b) => a - b);
 
+            let uniqueDates = [...new Set(rawDates)].sort((a,b) => a - b);
             window.generatedCycles = [];
             const badgesDiv = document.getElementById('timeline-badges'); badgesDiv.innerHTML = '';
 
@@ -598,7 +630,7 @@
                     return d.getFullYear() == parseInt(y) && (d.getMonth() + 1) == parseInt(m);
                 });
             } else {
-                window.currentMonthCycles = window.activeCycles; // Show all if no month selected
+                window.currentMonthCycles = window.activeCycles; 
             }
 
             let wrapper = document.getElementById('table-wrapper');
@@ -643,7 +675,7 @@
                 assignmentsSnap.forEach(doc => {
                     const task = doc.data(); const locCode = doc.id; const dcaName = task.dca_name || "UNKNOWN";
                     
-                    // APPLY DCA & REGION FILTERS (Mengabaikan rekod jika tidak sepadan)
+                    // APPLY DCA & REGION FILTERS 
                     if (fDcaVal && dcaName !== fDcaVal) return;
                     if (fRegVal && task.region !== fRegVal) return;
 
