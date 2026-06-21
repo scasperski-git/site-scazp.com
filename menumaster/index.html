@@ -1097,7 +1097,7 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 <div class="app-layout">
 
     <nav class="sidebar">
-        <div class="brand"><i class="fa-solid fa-crown"></i> Master Portal</div>
+        <div class="brand"><i class="fa-solid fa-crown" onclick="openSyncPopup()" style="cursor: pointer;" title="System Sync"></i> Master Portal</div>
         
         <div class="user-profile">
             <div id="userInfo"></div>
@@ -2304,6 +2304,126 @@ async function confirmDeleteAction() {
     }
 }
 
+/* =========================================================================
+   FUNGSI SYNC RAHSIA (KLIK LOGO CROWN + PASSCODE)
+========================================================================= */
+function openSyncPopup() {
+    document.getElementById("syncPasscode").value = "";
+    document.getElementById("syncError").style.display = "none";
+    document.getElementById("syncVerifyPopup").style.display = "flex";
+    setTimeout(() => document.getElementById("syncPasscode").focus(), 100);
+}
+
+function closeSyncPopup() {
+    document.getElementById("syncVerifyPopup").style.display = "none";
+}
+
+function toggleViewSyncPasscode() {
+    let inputEl = document.getElementById("syncPasscode");
+    let iconEl = document.getElementById("toggleSyncPasscodeIcon");
+    if (inputEl.style.webkitTextSecurity === "disc") {
+        inputEl.style.webkitTextSecurity = "none"; 
+        iconEl.classList.remove("fa-eye");
+        iconEl.classList.add("fa-eye-slash"); 
+        iconEl.style.color = "#4f46e5"; 
+    } else {
+        inputEl.style.webkitTextSecurity = "disc"; 
+        iconEl.classList.remove("fa-eye-slash");
+        iconEl.classList.add("fa-eye"); 
+        iconEl.style.color = "#94a3b8"; 
+    }
+}
+
+// Benarkan tekan Enter untuk terus Sync
+document.getElementById("syncPasscode").addEventListener("keypress", function(e){
+    if(e.key === "Enter"){ confirmSyncAction(); }
+});
+
+async function confirmSyncAction() {
+    let pass = document.getElementById("syncPasscode").value;
+    let inputEl = document.getElementById("syncPasscode");
+    let syncBtn = document.getElementById("btnConfirmSync");
+    
+    if(!pass) return;
+
+    try {
+        // 1. Tarik passcode rahsia dari Firebase (Guna security pass yang sama dengan Delete)
+        const q = window.query(window.collection(window.db, "SETTINGS"), window.where("type", "==", "security"));
+        const querySnapshot = await window.getDocs(q);
+        
+        let dbPasscode = null;
+        querySnapshot.forEach((doc) => { dbPasscode = doc.data().passcode; });
+
+        // 2. Semak jika kod laluan SALAH
+        if (!dbPasscode || pass !== dbPasscode) {
+            document.getElementById("syncError").style.display = "block";
+            inputEl.classList.add("shake"); 
+            setTimeout(() => inputEl.classList.remove("shake"), 400);
+            inputEl.value = "";
+            inputEl.focus();
+            return;
+        }
+
+        // 3. PASSCODE BETUL! Mulakan proses Sync
+        document.getElementById("syncError").style.display = "none";
+        syncBtn.disabled = true;
+        syncBtn.innerHTML = "<i class='fa fa-spinner fa-spin'></i> Syncing...";
+
+        // Tarik pukal dari Google Sheets
+        const res = await fetch(api + "?action=export_users&api_key=SCZP_SECURE_2026");
+        const sheetUsers = await res.json();
+        
+        if (!Array.isArray(sheetUsers)) {
+            alert("Ralat: Gagal menarik data dari Sheets. Sila pastikan skrip berhubung.");
+            closeSyncPopup();
+            return;
+        }
+
+        const qsUsers = await window.getDocs(window.collection(window.db, "USERS"));
+        let firebaseUserIds = [];
+        qsUsers.forEach((doc) => { firebaseUserIds.push(doc.id); });
+
+        let sheetUserIds = [];
+        let syncCount = 0;
+
+        for (const u of sheetUsers) {
+            sheetUserIds.push(u.id);
+            await window.setDoc(window.doc(window.db, "USERS", u.id), {
+                user_id: u.id,
+                password: u.pass,
+                type: u.type,
+                role: u.role,
+                name: u.name,
+                status: u.status
+            });
+            syncCount++;
+        }
+
+        let deleteCount = 0;
+        for (const fUid of firebaseUserIds) {
+            if (sheetUserIds.indexOf(fUid) === -1) {
+                await window.deleteDoc(window.doc(window.db, "USERS", fUid));
+                deleteCount++;
+            }
+        }
+
+        await systemLog("SYNC_USERS", "SUCCESS", "-", `Synced ${syncCount} users, purged ${deleteCount} users`);
+        
+        closeSyncPopup();
+        alert(`Berjaya! ${syncCount} pengguna disinkron & ${deleteCount} dipadam dari Firebase.`);
+        
+        if(typeof loadSummary === "function") loadSummary();
+
+    } catch (err) {
+        console.error("Ralat Sync:", err);
+        alert("Sistem ralat semasa proses Sync. Sila semak sambungan.");
+        closeSyncPopup();
+    } finally {
+        syncBtn.disabled = false;
+        syncBtn.innerHTML = "Sync Now";
+    }
+}
+
 // ==========================================
 // FUNGSI TOGGLE MATA PASSCODE
 // ==========================================
@@ -2454,6 +2574,25 @@ window.addEventListener('DOMContentLoaded', () => {
 });
     
 </script>
+
+<div id="syncVerifyPopup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center; z-index:9999;">
+    <div class="session-box">
+        <i class="fa fa-user-shield" style="font-size: 48px; color: #6366f1; margin-bottom: 16px;"></i>
+        <div style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #0f172a;">System Sync</div>
+        <div style="font-size: 13px; color: #475569; margin-bottom: 16px; line-height: 1.5;">Enter Master Passcode to sync Users from Google Sheets to Firebase.</div>
+        
+        <div style="position: relative; width: 100%; margin-bottom: 8px;">
+            <input type="text" id="syncPasscode" placeholder="ENTER PASSCODE" autocomplete="off" style="width: 100%; padding: 12px; padding-right: 40px; border-radius: 8px; border: 1px solid #cbd5e1; text-align: center; letter-spacing: 2px; font-weight: bold; -webkit-text-security: disc; box-sizing: border-box;">
+            <i class="fa fa-eye" id="toggleSyncPasscodeIcon" onclick="toggleViewSyncPasscode()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #94a3b8; font-size: 18px; transition: 0.3s;"></i>
+        </div>
+        <div id="syncError" style="display:none; color:#ef4444; margin-bottom:16px; font-size:12px; font-weight: 600;">Invalid Passcode!</div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button onclick="closeSyncPopup()" style="flex:1; background:#64748b; color:white; border:none; padding:12px; border-radius:8px; font-weight:600; cursor:pointer; transition:0.3s;">Cancel</button>
+            <button id="btnConfirmSync" onclick="confirmSyncAction()" style="flex:1; background:#6366f1; color:white; border:none; padding:12px; border-radius:8px; font-weight:600; cursor:pointer; transition:0.3s;">Sync Now</button>
+        </div>
+    </div>
+</div>
 
 <div id="sessionPopup">
     <div class="session-box">
