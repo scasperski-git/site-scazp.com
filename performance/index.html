@@ -331,6 +331,7 @@
   appId: "1:581375097218:web:feb9b0c8773bd33d56779b"
 };
 
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
@@ -672,7 +673,7 @@
                     card.style.borderColor = "var(--danger)";
                 } else {
                     card.style.borderColor = "var(--border-color)";
-                    dataPack.push({ locCode: locCode, ac: parseInt(acAc = acVal), rm: parseFloat(rmVal) });
+                    dataPack.push({ locCode: locCode, ac: parseInt(acVal), rm: parseFloat(rmVal) });
                 }
             });
 
