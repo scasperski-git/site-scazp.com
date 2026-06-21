@@ -535,7 +535,8 @@ async function login(){
             
             let isMaintenanceActive = true; // Default kalau tak jumpa, kita sekat demi keselamatan
             if (opSnap.exists()) {
-                isMaintenanceActive = opSnap.data().maintenance_mode; 
+                let rawMode = opSnap.data().maintenance_mode;
+                isMaintenanceActive = (rawMode === true || rawMode === "true");
             }
 
             // Jika fungsi sekatan di-ON-kan (true), baru kita check jam
