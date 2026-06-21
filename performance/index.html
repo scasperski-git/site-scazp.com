@@ -175,13 +175,13 @@
             <div class="header">
                 <div>
                     <h1>PAPAN PEMUKA ADMIN</h1>
-                    <p>Fokus Bulan Semasa: Memaparkan kitaran mengikut bulan, penapis agensi & wilayah.</p>
+                    <p>Fokus Kumpulan Tugasan: Memaparkan kitaran mengikut blok bulan, penapis agensi & wilayah.</p>
                 </div>
             </div>
 
             <div class="grid-2">
                 <div class="control-panel">
-                    <div class="panel-title">1. Enjin Automasi Tarikh Kitaran</div>
+                    <div class="panel-title">1. Enjin Automasi Tarikh Kitaran (Crossover)</div>
                     <div style="display: flex; gap: 15px;">
                         <div style="flex: 1;"><label class="panel-label">Start Date</label><input type="date" id="admin-start-date"></div>
                         <div style="flex: 1;"><label class="panel-label">End Date</label><input type="date" id="admin-end-date"></div>
@@ -224,9 +224,9 @@
                 <!-- FILTER ROW -->
                 <div class="grid-3" style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
                     <div>
-                        <label class="panel-label">Pilih Bulan</label>
-                        <select id="filter-month" onchange="generateFullReport()">
-                            <option value="">-- Semua Bulan --</option>
+                        <label class="panel-label">Pilih Bulan Tugasan (Assignment Block)</label>
+                        <select id="filter-block" onchange="generateFullReport()">
+                            <option value="">-- Semua Kitaran Tugasan --</option>
                         </select>
                     </div>
                     <div>
@@ -284,7 +284,9 @@
         window.rawExcelData = [];
         window.generatedCycles = []; 
         window.activeCycles = []; 
-        window.currentMonthCycles = [];
+        window.currentBlockCycles = [];
+        window.phaseCount = 3; // Default
+        window.generatedPhaseCount = 3;
 
         window.onload = function() { 
             listenToDcaList(); 
@@ -311,7 +313,7 @@
         }
 
         // ==========================================
-        // ADMIN: ENJIN KITARAN DINAMIK
+        // ADMIN: ENJIN KITARAN DINAMIK (CROSSOVER LOGIC)
         // ==========================================
         function addPhaseInput(defaultVal = "") {
             const container = document.getElementById('phase-container');
@@ -328,30 +330,69 @@
             const startStr = document.getElementById('admin-start-date').value;
             const endStr = document.getElementById('admin-end-date').value;
             if(!startStr || !endStr) { alert("Sila isikan Start Date dan End Date."); return; }
+            
             const phaseInputs = document.querySelectorAll('.phase-val');
             let rules = [];
             phaseInputs.forEach(input => { if(input.value.trim() !== "") rules.push(input.value.trim().toUpperCase()); });
             if(rules.length === 0) { alert("Sila masukkan pola fasa."); return; }
+            
+            window.generatedPhaseCount = rules.length;
 
-            let start = new Date(startStr); let end = new Date(endStr);
-            if(start >= end) { alert("End Date mesti lebih ke hadapan."); return; }
+            let start = new Date(startStr); start.setHours(0,0,0,0);
+            let end = new Date(endStr); end.setHours(0,0,0,0);
+            
+            if(start >= end) { alert("End Date mesti lebih ke hadapan dari Start Date."); return; }
 
-            let currentDate = new Date(start.getFullYear(), start.getMonth(), 1);
+            let currentYear = start.getFullYear();
+            let currentMonth = start.getMonth();
+            let prevDay = 0;
             let rawDates = [];
+            let stop = false;
+            let loops = 0;
 
-            while (currentDate <= end) {
-                let year = currentDate.getFullYear(); let month = currentDate.getMonth();
-                rules.forEach(rule => {
-                    let d;
-                    if (rule === 'EOM') { d = new Date(year, month + 1, 0); } 
-                    else { let dayNum = parseInt(rule); if(!isNaN(dayNum)) d = new Date(year, month, dayNum); }
-                    if (d && d >= start && d <= end) rawDates.push(d.getTime());
-                });
-                currentDate.setMonth(currentDate.getMonth() + 1);
+            // Logik Algoritma Lompatan Bulan (Crossover)
+            while (!stop && loops < 100) {
+                for (let i = 0; i < rules.length; i++) {
+                    let rule = rules[i];
+                    let targetDay;
+
+                    if (rule === 'EOM') {
+                        targetDay = new Date(currentYear, currentMonth + 1, 0).getDate();
+                    } else {
+                        targetDay = parseInt(rule);
+                        if (isNaN(targetDay)) continue;
+                    }
+
+                    if (targetDay < prevDay) {
+                        currentMonth++;
+                        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+                        if (rule === 'EOM') targetDay = new Date(currentYear, currentMonth + 1, 0).getDate();
+                    }
+
+                    let maxDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                    let actualDay = Math.min(targetDay, maxDaysInMonth);
+
+                    let d = new Date(currentYear, currentMonth, actualDay);
+                    d.setHours(0,0,0,0);
+
+                    if (d < start) {
+                        prevDay = targetDay; 
+                        continue;
+                    }
+
+                    if (d >= end) {
+                        rawDates.push(end.getTime());
+                        stop = true;
+                        break;
+                    } else {
+                        rawDates.push(d.getTime());
+                    }
+                    prevDay = targetDay;
+                }
+                loops++;
             }
-            rawDates.push(end.getTime());
-            let uniqueDates = [...new Set(rawDates)].sort((a,b) => a - b);
 
+            let uniqueDates = [...new Set(rawDates)].sort((a,b) => a - b);
             window.generatedCycles = [];
             const badgesDiv = document.getElementById('timeline-badges'); badgesDiv.innerHTML = '';
 
@@ -372,7 +413,11 @@
         async function saveCyclesToDB() {
             if(window.generatedCycles.length === 0) return;
             try {
-                await db.collection("settings").doc("active_cycles").set({ list: window.generatedCycles, updated_at: firebase.firestore.FieldValue.serverTimestamp() });
+                await db.collection("settings").doc("active_cycles").set({ 
+                    list: window.generatedCycles, 
+                    phase_count: window.generatedPhaseCount,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp() 
+                });
                 showToast("Garis Masa Kitaran Berjaya Disimpan!");
                 document.getElementById('timeline-preview').style.display = 'none'; fetchActiveCycles();
             } catch (error) { alert("Gagal simpan: " + error.message); }
@@ -382,42 +427,44 @@
             try {
                 const docSnap = await db.collection("settings").doc("active_cycles").get();
                 const dcaCycleSelect = document.getElementById('dca-cycle-select');
-                const fMonth = document.getElementById('filter-month');
+                const fBlock = document.getElementById('filter-block');
                 
                 dcaCycleSelect.innerHTML = '<option value="">-- Mencari kitaran aktif... --</option>';
-                fMonth.innerHTML = '<option value="">-- Semua Bulan --</option>';
+                fBlock.innerHTML = '<option value="">-- Semua Bulan Tugasan --</option>';
 
                 if (docSnap.exists) {
-                    window.activeCycles = docSnap.data().list || [];
+                    const data = docSnap.data();
+                    window.activeCycles = data.list || [];
+                    window.phaseCount = data.phase_count || 3;
                     
                     // 1. Auto-Detect untuk Portal DCA
                     const todayStr = new Date().toISOString().split('T')[0];
-                    let activeCycle = window.activeCycles.find(c => c.date >= todayStr);
-                    if(!activeCycle && window.activeCycles.length > 0) activeCycle = window.activeCycles[window.activeCycles.length - 1]; 
+                    let activeIndex = window.activeCycles.findIndex(c => c.date >= todayStr);
+                    if(activeIndex === -1 && window.activeCycles.length > 0) activeIndex = window.activeCycles.length - 1; 
 
-                    if(activeCycle) {
+                    if(activeIndex !== -1) {
+                        let activeCycle = window.activeCycles[activeIndex];
                         dcaCycleSelect.innerHTML = `<option value="${activeCycle.id}">${activeCycle.label} (Kitaran Terkunci)</option>`;
                     } else {
                         dcaCycleSelect.innerHTML = '<option value="">-- Tiada Kitaran Aktif --</option>';
                     }
 
-                    // 2. Bina Dropdown Bulan untuk Filter Dashboard
-                    let monthSet = new Map();
-                    window.activeCycles.forEach(c => {
-                        let d = new Date(c.date);
-                        let monthKey = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
-                        let monthLabel = d.toLocaleDateString('ms-MY', { month: 'long', year: 'numeric' }).toUpperCase();
-                        if(!monthSet.has(monthKey)) monthSet.set(monthKey, monthLabel);
-                    });
-                    
-                    monthSet.forEach((label, key) => {
-                        fMonth.innerHTML += `<option value="${key}">${label}</option>`;
-                    });
+                    // 2. Bina Dropdown "Bulan Tugasan" (Grouping by Block)
+                    let totalBlocks = Math.ceil(window.activeCycles.length / window.phaseCount);
+                    for(let b = 0; b < totalBlocks; b++) {
+                        let startCycle = b * window.phaseCount;
+                        let endCycle = Math.min((b + 1) * window.phaseCount, window.activeCycles.length);
+                        
+                        let startDateLabel = window.activeCycles[startCycle].label;
+                        let endDateLabel = window.activeCycles[endCycle - 1].label;
+                        
+                        fBlock.innerHTML += `<option value="${b}">Bulan Tugasan ${b + 1} (${startDateLabel} - ${endDateLabel})</option>`;
+                    }
 
-                    // Set Default ke Bulan Semasa jika wujud dalam senarai
-                    let currentMonthKey = `${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}`;
-                    if(monthSet.has(currentMonthKey)) {
-                        fMonth.value = currentMonthKey;
+                    // Auto-select Block Semasa
+                    if(activeIndex !== -1) {
+                        let activeBlock = Math.floor(activeIndex / window.phaseCount);
+                        fBlock.value = activeBlock.toString();
                     }
                 }
             } catch (e) { console.error("Ralat tarik kitaran:", e); }
@@ -552,15 +599,15 @@
             let html = '<table class="sub-table" cellpadding="5" cellspacing="0" border="0">';
             
             let thead = `<tr><th>REGION</th><th>AREA</th><th>LOC CODE</th><th>NAMA LOKASI</th><th style="text-align:center;">TOTAL A/C</th><th style="text-align:right;">OSB (RM)</th>`;
-            window.currentMonthCycles.forEach((c, idx) => {
-                thead += `<th style="text-align:right;">KUTIPAN C${idx+1} (RM)</th>`;
+            window.currentBlockCycles.forEach((c, idx) => {
+                thead += `<th style="text-align:right;">KITARAN ${idx+1} (RM)</th>`;
             });
-            thead += `<th style="text-align:right; color:var(--accent-gold);">TOTAL BULAN (RM)</th></tr>`;
+            thead += `<th style="text-align:right; color:var(--accent-gold);">TOTAL BULAN INI (RM)</th></tr>`;
             html += `<thead>${thead}</thead><tbody>`;
             
             locList.forEach(loc => {
                 let cycleHtml = '';
-                window.currentMonthCycles.forEach(c => {
+                window.currentBlockCycles.forEach(c => {
                     let val = loc.cycleVals[c.id]?.rm || 0;
                     cycleHtml += `<td style="text-align:right; color:${val > 0 ? 'var(--success)' : 'var(--text-muted)'};">${val > 0 ? val.toLocaleString(undefined, {minimumFractionDigits:2}) : '-'}</td>`;
                 });
@@ -586,19 +633,18 @@
             }
 
             // Get Filter Values
-            const fMonthVal = document.getElementById('filter-month').value;
+            const fBlockVal = document.getElementById('filter-block').value;
             const fDcaVal = document.getElementById('filter-dca').value;
             const fRegVal = document.getElementById('filter-region').value;
 
-            // Filter Columns to Show
-            if(fMonthVal) {
-                const [y, m] = fMonthVal.split('-');
-                window.currentMonthCycles = window.activeCycles.filter(c => {
-                    const d = new Date(c.date);
-                    return d.getFullYear() == parseInt(y) && (d.getMonth() + 1) == parseInt(m);
-                });
+            // Filter Columns to Show based on Assignment Block
+            if(fBlockVal !== "") {
+                let bIndex = parseInt(fBlockVal);
+                let startIdx = bIndex * window.phaseCount;
+                let endIdx = startIdx + window.phaseCount;
+                window.currentBlockCycles = window.activeCycles.slice(startIdx, endIdx);
             } else {
-                window.currentMonthCycles = window.activeCycles; // Show all if no month selected
+                window.currentBlockCycles = window.activeCycles; 
             }
 
             let wrapper = document.getElementById('table-wrapper');
@@ -609,16 +655,16 @@
                 <th>Total A/C</th>
                 <th>Jumlah OSB (RM)</th>`;
                 
-            window.currentMonthCycles.forEach((c, idx) => {
+            window.currentBlockCycles.forEach((c, idx) => {
                 tableHtml += `<th style="border-left: 1px solid var(--border-color); color: #fff;">KITARAN ${idx+1} <br><span style="font-size:10px; color:var(--text-muted);">${c.label}</span></th>`;
             });
-            if(window.currentMonthCycles.length === 0) {
+            if(window.currentBlockCycles.length === 0) {
                  tableHtml += `<th style="border-left: 1px solid var(--border-color); color: #fff;">KITARAN SEMASA<br><span style="font-size:10px; color:var(--text-muted);">Tiada Kitaran Bulan Ini</span></th>`;
             }
             
             tableHtml += `
                 <th style="border-left: 1px solid var(--accent-gold);">TOTAL BULAN PAPARAN<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
-                <th style="border-left: 1px solid var(--success);">TOTAL KESELURUHAN<br><span style="font-size:10px; color:var(--text-muted);">(Semua Bulan)</span></th>
+                <th style="border-left: 1px solid var(--success);">TOTAL KESELURUHAN<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
                 <th style="color:var(--success);">% PRESTASI</th>
             </tr></thead><tbody id="table-body"><tr><td colspan="15" style="text-align:center;">Mengumpulkan Data...</td></tr></tbody></table>`;
             
@@ -643,7 +689,7 @@
                 assignmentsSnap.forEach(doc => {
                     const task = doc.data(); const locCode = doc.id; const dcaName = task.dca_name || "UNKNOWN";
                     
-                    // APPLY DCA & REGION FILTERS (Mengabaikan rekod jika tidak sepadan)
+                    // APPLY DCA & REGION FILTERS 
                     if (fDcaVal && dcaName !== fDcaVal) return;
                     if (fRegVal && task.region !== fRegVal) return;
 
@@ -670,14 +716,14 @@
                         "Total OSB Assigned": osb
                     };
                     
-                    // Keseluruhan untuk Excel & Table
-                    window.activeCycles.forEach((c) => {
+                    // KESELURUHAN (Semua Kitaran) Untuk Excel & Grand Total
+                    window.activeCycles.forEach((c, idx) => {
                         let cAc = sub[c.id]?.ac_paying || 0;
                         let cRm = sub[c.id]?.collection_amount || 0;
                         locGrandAc += cAc;
                         locGrandRm += cRm;
                         
-                        let cycleHeader = `Kitaran (${c.label})`;
+                        let cycleHeader = `Kitaran ${idx+1} (${c.label})`;
                         excelRow[`${cycleHeader} - A/C Paying`] = cAc;
                         excelRow[`${cycleHeader} - Kutipan RM`] = cRm;
                     });
@@ -686,8 +732,8 @@
                     excelRow["Total Kutipan (Keseluruhan RM)"] = locGrandRm;
                     window.rawExcelData.push(excelRow);
 
-                    // Pengiraan Bulan Paparan Semasa sahaja untuk jadual luar
-                    window.currentMonthCycles.forEach(c => {
+                    // PENGIRAAN BULAN TUGASAN SEMASA SAHAJA
+                    window.currentBlockCycles.forEach(c => {
                         let cAc = sub[c.id]?.ac_paying || 0;
                         let cRm = sub[c.id]?.collection_amount || 0;
                         locMonthAc += cAc; locMonthRm += cRm;
@@ -726,11 +772,11 @@
                     const dcaPct = data.total_osb > 0 ? ((data.grand_rm / data.total_osb) * 100).toFixed(2) : "0.00";
 
                     let cycleTds = '';
-                    window.currentMonthCycles.forEach(c => {
+                    window.currentBlockCycles.forEach(c => {
                         let cData = data.cycle_data[c.id] || {ac:0, rm:0};
                         cycleTds += `<td style="border-left: 1px solid var(--border-color);">${getStatusCellHtml(todayStr, c.date, cData.rm, cData.ac)}</td>`;
                     });
-                    if(window.currentMonthCycles.length === 0) { cycleTds = `<td style="border-left: 1px solid var(--border-color); color:var(--text-muted); font-size:11px;">-</td>`; }
+                    if(window.currentBlockCycles.length === 0) { cycleTds = `<td style="border-left: 1px solid var(--border-color); color:var(--text-muted); font-size:11px;">-</td>`; }
 
                     const tr = document.createElement('tr');
                     tr.setAttribute('data-dca', dcaName);
@@ -759,7 +805,7 @@
                 document.getElementById('kpi-percent').textContent = `${percentVal.toFixed(2)}%`;
                 document.getElementById('kpi-pending').textContent = dcaCount;
 
-                let sortTarget = 5 + window.currentMonthCycles.length + 1;
+                let sortTarget = 5 + window.currentBlockCycles.length + 1;
 
                 const table = $('#report-table').DataTable({
                     "pageLength": 10,
