@@ -317,17 +317,14 @@
     </div>
 
     <script>
-                // ==========================================
-        // KONFIGURASI FIRESTORE
-        // ==========================================
         const firebaseConfig = {
-    apiKey: "AIzaSyA0PO0Tqv8IzN5YxYNuXO1ZSMFruKiK9Pg",
-  authDomain: "dca-performance.firebaseapp.com",
-  projectId: "dca-performance",
-  storageBucket: "dca-performance.firebasestorage.app",
-  messagingSenderId: "581375097218",
-  appId: "1:581375097218:web:feb9b0c8773bd33d56779b"
-};
+            apiKey: "AIzaSyA0PO0Tqv8IzN5YxYNuXO1ZSMFruKiK9Pg",
+            authDomain: "dca-performance.firebaseapp.com",
+            projectId: "dca-performance",
+            storageBucket: "dca-performance.firebasestorage.app",
+            messagingSenderId: "581375097218",
+            appId: "1:581375097218:web:feb9b0c8773bd33d56779b"
+        };
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -572,7 +569,11 @@
                 const lockSnap = await db.collection("submission_locks").doc(lockId).get();
                 if (lockSnap.exists) {
                     let logData = lockSnap.data();
-                    let formattedDateTime = logData.submitted_at ? new Date(logData.submitted_at.seconds * 1000).toLocaleString('en-US') : 'N/A';
+                    
+                    // FIXED: ROBUST DATE PARSING ENJIN
+                    let subDate = logData.submitted_at;
+                    let dateObj = (subDate && typeof subDate.toDate === 'function') ? subDate.toDate() : (subDate ? new Date(subDate) : new Date());
+                    let formattedDateTime = dateObj.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase();
                     
                     lockContainer.innerHTML = `
                         <div class="lock-banner">
@@ -839,7 +840,7 @@
                 <th style="width: 20px;"></th><th style="text-align: left;">DCA Agency Identifier</th><th>Total Branch Counts</th><th>Total A/C Vol</th><th>Total Assigned OSB (RM)</th>`;
                 
             activeCyclesForReport.forEach(c => {
-                let cDateStr = new Date(c.date).toLocaleDateString('en-US', {day:'numeric', month:'short'});
+                let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'});
                 tableHtml += `<th style="border-left: 1px solid var(--border-color); color: #fff;">${c.label} <br><span style="font-size:10px; color:var(--text-muted);">${cDateStr}</span></th>`;
             });
             
@@ -883,7 +884,6 @@
                     let locCycleVals = {};
                     let locMonthTotals = {}; 
 
-                    // FIX DEPLOYED HERE: INSTANTIATE EXCELROW BASE OBJECT PRUDENTLY
                     let excelRow = {
                         "Batch": batchName, "Display Filter": displayMonthName, "DCA Name": dcaName, "Region": task.region, "Area": task.area,
                         "Loc Code": locCode, "Loc Name": task.loc_name, "Total A/C Assigned": ac, "Total OSB Assigned": osb
