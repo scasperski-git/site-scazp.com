@@ -1054,6 +1054,7 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app-check.js";
   import { getFirestore, collection, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, setDoc, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -1066,6 +1067,13 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
   };
 
   const app = initializeApp(firebaseConfig);
+
+  // AKTIFKAN APP CHECK (GANTIKAN SITE KEY DI BAWAH)
+  const appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider('6LfrUSstAAAAAEIJr6yZ9W_wXEFPcGSM78vLjK8Z'),
+    isTokenAutoRefreshEnabled: true
+  });
+
   const db = getFirestore(app);
 
   window.db = db;
