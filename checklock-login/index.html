@@ -496,7 +496,7 @@ async function login(){
     document.getElementById("overlay").style.display="flex";
 
     try {
-        // SEMAK TERUS PADA DOKUMEN USERS DI FIREBASE (LEBIH LAJU!)
+        // 1. SEMAK TERUS PADA DOKUMEN USERS DI FIREBASE
         const userRef = window.doc(window.db, "USERS", user);
         const userSnap = await window.getDoc(userRef);
 
@@ -525,7 +525,44 @@ async function login(){
             return;
         }
 
-        // LULUS: TIMPA SESI LAMA (SINGLE DEVICE LOGIN)
+        /* =========================================================================
+           🔴 KAWALAN WAKTU OPERASI DENGAN TOGGLE ON/OFF (DARI FIREBASE SETTINGS)
+        ========================================================================= */
+        if (userData.type === "check" || userData.type === "lock") {
+            // Tarik status kawalan dari collection SETTINGS -> document OPERATIONS
+            const opRef = window.doc(window.db, "SETTINGS", "OPERATIONS");
+            const opSnap = await window.getDoc(opRef);
+            
+            let isMaintenanceActive = true; // Default kalau tak jumpa, kita sekat demi keselamatan
+            if (opSnap.exists()) {
+                isMaintenanceActive = opSnap.data().maintenance_mode; 
+            }
+
+            // Jika fungsi sekatan di-ON-kan (true), baru kita check jam
+            if (isMaintenanceActive === true) {
+                const currentHour = new Date().getHours();
+                if (currentHour >= 20 || currentHour < 7) { 
+                    
+                    await window.addDoc(window.collection(window.db, "SYSTEM_LOGS"), {
+                        timestamp: new Date().toISOString(),
+                        user_id: user,
+                        role: userData.role,
+                        action: "LOGIN_DENIED",
+                        status: "MAINTENANCE",
+                        acc_no: "-",
+                        details: `Blocked: Attempted night login at hour ${currentHour} (Toggle: ON)`
+                    });
+
+                    err.innerHTML = "<i class='fa-solid fa-screwdriver-wrench'></i> <b>System Under Maintenance</b><br><span style='font-size:11px; font-weight:400;'>Portal closed from 8:00 PM until 7:00 AM daily.</span>";
+                    err.style.display = "block";
+                    
+                    resetLoginBtn(loginBtn, originalBtnText);
+                    return; 
+                }
+            }
+        }
+
+        // LULUS KAWALAN MASA: TIMPA SESI LAMA (SINGLE DEVICE LOGIN)
         const sessionToken = generateSessionToken();
         const expireDate = new Date();
         expireDate.setHours(expireDate.getHours() + 24);
