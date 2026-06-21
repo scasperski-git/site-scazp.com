@@ -135,8 +135,8 @@
                 </div>
 
                 <div class="control-panel">
-                    <div class="panel-title">Sila Pilih Profil Anda</div>
-                    <label class="panel-label">Pilih Nama Agensi DCA</label>
+                    <div class="panel-title">SILA PILIH PROFIL ANDA</div>
+                    <label class="panel-label">PILIH NAMA AGENSI DCA</label>
                     <select id="dca-select" onchange="fetchAndRenderDcaTasks()">
                         <option value="">-- Memuat turun senarai agensi... --</option>
                     </select>
@@ -287,6 +287,7 @@
   messagingSenderId: "581375097218",
   appId: "1:581375097218:web:feb9b0c8773bd33d56779b"
 };
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
@@ -411,10 +412,15 @@
                 }
 
                 if(foundCycle) {
-                    window.activeDcaCycle = { monthIdx: foundMonth.month_idx, cycleId: foundCycle.id, label: `${foundMonth.month_name} (${foundCycle.label})` };
-                    subEl.textContent = `Kitaran Aktif: ${foundMonth.month_name.toUpperCase()} | Tarikh Penyerahan: ${foundCycle.label}`;
+                    let cDateStr = new Date(foundCycle.date).toLocaleDateString('ms-MY', {day:'numeric', month:'short', year:'numeric'});
+                    window.activeDcaCycle = { 
+                        monthIdx: foundMonth.month_idx, 
+                        cycleId: foundCycle.id, 
+                        label: `${foundCycle.label} - ${cDateStr}` 
+                    };
+                    subEl.innerHTML = `KITARAN AKTIF: <span style="color:#FFF;">${foundMonth.month_name.toUpperCase()}</span> &nbsp;|&nbsp; TARIKH PENYERAHAN: <span style="color:#FFF;">${foundCycle.label} (${cDateStr})</span>`;
                 } else {
-                    subEl.textContent = `Sistem Tidak Menjumpai Sebarang Kitaran Dalam Batch Ini.`;
+                    subEl.innerHTML = `Sistem Tidak Menjumpai Sebarang Kitaran Dalam Batch Ini.`;
                     subEl.style.color = "red";
                 }
             } else {
@@ -506,8 +512,8 @@
                                 <div style="text-align:center;"><label style="font-size:10px; color:var(--text-muted); display:block; margin-bottom:5px;">A/C Assigned</label><div style="font-size:16px; font-weight:bold;">${task.total_ac_assigned}</div></div>
                                 <div style="text-align:center; border-right:1px solid rgba(255,255,255,0.1); padding-right:15px;"><label style="font-size:10px; color:var(--text-muted); display:block; margin-bottom:5px;">OSB Assigned</label><div style="font-size:16px; font-weight:bold;">RM ${Number(task.total_osb_assigned).toLocaleString()}</div></div>
                                 
-                                <div style="flex:1.5;"><label style="font-size:10px; color:var(--accent-gold); display:block; margin-bottom:5px;">A/C Paying (${window.activeDcaCycle.label})</label><input type="number" class="metric-input" id="ac-${task.loc_code}" placeholder="0" onfocus="event.stopPropagation()"></div>
-                                <div style="flex:1.5;"><label style="font-size:10px; color:var(--accent-gold); display:block; margin-bottom:5px;">Kutipan RM (${window.activeDcaCycle.label})</label><input type="number" class="metric-input" id="coll-${task.loc_code}" placeholder="0.00" onfocus="event.stopPropagation()"></div>
+                                <div style="flex:1.5;"><label style="font-size:10px; color:var(--accent-gold); display:block; margin-bottom:5px;">A/C Paying <br><span style="color:var(--text-muted);">${window.activeDcaCycle.label}</span></label><input type="number" class="metric-input" id="ac-${task.loc_code}" placeholder="0" onfocus="event.stopPropagation()"></div>
+                                <div style="flex:1.5;"><label style="font-size:10px; color:var(--accent-gold); display:block; margin-bottom:5px;">Kutipan RM <br><span style="color:var(--text-muted);">${window.activeDcaCycle.label}</span></label><input type="number" class="metric-input" id="coll-${task.loc_code}" placeholder="0.00" onfocus="event.stopPropagation()"></div>
                             </div>
                             
                             <button class="btn-submit-report" onclick="submitPerformance('${task.loc_code}', '${window.activeBatchName}', ${window.activeDcaCycle.monthIdx}, '${window.activeDcaCycle.cycleId}', this, event)">HANTAR LAPORAN</button>
@@ -789,8 +795,6 @@
                     "columnDefs": [ { "orderable": false, "targets": 0 } ]
                 });
                 
-                let childRowConfig = activeCyclesForReport.map(c => ({ id: `${c.parentMonthIdx}_${c.id}`, label: c.label }));
-                
                 $('#report-table tbody').on('click', 'td.details-control', function () {
                     const tr = $(this).closest('tr'); const row = table.row(tr);
                     if (row.child.isShown()) { row.child.hide(); tr.removeClass('shown'); $(this).html('&#x2295;'); 
@@ -800,9 +804,6 @@
             } catch (error) { console.error("Ralat Dashboard:", error); tbody.innerHTML = `<tr><td colspan="15" style="color:red; text-align:center;">Ralat: ${error.message}</td></tr>`; }
         }
 
-        // ==========================================
-        // 6. FUNGSI EKSPORT EXCEL DENGAN TIMESTAMPS (JAM-MINIT-SAAT)
-        // ==========================================
         function exportRawToExcel() {
             if (!window.rawExcelData || window.rawExcelData.length === 0) { alert("Sila Jana Laporan terlebih dahulu!"); return; }
             showToast("Sedang menjana fail Excel...");
@@ -811,7 +812,6 @@
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Raw DCA Performance");
             
-            // Format masa unik (Jam-Minit-Saat) untuk elak replace bertindih
             const now = new Date();
             const dateStr = now.toISOString().split('T')[0];
             const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
