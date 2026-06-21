@@ -498,6 +498,7 @@
             document.getElementById('setup-start-date').value = b.start_date || '';
             document.getElementById('setup-end-date').value = b.end_date || '';
             
+            // Clear prior fasa records
             for(let i=1; i<=4; i++) {
                 document.getElementById(`m${i}-name`).value = "";
                 for(let j=1; j<=4; j++) {
@@ -659,6 +660,7 @@
                     });
                 }
                 
+                // SINGLE GLOBAL TRANSMISSION BUTTON (SPACE REDUCTION AND BATCH INTEGRITY)
                 htmlStructure += `<button class="btn-global-submit" id="btn-global-portal-submit" onclick="executeGlobalBatchSubmission()">Finalize and Submit Overall Performance Report</button>`;
                 displayArea.innerHTML = htmlStructure;
 
@@ -835,7 +837,7 @@
             if(!locList) return '<div>No inner rows identified.</div>';
 
             let html = '<table class="sub-table" cellpadding="5" cellspacing="0" border="0">';
-            let thead = `<tr><th style="text-align:left;">REGION</th><th style="text-align:left;">AREA</th><th style="text-align:left;">LOC CODE</th><th style="text-align:left;">LOCATION NAME</th><th style="text-align:center;">TOTAL<br>A/C</th><th style="text-align:right;">OSB (RM)</th>`;
+            let thead = `<tr><th style="text-align:left;">REGION</th><th style="text-align:left;">AREA</th><th style="text-align:left;">LOC CODE</th><th style="text-align:left;">LOCATION NAME</th><th style="text-align:center;">TOTAL A/C</th><th style="text-align:right;">OSB (RM)</th>`;
             
             activeMonths.forEach(m => { 
                 thead += `<th style="text-align:center; white-space: nowrap;">${m.month_name.toUpperCase()}<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>`; 
@@ -1014,9 +1016,9 @@
                         let cData = data.cycle_data[uniqueCycleKey] || {ac:0, rm:0};
                         
                         if (cData.rm > 0 || cData.ac > 0) {
-                            cycleTds += `<td style="border-left: 1px solid var(--border-color);"><span class="val-badge">${cData.ac}</span> | <span class="val-gold">RM ${cData.rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></td>`;
+                            cycleTds += `<td data-order="${cData.rm}" style="border-left: 1px solid var(--border-color);"><span class="val-badge">${cData.ac}</span> | <span class="val-gold">RM ${cData.rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></td>`;
                         } else {
-                            cycleTds += `<td style="border-left: 1px solid var(--border-color);"><span class="alert-red">-</span></td>`;
+                            cycleTds += `<td data-order="0" style="border-left: 1px solid var(--border-color);"><span class="alert-red">-</span></td>`;
                         }
                     });
 
@@ -1025,17 +1027,17 @@
                     tr.innerHTML = `
                         <td class="details-control">&#x2295;</td>
                         <td style="font-weight: bold; color: var(--accent-gold); text-align: left; font-size: 13px;">${dcaName}</td>
-                        <td>${data.total_locs}</td>
-                        <td>${data.total_ac.toLocaleString()}</td>
-                        <td style="font-weight: 500;">${data.total_osb.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td data-order="${data.total_locs}">${data.total_locs}</td>
+                        <td data-order="${data.total_ac}">${data.total_ac.toLocaleString()}</td>
+                        <td data-order="${data.total_osb}" style="font-weight: 500;">${data.total_osb.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                         ${cycleTds}
-                        <td style="border-left: 1px solid var(--accent-gold); color: var(--text-main);">
+                        <td data-order="${data.view_rm}" style="border-left: 1px solid var(--accent-gold); color: var(--text-main);">
                             <span class="val-badge">${data.view_ac}</span> | <span style="font-weight:bold; color: var(--accent-gold); font-size: 14px;">RM ${data.view_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                         </td>
-                        <td style="border-left: 1px solid var(--success); color: var(--text-main);">
+                        <td data-order="${data.grand_rm}" style="border-left: 1px solid var(--success); color: var(--text-main);">
                             <span class="val-badge">${data.grand_ac}</span> | <span style="font-weight:bold; color: var(--success); font-size: 14px;">RM ${data.grand_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                         </td>
-                        <td style="font-weight: bold; color: var(--success); font-size: 13px;">${dcaPct}%</td>
+                        <td data-order="${dcaPct}" style="font-weight: bold; color: var(--success); font-size: 13px;">${dcaPct}%</td>
                     `;
                     tbody.appendChild(tr);
                 }
