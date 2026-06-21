@@ -1009,6 +1009,7 @@ table tbody tr:hover td { background-color: #e2e8f0; }
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app-check.js";
   import { getFirestore, collection, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, setDoc, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -1020,7 +1021,14 @@ table tbody tr:hover td { background-color: #e2e8f0; }
     appId: "1:912034602664:web:f23b971b67a0ef1df8ac9d",
   };
 
-const app = initializeApp(firebaseConfig);
+  const app = initializeApp(firebaseConfig);
+
+  // AKTIFKAN APP CHECK (GANTIKAN SITE KEY DI BAWAH)
+  const appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider('6LfrUSstAAAAAEIJr6yZ9W_wXEFPcGSM78vLjK8Z'),
+    isTokenAutoRefreshEnabled: true
+  });
+
   const db = getFirestore(app);
 
   window.db = db;
