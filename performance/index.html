@@ -69,6 +69,8 @@
         .btn-action { background-color: var(--success); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; transition: opacity 0.2s; text-transform: uppercase;}
         .btn-gold { background-color: var(--accent-gold); color: #000; }
         .btn-outline { background-color: transparent; border: 1px solid var(--success); color: var(--success); }
+        .btn-danger-outline { background-color: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; border-radius: 6px; cursor: pointer; transition: 0.3s;}
+        .btn-danger-outline:hover { background-color: rgba(239, 68, 68, 0.1); }
         
         .btn-submit-report { background-color: var(--danger); color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.3s; text-transform: uppercase; margin-top: 10px; font-size: 13px;}
         .btn-submit-report:hover { opacity: 0.8; }
@@ -127,6 +129,9 @@
             <button class="tab-btn" onclick="switchTab('admin')">Tetapan Batch (Admin)</button>
         </div>
 
+        <!-- ============================================== -->
+        <!-- VIEW 1: PORTAL DCA -->
+        <!-- ============================================== -->
         <div id="view-portal" class="view-section active">
             <div class="container-portal">
                 <div class="header">
@@ -146,6 +151,9 @@
             </div>
         </div>
 
+        <!-- ============================================== -->
+        <!-- VIEW 2: DASHBOARD LAPORAN -->
+        <!-- ============================================== -->
         <div id="view-dashboard" class="view-section">
             <div class="header" style="text-align:left;">
                 <h1>PAPAN PEMUKA LAPORAN</h1>
@@ -200,6 +208,9 @@
             </div>
         </div>
 
+        <!-- ============================================== -->
+        <!-- VIEW 3: TETAPAN (ADMIN) -->
+        <!-- ============================================== -->
         <div id="view-admin" class="view-section">
             <div class="header" style="text-align:left;">
                 <h1>TETAPAN BATCH & KITARAN</h1>
@@ -272,6 +283,26 @@
                     </div>
                 </div>
             </div>
+
+            <!-- SEKSYEN KETIGA: RUMUSAN BATCH -->
+            <div class="control-panel" style="margin-top: 20px;">
+                <div class="panel-title">3. Senarai Kitaran Batch Berdaftar</div>
+                <div class="table-container" style="margin-top: 0;">
+                    <table class="dataTable" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left;">NO BATCH</th>
+                                <th style="text-align: center;">TEMPOH TUGASAN</th>
+                                <th style="text-align: center;">JUMLAH BULAN & KITARAN</th>
+                                <th style="text-align: center;">TINDAKAN</th>
+                            </tr>
+                        </thead>
+                        <tbody id="batch-summary-tbody">
+                            <tr><td colspan="4" style="text-align:center;">Memuat turun senarai batch...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
     </div>
@@ -287,6 +318,7 @@
   messagingSenderId: "581375097218",
   appId: "1:581375097218:web:feb9b0c8773bd33d56779b"
 };
+
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -358,6 +390,18 @@
             try {
                 await db.collection("batches").doc(batchName).set(batchData);
                 showToast("Tetapan Batch Berjaya Disimpan!");
+                
+                // Clear Form
+                document.getElementById('setup-batch-name').value = "";
+                document.getElementById('setup-start-date').value = "";
+                document.getElementById('setup-end-date').value = "";
+                for(let i=1; i<=4; i++) {
+                    document.getElementById(`m${i}-name`).value = "";
+                    for(let j=1; j<=4; j++) {
+                        document.getElementById(`m${i}-c${j}-no`).value = "";
+                        document.getElementById(`m${i}-c${j}-date`).value = "";
+                    }
+                }
                 fetchBatchesList();
             } catch (error) { alert("Ralat menyimpan: " + error.message); }
         }
@@ -376,8 +420,49 @@
                 });
 
                 autoDetectDcaPortal();
+                renderBatchSummary(); // Render jadual ke-3
 
             } catch (e) { console.error("Ralat tarik list batch:", e); }
+        }
+
+        // FUNGSI RENDER SENARAI BATCH
+        function renderBatchSummary() {
+            const tbody = document.getElementById('batch-summary-tbody');
+            if (window.allBatches.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Tiada Batch Didaftarkan.</td></tr>';
+                return;
+            }
+
+            let html = '';
+            window.allBatches.forEach(b => {
+                let startStr = b.start_date ? new Date(b.start_date).toLocaleDateString('ms-MY') : '-';
+                let endStr = b.end_date ? new Date(b.end_date).toLocaleDateString('ms-MY') : '-';
+                let totalCycles = 0;
+                b.months.forEach(m => totalCycles += m.cycles.length);
+                
+                html += `
+                <tr>
+                    <td style="font-weight:bold; color:var(--accent-gold); text-align: left;">${b.batch_name}</td>
+                    <td style="text-align: center;">${startStr} - ${endStr}</td>
+                    <td style="text-align: center;">${b.months.length} Bulan (${totalCycles} Kitaran)</td>
+                    <td style="text-align: center;">
+                        <button class="btn-danger-outline" style="font-size:11px;" onclick="deleteBatch('${b.batch_name}')">Padam</button>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // FUNGSI DELETE BATCH
+        async function deleteBatch(batchName) {
+            if(!confirm(`Adakah anda pasti mahu memadam rekod batch: ${batchName}?`)) return;
+            try {
+                await db.collection("batches").doc(batchName).delete();
+                showToast("Batch berjaya dipadam!");
+                fetchBatchesList();
+            } catch (e) {
+                alert("Ralat memadam batch: " + e.message);
+            }
         }
 
         function autoDetectDcaPortal() {
