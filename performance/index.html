@@ -342,7 +342,6 @@
         window.activeDcaCycle = null; 
         window.dashboardActiveBatch = null;
         window.dcaDetailsMap = {};
-        window.rawExcelData = [];
         window.activeMonthsForChildRows = [];
 
         window.onload = function() { 
@@ -351,17 +350,23 @@
         };
 
         $(document).ready(function() {
-            $(document).off('click', '#report-table tbody td.details-control').on('click', '#report-table tbody td.details-control', function () {
+            // LAZY LOAD BILA USER KLIK BUTANG + 
+            $(document).off('click', '#report-table tbody td.details-control').on('click', '#report-table tbody td.details-control', async function () {
                 const tr = $(this).closest('tr');
                 const table = $('#report-table').DataTable();
                 const row = table.row(tr);
+                let dcaName = tr.data('dca');
 
                 if (row.child.isShown()) {
                     row.child.hide();
                     tr.removeClass('shown');
                     $(this).html('&#x2295;'); 
                 } else {
-                    let dcaName = tr.data('dca');
+                    if (!window.dcaDetailsMap[dcaName]) {
+                        $(this).html('&#8987;'); // Ikon Jam Pasir (Loading)
+                        let details = await fetchDcaDetailsFromDB(dcaName, window.dashboardActiveBatch.batch_name);
+                        window.dcaDetailsMap[dcaName] = details;
+                    }
                     row.child(formatChildRow(dcaName, window.activeMonthsForChildRows || [])).show();
                     tr.addClass('shown');
                     $(this).html('&#x2296;');
@@ -723,7 +728,6 @@
                 submitted_at: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            // >>> TAMBAH DI SINI (Sebelum Commit) <<<
             let metaRef = db.collection("metadata").doc("report_status");
             firestoreBatch.set(metaRef, {
                 last_updated: firebase.firestore.FieldValue.serverTimestamp()
@@ -809,23 +813,19 @@
                 if (jsonData.length === 0) return;
                 showToast("Uploading rows to Firestore cloud environment...");
                 
-const batch = db.batch();
-let count = 0;
-let baselines = {};
+                const batch = db.batch();
+                let count = 0;
+                let baselines = {};
 
-let dcaSet = new Set();
-let regionSet = new Set();
+                let dcaSet = new Set();
+                let regionSet = new Set();
                 
                 jsonData.forEach(row => {
                     const locCodeRaw = row['LOC CODE'];
                     if (locCodeRaw) {
                         let dcaName = row['DCA NAME'] || 'UNASSIGNED';
-
                         dcaSet.add(dcaName);
-
-if(row['REGION']){
-    regionSet.add(row['REGION']);
-}
+                        if(row['REGION']) { regionSet.add(row['REGION']); }
                         
                         // Kumpul Data Untuk Dokumen Induk (Baselines)
                         if(!baselines[dcaName]) baselines[dcaName] = { locs: 0, ac: 0, osb: 0 };
@@ -840,114 +840,280 @@ if(row['REGION']){
                     }
                 });
 
-let baseRef = db.collection("dca_live_summaries").doc("GLOBAL_BASELINES");
-batch.set(baseRef, baselines, { merge: true });
+                // Tulis Ke Dalam Koleksi Summary Induk (GLOBAL BASELINES)
+                let baseRef = db.collection("dca_live_summaries").doc("GLOBAL_BASELINES");
+                batch.set(baseRef, baselines, { merge: true });
 
-batch.set(
-    db.collection("system_lists").doc("dropdowns"),
-    {
-        dcas: Array.from(dcaSet).sort(),
-        regions: Array.from(regionSet).sort(),
-        updated_at: firebase.firestore.FieldValue.serverTimestamp()
-    },
-    { merge:true }
-);
+                // Tulis Ke Dalam Koleksi Dropdowns Untuk Jimat Reads
+                batch.set(
+                    db.collection("system_lists").doc("dropdowns"),
+                    { dcas: Array.from(dcaSet).sort(), regions: Array.from(regionSet).sort(), updated_at: firebase.firestore.FieldValue.serverTimestamp() },
+                    { merge:true }
+                );
 
-                try { await batch.commit(); showToast(`Import complete: Added ${count} assets entries.`); input.value = ""; populateDcaList(); } 
-                catch (error) { alert("Excel data ingestion faulted."); }
+                try { 
+                    await batch.commit(); 
+                    showToast(`Import complete: Added ${count} assets entries.`); 
+                    input.value = ""; 
+                    localStorage.removeItem('dropdown_lists'); // Buang cache lama
+                    populateDcaList(); 
+                } catch (error) { alert("Excel data ingestion faulted."); }
             }; reader.readAsArrayBuffer(file);
         }
 
-async function populateDcaList() {
+        async function populateDcaList() {
+            const dcaSelect = document.getElementById('dca-select');
+            const filterDca = document.getElementById('filter-dca');
+            const filterReg = document.getElementById('filter-region');
 
-    const dcaSelect = document.getElementById('dca-select');
-    const filterDca = document.getElementById('filter-dca');
-    const filterReg = document.getElementById('filter-region');
+            dcaSelect.innerHTML = '<option value="">-- Select Your DCA Agency Name --</option>';
+            filterDca.innerHTML = '<option value="">ALL AGENCIES</option>';
+            filterReg.innerHTML = '<option value="">ALL REGIONS</option>';
 
-    dcaSelect.innerHTML =
-        '<option value="">-- Select Your DCA Agency Name --</option>';
+            try {
+                const cachedDropdowns = localStorage.getItem('dropdown_lists');
+                if (cachedDropdowns) {
+                    const data = JSON.parse(cachedDropdowns);
+                    data.dcas.forEach(d => {
+                        dcaSelect.innerHTML += `<option value="${d}">${d}</option>`;
+                        filterDca.innerHTML += `<option value="${d}">${d}</option>`;
+                    });
+                    data.regions.forEach(r => { filterReg.innerHTML += `<option value="${r}">${r}</option>`; });
+                    return;
+                }
 
-    filterDca.innerHTML =
-        '<option value="">ALL AGENCIES</option>';
+                // 1 READ SAHAJA DIGUNAKAN DI SINI UNTUK SELURUH SISTEM DROPDOWN!
+                const doc = await db.collection("system_lists").doc("dropdowns").get();
+                if(!doc.exists){ console.warn("Dropdown document not found."); return; }
 
-    filterReg.innerHTML =
-        '<option value="">ALL REGIONS</option>';
+                const data = doc.data();
+                data.dcas.forEach(d => {
+                    dcaSelect.innerHTML += `<option value="${d}">${d}</option>`;
+                    filterDca.innerHTML += `<option value="${d}">${d}</option>`;
+                });
+                data.regions.forEach(r => { filterReg.innerHTML += `<option value="${r}">${r}</option>`; });
 
-    try {
-
-        const cachedDropdowns =
-            localStorage.getItem('dropdown_lists');
-
-        if (cachedDropdowns) {
-
-            const data = JSON.parse(cachedDropdowns);
-
-            data.dcas.forEach(d => {
-                dcaSelect.innerHTML +=
-                    `<option value="${d}">${d}</option>`;
-
-                filterDca.innerHTML +=
-                    `<option value="${d}">${d}</option>`;
-            });
-
-            data.regions.forEach(r => {
-                filterReg.innerHTML +=
-                    `<option value="${r}">${r}</option>`;
-            });
-
-            return;
+                localStorage.setItem('dropdown_lists', JSON.stringify({ dcas: data.dcas || [], regions: data.regions || [] }));
+            } catch (e) { console.error("Dropdown error:", e); }
         }
 
-        const doc =
-            await db.collection("system_lists")
-                    .doc("dropdowns")
-                    .get();
+        // --- SISTEM PENJANAAN DASHBOARD (SUPER OPTIMIZED SUMMARY READS: 2 READS ONLY) ---
+        async function generateFullReport() {
+            if(!window.dashboardActiveBatch) { alert("Please complete Step 1: Select Active Collection Batch."); return; }
+            const monthIdxStr = document.getElementById('filter-month').value;
+            if(!monthIdxStr) { alert("Please specify valid Target Month constraint."); return; }
+            
+            const fDcaVal = document.getElementById('filter-dca').value;
+            const batchName = window.dashboardActiveBatch.batch_name;
+            const titleEl = document.getElementById('dashboard-dynamic-title');
 
-        if(!doc.exists){
-            console.warn("Dropdown document not found.");
-            return;
+            if ($.fn.DataTable.isDataTable('#report-table')) { $('#report-table').DataTable().clear().destroy(); }
+
+            const cacheKeyData = `report_data_${batchName}_${monthIdxStr}_${fDcaVal}`;
+            const cacheKeyTime = `report_time_${batchName}_${monthIdxStr}_${fDcaVal}`;
+
+            let displayMonthName = "ALL MONTHS";
+            let displayDcaName = fDcaVal ? fDcaVal : "ALL AGENCIES";
+            let activeCyclesForReport = []; let activeMonthsForReport = [];
+
+            if (monthIdxStr === "ALL") {
+                activeMonthsForReport = window.dashboardActiveBatch.months;
+                window.dashboardActiveBatch.months.forEach(m => m.cycles.forEach(c => activeCyclesForReport.push({ ...c, parentMonthIdx: m.month_idx })));
+            } else {
+                const monthIdx = parseInt(monthIdxStr);
+                const monthConfig = window.dashboardActiveBatch.months.find(m => m.month_idx === monthIdx);
+                displayMonthName = monthConfig.month_name;
+                activeMonthsForReport.push(monthConfig);
+                monthConfig.cycles.forEach(c => activeCyclesForReport.push({ ...c, parentMonthIdx: monthConfig.month_idx }));
+            }
+
+            window.activeMonthsForChildRows = activeMonthsForReport;
+            titleEl.innerHTML = `VIEWING MONTH: <span style="color:#FFF;">${displayMonthName.toUpperCase()}</span> &nbsp;&nbsp;|&nbsp;&nbsp; DCA: <span style="color:#FFF;">${displayDcaName.toUpperCase()}</span>`;
+
+            let wrapper = document.getElementById('table-wrapper');
+            let tableHtmlHead = `<table id="report-table" class="display nowrap"><thead><tr>
+                <th style="width: 20px;"></th><th style="text-align: left;">DCA NAME</th><th>TOTAL<br>LOC</th><th>TOTAL<br>A/C</th><th>TOTAL ASSIGNED<br>OSB (RM)</th>`;
+                
+            activeCyclesForReport.forEach(c => {
+                let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
+                tableHtmlHead += `<th style="border-left: 1px solid var(--border-color); color: #fff; white-space: nowrap;">${c.label.toUpperCase()}<br><span style="font-size:10px; color:var(--text-muted);">(${cDateStr})</span></th>`;
+            });
+            
+            tableHtmlHead += `
+                <th style="border-left: 1px solid var(--accent-gold);">TOTAL CURRENT<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
+                <th style="border-left: 1px solid var(--success);">G.TOTAL BATCH<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
+                <th style="color:var(--success);">%<br>PERFORMANCE</th>
+            </tr></thead><tbody id="table-body"></tbody></table>`;
+            
+            wrapper.innerHTML = tableHtmlHead; const tbody = document.getElementById('table-body');
+
+            try {
+                const metaSnap = await db.collection("metadata").doc("report_status").get();
+                let serverLastUpdated = (metaSnap.exists && metaSnap.data().last_updated) ? metaSnap.data().last_updated.toDate().getTime().toString() : null;
+                const localLastUpdated = localStorage.getItem(cacheKeyTime);
+                const cachedData = localStorage.getItem(cacheKeyData);
+
+                if (serverLastUpdated && localLastUpdated === serverLastUpdated && cachedData) {
+                    showToast("Memuatkan data dari cache (Sistem Optimum)...");
+                    const parsedCache = JSON.parse(cachedData);
+                    window.dcaDetailsMap = parsedCache.dcaDetailsMap; 
+                    binaSemulaStrukturJadual(parsedCache.tableHtml, parsedCache.kpi); return; 
+                }
+
+                console.log("Menarik RINGKASAN dari Pangkalan Data Firebase (Super Fast)...");
+                tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;">Compiling summary datasets...</td></tr>`;
+
+                window.dcaDetailsMap = {}; 
+                
+                // HANYA 2 DOKUMEN READS DILAKUKAN DI SINI UNTUK SELURUH DASHBOARD!
+                const baseSnap = await db.collection("dca_live_summaries").doc("GLOBAL_BASELINES").get();
+                const sumSnap = await db.collection("dca_live_summaries").doc(batchName).get();
+                
+                const baselines = baseSnap.exists ? baseSnap.data() : {};
+                const summaries = sumSnap.exists ? sumSnap.data() : {};
+
+                if (Object.keys(baselines).length === 0) { 
+                    tbody.innerHTML = '<tr><td colspan="15" style="text-align:center; color:var(--text-muted);">Tiada rekod Baseline Pangkalan Data. Sila muat naik Excel terlebih dahulu.</td></tr>'; return; 
+                }
+
+                let grandTotalOsb = 0, grandTotalCurrentMonthCollection = 0, grandTotalAllCollection = 0;
+                let htmlBodyContent = ""; let dcaCount = 0;
+
+                let dcaKeys = Object.keys(baselines).sort();
+                for (let dcaName of dcaKeys) {
+                    if (fDcaVal !== "" && dcaName !== fDcaVal) continue; 
+
+                    let baseData = baselines[dcaName];
+                    let dcaSum = summaries[dcaName] || {};
+
+                    let totalLocs = baseData.locs || 0; let totalAc = baseData.ac || 0; let totalOsb = baseData.osb || 0;
+                    dcaCount++; grandTotalOsb += totalOsb;
+
+                    let locViewAc = 0, locViewRm = 0, locGrandAc = 0, locGrandRm = 0;
+                    let cycleTds = '';
+
+                    window.dashboardActiveBatch.months.forEach(m => {
+                        m.cycles.forEach(c => {
+                            let dbKey = `m${m.month_idx}_${c.id}`;
+                            locGrandAc += dcaSum[`${dbKey}_ac`] || 0;
+                            locGrandRm += dcaSum[`${dbKey}_rm`] || 0;
+                        });
+                    });
+                    grandTotalAllCollection += locGrandRm;
+
+                    activeCyclesForReport.forEach(c => {
+                        let dbKey = `m${c.parentMonthIdx}_${c.id}`;
+                        let cAc = dcaSum[`${dbKey}_ac`] || 0;
+                        let cRm = dcaSum[`${dbKey}_rm`] || 0;
+                        locViewAc += cAc; locViewRm += cRm;
+
+                        if (cRm > 0 || cAc > 0) { cycleTds += `<td data-order="${cRm}" style="border-left: 1px solid var(--border-color);"><span class="val-badge">${cAc}</span> | <span class="val-gold">RM ${cRm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></td>`; } 
+                        else { cycleTds += `<td data-order="0" style="border-left: 1px solid var(--border-color);"><span class="alert-red">-</span></td>`; }
+                    });
+                    grandTotalCurrentMonthCollection += locViewRm;
+
+                    const dcaPct = totalOsb > 0 ? ((locGrandRm / totalOsb) * 100).toFixed(2) : "0.00";
+
+                    htmlBodyContent += `
+                        <tr data-dca="${dcaName}">
+                            <td class="details-control">&#x2295;</td>
+                            <td style="font-weight: bold; color: var(--accent-gold); text-align: left; font-size: 13px;">${dcaName}</td>
+                            <td data-order="${totalLocs}">${totalLocs}</td>
+                            <td data-order="${totalAc}">${totalAc.toLocaleString()}</td>
+                            <td data-order="${totalOsb}" style="font-weight: 500;">${totalOsb.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                            ${cycleTds}
+                            <td data-order="${locViewRm}" style="border-left: 1px solid var(--accent-gold); color: var(--text-main);">
+                                <span class="val-badge">${locViewAc}</span> | <span style="font-weight:bold; color: var(--accent-gold);">RM ${locViewRm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                            </td>
+                            <td data-order="${locGrandRm}" style="border-left: 1px solid var(--success); color: var(--text-main);">
+                                <span class="val-badge">${locGrandAc}</span> | <span style="font-weight:bold; color: var(--success);">RM ${locGrandRm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                            </td>
+                            <td data-order="${dcaPct}" style="font-weight: bold; color: var(--success); font-size: 13px;">${dcaPct}%</td>
+                        </tr>`;
+                }
+
+                let percentVal = grandTotalOsb > 0 ? (grandTotalAllCollection / grandTotalOsb) * 100 : 0;
+                let kpiValues = {
+                    osb: `RM ${grandTotalOsb.toLocaleString(undefined, {minimumFractionDigits: 2})}`,
+                    collection: `RM ${grandTotalCurrentMonthCollection.toLocaleString(undefined, {minimumFractionDigits: 2})}`,
+                    percent: `${percentVal.toFixed(2)}%`, count: dcaCount
+                };
+
+                binaSemulaStrukturJadual(htmlBodyContent, kpiValues);
+
+                if (serverLastUpdated) {
+                    localStorage.setItem(cacheKeyData, JSON.stringify({ tableHtml: htmlBodyContent, kpi: kpiValues, dcaDetailsMap: window.dcaDetailsMap }));
+                    localStorage.setItem(cacheKeyTime, serverLastUpdated);
+                }
+            } catch (error) { console.error("Dashboard error:", error); tbody.innerHTML = `<tr><td colspan="15" style="color:red; text-align:center;">Fatal: ${error.message}</td></tr>`; }
         }
 
-        const data = doc.data();
+        function binaSemulaStrukturJadual(bodyHtml, kpi) {
+            document.getElementById('table-body').innerHTML = bodyHtml;
+            document.getElementById('kpi-osb').textContent = kpi.osb; 
+            document.getElementById('kpi-collection').textContent = kpi.collection;
+            document.getElementById('kpi-percent').textContent = kpi.percent; 
+            document.getElementById('kpi-pending').textContent = kpi.count;
 
-        data.dcas.forEach(d => {
+            let sortTarget = $('#report-table th').length - 2; 
+            $('#report-table').DataTable({ "pageLength": 10, "scrollX": true, "order": [[ sortTarget, "desc" ]], "columnDefs": [ { "orderable": false, "targets": 0 } ] });
+        }
 
-            dcaSelect.innerHTML +=
-                `<option value="${d}">${d}</option>`;
+        // --- SISTEM LAZY LOAD CHILD ROWS (HANYA BACA DB BILA KLIK BUTANG +) ---
+        async function fetchDcaDetailsFromDB(dcaName, batchName) {
+            let details = [];
+            try {
+                const assignSnap = await db.collection("assignments").where("dca_name", "==", dcaName).get();
+                if(assignSnap.empty) return [];
 
-            filterDca.innerHTML +=
-                `<option value="${d}">${d}</option>`;
-        });
+                let locCodes = []; let tasks = {};
+                assignSnap.forEach(doc => { locCodes.push(doc.id); tasks[doc.id] = doc.data(); });
 
-        data.regions.forEach(r => {
+                let submissionsDict = {};
+                const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
+                const locCodeChunks = chunkArray(locCodes, 10);
 
-            filterReg.innerHTML +=
-                `<option value="${r}">${r}</option>`;
-        });
+                for (let chunk of locCodeChunks) {
+                    const subSnap = await db.collection("submissions").where(firebase.firestore.FieldPath.documentId(), 'in', chunk).get();
+                    subSnap.forEach(doc => { submissionsDict[doc.id] = doc.data(); });
+                }
 
-        localStorage.setItem(
-            'dropdown_lists',
-            JSON.stringify({
-                dcas: data.dcas || [],
-                regions: data.regions || []
-            })
-        );
+                for (let locCode of locCodes) {
+                    let task = tasks[locCode];
+                    let batchSub = submissionsDict[locCode]?.[batchName] || {};
 
-    } catch (e) {
-        console.error("Dropdown error:", e);
-    }
-}
-        
+                    let ac = parseInt(task.total_ac_assigned) || 0; let osb = parseFloat(task.total_osb_assigned) || 0;
+                    let locViewAc = 0, locViewRm = 0; let locMonthTotals = {};
+
+                    window.dashboardActiveBatch.months.forEach(m => {
+                        let mAc = 0, mRm = 0;
+                        m.cycles.forEach(c => {
+                            let dbKey = `m${m.month_idx}_${c.id}`;
+                            mAc += batchSub[dbKey]?.ac_paying || 0; mRm += batchSub[dbKey]?.collection_amount || 0;
+                        });
+                        locMonthTotals[m.month_idx] = { ac: mAc, rm: mRm };
+                    });
+
+                    window.activeMonthsForChildRows.forEach(m => {
+                        m.cycles.forEach(c => {
+                            let dbKey = `m${m.month_idx}_${c.id}`;
+                            locViewAc += batchSub[dbKey]?.ac_paying || 0; locViewRm += batchSub[dbKey]?.collection_amount || 0;
+                        });
+                    });
+
+                    details.push({ region: task.region, area: task.area, loc_code: locCode, loc_name: task.loc_name, ac: ac, osb: osb, viewAc: locViewAc, viewRm: locViewRm, monthTotals: locMonthTotals });
+                }
+            } catch(e) { console.error("Error fetching child rows:", e); }
+            return details;
+        }
+
         function formatChildRow(dcaName, activeMonths) {
             const locList = window.dcaDetailsMap[dcaName];
-            if(!locList) return '<div>No inner rows identified.</div>';
+            if(!locList || locList.length === 0) return '<div style="text-align:center; padding:10px; color:var(--text-muted);">No locations found / Database error.</div>';
 
             let html = '<table class="sub-table" cellpadding="5" cellspacing="0" border="0">';
             let thead = `<tr><th style="text-align:left;">REGION</th><th style="text-align:left;">AREA</th><th style="text-align:left;">LOC CODE</th><th style="text-align:left;">LOCATION NAME</th><th style="text-align:center;">TOTAL<br>A/C</th><th style="text-align:right;">OSB (RM)</th>`;
-            
-            activeMonths.forEach(m => { 
-                thead += `<th style="text-align:center; white-space: nowrap;">${m.month_name.toUpperCase()}<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>`; 
-            });
+            activeMonths.forEach(m => { thead += `<th style="text-align:center; white-space: nowrap;">${m.month_name.toUpperCase()}<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>`; });
             thead += `<th style="text-align:center; color:var(--accent-gold); white-space: nowrap;">TOTAL CURRENT<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th></tr>`;
             html += `<thead>${thead}</thead><tbody>`;
             
@@ -955,11 +1121,8 @@ async function populateDcaList() {
                 let monthHtml = '';
                 activeMonths.forEach(m => {
                     let val = loc.monthTotals[m.month_idx] || {ac:0, rm:0};
-                    if(val.rm > 0 || val.ac > 0) {
-                        monthHtml += `<td style="text-align:center; white-space: nowrap;"><span class="val-badge">${val.ac}</span> | <span style="font-weight:bold; color:var(--success);">RM ${val.rm.toLocaleString(undefined, {minimumFractionDigits:2})}</span></td>`;
-                    } else {
-                        monthHtml += `<td style="text-align:center; color:var(--text-muted); white-space: nowrap;">-</td>`;
-                    }
+                    if(val.rm > 0 || val.ac > 0) { monthHtml += `<td style="text-align:center; white-space: nowrap;"><span class="val-badge">${val.ac}</span> | <span style="font-weight:bold; color:var(--success);">RM ${val.rm.toLocaleString(undefined, {minimumFractionDigits:2})}</span></td>`; } 
+                    else { monthHtml += `<td style="text-align:center; color:var(--text-muted); white-space: nowrap;">-</td>`; }
                 });
 
                 html += `<tr>
@@ -969,292 +1132,85 @@ async function populateDcaList() {
                     <td style="text-align:center; font-weight:bold; color:var(--accent-gold); white-space: nowrap;"><span class="val-badge">${loc.viewAc}</span> | <span>RM ${loc.viewRm.toLocaleString(undefined, {minimumFractionDigits:2})}</span></td>
                 </tr>`;
             });
-            html += '</tbody></table>';
-            return html;
+            html += '</tbody></table>'; return html;
         }
 
-async function generateFullReport() {
-    if(!window.dashboardActiveBatch) { alert("Please complete Step 1: Select Active Collection Batch."); return; }
-    const monthIdxStr = document.getElementById('filter-month').value;
-    if(!monthIdxStr) { alert("Please specify valid Target Month constraint."); return; }
-    
-    const fDcaVal = document.getElementById('filter-dca').value;
-    const fRegVal = document.getElementById('filter-region').value;
-    const batchName = window.dashboardActiveBatch.batch_name;
-    const titleEl = document.getElementById('dashboard-dynamic-title');
-
-    // PENYELESAIAN 1: Hancurkan DataTables lama SEBELUM ubah HTML supaya tak crash
-    if ($.fn.DataTable.isDataTable('#report-table')) {
-        $('#report-table').DataTable().clear().destroy();
-    }
-
-    const cacheKeyData = `report_data_${batchName}_${monthIdxStr}_${fDcaVal}_${fRegVal}`;
-    const cacheKeyTime = `report_time_${batchName}_${monthIdxStr}_${fDcaVal}_${fRegVal}`;
-
-    // PENYELESAIAN 2: Sentiasa bina struktur kepala (Thead) dahulu setiap kali butang ditekan
-    let displayMonthName = "ALL MONTHS";
-    let displayDcaName = fDcaVal ? fDcaVal : "ALL AGENCIES";
-    let activeCyclesForReport = [];
-    let activeMonthsForReport = [];
-
-    if (monthIdxStr === "ALL") {
-        activeMonthsForReport = window.dashboardActiveBatch.months;
-        window.dashboardActiveBatch.months.forEach(m => {
-            m.cycles.forEach(c => activeCyclesForReport.push({ ...c, parentMonthIdx: m.month_idx }));
-        });
-    } else {
-        const monthIdx = parseInt(monthIdxStr);
-        const monthConfig = window.dashboardActiveBatch.months.find(m => m.month_idx === monthIdx);
-        if(!monthConfig) return;
-        displayMonthName = monthConfig.month_name;
-        activeMonthsForReport.push(monthConfig);
-        monthConfig.cycles.forEach(c => activeCyclesForReport.push({ ...c, parentMonthIdx: monthConfig.month_idx }));
-    }
-
-    window.activeMonthsForChildRows = activeMonthsForReport;
-    titleEl.innerHTML = `VIEWING MONTH: <span style="color:#FFF;">${displayMonthName.toUpperCase()}</span> &nbsp;&nbsp;|&nbsp;&nbsp; DCA: <span style="color:#FFF;">${displayDcaName.toUpperCase()}</span>`;
-
-    let wrapper = document.getElementById('table-wrapper');
-    let tableHtmlHead = `<table id="report-table" class="display nowrap"><thead><tr>
-        <th style="width: 20px;"></th><th style="text-align: left;">DCA NAME</th><th>TOTAL<br>LOC</th><th>TOTAL<br>A/C</th><th>TOTAL ASSIGNED<br>OSB (RM)</th>`;
-        
-    activeCyclesForReport.forEach(c => {
-        let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
-        tableHtmlHead += `<th style="border-left: 1px solid var(--border-color); color: #fff; white-space: nowrap;">${c.label.toUpperCase()}<br><span style="font-size:10px; color:var(--text-muted);">(${cDateStr})</span></th>`;
-    });
-    
-    tableHtmlHead += `
-        <th style="border-left: 1px solid var(--accent-gold);">TOTAL CURRENT<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
-        <th style="border-left: 1px solid var(--success);">G.TOTAL<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
-        <th style="color:var(--success);">%<br>PERFORMANCE</th>
-    </tr></thead><tbody id="table-body"></tbody></table>`;
-    
-    // Terapkan Thead ke dalam HTML sebelum menyemak cache (WAJIB)
-    wrapper.innerHTML = tableHtmlHead;
-    const tbody = document.getElementById('table-body');
-
-    try {
-        // 1. SEMAK METADATA DI FIREBASE (Guna 1 Read sahaja)
-        const metaSnap = await db.collection("metadata").doc("report_status").get();
-        let serverLastUpdated = null;
-        
-        if (metaSnap.exists && metaSnap.data().last_updated) {
-            serverLastUpdated = metaSnap.data().last_updated.toDate().getTime().toString();
-        }
-
-        // 2. SEMAK CACHE
-        const localLastUpdated = localStorage.getItem(cacheKeyTime);
-        const cachedData = localStorage.getItem(cacheKeyData);
-
-        if (serverLastUpdated && localLastUpdated === serverLastUpdated && cachedData) {
-            showToast("Memuatkan data dari cache (Sistem Optimum)...");
-            const parsedCache = JSON.parse(cachedData);
-            window.dcaDetailsMap = parsedCache.dcaDetailsMap;
-            window.rawExcelData = parsedCache.rawExcelData;
+        // --- SISTEM EXCEL RAW ON-DEMAND (HANYA BACA BILA KLIK BUTANG EXPORT) ---
+        async function exportRawToExcel() {
+            if(!window.dashboardActiveBatch) { alert("Sila Pilih Active Batch dan Generate Report dahulu."); return; }
             
-            // Panggil fungsi untuk set data dan initialize semula DataTables
-            binaSemulaStrukturJadual(parsedCache.tableHtml, parsedCache.kpi);
-            return; // Berhenti di sini, kuota selamat!
-        }
+            const batchName = window.dashboardActiveBatch.batch_name;
+            const fDcaVal = document.getElementById('filter-dca').value;
+            const fRegVal = document.getElementById('filter-region').value;
+            const monthIdxStr = document.getElementById('filter-month').value;
+            
+            showToast("Memuat turun data mentah penuh dari Pangkalan Data. Sila tunggu...");
 
-        // =========================================================================
-        // JIKA ADA PERUBAHAN DATA (ATAU CACHE TIADA), TARIK DARI FIREBASE
-        // =========================================================================
-        console.log("Menarik data terbaharu dari Pangkalan Data Firebase...");
-        tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;">Compiling active datasets...</td></tr>`;
-
-        window.dcaDetailsMap = {}; window.rawExcelData = [];
-
-        let assignQuery = db.collection("assignments");
-        if (fDcaVal !== "") assignQuery = assignQuery.where("dca_name", "==", fDcaVal);
-        if (fRegVal !== "") assignQuery = assignQuery.where("region", "==", fRegVal);
-
-        const assignmentsSnap = await assignQuery.get();
-        if (assignmentsSnap.empty) { 
-            tbody.innerHTML = '<tr><td colspan="15" style="text-align:center; color:var(--text-muted);">Tiada rekod Pangkalan Data untuk kriteria ini.</td></tr>'; 
-            return; 
-        }
-
-        let submissionsDict = {};
-        if (fDcaVal === "" && fRegVal === "") {
-            const submissionsSnap = await db.collection("submissions").get();
-            submissionsSnap.forEach(doc => { submissionsDict[doc.id] = doc.data(); });
-        } else {
-            let locCodes = [];
-            assignmentsSnap.forEach(doc => locCodes.push(doc.id));
-            const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
-            const locCodeChunks = chunkArray(locCodes, 10);
-            for (let chunk of locCodeChunks) {
-                const subSnap = await db.collection("submissions").where(firebase.firestore.FieldPath.documentId(), 'in', chunk).get();
-                subSnap.forEach(doc => { submissionsDict[doc.id] = doc.data(); });
-            }
-        }
-
-        let dcaGroupMap = {};
-        let grandTotalOsb = 0, grandTotalCurrentMonthCollection = 0, grandTotalAllCollection = 0;
-
-        assignmentsSnap.forEach(doc => {
-            const task = doc.data(); const locCode = doc.id; const dcaName = task.dca_name || "UNKNOWN";
-            const batchSub = submissionsDict[locCode]?.[batchName] || {};
-
-            if (!dcaGroupMap[dcaName]) {
-                dcaGroupMap[dcaName] = { total_locs: 0, total_ac: 0, total_osb: 0, view_ac: 0, view_rm: 0, grand_ac: 0, grand_rm: 0, cycle_data: {} };
-                window.dcaDetailsMap[dcaName] = [];
-            }
-
-            const osb = parseFloat(task.total_osb_assigned) || 0;
-            const ac = parseInt(task.total_ac_assigned) || 0;
-            let locViewAc = 0, locViewRm = 0, locGrandRm = 0, locGrandAc = 0;
-            let locMonthTotals = {}; 
-
-            let excelRow = {
-                "Batch": batchName, "Display Filter": displayMonthName, "DCA Name": dcaName, "Region": task.region, "Area": task.area,
-                "Loc Code": locCode, "Loc Name": task.loc_name, "Total A/C Assigned": ac, "Total OSB Assigned": osb
-            };
-
-            window.dashboardActiveBatch.months.forEach(m => {
-                let mAc = 0, mRm = 0;
-                m.cycles.forEach(c => {
-                    let dbKey = `m${m.month_idx}_${c.id}`;
-                    let cAc = batchSub[dbKey]?.ac_paying || 0;
-                    let cRm = batchSub[dbKey]?.collection_amount || 0;
-                    mAc += cAc; mRm += cRm;
-                    locGrandAc += cAc; locGrandRm += cRm;
-                });
-                locMonthTotals[m.month_idx] = { ac: mAc, rm: mRm };
-            });
-
-activeCyclesForReport.forEach(c => {
-                let dbKey = `m${c.parentMonthIdx}_${c.id}`;
-                let cAc = batchSub[dbKey]?.ac_paying || 0;
-                let cRm = batchSub[dbKey]?.collection_amount || 0;
-                locViewAc += cAc; locViewRm += cRm;
-                let uniqueCycleKey = `${c.parentMonthIdx}_${c.id}`; 
+            try {
+                let assignQuery = db.collection("assignments");
+                if (fDcaVal !== "") assignQuery = assignQuery.where("dca_name", "==", fDcaVal);
+                if (fRegVal !== "") assignQuery = assignQuery.where("region", "==", fRegVal);
                 
-                if(!dcaGroupMap[dcaName].cycle_data[uniqueCycleKey]) dcaGroupMap[dcaName].cycle_data[uniqueCycleKey] = {ac:0, rm:0};
-                dcaGroupMap[dcaName].cycle_data[uniqueCycleKey].ac += cAc;
-                dcaGroupMap[dcaName].cycle_data[uniqueCycleKey].rm += cRm;
+                const assignmentsSnap = await assignQuery.get();
+                if (assignmentsSnap.empty) { alert("Tiada rekod dijumpai untuk dieksport."); return; }
 
-                // --- KOD EXCEL DIKEMBALIKAN ---
-                let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
-                excelRow[`${c.label.toUpperCase()} (${cDateStr}) - A/C Paying`] = cAc;
-                excelRow[`${c.label.toUpperCase()} (${cDateStr}) - Collection RM`] = cRm;
-            });
-
-            // --- KOD EXCEL DIKEMBALIKAN ---
-            excelRow["Total A/C Paying (Current View)"] = locViewAc;
-            excelRow["Total Collection (Current View RM)"] = locViewRm;
-            excelRow["Total A/C Paying (G.Total Batch)"] = locGrandAc;
-            excelRow["Total Collection (G.Total Batch RM)"] = locGrandRm;
-            window.rawExcelData.push(excelRow);
-
-            dcaGroupMap[dcaName].total_locs += 1; dcaGroupMap[dcaName].total_ac += ac; dcaGroupMap[dcaName].total_osb += osb;
-            dcaGroupMap[dcaName].view_ac += locViewAc; dcaGroupMap[dcaName].view_rm += locViewRm;
-            dcaGroupMap[dcaName].grand_ac += locGrandAc; dcaGroupMap[dcaName].grand_rm += locGrandRm;
-            
-            grandTotalOsb += osb; grandTotalCurrentMonthCollection += locViewRm; grandTotalAllCollection += locGrandRm;
-
-            window.dcaDetailsMap[dcaName].push({
-                region: task.region, area: task.area, loc_code: locCode, loc_name: task.loc_name,
-                ac: ac, osb: osb, viewAc: locViewAc, viewRm: locViewRm, monthTotals: locMonthTotals
-            });
-        });
-
-        // Bina Baris HTML TR
-        let htmlBodyContent = "";
-        let dcaCount = 0;
-        for (const [dcaName, data] of Object.entries(dcaGroupMap)) {
-            dcaCount++;
-            const dcaPct = data.total_osb > 0 ? ((data.grand_rm / data.total_osb) * 100).toFixed(2) : "0.00";
-            let cycleTds = '';
-            activeCyclesForReport.forEach(c => {
-                let uniqueCycleKey = `${c.parentMonthIdx}_${c.id}`;
-                let cData = data.cycle_data[uniqueCycleKey] || {ac:0, rm:0};
-                if (cData.rm > 0 || cData.ac > 0) {
-                    cycleTds += `<td data-order="${cData.rm}" style="border-left: 1px solid var(--border-color);"><span class="val-badge">${cData.ac}</span> | <span class="val-gold">RM ${cData.rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></td>`;
-                } else {
-                    cycleTds += `<td data-order="0" style="border-left: 1px solid var(--border-color);"><span class="alert-red">-</span></td>`;
+                let submissionsDict = {};
+                let locCodes = []; assignmentsSnap.forEach(doc => locCodes.push(doc.id));
+                const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
+                const locCodeChunks = chunkArray(locCodes, 10);
+                
+                for (let chunk of locCodeChunks) {
+                    const subSnap = await db.collection("submissions").where(firebase.firestore.FieldPath.documentId(), 'in', chunk).get();
+                    subSnap.forEach(doc => { submissionsDict[doc.id] = doc.data(); });
                 }
-            });
 
-            htmlBodyContent += `
-                <tr data-dca="${dcaName}">
-                    <td class="details-control">&#x2295;</td>
-                    <td style="font-weight: bold; color: var(--accent-gold); text-align: left; font-size: 13px;">${dcaName}</td>
-                    <td data-order="${data.total_locs}">${data.total_locs}</td>
-                    <td data-order="${data.total_ac}">${data.total_ac.toLocaleString()}</td>
-                    <td data-order="${data.total_osb}" style="font-weight: 500;">${data.total_osb.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                    ${cycleTds}
-                    <td data-order="${data.view_rm}" style="border-left: 1px solid var(--accent-gold); color: var(--text-main);">
-                        <span class="val-badge">${data.view_ac}</span> | <span style="font-weight:bold; color: var(--accent-gold);">RM ${data.view_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-                    </td>
-                    <td data-order="${data.grand_rm}" style="border-left: 1px solid var(--success); color: var(--text-main);">
-                        <span class="val-badge">${data.grand_ac}</span> | <span style="font-weight:bold; color: var(--success);">RM ${data.grand_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-                    </td>
-                    <td data-order="${dcaPct}" style="font-weight: bold; color: var(--success); font-size: 13px;">${dcaPct}%</td>
-                </tr>`;
-        }
+                let excelData = [];
+                let activeCyclesForExcel = [];
+                let displayMonthName = "ALL MONTHS";
 
-        let percentVal = grandTotalOsb > 0 ? (grandTotalAllCollection / grandTotalOsb) * 100 : 0;
-        let kpiValues = {
-            osb: `RM ${grandTotalOsb.toLocaleString(undefined, {minimumFractionDigits: 2})}`,
-            collection: `RM ${grandTotalCurrentMonthCollection.toLocaleString(undefined, {minimumFractionDigits: 2})}`,
-            percent: `${percentVal.toFixed(2)}%`,
-            count: dcaCount
-        };
+                if (monthIdxStr === "ALL") {
+                    window.dashboardActiveBatch.months.forEach(m => m.cycles.forEach(c => activeCyclesForExcel.push({ ...c, parentMonthIdx: m.month_idx })));
+                } else {
+                    const monthIdx = parseInt(monthIdxStr);
+                    const monthConfig = window.dashboardActiveBatch.months.find(m => m.month_idx === monthIdx);
+                    if(monthConfig) { displayMonthName = monthConfig.month_name; monthConfig.cycles.forEach(c => activeCyclesForExcel.push({ ...c, parentMonthIdx: monthConfig.month_idx })); }
+                }
 
-        // Panggil fungsi pembinaan UI
-        binaSemulaStrukturJadual(htmlBodyContent, kpiValues);
+                assignmentsSnap.forEach(doc => {
+                    const task = doc.data(); const locCode = doc.id;
+                    const batchSub = submissionsDict[locCode]?.[batchName] || {};
+                    let locViewAc = 0, locViewRm = 0, locGrandRm = 0, locGrandAc = 0;
 
-        // 3. SIMPAN DATA TERBAHARU KE LOCAL STORAGE (CACHE) 
-        if (serverLastUpdated) {
-            let cachePayload = {
-                tableHtml: htmlBodyContent,
-                kpi: kpiValues,
-                dcaDetailsMap: window.dcaDetailsMap,
-                rawExcelData: window.rawExcelData
-            };
-            localStorage.setItem(cacheKeyData, JSON.stringify(cachePayload));
-            localStorage.setItem(cacheKeyTime, serverLastUpdated);
-        }
+                    let rowData = { "Batch": batchName, "Display Filter": displayMonthName, "DCA Name": task.dca_name || "UNKNOWN", "Region": task.region, "Area": task.area, "Loc Code": locCode, "Loc Name": task.loc_name, "Total A/C Assigned": parseInt(task.total_ac_assigned) || 0, "Total OSB Assigned": parseFloat(task.total_osb_assigned) || 0 };
 
-    } catch (error) { 
-        console.error("Dashboard error:", error); 
-        tbody.innerHTML = `<tr><td colspan="15" style="color:red; text-align:center;">Fatal: ${error.message}</td></tr>`; 
-    }
-}
+                    window.dashboardActiveBatch.months.forEach(m => {
+                        m.cycles.forEach(c => {
+                            let dbKey = `m${m.month_idx}_${c.id}`;
+                            locGrandAc += batchSub[dbKey]?.ac_paying || 0; locGrandRm += batchSub[dbKey]?.collection_amount || 0;
+                        });
+                    });
 
-// Fungsi helper untuk render UI jadual
-function binaSemulaStrukturJadual(bodyHtml, kpi) {
-    document.getElementById('table-body').innerHTML = bodyHtml;
-    document.getElementById('kpi-osb').textContent = kpi.osb;
-    document.getElementById('kpi-collection').textContent = kpi.collection;
-    document.getElementById('kpi-percent').textContent = kpi.percent;
-    document.getElementById('kpi-pending').textContent = kpi.count;
+                    activeCyclesForExcel.forEach(c => {
+                        let dbKey = `m${c.parentMonthIdx}_${c.id}`;
+                        let cAc = batchSub[dbKey]?.ac_paying || 0; let cRm = batchSub[dbKey]?.collection_amount || 0;
+                        locViewAc += cAc; locViewRm += cRm;
+                        
+                        let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
+                        rowData[`${c.label.toUpperCase()} (${cDateStr}) - A/C Paying`] = cAc;
+                        rowData[`${c.label.toUpperCase()} (${cDateStr}) - Collection RM`] = cRm;
+                    });
 
-    // Aktifkan DataTables Baharu
-    let sortTarget = $('#report-table th').length - 2; // G.Total Column
-    $('#report-table').DataTable({
-        "pageLength": 10,
-        "scrollX": true,
-        "order": [[ sortTarget, "desc" ]],
-        "columnDefs": [ { "orderable": false, "targets": 0 } ]
-    });
-}
+                    rowData["Total A/C Paying (Current View)"] = locViewAc; rowData["Total Collection (Current View RM)"] = locViewRm;
+                    rowData["Total A/C Paying (G.Total Batch)"] = locGrandAc; rowData["Total Collection (G.Total Batch RM)"] = locGrandRm;
+                    excelData.push(rowData);
+                });
 
-        function exportRawToExcel() {
-            if (!window.rawExcelData || window.rawExcelData.length === 0) { alert("Command rejected: Perform a verification query run prior to Excel output extraction."); return; }
-            showToast("Structuring master spreadsheet data block...");
-            
-            const worksheet = XLSX.utils.json_to_sheet(window.rawExcelData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Raw DCA Performance");
-            
-            const now = new Date();
-            const dateStr = now.toISOString().split('T')[0];
-            const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-            
-            XLSX.writeFile(workbook, `DCA_MasterPerformance_${window.dashboardActiveBatch.batch_name}_${dateStr}_${timeStr}.xlsx`);
+                const worksheet = XLSX.utils.json_to_sheet(excelData); const workbook = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(workbook, worksheet, "Raw DCA Performance");
+                const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+                XLSX.writeFile(workbook, `DCA_MasterPerformance_${batchName}_${dateStr}_${timeStr}.xlsx`);
+                showToast("Muat turun Excel berjaya!");
+
+            } catch(e) { alert("Ralat semasa muat turun: " + e.message); }
         }
     </script>
 </body>
