@@ -498,7 +498,6 @@
             document.getElementById('setup-start-date').value = b.start_date || '';
             document.getElementById('setup-end-date').value = b.end_date || '';
             
-            // Clear prior fasa records
             for(let i=1; i<=4; i++) {
                 document.getElementById(`m${i}-name`).value = "";
                 for(let j=1; j<=4; j++) {
@@ -660,7 +659,6 @@
                     });
                 }
                 
-                // SINGLE GLOBAL TRANSMISSION BUTTON (SPACE REDUCTION AND BATCH INTEGRITY)
                 htmlStructure += `<button class="btn-global-submit" id="btn-global-portal-submit" onclick="executeGlobalBatchSubmission()">Finalize and Submit Overall Performance Report</button>`;
                 displayArea.innerHTML = htmlStructure;
 
@@ -695,7 +693,12 @@
             const firestoreBatch = db.batch();
             const dbFieldKey = `m${window.activeDcaCycle.monthIdx}_${window.activeDcaCycle.cycleId}`;
 
-            dataPack.forEach(item => {
+            // ---- START LIVE AGGREGATOR WRITE ENGINE ----
+            let totalAc = 0; let totalRm = 0;
+            dataPack.forEach(item => { 
+                totalAc += item.ac; 
+                totalRm += item.rm; 
+                
                 let docRef = db.collection("submissions").doc(item.locCode);
                 firestoreBatch.set(docRef, {
                     [window.activeBatchName]: {
@@ -703,6 +706,14 @@
                     }
                 }, { merge: true });
             });
+
+            // Tulis Ke Dalam Koleksi Summary Induk Secara Automatik!
+            let summaryRef = db.collection("dca_live_summaries").doc(window.activeBatchName);
+            let updatePayload = {};
+            updatePayload[`${selectedDca}.${dbFieldKey}_ac`] = totalAc;
+            updatePayload[`${selectedDca}.${dbFieldKey}_rm`] = totalRm;
+            firestoreBatch.set(summaryRef, updatePayload, { merge: true });
+            // ---- END LIVE AGGREGATOR WRITE ENGINE ----
 
             const lockId = `${window.activeBatchName}_m${window.activeDcaCycle.monthIdx}_${window.activeDcaCycle.cycleId}_${selectedDca}`;
             let lockRef = db.collection("submission_locks").doc(lockId);
@@ -793,15 +804,30 @@
                 showToast("Uploading rows to Firestore cloud environment...");
                 
                 const batch = db.batch(); let count = 0;
+                let baselines = {}; // NEW: Kumpul Baseline
+                
                 jsonData.forEach(row => {
                     const locCodeRaw = row['LOC CODE'];
                     if (locCodeRaw) {
+                        let dcaName = row['DCA NAME'] || 'UNASSIGNED';
+                        
+                        // Kumpul Data Untuk Dokumen Induk (Baselines)
+                        if(!baselines[dcaName]) baselines[dcaName] = { locs: 0, ac: 0, osb: 0 };
+                        baselines[dcaName].locs += 1;
+                        baselines[dcaName].ac += parseInt(row['TOTAL A/C ASSIGNED']) || 0;
+                        baselines[dcaName].osb += parseFloat(row['TOTAL OSB ASSIGNED']) || 0;
+
                         batch.set(db.collection("assignments").doc(Math.floor(locCodeRaw).toString()), {
-                            dca_name: row['DCA NAME'] || 'UNASSIGNED', region: row['REGION'] || '', area: row['AREA'] || '', loc_name: row['LOC NAME'] || '',
+                            dca_name: dcaName, region: row['REGION'] || '', area: row['AREA'] || '', loc_name: row['LOC NAME'] || '',
                             total_ac_assigned: parseInt(row['TOTAL A/C ASSIGNED']) || 0, total_osb_assigned: parseFloat(row['TOTAL OSB ASSIGNED']) || 0
                         }, { merge: true }); count++;
                     }
                 });
+
+                // Tulis Ke Dalam Koleksi Summary Induk (GLOBAL BASELINES)
+                let baseRef = db.collection("dca_live_summaries").doc("GLOBAL_BASELINES");
+                batch.set(baseRef, baselines, { merge: true });
+
                 try { await batch.commit(); showToast(`Import complete: Added ${count} assets entries.`); input.value = ""; populateDcaList(); } 
                 catch (error) { alert("Excel data ingestion faulted."); }
             }; reader.readAsArrayBuffer(file);
@@ -837,7 +863,7 @@
             if(!locList) return '<div>No inner rows identified.</div>';
 
             let html = '<table class="sub-table" cellpadding="5" cellspacing="0" border="0">';
-            let thead = `<tr><th style="text-align:left;">REGION</th><th style="text-align:left;">AREA</th><th style="text-align:left;">LOC CODE</th><th style="text-align:left;">LOCATION NAME</th><th style="text-align:center;">TOTAL A/C</th><th style="text-align:right;">OSB (RM)</th>`;
+            let thead = `<tr><th style="text-align:left;">REGION</th><th style="text-align:left;">AREA</th><th style="text-align:left;">LOC CODE</th><th style="text-align:left;">LOCATION NAME</th><th style="text-align:center;">TOTAL<br>A/C</th><th style="text-align:right;">OSB (RM)</th>`;
             
             activeMonths.forEach(m => { 
                 thead += `<th style="text-align:center; white-space: nowrap;">${m.month_name.toUpperCase()}<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>`; 
@@ -897,7 +923,7 @@
                 monthConfig.cycles.forEach(c => activeCyclesForReport.push({ ...c, parentMonthIdx: monthConfig.month_idx }));
             }
 
-            window.activeMonthsForChildRows = activeMonthsForReport; // CACHE GLOBAL ACCESSIBLE MATRICES
+            window.activeMonthsForChildRows = activeMonthsForReport;
 
             titleEl.innerHTML = `VIEWING MONTH: <span style="color:#FFF;">${displayMonthName.toUpperCase()}</span> &nbsp;&nbsp;|&nbsp;&nbsp; DCA: <span style="color:#FFF;">${displayDcaName.toUpperCase()}</span>`;
 
@@ -921,6 +947,8 @@
             window.dcaDetailsMap = {}; window.rawExcelData = [];
 
             try {
+                // NOTA KEPADA BOS: Jadual Laporan ini dikekalkan memproses dari Data Mentah (Raw Data)
+                // supaya rekod lama bulan lepas tidak rosak dan kekal boleh dipaparkan 100% sama!
                 const assignmentsSnap = await db.collection("assignments").get();
                 if (assignmentsSnap.empty) { tbody.innerHTML = ''; return; }
 
