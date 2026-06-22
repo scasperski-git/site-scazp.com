@@ -809,13 +809,23 @@
                 if (jsonData.length === 0) return;
                 showToast("Uploading rows to Firestore cloud environment...");
                 
-                const batch = db.batch(); let count = 0;
-                let baselines = {}; // NEW: Kumpul Baseline
+const batch = db.batch();
+let count = 0;
+let baselines = {};
+
+let dcaSet = new Set();
+let regionSet = new Set();
                 
                 jsonData.forEach(row => {
                     const locCodeRaw = row['LOC CODE'];
                     if (locCodeRaw) {
                         let dcaName = row['DCA NAME'] || 'UNASSIGNED';
+
+                        dcaSet.add(dcaName);
+
+if(row['REGION']){
+    regionSet.add(row['REGION']);
+}
                         
                         // Kumpul Data Untuk Dokumen Induk (Baselines)
                         if(!baselines[dcaName]) baselines[dcaName] = { locs: 0, ac: 0, osb: 0 };
@@ -830,9 +840,18 @@
                     }
                 });
 
-                // Tulis Ke Dalam Koleksi Summary Induk (GLOBAL BASELINES)
-                let baseRef = db.collection("dca_live_summaries").doc("GLOBAL_BASELINES");
-                batch.set(baseRef, baselines, { merge: true });
+let baseRef = db.collection("dca_live_summaries").doc("GLOBAL_BASELINES");
+batch.set(baseRef, baselines, { merge: true });
+
+batch.set(
+    db.collection("system_lists").doc("dropdowns"),
+    {
+        dcas: Array.from(dcaSet).sort(),
+        regions: Array.from(regionSet).sort(),
+        updated_at: firebase.firestore.FieldValue.serverTimestamp()
+    },
+    { merge:true }
+);
 
                 try { await batch.commit(); showToast(`Import complete: Added ${count} assets entries.`); input.value = ""; populateDcaList(); } 
                 catch (error) { alert("Excel data ingestion faulted."); }
@@ -840,57 +859,85 @@
         }
 
 async function populateDcaList() {
+
     const dcaSelect = document.getElementById('dca-select');
     const filterDca = document.getElementById('filter-dca');
     const filterReg = document.getElementById('filter-region');
-    
-    // Default options
-    const resetDropdowns = () => {
-        dcaSelect.innerHTML = '<option value="">-- Select Your DCA Agency Name --</option>';
-        filterDca.innerHTML = '<option value="">ALL AGENCIES</option>';
-        filterReg.innerHTML = '<option value="">ALL REGIONS</option>';
-    };
-    resetDropdowns();
+
+    dcaSelect.innerHTML =
+        '<option value="">-- Select Your DCA Agency Name --</option>';
+
+    filterDca.innerHTML =
+        '<option value="">ALL AGENCIES</option>';
+
+    filterReg.innerHTML =
+        '<option value="">ALL REGIONS</option>';
 
     try {
-        // Semak jika senarai dropdown sudah ada dalam cache browser (tak perlu query DB)
-        const cachedDropdowns = localStorage.getItem('dropdown_lists');
+
+        const cachedDropdowns =
+            localStorage.getItem('dropdown_lists');
+
         if (cachedDropdowns) {
+
             const data = JSON.parse(cachedDropdowns);
+
             data.dcas.forEach(d => {
-                dcaSelect.innerHTML += `<option value="${d}">${d}</option>`;
-                filterDca.innerHTML += `<option value="${d}">${d}</option>`;
+                dcaSelect.innerHTML +=
+                    `<option value="${d}">${d}</option>`;
+
+                filterDca.innerHTML +=
+                    `<option value="${d}">${d}</option>`;
             });
-            data.regions.forEach(r => filterReg.innerHTML += `<option value="${r}">${r}</option>`);
-            return; // Berhenti di sini, kuota selamat pada page load!
+
+            data.regions.forEach(r => {
+                filterReg.innerHTML +=
+                    `<option value="${r}">${r}</option>`;
+            });
+
+            return;
         }
 
-        // Jika tiada cache, baru tarik 1 kali dan simpan
-        const snapshot = await db.collection("assignments").get();
-        if (snapshot.empty) return;
+        const doc =
+            await db.collection("system_lists")
+                    .doc("dropdowns")
+                    .get();
 
-        let dcaSet = new Set(), regSet = new Set();
-        snapshot.forEach(doc => { 
-            if(doc.data().dca_name) dcaSet.add(doc.data().dca_name);
-            if(doc.data().region) regSet.add(doc.data().region);
+        if(!doc.exists){
+            console.warn("Dropdown document not found.");
+            return;
+        }
+
+        const data = doc.data();
+
+        data.dcas.forEach(d => {
+
+            dcaSelect.innerHTML +=
+                `<option value="${d}">${d}</option>`;
+
+            filterDca.innerHTML +=
+                `<option value="${d}">${d}</option>`;
         });
-        
-        let dcaArray = Array.from(dcaSet).sort();
-        let regArray = Array.from(regSet).sort();
 
-        dcaArray.forEach(d => {
-            dcaSelect.innerHTML += `<option value="${d}">${d}</option>`;
-            filterDca.innerHTML += `<option value="${d}">${d}</option>`;
+        data.regions.forEach(r => {
+
+            filterReg.innerHTML +=
+                `<option value="${r}">${r}</option>`;
         });
-        regArray.forEach(r => filterReg.innerHTML += `<option value="${r}">${r}</option>`);
 
-        // Simpan senarai ini ke LocalStorage untuk jimat kuota pada masa depan
-        localStorage.setItem('dropdown_lists', JSON.stringify({ dcas: dcaArray, regions: regArray }));
+        localStorage.setItem(
+            'dropdown_lists',
+            JSON.stringify({
+                dcas: data.dcas || [],
+                regions: data.regions || []
+            })
+        );
 
     } catch (e) {
         console.error("Dropdown error:", e);
     }
 }
+        
         function formatChildRow(dcaName, activeMonths) {
             const locList = window.dcaDetailsMap[dcaName];
             if(!locList) return '<div>No inner rows identified.</div>';
