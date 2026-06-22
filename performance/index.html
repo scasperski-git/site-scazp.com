@@ -909,12 +909,58 @@ async function generateFullReport() {
     const batchName = window.dashboardActiveBatch.batch_name;
     const titleEl = document.getElementById('dashboard-dynamic-title');
 
-    // Buat satu ID unik untuk kombinasi filter ini
+    // PENYELESAIAN 1: Hancurkan DataTables lama SEBELUM ubah HTML supaya tak crash
+    if ($.fn.DataTable.isDataTable('#report-table')) {
+        $('#report-table').DataTable().clear().destroy();
+    }
+
     const cacheKeyData = `report_data_${batchName}_${monthIdxStr}_${fDcaVal}_${fRegVal}`;
     const cacheKeyTime = `report_time_${batchName}_${monthIdxStr}_${fDcaVal}_${fRegVal}`;
 
+    // PENYELESAIAN 2: Sentiasa bina struktur kepala (Thead) dahulu setiap kali butang ditekan
+    let displayMonthName = "ALL MONTHS";
+    let displayDcaName = fDcaVal ? fDcaVal : "ALL AGENCIES";
+    let activeCyclesForReport = [];
+    let activeMonthsForReport = [];
+
+    if (monthIdxStr === "ALL") {
+        activeMonthsForReport = window.dashboardActiveBatch.months;
+        window.dashboardActiveBatch.months.forEach(m => {
+            m.cycles.forEach(c => activeCyclesForReport.push({ ...c, parentMonthIdx: m.month_idx }));
+        });
+    } else {
+        const monthIdx = parseInt(monthIdxStr);
+        const monthConfig = window.dashboardActiveBatch.months.find(m => m.month_idx === monthIdx);
+        if(!monthConfig) return;
+        displayMonthName = monthConfig.month_name;
+        activeMonthsForReport.push(monthConfig);
+        monthConfig.cycles.forEach(c => activeCyclesForReport.push({ ...c, parentMonthIdx: monthConfig.month_idx }));
+    }
+
+    window.activeMonthsForChildRows = activeMonthsForReport;
+    titleEl.innerHTML = `VIEWING MONTH: <span style="color:#FFF;">${displayMonthName.toUpperCase()}</span> &nbsp;&nbsp;|&nbsp;&nbsp; DCA: <span style="color:#FFF;">${displayDcaName.toUpperCase()}</span>`;
+
+    let wrapper = document.getElementById('table-wrapper');
+    let tableHtmlHead = `<table id="report-table" class="display nowrap"><thead><tr>
+        <th style="width: 20px;"></th><th style="text-align: left;">DCA NAME</th><th>TOTAL<br>LOC</th><th>TOTAL<br>A/C</th><th>TOTAL ASSIGNED<br>OSB (RM)</th>`;
+        
+    activeCyclesForReport.forEach(c => {
+        let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
+        tableHtmlHead += `<th style="border-left: 1px solid var(--border-color); color: #fff; white-space: nowrap;">${c.label.toUpperCase()}<br><span style="font-size:10px; color:var(--text-muted);">(${cDateStr})</span></th>`;
+    });
+    
+    tableHtmlHead += `
+        <th style="border-left: 1px solid var(--accent-gold);">TOTAL CURRENT<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
+        <th style="border-left: 1px solid var(--success);">G.TOTAL<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
+        <th style="color:var(--success);">%<br>PERFORMANCE</th>
+    </tr></thead><tbody id="table-body"></tbody></table>`;
+    
+    // Terapkan Thead ke dalam HTML sebelum menyemak cache (WAJIB)
+    wrapper.innerHTML = tableHtmlHead;
+    const tbody = document.getElementById('table-body');
+
     try {
-        // 1. SEMAK METADATA DI FIREBASE (Cuma guna 1 Read!)
+        // 1. SEMAK METADATA DI FIREBASE (Guna 1 Read sahaja)
         const metaSnap = await db.collection("metadata").doc("report_status").get();
         let serverLastUpdated = null;
         
@@ -922,68 +968,27 @@ async function generateFullReport() {
             serverLastUpdated = metaSnap.data().last_updated.toDate().getTime().toString();
         }
 
-        // 2. SEMAK CACHE DI LOCAL STORAGE KOMPUTER
+        // 2. SEMAK CACHE
         const localLastUpdated = localStorage.getItem(cacheKeyTime);
         const cachedData = localStorage.getItem(cacheKeyData);
 
-        // Jika waktu server dan lokal sama, dan data lama ada dalam simpanan browser
         if (serverLastUpdated && localLastUpdated === serverLastUpdated && cachedData) {
-            console.log("Data tidak berubah. Memuatkan laporan dari Cache Browser (0 Reads!)");
             showToast("Memuatkan data dari cache (Sistem Optimum)...");
-            
-            // Tukar semula teks kepada objek dan proses jadual terus tanpa tarik Firebase
             const parsedCache = JSON.parse(cachedData);
             window.dcaDetailsMap = parsedCache.dcaDetailsMap;
             window.rawExcelData = parsedCache.rawExcelData;
             
-            // Terus bina jadual guna data lama
+            // Panggil fungsi untuk set data dan initialize semula DataTables
             binaSemulaStrukturJadual(parsedCache.tableHtml, parsedCache.kpi);
             return; // Berhenti di sini, kuota selamat!
         }
 
         // =========================================================================
-        // JIKA ADA PERUBAHAN DATA (ATAU CACHE TIADA), TARIK DATA BARU DARI FIREBASE
+        // JIKA ADA PERUBAHAN DATA (ATAU CACHE TIADA), TARIK DARI FIREBASE
         // =========================================================================
-        console.log("Data dikesan berubah atau tiada cache. Menarik data baharu dari Firebase...");
-        
-        let displayMonthName = "ALL MONTHS";
-        let activeCyclesForReport = [];
-        let activeMonthsForReport = [];
+        console.log("Menarik data terbaharu dari Pangkalan Data Firebase...");
+        tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;">Compiling active datasets...</td></tr>`;
 
-        if (monthIdxStr === "ALL") {
-            activeMonthsForReport = window.dashboardActiveBatch.months;
-            window.dashboardActiveBatch.months.forEach(m => {
-                m.cycles.forEach(c => activeCyclesForReport.push({ ...c, parentMonthIdx: m.month_idx }));
-            });
-        } else {
-            const monthIdx = parseInt(monthIdxStr);
-            const monthConfig = window.dashboardActiveBatch.months.find(m => m.month_idx === monthIdx);
-            if(!monthConfig) return;
-            displayMonthName = monthConfig.month_name;
-            activeMonthsForReport.push(monthConfig);
-            monthConfig.cycles.forEach(c => activeCyclesForReport.push({ ...c, parentMonthIdx: monthConfig.month_idx }));
-        }
-
-        window.activeMonthsForChildRows = activeMonthsForReport;
-        titleEl.innerHTML = `VIEWING MONTH: <span style="color:#FFF;">${displayMonthName.toUpperCase()}</span> &nbsp;&nbsp;|&nbsp;&nbsp; DCA: <span style="color:#FFF;">${displayDcaName.toUpperCase()}</span>`;
-
-        let wrapper = document.getElementById('table-wrapper');
-        let tableHtmlHead = `<table id="report-table" class="display nowrap"><thead><tr>
-            <th style="width: 20px;"></th><th style="text-align: left;">DCA NAME</th><th>TOTAL<br>LOC</th><th>TOTAL<br>A/C</th><th>TOTAL ASSIGNED<br>OSB (RM)</th>`;
-            
-        activeCyclesForReport.forEach(c => {
-            let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
-            tableHtmlHead += `<th style="border-left: 1px solid var(--border-color); color: #fff; white-space: nowrap;">${c.label.toUpperCase()}<br><span style="font-size:10px; color:var(--text-muted);">(${cDateStr})</span></th>`;
-        });
-        
-        tableHtmlHead += `
-            <th style="border-left: 1px solid var(--accent-gold);">TOTAL CURRENT<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
-            <th style="border-left: 1px solid var(--success);">G.TOTAL<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
-            <th style="color:var(--success);">%<br>PERFORMANCE</th>
-        </tr></thead><tbody id="table-body"></tbody></table>`;
-        wrapper.innerHTML = tableHtmlHead;
-
-        const tbody = document.getElementById('table-body');
         window.dcaDetailsMap = {}; window.rawExcelData = [];
 
         let assignQuery = db.collection("assignments");
@@ -992,7 +997,7 @@ async function generateFullReport() {
 
         const assignmentsSnap = await assignQuery.get();
         if (assignmentsSnap.empty) { 
-            tbody.innerHTML = '<tr><td colspan="15" style="text-align:center; color:var(--text-muted);">No dataset compiled.</td></tr>'; 
+            tbody.innerHTML = '<tr><td colspan="15" style="text-align:center; color:var(--text-muted);">Tiada rekod Pangkalan Data untuk kriteria ini.</td></tr>'; 
             return; 
         }
 
@@ -1115,7 +1120,7 @@ async function generateFullReport() {
         // Panggil fungsi pembinaan UI
         binaSemulaStrukturJadual(htmlBodyContent, kpiValues);
 
-        // 3. SIMPAN DATA TERBAHARU KE LOCAL STORAGE (CACHE) UNTUK PENGGUNAAN AKAN DATANG
+        // 3. SIMPAN DATA TERBAHARU KE LOCAL STORAGE (CACHE) 
         if (serverLastUpdated) {
             let cachePayload = {
                 tableHtml: htmlBodyContent,
@@ -1133,7 +1138,7 @@ async function generateFullReport() {
     }
 }
 
-// Fungsi helper untuk render UI jadual supaya kod di atas nampak bersih
+// Fungsi helper untuk render UI jadual
 function binaSemulaStrukturJadual(bodyHtml, kpi) {
     document.getElementById('table-body').innerHTML = bodyHtml;
     document.getElementById('kpi-osb').textContent = kpi.osb;
@@ -1141,11 +1146,7 @@ function binaSemulaStrukturJadual(bodyHtml, kpi) {
     document.getElementById('kpi-percent').textContent = kpi.percent;
     document.getElementById('kpi-pending').textContent = kpi.count;
 
-    // Initialize Semula DataTables
-    if ($.fn.DataTable.isDataTable('#report-table')) {
-        $('#report-table').DataTable().destroy();
-    }
-    
+    // Aktifkan DataTables Baharu
     let sortTarget = $('#report-table th').length - 2; // G.Total Column
     $('#report-table').DataTable({
         "pageLength": 10,
