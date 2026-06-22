@@ -115,7 +115,7 @@
         table.sub-table td { padding: 8px; font-size: 11px; border-bottom: 1px solid rgba(255,255,255,0.02); color: var(--text-main); text-align: center; white-space: nowrap;}
 
         .val-badge { padding: 3px 6px; border-radius: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: inline-block; min-width: 35px; text-align: center; font-size: 10px;}
-        .val-gold { color: var(--accent-gold); font-weight: bold; font-size: 12px;}
+        .val-gold { color: var(--accent-gold); font-weight: bold; font-size: 11px;}
         .alert-red { background-color: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px 8px; border-radius: 6px; font-weight: bold; font-size: 10px; display: inline-block; }
         .lock-banner { background-color: rgba(16, 185, 129, 0.15); border: 1px dashed var(--success); color: var(--success); padding: 20px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 15px; margin-bottom: 20px; }
 
@@ -1059,12 +1059,12 @@
                         <td data-order="${data.total_ac}">${data.total_ac.toLocaleString()}</td>
                         <td data-order="${data.total_osb}" style="font-weight: 500;">${data.total_osb.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                         ${cycleTds}
-                        <td data-order="${data.view_rm}" style="border-left: 1px solid var(--accent-gold); color: var(--text-main);">
-                            <span class="val-badge">${data.view_ac}</span> | <span style="font-weight:bold; color: var(--accent-gold); font-size: 14px;">RM ${data.view_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-                        </td>
-                        <td data-order="${data.grand_rm}" style="border-left: 1px solid var(--success); color: var(--text-main);">
-                            <span class="val-badge">${data.grand_ac}</span> | <span style="font-weight:bold; color: var(--success); font-size: 14px;">RM ${data.grand_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-                        </td>
+<td data-order="${data.view_rm}" style="border-left: 1px solid var(--accent-gold); color: var(--text-main);">
+    <span class="val-badge">${data.view_ac}</span> | <span style="font-weight:bold; color: var(--accent-gold);">RM ${data.view_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+</td>
+<td data-order="${data.grand_rm}" style="border-left: 1px solid var(--success); color: var(--text-main);">
+    <span class="val-badge">${data.grand_ac}</span> | <span style="font-weight:bold; color: var(--success);">RM ${data.grand_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+</td>
                         <td data-order="${dcaPct}" style="font-weight: bold; color: var(--success); font-size: 13px;">${dcaPct}%</td>
                     `;
                     tbody.appendChild(tr);
