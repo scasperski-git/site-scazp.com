@@ -839,31 +839,58 @@
             }; reader.readAsArrayBuffer(file);
         }
 
-        function populateDcaList() {
-            db.collection("assignments").onSnapshot((snapshot) => {
-                const dcaSelect = document.getElementById('dca-select');
-                const filterDca = document.getElementById('filter-dca');
-                const filterReg = document.getElementById('filter-region');
-                
-                dcaSelect.innerHTML = '<option value="">-- Select Your DCA Agency Name --</option>';
-                filterDca.innerHTML = '<option value="">ALL AGENCIES</option>';
-                filterReg.innerHTML = '<option value="">ALL REGIONS</option>';
+async function populateDcaList() {
+    const dcaSelect = document.getElementById('dca-select');
+    const filterDca = document.getElementById('filter-dca');
+    const filterReg = document.getElementById('filter-region');
+    
+    // Default options
+    const resetDropdowns = () => {
+        dcaSelect.innerHTML = '<option value="">-- Select Your DCA Agency Name --</option>';
+        filterDca.innerHTML = '<option value="">ALL AGENCIES</option>';
+        filterReg.innerHTML = '<option value="">ALL REGIONS</option>';
+    };
+    resetDropdowns();
 
-                if (snapshot.empty) return;
-                let dcaSet = new Set(), regSet = new Set();
-                snapshot.forEach(doc => { 
-                    if(doc.data().dca_name) dcaSet.add(doc.data().dca_name);
-                    if(doc.data().region) regSet.add(doc.data().region);
-                });
-                
-                Array.from(dcaSet).sort().forEach(d => {
-                    dcaSelect.innerHTML += `<option value="${d}">${d}</option>`;
-                    filterDca.innerHTML += `<option value="${d}">${d}</option>`;
-                });
-                Array.from(regSet).sort().forEach(r => filterReg.innerHTML += `<option value="${r}">${r}</option>`);
+    try {
+        // Semak jika senarai dropdown sudah ada dalam cache browser (tak perlu query DB)
+        const cachedDropdowns = localStorage.getItem('dropdown_lists');
+        if (cachedDropdowns) {
+            const data = JSON.parse(cachedDropdowns);
+            data.dcas.forEach(d => {
+                dcaSelect.innerHTML += `<option value="${d}">${d}</option>`;
+                filterDca.innerHTML += `<option value="${d}">${d}</option>`;
             });
+            data.regions.forEach(r => filterReg.innerHTML += `<option value="${r}">${r}</option>`);
+            return; // Berhenti di sini, kuota selamat pada page load!
         }
 
+        // Jika tiada cache, baru tarik 1 kali dan simpan
+        const snapshot = await db.collection("assignments").get();
+        if (snapshot.empty) return;
+
+        let dcaSet = new Set(), regSet = new Set();
+        snapshot.forEach(doc => { 
+            if(doc.data().dca_name) dcaSet.add(doc.data().dca_name);
+            if(doc.data().region) regSet.add(doc.data().region);
+        });
+        
+        let dcaArray = Array.from(dcaSet).sort();
+        let regArray = Array.from(regSet).sort();
+
+        dcaArray.forEach(d => {
+            dcaSelect.innerHTML += `<option value="${d}">${d}</option>`;
+            filterDca.innerHTML += `<option value="${d}">${d}</option>`;
+        });
+        regArray.forEach(r => filterReg.innerHTML += `<option value="${r}">${r}</option>`);
+
+        // Simpan senarai ini ke LocalStorage untuk jimat kuota pada masa depan
+        localStorage.setItem('dropdown_lists', JSON.stringify({ dcas: dcaArray, regions: regArray }));
+
+    } catch (e) {
+        console.error("Dropdown error:", e);
+    }
+}
         function formatChildRow(dcaName, activeMonths) {
             const locList = window.dcaDetailsMap[dcaName];
             if(!locList) return '<div>No inner rows identified.</div>';
