@@ -1050,7 +1050,7 @@ async function generateFullReport() {
                 locMonthTotals[m.month_idx] = { ac: mAc, rm: mRm };
             });
 
-            activeCyclesForReport.forEach(c => {
+activeCyclesForReport.forEach(c => {
                 let dbKey = `m${c.parentMonthIdx}_${c.id}`;
                 let cAc = batchSub[dbKey]?.ac_paying || 0;
                 let cRm = batchSub[dbKey]?.collection_amount || 0;
@@ -1060,7 +1060,19 @@ async function generateFullReport() {
                 if(!dcaGroupMap[dcaName].cycle_data[uniqueCycleKey]) dcaGroupMap[dcaName].cycle_data[uniqueCycleKey] = {ac:0, rm:0};
                 dcaGroupMap[dcaName].cycle_data[uniqueCycleKey].ac += cAc;
                 dcaGroupMap[dcaName].cycle_data[uniqueCycleKey].rm += cRm;
+
+                // --- KOD EXCEL DIKEMBALIKAN ---
+                let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
+                excelRow[`${c.label.toUpperCase()} (${cDateStr}) - A/C Paying`] = cAc;
+                excelRow[`${c.label.toUpperCase()} (${cDateStr}) - Collection RM`] = cRm;
             });
+
+            // --- KOD EXCEL DIKEMBALIKAN ---
+            excelRow["Total A/C Paying (Current View)"] = locViewAc;
+            excelRow["Total Collection (Current View RM)"] = locViewRm;
+            excelRow["Total A/C Paying (G.Total Batch)"] = locGrandAc;
+            excelRow["Total Collection (G.Total Batch RM)"] = locGrandRm;
+            window.rawExcelData.push(excelRow);
 
             dcaGroupMap[dcaName].total_locs += 1; dcaGroupMap[dcaName].total_ac += ac; dcaGroupMap[dcaName].total_osb += osb;
             dcaGroupMap[dcaName].view_ac += locViewAc; dcaGroupMap[dcaName].view_rm += locViewRm;
