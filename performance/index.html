@@ -713,11 +713,15 @@
             });
 
             // Tulis Ke Dalam Koleksi Summary Induk Secara Automatik!
-            let summaryRef = db.collection("dca_live_summaries").doc(window.activeBatchName);
-            let updatePayload = {};
-            updatePayload[`${selectedDca}.${dbFieldKey}_ac`] = totalAc;
-            updatePayload[`${selectedDca}.${dbFieldKey}_rm`] = totalRm;
-            firestoreBatch.set(summaryRef, updatePayload, { merge: true });
+// Tulis Ke Dalam Koleksi Summary Induk Secara Automatik!
+let summaryRef = db.collection("dca_live_summaries").doc(window.activeBatchName);
+let updatePayload = {
+    [selectedDca]: {
+        [`${dbFieldKey}_ac`]: totalAc,
+        [`${dbFieldKey}_rm`]: totalRm
+    }
+};
+firestoreBatch.set(summaryRef, updatePayload, { merge: true });
             // ---- END LIVE AGGREGATOR WRITE ENGINE ----
 
             const lockId = `${window.activeBatchName}_m${window.activeDcaCycle.monthIdx}_${window.activeDcaCycle.cycleId}_${selectedDca}`;
