@@ -1,15 +1,19 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal & Dashboard DCA | scazp.com</title>
+    <title>DCA Portal & Performance Dashboard | scazp.com</title>
     
+    <!-- jQuery & DataTables Libraries -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    
+    <!-- SheetJS Excel Library -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
+    <!-- Firebase Legacy SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
@@ -25,6 +29,7 @@
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 20px; }
         .container { max-width: 1300px; margin: 0 auto; }
 
+        /* Navigation Tabs */
         .tab-menu { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; overflow-x: auto; }
         .tab-btn { background: transparent; color: var(--text-muted); border: none; padding: 10px 20px; font-size: 15px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: all 0.3s; white-space: nowrap; }
         .tab-btn:hover { color: var(--text-main); background-color: rgba(255,255,255,0.05); }
@@ -47,7 +52,6 @@
             color: var(--text-main); border-radius: 6px; font-size: 14px; margin-bottom: 15px; box-sizing: border-box; color-scheme: dark;
         }
         select:focus, input:focus { border-color: var(--accent-gold); outline: none; }
-        select:disabled { opacity: 0.7; cursor: not-allowed; border-color: var(--success); color: var(--success); font-weight: bold; }
 
         .grid-2 { display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; }
         .grid-3 { display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; }
@@ -56,7 +60,7 @@
             .grid-2 { grid-template-columns: repeat(2, 1fr); } 
             .grid-3 { grid-template-columns: repeat(3, 1fr); }
             .grid-4 { grid-template-columns: repeat(4, 1fr); }
-            .container-portal { max-width: 900px; margin: 0 auto; } 
+            .container-portal { max-width: 950px; margin: 0 auto; } 
         }
 
         .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
@@ -69,49 +73,58 @@
         .btn-action { background-color: var(--success); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; transition: opacity 0.2s; text-transform: uppercase;}
         .btn-gold { background-color: var(--accent-gold); color: #000; }
         .btn-outline { background-color: transparent; border: 1px solid var(--success); color: var(--success); }
+        .btn-danger-outline { background-color: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; border-radius: 6px; cursor: pointer; transition: 0.3s;}
+        .btn-danger-outline:hover { background-color: rgba(239, 68, 68, 0.1); }
         
-        .btn-submit-report { background-color: var(--danger); color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.3s; text-transform: uppercase; margin-top: 10px; font-size: 13px;}
-        .btn-submit-report:hover { opacity: 0.8; }
-        .btn-submit-report.submitted { background-color: var(--success) !important; color: white !important; cursor: not-allowed; opacity: 1; }
+        /* GLOBAL RED/GREEN ACTION BUTTON FOR DCA PORTAL */
+        .btn-global-submit { background-color: var(--danger); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.3s; text-transform: uppercase; margin-top: 20px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2); }
+        .btn-global-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-global-submit.submitted { background-color: var(--success) !important; color: white !important; cursor: not-allowed; opacity: 1; box-shadow: none; transform: none; }
 
         .month-setup-box { background-color: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px; }
         .month-setup-title { color: var(--success); font-size: 13px; font-weight: bold; margin-bottom: 10px; display: block;}
 
-        .loc-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; margin-bottom: 18px; }
+        .region-section-title { color: var(--accent-gold); font-size: 13px; text-transform: uppercase; margin: 35px 0 15px 0; padding-left: 8px; border-left: 3px solid var(--accent-gold); }
+        .loc-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
         .loc-title { font-size: 15px; font-weight: 600; color: #FFFFFF; }
         .loc-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
         
-        .metrics-row { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; background-color: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05);}
+        /* FLAT STREAMLINED DESIGN (SPACE SAVING) */
+        .metrics-row { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; background-color: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-top: 12px; border: 1px solid rgba(255,255,255,0.05);}
         .metrics-row > div { flex: 1; min-width: 120px; }
         .metric-input { width: 100%; box-sizing: border-box; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--accent-gold); padding: 8px; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; margin: 0;}
         .metric-input:focus { border-color: var(--accent-gold); outline:none; box-shadow: 0 0 10px var(--accent-glow);}
 
         .table-container { background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); padding: 15px; overflow-x: auto; margin-top: 20px; }
         table.dataTable { width: 100% !important; border-collapse: collapse; color: var(--text-main); }
-        table.dataTable thead th { background-color: rgba(0,0,0,0.4); color: var(--accent-gold); border-bottom: 1px solid var(--border-color); padding: 12px 10px; white-space: normal; text-align: center; font-size: 11px; vertical-align: middle;}
-        table.dataTable tbody td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); background-color: transparent !important; white-space: nowrap; text-align: center; font-size: 12px;}
+        
+        /* TWEAKED: SMALLER FONT AND PADDING TO AUTO-FIT SCREEN */
+        table.dataTable thead th { background-color: rgba(0,0,0,0.4); color: var(--accent-gold); border-bottom: 1px solid var(--border-color); padding: 8px 6px; white-space: nowrap !important; text-align: center; font-size: 10px; vertical-align: middle;}
+        table.dataTable tbody td { padding: 8px 6px; border-bottom: 1px solid var(--border-color); background-color: transparent !important; white-space: nowrap; text-align: center; font-size: 11px;}
         table.dataTable tbody tr:hover { background-color: rgba(255,255,255,0.03) !important; }
         div.dataTables_wrapper div.dataTables_filter { text-align: center; float: none; margin-bottom: 30px; }
-        div.dataTables_wrapper div.dataTables_filter input { width: 100%; max-width: 400px; padding: 12px 20px; font-size: 16px; border-radius: 30px; border: 2px solid var(--accent-gold); background-color: var(--bg-main); color: white; margin-left: 15px; outline: none; }
-        .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: var(--text-muted) !important; font-size: 12px; margin-bottom: 15px; }
+        div.dataTables_wrapper div.dataTables_filter input { width: 100%; max-width: 400px; padding: 10px 15px; font-size: 14px; border-radius: 30px; border: 2px solid var(--accent-gold); background-color: var(--bg-main); color: white; margin-left: 15px; outline: none; }
+        .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: var(--text-muted) !important; font-size: 11px; margin-bottom: 15px; }
         .dataTables_wrapper .dataTables_paginate .paginate_button { color: var(--text-muted) !important; }
         .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: var(--accent-gold) !important; color: #000 !important; border: none; font-weight: bold;}
 
         td.details-control { cursor: pointer; color: var(--accent-gold); font-size: 18px; font-weight: bold; width: 30px; text-align: center;}
         tr.shown td.details-control { color: var(--danger); transform: rotate(45deg); transition: 0.3s;}
         table.sub-table { width: 100%; background-color: rgba(0,0,0,0.3); border-radius: 8px; margin: 10px 0; border: 1px solid rgba(255,255,255,0.05); }
-        table.sub-table th { background-color: rgba(0,0,0,0.5); color: var(--text-muted); font-size: 11px; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center;}
-        table.sub-table td { padding: 10px; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.02); color: var(--text-main); text-align: center;}
+        table.sub-table th { background-color: rgba(0,0,0,0.5); color: var(--text-muted); font-size: 10px; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; white-space: nowrap;}
+        table.sub-table td { padding: 8px; font-size: 11px; border-bottom: 1px solid rgba(255,255,255,0.02); color: var(--text-main); text-align: center; white-space: nowrap;}
 
-        .val-badge { padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: inline-block; min-width: 40px; text-align: center; font-size: 11px;}
-        .val-gold { color: var(--accent-gold); font-weight: bold; font-size: 13px;}
+        .val-badge { padding: 3px 6px; border-radius: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: inline-block; min-width: 35px; text-align: center; font-size: 10px;}
+        .val-gold { color: var(--accent-gold); font-weight: bold; font-size: 12px;}
         .alert-red { background-color: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px 8px; border-radius: 6px; font-weight: bold; font-size: 10px; display: inline-block; }
-        
+        .lock-banner { background-color: rgba(16, 185, 129, 0.15); border: 1px dashed var(--success); color: var(--success); padding: 20px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 15px; margin-bottom: 20px; }
+
+        /* CENTER SCREEN PREMIUM TOAST */
         #toast { 
-            visibility: hidden; min-width: 300px; background-color: var(--success); color: #fff; text-align: center; 
+            visibility: hidden; min-width: 320px; background-color: var(--success); color: #fff; text-align: center; 
             border-radius: 8px; padding: 20px; position: fixed; z-index: 9999; 
             left: 50%; top: 50%; transform: translate(-50%, -50%); 
-            font-size: 15px; font-weight: bold; box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
+            font-size: 15px; font-weight: bold; box-shadow: 0 10px 40px rgba(0,0,0,0.7); 
             opacity: 0; transition: opacity 0.3s ease-in-out;
         }
         #toast.show { visibility: visible; opacity: 1; animation: popIn 0.3s forwards; }
@@ -122,79 +135,83 @@
 
     <div class="container">
         <div class="tab-menu">
-            <button class="tab-btn active" onclick="switchTab('portal')">Kemas Kini Prestasi (DCA)</button>
-            <button class="tab-btn" onclick="switchTab('dashboard')">Dashboard Laporan</button>
-            <button class="tab-btn" onclick="switchTab('admin')">Tetapan Batch (Admin)</button>
+            <button class="tab-btn active" onclick="switchTab('portal')">DCA Submission Portal</button>
+            <button class="tab-btn" onclick="switchTab('dashboard')">Management Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('admin')">Batch Settings (Admin)</button>
         </div>
 
         <div id="view-portal" class="view-section active">
             <div class="container-portal">
                 <div class="header">
-                    <h1 id="dca-active-batch-title">SEDANG MENGESAN TUGASAN AKTIF...</h1>
+                    <h1 id="dca-active-batch-title">DETECTING ACTIVE COLLECTION BATCH...</h1>
                     <p id="dca-active-cycle-subtitle" style="color:var(--success); font-weight:bold; font-size:14px;"></p>
                 </div>
 
                 <div class="control-panel">
-                    <div class="panel-title">SILA PILIH PROFIL ANDA</div>
-                    <label class="panel-label">PILIH NAMA AGENSI DCA</label>
-                    <select id="dca-select" onchange="fetchAndRenderDcaTasks()">
-                        <option value="">-- Memuat turun senarai agensi... --</option>
+                    <div class="panel-title">Profile Authentication</div>
+                    <label class="panel-label">Select Your DCA Agency Name</label>
+                    <select id="dca-select" onchange="checkLockAndRenderPortal()">
+                        <option value="">-- Fetching registered agencies... --</option>
                     </select>
                 </div>
 
-                <div id="portal-display"><div style="text-align:center; color: var(--text-muted); padding: 30px;">Sila pilih Nama Agensi untuk mula mengemas kini.</div></div>
+                <div id="portal-lock-container" style="display: none;"></div>
+
+                <div id="portal-display-wrapper">
+                    <div id="portal-display"><div style="text-align:center; color: var(--text-muted); padding: 30px;">Please select your DCA Agency Name to load assigned accounts.</div></div>
+                </div>
             </div>
         </div>
 
         <div id="view-dashboard" class="view-section">
             <div class="header" style="text-align:left;">
-                <h1>PAPAN PEMUKA LAPORAN</h1>
-                <p>Rumusan eksekutif mengikut Batch, Bulan, dan Agensi.</p>
+                <h1>DCA Performance Dashboard</h1>
+                <p>Executive performance tracking grouped by Agency with conditional verification metrics.</p>
             </div>
 
             <div class="control-panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 15px;">
-                    <div><div class="panel-title" style="margin-bottom: 5px; border: none;">Tapisan Laporan Lanjutan (Multi-Filter)</div></div>
+                    <div><div class="panel-title" style="margin-bottom: 5px; border: none;">Multi-Level Filtration Filter</div></div>
                     <div style="display: flex; gap: 10px;">
-                        <button class="btn-action btn-outline" style="width: auto;" onclick="exportRawToExcel()">&#8595; Eksport Excel</button>
-                        <button class="btn-action" style="width: auto; background-color: var(--success);" onclick="generateFullReport()">Jana Jadual</button>
+                        <button class="btn-action btn-outline" style="width: auto;" onclick="exportRawToExcel()">&#8595; Export Raw Excel</button>
+                        <button class="btn-action" style="width: auto; background-color: var(--success);" onclick="generateFullReport()">Generate Report</button>
                     </div>
                 </div>
 
                 <div class="grid-4" style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
                     <div>
-                        <label class="panel-label">1. Pilih No Batch</label>
-                        <select id="filter-batch" onchange="updateDashboardMonthFilter()"><option value="">-- Pilih Batch --</option></select>
+                        <label class="panel-label">1. SELECT BATCH NO</label>
+                        <select id="filter-batch" onchange="updateDashboardMonthFilter()"><option value="">-- Select Batch --</option></select>
                     </div>
                     <div>
-                        <label class="panel-label">2. Pilih Bulan Tugasan</label>
-                        <select id="filter-month"><option value="">-- Sila Pilih Batch Dulu --</option></select>
+                        <label class="panel-label">2. SELECT MONTH</label>
+                        <select id="filter-month"><option value="">-- Awaiting Batch Selection --</option></select>
                     </div>
                     <div>
-                        <label class="panel-label">3. Pilih Agensi</label>
-                        <select id="filter-dca"><option value="">Semua Agensi</option></select>
+                        <label class="panel-label">3. SELECT DCA</label>
+                        <select id="filter-dca"><option value="">ALL AGENCIES</option></select>
                     </div>
                     <div>
-                        <label class="panel-label">4. Pilih Wilayah</label>
-                        <select id="filter-region"><option value="">Semua Wilayah</option></select>
+                        <label class="panel-label">4. SELECT REGION</label>
+                        <select id="filter-region"><option value="">ALL REGIONS</option></select>
                     </div>
                 </div>
             </div>
 
             <div class="kpi-grid">
-                <div class="kpi-card"><h3>Total OSB (Hasil Tapisan)</h3><div class="kpi-value" id="kpi-osb">RM 0.00</div></div>
-                <div class="kpi-card"><h3>Kutipan Bulan Terpilih</h3><div class="kpi-value green" id="kpi-collection">RM 0.00</div></div>
-                <div class="kpi-card"><h3>% Prestasi Keseluruhan</h3><div class="kpi-value gold" id="kpi-percent">0.00%</div></div>
-                <div class="kpi-card"><h3>Agensi DCA (Aktif)</h3><div class="kpi-value" id="kpi-pending" style="color:var(--text-main);">0</div></div>
+                <div class="kpi-card"><h3>Total OSB (Filtered)</h3><div class="kpi-value" id="kpi-osb">RM 0.00</div></div>
+                <div class="kpi-card"><h3>Selected Month Collection</h3><div class="kpi-value green" id="kpi-collection">RM 0.00</div></div>
+                <div class="kpi-card"><h3>% Total Batch Performance</h3><div class="kpi-value gold" id="kpi-percent">0.00%</div></div>
+                <div class="kpi-card"><h3>DCA Agencies (Active)</h3><div class="kpi-value" id="kpi-pending" style="color:var(--text-main);">0</div></div>
             </div>
 
             <h2 id="dashboard-dynamic-title" style="text-align:center; color:var(--accent-gold); margin: 35px 0 15px 0; font-size:20px; text-transform:uppercase;">
-                SILA PILIH BATCH DAN TEKAN JANA JADUAL
+                Please Select Batch Parameters and Click Generate Report
             </h2>
 
             <div id="table-wrapper" class="table-container">
                 <table id="report-table" class="display nowrap">
-                    <thead id="table-head"><tr><th colspan="10" style="text-align:center;">Tiada Data.</th></tr></thead>
+                    <thead id="table-head"><tr><th colspan="10" style="text-align:center;">No dataset compiled.</th></tr></thead>
                     <tbody id="table-body"></tbody>
                 </table>
             </div>
@@ -202,15 +219,15 @@
 
         <div id="view-admin" class="view-section">
             <div class="header" style="text-align:left;">
-                <h1>TETAPAN BATCH & KITARAN</h1>
-                <p>Kawalan mutlak tetapan kitaran (Max 4 Kitaran Sebulan) & Muat Naik Pangkalan Data.</p>
+                <h1>System Administration Control Panel</h1>
+                <p>Configure collection batches, manage manual date rules, and process baseline Excel data uploads.</p>
             </div>
 
             <div class="grid-2">
                 <div class="control-panel">
-                    <div class="panel-title">1. Daftar / Kemas Kini Kitaran Batch Baru</div>
-                    <label class="panel-label">Masukkan No Batch (Cth: UMOBILE-01)</label>
-                    <input type="text" id="setup-batch-name" placeholder="Nama Batch Mesti Unik">
+                    <div class="panel-title">1. Register / Update Collection Batch Configuration</div>
+                    <label class="panel-label">Collection Batch Code (Must be unique)</label>
+                    <input type="text" id="setup-batch-name" placeholder="e.g., BATCH XX-1">
                     
                     <div class="grid-2">
                         <div><label class="panel-label">Start Date Assignment</label><input type="date" id="setup-start-date"></div>
@@ -226,8 +243,8 @@
                                 html += `
                                 <div>
                                     <div style="display:flex; gap:5px;">
-                                        <input type="text" id="m${mIndex}-c${i}-no" placeholder="C (Cth: 1)" style="width: 45%; margin-bottom:5px;">
-                                        <input type="date" id="m${mIndex}-c${i}-date" style="width: 55%; margin-bottom:5px;">
+                                        <input type="text" id="m${mIndex}-c${i}-no" placeholder="C-No" style="width: 40%; margin-bottom:5px;">
+                                        <input type="date" id="m${mIndex}-c${i}-date" style="width: 60%; margin-bottom:5px;">
                                     </div>
                                 </div>`;
                             }
@@ -237,56 +254,85 @@
                     </script>
 
                     <div class="month-setup-box">
-                        <label class="month-setup-title">Tetapan Bulan 1</label>
-                        <input type="text" id="m1-name" placeholder="Masukkan Nama Bulan (Cth: Jun 2026)">
+                        <label class="month-setup-title">Target Month Block 1 Setup</label>
+                        <input type="text" id="m1-name" placeholder="Enter Month Name Label (e.g., June 2026)">
                         <script>generateCycleInputs(1);</script>
                     </div>
 
                     <div class="month-setup-box">
-                        <label class="month-setup-title">Tetapan Bulan 2</label>
-                        <input type="text" id="m2-name" placeholder="Masukkan Nama Bulan (Cth: Julai 2026)">
+                        <label class="month-setup-title">Target Month Block 2 Setup</label>
+                        <input type="text" id="m2-name" placeholder="Enter Month Name Label (e.g., July 2026)">
                         <script>generateCycleInputs(2);</script>
                     </div>
 
                     <div class="month-setup-box">
-                        <label class="month-setup-title">Tetapan Bulan 3</label>
-                        <input type="text" id="m3-name" placeholder="Masukkan Nama Bulan (Kosongkan jika tak perlu)">
+                        <label class="month-setup-title">Target Month Block 3 Setup</label>
+                        <input type="text" id="m3-name" placeholder="Leave empty if not required">
                         <script>generateCycleInputs(3);</script>
                     </div>
 
                     <div class="month-setup-box">
-                        <label class="month-setup-title">Tetapan Bulan 4</label>
-                        <input type="text" id="m4-name" placeholder="Masukkan Nama Bulan (Kosongkan jika tak perlu)">
+                        <label class="month-setup-title">Target Month Block 4 Setup</label>
+                        <input type="text" id="m4-name" placeholder="Leave empty if not required">
                         <script>generateCycleInputs(4);</script>
                     </div>
 
-                    <button class="btn-action btn-gold" onclick="saveBatchSetup()">Simpan Tetapan Batch</button>
+                    <button class="btn-action btn-gold" onclick="saveBatchSetup()">Save Batch Configuration</button>
                 </div>
 
                 <div>
                     <div class="control-panel">
-                        <div class="panel-title">2. Muat Naik Data Agihan (Excel)</div>
-                        <label class="panel-label" style="color:var(--danger); margin-bottom:10px;">Penting: Pastikan fail Excel mempunyai kolum 'LOC CODE', 'DCA NAME', 'REGION', 'AREA', 'TOTAL A/C ASSIGNED', dan 'TOTAL OSB ASSIGNED'.</label>
-                        <label class="panel-label">Muat Naik Fail</label>
+                        <div class="panel-title">2. Upload Baseline Assignment Database (Excel)</div>
+                        <label class="panel-label" style="color:var(--danger); margin-bottom:10px; line-height:1.4;">Critical Requirement: Excel file layout must strictly contain the headers 'LOC CODE', 'DCA NAME', 'REGION', 'AREA', 'TOTAL A/C ASSIGNED', and 'TOTAL OSB ASSIGNED'.</label>
+                        <label class="panel-label">Choose Assignment Data File</label>
                         <input type="file" id="excel-file" accept=".xlsx, .xls" onchange="uploadExcelToFirestore(this)">
                     </div>
+
+                    <div class="control-panel" style="margin-top: 20px;">
+                        <div class="panel-title">4. Unlock DCA Submission Restrictions (Correction Overrides)</div>
+                        <label class="panel-label">Target Batch Code</label>
+                        <select id="unlock-batch-select" onchange="populateUnlockDcaDropdown()"><option value="">-- Select Target Batch --</option></select>
+                        <label class="panel-label" style="margin-top:10px;">Select Restricted DCA Agency To Unlock</label>
+                        <select id="unlock-dca-select"><option value="">-- Awaiting Batch Parameter --</option></select>
+                        <button class="btn-action" style="background-color: var(--danger); width:100%; margin-top:10px;" onclick="executeSubmissionUnlock()">Unlock Agency Submission</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-panel" style="margin-top: 20px;">
+                <div class="panel-title">3. Active Configuration Registry Summary</div>
+                <div class="table-container" style="margin-top: 0; padding:5px;">
+                    <table class="dataTable" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left;">BATCH ID CODE</th>
+                                <th style="text-align: center;">ASSIGNMENT TIME INTERVAL</th>
+                                <th style="text-align: center;">TOTAL BLOCKS & SYSTEM CYCLES</th>
+                                <th style="text-align: center;">SYSTEM ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="batch-summary-tbody">
+                            <tr><td colspan="4" style="text-align:center; padding:20px;">Populating registry logs...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <div id="toast">Operasi Berjaya Dilaksanakan!</div>
+    <!-- CENTER PRESTIGE TOAST ALERT -->
+    <div id="toast">Operation successfully executed!</div>
 
     <script>
         const firebaseConfig = {
-    apiKey: "AIzaSyA0PO0Tqv8IzN5YxYNuXO1ZSMFruKiK9Pg",
-  authDomain: "dca-performance.firebaseapp.com",
-  projectId: "dca-performance",
-  storageBucket: "dca-performance.firebasestorage.app",
-  messagingSenderId: "581375097218",
-  appId: "1:581375097218:web:feb9b0c8773bd33d56779b"
-};
+            apiKey: "AIzaSyA0PO0Tqv8IzN5YxYNuXO1ZSMFruKiK9Pg",
+            authDomain: "dca-performance.firebaseapp.com",
+            projectId: "dca-performance",
+            storageBucket: "dca-performance.firebasestorage.app",
+            messagingSenderId: "581375097218",
+            appId: "1:581375097218:web:feb9b0c8773bd33d56779b"
+        };
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -297,11 +343,31 @@
         window.dashboardActiveBatch = null;
         window.dcaDetailsMap = {};
         window.rawExcelData = [];
+        window.activeMonthsForChildRows = [];
 
         window.onload = function() { 
             fetchBatchesList();
             populateDcaList(); 
         };
+
+        $(document).ready(function() {
+            $(document).off('click', '#report-table tbody td.details-control').on('click', '#report-table tbody td.details-control', function () {
+                const tr = $(this).closest('tr');
+                const table = $('#report-table').DataTable();
+                const row = table.row(tr);
+
+                if (row.child.isShown()) {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                    $(this).html('&#x2295;'); 
+                } else {
+                    let dcaName = tr.data('dca');
+                    row.child(formatChildRow(dcaName, window.activeMonthsForChildRows || [])).show();
+                    tr.addClass('shown');
+                    $(this).html('&#x2296;');
+                }
+            });
+        });
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -326,7 +392,7 @@
 
         async function saveBatchSetup() {
             const batchName = document.getElementById('setup-batch-name').value.trim();
-            if(!batchName) { alert("Sila masukkan No Batch!"); return; }
+            if(!batchName) { alert("Please type a valid Batch Code identifier."); return; }
 
             let batchData = {
                 batch_name: batchName,
@@ -353,31 +419,113 @@
                 }
             }
 
-            if(batchData.months.length === 0) { alert("Sila isikan sekurang-kurangnya tetapan 1 kitaran untuk Bulan 1!"); return; }
+            if(batchData.months.length === 0) { alert("Validation Failed: Specify at least one configuration loop matrix within Block 1."); return; }
 
             try {
                 await db.collection("batches").doc(batchName).set(batchData);
-                showToast("Tetapan Batch Berjaya Disimpan!");
+                showToast("Collection Batch successfully stored in cloud!");
+                
+                document.getElementById('setup-batch-name').value = "";
+                document.getElementById('setup-start-date').value = "";
+                document.getElementById('setup-end-date').value = "";
+                for(let i=1; i<=4; i++) {
+                    document.getElementById(`m${i}-name`).value = "";
+                    for(let j=1; j<=4; j++) {
+                        document.getElementById(`m${i}-c${j}-no`).value = "";
+                        document.getElementById(`m${i}-c${j}-date`).value = "";
+                    }
+                }
                 fetchBatchesList();
-            } catch (error) { alert("Ralat menyimpan: " + error.message); }
+            } catch (error) { alert("Cloud submission aborted: " + error.message); }
         }
 
         async function fetchBatchesList() {
             try {
                 const snapshot = await db.collection("batches").get();
                 const dashBatchSelect = document.getElementById('filter-batch');
-                dashBatchSelect.innerHTML = '<option value="">-- Pilih No Batch --</option>';
+                const unlockBatchSelect = document.getElementById('unlock-batch-select');
+                
+                dashBatchSelect.innerHTML = '<option value="">-- Choose Batch --</option>';
+                unlockBatchSelect.innerHTML = '<option value="">-- Select Target Batch --</option>';
                 window.allBatches = [];
 
                 snapshot.forEach(doc => {
                     let b = doc.data();
                     window.allBatches.push(b);
                     dashBatchSelect.innerHTML += `<option value="${b.batch_name}">${b.batch_name}</option>`;
+                    unlockBatchSelect.innerHTML += `<option value="${b.batch_name}">${b.batch_name}</option>`;
                 });
 
                 autoDetectDcaPortal();
+                renderBatchSummary(); 
 
-            } catch (e) { console.error("Ralat tarik list batch:", e); }
+            } catch (e) { console.error("Data synchronization failed:", e); }
+        }
+
+        function renderBatchSummary() {
+            const tbody = document.getElementById('batch-summary-tbody');
+            if (window.allBatches.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No active batches found in registry.</td></tr>';
+                return;
+            }
+
+            let html = '';
+            window.allBatches.forEach(b => {
+                let startStr = b.start_date ? new Date(b.start_date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : '-';
+                let endStr = b.end_date ? new Date(b.end_date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : '-';
+                let totalCycles = 0;
+                b.months.forEach(m => totalCycles += m.cycles.length);
+                
+                html += `
+                <tr>
+                    <td style="font-weight:bold; color:var(--accent-gold); text-align: left;">${b.batch_name}</td>
+                    <td style="text-align: center;">${startStr} to ${endStr}</td>
+                    <td style="text-align: center;">${b.months.length} Month Block(s) (${totalCycles} Cut-offs)</td>
+                    <td style="text-align: center; display:flex; justify-content:center; gap:5px;">
+                        <button class="btn-action btn-gold" style="padding: 4px 10px; font-size:11px;" onclick="loadBatchToForm('${b.batch_name}')">Edit</button>
+                        <button class="btn-danger-outline" style="padding: 4px 10px; font-size:11px;" onclick="deleteBatch('${b.batch_name}')">Delete</button>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function loadBatchToForm(batchName) {
+            const b = window.allBatches.find(x => x.batch_name === batchName);
+            if(!b) return;
+            
+            document.getElementById('setup-batch-name').value = b.batch_name;
+            document.getElementById('setup-start-date').value = b.start_date || '';
+            document.getElementById('setup-end-date').value = b.end_date || '';
+            
+            // Clear prior fasa records
+            for(let i=1; i<=4; i++) {
+                document.getElementById(`m${i}-name`).value = "";
+                for(let j=1; j<=4; j++) {
+                    document.getElementById(`m${i}-c${j}-no`).value = "";
+                    document.getElementById(`m${i}-c${j}-date`).value = "";
+                }
+            }
+
+            b.months.forEach(m => {
+                let idx = m.month_idx + 1;
+                document.getElementById(`m${idx}-name`).value = m.month_name;
+                m.cycles.forEach((c, cIdx) => {
+                    let cNoNum = c.label.replace('C-', '');
+                    document.getElementById(`m${idx}-c${cIdx + 1}-no`).value = cNoNum;
+                    document.getElementById(`m${idx}-c${cIdx + 1}-date`).value = c.date;
+                });
+            });
+            showToast(`Loaded ${batchName} constraints into form!`);
+        }
+
+        async function deleteBatch(batchName) {
+            if(!confirm(`Security Action: Are you absolutely certain you want to purge configuration logs for: ${batchName}?`)) return;
+            try {
+                await db.collection("batches").doc(batchName).delete();
+                showToast("Collection Batch successfully expunged from system cloud.");
+                fetchBatchesList();
+            } catch (e) { alert("Deletion protocol errored out: " + e.message); }
         }
 
         function autoDetectDcaPortal() {
@@ -396,7 +544,7 @@
 
             if(activeBatch) {
                 window.activeBatchName = activeBatch.batch_name;
-                titleEl.textContent = `LAPORAN PRESTASI BAGI: ${activeBatch.batch_name}`;
+                titleEl.textContent = `COLLECTION ASSIGNMENT PORTAL: ${activeBatch.batch_name}`;
                 
                 let foundCycle = null, foundMonth = null;
                 for(let m of activeBatch.months) {
@@ -412,20 +560,226 @@
                 }
 
                 if(foundCycle) {
-                    let cDateStr = new Date(foundCycle.date).toLocaleDateString('ms-MY', {day:'numeric', month:'short', year:'numeric'});
+                    let cDateStr = new Date(foundCycle.date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}).toUpperCase();
                     window.activeDcaCycle = { 
                         monthIdx: foundMonth.month_idx, 
                         cycleId: foundCycle.id, 
-                        label: `${foundCycle.label} - ${cDateStr}` 
+                        cycleLabel: foundCycle.label,
+                        dateLabel: cDateStr,
+                        label: `${foundCycle.label} (${cDateStr})` 
                     };
-                    subEl.innerHTML = `KITARAN AKTIF: <span style="color:#FFF;">${foundMonth.month_name.toUpperCase()}</span> &nbsp;|&nbsp; TARIKH PENYERAHAN: <span style="color:#FFF;">${foundCycle.label} (${cDateStr})</span>`;
+                    subEl.innerHTML = `ACTIVE TIMELINE: <span style="color:#FFF;">${foundMonth.month_name.toUpperCase()}</span> &nbsp;|&nbsp; CUT-OFF DATE: <span style="color:#FFF;">${foundCycle.label} (${cDateStr})</span>`;
+                    checkLockAndRenderPortal();
                 } else {
-                    subEl.innerHTML = `Sistem Tidak Menjumpai Sebarang Kitaran Dalam Batch Ini.`;
+                    subEl.innerHTML = `System Error: No configuration matrix loop covers today's date context parameters.`;
                     subEl.style.color = "red";
                 }
             } else {
-                titleEl.textContent = `TIADA TUGASAN AKTIF`;
-                subEl.textContent = `Pihak Admin Belum Mendaftar Sebarang Batch Tugasan.`;
+                titleEl.textContent = `NO ACTIVE ASSIGNMENT INTERVALS`;
+                subEl.textContent = `Administration team has not declared or initiated any distinct collection batches yet.`;
+            }
+        }
+
+        async function checkLockAndRenderPortal() {
+            const selectedDca = document.getElementById('dca-select').value;
+            const lockContainer = document.getElementById('portal-lock-container');
+            const mainDisplayWrapper = document.getElementById('portal-display-wrapper');
+            const displayArea = document.getElementById('portal-display');
+
+            if (!selectedDca || !window.activeBatchName || !window.activeDcaCycle) {
+                lockContainer.style.display = 'none';
+                mainDisplayWrapper.style.display = 'block';
+                displayArea.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 30px;">Please select your DCA Agency Name to load assigned accounts.</div>';
+                return;
+            }
+
+            const lockId = `${window.activeBatchName}_m${window.activeDcaCycle.monthIdx}_${window.activeDcaCycle.cycleId}_${selectedDca}`;
+            try {
+                const lockSnap = await db.collection("submission_locks").doc(lockId).get();
+                if (lockSnap.exists) {
+                    let logData = lockSnap.data();
+                    let subDate = logData.submitted_at;
+                    let dateObj = (subDate && typeof subDate.toDate === 'function') ? subDate.toDate() : (subDate ? new Date(subDate) : new Date());
+                    if (isNaN(dateObj.getTime())) dateObj = new Date();
+                    let formattedDateTime = dateObj.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase();
+                    
+                    lockContainer.innerHTML = `
+                        <div class="lock-banner">
+                            &#128274; SECURITY LOCKOUT ENFORCED<br>
+                            Your performance dataset for <span style="color:#FFF;">${window.activeDcaCycle.label}</span> was successfully finalized and transmitted on <span style="color:#FFF;">${formattedDateTime}</span>.<br>
+                            <span style="color:var(--text-muted); font-size:12px; margin-top:8px; display:block;">Double submission prevented. If structural corrections are required, please file an unlock request via your Credit Recovery Manager.</span>
+                        </div>`;
+                    lockContainer.style.display = 'block';
+                    mainDisplayWrapper.style.display = 'none';
+                } else {
+                    lockContainer.style.display = 'none';
+                    mainDisplayWrapper.style.display = 'block';
+                    fetchAndRenderDcaTasks();
+                }
+            } catch (e) {
+                console.error("Lock verification fault:", e);
+            }
+        }
+
+        async function fetchAndRenderDcaTasks() {
+            const selectedDca = document.getElementById('dca-select').value; 
+            const displayArea = document.getElementById('portal-display');
+            
+            displayArea.innerHTML = '<div style="text-align:center; padding: 30px;">Loading matching asset registers...</div>';
+            
+            try {
+                const querySnapshot = await db.collection("assignments").where("dca_name", "==", selectedDca).get(); 
+                displayArea.innerHTML = ''; 
+                if (querySnapshot.empty) { displayArea.innerHTML = '<div style="text-align:center;">No baseline assignment records linked to this agency code.</div>'; return; }
+                
+                let groupedByRegion = {};
+                querySnapshot.forEach((doc) => {
+                    let task = doc.data(); task.loc_code = doc.id;
+                    if (!groupedByRegion[task.region]) groupedByRegion[task.region] = []; groupedByRegion[task.region].push(task);
+                });
+                
+                let htmlStructure = '';
+                for (const region in groupedByRegion) {
+                    htmlStructure += `<div class="region-section-title">REGIONAL DIVISION: ${region}</div>`;
+                    
+                    groupedByRegion[region].forEach(task => {
+                        htmlStructure += `
+                            <div class="loc-card" data-loc="${task.loc_code}">
+                                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
+                                    <div><div class="loc-title">LOC ${task.loc_code} - ${task.loc_name}</div><div class="loc-subtitle">${task.region} | ${task.area}</div></div>
+                                </div>
+                                
+                                <div class="metrics-row">
+                                    <div style="text-align:center;"><label style="font-size:10px; color:var(--text-muted); display:block; margin-bottom:5px;">A/C Assigned</label><div style="font-size:16px; font-weight:bold;">${task.total_ac_assigned}</div></div>
+                                    <div style="text-align:center; border-right:1px solid rgba(255,255,255,0.1); padding-right:15px;"><label style="font-size:10px; color:var(--text-muted); display:block; margin-bottom:5px;">OSB Balance</label><div style="font-size:16px; font-weight:bold;">RM ${Number(task.total_osb_assigned).toLocaleString()}</div></div>
+                                    
+                                    <div style="flex:1.5;"><label style="font-size:10px; color:var(--accent-gold); display:block; margin-bottom:5px;">Active A/C Paying <br><span style="color:var(--text-muted); font-size:9px;">(${window.activeDcaCycle.label})</span></label><input type="number" class="metric-input input-ac" data-loc="${task.loc_code}" placeholder="0"></div>
+                                    <div style="flex:1.5;"><label style="font-size:10px; color:var(--accent-gold); display:block; margin-bottom:5px;">Collection Target RM <br><span style="color:var(--text-muted); font-size:9px;">(${window.activeDcaCycle.label})</span></label><input type="number" class="metric-input input-rm" data-loc="${task.loc_code}" placeholder="0.00"></div>
+                                </div>
+                            </div>`;
+                    });
+                }
+                
+                // SINGLE GLOBAL TRANSMISSION BUTTON (SPACE REDUCTION AND BATCH INTEGRITY)
+                htmlStructure += `<button class="btn-global-submit" id="btn-global-portal-submit" onclick="executeGlobalBatchSubmission()">Finalize and Submit Overall Performance Report</button>`;
+                displayArea.innerHTML = htmlStructure;
+
+            } catch (error) { displayArea.innerHTML = `<div>Database error encountered: ${error.message}</div>`; }
+        }
+
+        async function executeGlobalBatchSubmission() {
+            const selectedDca = document.getElementById('dca-select').value;
+            const btn = document.getElementById('btn-global-portal-submit');
+            
+            let locCards = document.querySelectorAll('.loc-card');
+            let dataPack = [];
+            let validationPass = true;
+
+            locCards.forEach(card => {
+                let locCode = card.getAttribute('data-loc');
+                let acVal = card.querySelector('.input-ac').value.trim();
+                let rmVal = card.querySelector('.input-rm').value.trim();
+
+                if(!acVal || !rmVal) {
+                    validationPass = false;
+                    card.style.borderColor = "var(--danger)";
+                } else {
+                    card.style.borderColor = "var(--border-color)";
+                    dataPack.push({ locCode: locCode, ac: parseInt(acVal), rm: parseFloat(rmVal) });
+                }
+            });
+
+            if(!validationPass) { alert("Submission Blocked: Ensure all numeric metrics (A/C Paying and Collection RM) are fully populated."); return; }
+            if(!confirm(`Pre-Submission Verification:\nAre you certain you want to transmit performance data for all locations across ${window.activeDcaCycle.label}? This action locks input rights.`)) return;
+
+            const firestoreBatch = db.batch();
+            const dbFieldKey = `m${window.activeDcaCycle.monthIdx}_${window.activeDcaCycle.cycleId}`;
+
+            dataPack.forEach(item => {
+                let docRef = db.collection("submissions").doc(item.locCode);
+                firestoreBatch.set(docRef, {
+                    [window.activeBatchName]: {
+                        [dbFieldKey]: { ac_paying: item.ac, collection_amount: item.rm, timestamp: firebase.firestore.FieldValue.serverTimestamp() }
+                    }
+                }, { merge: true });
+            });
+
+            const lockId = `${window.activeBatchName}_m${window.activeDcaCycle.monthIdx}_${window.activeDcaCycle.cycleId}_${selectedDca}`;
+            let lockRef = db.collection("submission_locks").doc(lockId);
+            firestoreBatch.set(lockRef, {
+                batch_name: window.activeBatchName, dca_name: selectedDca,
+                month_idx: window.activeDcaCycle.monthIdx, cycle_id: window.activeDcaCycle.cycleId,
+                submitted_at: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            try {
+                await firestoreBatch.commit();
+                showToast("Performance report safely transmitted and secured!");
+                
+                btn.classList.add('submitted');
+                btn.innerText = "REPORT SUCCESSFULLY SUBMITTED";
+                btn.disabled = true;
+                
+                setTimeout(() => { checkLockAndRenderPortal(); }, 1500);
+            } catch (e) {
+                alert("Critical network failure: Transmit loop terminated: " + e.message);
+            }
+        }
+
+        async function populateUnlockDcaDropdown() {
+            const bName = document.getElementById('unlock-batch-select').value;
+            const unlockDcaSelect = document.getElementById('unlock-dca-select');
+            unlockDcaSelect.innerHTML = '<option value="">-- Scanning Submitted Locks --</option>';
+
+            if(!bName) return;
+            try {
+                const snap = await db.collection("submission_locks").where("batch_name", "==", bName).get();
+                unlockDcaSelect.innerHTML = '<option value="">-- Select Agency To Release --</option>';
+                if(snap.empty) return;
+                
+                let uniqueDcas = new Set();
+                snap.forEach(doc => uniqueDcas.add(doc.data().dca_name));
+                uniqueDcas.forEach(d => unlockDcaSelect.innerHTML += `<option value="${d}">${d}</option>`);
+            } catch (e) { console.error(e); }
+        }
+
+        async function executeSubmissionUnlock() {
+            const bName = document.getElementById('unlock-batch-select').value;
+            const dName = document.getElementById('unlock-dca-select').value;
+            if(!bName || !dName) { alert("Parameter missing: Specify both Batch and DCA variables."); return; }
+
+            if(!confirm(`Security Override: Proceeding will erase all lock identifiers for ${dName} within batch ${bName}. They will regain rewriting authorization. Execute?`)) return;
+
+            try {
+                const snapshot = await db.collection("submission_locks")
+                                    .where("batch_name", "==", bName)
+                                    .where("dca_name", "==", dName).get();
+                
+                const deleteBatch = db.batch();
+                snapshot.forEach(doc => deleteBatch.delete(doc.ref));
+                await deleteBatch.commit();
+                
+                showToast(`Submission path unlocked for ${dName}!`);
+                populateUnlockDcaDropdown();
+                autoDetectDcaPortal(); 
+            } catch (error) { alert("Override fault: " + error.message); }
+        }
+
+        function updateDashboardMonthFilter() {
+            const batchName = document.getElementById('filter-batch').value;
+            const fMonth = document.getElementById('filter-month');
+            fMonth.innerHTML = '<option value="">-- Select Target Month Block --</option>';
+            window.dashboardActiveBatch = null;
+
+            if(!batchName) return;
+            const batchObj = window.allBatches.find(b => b.batch_name === batchName);
+            if(batchObj) {
+                window.dashboardActiveBatch = batchObj;
+                fMonth.innerHTML += `<option value="ALL">-- VIEW ALL MONTHS COMBINED --</option>`; 
+                batchObj.months.forEach(m => {
+                    fMonth.innerHTML += `<option value="${m.month_idx}">${m.month_name.toUpperCase()}</option>`;
+                });
+                fMonth.value = "ALL"; 
             }
         }
 
@@ -436,20 +790,20 @@
                 const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, { type: 'array' });
                 const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
                 if (jsonData.length === 0) return;
-                showToast("Memuat naik data... Sila tunggu.");
+                showToast("Uploading rows to Firestore cloud environment...");
                 
                 const batch = db.batch(); let count = 0;
                 jsonData.forEach(row => {
                     const locCodeRaw = row['LOC CODE'];
                     if (locCodeRaw) {
                         batch.set(db.collection("assignments").doc(Math.floor(locCodeRaw).toString()), {
-                            dca_name: row['DCA NAME'] || 'TIADA NAMA', region: row['REGION'] || '', area: row['AREA'] || '', loc_name: row['LOC NAME'] || '',
+                            dca_name: row['DCA NAME'] || 'UNASSIGNED', region: row['REGION'] || '', area: row['AREA'] || '', loc_name: row['LOC NAME'] || '',
                             total_ac_assigned: parseInt(row['TOTAL A/C ASSIGNED']) || 0, total_osb_assigned: parseFloat(row['TOTAL OSB ASSIGNED']) || 0
                         }, { merge: true }); count++;
                     }
                 });
-                try { await batch.commit(); showToast(`${count} rekod berjaya dimuat naik!`); input.value = ""; populateDcaList(); } 
-                catch (error) { alert("Ralat muat naik data."); }
+                try { await batch.commit(); showToast(`Import complete: Added ${count} assets entries.`); input.value = ""; populateDcaList(); } 
+                catch (error) { alert("Excel data ingestion faulted."); }
             }; reader.readAsArrayBuffer(file);
         }
 
@@ -459,9 +813,9 @@
                 const filterDca = document.getElementById('filter-dca');
                 const filterReg = document.getElementById('filter-region');
                 
-                dcaSelect.innerHTML = '<option value="">-- Sila Pilih Agensi DCA --</option>';
-                filterDca.innerHTML = '<option value="">SEMUA AGENSI</option>';
-                filterReg.innerHTML = '<option value="">SEMUA WILAYAH</option>';
+                dcaSelect.innerHTML = '<option value="">-- Select Your DCA Agency Name --</option>';
+                filterDca.innerHTML = '<option value="">ALL AGENCIES</option>';
+                filterReg.innerHTML = '<option value="">ALL REGIONS</option>';
 
                 if (snapshot.empty) return;
                 let dcaSet = new Set(), regSet = new Set();
@@ -478,112 +832,17 @@
             });
         }
 
-        async function fetchAndRenderDcaTasks() {
-            const selectedDca = document.getElementById('dca-select').value; 
-            const displayArea = document.getElementById('portal-display');
-            
-            if (!selectedDca || !window.activeBatchName || !window.activeDcaCycle) { 
-                displayArea.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 30px;">Sila pastikan agensi dipilih.</div>'; return; 
-            }
-            displayArea.innerHTML = '<div style="text-align:center; padding: 30px;">Menarik data...</div>';
-            
-            try {
-                const querySnapshot = await db.collection("assignments").where("dca_name", "==", selectedDca).get(); 
-                displayArea.innerHTML = ''; 
-                if (querySnapshot.empty) { displayArea.innerHTML = '<div style="text-align:center;">Tiada rekod tugas untuk agensi ini.</div>'; return; }
-                
-                let groupedByRegion = {};
-                querySnapshot.forEach((doc) => {
-                    let task = doc.data(); task.loc_code = doc.id;
-                    if (!groupedByRegion[task.region]) groupedByRegion[task.region] = []; groupedByRegion[task.region].push(task);
-                });
-                
-                for (const region in groupedByRegion) {
-                    const regionHeader = document.createElement('div'); regionHeader.className = 'region-section-title'; regionHeader.textContent = `REGION: ${region}`; displayArea.appendChild(regionHeader);
-                    
-                    groupedByRegion[region].forEach(task => {
-                        const card = document.createElement('div'); card.className = 'loc-card';
-                        card.innerHTML = `
-                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
-                                <div><div class="loc-title">LOC ${task.loc_code} - ${task.loc_name}</div><div class="loc-subtitle">${task.region} | ${task.area}</div></div>
-                            </div>
-                            
-                            <div class="metrics-row">
-                                <div style="text-align:center;"><label style="font-size:10px; color:var(--text-muted); display:block; margin-bottom:5px;">A/C Assigned</label><div style="font-size:16px; font-weight:bold;">${task.total_ac_assigned}</div></div>
-                                <div style="text-align:center; border-right:1px solid rgba(255,255,255,0.1); padding-right:15px;"><label style="font-size:10px; color:var(--text-muted); display:block; margin-bottom:5px;">OSB Assigned</label><div style="font-size:16px; font-weight:bold;">RM ${Number(task.total_osb_assigned).toLocaleString()}</div></div>
-                                
-                                <div style="flex:1.5;"><label style="font-size:10px; color:var(--accent-gold); display:block; margin-bottom:5px;">A/C Paying <br><span style="color:var(--text-muted);">${window.activeDcaCycle.label}</span></label><input type="number" class="metric-input" id="ac-${task.loc_code}" placeholder="0" onfocus="event.stopPropagation()"></div>
-                                <div style="flex:1.5;"><label style="font-size:10px; color:var(--accent-gold); display:block; margin-bottom:5px;">Kutipan RM <br><span style="color:var(--text-muted);">${window.activeDcaCycle.label}</span></label><input type="number" class="metric-input" id="coll-${task.loc_code}" placeholder="0.00" onfocus="event.stopPropagation()"></div>
-                            </div>
-                            
-                            <button class="btn-submit-report" onclick="submitPerformance('${task.loc_code}', '${window.activeBatchName}', ${window.activeDcaCycle.monthIdx}, '${window.activeDcaCycle.cycleId}', this, event)">HANTAR LAPORAN</button>
-                        `; displayArea.appendChild(card);
-                    });
-                }
-            } catch (error) { displayArea.innerHTML = `<div>Ralat: ${error.message}</div>`; }
-        }
-
-        async function submitPerformance(locCode, batchName, monthIdx, cycleId, btnElement, event) {
-            event.stopPropagation();
-            if(btnElement.disabled) return; 
-            
-            const acPaying = document.getElementById(`ac-${locCode}`).value; const collResult = document.getElementById(`coll-${locCode}`).value;
-            if (!acPaying || !collResult) { alert("Sila isi nilai A/C dan RM."); return; }
-            
-            try {
-                const dbKey = `m${monthIdx}_${cycleId}`;
-                await db.collection("submissions").doc(locCode).set({
-                    [batchName]: {
-                        [dbKey]: { ac_paying: parseInt(acPaying), collection_amount: parseFloat(collResult), timestamp: firebase.firestore.FieldValue.serverTimestamp() }
-                    }
-                }, { merge: true });
-                
-                showToast(`Prestasi LOC ${locCode} berjaya dihantar!`);
-                btnElement.classList.add('submitted');
-                btnElement.innerText = "LAPORAN DI HANTAR";
-                btnElement.disabled = true;
-
-            } catch (e) { alert("Gagal hantar: " + e.message); }
-        }
-
-        function updateDashboardMonthFilter() {
-            const batchName = document.getElementById('filter-batch').value;
-            const fMonth = document.getElementById('filter-month');
-            fMonth.innerHTML = '<option value="">-- Sila Pilih Bulan --</option>';
-            window.dashboardActiveBatch = null;
-
-            if(!batchName) return;
-
-            const batchObj = window.allBatches.find(b => b.batch_name === batchName);
-            if(batchObj) {
-                window.dashboardActiveBatch = batchObj;
-                fMonth.innerHTML += `<option value="ALL">-- SEMUA BULAN --</option>`; 
-                batchObj.months.forEach(m => {
-                    fMonth.innerHTML += `<option value="${m.month_idx}">${m.month_name}</option>`;
-                });
-                fMonth.value = "ALL"; 
-            }
-        }
-
-        function getStatusCellHtml(cycleAmount, cycleAc) {
-            if (cycleAmount > 0 || cycleAc > 0) {
-                return `<span class="val-badge">${cycleAc}</span> | <span class="val-gold">RM ${cycleAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>`;
-            } else {
-                return `<span class="alert-red">-</span>`;
-            }
-        }
-
         function formatChildRow(dcaName, activeMonths) {
             const locList = window.dcaDetailsMap[dcaName];
-            if(!locList) return '<div>Tiada butiran ditemui.</div>';
+            if(!locList) return '<div>No inner rows identified.</div>';
 
             let html = '<table class="sub-table" cellpadding="5" cellspacing="0" border="0">';
-            let thead = `<tr><th style="text-align:left;">REGION</th><th style="text-align:left;">AREA</th><th style="text-align:left;">LOC CODE</th><th style="text-align:left;">NAMA LOKASI</th><th style="text-align:center;">TOTAL A/C</th><th style="text-align:right;">OSB (RM)</th>`;
+            let thead = `<tr><th style="text-align:left;">REGION</th><th style="text-align:left;">AREA</th><th style="text-align:left;">LOC CODE</th><th style="text-align:left;">LOCATION NAME</th><th style="text-align:center;">TOTAL A/C</th><th style="text-align:right;">OSB (RM)</th>`;
             
             activeMonths.forEach(m => { 
-                thead += `<th style="text-align:center;">${m.month_name.toUpperCase()}<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>`; 
+                thead += `<th style="text-align:center; white-space: nowrap;">${m.month_name.toUpperCase()}<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>`; 
             });
-            thead += `<th style="text-align:center; color:var(--accent-gold);">TOTAL PAPARAN<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th></tr>`;
+            thead += `<th style="text-align:center; color:var(--accent-gold); white-space: nowrap;">TOTAL CURRENT<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th></tr>`;
             html += `<thead>${thead}</thead><tbody>`;
             
             locList.forEach(loc => {
@@ -591,17 +850,17 @@
                 activeMonths.forEach(m => {
                     let val = loc.monthTotals[m.month_idx] || {ac:0, rm:0};
                     if(val.rm > 0 || val.ac > 0) {
-                        monthHtml += `<td style="text-align:center;"><span class="val-badge">${val.ac}</span> | <span style="font-weight:bold; color:var(--success);">${val.rm.toLocaleString(undefined, {minimumFractionDigits:2})}</span></td>`;
+                        monthHtml += `<td style="text-align:center; white-space: nowrap;"><span class="val-badge">${val.ac}</span> | <span style="font-weight:bold; color:var(--success);">RM ${val.rm.toLocaleString(undefined, {minimumFractionDigits:2})}</span></td>`;
                     } else {
-                        monthHtml += `<td style="text-align:center; color:var(--text-muted);">-</td>`;
+                        monthHtml += `<td style="text-align:center; color:var(--text-muted); white-space: nowrap;">-</td>`;
                     }
                 });
 
                 html += `<tr>
-                    <td style="text-align:left;">${loc.region}</td><td style="text-align:left;">${loc.area}</td><td style="text-align:left; font-weight:bold; color:var(--accent-gold);">${loc.loc_code}</td><td style="text-align:left;">${loc.loc_name}</td>
-                    <td style="text-align:center;">${loc.ac}</td><td style="text-align:right;">${loc.osb.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                    <td style="text-align:left; white-space: nowrap;">${loc.region}</td><td style="text-align:left; white-space: nowrap;">${loc.area}</td><td style="text-align:left; font-weight:bold; color:var(--accent-gold); white-space: nowrap;">${loc.loc_code}</td><td style="text-align:left; white-space: nowrap;">${loc.loc_name}</td>
+                    <td style="text-align:center; white-space: nowrap;">${loc.ac}</td><td style="text-align:right; white-space: nowrap;">RM ${loc.osb.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
                     ${monthHtml}
-                    <td style="text-align:center; font-weight:bold; color:var(--accent-gold);"><span class="val-badge">${loc.viewAc}</span> | <span>${loc.viewRm.toLocaleString(undefined, {minimumFractionDigits:2})}</span></td>
+                    <td style="text-align:center; font-weight:bold; color:var(--accent-gold); white-space: nowrap;"><span class="val-badge">${loc.viewAc}</span> | <span>RM ${loc.viewRm.toLocaleString(undefined, {minimumFractionDigits:2})}</span></td>
                 </tr>`;
             });
             html += '</tbody></table>';
@@ -609,17 +868,17 @@
         }
 
         async function generateFullReport() {
-            if(!window.dashboardActiveBatch) { alert("Sila pilih No Batch terlebih dahulu."); return; }
+            if(!window.dashboardActiveBatch) { alert("Please complete Step 1: Select Active Collection Batch."); return; }
             const monthIdxStr = document.getElementById('filter-month').value;
-            if(!monthIdxStr) { alert("Sila pilih Bulan Tugasan."); return; }
+            if(!monthIdxStr) { alert("Please specify valid Target Month constraint."); return; }
             
             const fDcaVal = document.getElementById('filter-dca').value;
             const fRegVal = document.getElementById('filter-region').value;
             const batchName = window.dashboardActiveBatch.batch_name;
-
             const titleEl = document.getElementById('dashboard-dynamic-title');
-            let displayMonthName = "SEMUA BULAN";
-            let displayDcaName = fDcaVal ? fDcaVal : "SEMUA AGENSI";
+
+            let displayMonthName = "ALL MONTHS";
+            let displayDcaName = fDcaVal ? fDcaVal : "ALL AGENCIES";
             
             let activeCyclesForReport = [];
             let activeMonthsForReport = [];
@@ -638,22 +897,24 @@
                 monthConfig.cycles.forEach(c => activeCyclesForReport.push({ ...c, parentMonthIdx: monthConfig.month_idx }));
             }
 
-            titleEl.innerHTML = `PAPARAN BULAN: <span style="color:#FFF;">${displayMonthName}</span> &nbsp;&nbsp;|&nbsp;&nbsp; AGENSI: <span style="color:#FFF;">${displayDcaName}</span>`;
+            window.activeMonthsForChildRows = activeMonthsForReport; // CACHE GLOBAL ACCESSIBLE MATRICES
+
+            titleEl.innerHTML = `VIEWING MONTH: <span style="color:#FFF;">${displayMonthName.toUpperCase()}</span> &nbsp;&nbsp;|&nbsp;&nbsp; DCA: <span style="color:#FFF;">${displayDcaName.toUpperCase()}</span>`;
 
             let wrapper = document.getElementById('table-wrapper');
             let tableHtml = `<table id="report-table" class="display nowrap"><thead><tr>
-                <th style="width: 20px;"></th><th style="text-align: left;">Nama Agensi DCA</th><th>Jum. Caw.</th><th>Total A/C</th><th>Jumlah OSB (RM)</th>`;
+                <th style="width: 20px;"></th><th style="text-align: left;">DCA NAME</th><th>TOTAL<br>LOC</th><th>TOTAL<br>A/C</th><th>TOTAL ASSIGNED<br>OSB (RM)</th>`;
                 
             activeCyclesForReport.forEach(c => {
-                let cDateStr = new Date(c.date).toLocaleDateString('ms-MY', {day:'numeric', month:'short'});
-                tableHtml += `<th style="border-left: 1px solid var(--border-color); color: #fff;">${c.label} <br><span style="font-size:10px; color:var(--text-muted);">${cDateStr}</span></th>`;
+                let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
+                tableHtml += `<th style="border-left: 1px solid var(--border-color); color: #fff; white-space: nowrap;">${c.label.toUpperCase()}<br><span style="font-size:10px; color:var(--text-muted);">(${cDateStr})</span></th>`;
             });
             
             tableHtml += `
-                <th style="border-left: 1px solid var(--accent-gold);">TOTAL PAPARAN JADUAL<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
-                <th style="border-left: 1px solid var(--success);">TOTAL KESELURUHAN BATCH<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
-                <th style="color:var(--success);">% PRESTASI BATCH</th>
-            </tr></thead><tbody id="table-body"><tr><td colspan="15" style="text-align:center;">Mengumpulkan Data...</td></tr></tbody></table>`;
+                <th style="border-left: 1px solid var(--accent-gold);">TOTAL CURRENT<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
+                <th style="border-left: 1px solid var(--success);">G.TOTAL<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
+                <th style="color:var(--success);">%<br>PERFORMANCE</th>
+            </tr></thead><tbody id="table-body"><tr><td colspan="15" style="text-align:center;">Compiling active datasets...</td></tr></tbody></table>`;
             wrapper.innerHTML = tableHtml;
 
             const tbody = document.getElementById('table-body');
@@ -690,17 +951,16 @@
                     let locMonthTotals = {}; 
 
                     let excelRow = {
-                        "Batch": batchName, "Paparan Filter": displayMonthName, "DCA Name": dcaName, "Region": task.region, "Area": task.area,
+                        "Batch": batchName, "Display Filter": displayMonthName, "DCA Name": dcaName, "Region": task.region, "Area": task.area,
                         "Loc Code": locCode, "Loc Name": task.loc_name, "Total A/C Assigned": ac, "Total OSB Assigned": osb
                     };
-                    
+
                     window.dashboardActiveBatch.months.forEach(m => {
                         let mAc = 0, mRm = 0;
                         m.cycles.forEach(c => {
                             let dbKey = `m${m.month_idx}_${c.id}`;
                             let cAc = batchSub[dbKey]?.ac_paying || 0;
                             let cRm = batchSub[dbKey]?.collection_amount || 0;
-                            
                             mAc += cAc; mRm += cRm;
                             locGrandAc += cAc; locGrandRm += cRm;
                         });
@@ -721,15 +981,15 @@
                         dcaGroupMap[dcaName].cycle_data[uniqueCycleKey].ac += cAc;
                         dcaGroupMap[dcaName].cycle_data[uniqueCycleKey].rm += cRm;
                         
-                        let cDateStr = new Date(c.date).toLocaleDateString('ms-MY', {day:'numeric', month:'short'});
-                        excelRow[`${c.label} (${cDateStr}) - A/C Paying`] = cAc;
-                        excelRow[`${c.label} (${cDateStr}) - Kutipan RM`] = cRm;
+                        let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
+                        excelRow[`${c.label.toUpperCase()} (${cDateStr}) - A/C Paying`] = cAc;
+                        excelRow[`${c.label.toUpperCase()} (${cDateStr}) - Collection RM`] = cRm;
                     });
 
-                    excelRow["Total A/C Paying (Paparan Jadual)"] = locViewAc;
-                    excelRow["Total Kutipan (Paparan Jadual RM)"] = locViewRm;
-                    excelRow["Total A/C Paying (Keseluruhan Batch)"] = locGrandAc;
-                    excelRow["Total Kutipan (Keseluruhan Batch RM)"] = locGrandRm;
+                    excelRow["Total A/C Paying (Current View)"] = locViewAc;
+                    excelRow["Total Collection (Current View RM)"] = locViewRm;
+                    excelRow["Total A/C Paying (G.Total Batch)"] = locGrandAc;
+                    excelRow["Total Collection (G.Total Batch RM)"] = locGrandRm;
                     window.rawExcelData.push(excelRow);
 
                     dcaGroupMap[dcaName].total_locs += 1; dcaGroupMap[dcaName].total_ac += ac; dcaGroupMap[dcaName].total_osb += osb;
@@ -754,7 +1014,12 @@
                     activeCyclesForReport.forEach(c => {
                         let uniqueCycleKey = `${c.parentMonthIdx}_${c.id}`;
                         let cData = data.cycle_data[uniqueCycleKey] || {ac:0, rm:0};
-                        cycleTds += `<td style="border-left: 1px solid var(--border-color);">${getStatusCellHtml(cData.rm, cData.ac)}</td>`;
+                        
+                        if (cData.rm > 0 || cData.ac > 0) {
+                            cycleTds += `<td data-order="${cData.rm}" style="border-left: 1px solid var(--border-color);"><span class="val-badge">${cData.ac}</span> | <span class="val-gold">RM ${cData.rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></td>`;
+                        } else {
+                            cycleTds += `<td data-order="0" style="border-left: 1px solid var(--border-color);"><span class="alert-red">-</span></td>`;
+                        }
                     });
 
                     const tr = document.createElement('tr');
@@ -762,17 +1027,17 @@
                     tr.innerHTML = `
                         <td class="details-control">&#x2295;</td>
                         <td style="font-weight: bold; color: var(--accent-gold); text-align: left; font-size: 13px;">${dcaName}</td>
-                        <td>${data.total_locs} Caw.</td>
-                        <td>${data.total_ac.toLocaleString()}</td>
-                        <td style="font-weight: 500;">${data.total_osb.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td data-order="${data.total_locs}">${data.total_locs}</td>
+                        <td data-order="${data.total_ac}">${data.total_ac.toLocaleString()}</td>
+                        <td data-order="${data.total_osb}" style="font-weight: 500;">${data.total_osb.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                         ${cycleTds}
-                        <td style="border-left: 1px solid var(--accent-gold); color: var(--text-main);">
-                            <span class="val-badge">${data.view_ac}</span> | <span style="font-weight:bold; color: var(--accent-gold); font-size: 14px;">${data.view_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                        <td data-order="${data.view_rm}" style="border-left: 1px solid var(--accent-gold); color: var(--text-main);">
+                            <span class="val-badge">${data.view_ac}</span> | <span style="font-weight:bold; color: var(--accent-gold); font-size: 14px;">RM ${data.view_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                         </td>
-                        <td style="border-left: 1px solid var(--success); color: var(--text-main);">
-                            <span class="val-badge">${data.grand_ac}</span> | <span style="font-weight:bold; color: var(--success); font-size: 14px;">${data.grand_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                        <td data-order="${data.grand_rm}" style="border-left: 1px solid var(--success); color: var(--text-main);">
+                            <span class="val-badge">${data.grand_ac}</span> | <span style="font-weight:bold; color: var(--success); font-size: 14px;">RM ${data.grand_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                         </td>
-                        <td style="font-weight: bold; color: var(--success); font-size: 13px;">${dcaPct}%</td>
+                        <td data-order="${dcaPct}" style="font-weight: bold; color: var(--success); font-size: 13px;">${dcaPct}%</td>
                     `;
                     tbody.appendChild(tr);
                 }
@@ -788,25 +1053,19 @@
                 const table = $('#report-table').DataTable({
                     "pageLength": 10,
                     "language": {
-                        "search": "CARI REKOD AGENSI:", "lengthMenu": "Papar _MENU_ rekod", "info": "Papar _START_ ke _END_ dari _TOTAL_ agensi", "paginate": { "next": "Seterusnya", "previous": "Sebelumnya" }
+                        "search": "SEARCH REGISTRY LOGS:", "lengthMenu": "Display _MENU_ vendors", "info": "Showing _START_ to _END_ of _TOTAL_ entries", "paginate": { "next": "Next", "previous": "Prev" }
                     },
                     "scrollX": true,
                     "order": [[ sortTarget, "desc" ]],
                     "columnDefs": [ { "orderable": false, "targets": 0 } ]
                 });
-                
-                $('#report-table tbody').on('click', 'td.details-control', function () {
-                    const tr = $(this).closest('tr'); const row = table.row(tr);
-                    if (row.child.isShown()) { row.child.hide(); tr.removeClass('shown'); $(this).html('&#x2295;'); 
-                    } else { row.child(formatChildRow(tr.data('dca'), activeMonthsForReport)).show(); tr.addClass('shown'); $(this).html('&#x2296;'); }
-                });
 
-            } catch (error) { console.error("Ralat Dashboard:", error); tbody.innerHTML = `<tr><td colspan="15" style="color:red; text-align:center;">Ralat: ${error.message}</td></tr>`; }
+            } catch (error) { console.error("Dashboard compilation halted:", error); tbody.innerHTML = `<tr><td colspan="15" style="color:red; text-align:center;">Fatal Inception: ${error.message}</td></tr>`; }
         }
 
         function exportRawToExcel() {
-            if (!window.rawExcelData || window.rawExcelData.length === 0) { alert("Sila Jana Laporan terlebih dahulu!"); return; }
-            showToast("Sedang menjana fail Excel...");
+            if (!window.rawExcelData || window.rawExcelData.length === 0) { alert("Command rejected: Perform a verification query run prior to Excel output extraction."); return; }
+            showToast("Structuring master spreadsheet data block...");
             
             const worksheet = XLSX.utils.json_to_sheet(window.rawExcelData);
             const workbook = XLSX.utils.book_new();
@@ -816,7 +1075,7 @@
             const dateStr = now.toISOString().split('T')[0];
             const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
             
-            XLSX.writeFile(workbook, `DCA_Performance_${window.dashboardActiveBatch.batch_name}_${dateStr}_${timeStr}.xlsx`);
+            XLSX.writeFile(workbook, `DCA_MasterPerformance_${window.dashboardActiveBatch.batch_name}_${dateStr}_${timeStr}.xlsx`);
         }
     </script>
 </body>
