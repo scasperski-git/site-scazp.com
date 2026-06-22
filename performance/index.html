@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DCA Portal & Performance Dashboard | scazp.com</title>
     
+    <!-- jQuery & DataTables Libraries -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     
+    <!-- SheetJS Excel Library -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
+    <!-- Firebase Legacy SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
@@ -23,10 +26,8 @@
             --border-color: rgba(255,255,255,0.06);
         }
 
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 15px 20px; }
-        
-        /* DIBAIKI: DITUKAR KEPADA 100% UNTUK FLUID AUTO-FIT SEMUA RESOLUTION DEKSTOP */
-        .container { max-width: 100%; width: 100%; margin: 0 auto; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 20px; }
+        .container { max-width: 1300px; margin: 0 auto; }
 
         /* Navigation Tabs */
         .tab-menu { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; overflow-x: auto; }
@@ -59,7 +60,7 @@
             .grid-2 { grid-template-columns: repeat(2, 1fr); } 
             .grid-3 { grid-template-columns: repeat(3, 1fr); }
             .grid-4 { grid-template-columns: repeat(4, 1fr); }
-            .container-portal { max-width: 100%; margin: 0 auto; } 
+            .container-portal { max-width: 950px; margin: 0 auto; } 
         }
 
         .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
@@ -75,6 +76,7 @@
         .btn-danger-outline { background-color: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; border-radius: 6px; cursor: pointer; transition: 0.3s;}
         .btn-danger-outline:hover { background-color: rgba(239, 68, 68, 0.1); }
         
+        /* GLOBAL RED/GREEN ACTION BUTTON FOR DCA PORTAL */
         .btn-global-submit { background-color: var(--danger); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.3s; text-transform: uppercase; margin-top: 20px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2); }
         .btn-global-submit:hover { opacity: 0.9; transform: translateY(-1px); }
         .btn-global-submit.submitted { background-color: var(--success) !important; color: white !important; cursor: not-allowed; opacity: 1; box-shadow: none; transform: none; }
@@ -87,14 +89,16 @@
         .loc-title { font-size: 15px; font-weight: 600; color: #FFFFFF; }
         .loc-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
         
+        /* FLAT STREAMLINED DESIGN (SPACE SAVING) */
         .metrics-row { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; background-color: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-top: 12px; border: 1px solid rgba(255,255,255,0.05);}
         .metrics-row > div { flex: 1; min-width: 120px; }
         .metric-input { width: 100%; box-sizing: border-box; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--accent-gold); padding: 8px; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; margin: 0;}
         .metric-input:focus { border-color: var(--accent-gold); outline:none; box-shadow: 0 0 10px var(--accent-glow);}
 
-        .table-container { background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); padding: 15px; overflow-x: auto; margin-top: 20px; width: 100%; }
+        .table-container { background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); padding: 15px; overflow-x: auto; margin-top: 20px; }
         table.dataTable { width: 100% !important; border-collapse: collapse; color: var(--text-main); }
         
+        /* TWEAKED: SMALLER FONT AND PADDING TO AUTO-FIT SCREEN */
         table.dataTable thead th { background-color: rgba(0,0,0,0.4); color: var(--accent-gold); border-bottom: 1px solid var(--border-color); padding: 8px 6px; white-space: nowrap !important; text-align: center; font-size: 10px; vertical-align: middle;}
         table.dataTable tbody td { padding: 8px 6px; border-bottom: 1px solid var(--border-color); background-color: transparent !important; white-space: nowrap; text-align: center; font-size: 11px;}
         table.dataTable tbody tr:hover { background-color: rgba(255,255,255,0.03) !important; }
@@ -115,6 +119,7 @@
         .alert-red { background-color: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px 8px; border-radius: 6px; font-weight: bold; font-size: 10px; display: inline-block; }
         .lock-banner { background-color: rgba(16, 185, 129, 0.15); border: 1px dashed var(--success); color: var(--success); padding: 20px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 15px; margin-bottom: 20px; }
 
+        /* CENTER SCREEN PREMIUM TOAST */
         #toast { 
             visibility: hidden; min-width: 320px; background-color: var(--success); color: #fff; text-align: center; 
             border-radius: 8px; padding: 20px; position: fixed; z-index: 9999; 
@@ -205,7 +210,7 @@
             </h2>
 
             <div id="table-wrapper" class="table-container">
-                <table id="report-table" class="display">
+                <table id="report-table" class="display nowrap">
                     <thead id="table-head"><tr><th colspan="10" style="text-align:center;">No dataset compiled.</th></tr></thead>
                     <tbody id="table-body"></tbody>
                 </table>
@@ -316,6 +321,7 @@
 
     </div>
 
+    <!-- CENTER PRESTIGE TOAST ALERT -->
     <div id="toast">Operation successfully executed!</div>
 
     <script>
@@ -687,6 +693,7 @@
             const firestoreBatch = db.batch();
             const dbFieldKey = `m${window.activeDcaCycle.monthIdx}_${window.activeDcaCycle.cycleId}`;
 
+            // ---- START LIVE AGGREGATOR WRITE ENGINE ----
             let totalAc = 0; let totalRm = 0;
             dataPack.forEach(item => { 
                 totalAc += item.ac; 
@@ -700,11 +707,13 @@
                 }, { merge: true });
             });
 
+            // Tulis Ke Dalam Koleksi Summary Induk Secara Automatik!
             let summaryRef = db.collection("dca_live_summaries").doc(window.activeBatchName);
             let updatePayload = {};
             updatePayload[`${selectedDca}.${dbFieldKey}_ac`] = totalAc;
             updatePayload[`${selectedDca}.${dbFieldKey}_rm`] = totalRm;
             firestoreBatch.set(summaryRef, updatePayload, { merge: true });
+            // ---- END LIVE AGGREGATOR WRITE ENGINE ----
 
             const lockId = `${window.activeBatchName}_m${window.activeDcaCycle.monthIdx}_${window.activeDcaCycle.cycleId}_${selectedDca}`;
             let lockRef = db.collection("submission_locks").doc(lockId);
@@ -795,13 +804,14 @@
                 showToast("Uploading rows to Firestore cloud environment...");
                 
                 const batch = db.batch(); let count = 0;
-                let baselines = {}; 
+                let baselines = {}; // NEW: Kumpul Baseline
                 
                 jsonData.forEach(row => {
                     const locCodeRaw = row['LOC CODE'];
                     if (locCodeRaw) {
                         let dcaName = row['DCA NAME'] || 'UNASSIGNED';
                         
+                        // Kumpul Data Untuk Dokumen Induk (Baselines)
                         if(!baselines[dcaName]) baselines[dcaName] = { locs: 0, ac: 0, osb: 0 };
                         baselines[dcaName].locs += 1;
                         baselines[dcaName].ac += parseInt(row['TOTAL A/C ASSIGNED']) || 0;
@@ -814,6 +824,7 @@
                     }
                 });
 
+                // Tulis Ke Dalam Koleksi Summary Induk (GLOBAL BASELINES)
                 let baseRef = db.collection("dca_live_summaries").doc("GLOBAL_BASELINES");
                 batch.set(baseRef, baselines, { merge: true });
 
@@ -912,12 +923,12 @@
                 monthConfig.cycles.forEach(c => activeCyclesForReport.push({ ...c, parentMonthIdx: monthConfig.month_idx }));
             }
 
-            window.activeMonthsForChildRows = activeMonthsForReport; 
+            window.activeMonthsForChildRows = activeMonthsForReport;
 
             titleEl.innerHTML = `VIEWING MONTH: <span style="color:#FFF;">${displayMonthName.toUpperCase()}</span> &nbsp;&nbsp;|&nbsp;&nbsp; DCA: <span style="color:#FFF;">${displayDcaName.toUpperCase()}</span>`;
 
             let wrapper = document.getElementById('table-wrapper');
-            let tableHtml = `<table id="report-table" class="display"><thead><tr>
+            let tableHtml = `<table id="report-table" class="display nowrap"><thead><tr>
                 <th style="width: 20px;"></th><th style="text-align: left;">DCA NAME</th><th>TOTAL<br>LOC</th><th>TOTAL<br>A/C</th><th>TOTAL ASSIGNED<br>OSB (RM)</th>`;
                 
             activeCyclesForReport.forEach(c => {
@@ -936,6 +947,8 @@
             window.dcaDetailsMap = {}; window.rawExcelData = [];
 
             try {
+                // NOTA KEPADA BOS: Jadual Laporan ini dikekalkan memproses dari Data Mentah (Raw Data)
+                // supaya rekod lama bulan lepas tidak rosak dan kekal boleh dipaparkan 100% sama!
                 const assignmentsSnap = await db.collection("assignments").get();
                 if (assignmentsSnap.empty) { tbody.innerHTML = ''; return; }
 
@@ -1067,10 +1080,10 @@
 
                 const table = $('#report-table').DataTable({
                     "pageLength": 10,
-                    "autoWidth": true,
                     "language": {
-                        "search": "SEARCH DCA :", "lengthMenu": "Display _MENU_ vendors", "info": "Showing _START_ to _END_ of _TOTAL_ entries", "paginate": { "next": "Next", "previous": "Prev" }
+                        "search": "SEARCH DCA: ", "lengthMenu": "Display _MENU_ vendors", "info": "Showing _START_ to _END_ of _TOTAL_ entries", "paginate": { "next": "Next", "previous": "Prev" }
                     },
+                    "scrollX": true,
                     "order": [[ sortTarget, "desc" ]],
                     "columnDefs": [ { "orderable": false, "targets": 0 } ]
                 });
