@@ -723,6 +723,12 @@
                 submitted_at: firebase.firestore.FieldValue.serverTimestamp()
             });
 
+            // >>> TAMBAH DI SINI (Sebelum Commit) <<<
+            let metaRef = db.collection("metadata").doc("report_status");
+            firestoreBatch.set(metaRef, {
+                last_updated: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
             try {
                 await firestoreBatch.commit();
                 showToast("Performance report safely transmitted and secured!");
@@ -903,89 +909,108 @@ async function generateFullReport() {
     const batchName = window.dashboardActiveBatch.batch_name;
     const titleEl = document.getElementById('dashboard-dynamic-title');
 
-    let displayMonthName = "ALL MONTHS";
-    let displayDcaName = fDcaVal ? fDcaVal : "ALL AGENCIES";
-    
-    let activeCyclesForReport = [];
-    let activeMonthsForReport = [];
-
-    if (monthIdxStr === "ALL") {
-        activeMonthsForReport = window.dashboardActiveBatch.months;
-        window.dashboardActiveBatch.months.forEach(m => {
-            m.cycles.forEach(c => activeCyclesForReport.push({ ...c, parentMonthIdx: m.month_idx }));
-        });
-    } else {
-        const monthIdx = parseInt(monthIdxStr);
-        const monthConfig = window.dashboardActiveBatch.months.find(m => m.month_idx === monthIdx);
-        if(!monthConfig) return;
-        displayMonthName = monthConfig.month_name;
-        activeMonthsForReport.push(monthConfig);
-        monthConfig.cycles.forEach(c => activeCyclesForReport.push({ ...c, parentMonthIdx: monthConfig.month_idx }));
-    }
-
-    window.activeMonthsForChildRows = activeMonthsForReport;
-
-    titleEl.innerHTML = `VIEWING MONTH: <span style="color:#FFF;">${displayMonthName.toUpperCase()}</span> &nbsp;&nbsp;|&nbsp;&nbsp; DCA: <span style="color:#FFF;">${displayDcaName.toUpperCase()}</span>`;
-
-    let wrapper = document.getElementById('table-wrapper');
-    let tableHtml = `<table id="report-table" class="display nowrap"><thead><tr>
-        <th style="width: 20px;"></th><th style="text-align: left;">DCA NAME</th><th>TOTAL<br>LOC</th><th>TOTAL<br>A/C</th><th>TOTAL ASSIGNED<br>OSB (RM)</th>`;
-        
-    activeCyclesForReport.forEach(c => {
-        let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
-        tableHtml += `<th style="border-left: 1px solid var(--border-color); color: #fff; white-space: nowrap;">${c.label.toUpperCase()}<br><span style="font-size:10px; color:var(--text-muted);">(${cDateStr})</span></th>`;
-    });
-    
-    tableHtml += `
-        <th style="border-left: 1px solid var(--accent-gold);">TOTAL CURRENT<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
-        <th style="border-left: 1px solid var(--success);">G.TOTAL<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
-        <th style="color:var(--success);">%<br>PERFORMANCE</th>
-    </tr></thead><tbody id="table-body"><tr><td colspan="15" style="text-align:center;">Compiling active datasets...</td></tr></tbody></table>`;
-    wrapper.innerHTML = tableHtml;
-
-    const tbody = document.getElementById('table-body');
-    window.dcaDetailsMap = {}; window.rawExcelData = [];
+    // Buat satu ID unik untuk kombinasi filter ini
+    const cacheKeyData = `report_data_${batchName}_${monthIdxStr}_${fDcaVal}_${fRegVal}`;
+    const cacheKeyTime = `report_time_${batchName}_${monthIdxStr}_${fDcaVal}_${fRegVal}`;
 
     try {
-        // --- 1. SERVER-SIDE FILTERING UNTUK ASSIGNMENTS ---
-        let assignQuery = db.collection("assignments");
+        // 1. SEMAK METADATA DI FIREBASE (Cuma guna 1 Read!)
+        const metaSnap = await db.collection("metadata").doc("report_status").get();
+        let serverLastUpdated = null;
         
-        if (fDcaVal !== "") {
-            assignQuery = assignQuery.where("dca_name", "==", fDcaVal);
+        if (metaSnap.exists && metaSnap.data().last_updated) {
+            serverLastUpdated = metaSnap.data().last_updated.toDate().getTime().toString();
         }
-        if (fRegVal !== "") {
-            assignQuery = assignQuery.where("region", "==", fRegVal);
+
+        // 2. SEMAK CACHE DI LOCAL STORAGE KOMPUTER
+        const localLastUpdated = localStorage.getItem(cacheKeyTime);
+        const cachedData = localStorage.getItem(cacheKeyData);
+
+        // Jika waktu server dan lokal sama, dan data lama ada dalam simpanan browser
+        if (serverLastUpdated && localLastUpdated === serverLastUpdated && cachedData) {
+            console.log("Data tidak berubah. Memuatkan laporan dari Cache Browser (0 Reads!)");
+            showToast("Memuatkan data dari cache (Sistem Optimum)...");
+            
+            // Tukar semula teks kepada objek dan proses jadual terus tanpa tarik Firebase
+            const parsedCache = JSON.parse(cachedData);
+            window.dcaDetailsMap = parsedCache.dcaDetailsMap;
+            window.rawExcelData = parsedCache.rawExcelData;
+            
+            // Terus bina jadual guna data lama
+            binaSemulaStrukturJadual(parsedCache.tableHtml, parsedCache.kpi);
+            return; // Berhenti di sini, kuota selamat!
         }
+
+        // =========================================================================
+        // JIKA ADA PERUBAHAN DATA (ATAU CACHE TIADA), TARIK DATA BARU DARI FIREBASE
+        // =========================================================================
+        console.log("Data dikesan berubah atau tiada cache. Menarik data baharu dari Firebase...");
+        
+        let displayMonthName = "ALL MONTHS";
+        let activeCyclesForReport = [];
+        let activeMonthsForReport = [];
+
+        if (monthIdxStr === "ALL") {
+            activeMonthsForReport = window.dashboardActiveBatch.months;
+            window.dashboardActiveBatch.months.forEach(m => {
+                m.cycles.forEach(c => activeCyclesForReport.push({ ...c, parentMonthIdx: m.month_idx }));
+            });
+        } else {
+            const monthIdx = parseInt(monthIdxStr);
+            const monthConfig = window.dashboardActiveBatch.months.find(m => m.month_idx === monthIdx);
+            if(!monthConfig) return;
+            displayMonthName = monthConfig.month_name;
+            activeMonthsForReport.push(monthConfig);
+            monthConfig.cycles.forEach(c => activeCyclesForReport.push({ ...c, parentMonthIdx: monthConfig.month_idx }));
+        }
+
+        window.activeMonthsForChildRows = activeMonthsForReport;
+        titleEl.innerHTML = `VIEWING MONTH: <span style="color:#FFF;">${displayMonthName.toUpperCase()}</span> &nbsp;&nbsp;|&nbsp;&nbsp; DCA: <span style="color:#FFF;">${displayDcaName.toUpperCase()}</span>`;
+
+        let wrapper = document.getElementById('table-wrapper');
+        let tableHtmlHead = `<table id="report-table" class="display nowrap"><thead><tr>
+            <th style="width: 20px;"></th><th style="text-align: left;">DCA NAME</th><th>TOTAL<br>LOC</th><th>TOTAL<br>A/C</th><th>TOTAL ASSIGNED<br>OSB (RM)</th>`;
+            
+        activeCyclesForReport.forEach(c => {
+            let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
+            tableHtmlHead += `<th style="border-left: 1px solid var(--border-color); color: #fff; white-space: nowrap;">${c.label.toUpperCase()}<br><span style="font-size:10px; color:var(--text-muted);">(${cDateStr})</span></th>`;
+        });
+        
+        tableHtmlHead += `
+            <th style="border-left: 1px solid var(--accent-gold);">TOTAL CURRENT<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
+            <th style="border-left: 1px solid var(--success);">G.TOTAL<br><span style="font-size:10px; color:var(--text-muted);">(A/C | RM)</span></th>
+            <th style="color:var(--success);">%<br>PERFORMANCE</th>
+        </tr></thead><tbody id="table-body"></tbody></table>`;
+        wrapper.innerHTML = tableHtmlHead;
+
+        const tbody = document.getElementById('table-body');
+        window.dcaDetailsMap = {}; window.rawExcelData = [];
+
+        let assignQuery = db.collection("assignments");
+        if (fDcaVal !== "") assignQuery = assignQuery.where("dca_name", "==", fDcaVal);
+        if (fRegVal !== "") assignQuery = assignQuery.where("region", "==", fRegVal);
 
         const assignmentsSnap = await assignQuery.get();
         if (assignmentsSnap.empty) { 
-            tbody.innerHTML = '<tr><td colspan="15" style="text-align:center; color:var(--text-muted);">Tiada rekod dijumpai untuk kriteria carian ini.</td></tr>'; 
+            tbody.innerHTML = '<tr><td colspan="15" style="text-align:center; color:var(--text-muted);">No dataset compiled.</td></tr>'; 
             return; 
         }
 
-        // --- 2. OPTIMASI BACAAN KOLEKSI SUBMISSIONS ---
         let submissionsDict = {};
-        
         if (fDcaVal === "" && fRegVal === "") {
-            // Jika tiada tapisan (ALL), lebih menjimatkan untuk tarik semuanya sekaligus.
             const submissionsSnap = await db.collection("submissions").get();
             submissionsSnap.forEach(doc => { submissionsDict[doc.id] = doc.data(); });
         } else {
-            // Jika DCA/Region spesifik ditapis, kita HANYA tarik dokumen submissions untuk Loc Code tersebut.
             let locCodes = [];
             assignmentsSnap.forEach(doc => locCodes.push(doc.id));
-            
-            // Firebase mengehadkan 'in' array maksimum 10 elemen. Kita perlu pecahkan (chunking).
             const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
             const locCodeChunks = chunkArray(locCodes, 10);
-            
             for (let chunk of locCodeChunks) {
                 const subSnap = await db.collection("submissions").where(firebase.firestore.FieldPath.documentId(), 'in', chunk).get();
                 subSnap.forEach(doc => { submissionsDict[doc.id] = doc.data(); });
             }
         }
 
-        // --- 3. PEMPROSESAN DATA JADUAL (Dikekalkan seperti asal) ---
         let dcaGroupMap = {};
         let grandTotalOsb = 0, grandTotalCurrentMonthCollection = 0, grandTotalAllCollection = 0;
 
@@ -1000,9 +1025,7 @@ async function generateFullReport() {
 
             const osb = parseFloat(task.total_osb_assigned) || 0;
             const ac = parseInt(task.total_ac_assigned) || 0;
-            
             let locViewAc = 0, locViewRm = 0, locGrandRm = 0, locGrandAc = 0;
-            let locCycleVals = {};
             let locMonthTotals = {}; 
 
             let excelRow = {
@@ -1026,26 +1049,13 @@ async function generateFullReport() {
                 let dbKey = `m${c.parentMonthIdx}_${c.id}`;
                 let cAc = batchSub[dbKey]?.ac_paying || 0;
                 let cRm = batchSub[dbKey]?.collection_amount || 0;
-                
                 locViewAc += cAc; locViewRm += cRm;
-                
                 let uniqueCycleKey = `${c.parentMonthIdx}_${c.id}`; 
-                locCycleVals[uniqueCycleKey] = {ac: cAc, rm: cRm};
                 
                 if(!dcaGroupMap[dcaName].cycle_data[uniqueCycleKey]) dcaGroupMap[dcaName].cycle_data[uniqueCycleKey] = {ac:0, rm:0};
                 dcaGroupMap[dcaName].cycle_data[uniqueCycleKey].ac += cAc;
                 dcaGroupMap[dcaName].cycle_data[uniqueCycleKey].rm += cRm;
-                
-                let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
-                excelRow[`${c.label.toUpperCase()} (${cDateStr}) - A/C Paying`] = cAc;
-                excelRow[`${c.label.toUpperCase()} (${cDateStr}) - Collection RM`] = cRm;
             });
-
-            excelRow["Total A/C Paying (Current View)"] = locViewAc;
-            excelRow["Total Collection (Current View RM)"] = locViewRm;
-            excelRow["Total A/C Paying (G.Total Batch)"] = locGrandAc;
-            excelRow["Total Collection (G.Total Batch RM)"] = locGrandRm;
-            window.rawExcelData.push(excelRow);
 
             dcaGroupMap[dcaName].total_locs += 1; dcaGroupMap[dcaName].total_ac += ac; dcaGroupMap[dcaName].total_osb += osb;
             dcaGroupMap[dcaName].view_ac += locViewAc; dcaGroupMap[dcaName].view_rm += locViewRm;
@@ -1059,17 +1069,16 @@ async function generateFullReport() {
             });
         });
 
-        tbody.innerHTML = ''; let dcaCount = 0;
-
+        // Bina Baris HTML TR
+        let htmlBodyContent = "";
+        let dcaCount = 0;
         for (const [dcaName, data] of Object.entries(dcaGroupMap)) {
             dcaCount++;
             const dcaPct = data.total_osb > 0 ? ((data.grand_rm / data.total_osb) * 100).toFixed(2) : "0.00";
-
             let cycleTds = '';
             activeCyclesForReport.forEach(c => {
                 let uniqueCycleKey = `${c.parentMonthIdx}_${c.id}`;
                 let cData = data.cycle_data[uniqueCycleKey] || {ac:0, rm:0};
-                
                 if (cData.rm > 0 || cData.ac > 0) {
                     cycleTds += `<td data-order="${cData.rm}" style="border-left: 1px solid var(--border-color);"><span class="val-badge">${cData.ac}</span> | <span class="val-gold">RM ${cData.rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></td>`;
                 } else {
@@ -1077,48 +1086,73 @@ async function generateFullReport() {
                 }
             });
 
-            const tr = document.createElement('tr');
-            tr.setAttribute('data-dca', dcaName);
-            tr.innerHTML = `
-                <td class="details-control">&#x2295;</td>
-                <td style="font-weight: bold; color: var(--accent-gold); text-align: left; font-size: 13px;">${dcaName}</td>
-                <td data-order="${data.total_locs}">${data.total_locs}</td>
-                <td data-order="${data.total_ac}">${data.total_ac.toLocaleString()}</td>
-                <td data-order="${data.total_osb}" style="font-weight: 500;">${data.total_osb.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                ${cycleTds}
-                <td data-order="${data.view_rm}" style="border-left: 1px solid var(--accent-gold); color: var(--text-main);">
-                    <span class="val-badge">${data.view_ac}</span> | <span style="font-weight:bold; color: var(--accent-gold);">RM ${data.view_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-                </td>
-                <td data-order="${data.grand_rm}" style="border-left: 1px solid var(--success); color: var(--text-main);">
-                    <span class="val-badge">${data.grand_ac}</span> | <span style="font-weight:bold; color: var(--success);">RM ${data.grand_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-                </td>
-                <td data-order="${dcaPct}" style="font-weight: bold; color: var(--success); font-size: 13px;">${dcaPct}%</td>
-            `;
-            tbody.appendChild(tr);
+            htmlBodyContent += `
+                <tr data-dca="${dcaName}">
+                    <td class="details-control">&#x2295;</td>
+                    <td style="font-weight: bold; color: var(--accent-gold); text-align: left; font-size: 13px;">${dcaName}</td>
+                    <td data-order="${data.total_locs}">${data.total_locs}</td>
+                    <td data-order="${data.total_ac}">${data.total_ac.toLocaleString()}</td>
+                    <td data-order="${data.total_osb}" style="font-weight: 500;">${data.total_osb.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                    ${cycleTds}
+                    <td data-order="${data.view_rm}" style="border-left: 1px solid var(--accent-gold); color: var(--text-main);">
+                        <span class="val-badge">${data.view_ac}</span> | <span style="font-weight:bold; color: var(--accent-gold);">RM ${data.view_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                    </td>
+                    <td data-order="${data.grand_rm}" style="border-left: 1px solid var(--success); color: var(--text-main);">
+                        <span class="val-badge">${data.grand_ac}</span> | <span style="font-weight:bold; color: var(--success);">RM ${data.grand_rm.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                    </td>
+                    <td data-order="${dcaPct}" style="font-weight: bold; color: var(--success); font-size: 13px;">${dcaPct}%</td>
+                </tr>`;
         }
 
         let percentVal = grandTotalOsb > 0 ? (grandTotalAllCollection / grandTotalOsb) * 100 : 0;
-        document.getElementById('kpi-osb').textContent = `RM ${grandTotalOsb.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-        document.getElementById('kpi-collection').textContent = `RM ${grandTotalCurrentMonthCollection.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-        document.getElementById('kpi-percent').textContent = `${percentVal.toFixed(2)}%`;
-        document.getElementById('kpi-pending').textContent = dcaCount;
+        let kpiValues = {
+            osb: `RM ${grandTotalOsb.toLocaleString(undefined, {minimumFractionDigits: 2})}`,
+            collection: `RM ${grandTotalCurrentMonthCollection.toLocaleString(undefined, {minimumFractionDigits: 2})}`,
+            percent: `${percentVal.toFixed(2)}%`,
+            count: dcaCount
+        };
 
-        let sortTarget = 5 + activeCyclesForReport.length + 1; 
+        // Panggil fungsi pembinaan UI
+        binaSemulaStrukturJadual(htmlBodyContent, kpiValues);
 
-        const table = $('#report-table').DataTable({
-            "pageLength": 10,
-            "language": {
-                "search": "SEARCH REGISTRY LOGS:", "lengthMenu": "Display _MENU_ vendors", "info": "Showing _START_ to _END_ of _TOTAL_ entries", "paginate": { "next": "Next", "previous": "Prev" }
-            },
-            "scrollX": true,
-            "order": [[ sortTarget, "desc" ]],
-            "columnDefs": [ { "orderable": false, "targets": 0 } ]
-        });
+        // 3. SIMPAN DATA TERBAHARU KE LOCAL STORAGE (CACHE) UNTUK PENGGUNAAN AKAN DATANG
+        if (serverLastUpdated) {
+            let cachePayload = {
+                tableHtml: htmlBodyContent,
+                kpi: kpiValues,
+                dcaDetailsMap: window.dcaDetailsMap,
+                rawExcelData: window.rawExcelData
+            };
+            localStorage.setItem(cacheKeyData, JSON.stringify(cachePayload));
+            localStorage.setItem(cacheKeyTime, serverLastUpdated);
+        }
 
     } catch (error) { 
-        console.error("Dashboard compilation halted:", error); 
-        tbody.innerHTML = `<tr><td colspan="15" style="color:red; text-align:center;">Fatal Inception: ${error.message}</td></tr>`; 
+        console.error("Dashboard error:", error); 
+        tbody.innerHTML = `<tr><td colspan="15" style="color:red; text-align:center;">Fatal: ${error.message}</td></tr>`; 
     }
+}
+
+// Fungsi helper untuk render UI jadual supaya kod di atas nampak bersih
+function binaSemulaStrukturJadual(bodyHtml, kpi) {
+    document.getElementById('table-body').innerHTML = bodyHtml;
+    document.getElementById('kpi-osb').textContent = kpi.osb;
+    document.getElementById('kpi-collection').textContent = kpi.collection;
+    document.getElementById('kpi-percent').textContent = kpi.percent;
+    document.getElementById('kpi-pending').textContent = kpi.count;
+
+    // Initialize Semula DataTables
+    if ($.fn.DataTable.isDataTable('#report-table')) {
+        $('#report-table').DataTable().destroy();
+    }
+    
+    let sortTarget = $('#report-table th').length - 2; // G.Total Column
+    $('#report-table').DataTable({
+        "pageLength": 10,
+        "scrollX": true,
+        "order": [[ sortTarget, "desc" ]],
+        "columnDefs": [ { "orderable": false, "targets": 0 } ]
+    });
 }
 
         function exportRawToExcel() {
