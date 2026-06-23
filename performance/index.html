@@ -713,7 +713,8 @@ let totalAc = 0; let totalRm = 0;
 let flatPayload = {
     batch_name: window.activeBatchName,
     dca_name: selectedDca,
-    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+    updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+    records: {} // KITA KENA DECLARE OBJEK 'RECORDS' DI SINI DULU
 };
 
 dataPack.forEach(item => { 
@@ -728,18 +729,19 @@ dataPack.forEach(item => {
         }
     }, { merge: true });
 
-    // 2. BINA FLAT DOCUMENT (Gabungkan Profil LOC & Data Kutipan)
+    // 2. BINA FLAT DOCUMENT (Guna format Objek bersarang / Nested Object)
     let baseTask = window.currentDcaTasks.find(t => t.loc_code === item.locCode) || {};
     
-    flatPayload[`records.${item.locCode}.loc_code`] = item.locCode;
-    flatPayload[`records.${item.locCode}.loc_name`] = baseTask.loc_name || "";
-    flatPayload[`records.${item.locCode}.region`] = baseTask.region || "";
-    flatPayload[`records.${item.locCode}.area`] = baseTask.area || "";
-    flatPayload[`records.${item.locCode}.total_ac_assigned`] = baseTask.total_ac_assigned || 0;
-    flatPayload[`records.${item.locCode}.total_osb_assigned`] = baseTask.total_osb_assigned || 0;
-    
-    flatPayload[`records.${item.locCode}.${dbFieldKey}_ac`] = item.ac;
-    flatPayload[`records.${item.locCode}.${dbFieldKey}_rm`] = item.rm;
+    flatPayload.records[item.locCode] = {
+        loc_code: item.locCode,
+        loc_name: baseTask.loc_name || "",
+        region: baseTask.region || "",
+        area: baseTask.area || "",
+        total_ac_assigned: baseTask.total_ac_assigned || 0,
+        total_osb_assigned: baseTask.total_osb_assigned || 0,
+        [`${dbFieldKey}_ac`]: item.ac,
+        [`${dbFieldKey}_rm`]: item.rm
+    };
 });
 
 // Simpan Flat Document ke koleksi baharu "flat_reports"
