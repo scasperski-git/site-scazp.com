@@ -637,10 +637,15 @@
                 if (querySnapshot.empty) { displayArea.innerHTML = '<div style="text-align:center;">No baseline assignment records linked to this agency code.</div>'; return; }
                 
                 let groupedByRegion = {};
-                querySnapshot.forEach((doc) => {
-                    let task = doc.data(); task.loc_code = doc.id;
-                    if (!groupedByRegion[task.region]) groupedByRegion[task.region] = []; groupedByRegion[task.region].push(task);
-                });
+window.currentDcaTasks = []; // Tambah baris ini
+
+querySnapshot.forEach((doc) => {
+    let task = doc.data(); task.loc_code = doc.id;
+    window.currentDcaTasks.push(task); // Tambah baris ini
+    
+    if (!groupedByRegion[task.region]) groupedByRegion[task.region] = []; 
+    groupedByRegion[task.region].push(task);
+});
                 
                 let htmlStructure = '';
                 for (const region in groupedByRegion) {
@@ -698,22 +703,45 @@
             const firestoreBatch = db.batch();
             const dbFieldKey = `m${window.activeDcaCycle.monthIdx}_${window.activeDcaCycle.cycleId}`;
 
-            // ---- START LIVE AGGREGATOR WRITE ENGINE ----
-            let totalAc = 0; let totalRm = 0;
-            dataPack.forEach(item => { 
-                totalAc += item.ac; 
-                totalRm += item.rm; 
-                
-                let docRef = db.collection("submissions").doc(item.locCode);
-                firestoreBatch.set(docRef, {
-                    [window.activeBatchName]: {
-                        [dbFieldKey]: { ac_paying: item.ac, collection_amount: item.rm, timestamp: firebase.firestore.FieldValue.serverTimestamp() }
-                    }
-                }, { merge: true });
-            });
+// ---- START LIVE AGGREGATOR WRITE ENGINE & FLAT DOCUMENT ----
+let totalAc = 0; let totalRm = 0;
+let flatPayload = {
+    batch_name: window.activeBatchName,
+    dca_name: selectedDca,
+    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+};
 
-            // Tulis Ke Dalam Koleksi Summary Induk Secara Automatik!
-// Tulis Ke Dalam Koleksi Summary Induk Secara Automatik!
+dataPack.forEach(item => { 
+    totalAc += item.ac; 
+    totalRm += item.rm; 
+    
+    // 1. Kekalkan simpanan rekod lama untuk backup
+    let docRef = db.collection("submissions").doc(item.locCode);
+    firestoreBatch.set(docRef, {
+        [window.activeBatchName]: {
+            [dbFieldKey]: { ac_paying: item.ac, collection_amount: item.rm, timestamp: firebase.firestore.FieldValue.serverTimestamp() }
+        }
+    }, { merge: true });
+
+    // 2. BINA FLAT DOCUMENT (Gabungkan Profil LOC & Data Kutipan)
+    let baseTask = window.currentDcaTasks.find(t => t.loc_code === item.locCode) || {};
+    
+    flatPayload[`records.${item.locCode}.loc_code`] = item.locCode;
+    flatPayload[`records.${item.locCode}.loc_name`] = baseTask.loc_name || "";
+    flatPayload[`records.${item.locCode}.region`] = baseTask.region || "";
+    flatPayload[`records.${item.locCode}.area`] = baseTask.area || "";
+    flatPayload[`records.${item.locCode}.total_ac_assigned`] = baseTask.total_ac_assigned || 0;
+    flatPayload[`records.${item.locCode}.total_osb_assigned`] = baseTask.total_osb_assigned || 0;
+    
+    flatPayload[`records.${item.locCode}.${dbFieldKey}_ac`] = item.ac;
+    flatPayload[`records.${item.locCode}.${dbFieldKey}_rm`] = item.rm;
+});
+
+// Simpan Flat Document ke koleksi baharu "flat_reports"
+let flatRef = db.collection("flat_reports").doc(`${window.activeBatchName}_${selectedDca}`);
+firestoreBatch.set(flatRef, flatPayload, { merge: true });
+
+// Tulis Ke Dalam Koleksi Summary Induk (Live Aggregator sedia ada)
 let summaryRef = db.collection("dca_live_summaries").doc(window.activeBatchName);
 let updatePayload = {
     [selectedDca]: {
@@ -722,6 +750,7 @@ let updatePayload = {
     }
 };
 firestoreBatch.set(summaryRef, updatePayload, { merge: true });
+// ---- END LIVE AGGREGATOR WRITE ENGINE & FLAT DOCUMENT ----
             // ---- END LIVE AGGREGATOR WRITE ENGINE ----
 
             const lockId = `${window.activeBatchName}_m${window.activeDcaCycle.monthIdx}_${window.activeDcaCycle.cycleId}_${selectedDca}`;
@@ -1140,82 +1169,107 @@ firestoreBatch.set(summaryRef, updatePayload, { merge: true });
         }
 
         // --- SISTEM EXCEL RAW ON-DEMAND (HANYA BACA BILA KLIK BUTANG EXPORT) ---
-        async function exportRawToExcel() {
-            if(!window.dashboardActiveBatch) { alert("Sila Pilih Active Batch dan Generate Report dahulu."); return; }
-            
-            const batchName = window.dashboardActiveBatch.batch_name;
-            const fDcaVal = document.getElementById('filter-dca').value;
-            const fRegVal = document.getElementById('filter-region').value;
-            const monthIdxStr = document.getElementById('filter-month').value;
-            
-            showToast("Memuat turun data mentah penuh dari Pangkalan Data. Sila tunggu...");
+async function exportRawToExcel() {
+    if(!window.dashboardActiveBatch) { alert("Sila Pilih Active Batch dan Generate Report dahulu."); return; }
+    
+    const batchName = window.dashboardActiveBatch.batch_name;
+    const fDcaVal = document.getElementById('filter-dca').value;
+    const fRegVal = document.getElementById('filter-region').value;
+    const monthIdxStr = document.getElementById('filter-month').value;
+    
+    showToast("Memuat turun laporan (Flat Document System). Sila tunggu...");
 
-            try {
-                let assignQuery = db.collection("assignments");
-                if (fDcaVal !== "") assignQuery = assignQuery.where("dca_name", "==", fDcaVal);
-                if (fRegVal !== "") assignQuery = assignQuery.where("region", "==", fRegVal);
+    try {
+        // HANYA BACA FLAT DOCUMENTS! (Max 20-30 reads bergantung pada jumlah DCA)
+        let query = db.collection("flat_reports").where("batch_name", "==", batchName);
+        if (fDcaVal !== "") query = query.where("dca_name", "==", fDcaVal);
+        
+        const flatSnap = await query.get();
+        if (flatSnap.empty) { alert("Tiada rekod laporan yang telah dihantar oleh DCA dijumpai untuk dieksport."); return; }
+
+        let excelData = [];
+        let activeCyclesForExcel = [];
+        let displayMonthName = "ALL MONTHS";
+
+        // Tentukan Kitaran Bulan yang ditapis
+        if (monthIdxStr === "ALL") {
+            window.dashboardActiveBatch.months.forEach(m => m.cycles.forEach(c => activeCyclesForExcel.push({ ...c, parentMonthIdx: m.month_idx })));
+        } else {
+            const monthIdx = parseInt(monthIdxStr);
+            const monthConfig = window.dashboardActiveBatch.months.find(m => m.month_idx === monthIdx);
+            if(monthConfig) { displayMonthName = monthConfig.month_name; monthConfig.cycles.forEach(c => activeCyclesForExcel.push({ ...c, parentMonthIdx: monthConfig.month_idx })); }
+        }
+
+        // Proses Data dari Flat Document terus ke format Excel
+        flatSnap.forEach(doc => {
+            let data = doc.data();
+            let dcaName = data.dca_name;
+            let records = data.records || {};
+
+            for (let locCode in records) {
+                let task = records[locCode];
                 
-                const assignmentsSnap = await assignQuery.get();
-                if (assignmentsSnap.empty) { alert("Tiada rekod dijumpai untuk dieksport."); return; }
+                // Tapisan Region (jika ada)
+                if (fRegVal !== "" && task.region !== fRegVal) continue;
 
-                let submissionsDict = {};
-                let locCodes = []; assignmentsSnap.forEach(doc => locCodes.push(doc.id));
-                const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
-                const locCodeChunks = chunkArray(locCodes, 10);
-                
-                for (let chunk of locCodeChunks) {
-                    const subSnap = await db.collection("submissions").where(firebase.firestore.FieldPath.documentId(), 'in', chunk).get();
-                    subSnap.forEach(doc => { submissionsDict[doc.id] = doc.data(); });
-                }
+                let locViewAc = 0, locViewRm = 0, locGrandRm = 0, locGrandAc = 0;
+                let rowData = { 
+                    "Batch": batchName, 
+                    "Display Filter": displayMonthName, 
+                    "DCA Name": dcaName, 
+                    "Region": task.region || "-", 
+                    "Area": task.area || "-", 
+                    "Loc Code": locCode, 
+                    "Loc Name": task.loc_name || "-", 
+                    "Total A/C Assigned": task.total_ac_assigned || 0, 
+                    "Total OSB Assigned": task.total_osb_assigned || 0 
+                };
 
-                let excelData = [];
-                let activeCyclesForExcel = [];
-                let displayMonthName = "ALL MONTHS";
-
-                if (monthIdxStr === "ALL") {
-                    window.dashboardActiveBatch.months.forEach(m => m.cycles.forEach(c => activeCyclesForExcel.push({ ...c, parentMonthIdx: m.month_idx })));
-                } else {
-                    const monthIdx = parseInt(monthIdxStr);
-                    const monthConfig = window.dashboardActiveBatch.months.find(m => m.month_idx === monthIdx);
-                    if(monthConfig) { displayMonthName = monthConfig.month_name; monthConfig.cycles.forEach(c => activeCyclesForExcel.push({ ...c, parentMonthIdx: monthConfig.month_idx })); }
-                }
-
-                assignmentsSnap.forEach(doc => {
-                    const task = doc.data(); const locCode = doc.id;
-                    const batchSub = submissionsDict[locCode]?.[batchName] || {};
-                    let locViewAc = 0, locViewRm = 0, locGrandRm = 0, locGrandAc = 0;
-
-                    let rowData = { "Batch": batchName, "Display Filter": displayMonthName, "DCA Name": task.dca_name || "UNKNOWN", "Region": task.region, "Area": task.area, "Loc Code": locCode, "Loc Name": task.loc_name, "Total A/C Assigned": parseInt(task.total_ac_assigned) || 0, "Total OSB Assigned": parseFloat(task.total_osb_assigned) || 0 };
-
-                    window.dashboardActiveBatch.months.forEach(m => {
-                        m.cycles.forEach(c => {
-                            let dbKey = `m${m.month_idx}_${c.id}`;
-                            locGrandAc += batchSub[dbKey]?.ac_paying || 0; locGrandRm += batchSub[dbKey]?.collection_amount || 0;
-                        });
+                // Kira Grand Total
+                window.dashboardActiveBatch.months.forEach(m => {
+                    m.cycles.forEach(c => {
+                        let dbKey = `m${m.month_idx}_${c.id}`;
+                        locGrandAc += task[`${dbKey}_ac`] || 0; 
+                        locGrandRm += task[`${dbKey}_rm`] || 0;
                     });
-
-                    activeCyclesForExcel.forEach(c => {
-                        let dbKey = `m${c.parentMonthIdx}_${c.id}`;
-                        let cAc = batchSub[dbKey]?.ac_paying || 0; let cRm = batchSub[dbKey]?.collection_amount || 0;
-                        locViewAc += cAc; locViewRm += cRm;
-                        
-                        let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
-                        rowData[`${c.label.toUpperCase()} (${cDateStr}) - A/C Paying`] = cAc;
-                        rowData[`${c.label.toUpperCase()} (${cDateStr}) - Collection RM`] = cRm;
-                    });
-
-                    rowData["Total A/C Paying (Current View)"] = locViewAc; rowData["Total Collection (Current View RM)"] = locViewRm;
-                    rowData["Total A/C Paying (G.Total Batch)"] = locGrandAc; rowData["Total Collection (G.Total Batch RM)"] = locGrandRm;
-                    excelData.push(rowData);
                 });
 
-                const worksheet = XLSX.utils.json_to_sheet(excelData); const workbook = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(workbook, worksheet, "Raw DCA Performance");
-                const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-                XLSX.writeFile(workbook, `DCA_MasterPerformance_${batchName}_${dateStr}_${timeStr}.xlsx`);
-                showToast("Muat turun Excel berjaya!");
+                // Masukkan lajur untuk bulan yang dipilih sahaja
+                activeCyclesForExcel.forEach(c => {
+                    let dbKey = `m${c.parentMonthIdx}_${c.id}`;
+                    let cAc = task[`${dbKey}_ac`] || 0; 
+                    let cRm = task[`${dbKey}_rm`] || 0;
+                    locViewAc += cAc; locViewRm += cRm;
+                    
+                    let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
+                    rowData[`${c.label.toUpperCase()} (${cDateStr}) - A/C Paying`] = cAc;
+                    rowData[`${c.label.toUpperCase()} (${cDateStr}) - Collection RM`] = cRm;
+                });
 
-            } catch(e) { alert("Ralat semasa muat turun: " + e.message); }
-        }
+                rowData["Total A/C Paying (Current View)"] = locViewAc; 
+                rowData["Total Collection (Current View RM)"] = locViewRm;
+                rowData["Total A/C Paying (G.Total Batch)"] = locGrandAc; 
+                rowData["Total Collection (G.Total Batch RM)"] = locGrandRm;
+                
+                excelData.push(rowData);
+            }
+        });
+
+        // Jana Fail Excel
+        const worksheet = XLSX.utils.json_to_sheet(excelData); 
+        const workbook = XLSX.utils.book_new(); 
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Raw DCA Performance");
+        const now = new Date(); 
+        const dateStr = now.toISOString().split('T')[0]; 
+        const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+        
+        XLSX.writeFile(workbook, `DCA_MasterPerformance_${batchName}_${dateStr}_${timeStr}.xlsx`);
+        showToast("Muat turun Excel berjaya (Sistem Super Ringan)!");
+
+    } catch(e) { 
+        alert("Ralat semasa muat turun: " + e.message); 
+    }
+}
     </script>
 </body>
 </html>
