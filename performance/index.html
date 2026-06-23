@@ -296,7 +296,16 @@
                         <select id="unlock-dca-select"><option value="">-- Awaiting Batch Parameter --</option></select>
                         <button class="btn-action" style="background-color: var(--danger); width:100%; margin-top:10px;" onclick="executeSubmissionUnlock()">Unlock Agency Submission</button>
                     </div>
-                </div>
+                        <div class="control-panel" style="margin-top: 20px;">
+                        <div class="panel-title">5. Export Full Master Raw Data (Submitted + Pending)</div>
+                        <label class="panel-label">Target Batch Code</label>
+                        <select id="export-master-batch"><option value="">-- Fetching Target Batch --</option></select>
+                        <button class="btn-action btn-gold" style="width:100%; margin-top:10px;" onclick="exportMasterRawToExcel()">Download Master Raw Excel</button>
+                        <p style="font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.4;">
+                            <strong>Operation Notice:</strong> This function will compile ALL assigned accounts from the database regardless of submission status. Use this primarily for final month-end auditing to minimize database read operations.
+                        </p>
+                    </div>
+                    </div>
             </div>
 
             <div class="control-panel" style="margin-top: 20px;">
@@ -449,14 +458,16 @@ $(document).ready(function() {
             } catch (error) { alert("Cloud submission aborted: " + error.message); }
         }
 
-        async function fetchBatchesList() {
+async function fetchBatchesList() {
             try {
                 const snapshot = await db.collection("batches").get();
                 const dashBatchSelect = document.getElementById('filter-batch');
                 const unlockBatchSelect = document.getElementById('unlock-batch-select');
+                const masterExportSelect = document.getElementById('export-master-batch'); // Tambah ini
                 
                 dashBatchSelect.innerHTML = '<option value="">-- Choose Batch --</option>';
                 unlockBatchSelect.innerHTML = '<option value="">-- Select Target Batch --</option>';
+                masterExportSelect.innerHTML = '<option value="">-- Choose Target Batch --</option>'; // Tambah ini
                 window.allBatches = [];
 
                 snapshot.forEach(doc => {
@@ -464,6 +475,7 @@ $(document).ready(function() {
                     window.allBatches.push(b);
                     dashBatchSelect.innerHTML += `<option value="${b.batch_name}">${b.batch_name}</option>`;
                     unlockBatchSelect.innerHTML += `<option value="${b.batch_name}">${b.batch_name}</option>`;
+                    masterExportSelect.innerHTML += `<option value="${b.batch_name}">${b.batch_name}</option>`; // Tambah ini
                 });
 
                 autoDetectDcaPortal();
@@ -1208,6 +1220,103 @@ async function fetchDcaDetailsFromDB(dcaName, batchName) {
                 </tr>`;
             });
             html += '</tbody></table>'; return html;
+        }
+
+    // --- ADMIN ONLY: EXPORT FULL MASTER DATA (PENDING + SUBMITTED) ---
+        async function exportMasterRawToExcel() {
+            const batchName = document.getElementById('export-master-batch').value;
+            if(!batchName) { alert("Please select a target batch to export."); return; }
+
+            const batchObj = window.allBatches.find(b => b.batch_name === batchName);
+            if(!batchObj) { alert("Batch configuration parameters missing."); return; }
+
+            showToast("Compiling FULL Master Raw Data. This may take a moment...");
+
+            try {
+                // 1. Baca semua tugasan (Ini guna banyak reads - bergantung pada saiz Excel yang di-upload)
+                const assignSnap = await db.collection("assignments").get();
+                if (assignSnap.empty) { alert("No baseline assignments found in database."); return; }
+
+                // 2. Baca semua Flat Reports untuk batch ini (Hanya guna sikit reads - purata 20-30 dokumen)
+                const flatSnap = await db.collection("flat_reports").where("batch_name", "==", batchName).get();
+                let submittedDict = {}; 
+                
+                // Susun data kutipan ke dalam 'dictionary' supaya laju dicari oleh script
+                flatSnap.forEach(doc => {
+                    let data = doc.data();
+                    submittedDict[data.dca_name] = data.records || {};
+                });
+
+                let excelData = [];
+                let activeCyclesForExcel = [];
+                
+                // Sediakan tajuk lajur dinamik berdasarkan kitaran Batch
+                batchObj.months.forEach(m => {
+                    m.cycles.forEach(c => activeCyclesForExcel.push({ ...c, parentMonthIdx: m.month_idx }));
+                });
+
+                // 3. Mula proses menggabungkan data
+                assignSnap.forEach(doc => {
+                    let task = doc.data();
+                    let locCode = doc.id;
+                    let dcaName = task.dca_name || "UNASSIGNED";
+                    
+                    // Semak sama ada DCA ini dah submit data untuk LOC ini di dalam Flat Report
+                    let flatRecord = submittedDict[dcaName] ? submittedDict[dcaName][locCode] : null;
+
+                    let locGrandRm = 0, locGrandAc = 0;
+                    let rowData = { 
+                        "Batch": batchName, 
+                        "DCA Name": dcaName, 
+                        "Region": task.region || "-", 
+                        "Area": task.area || "-", 
+                        "Loc Code": locCode, 
+                        "Loc Name": task.loc_name || "-", 
+                        "Total A/C Assigned": parseInt(task.total_ac_assigned) || 0, 
+                        "Total OSB Assigned": parseFloat(task.total_osb_assigned) || 0 
+                    };
+
+                    // Masukkan nilai untuk setiap kitaran (C-1, C-2, dll)
+                    activeCyclesForExcel.forEach(c => {
+                        let dbKey = `m${c.parentMonthIdx}_${c.id}`;
+                        let cAc = 0; let cRm = 0;
+                        
+                        // Jika wujud rekod Flat Document, ambil nilainya. Jika tidak, ia kekal 0.
+                        if (flatRecord) {
+                            cAc = flatRecord[`${dbKey}_ac`] || 0; 
+                            cRm = flatRecord[`${dbKey}_rm`] || 0;
+                        }
+
+                        locGrandAc += cAc;
+                        locGrandRm += cRm;
+                        
+                        let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
+                        rowData[`${c.label.toUpperCase()} (${cDateStr}) - A/C Paying`] = cAc;
+                        rowData[`${c.label.toUpperCase()} (${cDateStr}) - Collection RM`] = cRm;
+                    });
+
+                    rowData["Total A/C Paying (G.Total Batch)"] = locGrandAc; 
+                    rowData["Total Collection (G.Total Batch RM)"] = locGrandRm;
+                    
+                    excelData.push(rowData);
+                });
+
+                // 4. Jana Excel Menggunakan SheetJS
+                const worksheet = XLSX.utils.json_to_sheet(excelData); 
+                const workbook = XLSX.utils.book_new(); 
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Master Raw Dataset");
+                
+                const now = new Date(); 
+                const dateStr = now.toISOString().split('T')[0]; 
+                const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+                
+                XLSX.writeFile(workbook, `DCA_MASTER_RAW_${batchName}_${dateStr}_${timeStr}.xlsx`);
+                showToast("Master Raw Excel successfully downloaded!");
+
+            } catch(e) { 
+                console.error("Master Export Error:", e); 
+                alert("Ralat semasa muat turun: " + e.message); 
+            }
         }
 
         // --- SISTEM EXCEL RAW ON-DEMAND (HANYA BACA BILA KLIK BUTANG EXPORT) ---
