@@ -349,13 +349,15 @@
             populateDcaList(); 
         };
 
-        $(document).ready(function() {
-            // LAZY LOAD BILA USER KLIK BUTANG + 
+$(document).ready(function() {
+            // LAZY LOAD BILA USER KLIK BUTANG + (DIKEMAS KINI)
             $(document).off('click', '#report-table tbody td.details-control').on('click', '#report-table tbody td.details-control', async function () {
                 const tr = $(this).closest('tr');
                 const table = $('#report-table').DataTable();
                 const row = table.row(tr);
-                let dcaName = tr.data('dca');
+                
+                // GUNA .attr() LEBIH SELAMAT DARI .data() UNTUK ELAK FORMAT TEKS BERUBAH
+                let dcaName = tr.attr('data-dca'); 
 
                 if (row.child.isShown()) {
                     row.child.hide();
@@ -363,7 +365,10 @@
                     $(this).html('&#x2295;'); 
                 } else {
                     if (!window.dcaDetailsMap[dcaName]) {
-                        $(this).html('&#8987;'); // Ikon Jam Pasir (Loading)
+                        $(this).html('&#8987;'); // Ikon Loading
+                        
+                        console.log(`[DEBUG] Bermula tarikan data untuk DCA: "${dcaName}"`); // Radar kita
+                        
                         let details = await fetchDcaDetailsFromDB(dcaName, window.dashboardActiveBatch.batch_name);
                         window.dcaDetailsMap[dcaName] = details;
                     }
@@ -1092,16 +1097,18 @@ firestoreBatch.set(summaryRef, updatePayload, { merge: true });
             $('#report-table').DataTable({ "pageLength": 10, "scrollX": true, "order": [[ sortTarget, "desc" ]], "columnDefs": [ { "orderable": false, "targets": 0 } ] });
         }
 
-// --- SISTEM LAZY LOAD CHILD ROWS (FLAT DOCUMENT OPTIMIZED) ---
+// --- SISTEM LAZY LOAD CHILD ROWS (FLAT DOCUMENT OPTIMIZED + DEBUGGER) ---
 async function fetchDcaDetailsFromDB(dcaName, batchName) {
     let details = [];
     try {
-        // 1. CUBA BACA DARI FLAT DOCUMENT DAHULU (Kaedah Paling Pantas: 1 Read)
-        const flatRef = db.collection("flat_reports").doc(`${batchName}_${dcaName}`);
+        const flatDocName = `${batchName}_${dcaName}`;
+        console.log(`[DEBUG] 1. Mencari Dokumen Flat: ${flatDocName}`);
+        
+        const flatRef = db.collection("flat_reports").doc(flatDocName);
         const flatSnap = await flatRef.get();
 
         if (flatSnap.exists) {
-            // Jika DCA sudah submit data, kita tarik dari dokumen ini sahaja
+            console.log(`[DEBUG] 2. Dokumen Flat JUMPA! Mengekstrak rekod...`);
             let data = flatSnap.data();
             let records = data.records || {};
 
@@ -1112,7 +1119,6 @@ async function fetchDcaDetailsFromDB(dcaName, batchName) {
                 let locViewAc = 0, locViewRm = 0; 
                 let locMonthTotals = {};
 
-                // Kira jumlah untuk setiap bulan
                 window.dashboardActiveBatch.months.forEach(m => {
                     let mAc = 0, mRm = 0;
                     m.cycles.forEach(c => {
@@ -1123,7 +1129,6 @@ async function fetchDcaDetailsFromDB(dcaName, batchName) {
                     locMonthTotals[m.month_idx] = { ac: mAc, rm: mRm };
                 });
 
-                // Kira jumlah untuk paparan semasa (View Filter)
                 window.activeMonthsForChildRows.forEach(m => {
                     m.cycles.forEach(c => {
                         let dbKey = `m${m.month_idx}_${c.id}`;
@@ -1140,17 +1145,20 @@ async function fetchDcaDetailsFromDB(dcaName, batchName) {
                     monthTotals: locMonthTotals 
                 });
             }
+            console.log(`[DEBUG] 3. Berjaya proses ${details.length} lokasi dari Flat Document.`);
         } else {
-            // 2. FALLBACK (Jika DCA belum pernah submit apa-apa untuk batch ini)
-            // Terpaksa baca dari senarai "assignments" untuk tunjukkan baris lokasi kosong (0 Kutipan).
+            console.log(`[DEBUG] 2. Dokumen Flat TIADA. Bertukar ke mod Fallback (Baca dari assignments)...`);
             const assignSnap = await db.collection("assignments").where("dca_name", "==", dcaName).get();
-            if(assignSnap.empty) return [];
+            
+            if(assignSnap.empty) {
+                console.warn(`[DEBUG] 3. Ralat: Tiada langsung data lokasi dijumpai dalam 'assignments' untuk "${dcaName}"!`);
+                return [];
+            }
 
             assignSnap.forEach(doc => {
                 let task = doc.data();
                 let locMonthTotals = {};
                 
-                // Semua kosong sebab belum ada submission
                 window.dashboardActiveBatch.months.forEach(m => {
                     locMonthTotals[m.month_idx] = { ac: 0, rm: 0 };
                 });
@@ -1164,9 +1172,10 @@ async function fetchDcaDetailsFromDB(dcaName, batchName) {
                     monthTotals: locMonthTotals 
                 });
             });
+            console.log(`[DEBUG] 3. Berjaya proses ${details.length} lokasi menggunakan mod Fallback.`);
         }
     } catch(e) { 
-        console.error("Error fetching child rows:", e); 
+        console.error("[DEBUG] RALAT KRITIKAL semasa fetchDcaDetailsFromDB:", e); 
     }
     return details;
 }
