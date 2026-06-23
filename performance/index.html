@@ -1092,53 +1092,84 @@ firestoreBatch.set(summaryRef, updatePayload, { merge: true });
             $('#report-table').DataTable({ "pageLength": 10, "scrollX": true, "order": [[ sortTarget, "desc" ]], "columnDefs": [ { "orderable": false, "targets": 0 } ] });
         }
 
-        // --- SISTEM LAZY LOAD CHILD ROWS (HANYA BACA DB BILA KLIK BUTANG +) ---
-        async function fetchDcaDetailsFromDB(dcaName, batchName) {
-            let details = [];
-            try {
-                const assignSnap = await db.collection("assignments").where("dca_name", "==", dcaName).get();
-                if(assignSnap.empty) return [];
+// --- SISTEM LAZY LOAD CHILD ROWS (FLAT DOCUMENT OPTIMIZED) ---
+async function fetchDcaDetailsFromDB(dcaName, batchName) {
+    let details = [];
+    try {
+        // 1. CUBA BACA DARI FLAT DOCUMENT DAHULU (Kaedah Paling Pantas: 1 Read)
+        const flatRef = db.collection("flat_reports").doc(`${batchName}_${dcaName}`);
+        const flatSnap = await flatRef.get();
 
-                let locCodes = []; let tasks = {};
-                assignSnap.forEach(doc => { locCodes.push(doc.id); tasks[doc.id] = doc.data(); });
+        if (flatSnap.exists) {
+            // Jika DCA sudah submit data, kita tarik dari dokumen ini sahaja
+            let data = flatSnap.data();
+            let records = data.records || {};
 
-                let submissionsDict = {};
-                const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
-                const locCodeChunks = chunkArray(locCodes, 10);
+            for (let locCode in records) {
+                let task = records[locCode];
+                let ac = parseInt(task.total_ac_assigned) || 0; 
+                let osb = parseFloat(task.total_osb_assigned) || 0;
+                let locViewAc = 0, locViewRm = 0; 
+                let locMonthTotals = {};
 
-                for (let chunk of locCodeChunks) {
-                    const subSnap = await db.collection("submissions").where(firebase.firestore.FieldPath.documentId(), 'in', chunk).get();
-                    subSnap.forEach(doc => { submissionsDict[doc.id] = doc.data(); });
-                }
-
-                for (let locCode of locCodes) {
-                    let task = tasks[locCode];
-                    let batchSub = submissionsDict[locCode]?.[batchName] || {};
-
-                    let ac = parseInt(task.total_ac_assigned) || 0; let osb = parseFloat(task.total_osb_assigned) || 0;
-                    let locViewAc = 0, locViewRm = 0; let locMonthTotals = {};
-
-                    window.dashboardActiveBatch.months.forEach(m => {
-                        let mAc = 0, mRm = 0;
-                        m.cycles.forEach(c => {
-                            let dbKey = `m${m.month_idx}_${c.id}`;
-                            mAc += batchSub[dbKey]?.ac_paying || 0; mRm += batchSub[dbKey]?.collection_amount || 0;
-                        });
-                        locMonthTotals[m.month_idx] = { ac: mAc, rm: mRm };
+                // Kira jumlah untuk setiap bulan
+                window.dashboardActiveBatch.months.forEach(m => {
+                    let mAc = 0, mRm = 0;
+                    m.cycles.forEach(c => {
+                        let dbKey = `m${m.month_idx}_${c.id}`;
+                        mAc += task[`${dbKey}_ac`] || 0; 
+                        mRm += task[`${dbKey}_rm`] || 0;
                     });
+                    locMonthTotals[m.month_idx] = { ac: mAc, rm: mRm };
+                });
 
-                    window.activeMonthsForChildRows.forEach(m => {
-                        m.cycles.forEach(c => {
-                            let dbKey = `m${m.month_idx}_${c.id}`;
-                            locViewAc += batchSub[dbKey]?.ac_paying || 0; locViewRm += batchSub[dbKey]?.collection_amount || 0;
-                        });
+                // Kira jumlah untuk paparan semasa (View Filter)
+                window.activeMonthsForChildRows.forEach(m => {
+                    m.cycles.forEach(c => {
+                        let dbKey = `m${m.month_idx}_${c.id}`;
+                        locViewAc += task[`${dbKey}_ac`] || 0; 
+                        locViewRm += task[`${dbKey}_rm`] || 0;
                     });
+                });
 
-                    details.push({ region: task.region, area: task.area, loc_code: locCode, loc_name: task.loc_name, ac: ac, osb: osb, viewAc: locViewAc, viewRm: locViewRm, monthTotals: locMonthTotals });
-                }
-            } catch(e) { console.error("Error fetching child rows:", e); }
-            return details;
+                details.push({ 
+                    region: task.region || "-", area: task.area || "-", 
+                    loc_code: locCode, loc_name: task.loc_name || "-", 
+                    ac: ac, osb: osb, 
+                    viewAc: locViewAc, viewRm: locViewRm, 
+                    monthTotals: locMonthTotals 
+                });
+            }
+        } else {
+            // 2. FALLBACK (Jika DCA belum pernah submit apa-apa untuk batch ini)
+            // Terpaksa baca dari senarai "assignments" untuk tunjukkan baris lokasi kosong (0 Kutipan).
+            const assignSnap = await db.collection("assignments").where("dca_name", "==", dcaName).get();
+            if(assignSnap.empty) return [];
+
+            assignSnap.forEach(doc => {
+                let task = doc.data();
+                let locMonthTotals = {};
+                
+                // Semua kosong sebab belum ada submission
+                window.dashboardActiveBatch.months.forEach(m => {
+                    locMonthTotals[m.month_idx] = { ac: 0, rm: 0 };
+                });
+
+                details.push({ 
+                    region: task.region || "-", area: task.area || "-", 
+                    loc_code: doc.id, loc_name: task.loc_name || "-", 
+                    ac: parseInt(task.total_ac_assigned) || 0, 
+                    osb: parseFloat(task.total_osb_assigned) || 0, 
+                    viewAc: 0, viewRm: 0, 
+                    monthTotals: locMonthTotals 
+                });
+            });
         }
+    } catch(e) { 
+        console.error("Error fetching child rows:", e); 
+    }
+    return details;
+}
 
         function formatChildRow(dcaName, activeMonths) {
             const locList = window.dcaDetailsMap[dcaName];
