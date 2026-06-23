@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DCA Portal & Performance Dashboard | scazp.com</title>
     
-    <!-- jQuery & DataTables Libraries -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     
-    <!-- SheetJS Excel Library -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
-    <!-- Firebase Legacy SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
@@ -224,8 +221,9 @@
             </div>
 
             <div class="grid-2">
+                
                 <div class="control-panel">
-                    <div class="panel-title">1. Register / Update Collection Batch Configuration</div>
+                    <div class="panel-title">&#9881;&#65039; 1. Register / Update Collection Batch Configuration</div>
                     <label class="panel-label">Collection Batch Code (Must be unique)</label>
                     <input type="text" id="setup-batch-name" placeholder="e.g., BATCH XX-1">
                     
@@ -280,36 +278,43 @@
                     <button class="btn-action btn-gold" onclick="saveBatchSetup()">Save Batch Configuration</button>
                 </div>
 
-                <div>
-                    <div class="control-panel">
-                        <div class="panel-title">2. Upload Baseline Assignment Database (Excel)</div>
-                        <label class="panel-label" style="color:var(--danger); margin-bottom:10px; line-height:1.4;">Critical Requirement: Excel file layout must strictly contain the headers 'LOC CODE', 'DCA NAME', 'REGION', 'AREA', 'TOTAL A/C ASSIGNED', and 'TOTAL OSB ASSIGNED'.</label>
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    
+                    <div class="control-panel" style="margin-bottom: 0;">
+                        <div class="panel-title">&#128194; 2. Upload Baseline Assignment Database (Excel)</div>
+                        
+                        <div style="background-color: rgba(239, 68, 68, 0.1); border-left: 3px solid var(--danger); padding: 12px; margin-bottom: 15px; border-radius: 4px;">
+                            <label class="panel-label" style="color:var(--danger); margin-bottom:0; line-height:1.4;">Critical Requirement: Excel file layout must strictly contain the headers 'LOC CODE', 'DCA NAME', 'REGION', 'AREA', 'TOTAL A/C ASSIGNED', and 'TOTAL OSB ASSIGNED'.</label>
+                        </div>
+                        
                         <label class="panel-label">Choose Assignment Data File</label>
                         <input type="file" id="excel-file" accept=".xlsx, .xls" onchange="uploadExcelToFirestore(this)">
                     </div>
+                    
+                    <div class="control-panel" style="margin-bottom: 0;">
+                        <div class="panel-title">&#128202; 3. Export Full Master Raw Data (Submitted + Pending)</div>
+                        <label class="panel-label">Target Batch Code</label>
+                        <select id="export-master-batch"><option value="">-- Fetching Target Batch --</option></select>
+                        <button class="btn-action btn-gold" style="width:100%; margin-top:10px;" onclick="exportMasterRawToExcel()">Download Master Raw Excel</button>
+                        <p style="font-size: 11px; color: var(--text-muted); margin-top: 10px; margin-bottom: 0; line-height: 1.4;">
+                            <strong>Operation Notice:</strong> This function will compile ALL assigned accounts from the database regardless of submission status. Use this primarily for final month-end auditing to minimize database read operations.
+                        </p>
+                    </div>
 
-                    <div class="control-panel" style="margin-top: 20px;">
-                        <div class="panel-title">4. Unlock DCA Submission Restrictions (Correction Overrides)</div>
+                    <div class="control-panel" style="margin-bottom: 0;">
+                        <div class="panel-title">&#128275; 4. Unlock DCA Submission Restrictions (Correction Overrides)</div>
                         <label class="panel-label">Target Batch Code</label>
                         <select id="unlock-batch-select" onchange="populateUnlockDcaDropdown()"><option value="">-- Select Target Batch --</option></select>
                         <label class="panel-label" style="margin-top:10px;">Select Restricted DCA Agency To Unlock</label>
                         <select id="unlock-dca-select"><option value="">-- Awaiting Batch Parameter --</option></select>
                         <button class="btn-action" style="background-color: var(--danger); width:100%; margin-top:10px;" onclick="executeSubmissionUnlock()">Unlock Agency Submission</button>
                     </div>
-                        <div class="control-panel" style="margin-top: 20px;">
-                        <div class="panel-title">5. Export Full Master Raw Data (Submitted + Pending)</div>
-                        <label class="panel-label">Target Batch Code</label>
-                        <select id="export-master-batch"><option value="">-- Fetching Target Batch --</option></select>
-                        <button class="btn-action btn-gold" style="width:100%; margin-top:10px;" onclick="exportMasterRawToExcel()">Download Master Raw Excel</button>
-                        <p style="font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.4;">
-                            <strong>Operation Notice:</strong> This function will compile ALL assigned accounts from the database regardless of submission status. Use this primarily for final month-end auditing to minimize database read operations.
-                        </p>
-                    </div>
-                    </div>
+                    
+                </div>
             </div>
 
             <div class="control-panel" style="margin-top: 20px;">
-                <div class="panel-title">3. Active Configuration Registry Summary</div>
+                <div class="panel-title">&#128203; 5. Active Configuration Registry Summary</div>
                 <div class="table-container" style="margin-top: 0; padding:5px;">
                     <table class="dataTable" style="width: 100%;">
                         <thead>
@@ -326,11 +331,11 @@
                     </table>
                 </div>
             </div>
+            
         </div>
 
     </div>
 
-    <!-- CENTER PRESTIGE TOAST ALERT -->
     <div id="toast">Operation successfully executed!</div>
 
     <script>
