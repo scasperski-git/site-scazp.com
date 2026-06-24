@@ -872,11 +872,10 @@ async function uploadExcelToFirestore(input) {
                 showToast("Processing file and standardizing DCA names...");
 
                 try {
-                    // 1. AMBIL NAMA DCA SEDIA ADA DARI FIREBASE (Untuk rujukan silang)
+                    // 1. AMBIL NAMA DCA SEDIA ADA DARI FIREBASE
                     const sysDoc = await db.collection("system_lists").doc("dropdowns").get();
                     let existingDcas = sysDoc.exists ? (sysDoc.data().dcas || []) : [];
 
-                    // 2. KUMPULKAN SEMUA NAMA DCA (Dari Excel + Firebase)
                     let rawNamesSet = new Set();
                     existingDcas.forEach(d => rawNamesSet.add(d.toString().trim().toUpperCase()));
                     jsonData.forEach(row => {
@@ -884,28 +883,32 @@ async function uploadExcelToFirestore(input) {
                         if(name) rawNamesSet.add(name.toString().trim().toUpperCase());
                     });
 
-                    // 3. SUSUN NAMA DARI PALING PANJANG KE PALING PENDEK
+                    // Susun dari paling panjang ke paling pendek
                     let sortedNames = Array.from(rawNamesSet).sort((a, b) => b.length - a.length);
 
-                    // 4. FUNGSI PENYELARASAN NAMA (AUTO-MERGE)
+                    // 2. FUNGSI AUTO-MERGE V2 (LEBIH BIJAK)
                     function getOfficialName(rawName) {
                         if(!rawName) return 'UNASSIGNED';
-                        let upperName = rawName.toString().trim().toUpperCase();
+                        let original = rawName.toString().trim().toUpperCase();
+                        
+                        // Buang semua simbol (&, ., -, jarak) untuk buat padanan bersih
+                        let cleanInput = original.replace(/[^A-Z0-9]/g, ''); 
                         
                         for(let longName of sortedNames) {
-                            if (longName.length > upperName.length) {
-                                // Semak jika nama pendek wujud sebagai perkataan penuh dalam nama panjang
-                                // Mencegah salah cantum: "ALI" takkan jadi "ALIA"
-                                if (
-                                    longName.startsWith(upperName + " ") || 
-                                    longName.endsWith(" " + upperName) || 
-                                    longName.includes(" " + upperName + " ")
-                                ) {
-                                    return longName; // Pulangkan nama penuh (Cth: BASRI & PARTNERS)
-                                }
+                            let cleanLong = longName.replace(/[^A-Z0-9]/g, '');
+                            
+                            // Syarat A: Padanan Tepat Walaupun Tanpa Simbol (Cth: BASRIPARTNERS == BASRIPARTNERS)
+                            if (cleanLong === cleanInput) {
+                                return longName;
+                            }
+                            
+                            // Syarat B: Padanan Separa (Cth: XTREMEJR bermula dengan XTREME)
+                            // Minimum 3 huruf untuk elak cantuman secara rawak
+                            if (cleanLong.startsWith(cleanInput) && cleanInput.length >= 3) {
+                                return longName;
                             }
                         }
-                        return upperName;
+                        return original;
                     }
 
                     const batch = db.batch();
@@ -919,7 +922,7 @@ async function uploadExcelToFirestore(input) {
                         if (locCodeRaw) {
                             let rawDca = row['DCA NAME'];
                             
-                            // *** GUNAKAN FUNGSI AUTO-MERGE DI SINI ***
+                            // Masukkan nama ke dalam mesin tapisan
                             let dcaName = getOfficialName(rawDca); 
                             
                             dcaSet.add(dcaName);
@@ -938,21 +941,20 @@ async function uploadExcelToFirestore(input) {
                         }
                     });
 
-                    // Tulis Ke Dalam Koleksi Summary Induk (GLOBAL BASELINES)
+                    // PENYELESAIAN ISU 16 JUTA (TOTAL OSB): 
+                    // Kita BUANG '{ merge: true }' supaya data hantu dari fail Excel test sebelum ini terpadam!
                     let baseRef = db.collection("dca_live_summaries").doc("GLOBAL_BASELINES");
-                    batch.set(baseRef, baselines, { merge: true });
+                    batch.set(baseRef, baselines); 
 
-                    // Tulis Ke Dalam Koleksi Dropdowns Untuk Jimat Reads
                     batch.set(
                         db.collection("system_lists").doc("dropdowns"),
-                        { dcas: Array.from(dcaSet).sort(), regions: Array.from(regionSet).sort(), updated_at: firebase.firestore.FieldValue.serverTimestamp() },
-                        { merge:true }
+                        { dcas: Array.from(dcaSet).sort(), regions: Array.from(regionSet).sort(), updated_at: firebase.firestore.FieldValue.serverTimestamp() }
                     );
 
                     await batch.commit(); 
                     showToast(`Import complete: Added ${count} entries. DCA names standardized!`); 
                     input.value = ""; 
-                    localStorage.removeItem('dropdown_lists'); // Buang cache lama
+                    localStorage.removeItem('dropdown_lists');
                     populateDcaList(); 
 
                 } catch (error) { 
