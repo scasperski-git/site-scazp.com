@@ -15,7 +15,7 @@ body{
     radial-gradient(circle at bottom right, #fce4ec, transparent 40%),
     linear-gradient(180deg, #eef1f4, #f4f6f8);
   padding:20px;
-  color:#000;
+  color:#333;
 }
 
 /* ===== CONTAINER ===== */
@@ -23,67 +23,79 @@ body{
   max-width:420px;
   margin:auto;
   background:#fff;
-  padding:16px 20px 20px;
-  border-radius:10px;
-  box-shadow:0 8px 20px rgba(0,0,0,.08);
+  padding:20px 24px;
+  border-radius:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
   position:relative;
-  animation:fade .3s ease;
+  animation:fade .4s ease;
 }
 .container::before{
   content:"";
   position:absolute;
   top:0; left:0;
-  height:4px; width:100%;
+  height:5px; width:100%;
   background:linear-gradient(90deg,#1e88e5,#42a5f5);
-  border-radius:10px 10px 0 0;
+  border-radius:12px 12px 0 0;
 }
 
 .success-container{ max-width:520px; }
 
 @keyframes fade{
-  from{opacity:0; transform:translateY(8px)}
+  from{opacity:0; transform:translateY(10px)}
   to{opacity:1; transform:none}
 }
 
 /* ===== TEXT ===== */
-h2{ text-align:center; margin:6px 0 12px }
-label{ font-size:12px; color:#555; font-weight:bold }
-.req{ color:#e53935 }
+h2{ text-align:center; margin:10px 0 16px; color:#111; font-size: 20px;}
+label{ font-size:12px; color:#555; font-weight:bold; letter-spacing: 0.3px; }
+.req{ color:#e53935; font-size: 14px; }
 .helper{
   font-size:12px;
   color:#777;
-  margin-top:6px;
+  margin-top:8px;
   text-align:center;
 }
 
 /* ===== INPUT ===== */
-.input-wrap{ position:relative }
+.input-wrap{ position:relative; margin-bottom: 4px;}
 .input-wrap span{
   position:absolute;
-  left:10px; top:50%;
+  left:12px; top:50%;
   transform:translateY(-50%);
-  opacity:.6;
+  opacity:.7;
 }
-input{
+.input-wrap.textarea-wrap span {
+  top: 14px; /* Align icon to top for textarea */
+  transform: none;
+}
+
+input, textarea {
   width:100%;
-  padding:10px 10px 10px 30px;
+  padding:12px 12px 12px 35px;
   margin:4px 0;
-  border:1px solid #ccc;
-  border-radius:6px;
+  border:1.5px solid #ddd;
+  border-radius:8px;
   font-size:14px;
+  font-family: inherit;
   box-sizing:border-box;
   text-transform:uppercase;
+  transition: all 0.2s ease;
 }
+textarea {
+  resize: vertical;
+}
+
 ::placeholder{
   text-transform:none;
-  color:#999;
+  color:#aaa;
+  font-size: 13px;
 }
-input:focus{
+input:focus, textarea:focus {
   border-color:#1e88e5;
-  box-shadow:0 0 0 2px rgba(30,136,229,.15);
+  box-shadow:0 0 0 3px rgba(30,136,229,.15);
   outline:none;
 }
-input.error{
+input.error, textarea.error {
   border-color:#e53935;
   background:#fff5f5;
 }
@@ -92,38 +104,53 @@ input.error{
   font-size:11px;
   color:#e53935;
   display:none;
-  margin-bottom:6px;
+  margin-bottom:10px;
+  padding-left: 4px;
 }
 
 /* ===== SECTION ===== */
 .section-title{
-  margin-top:12px;
-  font-size:13px;
+  margin:20px 0 12px 0;
+  font-size:14px;
   font-weight:bold;
   color:#1e88e5;
-  border-left:3px solid #1e88e5;
-  padding-left:8px;
+  border-left:4px solid #1e88e5;
+  padding-left:10px;
+  background: #f0f7ff;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  border-radius: 0 4px 4px 0;
 }
 
 /* ===== CONSENT ===== */
 .consent{
   font-size:13px;
-  margin:10px 0;
+  margin:16px 0;
   color:#555;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.consent input {
+  margin-top: 3px;
+  width: auto;
 }
 
 /* ===== BUTTON ===== */
 button{
   width:100%;
-  padding:12px;
+  padding:14px;
   border:none;
-  border-radius:6px;
+  border-radius:8px;
   font-size:16px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
   color:#fff;
   background:#90caf9;
   cursor:not-allowed;
-  transition:.2s;
-  opacity:.6;
+  transition:all .3s ease;
+  opacity:.7;
 }
 button.enabled{
   background:linear-gradient(135deg,#1e88e5,#42a5f5);
@@ -131,50 +158,51 @@ button.enabled{
   opacity:1;
 }
 button.enabled:hover{
-  transform:translateY(-1px);
-  box-shadow:0 6px 12px rgba(30,136,229,.25);
+  transform:translateY(-2px);
+  box-shadow:0 8px 15px rgba(30,136,229,.3);
 }
 
 /* ===== SUCCESS ===== */
 .successIcon{
-  width:70px;
-  margin:14px auto;
-  animation:pop .4s ease;
+  width:75px;
+  margin:20px auto 10px;
+  animation:pop .5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 @keyframes pop{
-  from{transform:scale(.6);opacity:0}
+  from{transform:scale(.5);opacity:0}
   to{transform:scale(1);opacity:1}
 }
 .ref{
   background:#e3f2fd;
   border:1px dashed #1e88e5;
-  padding:8px;
+  padding:10px;
   border-radius:6px;
   text-align:center;
   font-weight:bold;
-  margin-bottom:10px;
-  font-size:14px;
+  margin-bottom:16px;
+  font-size:15px;
+  color: #0d47a1;
 }
 .summary{
-  font-size:14px;
+  font-size:13.5px;
   margin-top:10px;
   line-height:1.6;
 }
 .summary div{
   background:#fafafa;
   border:1px solid #eee;
-  padding:6px 8px;
-  border-radius:5px;
-  margin-bottom:5px;
+  padding:8px 12px;
+  border-radius:6px;
+  margin-bottom:6px;
 }
 .watermark{
   position:absolute;
   top:45%;
   left:50%;
   transform:translate(-50%,-50%) rotate(-25deg);
-  font-size:48px;
-  color:rgba(0,0,0,0.06);
-  font-weight:bold;
+  font-size:55px;
+  color:rgba(0,0,0,0.04);
+  font-weight:900;
   display:none;
   pointer-events:none;
 }
@@ -184,29 +212,32 @@ button.enabled:hover{
   max-width:420px;
   margin:auto;
   background:#fff;
-  padding:25px 20px;
-  border-radius:10px;
+  padding:30px 20px;
+  border-radius:12px;
   box-shadow:0 8px 20px rgba(0,0,0,.08);
   text-align:center;
 }
-.maintenance p{ font-size:13px; color:#555 }
+.maintenance p{ font-size:14px; color:#555; line-height: 1.5; }
 
 /* ===== FOOTER ===== */
 .footer{
-  margin-top:25px;
+  margin-top:30px;
   text-align:center;
-  font-size:11px;
-  color:#888;
+  font-size:12px;
+  color:#777;
 }
 .divider{
   height:2px;
   background:linear-gradient(to right,transparent,#1e88e5,transparent);
-  margin-bottom:10px;
+  margin-bottom:12px;
+  opacity: 0.5;
 }
 .footer a{
-  color:#888;
+  color:#555;
   text-decoration:none;
+  font-weight: bold;
 }
+.footer a:hover { text-decoration: underline; }
 </style>
 </head>
 
@@ -217,9 +248,8 @@ button.enabled:hover{
 var FORM_ENABLED = true;
 </script>
 
-<!-- MAINTENANCE -->
 <div class="maintenance" id="maintenanceBox" style="display:none;">
-  <h2>🚧</h2>
+  <h2 style="font-size: 40px; margin: 0;">🚧</h2>
   <h2>Temporarily Unavailable</h2>
   <p>
     This submission form is currently unavailable.<br><br>
@@ -227,13 +257,12 @@ var FORM_ENABLED = true;
   </p>
 </div>
 
-<!-- FORM -->
 <div class="container" id="formBox">
-  <h2>📄 AGENCY CONTACT INFO SUBMISSION</h2>
+  <h2>📄 AGENCY CONTACT INFO</h2>
 
   <form onsubmit="return submitForm();">
 
-    <div class="section-title">Agency & Officer In-charge Information</div>
+    <div class="section-title">Agency & Officer In-charge</div>
 
     <label>Agency Name (Mandatory) <span class="req">*</span></label>
     <div class="input-wrap">
@@ -241,6 +270,13 @@ var FORM_ENABLED = true;
       <input type="text" id="agency" placeholder="Example: ABC DEBT SDN BHD">
     </div>
     <div class="errorText" id="err_agency">This field is required</div>
+
+    <label>Agency Address (Mandatory) <span class="req">*</span></label>
+    <div class="input-wrap textarea-wrap">
+      <span>📍</span>
+      <textarea id="address" rows="3" placeholder="Example: NO 12, JALAN MERDEKA..."></textarea>
+    </div>
+    <div class="errorText" id="err_address">This field is required</div>
 
     <label>Officer Name-1 (Mandatory) <span class="req">*</span></label>
     <div class="input-wrap">
@@ -277,18 +313,16 @@ var FORM_ENABLED = true;
     </div>
     <div class="errorText" id="err_whatsapp">This field is required</div>
 
-    <div class="consent">
+    <label class="consent">
       <input type="checkbox" id="consent" onclick="updateState()">
-      I confirm that the information provided is accurate and consent to its use
-      for official communication purposes.
-    </div>
+      <span>I confirm that the information provided is accurate and consent to its use for official communication purposes.</span>
+    </label>
 
-    <button type="submit" id="submitBtn">Submit</button>
+    <button type="submit" id="submitBtn">Submit Now</button>
     <div class="helper" id="helperText"></div>
   </form>
 </div>
 
-<!-- SUCCESS -->
 <div class="container success-container" id="successBox" style="display:none;">
   <div class="watermark" id="watermark">SUBMITTED</div>
 
@@ -303,22 +337,20 @@ var FORM_ENABLED = true;
   <div class="ref" id="refDisplay"></div>
   <div class="summary" id="summaryBox"></div>
 
-  <div class="consent" style="margin-top:15px;">
-    ✔ CONSENT CONFIRMED FOR OFFICIAL COMMUNICATION PURPOSES.
+  <div class="consent" style="margin-top:20px; font-weight: bold; color: #1e88e5; justify-content: center;">
+    ✔ CONSENT CONFIRMED FOR OFFICIAL COMMUNICATION
   </div>
 
-  <p style="text-align:center;font-size:13px;">
+  <p style="text-align:center;font-size:13px; color: #666;">
     You may safely close this page. Thank You!
   </p>
 </div>
 
-<!-- FOOTER -->
 <div class="footer">
   <div class="divider"></div>
   <div id="trademark"></div>
-  <div>
-    Information submitted is collected solely for communication and
-    administrative record purposes.
+  <div style="margin-top: 4px;">
+    Information submitted is collected solely for communication and administrative record purposes.
   </div>
 </div>
 
@@ -326,15 +358,16 @@ var FORM_ENABLED = true;
 /* ===== PAGE LOAD ===== */
 window.onload=function(){
   if(!FORM_ENABLED){
-    formBox.style.display="none";
-    successBox.style.display="none";
-    maintenanceBox.style.display="block";
+    document.getElementById("formBox").style.display="none";
+    document.getElementById("successBox").style.display="none";
+    document.getElementById("maintenanceBox").style.display="block";
   }
 };
 
 /* ===== VALIDATION ===== */
 const mandatoryFields=[
   {id:"agency",err:"err_agency"},
+  {id:"address",err:"err_address"}, // ADDED ADDRESS HERE
   {id:"pic1",err:"err_pic1"},
   {id:"contact1",err:"err_contact1"},
   {id:"whatsapp",err:"err_whatsapp"}
@@ -362,6 +395,10 @@ function updateState(){
     }
   });
 
+  const submitBtn = document.getElementById("submitBtn");
+  const consent = document.getElementById("consent");
+  const helperText = document.getElementById("helperText");
+
   submitBtn.disabled=!ok||!consent.checked;
   submitBtn.classList.toggle("enabled",!submitBtn.disabled);
   helperText.innerText=!ok
@@ -378,36 +415,44 @@ mandatoryFields.forEach(f=>{
 /* ===== SUBMIT ===== */
 function submitForm(){
   updateState();
+  const submitBtn = document.getElementById("submitBtn");
   if(submitBtn.disabled) return false;
 
   const ref=generateRef();
   const data=new URLSearchParams();
   data.append("ref",ref);
-  data.append("agency",agency.value.toUpperCase());
-  data.append("pic1",pic1.value.toUpperCase());
-  data.append("pic2",pic2.value.toUpperCase());
-  data.append("contact1",contact1.value);
-  data.append("contact2",contact2.value);
-  data.append("whatsapp",whatsapp.value);
+  data.append("agency", document.getElementById("agency").value.toUpperCase());
+  data.append("address", document.getElementById("address").value.toUpperCase()); // ADDED TO URL PARAMS
+  data.append("pic1", document.getElementById("pic1").value.toUpperCase());
+  data.append("pic2", document.getElementById("pic2").value.toUpperCase());
+  data.append("contact1", document.getElementById("contact1").value);
+  data.append("contact2", document.getElementById("contact2").value);
+  data.append("whatsapp", document.getElementById("whatsapp").value);
   data.append("consent","YES");
 
+  // Fetch to Google Apps Script
   fetch("https://script.google.com/macros/s/AKfycbw3ZP7SV102Bk2YzTQX0vrJ6etipbV98_9ts3V8VFjyaAp5LFoS3QifUa3fZv5ThPaM/exec",
     {method:"POST",body:data});
 
-  formBox.style.display="none";
-  successBox.style.display="block";
-  watermark.style.display="block";
+  document.getElementById("formBox").style.display="none";
+  document.getElementById("successBox").style.display="block";
+  document.getElementById("watermark").style.display="block";
 
-  refDisplay.innerText="REFERENCE NO: "+ref;
-  summaryBox.innerHTML=
-    `<div><b>AGENCY NAME:</b> ${agency.value.toUpperCase()}</div>
-     <div><b>OFFICER NAME-1:</b> ${pic1.value.toUpperCase()}</div>
-     ${pic2.value?`<div><b>OFFICER NAME-2:</b> ${pic2.value.toUpperCase()}</div>`:""}
-     <div><b>CONTACT NO (MANDATORY):</b> ${contact1.value}</div>
-     ${contact2.value?`<div><b>CONTACT NO (OPTIONAL):</b> ${contact2.value}</div>`:""}
-     <div><b>WHATSAPP NO (MANDATORY):</b> ${whatsapp.value}</div>`;
+  document.getElementById("refDisplay").innerText="REFERENCE NO: "+ref;
+  
+  const pic2Val = document.getElementById("pic2").value;
+  const contact2Val = document.getElementById("contact2").value;
 
-  return false;
+  document.getElementById("summaryBox").innerHTML=
+    `<div><b>AGENCY NAME:</b> ${document.getElementById("agency").value.toUpperCase()}</div>
+     <div><b>ADDRESS:</b> ${document.getElementById("address").value.toUpperCase()}</div>
+     <div><b>OFFICER NAME-1:</b> ${document.getElementById("pic1").value.toUpperCase()}</div>
+     ${pic2Val?`<div><b>OFFICER NAME-2:</b> ${pic2Val.toUpperCase()}</div>`:""}
+     <div><b>CONTACT NO (MANDATORY):</b> ${document.getElementById("contact1").value}</div>
+     ${contact2Val?`<div><b>CONTACT NO (OPTIONAL):</b> ${contact2Val}</div>`:""}
+     <div><b>WHATSAPP NO:</b> ${document.getElementById("whatsapp").value}</div>`;
+
+  return false; // Prevent default form submission reload
 }
 
 function generateRef(){
@@ -423,8 +468,8 @@ function generateRef(){
 /* FOOTER */
 (function(){
   const year=new Date().getFullYear();
-  trademark.innerHTML=
-    `© ${year} <a href="https://sczpnet.org" target="_blank">sczpnet.org</a> •Official Agency Communication Portal• v1.1`;
+  document.getElementById("trademark").innerHTML=
+    `© ${year} <a href="https://sczpnet.org" target="_blank">sczpnet.org</a> • Official Agency Communication Portal • v1.2`;
 })();
 </script>
 
