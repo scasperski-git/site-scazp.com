@@ -861,60 +861,104 @@ firestoreBatch.set(summaryRef, updatePayload, { merge: true });
             }
         }
 
-        async function uploadExcelToFirestore(input) {
+async function uploadExcelToFirestore(input) {
             const file = input.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, { type: 'array' });
                 const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
                 if (jsonData.length === 0) return;
-                showToast("Uploading rows to Firestore cloud environment...");
                 
-                const batch = db.batch();
-                let count = 0;
-                let baselines = {};
+                showToast("Processing file and standardizing DCA names...");
 
-                let dcaSet = new Set();
-                let regionSet = new Set();
-                
-                jsonData.forEach(row => {
-                    const locCodeRaw = row['LOC CODE'];
-                    if (locCodeRaw) {
-                        let dcaName = row['DCA NAME'] || 'UNASSIGNED';
-                        dcaSet.add(dcaName);
-                        if(row['REGION']) { regionSet.add(row['REGION']); }
+                try {
+                    // 1. AMBIL NAMA DCA SEDIA ADA DARI FIREBASE (Untuk rujukan silang)
+                    const sysDoc = await db.collection("system_lists").doc("dropdowns").get();
+                    let existingDcas = sysDoc.exists ? (sysDoc.data().dcas || []) : [];
+
+                    // 2. KUMPULKAN SEMUA NAMA DCA (Dari Excel + Firebase)
+                    let rawNamesSet = new Set();
+                    existingDcas.forEach(d => rawNamesSet.add(d.toString().trim().toUpperCase()));
+                    jsonData.forEach(row => {
+                        let name = row['DCA NAME'];
+                        if(name) rawNamesSet.add(name.toString().trim().toUpperCase());
+                    });
+
+                    // 3. SUSUN NAMA DARI PALING PANJANG KE PALING PENDEK
+                    let sortedNames = Array.from(rawNamesSet).sort((a, b) => b.length - a.length);
+
+                    // 4. FUNGSI PENYELARASAN NAMA (AUTO-MERGE)
+                    function getOfficialName(rawName) {
+                        if(!rawName) return 'UNASSIGNED';
+                        let upperName = rawName.toString().trim().toUpperCase();
                         
-                        // Kumpul Data Untuk Dokumen Induk (Baselines)
-                        if(!baselines[dcaName]) baselines[dcaName] = { locs: 0, ac: 0, osb: 0 };
-                        baselines[dcaName].locs += 1;
-                        baselines[dcaName].ac += parseInt(row['TOTAL A/C ASSIGNED']) || 0;
-                        baselines[dcaName].osb += parseFloat(row['TOTAL OSB ASSIGNED']) || 0;
-
-                        batch.set(db.collection("assignments").doc(Math.floor(locCodeRaw).toString()), {
-                            dca_name: dcaName, region: row['REGION'] || '', area: row['AREA'] || '', loc_name: row['LOC NAME'] || '',
-                            total_ac_assigned: parseInt(row['TOTAL A/C ASSIGNED']) || 0, total_osb_assigned: parseFloat(row['TOTAL OSB ASSIGNED']) || 0
-                        }, { merge: true }); count++;
+                        for(let longName of sortedNames) {
+                            if (longName.length > upperName.length) {
+                                // Semak jika nama pendek wujud sebagai perkataan penuh dalam nama panjang
+                                // Mencegah salah cantum: "ALI" takkan jadi "ALIA"
+                                if (
+                                    longName.startsWith(upperName + " ") || 
+                                    longName.endsWith(" " + upperName) || 
+                                    longName.includes(" " + upperName + " ")
+                                ) {
+                                    return longName; // Pulangkan nama penuh (Cth: BASRI & PARTNERS)
+                                }
+                            }
+                        }
+                        return upperName;
                     }
-                });
 
-                // Tulis Ke Dalam Koleksi Summary Induk (GLOBAL BASELINES)
-                let baseRef = db.collection("dca_live_summaries").doc("GLOBAL_BASELINES");
-                batch.set(baseRef, baselines, { merge: true });
+                    const batch = db.batch();
+                    let count = 0;
+                    let baselines = {};
+                    let dcaSet = new Set();
+                    let regionSet = new Set();
+                    
+                    jsonData.forEach(row => {
+                        const locCodeRaw = row['LOC CODE'];
+                        if (locCodeRaw) {
+                            let rawDca = row['DCA NAME'];
+                            
+                            // *** GUNAKAN FUNGSI AUTO-MERGE DI SINI ***
+                            let dcaName = getOfficialName(rawDca); 
+                            
+                            dcaSet.add(dcaName);
+                            if(row['REGION']) { regionSet.add(row['REGION'].toString().trim().toUpperCase()); }
+                            
+                            // Kumpul Data Untuk Dokumen Induk (Baselines)
+                            if(!baselines[dcaName]) baselines[dcaName] = { locs: 0, ac: 0, osb: 0 };
+                            baselines[dcaName].locs += 1;
+                            baselines[dcaName].ac += parseInt(row['TOTAL A/C ASSIGNED']) || 0;
+                            baselines[dcaName].osb += parseFloat(row['TOTAL OSB ASSIGNED']) || 0;
 
-                // Tulis Ke Dalam Koleksi Dropdowns Untuk Jimat Reads
-                batch.set(
-                    db.collection("system_lists").doc("dropdowns"),
-                    { dcas: Array.from(dcaSet).sort(), regions: Array.from(regionSet).sort(), updated_at: firebase.firestore.FieldValue.serverTimestamp() },
-                    { merge:true }
-                );
+                            batch.set(db.collection("assignments").doc(Math.floor(locCodeRaw).toString()), {
+                                dca_name: dcaName, region: row['REGION'] || '', area: row['AREA'] || '', loc_name: row['LOC NAME'] || '',
+                                total_ac_assigned: parseInt(row['TOTAL A/C ASSIGNED']) || 0, total_osb_assigned: parseFloat(row['TOTAL OSB ASSIGNED']) || 0
+                            }, { merge: true }); count++;
+                        }
+                    });
 
-                try { 
+                    // Tulis Ke Dalam Koleksi Summary Induk (GLOBAL BASELINES)
+                    let baseRef = db.collection("dca_live_summaries").doc("GLOBAL_BASELINES");
+                    batch.set(baseRef, baselines, { merge: true });
+
+                    // Tulis Ke Dalam Koleksi Dropdowns Untuk Jimat Reads
+                    batch.set(
+                        db.collection("system_lists").doc("dropdowns"),
+                        { dcas: Array.from(dcaSet).sort(), regions: Array.from(regionSet).sort(), updated_at: firebase.firestore.FieldValue.serverTimestamp() },
+                        { merge:true }
+                    );
+
                     await batch.commit(); 
-                    showToast(`Import complete: Added ${count} assets entries.`); 
+                    showToast(`Import complete: Added ${count} entries. DCA names standardized!`); 
                     input.value = ""; 
                     localStorage.removeItem('dropdown_lists'); // Buang cache lama
                     populateDcaList(); 
-                } catch (error) { alert("Excel data ingestion faulted."); }
+
+                } catch (error) { 
+                    console.error("Upload Error:", error);
+                    alert("Excel data ingestion faulted: " + error.message); 
+                }
             }; reader.readAsArrayBuffer(file);
         }
 
