@@ -36,9 +36,16 @@
         .view-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .header { margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; text-align: center;}
+        /* Section Selector Mega Buttons */
+        .section-selector-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 50vh; animation: fadeIn 0.5s ease; }
+        .section-btn-mega { background-color: var(--bg-card); color: var(--accent-gold); border: 2px solid var(--accent-gold); padding: 25px 40px; font-size: 20px; font-weight: bold; border-radius: 12px; cursor: pointer; transition: all 0.3s; text-transform: uppercase; width: 100%; max-width: 400px; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(212, 175, 55, 0.1); display: flex; justify-content: space-between; align-items: center;}
+        .section-btn-mega:hover { background-color: var(--accent-gold); color: #000; transform: translateY(-3px); box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3); }
+
+        .header { margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; text-align: center; position: relative;}
         .header h1 { color: var(--accent-gold); margin: 0; font-size: 26px; text-transform: uppercase; letter-spacing: 1px; }
         .header p { color: var(--text-muted); font-size: 13px; margin-top: 5px; }
+        .btn-back-section { position: absolute; left: 0; top: 0; background: transparent; color: var(--text-muted); border: 1px solid var(--text-muted); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: 0.3s; }
+        .btn-back-section:hover { color: #FFF; border-color: #FFF; background: rgba(255,255,255,0.1);}
 
         .control-panel { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; margin-bottom: 25px; }
         .panel-title { color: var(--accent-gold); font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px; }
@@ -53,6 +60,7 @@
         .grid-2 { display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; }
         .grid-3 { display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; }
         .grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .grid-5-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; } /* New responsive grid */
         @media (min-width: 768px) { 
             .grid-2 { grid-template-columns: repeat(2, 1fr); } 
             .grid-3 { grid-template-columns: repeat(3, 1fr); }
@@ -138,8 +146,18 @@
         </div>
 
         <div id="view-portal" class="view-section active">
-            <div class="container-portal">
+            
+            <div id="portal-section-selector" class="section-selector-container">
+                <h2 style="color:var(--accent-gold); margin-bottom: 30px; text-transform:uppercase; letter-spacing: 1px;">Select Department Section</h2>
+                <button class="section-btn-mega" onclick="selectPortalSection('JV-AGENCY')">JV-AGENCY <span>&#10140;</span></button>
+                <button class="section-btn-mega" onclick="selectPortalSection('JVBC-AGENCY')">JVBC-AGENCY <span>&#10140;</span></button>
+                <button class="section-btn-mega" onclick="selectPortalSection('EXT. AGY(NPL)')">EXT. AGY(NPL) <span>&#10140;</span></button>
+                <p style="color: var(--text-muted); font-size: 12px; margin-top: 20px;">Please ensure you select the correct division before submitting your collection data.</p>
+            </div>
+
+            <div class="container-portal" id="portal-main-area" style="display:none;">
                 <div class="header">
+                    <button class="btn-back-section" onclick="resetPortalSection()">&#8592; Change Section</button>
                     <h1 id="dca-active-batch-title">DETECTING ACTIVE COLLECTION BATCH...</h1>
                     <p id="dca-active-cycle-subtitle" style="color:var(--success); font-weight:bold; font-size:14px;"></p>
                 </div>
@@ -175,21 +193,30 @@
                     </div>
                 </div>
 
-                <div class="grid-4" style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
+                <div class="grid-5-auto" style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
                     <div>
-                        <label class="panel-label">1. SELECT BATCH NO</label>
-                        <select id="filter-batch" onchange="updateDashboardMonthFilter()"><option value="">-- Select Batch --</option></select>
+                        <label class="panel-label" style="color:var(--accent-gold);">1. SELECT SECTION</label>
+                        <select id="filter-section" onchange="populateDashboardBatches()">
+                            <option value="">-- Select Section --</option>
+                            <option value="JV-AGENCY">JV-AGENCY</option>
+                            <option value="JVBC-AGENCY">JVBC-AGENCY</option>
+                            <option value="EXT. AGY(NPL)">EXT. AGY(NPL)</option>
+                        </select>
                     </div>
                     <div>
-                        <label class="panel-label">2. SELECT MONTH</label>
+                        <label class="panel-label">2. SELECT BATCH NO</label>
+                        <select id="filter-batch" onchange="updateDashboardMonthFilter()"><option value="">-- Awaiting Section --</option></select>
+                    </div>
+                    <div>
+                        <label class="panel-label">3. SELECT MONTH</label>
                         <select id="filter-month"><option value="">-- Awaiting Batch Selection --</option></select>
                     </div>
                     <div>
-                        <label class="panel-label">3. SELECT DCA</label>
+                        <label class="panel-label">4. SELECT DCA</label>
                         <select id="filter-dca"><option value="">ALL AGENCIES</option></select>
                     </div>
                     <div>
-                        <label class="panel-label">4. SELECT REGION</label>
+                        <label class="panel-label">5. SELECT REGION</label>
                         <select id="filter-region"><option value="">ALL REGIONS</option></select>
                     </div>
                 </div>
@@ -224,6 +251,15 @@
                 
                 <div class="control-panel">
                     <div class="panel-title">&#9881;&#65039; 1. Register / Update Collection Batch Configuration</div>
+                    
+                    <label class="panel-label" style="color:var(--accent-gold);">Target Department Section</label>
+                    <select id="setup-section">
+                        <option value="">-- Select Target Section --</option>
+                        <option value="JV-AGENCY">JV-AGENCY</option>
+                        <option value="JVBC-AGENCY">JVBC-AGENCY</option>
+                        <option value="EXT. AGY(NPL)">EXT. AGY(NPL)</option>
+                    </select>
+
                     <label class="panel-label">Collection Batch Code (Must be unique)</label>
                     <input type="text" id="setup-batch-name" placeholder="e.g., BATCH XX-1">
                     
@@ -293,9 +329,22 @@
                     
                     <div class="control-panel" style="margin-bottom: 0;">
                         <div class="panel-title">&#128202; 3. Export Full Master Raw Data (Submitted + Pending)</div>
-                        <label class="panel-label">Target Batch Code</label>
-                        <select id="export-master-batch"><option value="">-- Fetching Target Batch --</option></select>
-                        <button class="btn-action btn-gold" style="width:100%; margin-top:10px;" onclick="exportMasterRawToExcel()">Download Master Raw Excel</button>
+                        <div class="grid-2">
+                            <div>
+                                <label class="panel-label">Target Section</label>
+                                <select id="export-master-section" onchange="populateAdminExportBatches()">
+                                    <option value="">-- Select Section --</option>
+                                    <option value="JV-AGENCY">JV-AGENCY</option>
+                                    <option value="JVBC-AGENCY">JVBC-AGENCY</option>
+                                    <option value="EXT. AGY(NPL)">EXT. AGY(NPL)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="panel-label">Target Batch Code</label>
+                                <select id="export-master-batch"><option value="">-- Awaiting Section --</option></select>
+                            </div>
+                        </div>
+                        <button class="btn-action btn-gold" style="width:100%; margin-top:5px;" onclick="exportMasterRawToExcel()">Download Master Raw Excel</button>
                         <p style="font-size: 11px; color: var(--text-muted); margin-top: 10px; margin-bottom: 0; line-height: 1.4;">
                             <strong>Operation Notice:</strong> This function will compile ALL assigned accounts from the database regardless of submission status. Use this primarily for final month-end auditing to minimize database read operations.
                         </p>
@@ -303,8 +352,21 @@
 
                     <div class="control-panel" style="margin-bottom: 0;">
                         <div class="panel-title">&#128275; 4. Unlock DCA Submission Restrictions (Correction Overrides)</div>
-                        <label class="panel-label">Target Batch Code</label>
-                        <select id="unlock-batch-select" onchange="populateUnlockDcaDropdown()"><option value="">-- Select Target Batch --</option></select>
+                        <div class="grid-2">
+                            <div>
+                                <label class="panel-label">Target Section</label>
+                                <select id="unlock-section" onchange="populateAdminUnlockBatches()">
+                                    <option value="">-- Select Section --</option>
+                                    <option value="JV-AGENCY">JV-AGENCY</option>
+                                    <option value="JVBC-AGENCY">JVBC-AGENCY</option>
+                                    <option value="EXT. AGY(NPL)">EXT. AGY(NPL)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="panel-label">Target Batch Code</label>
+                                <select id="unlock-batch-select" onchange="populateUnlockDcaDropdown()"><option value="">-- Awaiting Section --</option></select>
+                            </div>
+                        </div>
                         <label class="panel-label" style="margin-top:10px;">Select Restricted DCA Agency To Unlock</label>
                         <select id="unlock-dca-select"><option value="">-- Awaiting Batch Parameter --</option></select>
                         <button class="btn-action" style="background-color: var(--danger); width:100%; margin-top:10px;" onclick="executeSubmissionUnlock()">Unlock Agency Submission</button>
@@ -319,14 +381,15 @@
                     <table class="dataTable" style="width: 100%;">
                         <thead>
                             <tr>
+                                <th style="text-align: left; color:var(--accent-gold);">DEPARTMENT SECTION</th>
                                 <th style="text-align: left;">BATCH ID CODE</th>
                                 <th style="text-align: center;">ASSIGNMENT TIME INTERVAL</th>
-                                <th style="text-align: center;">TOTAL BLOCKS & SYSTEM CYCLES</th>
+                                <th style="text-align: center;">TOTAL BLOCKS & CYCLES</th>
                                 <th style="text-align: center;">SYSTEM ACTIONS</th>
                             </tr>
                         </thead>
                         <tbody id="batch-summary-tbody">
-                            <tr><td colspan="4" style="text-align:center; padding:20px;">Populating registry logs...</td></tr>
+                            <tr><td colspan="5" style="text-align:center; padding:20px;">Populating registry logs...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -354,6 +417,7 @@
         window.allBatches = [];
         window.activeBatchName = null;
         window.activeDcaCycle = null; 
+        window.activePortalSection = null; // Track chosen section in Portal
         window.dashboardActiveBatch = null;
         window.dcaDetailsMap = {};
         window.activeMonthsForChildRows = [];
@@ -363,14 +427,13 @@
             populateDcaList(); 
         };
 
-$(document).ready(function() {
-            // LAZY LOAD BILA USER KLIK BUTANG + (DIKEMAS KINI)
+        $(document).ready(function() {
+            // LAZY LOAD BILA USER KLIK BUTANG +
             $(document).off('click', '#report-table tbody td.details-control').on('click', '#report-table tbody td.details-control', async function () {
                 const tr = $(this).closest('tr');
                 const table = $('#report-table').DataTable();
                 const row = table.row(tr);
                 
-                // GUNA .attr() LEBIH SELAMAT DARI .data() UNTUK ELAK FORMAT TEKS BERUBAH
                 let dcaName = tr.attr('data-dca'); 
 
                 if (row.child.isShown()) {
@@ -380,9 +443,6 @@ $(document).ready(function() {
                 } else {
                     if (!window.dcaDetailsMap[dcaName]) {
                         $(this).html('&#8987;'); // Ikon Loading
-                        
-                        console.log(`[DEBUG] Bermula tarikan data untuk DCA: "${dcaName}"`); // Radar kita
-                        
                         let details = await fetchDcaDetailsFromDB(dcaName, window.dashboardActiveBatch.batch_name);
                         window.dcaDetailsMap[dcaName] = details;
                     }
@@ -414,11 +474,62 @@ $(document).ready(function() {
             setTimeout(() => { toast.classList.remove("show"); }, 3000);
         }
 
+        /* --- LOGIK BAHARU: TAB 1 SECTION SELECTOR --- */
+        function selectPortalSection(section) {
+            window.activePortalSection = section;
+            document.getElementById('portal-section-selector').style.display = 'none';
+            document.getElementById('portal-main-area').style.display = 'block';
+            autoDetectDcaPortal(section);
+        }
+
+        function resetPortalSection() {
+            window.activePortalSection = null;
+            document.getElementById('portal-main-area').style.display = 'none';
+            document.getElementById('portal-section-selector').style.display = 'flex';
+        }
+
+        /* --- LOGIK BAHARU: CASCADING DROPDOWNS --- */
+        function populateDashboardBatches() {
+            const sec = document.getElementById('filter-section').value;
+            const batchSel = document.getElementById('filter-batch');
+            batchSel.innerHTML = '<option value="">-- Select Batch --</option>';
+            document.getElementById('filter-month').innerHTML = '<option value="">-- Awaiting Batch Selection --</option>';
+            window.dashboardActiveBatch = null;
+
+            if(!sec) return;
+            let secBatches = window.allBatches.filter(b => b.section === sec);
+            secBatches.forEach(b => { batchSel.innerHTML += `<option value="${b.batch_name}">${b.batch_name}</option>`; });
+        }
+
+        function populateAdminExportBatches() {
+            const sec = document.getElementById('export-master-section').value;
+            const batchSel = document.getElementById('export-master-batch');
+            batchSel.innerHTML = '<option value="">-- Select Target Batch --</option>';
+            if(!sec) return;
+            let secBatches = window.allBatches.filter(b => b.section === sec);
+            secBatches.forEach(b => { batchSel.innerHTML += `<option value="${b.batch_name}">${b.batch_name}</option>`; });
+        }
+
+        function populateAdminUnlockBatches() {
+            const sec = document.getElementById('unlock-section').value;
+            const batchSel = document.getElementById('unlock-batch-select');
+            document.getElementById('unlock-dca-select').innerHTML = '<option value="">-- Awaiting Batch Parameter --</option>';
+            batchSel.innerHTML = '<option value="">-- Select Target Batch --</option>';
+            if(!sec) return;
+            let secBatches = window.allBatches.filter(b => b.section === sec);
+            secBatches.forEach(b => { batchSel.innerHTML += `<option value="${b.batch_name}">${b.batch_name}</option>`; });
+        }
+
+
         async function saveBatchSetup() {
+            const sectionVal = document.getElementById('setup-section').value;
             const batchName = document.getElementById('setup-batch-name').value.trim();
+            
+            if(!sectionVal) { alert("Please select a Target Department Section."); return; }
             if(!batchName) { alert("Please type a valid Batch Code identifier."); return; }
 
             let batchData = {
+                section: sectionVal, // Ditambah
                 batch_name: batchName,
                 start_date: document.getElementById('setup-start-date').value,
                 end_date: document.getElementById('setup-end-date').value,
@@ -449,6 +560,7 @@ $(document).ready(function() {
                 await db.collection("batches").doc(batchName).set(batchData);
                 showToast("Collection Batch successfully stored in cloud!");
                 
+                document.getElementById('setup-section').value = "";
                 document.getElementById('setup-batch-name').value = "";
                 document.getElementById('setup-start-date').value = "";
                 document.getElementById('setup-end-date').value = "";
@@ -463,28 +575,25 @@ $(document).ready(function() {
             } catch (error) { alert("Cloud submission aborted: " + error.message); }
         }
 
-async function fetchBatchesList() {
+        async function fetchBatchesList() {
             try {
                 const snapshot = await db.collection("batches").get();
-                const dashBatchSelect = document.getElementById('filter-batch');
-                const unlockBatchSelect = document.getElementById('unlock-batch-select');
-                const masterExportSelect = document.getElementById('export-master-batch'); // Tambah ini
-                
-                dashBatchSelect.innerHTML = '<option value="">-- Choose Batch --</option>';
-                unlockBatchSelect.innerHTML = '<option value="">-- Select Target Batch --</option>';
-                masterExportSelect.innerHTML = '<option value="">-- Choose Target Batch --</option>'; // Tambah ini
                 window.allBatches = [];
 
                 snapshot.forEach(doc => {
-                    let b = doc.data();
-                    window.allBatches.push(b);
-                    dashBatchSelect.innerHTML += `<option value="${b.batch_name}">${b.batch_name}</option>`;
-                    unlockBatchSelect.innerHTML += `<option value="${b.batch_name}">${b.batch_name}</option>`;
-                    masterExportSelect.innerHTML += `<option value="${b.batch_name}">${b.batch_name}</option>`; // Tambah ini
+                    window.allBatches.push(doc.data());
                 });
 
-                autoDetectDcaPortal();
+                // Update UI Dropdowns based on active selections if any
+                populateDashboardBatches();
+                populateAdminExportBatches();
+                populateAdminUnlockBatches();
                 renderBatchSummary(); 
+
+                // Jika DCA refresh page masa tengah ada dalam portal
+                if(window.activePortalSection) {
+                    autoDetectDcaPortal(window.activePortalSection);
+                }
 
             } catch (e) { console.error("Data synchronization failed:", e); }
         }
@@ -492,19 +601,28 @@ async function fetchBatchesList() {
         function renderBatchSummary() {
             const tbody = document.getElementById('batch-summary-tbody');
             if (window.allBatches.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No active batches found in registry.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No active batches found in registry.</td></tr>';
                 return;
             }
 
             let html = '';
-            window.allBatches.forEach(b => {
+            // Susun batch mengikut section dan nama
+            let sortedBatches = window.allBatches.slice().sort((a,b) => {
+                if(a.section < b.section) return -1;
+                if(a.section > b.section) return 1;
+                return 0;
+            });
+
+            sortedBatches.forEach(b => {
                 let startStr = b.start_date ? new Date(b.start_date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : '-';
                 let endStr = b.end_date ? new Date(b.end_date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : '-';
                 let totalCycles = 0;
                 b.months.forEach(m => totalCycles += m.cycles.length);
+                let secColor = b.section === 'JV-AGENCY' ? '#10B981' : (b.section === 'JVBC-AGENCY' ? '#3B82F6' : '#EF4444');
                 
                 html += `
                 <tr>
+                    <td style="font-weight:bold; color:${secColor}; text-align: left;">${b.section || 'UNASSIGNED'}</td>
                     <td style="font-weight:bold; color:var(--accent-gold); text-align: left;">${b.batch_name}</td>
                     <td style="text-align: center;">${startStr} to ${endStr}</td>
                     <td style="text-align: center;">${b.months.length} Month Block(s) (${totalCycles} Cut-offs)</td>
@@ -521,6 +639,7 @@ async function fetchBatchesList() {
             const b = window.allBatches.find(x => x.batch_name === batchName);
             if(!b) return;
             
+            document.getElementById('setup-section').value = b.section || '';
             document.getElementById('setup-batch-name').value = b.batch_name;
             document.getElementById('setup-start-date').value = b.start_date || '';
             document.getElementById('setup-end-date').value = b.end_date || '';
@@ -554,7 +673,7 @@ async function fetchBatchesList() {
             } catch (e) { alert("Deletion protocol errored out: " + e.message); }
         }
 
-        function autoDetectDcaPortal() {
+        function autoDetectDcaPortal(selectedSection) {
             const titleEl = document.getElementById('dca-active-batch-title');
             const subEl = document.getElementById('dca-active-cycle-subtitle');
             const todayStr = new Date().toISOString().split('T')[0];
@@ -564,13 +683,19 @@ async function fetchBatchesList() {
 
             let activeBatch = null;
             for(let b of window.allBatches) {
-                if(b.start_date <= todayStr && todayStr <= b.end_date) { activeBatch = b; break; }
+                if(b.section === selectedSection && b.start_date <= todayStr && todayStr <= b.end_date) { 
+                    activeBatch = b; break; 
+                }
             }
-            if(!activeBatch && window.allBatches.length > 0) { activeBatch = window.allBatches[window.allBatches.length - 1]; }
+            // Fallback kepada batch terkini dalam section tersebut jika date luput
+            if(!activeBatch) { 
+                let secBatches = window.allBatches.filter(b => b.section === selectedSection);
+                if(secBatches.length > 0) activeBatch = secBatches[secBatches.length - 1]; 
+            }
 
             if(activeBatch) {
                 window.activeBatchName = activeBatch.batch_name;
-                titleEl.textContent = `COLLECTION ASSIGNMENT PORTAL: ${activeBatch.batch_name}`;
+                titleEl.innerHTML = `COLLECTION ASSIGNMENT PORTAL:<br><span style="color:#FFF;">${activeBatch.batch_name}</span>`;
                 
                 let foundCycle = null, foundMonth = null;
                 for(let m of activeBatch.months) {
@@ -602,7 +727,9 @@ async function fetchBatchesList() {
                 }
             } else {
                 titleEl.textContent = `NO ACTIVE ASSIGNMENT INTERVALS`;
-                subEl.textContent = `Administration team has not declared or initiated any distinct collection batches yet.`;
+                subEl.textContent = `Administration team has not declared or initiated any distinct collection batches for ${selectedSection} yet.`;
+                document.getElementById('portal-lock-container').style.display = 'none';
+                document.getElementById('portal-display-wrapper').style.display = 'none';
             }
         }
 
@@ -659,15 +786,15 @@ async function fetchBatchesList() {
                 if (querySnapshot.empty) { displayArea.innerHTML = '<div style="text-align:center;">No baseline assignment records linked to this agency code.</div>'; return; }
                 
                 let groupedByRegion = {};
-window.currentDcaTasks = []; // Tambah baris ini
+                window.currentDcaTasks = [];
 
-querySnapshot.forEach((doc) => {
-    let task = doc.data(); task.loc_code = doc.id;
-    window.currentDcaTasks.push(task); // Tambah baris ini
-    
-    if (!groupedByRegion[task.region]) groupedByRegion[task.region] = []; 
-    groupedByRegion[task.region].push(task);
-});
+                querySnapshot.forEach((doc) => {
+                    let task = doc.data(); task.loc_code = doc.id;
+                    window.currentDcaTasks.push(task); 
+                    
+                    if (!groupedByRegion[task.region]) groupedByRegion[task.region] = []; 
+                    groupedByRegion[task.region].push(task);
+                });
                 
                 let htmlStructure = '';
                 for (const region in groupedByRegion) {
@@ -725,57 +852,50 @@ querySnapshot.forEach((doc) => {
             const firestoreBatch = db.batch();
             const dbFieldKey = `m${window.activeDcaCycle.monthIdx}_${window.activeDcaCycle.cycleId}`;
 
-// ---- START LIVE AGGREGATOR WRITE ENGINE & FLAT DOCUMENT ----
-let totalAc = 0; let totalRm = 0;
-let flatPayload = {
-    batch_name: window.activeBatchName,
-    dca_name: selectedDca,
-    updated_at: firebase.firestore.FieldValue.serverTimestamp(),
-    records: {} // KITA KENA DECLARE OBJEK 'RECORDS' DI SINI DULU
-};
+            let totalAc = 0; let totalRm = 0;
+            let flatPayload = {
+                batch_name: window.activeBatchName,
+                dca_name: selectedDca,
+                updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+                records: {} 
+            };
 
-dataPack.forEach(item => { 
-    totalAc += item.ac; 
-    totalRm += item.rm; 
-    
-    // 1. Kekalkan simpanan rekod lama untuk backup
-    let docRef = db.collection("submissions").doc(item.locCode);
-    firestoreBatch.set(docRef, {
-        [window.activeBatchName]: {
-            [dbFieldKey]: { ac_paying: item.ac, collection_amount: item.rm, timestamp: firebase.firestore.FieldValue.serverTimestamp() }
-        }
-    }, { merge: true });
+            dataPack.forEach(item => { 
+                totalAc += item.ac; 
+                totalRm += item.rm; 
+                
+                let docRef = db.collection("submissions").doc(item.locCode);
+                firestoreBatch.set(docRef, {
+                    [window.activeBatchName]: {
+                        [dbFieldKey]: { ac_paying: item.ac, collection_amount: item.rm, timestamp: firebase.firestore.FieldValue.serverTimestamp() }
+                    }
+                }, { merge: true });
 
-    // 2. BINA FLAT DOCUMENT (Guna format Objek bersarang / Nested Object)
-    let baseTask = window.currentDcaTasks.find(t => t.loc_code === item.locCode) || {};
-    
-    flatPayload.records[item.locCode] = {
-        loc_code: item.locCode,
-        loc_name: baseTask.loc_name || "",
-        region: baseTask.region || "",
-        area: baseTask.area || "",
-        total_ac_assigned: baseTask.total_ac_assigned || 0,
-        total_osb_assigned: baseTask.total_osb_assigned || 0,
-        [`${dbFieldKey}_ac`]: item.ac,
-        [`${dbFieldKey}_rm`]: item.rm
-    };
-});
+                let baseTask = window.currentDcaTasks.find(t => t.loc_code === item.locCode) || {};
+                
+                flatPayload.records[item.locCode] = {
+                    loc_code: item.locCode,
+                    loc_name: baseTask.loc_name || "",
+                    region: baseTask.region || "",
+                    area: baseTask.area || "",
+                    total_ac_assigned: baseTask.total_ac_assigned || 0,
+                    total_osb_assigned: baseTask.total_osb_assigned || 0,
+                    [`${dbFieldKey}_ac`]: item.ac,
+                    [`${dbFieldKey}_rm`]: item.rm
+                };
+            });
 
-// Simpan Flat Document ke koleksi baharu "flat_reports"
-let flatRef = db.collection("flat_reports").doc(`${window.activeBatchName}_${selectedDca}`);
-firestoreBatch.set(flatRef, flatPayload, { merge: true });
+            let flatRef = db.collection("flat_reports").doc(`${window.activeBatchName}_${selectedDca}`);
+            firestoreBatch.set(flatRef, flatPayload, { merge: true });
 
-// Tulis Ke Dalam Koleksi Summary Induk (Live Aggregator sedia ada)
-let summaryRef = db.collection("dca_live_summaries").doc(window.activeBatchName);
-let updatePayload = {
-    [selectedDca]: {
-        [`${dbFieldKey}_ac`]: totalAc,
-        [`${dbFieldKey}_rm`]: totalRm
-    }
-};
-firestoreBatch.set(summaryRef, updatePayload, { merge: true });
-// ---- END LIVE AGGREGATOR WRITE ENGINE & FLAT DOCUMENT ----
-            // ---- END LIVE AGGREGATOR WRITE ENGINE ----
+            let summaryRef = db.collection("dca_live_summaries").doc(window.activeBatchName);
+            let updatePayload = {
+                [selectedDca]: {
+                    [`${dbFieldKey}_ac`]: totalAc,
+                    [`${dbFieldKey}_rm`]: totalRm
+                }
+            };
+            firestoreBatch.set(summaryRef, updatePayload, { merge: true });
 
             const lockId = `${window.activeBatchName}_m${window.activeDcaCycle.monthIdx}_${window.activeDcaCycle.cycleId}_${selectedDca}`;
             let lockRef = db.collection("submission_locks").doc(lockId);
@@ -786,9 +906,7 @@ firestoreBatch.set(summaryRef, updatePayload, { merge: true });
             });
 
             let metaRef = db.collection("metadata").doc("report_status");
-            firestoreBatch.set(metaRef, {
-                last_updated: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+            firestoreBatch.set(metaRef, { last_updated: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
 
             try {
                 await firestoreBatch.commit();
@@ -799,9 +917,7 @@ firestoreBatch.set(summaryRef, updatePayload, { merge: true });
                 btn.disabled = true;
                 
                 setTimeout(() => { checkLockAndRenderPortal(); }, 1500);
-            } catch (e) {
-                alert("Critical network failure: Transmit loop terminated: " + e.message);
-            }
+            } catch (e) { alert("Critical network failure: Transmit loop terminated: " + e.message); }
         }
 
         async function populateUnlockDcaDropdown() {
@@ -839,7 +955,7 @@ firestoreBatch.set(summaryRef, updatePayload, { merge: true });
                 
                 showToast(`Submission path unlocked for ${dName}!`);
                 populateUnlockDcaDropdown();
-                autoDetectDcaPortal(); 
+                if(window.activePortalSection) autoDetectDcaPortal(window.activePortalSection); 
             } catch (error) { alert("Override fault: " + error.message); }
         }
 
@@ -861,7 +977,7 @@ firestoreBatch.set(summaryRef, updatePayload, { merge: true });
             }
         }
 
-async function uploadExcelToFirestore(input) {
+        async function uploadExcelToFirestore(input) {
             const file = input.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = async function(e) {
@@ -872,7 +988,6 @@ async function uploadExcelToFirestore(input) {
                 showToast("Processing file and standardizing DCA names...");
 
                 try {
-                    // 1. AMBIL NAMA DCA SEDIA ADA DARI FIREBASE
                     const sysDoc = await db.collection("system_lists").doc("dropdowns").get();
                     let existingDcas = sysDoc.exists ? (sysDoc.data().dcas || []) : [];
 
@@ -883,30 +998,17 @@ async function uploadExcelToFirestore(input) {
                         if(name) rawNamesSet.add(name.toString().trim().toUpperCase());
                     });
 
-                    // Susun dari paling panjang ke paling pendek
                     let sortedNames = Array.from(rawNamesSet).sort((a, b) => b.length - a.length);
 
-                    // 2. FUNGSI AUTO-MERGE V2 (LEBIH BIJAK)
                     function getOfficialName(rawName) {
                         if(!rawName) return 'UNASSIGNED';
                         let original = rawName.toString().trim().toUpperCase();
-                        
-                        // Buang semua simbol (&, ., -, jarak) untuk buat padanan bersih
                         let cleanInput = original.replace(/[^A-Z0-9]/g, ''); 
                         
                         for(let longName of sortedNames) {
                             let cleanLong = longName.replace(/[^A-Z0-9]/g, '');
-                            
-                            // Syarat A: Padanan Tepat Walaupun Tanpa Simbol (Cth: BASRIPARTNERS == BASRIPARTNERS)
-                            if (cleanLong === cleanInput) {
-                                return longName;
-                            }
-                            
-                            // Syarat B: Padanan Separa (Cth: XTREMEJR bermula dengan XTREME)
-                            // Minimum 3 huruf untuk elak cantuman secara rawak
-                            if (cleanLong.startsWith(cleanInput) && cleanInput.length >= 3) {
-                                return longName;
-                            }
+                            if (cleanLong === cleanInput) return longName;
+                            if (cleanLong.startsWith(cleanInput) && cleanInput.length >= 3) return longName;
                         }
                         return original;
                     }
@@ -921,14 +1023,11 @@ async function uploadExcelToFirestore(input) {
                         const locCodeRaw = row['LOC CODE'];
                         if (locCodeRaw) {
                             let rawDca = row['DCA NAME'];
-                            
-                            // Masukkan nama ke dalam mesin tapisan
                             let dcaName = getOfficialName(rawDca); 
                             
                             dcaSet.add(dcaName);
                             if(row['REGION']) { regionSet.add(row['REGION'].toString().trim().toUpperCase()); }
                             
-                            // Kumpul Data Untuk Dokumen Induk (Baselines)
                             if(!baselines[dcaName]) baselines[dcaName] = { locs: 0, ac: 0, osb: 0 };
                             baselines[dcaName].locs += 1;
                             baselines[dcaName].ac += parseInt(row['TOTAL A/C ASSIGNED']) || 0;
@@ -941,8 +1040,6 @@ async function uploadExcelToFirestore(input) {
                         }
                     });
 
-                    // PENYELESAIAN ISU 16 JUTA (TOTAL OSB): 
-                    // Kita BUANG '{ merge: true }' supaya data hantu dari fail Excel test sebelum ini terpadam!
                     let baseRef = db.collection("dca_live_summaries").doc("GLOBAL_BASELINES");
                     batch.set(baseRef, baselines); 
 
@@ -985,7 +1082,6 @@ async function uploadExcelToFirestore(input) {
                     return;
                 }
 
-                // 1 READ SAHAJA DIGUNAKAN DI SINI UNTUK SELURUH SISTEM DROPDOWN!
                 const doc = await db.collection("system_lists").doc("dropdowns").get();
                 if(!doc.exists){ console.warn("Dropdown document not found."); return; }
 
@@ -1000,9 +1096,8 @@ async function uploadExcelToFirestore(input) {
             } catch (e) { console.error("Dropdown error:", e); }
         }
 
-        // --- SISTEM PENJANAAN DASHBOARD (SUPER OPTIMIZED SUMMARY READS: 2 READS ONLY) ---
         async function generateFullReport() {
-            if(!window.dashboardActiveBatch) { alert("Please complete Step 1: Select Active Collection Batch."); return; }
+            if(!window.dashboardActiveBatch) { alert("Please complete Step 1 & 2: Select Section and Active Batch."); return; }
             const monthIdxStr = document.getElementById('filter-month').value;
             if(!monthIdxStr) { alert("Please specify valid Target Month constraint."); return; }
             
@@ -1063,12 +1158,9 @@ async function uploadExcelToFirestore(input) {
                     binaSemulaStrukturJadual(parsedCache.tableHtml, parsedCache.kpi); return; 
                 }
 
-                console.log("Menarik RINGKASAN dari Pangkalan Data Firebase (Super Fast)...");
                 tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;">Compiling summary datasets...</td></tr>`;
-
                 window.dcaDetailsMap = {}; 
                 
-                // HANYA 2 DOKUMEN READS DILAKUKAN DI SINI UNTUK SELURUH DASHBOARD!
                 const baseSnap = await db.collection("dca_live_summaries").doc("GLOBAL_BASELINES").get();
                 const sumSnap = await db.collection("dca_live_summaries").doc(batchName).get();
                 
@@ -1162,88 +1254,72 @@ async function uploadExcelToFirestore(input) {
             $('#report-table').DataTable({ "pageLength": 10, "scrollX": true, "order": [[ sortTarget, "desc" ]], "columnDefs": [ { "orderable": false, "targets": 0 } ] });
         }
 
-// --- SISTEM LAZY LOAD CHILD ROWS (FLAT DOCUMENT OPTIMIZED + DEBUGGER) ---
-async function fetchDcaDetailsFromDB(dcaName, batchName) {
-    let details = [];
-    try {
-        const flatDocName = `${batchName}_${dcaName}`;
-        console.log(`[DEBUG] 1. Mencari Dokumen Flat: ${flatDocName}`);
-        
-        const flatRef = db.collection("flat_reports").doc(flatDocName);
-        const flatSnap = await flatRef.get();
+        async function fetchDcaDetailsFromDB(dcaName, batchName) {
+            let details = [];
+            try {
+                const flatDocName = `${batchName}_${dcaName}`;
+                const flatRef = db.collection("flat_reports").doc(flatDocName);
+                const flatSnap = await flatRef.get();
 
-        if (flatSnap.exists) {
-            console.log(`[DEBUG] 2. Dokumen Flat JUMPA! Mengekstrak rekod...`);
-            let data = flatSnap.data();
-            let records = data.records || {};
+                if (flatSnap.exists) {
+                    let data = flatSnap.data();
+                    let records = data.records || {};
 
-            for (let locCode in records) {
-                let task = records[locCode];
-                let ac = parseInt(task.total_ac_assigned) || 0; 
-                let osb = parseFloat(task.total_osb_assigned) || 0;
-                let locViewAc = 0, locViewRm = 0; 
-                let locMonthTotals = {};
+                    for (let locCode in records) {
+                        let task = records[locCode];
+                        let ac = parseInt(task.total_ac_assigned) || 0; 
+                        let osb = parseFloat(task.total_osb_assigned) || 0;
+                        let locViewAc = 0, locViewRm = 0; 
+                        let locMonthTotals = {};
 
-                window.dashboardActiveBatch.months.forEach(m => {
-                    let mAc = 0, mRm = 0;
-                    m.cycles.forEach(c => {
-                        let dbKey = `m${m.month_idx}_${c.id}`;
-                        mAc += task[`${dbKey}_ac`] || 0; 
-                        mRm += task[`${dbKey}_rm`] || 0;
+                        window.dashboardActiveBatch.months.forEach(m => {
+                            let mAc = 0, mRm = 0;
+                            m.cycles.forEach(c => {
+                                let dbKey = `m${m.month_idx}_${c.id}`;
+                                mAc += task[`${dbKey}_ac`] || 0; 
+                                mRm += task[`${dbKey}_rm`] || 0;
+                            });
+                            locMonthTotals[m.month_idx] = { ac: mAc, rm: mRm };
+                        });
+
+                        window.activeMonthsForChildRows.forEach(m => {
+                            m.cycles.forEach(c => {
+                                let dbKey = `m${m.month_idx}_${c.id}`;
+                                locViewAc += task[`${dbKey}_ac`] || 0; 
+                                locViewRm += task[`${dbKey}_rm`] || 0;
+                            });
+                        });
+
+                        details.push({ 
+                            region: task.region || "-", area: task.area || "-", 
+                            loc_code: locCode, loc_name: task.loc_name || "-", 
+                            ac: ac, osb: osb, 
+                            viewAc: locViewAc, viewRm: locViewRm, 
+                            monthTotals: locMonthTotals 
+                        });
+                    }
+                } else {
+                    const assignSnap = await db.collection("assignments").where("dca_name", "==", dcaName).get();
+                    if(assignSnap.empty) return [];
+
+                    assignSnap.forEach(doc => {
+                        let task = doc.data();
+                        let locMonthTotals = {};
+                        window.dashboardActiveBatch.months.forEach(m => { locMonthTotals[m.month_idx] = { ac: 0, rm: 0 }; });
+
+                        details.push({ 
+                            region: task.region || "-", area: task.area || "-", 
+                            loc_code: doc.id, loc_name: task.loc_name || "-", 
+                            ac: parseInt(task.total_ac_assigned) || 0, 
+                            osb: parseFloat(task.total_osb_assigned) || 0, 
+                            viewAc: 0, viewRm: 0, 
+                            monthTotals: locMonthTotals 
+                        });
                     });
-                    locMonthTotals[m.month_idx] = { ac: mAc, rm: mRm };
-                });
-
-                window.activeMonthsForChildRows.forEach(m => {
-                    m.cycles.forEach(c => {
-                        let dbKey = `m${m.month_idx}_${c.id}`;
-                        locViewAc += task[`${dbKey}_ac`] || 0; 
-                        locViewRm += task[`${dbKey}_rm`] || 0;
-                    });
-                });
-
-                details.push({ 
-                    region: task.region || "-", area: task.area || "-", 
-                    loc_code: locCode, loc_name: task.loc_name || "-", 
-                    ac: ac, osb: osb, 
-                    viewAc: locViewAc, viewRm: locViewRm, 
-                    monthTotals: locMonthTotals 
-                });
-            }
-            console.log(`[DEBUG] 3. Berjaya proses ${details.length} lokasi dari Flat Document.`);
-        } else {
-            console.log(`[DEBUG] 2. Dokumen Flat TIADA. Bertukar ke mod Fallback (Baca dari assignments)...`);
-            const assignSnap = await db.collection("assignments").where("dca_name", "==", dcaName).get();
-            
-            if(assignSnap.empty) {
-                console.warn(`[DEBUG] 3. Ralat: Tiada langsung data lokasi dijumpai dalam 'assignments' untuk "${dcaName}"!`);
-                return [];
-            }
-
-            assignSnap.forEach(doc => {
-                let task = doc.data();
-                let locMonthTotals = {};
-                
-                window.dashboardActiveBatch.months.forEach(m => {
-                    locMonthTotals[m.month_idx] = { ac: 0, rm: 0 };
-                });
-
-                details.push({ 
-                    region: task.region || "-", area: task.area || "-", 
-                    loc_code: doc.id, loc_name: task.loc_name || "-", 
-                    ac: parseInt(task.total_ac_assigned) || 0, 
-                    osb: parseFloat(task.total_osb_assigned) || 0, 
-                    viewAc: 0, viewRm: 0, 
-                    monthTotals: locMonthTotals 
-                });
-            });
-            console.log(`[DEBUG] 3. Berjaya proses ${details.length} lokasi menggunakan mod Fallback.`);
+                }
+            } catch(e) { console.error("[DEBUG] RALAT KRITIKAL semasa fetchDcaDetailsFromDB:", e); }
+            return details;
         }
-    } catch(e) { 
-        console.error("[DEBUG] RALAT KRITIKAL semasa fetchDcaDetailsFromDB:", e); 
-    }
-    return details;
-}
 
         function formatChildRow(dcaName, activeMonths) {
             const locList = window.dcaDetailsMap[dcaName];
@@ -1273,7 +1349,6 @@ async function fetchDcaDetailsFromDB(dcaName, batchName) {
             html += '</tbody></table>'; return html;
         }
 
-    // --- ADMIN ONLY: EXPORT FULL MASTER DATA (PENDING + SUBMITTED) ---
         async function exportMasterRawToExcel() {
             const batchName = document.getElementById('export-master-batch').value;
             if(!batchName) { alert("Please select a target batch to export."); return; }
@@ -1284,15 +1359,12 @@ async function fetchDcaDetailsFromDB(dcaName, batchName) {
             showToast("Compiling FULL Master Raw Data. This may take a moment...");
 
             try {
-                // 1. Baca semua tugasan (Ini guna banyak reads - bergantung pada saiz Excel yang di-upload)
                 const assignSnap = await db.collection("assignments").get();
                 if (assignSnap.empty) { alert("No baseline assignments found in database."); return; }
 
-                // 2. Baca semua Flat Reports untuk batch ini (Hanya guna sikit reads - purata 20-30 dokumen)
                 const flatSnap = await db.collection("flat_reports").where("batch_name", "==", batchName).get();
                 let submittedDict = {}; 
                 
-                // Susun data kutipan ke dalam 'dictionary' supaya laju dicari oleh script
                 flatSnap.forEach(doc => {
                     let data = doc.data();
                     submittedDict[data.dca_name] = data.records || {};
@@ -1301,45 +1373,26 @@ async function fetchDcaDetailsFromDB(dcaName, batchName) {
                 let excelData = [];
                 let activeCyclesForExcel = [];
                 
-                // Sediakan tajuk lajur dinamik berdasarkan kitaran Batch
-                batchObj.months.forEach(m => {
-                    m.cycles.forEach(c => activeCyclesForExcel.push({ ...c, parentMonthIdx: m.month_idx }));
-                });
+                batchObj.months.forEach(m => { m.cycles.forEach(c => activeCyclesForExcel.push({ ...c, parentMonthIdx: m.month_idx })); });
 
-                // 3. Mula proses menggabungkan data
                 assignSnap.forEach(doc => {
                     let task = doc.data();
                     let locCode = doc.id;
                     let dcaName = task.dca_name || "UNASSIGNED";
-                    
-                    // Semak sama ada DCA ini dah submit data untuk LOC ini di dalam Flat Report
                     let flatRecord = submittedDict[dcaName] ? submittedDict[dcaName][locCode] : null;
 
                     let locGrandRm = 0, locGrandAc = 0;
                     let rowData = { 
-                        "Batch": batchName, 
-                        "DCA Name": dcaName, 
-                        "Region": task.region || "-", 
-                        "Area": task.area || "-", 
-                        "Loc Code": locCode, 
-                        "Loc Name": task.loc_name || "-", 
-                        "Total A/C Assigned": parseInt(task.total_ac_assigned) || 0, 
-                        "Total OSB Assigned": parseFloat(task.total_osb_assigned) || 0 
+                        "Section": batchObj.section || "UNKNOWN",
+                        "Batch": batchName, "DCA Name": dcaName, "Region": task.region || "-", "Area": task.area || "-", 
+                        "Loc Code": locCode, "Loc Name": task.loc_name || "-", "Total A/C Assigned": parseInt(task.total_ac_assigned) || 0, "Total OSB Assigned": parseFloat(task.total_osb_assigned) || 0 
                     };
 
-                    // Masukkan nilai untuk setiap kitaran (C-1, C-2, dll)
                     activeCyclesForExcel.forEach(c => {
                         let dbKey = `m${c.parentMonthIdx}_${c.id}`;
                         let cAc = 0; let cRm = 0;
-                        
-                        // Jika wujud rekod Flat Document, ambil nilainya. Jika tidak, ia kekal 0.
-                        if (flatRecord) {
-                            cAc = flatRecord[`${dbKey}_ac`] || 0; 
-                            cRm = flatRecord[`${dbKey}_rm`] || 0;
-                        }
-
-                        locGrandAc += cAc;
-                        locGrandRm += cRm;
+                        if (flatRecord) { cAc = flatRecord[`${dbKey}_ac`] || 0; cRm = flatRecord[`${dbKey}_rm`] || 0; }
+                        locGrandAc += cAc; locGrandRm += cRm;
                         
                         let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
                         rowData[`${c.label.toUpperCase()} (${cDateStr}) - A/C Paying`] = cAc;
@@ -1348,130 +1401,86 @@ async function fetchDcaDetailsFromDB(dcaName, batchName) {
 
                     rowData["Total A/C Paying (G.Total Batch)"] = locGrandAc; 
                     rowData["Total Collection (G.Total Batch RM)"] = locGrandRm;
-                    
                     excelData.push(rowData);
                 });
 
-                // 4. Jana Excel Menggunakan SheetJS
-                const worksheet = XLSX.utils.json_to_sheet(excelData); 
-                const workbook = XLSX.utils.book_new(); 
+                const worksheet = XLSX.utils.json_to_sheet(excelData); const workbook = XLSX.utils.book_new(); 
                 XLSX.utils.book_append_sheet(workbook, worksheet, "Master Raw Dataset");
-                
-                const now = new Date(); 
-                const dateStr = now.toISOString().split('T')[0]; 
-                const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-                
-                XLSX.writeFile(workbook, `DCA_MASTER_RAW_${batchName}_${dateStr}_${timeStr}.xlsx`);
+                const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+                XLSX.writeFile(workbook, `DCA_MASTER_RAW_${batchObj.section}_${batchName}_${dateStr}_${timeStr}.xlsx`);
                 showToast("Master Raw Excel successfully downloaded!");
-
-            } catch(e) { 
-                console.error("Master Export Error:", e); 
-                alert("Ralat semasa muat turun: " + e.message); 
-            }
+            } catch(e) { console.error("Master Export Error:", e); alert("Ralat semasa muat turun: " + e.message); }
         }
 
-        // --- SISTEM EXCEL RAW ON-DEMAND (HANYA BACA BILA KLIK BUTANG EXPORT) ---
-async function exportRawToExcel() {
-    if(!window.dashboardActiveBatch) { alert("Sila Pilih Active Batch dan Generate Report dahulu."); return; }
-    
-    const batchName = window.dashboardActiveBatch.batch_name;
-    const fDcaVal = document.getElementById('filter-dca').value;
-    const fRegVal = document.getElementById('filter-region').value;
-    const monthIdxStr = document.getElementById('filter-month').value;
-    
-    showToast("Memuat turun laporan (Flat Document System). Sila tunggu...");
+        async function exportRawToExcel() {
+            if(!window.dashboardActiveBatch) { alert("Sila Pilih Active Batch dan Generate Report dahulu."); return; }
+            const batchName = window.dashboardActiveBatch.batch_name;
+            const fDcaVal = document.getElementById('filter-dca').value;
+            const fRegVal = document.getElementById('filter-region').value;
+            const monthIdxStr = document.getElementById('filter-month').value;
+            
+            showToast("Memuat turun laporan (Flat Document System). Sila tunggu...");
 
-    try {
-        // HANYA BACA FLAT DOCUMENTS! (Max 20-30 reads bergantung pada jumlah DCA)
-        let query = db.collection("flat_reports").where("batch_name", "==", batchName);
-        if (fDcaVal !== "") query = query.where("dca_name", "==", fDcaVal);
-        
-        const flatSnap = await query.get();
-        if (flatSnap.empty) { alert("Tiada rekod laporan yang telah dihantar oleh DCA dijumpai untuk dieksport."); return; }
+            try {
+                let query = db.collection("flat_reports").where("batch_name", "==", batchName);
+                if (fDcaVal !== "") query = query.where("dca_name", "==", fDcaVal);
+                
+                const flatSnap = await query.get();
+                if (flatSnap.empty) { alert("Tiada rekod laporan yang telah dihantar oleh DCA dijumpai untuk dieksport."); return; }
 
-        let excelData = [];
-        let activeCyclesForExcel = [];
-        let displayMonthName = "ALL MONTHS";
+                let excelData = []; let activeCyclesForExcel = []; let displayMonthName = "ALL MONTHS";
 
-        // Tentukan Kitaran Bulan yang ditapis
-        if (monthIdxStr === "ALL") {
-            window.dashboardActiveBatch.months.forEach(m => m.cycles.forEach(c => activeCyclesForExcel.push({ ...c, parentMonthIdx: m.month_idx })));
-        } else {
-            const monthIdx = parseInt(monthIdxStr);
-            const monthConfig = window.dashboardActiveBatch.months.find(m => m.month_idx === monthIdx);
-            if(monthConfig) { displayMonthName = monthConfig.month_name; monthConfig.cycles.forEach(c => activeCyclesForExcel.push({ ...c, parentMonthIdx: monthConfig.month_idx })); }
+                if (monthIdxStr === "ALL") {
+                    window.dashboardActiveBatch.months.forEach(m => m.cycles.forEach(c => activeCyclesForExcel.push({ ...c, parentMonthIdx: m.month_idx })));
+                } else {
+                    const monthIdx = parseInt(monthIdxStr);
+                    const monthConfig = window.dashboardActiveBatch.months.find(m => m.month_idx === monthIdx);
+                    if(monthConfig) { displayMonthName = monthConfig.month_name; monthConfig.cycles.forEach(c => activeCyclesForExcel.push({ ...c, parentMonthIdx: monthConfig.month_idx })); }
+                }
+
+                flatSnap.forEach(doc => {
+                    let data = doc.data(); let dcaName = data.dca_name; let records = data.records || {};
+                    for (let locCode in records) {
+                        let task = records[locCode];
+                        if (fRegVal !== "" && task.region !== fRegVal) continue;
+
+                        let locViewAc = 0, locViewRm = 0, locGrandRm = 0, locGrandAc = 0;
+                        let rowData = { 
+                            "Section": window.dashboardActiveBatch.section || "UNKNOWN",
+                            "Batch": batchName, "Display Filter": displayMonthName, "DCA Name": dcaName, "Region": task.region || "-", "Area": task.area || "-", 
+                            "Loc Code": locCode, "Loc Name": task.loc_name || "-", "Total A/C Assigned": task.total_ac_assigned || 0, "Total OSB Assigned": task.total_osb_assigned || 0 
+                        };
+
+                        window.dashboardActiveBatch.months.forEach(m => {
+                            m.cycles.forEach(c => {
+                                let dbKey = `m${m.month_idx}_${c.id}`;
+                                locGrandAc += task[`${dbKey}_ac`] || 0; locGrandRm += task[`${dbKey}_rm`] || 0;
+                            });
+                        });
+
+                        activeCyclesForExcel.forEach(c => {
+                            let dbKey = `m${c.parentMonthIdx}_${c.id}`;
+                            let cAc = task[`${dbKey}_ac`] || 0; let cRm = task[`${dbKey}_rm`] || 0;
+                            locViewAc += cAc; locViewRm += cRm;
+                            let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
+                            rowData[`${c.label.toUpperCase()} (${cDateStr}) - A/C Paying`] = cAc;
+                            rowData[`${c.label.toUpperCase()} (${cDateStr}) - Collection RM`] = cRm;
+                        });
+
+                        rowData["Total A/C Paying (Current View)"] = locViewAc; rowData["Total Collection (Current View RM)"] = locViewRm;
+                        rowData["Total A/C Paying (G.Total Batch)"] = locGrandAc; rowData["Total Collection (G.Total Batch RM)"] = locGrandRm;
+                        excelData.push(rowData);
+                    }
+                });
+
+                const worksheet = XLSX.utils.json_to_sheet(excelData); const workbook = XLSX.utils.book_new(); 
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Raw DCA Performance");
+                const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+                XLSX.writeFile(workbook, `DCA_MasterPerformance_${window.dashboardActiveBatch.section}_${batchName}_${dateStr}_${timeStr}.xlsx`);
+                showToast("Muat turun Excel berjaya!");
+
+            } catch(e) { alert("Ralat semasa muat turun: " + e.message); }
         }
-
-        // Proses Data dari Flat Document terus ke format Excel
-        flatSnap.forEach(doc => {
-            let data = doc.data();
-            let dcaName = data.dca_name;
-            let records = data.records || {};
-
-            for (let locCode in records) {
-                let task = records[locCode];
-                
-                // Tapisan Region (jika ada)
-                if (fRegVal !== "" && task.region !== fRegVal) continue;
-
-                let locViewAc = 0, locViewRm = 0, locGrandRm = 0, locGrandAc = 0;
-                let rowData = { 
-                    "Batch": batchName, 
-                    "Display Filter": displayMonthName, 
-                    "DCA Name": dcaName, 
-                    "Region": task.region || "-", 
-                    "Area": task.area || "-", 
-                    "Loc Code": locCode, 
-                    "Loc Name": task.loc_name || "-", 
-                    "Total A/C Assigned": task.total_ac_assigned || 0, 
-                    "Total OSB Assigned": task.total_osb_assigned || 0 
-                };
-
-                // Kira Grand Total
-                window.dashboardActiveBatch.months.forEach(m => {
-                    m.cycles.forEach(c => {
-                        let dbKey = `m${m.month_idx}_${c.id}`;
-                        locGrandAc += task[`${dbKey}_ac`] || 0; 
-                        locGrandRm += task[`${dbKey}_rm`] || 0;
-                    });
-                });
-
-                // Masukkan lajur untuk bulan yang dipilih sahaja
-                activeCyclesForExcel.forEach(c => {
-                    let dbKey = `m${c.parentMonthIdx}_${c.id}`;
-                    let cAc = task[`${dbKey}_ac`] || 0; 
-                    let cRm = task[`${dbKey}_rm`] || 0;
-                    locViewAc += cAc; locViewRm += cRm;
-                    
-                    let cDateStr = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}).toUpperCase();
-                    rowData[`${c.label.toUpperCase()} (${cDateStr}) - A/C Paying`] = cAc;
-                    rowData[`${c.label.toUpperCase()} (${cDateStr}) - Collection RM`] = cRm;
-                });
-
-                rowData["Total A/C Paying (Current View)"] = locViewAc; 
-                rowData["Total Collection (Current View RM)"] = locViewRm;
-                rowData["Total A/C Paying (G.Total Batch)"] = locGrandAc; 
-                rowData["Total Collection (G.Total Batch RM)"] = locGrandRm;
-                
-                excelData.push(rowData);
-            }
-        });
-
-        // Jana Fail Excel
-        const worksheet = XLSX.utils.json_to_sheet(excelData); 
-        const workbook = XLSX.utils.book_new(); 
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Raw DCA Performance");
-        const now = new Date(); 
-        const dateStr = now.toISOString().split('T')[0]; 
-        const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-        
-        XLSX.writeFile(workbook, `DCA_MasterPerformance_${batchName}_${dateStr}_${timeStr}.xlsx`);
-        showToast("Muat turun Excel berjaya (Sistem Super Ringan)!");
-
-    } catch(e) { 
-        alert("Ralat semasa muat turun: " + e.message); 
-    }
-}
     </script>
 </body>
 </html>
