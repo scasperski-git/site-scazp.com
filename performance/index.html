@@ -664,13 +664,48 @@
             showToast(`Loaded ${batchName} constraints into form!`);
         }
 
+// --- ADMIN ONLY: DEEP DELETE PROTOCOL ---
         async function deleteBatch(batchName) {
-            if(!confirm(`Security Action: Are you absolutely certain you want to purge configuration logs for: ${batchName}?`)) return;
+            if(!confirm(`AMARAN KESELAMATAN: Adakah anda pasti mahu memadam batch ${batchName} berserta SEMUA rekod laporan, kunci (locks), dan data rumusan yang berkaitan dengannya? Tindakan ini tidak boleh diundur.`)) return;
+
+            showToast("Memulakan protokol pemadaman berangkai (Deep Delete)...");
+
             try {
-                await db.collection("batches").doc(batchName).delete();
-                showToast("Collection Batch successfully expunged from system cloud.");
-                fetchBatchesList();
-            } catch (e) { alert("Deletion protocol errored out: " + e.message); }
+                // Kita gunakan db.batch() untuk buat pemadaman pukal secara serentak
+                const deleteOperations = db.batch(); 
+
+                // 1. Padam fail konfigurasi Batch utama
+                let batchRef = db.collection("batches").doc(batchName);
+                deleteOperations.delete(batchRef);
+
+                // 2. Padam dokumen Live Summary untuk batch ini
+                let summaryRef = db.collection("dca_live_summaries").doc(batchName);
+                deleteOperations.delete(summaryRef);
+
+                // 3. Cari dan padam semua Flat Reports milik DCA untuk batch ini
+                const flatSnap = await db.collection("flat_reports").where("batch_name", "==", batchName).get();
+                flatSnap.forEach(doc => {
+                    deleteOperations.delete(doc.ref);
+                });
+
+                // 4. Cari dan padam semua rekod Submission Locks untuk batch ini
+                const lockSnap = await db.collection("submission_locks").where("batch_name", "==", batchName).get();
+                lockSnap.forEach(doc => {
+                    deleteOperations.delete(doc.ref);
+                });
+
+                // 5. Tembak semua arahan pemadaman ke Firebase (Commit)
+                await deleteOperations.commit();
+
+                showToast(`Selesai: Semua sisa data untuk ${batchName} telah dibersihkan dari server!`);
+                
+                // Refresh senarai UI
+                fetchBatchesList(); 
+                
+            } catch (e) { 
+                console.error("Deletion protocol errored out:", e);
+                alert("Ralat sistem semasa memadam: " + e.message); 
+            }
         }
 
         function autoDetectDcaPortal(selectedSection) {
