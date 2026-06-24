@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DCA Portal & Performance Dashboard | scazp.com</title>
     
+    <!-- jQuery & DataTables Libraries -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     
+    <!-- SheetJS Excel Library -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
+    <!-- Firebase Legacy SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
@@ -60,7 +63,7 @@
         .grid-2 { display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; }
         .grid-3 { display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; }
         .grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .grid-5-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; } /* New responsive grid */
+        .grid-5-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
         @media (min-width: 768px) { 
             .grid-2 { grid-template-columns: repeat(2, 1fr); } 
             .grid-3 { grid-template-columns: repeat(3, 1fr); }
@@ -145,8 +148,10 @@
             <button class="tab-btn" onclick="switchTab('admin')">Batch Settings (Admin)</button>
         </div>
 
+        <!-- TAB 1: DCA PORTAL -->
         <div id="view-portal" class="view-section active">
             
+            <!-- SECTION SELECTOR (New Multi-Department UI) -->
             <div id="portal-section-selector" class="section-selector-container">
                 <h2 style="color:var(--accent-gold); margin-bottom: 30px; text-transform:uppercase; letter-spacing: 1px;">Select Department Section</h2>
                 <button class="section-btn-mega" onclick="selectPortalSection('JV-AGENCY')">JV-AGENCY <span>&#10140;</span></button>
@@ -155,6 +160,7 @@
                 <p style="color: var(--text-muted); font-size: 12px; margin-top: 20px;">Please ensure you select the correct division before submitting your collection data.</p>
             </div>
 
+            <!-- MAIN PORTAL AREA -->
             <div class="container-portal" id="portal-main-area" style="display:none;">
                 <div class="header">
                     <button class="btn-back-section" onclick="resetPortalSection()">&#8592; Change Section</button>
@@ -178,6 +184,7 @@
             </div>
         </div>
 
+        <!-- TAB 2: MANAGEMENT DASHBOARD -->
         <div id="view-dashboard" class="view-section">
             <div class="header" style="text-align:left;">
                 <h1>DCA Performance Dashboard</h1>
@@ -241,6 +248,7 @@
             </div>
         </div>
 
+        <!-- TAB 3: ADMIN PANEL -->
         <div id="view-admin" class="view-section">
             <div class="header" style="text-align:left;">
                 <h1>System Administration Control Panel</h1>
@@ -249,6 +257,7 @@
 
             <div class="grid-2">
                 
+                <!-- LEFT COLUMN: Setup Panel -->
                 <div class="control-panel">
                     <div class="panel-title">&#9881;&#65039; 1. Register / Update Collection Batch Configuration</div>
                     
@@ -314,12 +323,22 @@
                     <button class="btn-action btn-gold" onclick="saveBatchSetup()">Save Batch Configuration</button>
                 </div>
 
+                <!-- RIGHT COLUMN: Stacked Panels -->
                 <div style="display: flex; flex-direction: column; gap: 20px;">
                     
+                    <!-- BOX 2: Upload Excel -->
                     <div class="control-panel" style="margin-bottom: 0;">
                         <div class="panel-title">&#128194; 2. Upload Baseline Assignment Database (Excel)</div>
                         
-                        <div style="background-color: rgba(239, 68, 68, 0.1); border-left: 3px solid var(--danger); padding: 12px; margin-bottom: 15px; border-radius: 4px;">
+                        <label class="panel-label" style="color:var(--accent-gold);">Target Department Section</label>
+                        <select id="upload-section">
+                            <option value="">-- Select Section For This Excel --</option>
+                            <option value="JV-AGENCY">JV-AGENCY</option>
+                            <option value="JVBC-AGENCY">JVBC-AGENCY</option>
+                            <option value="EXT. AGY(NPL)">EXT. AGY(NPL)</option>
+                        </select>
+
+                        <div style="background-color: rgba(239, 68, 68, 0.1); border-left: 3px solid var(--danger); padding: 12px; margin-bottom: 15px; margin-top: 15px; border-radius: 4px;">
                             <label class="panel-label" style="color:var(--danger); margin-bottom:0; line-height:1.4;">Critical Requirement: Excel file layout must strictly contain the headers 'LOC CODE', 'DCA NAME', 'REGION', 'AREA', 'TOTAL A/C ASSIGNED', and 'TOTAL OSB ASSIGNED'.</label>
                         </div>
                         
@@ -327,6 +346,7 @@
                         <input type="file" id="excel-file" accept=".xlsx, .xls" onchange="uploadExcelToFirestore(this)">
                     </div>
                     
+                    <!-- BOX 3: Export Data -->
                     <div class="control-panel" style="margin-bottom: 0;">
                         <div class="panel-title">&#128202; 3. Export Full Master Raw Data (Submitted + Pending)</div>
                         <div class="grid-2">
@@ -350,6 +370,7 @@
                         </p>
                     </div>
 
+                    <!-- BOX 4: Unlock Restrictions -->
                     <div class="control-panel" style="margin-bottom: 0;">
                         <div class="panel-title">&#128275; 4. Unlock DCA Submission Restrictions (Correction Overrides)</div>
                         <div class="grid-2">
@@ -375,6 +396,7 @@
                 </div>
             </div>
 
+            <!-- BOTTOM ROW: Registry Summary -->
             <div class="control-panel" style="margin-top: 20px;">
                 <div class="panel-title">&#128203; 5. Active Configuration Registry Summary</div>
                 <div class="table-container" style="margin-top: 0; padding:5px;">
@@ -399,6 +421,7 @@
 
     </div>
 
+    <!-- CENTER PRESTIGE TOAST ALERT -->
     <div id="toast">Operation successfully executed!</div>
 
     <script>
@@ -417,14 +440,14 @@
         window.allBatches = [];
         window.activeBatchName = null;
         window.activeDcaCycle = null; 
-        window.activePortalSection = null; // Track chosen section in Portal
+        window.activePortalSection = null; 
         window.dashboardActiveBatch = null;
         window.dcaDetailsMap = {};
         window.activeMonthsForChildRows = [];
 
         window.onload = function() { 
             fetchBatchesList();
-            populateDcaList(); 
+            // populateDcaList() dikeluarkan dari sini kerana kita guna fungsi Dynamic Dropdowns
         };
 
         $(document).ready(function() {
@@ -474,11 +497,52 @@
             setTimeout(() => { toast.classList.remove("show"); }, 3000);
         }
 
+        /* --- FUNGSI DYNAMIC DROPDOWNS KHAS UNTUK SECTION (MENGGANTIKAN populateDcaList) --- */
+        async function loadDcaDropdowns(section, targetSelectId, targetFilterId, targetRegionId) {
+            const dcaSelect = targetSelectId ? document.getElementById(targetSelectId) : null;
+            const filterDca = targetFilterId ? document.getElementById(targetFilterId) : null;
+            const filterReg = targetRegionId ? document.getElementById(targetRegionId) : null;
+
+            if (dcaSelect) dcaSelect.innerHTML = '<option value="">-- Select Your DCA Agency Name --</option>';
+            if (filterDca) filterDca.innerHTML = '<option value="">ALL AGENCIES</option>';
+            if (filterReg) filterReg.innerHTML = '<option value="">ALL REGIONS</option>';
+
+            if(!section) return;
+
+            try {
+                const cacheKey = `dropdowns_${section}`;
+                let data = null;
+                const cached = localStorage.getItem(cacheKey);
+                
+                if (cached) {
+                    data = JSON.parse(cached);
+                } else {
+                    const doc = await db.collection("system_lists").doc(cacheKey).get();
+                    if(doc.exists){ 
+                        data = doc.data(); 
+                        localStorage.setItem(cacheKey, JSON.stringify({ dcas: data.dcas || [], regions: data.regions || [] }));
+                    }
+                }
+
+                if (data) {
+                    data.dcas.forEach(d => {
+                        if(dcaSelect) dcaSelect.innerHTML += `<option value="${d}">${d}</option>`;
+                        if(filterDca) filterDca.innerHTML += `<option value="${d}">${d}</option>`;
+                    });
+                    data.regions.forEach(r => { 
+                        if(filterReg) filterReg.innerHTML += `<option value="${r}">${r}</option>`; 
+                    });
+                }
+            } catch (e) { console.error("Dropdown error:", e); }
+        }
+
         /* --- LOGIK BAHARU: TAB 1 SECTION SELECTOR --- */
         function selectPortalSection(section) {
             window.activePortalSection = section;
             document.getElementById('portal-section-selector').style.display = 'none';
             document.getElementById('portal-main-area').style.display = 'block';
+            
+            loadDcaDropdowns(section, 'dca-select', null, null);
             autoDetectDcaPortal(section);
         }
 
@@ -496,7 +560,15 @@
             document.getElementById('filter-month').innerHTML = '<option value="">-- Awaiting Batch Selection --</option>';
             window.dashboardActiveBatch = null;
 
-            if(!sec) return;
+            if(!sec) {
+                document.getElementById('filter-dca').innerHTML = '<option value="">ALL AGENCIES</option>';
+                document.getElementById('filter-region').innerHTML = '<option value="">ALL REGIONS</option>';
+                return;
+            }
+            
+            // Panggil senarai DCA khusus untuk Section Dashboard
+            loadDcaDropdowns(sec, null, 'filter-dca', 'filter-region');
+
             let secBatches = window.allBatches.filter(b => b.section === sec);
             secBatches.forEach(b => { batchSel.innerHTML += `<option value="${b.batch_name}">${b.batch_name}</option>`; });
         }
@@ -529,7 +601,7 @@
             if(!batchName) { alert("Please type a valid Batch Code identifier."); return; }
 
             let batchData = {
-                section: sectionVal, // Ditambah
+                section: sectionVal,
                 batch_name: batchName,
                 start_date: document.getElementById('setup-start-date').value,
                 end_date: document.getElementById('setup-end-date').value,
@@ -584,13 +656,11 @@
                     window.allBatches.push(doc.data());
                 });
 
-                // Update UI Dropdowns based on active selections if any
                 populateDashboardBatches();
                 populateAdminExportBatches();
                 populateAdminUnlockBatches();
                 renderBatchSummary(); 
 
-                // Jika DCA refresh page masa tengah ada dalam portal
                 if(window.activePortalSection) {
                     autoDetectDcaPortal(window.activePortalSection);
                 }
@@ -606,7 +676,6 @@
             }
 
             let html = '';
-            // Susun batch mengikut section dan nama
             let sortedBatches = window.allBatches.slice().sort((a,b) => {
                 if(a.section < b.section) return -1;
                 if(a.section > b.section) return 1;
@@ -664,44 +733,26 @@
             showToast(`Loaded ${batchName} constraints into form!`);
         }
 
-// --- ADMIN ONLY: DEEP DELETE PROTOCOL ---
         async function deleteBatch(batchName) {
             if(!confirm(`AMARAN KESELAMATAN: Adakah anda pasti mahu memadam batch ${batchName} berserta SEMUA rekod laporan, kunci (locks), dan data rumusan yang berkaitan dengannya? Tindakan ini tidak boleh diundur.`)) return;
-
             showToast("Memulakan protokol pemadaman berangkai (Deep Delete)...");
-
             try {
-                // Kita gunakan db.batch() untuk buat pemadaman pukal secara serentak
                 const deleteOperations = db.batch(); 
-
-                // 1. Padam fail konfigurasi Batch utama
                 let batchRef = db.collection("batches").doc(batchName);
                 deleteOperations.delete(batchRef);
 
-                // 2. Padam dokumen Live Summary untuk batch ini
                 let summaryRef = db.collection("dca_live_summaries").doc(batchName);
                 deleteOperations.delete(summaryRef);
 
-                // 3. Cari dan padam semua Flat Reports milik DCA untuk batch ini
                 const flatSnap = await db.collection("flat_reports").where("batch_name", "==", batchName).get();
-                flatSnap.forEach(doc => {
-                    deleteOperations.delete(doc.ref);
-                });
+                flatSnap.forEach(doc => { deleteOperations.delete(doc.ref); });
 
-                // 4. Cari dan padam semua rekod Submission Locks untuk batch ini
                 const lockSnap = await db.collection("submission_locks").where("batch_name", "==", batchName).get();
-                lockSnap.forEach(doc => {
-                    deleteOperations.delete(doc.ref);
-                });
+                lockSnap.forEach(doc => { deleteOperations.delete(doc.ref); });
 
-                // 5. Tembak semua arahan pemadaman ke Firebase (Commit)
                 await deleteOperations.commit();
-
                 showToast(`Selesai: Semua sisa data untuk ${batchName} telah dibersihkan dari server!`);
-                
-                // Refresh senarai UI
                 fetchBatchesList(); 
-                
             } catch (e) { 
                 console.error("Deletion protocol errored out:", e);
                 alert("Ralat sistem semasa memadam: " + e.message); 
@@ -722,7 +773,6 @@
                     activeBatch = b; break; 
                 }
             }
-            // Fallback kepada batch terkini dalam section tersebut jika date luput
             if(!activeBatch) { 
                 let secBatches = window.allBatches.filter(b => b.section === selectedSection);
                 if(secBatches.length > 0) activeBatch = secBatches[secBatches.length - 1]; 
@@ -816,7 +866,11 @@
             displayArea.innerHTML = '<div style="text-align:center; padding: 30px;">Loading matching asset registers...</div>';
             
             try {
-                const querySnapshot = await db.collection("assignments").where("dca_name", "==", selectedDca).get(); 
+                // SEKARANG TAPIS MENGIKUT SECTION AKTIF DI PORTAL
+                const querySnapshot = await db.collection("assignments")
+                                              .where("section", "==", window.activePortalSection)
+                                              .where("dca_name", "==", selectedDca).get(); 
+                
                 displayArea.innerHTML = ''; 
                 if (querySnapshot.empty) { displayArea.innerHTML = '<div style="text-align:center;">No baseline assignment records linked to this agency code.</div>'; return; }
                 
@@ -824,7 +878,8 @@
                 window.currentDcaTasks = [];
 
                 querySnapshot.forEach((doc) => {
-                    let task = doc.data(); task.loc_code = doc.id;
+                    let task = doc.data(); 
+                    task.loc_code = doc.id.split('_').pop(); // Buang prefix section untuk paparan
                     window.currentDcaTasks.push(task); 
                     
                     if (!groupedByRegion[task.region]) groupedByRegion[task.region] = []; 
@@ -899,7 +954,8 @@
                 totalAc += item.ac; 
                 totalRm += item.rm; 
                 
-                let docRef = db.collection("submissions").doc(item.locCode);
+                const assignmentId = `${window.activePortalSection}_${item.locCode}`;
+                let docRef = db.collection("submissions").doc(assignmentId);
                 firestoreBatch.set(docRef, {
                     [window.activeBatchName]: {
                         [dbFieldKey]: { ac_paying: item.ac, collection_amount: item.rm, timestamp: firebase.firestore.FieldValue.serverTimestamp() }
@@ -1013,6 +1069,12 @@
         }
 
         async function uploadExcelToFirestore(input) {
+            const uploadSection = document.getElementById('upload-section').value;
+            if(!uploadSection) {
+                alert("Sila pilih Target Department Section terlebih dahulu sebelum muat naik Excel!");
+                input.value = ""; return;
+            }
+
             const file = input.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = async function(e) {
@@ -1023,7 +1085,8 @@
                 showToast("Processing file and standardizing DCA names...");
 
                 try {
-                    const sysDoc = await db.collection("system_lists").doc("dropdowns").get();
+                    const cacheKey = `dropdowns_${uploadSection}`;
+                    const sysDoc = await db.collection("system_lists").doc(cacheKey).get();
                     let existingDcas = sysDoc.exists ? (sysDoc.data().dcas || []) : [];
 
                     let rawNamesSet = new Set();
@@ -1068,67 +1131,40 @@
                             baselines[dcaName].ac += parseInt(row['TOTAL A/C ASSIGNED']) || 0;
                             baselines[dcaName].osb += parseFloat(row['TOTAL OSB ASSIGNED']) || 0;
 
-                            batch.set(db.collection("assignments").doc(Math.floor(locCodeRaw).toString()), {
+                            // ID DENGAN PREFIX SECTION UNTUK MENGELAKKAN OVERWRITE ANTARA SECTION
+                            const docId = `${uploadSection}_${Math.floor(locCodeRaw).toString()}`;
+                            
+                            batch.set(db.collection("assignments").doc(docId), {
+                                section: uploadSection, // TAG SECTION
                                 dca_name: dcaName, region: row['REGION'] || '', area: row['AREA'] || '', loc_name: row['LOC NAME'] || '',
                                 total_ac_assigned: parseInt(row['TOTAL A/C ASSIGNED']) || 0, total_osb_assigned: parseFloat(row['TOTAL OSB ASSIGNED']) || 0
                             }, { merge: true }); count++;
                         }
                     });
 
-                    let baseRef = db.collection("dca_live_summaries").doc("GLOBAL_BASELINES");
+                    // BASELINES & DROPDOWNS KHUSUS UNTUK SECTION INI
+                    let baseRef = db.collection("dca_live_summaries").doc(`GLOBAL_BASELINES_${uploadSection}`);
                     batch.set(baseRef, baselines); 
 
                     batch.set(
-                        db.collection("system_lists").doc("dropdowns"),
+                        db.collection("system_lists").doc(cacheKey),
                         { dcas: Array.from(dcaSet).sort(), regions: Array.from(regionSet).sort(), updated_at: firebase.firestore.FieldValue.serverTimestamp() }
                     );
 
                     await batch.commit(); 
-                    showToast(`Import complete: Added ${count} entries. DCA names standardized!`); 
+                    showToast(`Import complete for ${uploadSection}. Added ${count} entries. DCA names standardized!`); 
                     input.value = ""; 
-                    localStorage.removeItem('dropdown_lists');
-                    populateDcaList(); 
+                    localStorage.removeItem(cacheKey); // Clear spesifik cache
+                    
+                    // Kalau admin tengah tengok section tu kat dashboard, auto update
+                    const dashSec = document.getElementById('filter-section').value;
+                    if(dashSec === uploadSection) loadDcaDropdowns(uploadSection, null, 'filter-dca', 'filter-region');
 
                 } catch (error) { 
                     console.error("Upload Error:", error);
                     alert("Excel data ingestion faulted: " + error.message); 
                 }
             }; reader.readAsArrayBuffer(file);
-        }
-
-        async function populateDcaList() {
-            const dcaSelect = document.getElementById('dca-select');
-            const filterDca = document.getElementById('filter-dca');
-            const filterReg = document.getElementById('filter-region');
-
-            dcaSelect.innerHTML = '<option value="">-- Select Your DCA Agency Name --</option>';
-            filterDca.innerHTML = '<option value="">ALL AGENCIES</option>';
-            filterReg.innerHTML = '<option value="">ALL REGIONS</option>';
-
-            try {
-                const cachedDropdowns = localStorage.getItem('dropdown_lists');
-                if (cachedDropdowns) {
-                    const data = JSON.parse(cachedDropdowns);
-                    data.dcas.forEach(d => {
-                        dcaSelect.innerHTML += `<option value="${d}">${d}</option>`;
-                        filterDca.innerHTML += `<option value="${d}">${d}</option>`;
-                    });
-                    data.regions.forEach(r => { filterReg.innerHTML += `<option value="${r}">${r}</option>`; });
-                    return;
-                }
-
-                const doc = await db.collection("system_lists").doc("dropdowns").get();
-                if(!doc.exists){ console.warn("Dropdown document not found."); return; }
-
-                const data = doc.data();
-                data.dcas.forEach(d => {
-                    dcaSelect.innerHTML += `<option value="${d}">${d}</option>`;
-                    filterDca.innerHTML += `<option value="${d}">${d}</option>`;
-                });
-                data.regions.forEach(r => { filterReg.innerHTML += `<option value="${r}">${r}</option>`; });
-
-                localStorage.setItem('dropdown_lists', JSON.stringify({ dcas: data.dcas || [], regions: data.regions || [] }));
-            } catch (e) { console.error("Dropdown error:", e); }
         }
 
         async function generateFullReport() {
@@ -1138,6 +1174,7 @@
             
             const fDcaVal = document.getElementById('filter-dca').value;
             const batchName = window.dashboardActiveBatch.batch_name;
+            const secVal = window.dashboardActiveBatch.section; // Gunakan section dari batch
             const titleEl = document.getElementById('dashboard-dynamic-title');
 
             if ($.fn.DataTable.isDataTable('#report-table')) { $('#report-table').DataTable().clear().destroy(); }
@@ -1196,14 +1233,15 @@
                 tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;">Compiling summary datasets...</td></tr>`;
                 window.dcaDetailsMap = {}; 
                 
-                const baseSnap = await db.collection("dca_live_summaries").doc("GLOBAL_BASELINES").get();
+                // MENGGUNAKAN BASELINES SPESIFIK UNTUK SECTION
+                const baseSnap = await db.collection("dca_live_summaries").doc(`GLOBAL_BASELINES_${secVal}`).get();
                 const sumSnap = await db.collection("dca_live_summaries").doc(batchName).get();
                 
                 const baselines = baseSnap.exists ? baseSnap.data() : {};
                 const summaries = sumSnap.exists ? sumSnap.data() : {};
 
                 if (Object.keys(baselines).length === 0) { 
-                    tbody.innerHTML = '<tr><td colspan="15" style="text-align:center; color:var(--text-muted);">Tiada rekod Baseline Pangkalan Data. Sila muat naik Excel terlebih dahulu.</td></tr>'; return; 
+                    tbody.innerHTML = `<tr><td colspan="15" style="text-align:center; color:var(--text-muted);">Tiada rekod Baseline Pangkalan Data untuk Section ${secVal}. Sila muat naik Excel.</td></tr>`; return; 
                 }
 
                 let grandTotalOsb = 0, grandTotalCurrentMonthCollection = 0, grandTotalAllCollection = 0;
@@ -1334,7 +1372,8 @@
                         });
                     }
                 } else {
-                    const assignSnap = await db.collection("assignments").where("dca_name", "==", dcaName).get();
+                    const sec = window.dashboardActiveBatch.section;
+                    const assignSnap = await db.collection("assignments").where("section", "==", sec).where("dca_name", "==", dcaName).get();
                     if(assignSnap.empty) return [];
 
                     assignSnap.forEach(doc => {
@@ -1344,7 +1383,7 @@
 
                         details.push({ 
                             region: task.region || "-", area: task.area || "-", 
-                            loc_code: doc.id, loc_name: task.loc_name || "-", 
+                            loc_code: doc.id.split('_').pop(), loc_name: task.loc_name || "-", 
                             ac: parseInt(task.total_ac_assigned) || 0, 
                             osb: parseFloat(task.total_osb_assigned) || 0, 
                             viewAc: 0, viewRm: 0, 
@@ -1386,16 +1425,17 @@
 
         async function exportMasterRawToExcel() {
             const batchName = document.getElementById('export-master-batch').value;
-            if(!batchName) { alert("Please select a target batch to export."); return; }
+            const secVal = document.getElementById('export-master-section').value;
+            if(!secVal || !batchName) { alert("Please select a target Section and Batch to export."); return; }
 
-            const batchObj = window.allBatches.find(b => b.batch_name === batchName);
+            const batchObj = window.allBatches.find(b => b.batch_name === batchName && b.section === secVal);
             if(!batchObj) { alert("Batch configuration parameters missing."); return; }
 
             showToast("Compiling FULL Master Raw Data. This may take a moment...");
 
             try {
-                const assignSnap = await db.collection("assignments").get();
-                if (assignSnap.empty) { alert("No baseline assignments found in database."); return; }
+                const assignSnap = await db.collection("assignments").where("section", "==", secVal).get();
+                if (assignSnap.empty) { alert("No baseline assignments found in database for this section."); return; }
 
                 const flatSnap = await db.collection("flat_reports").where("batch_name", "==", batchName).get();
                 let submittedDict = {}; 
@@ -1412,7 +1452,7 @@
 
                 assignSnap.forEach(doc => {
                     let task = doc.data();
-                    let locCode = doc.id;
+                    let locCode = doc.id.split('_').pop(); 
                     let dcaName = task.dca_name || "UNASSIGNED";
                     let flatRecord = submittedDict[dcaName] ? submittedDict[dcaName][locCode] : null;
 
