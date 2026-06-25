@@ -10,12 +10,9 @@
 html, body { height:100%; margin:0; }
 body{
   font-family: Arial, sans-serif;
-  background:
-    radial-gradient(circle at top left, #e3f2fd, transparent 40%),
-    radial-gradient(circle at bottom right, #fce4ec, transparent 40%),
-    linear-gradient(180deg, #eef1f4, #f4f6f8);
+  background: linear-gradient(180deg, #f7f9fb, #eef2f5);
   padding:20px;
-  color:#333;
+  color:#000;
 }
 
 /* ===== CONTAINER ===== */
@@ -23,79 +20,73 @@ body{
   max-width:420px;
   margin:auto;
   background:#fff;
-  padding:20px 24px;
-  border-radius:12px;
-  box-shadow:0 10px 25px rgba(0,0,0,.08);
+  padding:16px 20px 20px;
+  border-radius:10px;
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
   position:relative;
-  animation:fade .4s ease;
+  animation:fade .3s ease;
 }
 .container::before{
   content:"";
   position:absolute;
   top:0; left:0;
-  height:5px; width:100%;
+  height:4px; width:100%;
   background:linear-gradient(90deg,#1e88e5,#42a5f5);
-  border-radius:12px 12px 0 0;
+  border-radius:10px 10px 0 0;
 }
 
 .success-container{ max-width:520px; }
 
 @keyframes fade{
-  from{opacity:0; transform:translateY(10px)}
+  from{opacity:0; transform:translateY(8px)}
   to{opacity:1; transform:none}
 }
 
 /* ===== TEXT ===== */
-h2{ text-align:center; margin:10px 0 16px; color:#111; font-size: 20px;}
-label{ font-size:12px; color:#555; font-weight:bold; letter-spacing: 0.3px; }
-.req{ color:#e53935; font-size: 14px; }
+h2{ text-align:center; margin:6px 0 12px }
+label{ font-size:12px; color:#555; font-weight:bold }
+.req{ color:#e53935 }
 .helper{
   font-size:12px;
   color:#777;
-  margin-top:8px;
+  margin-top:6px;
   text-align:center;
+}
+  
+.shake{
+  animation:shake .45s;
+  border-color:#e53935;
+  box-shadow:0 0 0 2px rgba(229,57,53,.25);
 }
 
 /* ===== INPUT ===== */
-.input-wrap{ position:relative; margin-bottom: 4px;}
+.input-wrap{ position:relative }
 .input-wrap span{
   position:absolute;
-  left:12px; top:50%;
+  left:10px; top:50%;
   transform:translateY(-50%);
-  opacity:.7;
+  opacity:.6;
 }
-.input-wrap.textarea-wrap span {
-  top: 14px; /* Align icon to top for textarea */
-  transform: none;
-}
-
-input, textarea {
+input{
   width:100%;
-  padding:12px 12px 12px 35px;
+  padding:10px 10px 10px 30px;
   margin:4px 0;
-  border:1.5px solid #ddd;
-  border-radius:8px;
+  border:1px solid #ccc;
+  border-radius:6px;
   font-size:14px;
-  font-family: inherit;
   box-sizing:border-box;
   text-transform:uppercase;
-  transition: all 0.2s ease;
 }
-textarea {
-  resize: vertical;
-}
-
 ::placeholder{
   text-transform:none;
-  color:#aaa;
-  font-size: 13px;
+  color:#999;
 }
-input:focus, textarea:focus {
+input:focus{
   border-color:#1e88e5;
-  box-shadow:0 0 0 3px rgba(30,136,229,.15);
+  box-shadow:0 0 0 2px rgba(30,136,229,.15);
   outline:none;
 }
-input.error, textarea.error {
+input.error{
   border-color:#e53935;
   background:#fff5f5;
 }
@@ -104,53 +95,48 @@ input.error, textarea.error {
   font-size:11px;
   color:#e53935;
   display:none;
-  margin-bottom:10px;
-  padding-left: 4px;
+  margin-bottom:6px;
+}
+
+/* ===== SHAKE ERROR ===== */
+@keyframes shake{
+  0%{transform:translateX(0)}
+  20%{transform:translateX(-10px)}
+  40%{transform:translateX(10px)}
+  60%{transform:translateX(-8px)}
+  80%{transform:translateX(8px)}
+  100%{transform:translateX(0)}
 }
 
 /* ===== SECTION ===== */
 .section-title{
-  margin:20px 0 12px 0;
-  font-size:14px;
+  margin-top:12px;
+  font-size:13px;
   font-weight:bold;
   color:#1e88e5;
-  border-left:4px solid #1e88e5;
-  padding-left:10px;
-  background: #f0f7ff;
-  padding-top: 6px;
-  padding-bottom: 6px;
-  border-radius: 0 4px 4px 0;
+  border-left:3px solid #1e88e5;
+  padding-left:8px;
 }
 
 /* ===== CONSENT ===== */
 .consent{
   font-size:13px;
-  margin:16px 0;
+  margin:10px 0;
   color:#555;
-  line-height: 1.5;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-.consent input {
-  margin-top: 3px;
-  width: auto;
 }
 
 /* ===== BUTTON ===== */
 button{
   width:100%;
-  padding:14px;
+  padding:12px;
   border:none;
-  border-radius:8px;
+  border-radius:6px;
   font-size:16px;
-  font-weight: bold;
-  letter-spacing: 0.5px;
   color:#fff;
   background:#90caf9;
   cursor:not-allowed;
-  transition:all .3s ease;
-  opacity:.7;
+  transition:.2s;
+  opacity:.6;
 }
 button.enabled{
   background:linear-gradient(135deg,#1e88e5,#42a5f5);
@@ -158,51 +144,50 @@ button.enabled{
   opacity:1;
 }
 button.enabled:hover{
-  transform:translateY(-2px);
-  box-shadow:0 8px 15px rgba(30,136,229,.3);
+  transform:translateY(-1px);
+  box-shadow:0 6px 12px rgba(30,136,229,.25);
 }
 
 /* ===== SUCCESS ===== */
 .successIcon{
-  width:75px;
-  margin:20px auto 10px;
-  animation:pop .5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  width:70px;
+  margin:14px auto;
+  animation:pop .4s ease;
 }
 @keyframes pop{
-  from{transform:scale(.5);opacity:0}
+  from{transform:scale(.6);opacity:0}
   to{transform:scale(1);opacity:1}
 }
 .ref{
   background:#e3f2fd;
   border:1px dashed #1e88e5;
-  padding:10px;
+  padding:8px;
   border-radius:6px;
   text-align:center;
   font-weight:bold;
-  margin-bottom:16px;
-  font-size:15px;
-  color: #0d47a1;
+  margin-bottom:10px;
+  font-size:14px;
 }
 .summary{
-  font-size:13.5px;
+  font-size:14px;
   margin-top:10px;
   line-height:1.6;
 }
 .summary div{
   background:#fafafa;
   border:1px solid #eee;
-  padding:8px 12px;
-  border-radius:6px;
-  margin-bottom:6px;
+  padding:6px 8px;
+  border-radius:5px;
+  margin-bottom:5px;
 }
 .watermark{
   position:absolute;
   top:45%;
   left:50%;
   transform:translate(-50%,-50%) rotate(-25deg);
-  font-size:55px;
-  color:rgba(0,0,0,0.04);
-  font-weight:900;
+  font-size:48px;
+  color:rgba(0,0,0,0.06);
+  font-weight:bold;
   display:none;
   pointer-events:none;
 }
@@ -212,117 +197,413 @@ button.enabled:hover{
   max-width:420px;
   margin:auto;
   background:#fff;
-  padding:30px 20px;
-  border-radius:12px;
+  padding:25px 20px;
+  border-radius:10px;
   box-shadow:0 8px 20px rgba(0,0,0,.08);
   text-align:center;
 }
-.maintenance p{ font-size:14px; color:#555; line-height: 1.5; }
+.maintenance p{ font-size:13px; color:#555 }
 
 /* ===== FOOTER ===== */
 .footer{
-  margin-top:30px;
+  margin-top:25px;
   text-align:center;
-  font-size:12px;
-  color:#777;
+  font-size:11px;
+  color:#888;
 }
 .divider{
   height:2px;
   background:linear-gradient(to right,transparent,#1e88e5,transparent);
-  margin-bottom:12px;
-  opacity: 0.5;
+  margin-bottom:10px;
 }
 .footer a{
-  color:#555;
-  text-decoration:none;
-  font-weight: bold;
+  color:#888;
+  text-decoration:underline;
+
+  }
+
+.footer a:hover{
+  text-decoration:underline;
 }
-.footer a:hover { text-decoration: underline; }
+
+/* ===== PROCESSING OVERLAY ===== */
+#processingOverlay{
+  position:fixed;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  background:rgba(255,255,255,0.85);
+  z-index:9999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+.processingBox{
+  text-align:center;
+}
+.spinner{
+  width:42px;
+  height:42px;
+  border:4px solid #cfd8dc;
+  border-top:4px solid #1e88e5;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  margin:auto;
+}
+.processingText{
+  margin-top:10px;
+  font-size:14px;
+  color:#555;
+  font-weight:bold;
+}
+@keyframes spin{
+  to{ transform:rotate(360deg); }
+}
+
+/* ===== CONSENT CARD (FINAL CANTIK) ===== */
+.consent-box{
+  margin:14px 0 10px;
+}
+
+.consent-card{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:12px 14px;
+  border:1px solid #ddd;
+  border-radius:8px;
+  background:#fafafa;
+  cursor:pointer;
+  transition:.25s;
+}
+
+.consent-card:hover{
+  border-color:#90caf9;
+  background:#f5faff;
+}
+
+/* Hide default checkbox */
+.consent-card input{
+  display:none;
+}
+
+/* Custom checkbox */
+.checkmark{
+  width:18px;
+  height:18px;
+  border:2px solid #90caf9;
+  border-radius:4px;
+  position:relative;
+  margin-top:2px;
+  flex-shrink:0;
+}
+
+/* Tick */
+.checkmark::after{
+  content:"";
+  position:absolute;
+  left:4px;
+  top:0px;
+  width:5px;
+  height:10px;
+  border:solid #fff;
+  border-width:0 2px 2px 0;
+  transform:rotate(45deg);
+  opacity:0;
+}
+
+/* Checked */
+.consent-card input:checked + .checkmark{
+  background:#2e7d32;
+  border-color:#2e7d32;
+}
+
+.consent-card input:checked + .checkmark::after{
+  opacity:1;
+}
+
+.consent-card input:checked ~ .consent-text{
+  color:#2e7d32;
+  font-weight:bold;
+}
+
+.consent-text{
+  font-size:13px;
+  line-height:1.5;
+  color:#444;
+}
+  .footer-brand{
+  font-weight:normal;
+  letter-spacing:.3px;
+  margin-bottom:6px;
+}
+
+.footer-note{
+  font-size:10.5px;
+  color:#777;
+  line-height:1.4;
+}
+
+
+/* ===== CLOSE BUTTON ===== */
+.closeBtn{
+  width:100%;
+  margin-top:12px;
+  padding:10px;
+  border:none;
+  border-radius:6px;
+  font-size:15px;
+  font-weight:bold;
+  background:#2e7d32;
+  color:#fff;
+  cursor:pointer;
+}
+.closeBtn:hover{
+  background:#1b5e20;
+}
+
+/* ===== UI UPGRADE ===== */
+
+body{
+  background:
+  radial-gradient(circle at top,#f4f8ff,#eef2f5);
+}
+
+/* HEADER */
+
+.form-header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:15px;
+  padding-bottom:12px;
+  border-bottom:1px solid #eee;
+}
+
+.logo{
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  background:linear-gradient(135deg,#1e88e5,#42a5f5);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  color:#fff;
+}
+
+.title{
+  font-size:15px;
+  font-weight:bold;
+}
+
+.subtitle{
+  font-size:11px;
+  color:#777;
+}
+
+/* CONTAINER */
+
+.container{
+  padding:20px 22px 24px;
+  border-radius:14px;
+  box-shadow:
+    0 10px 25px rgba(0,0,0,.08),
+    0 2px 6px rgba(0,0,0,.04);
+}
+
+/* SECTION TITLE */
+
+.section-title{
+  margin-top:18px;
+  margin-bottom:8px;
+  font-size:12px;
+  font-weight:bold;
+  color:#1e88e5;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  border-left:4px solid #1e88e5;
+  padding-left:10px;
+}
+
+/* INPUT */
+
+input{
+  padding:12px 12px 12px 36px;
+  border:1px solid #dcdcdc;
+  border-radius:8px;
+  transition:.2s;
+}
+
+input:hover{
+  border-color:#90caf9;
+}
+
+input:focus{
+  transform:scale(1.01);
+}
+
+/* BUTTON */
+
+button.enabled{
+  background:linear-gradient(135deg,#1e88e5,#1976d2);
+  box-shadow:0 4px 12px rgba(30,136,229,.25);
+}
+
+button.enabled:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 18px rgba(30,136,229,.35);
+}
+
+/* SUCCESS */
+
+.success-container{
+  text-align:center;
+}
+
+.ref{
+  font-size:15px;
+  letter-spacing:.5px;
+}
+
+/* ===== CONFETTI ===== */
+.confetti{
+  position:fixed;
+  width:8px;
+  height:8px;
+  top:-10px;
+  z-index:9999;
+  animation:confettiFall 3s linear forwards;
+  border-radius:2px;
+}
+
+@keyframes confettiFall{
+  to{
+    transform:translateY(100vh) rotate(720deg);
+    opacity:0;
+  }
+}
+
+/* ===== SUCCESS UPGRADE ===== */
+.success-container{
+  text-align:center;
+  animation:fadeSuccess .5s ease;
+}
+
+@keyframes fadeSuccess{
+  from{opacity:0; transform:translateY(20px)}
+  to{opacity:1; transform:translateY(0)}
+}
+
+.successIcon{
+  width:80px;
+  margin:20px auto 10px;
+}
+
+.ref{
+  font-size:15px;
+  letter-spacing:.5px;
+  background:linear-gradient(135deg,#e3f2fd,#f1f8ff);
+  border:1px solid #bbdefb;
+}
+  
 </style>
 </head>
 
 <body>
 
 <script>
-/* ===== ON / OFF MODE ===== */
 var FORM_ENABLED = true;
+const SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbyMtm1R2Geo-MpMtKSoWVvu9y3s0tYBxMwyaP2krcHl1lau8dRGjwCvClB3J_fXhbw7/exec";
 </script>
 
+<!-- ===== MAINTENANCE ===== -->
 <div class="maintenance" id="maintenanceBox" style="display:none;">
-  <h2 style="font-size: 40px; margin: 0;">🚧</h2>
-  <h2>Temporarily Unavailable</h2>
-  <p>
-    This submission form is currently unavailable.<br><br>
-    Please contact Cik Syah at HQ Singer.
-  </p>
+  <h2>🚧 Temporarily Unavailable</h2>
+  <p>This submission form is currently unavailable.<br><br>Please contact the administrator.</p>
 </div>
 
+<!-- ===== FORM ===== -->
 <div class="container" id="formBox">
-  <h2>📄 AGENCY CONTACT INFO</h2>
+  <div class="form-header">
+  <div class="logo">📨</div>
+  <div>
+    <div class="title">Agency Contact Submission</div>
+    <div class="subtitle">Singer Malaysia Communication Portal</div>
+  </div>
+</div>
 
   <form onsubmit="return submitForm();">
 
-    <div class="section-title">Agency & Officer In-charge</div>
+    <div class="section-title">Agency & Officer In-charge Information</div>
 
     <label>Agency Name (Mandatory) <span class="req">*</span></label>
-    <div class="input-wrap">
-      <span>🏢</span>
+    <div class="input-wrap"><span>🏢</span>
       <input type="text" id="agency" placeholder="Example: ABC DEBT SDN BHD">
     </div>
     <div class="errorText" id="err_agency">This field is required</div>
 
-    <label>Agency Address (Mandatory) <span class="req">*</span></label>
-    <div class="input-wrap textarea-wrap">
-      <span>📍</span>
-      <textarea id="address" rows="3" placeholder="Example: NO 12, JALAN MERDEKA..."></textarea>
-    </div>
-    <div class="errorText" id="err_address">This field is required</div>
-
-    <label>Officer Name-1 (Mandatory) <span class="req">*</span></label>
-    <div class="input-wrap">
-      <span>👤</span>
+    <label>Officer Name 1 (Mandatory) <span class="req">*</span></label>
+    <div class="input-wrap"><span>👤</span>
       <input type="text" id="pic1" placeholder="Example: MR JOHN DOE">
     </div>
     <div class="errorText" id="err_pic1">This field is required</div>
 
-    <label>Officer Name-2 (Optional)</label>
-    <div class="input-wrap">
-      <span>👤</span>
+    <label>Officer Name 2 (Optional)</label>
+    <div class="input-wrap"><span>👤</span>
       <input type="text" id="pic2" placeholder="Example: MISS JANE DOE">
     </div>
 
     <div class="section-title">Contact Information</div>
 
     <label>Contact No (Mandatory) <span class="req">*</span></label>
-    <div class="input-wrap">
-      <span>📞</span>
-      <input type="tel" id="contact1" placeholder="Example: 0123456789" oninput="formatPhone(this)">
+    <div class="input-wrap"><span>📞</span>
+      <input type="tel" inputmode="numeric" id="contact1" placeholder="Example: 0123456789" oninput="formatPhone(this)">
+      <div class="errorText" id="err_contact1_format">
+  Invalid contact number format (must start with 0)
+</div>
+
     </div>
     <div class="errorText" id="err_contact1">This field is required</div>
 
     <label>Contact No (Optional)</label>
-    <div class="input-wrap">
-      <span>📞</span>
-      <input type="tel" id="contact2" placeholder="Example: 0123456789" oninput="formatPhone(this)">
+    <div class="input-wrap"><span>📞</span>
+      <input type="tel" inputmode="numeric" id="contact2" placeholder="Example: 0123456789" oninput="formatPhone(this)">
+      <div class="errorText" id="err_contact2_format">
+  Invalid contact number format (must start with 0)
+</div>
+
     </div>
 
     <label>WhatsApp No (Mandatory) <span class="req">*</span></label>
-    <div class="input-wrap">
-      <span>💬</span>
-      <input type="tel" id="whatsapp" placeholder="Example: 0123456789" oninput="formatPhone(this)">
+    <div class="input-wrap"><span>💬</span>
+      <input type="tel" inputmode="numeric" id="whatsapp" placeholder="Example: 0123456789" oninput="formatPhone(this)">
+      <div class="errorText" id="err_whatsapp_format">
+  Invalid contact number format (must start with 0)
+</div>
+
     </div>
     <div class="errorText" id="err_whatsapp">This field is required</div>
 
-    <label class="consent">
-      <input type="checkbox" id="consent" onclick="updateState()">
-      <span>I confirm that the information provided is accurate and consent to its use for official communication purposes.</span>
-    </label>
+<div class="consent-box">
+  <label class="consent-card">
+    <input type="checkbox" id="consent" onchange="updateState()">
+    <span class="checkmark"></span>
+    <span class="consent-text">
+      I confirm that the information provided is accurate and consent to its use
+      for official communication purposes.
+    </span>
+  </label>
+</div>
 
-    <button type="submit" id="submitBtn">Submit Now</button>
+
+    <button type="submit" id="submitBtn">Submit</button>
     <div class="helper" id="helperText"></div>
   </form>
 </div>
 
+<!-- ===== SUCCESS ===== -->
 <div class="container success-container" id="successBox" style="display:none;">
   <div class="watermark" id="watermark">SUBMITTED</div>
 
@@ -337,140 +618,357 @@ var FORM_ENABLED = true;
   <div class="ref" id="refDisplay"></div>
   <div class="summary" id="summaryBox"></div>
 
-  <div class="consent" style="margin-top:20px; font-weight: bold; color: #1e88e5; justify-content: center;">
-    ✔ CONSENT CONFIRMED FOR OFFICIAL COMMUNICATION
+  <div class="consent" style="margin-top:15px;">
+    ✔ CONSENT CONFIRMED FOR OFFICIAL COMMUNICATION PURPOSES.
   </div>
 
-  <p style="text-align:center;font-size:13px; color: #666;">
-    You may safely close this page. Thank You!
-  </p>
+  <p style="text-align:center;font-size:13px;">You may safely close this page.</p>
+
+<button class="closeBtn" onclick="returnToMain()">Return to Main Page</button>
+
 </div>
 
+<!-- ===== PROCESSING OVERLAY ===== -->
+<div id="processingOverlay">
+  <div class="processingBox">
+    <div class="spinner"></div>
+    <div class="processingText">Processing submission…</div>
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
 <div class="footer">
   <div class="divider"></div>
-  <div id="trademark"></div>
-  <div style="margin-top: 4px;">
-    Information submitted is collected solely for communication and administrative record purposes.
+
+  <div class="footer-brand">
+    © <span id="year"></span>
+    Powered by
+    <a href="https://sczpnet.org" target="_blank">sczpnet.org</a>
+    · Communication Portal v2.0 ·
+  </div>
+
+  <div class="footer-note">
+    Information submitted is collected solely for communication and
+    administrative record purposes.
   </div>
 </div>
 
+
 <script>
-/* ===== PAGE LOAD ===== */
 window.onload=function(){
+  document.getElementById("year").innerText=new Date().getFullYear();
   if(!FORM_ENABLED){
-    document.getElementById("formBox").style.display="none";
-    document.getElementById("successBox").style.display="none";
-    document.getElementById("maintenanceBox").style.display="block";
+    formBox.style.display="none";
+    successBox.style.display="none";
+    maintenanceBox.style.display="block";
   }
 };
 
-/* ===== VALIDATION ===== */
 const mandatoryFields=[
   {id:"agency",err:"err_agency"},
-  {id:"address",err:"err_address"}, // ADDED ADDRESS HERE
   {id:"pic1",err:"err_pic1"},
   {id:"contact1",err:"err_contact1"},
   {id:"whatsapp",err:"err_whatsapp"}
 ];
 
-function formatPhone(el){
-  let v=el.value.replace(/\D/g,'');
-  if(v.startsWith("0"))v="6"+v;
-  if(!v.startsWith("6"))v="6"+v;
-  el.value=v;
-}
-
-function updateState(){
-  let ok=true;
-  mandatoryFields.forEach(f=>{
-    const i=document.getElementById(f.id);
-    const e=document.getElementById(f.err);
-    if(!i.value.trim()){
-      ok=false;
-      i.classList.add("error");
-      e.style.display="block";
-    }else{
-      i.classList.remove("error");
-      e.style.display="none";
-    }
-  });
-
-  const submitBtn = document.getElementById("submitBtn");
-  const consent = document.getElementById("consent");
-  const helperText = document.getElementById("helperText");
-
-  submitBtn.disabled=!ok||!consent.checked;
-  submitBtn.classList.toggle("enabled",!submitBtn.disabled);
-  helperText.innerText=!ok
-    ?"Please complete all mandatory fields."
-    :!consent.checked
-    ?"Please confirm consent to proceed."
-    :"";
-}
-
 mandatoryFields.forEach(f=>{
-  document.getElementById(f.id).addEventListener("input",updateState);
+  const el=document.getElementById(f.id);
+  if(el){
+    el.addEventListener("input",()=>updateState(false));
+    el.addEventListener("blur",()=>updateState(true));
+  }
 });
 
-/* ===== SUBMIT ===== */
+["contact1","contact2","whatsapp"].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el){
+    el.addEventListener("keydown",blockNonNumeric);
+  }
+});
+
+function showProcessing(){
+  processingOverlay.style.display="flex";
+}
+
+function hideProcessing(){
+  processingOverlay.style.display="none";
+}
+
+function formatPhone(el){
+
+  let raw=el.value.replace(/\D/g,'');
+
+  const errId=
+    el.id==="contact1"?"err_contact1_format":
+    el.id==="contact2"?"err_contact2_format":
+    el.id==="whatsapp"?"err_whatsapp_format":null;
+
+  if(errId) document.getElementById(errId).style.display="none";
+
+  el.classList.remove("error");
+
+  if(!raw) return;
+
+  if(!raw.startsWith("0")){
+    if(errId){
+      document.getElementById(errId).style.display="block";
+      el.classList.add("error");
+    }
+    return;
+  }
+
+  if(raw.startsWith("01")){
+    if(raw.length<=10)
+      el.value=raw.replace(/(\d{3})(\d+)/,"$1-$2");
+    else
+      el.value=raw.replace(/(\d{3})(\d{4})(\d+)/,"$1-$2$3");
+  }
+  else{
+    el.value=raw.replace(/(\d{2})(\d+)/,"$1-$2");
+  }
+}
+
+function blockNonNumeric(e){
+
+  const key=e.key;
+
+  if(
+    !/[0-9]/.test(key) &&
+    key!=="Backspace" &&
+    key!=="Delete" &&
+    key!=="ArrowLeft" &&
+    key!=="ArrowRight" &&
+    key!=="Tab"
+  ){
+    e.preventDefault();
+  }
+}
+
+function updateState(showErrors=false){
+
+  let ok=true;
+
+  mandatoryFields.forEach(f=>{
+
+    const i=document.getElementById(f.id);
+    const e=document.getElementById(f.err);
+
+    if(!i.value.trim()){
+
+      ok=false;
+
+      if(showErrors){
+        i.classList.add("error");
+        e.style.display="block";
+      }
+
+    }else{
+
+      i.classList.remove("error");
+      e.style.display="none";
+
+    }
+
+  });
+
+  ["contact1","whatsapp"].forEach(id=>{
+
+    const el=document.getElementById(id);
+
+    if(el.value && !el.value.trim().startsWith("0")){
+      ok=false;
+      if(showErrors) el.classList.add("error");
+    }
+
+  });
+
+  if(ok && consent.checked){
+    submitBtn.disabled=false;
+    submitBtn.classList.add("enabled");
+  }
+  else{
+    submitBtn.disabled=true;
+    submitBtn.classList.remove("enabled");
+  }
+
+}
+
+function focusFirstError(){
+
+  for(let f of mandatoryFields){
+
+    const el=document.getElementById(f.id);
+
+    if(!el.value.trim()){
+
+      const wrap=el.closest(".input-wrap") || el;
+
+      wrap.scrollIntoView({
+        behavior:"smooth",
+        block:"center"
+      });
+
+      wrap.classList.remove("shake");
+      void wrap.offsetWidth;
+      wrap.classList.add("shake");
+
+      setTimeout(()=>{
+        wrap.classList.remove("shake");
+      },450);
+
+      el.focus();
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function submitForm(){
-  updateState();
-  const submitBtn = document.getElementById("submitBtn");
-  if(submitBtn.disabled) return false;
+
+  updateState(true);
+
+  if(submitBtn.disabled){
+    focusFirstError();
+    return false;
+  }
+
+  showProcessing();
 
   const ref=generateRef();
+
   const data=new URLSearchParams();
+
   data.append("ref",ref);
-  data.append("agency", document.getElementById("agency").value.toUpperCase());
-  data.append("address", document.getElementById("address").value.toUpperCase()); // ADDED TO URL PARAMS
-  data.append("pic1", document.getElementById("pic1").value.toUpperCase());
-  data.append("pic2", document.getElementById("pic2").value.toUpperCase());
-  data.append("contact1", document.getElementById("contact1").value);
-  data.append("contact2", document.getElementById("contact2").value);
-  data.append("whatsapp", document.getElementById("whatsapp").value);
+  data.append("agency",agency.value.toUpperCase());
+  data.append("pic1",pic1.value.toUpperCase());
+  data.append("pic2",pic2.value.toUpperCase());
+  data.append("contact1",contact1.value);
+  data.append("contact2",contact2.value);
+  data.append("whatsapp",whatsapp.value);
   data.append("consent","YES");
+  data.append("update","NO");
 
-  // Fetch to Google Apps Script
-  fetch("https://script.google.com/macros/s/AKfycbw-wlQTmW8I-qYcrr1o7aiBLqyC70v3GpB6JJwf5aEvuUKea1PDxIlyudm1GeNSx0M/exec",
-    {method:"POST",body:data});
+  fetch(SCRIPT_URL,{method:"POST",body:data})
+  .then(r=>r.json())
+  .then(res=>{
 
-  document.getElementById("formBox").style.display="none";
-  document.getElementById("successBox").style.display="block";
-  document.getElementById("watermark").style.display="block";
+    if(res.status==="DUPLICATE"){
 
-  document.getElementById("refDisplay").innerText="REFERENCE NO: "+ref;
+      hideProcessing();
+
+      if(confirm("Agency record already exists.\nDo you want to update the information?")){
+
+        showProcessing();
+
+        data.set("update","YES");
+
+        fetch(SCRIPT_URL,{method:"POST",body:data})
+        .then(r=>r.json())
+        .then(res2=>{
+
+          hideProcessing();
+
+          if(res2.status==="UPDATED"){
+            showSuccess(res2.ref,res2.updateInfo || "UPDATED");
+          }
+          else{
+            alert("Update limit reached. Please contact Cik Syah@HQ Singer");
+            location.reload();
+          }
+
+        });
+
+      }
+
+      return;
+
+    }
+
+    hideProcessing();
+    showSuccess(res.ref,"NEW SUBMISSION");
+
+  });
+
+  return false;
+}
+
+function showSuccess(ref,statusText){
+
+  formBox.style.display="none";
+  successBox.style.display="block";
+  watermark.style.display="block";
   
-  const pic2Val = document.getElementById("pic2").value;
-  const contact2Val = document.getElementById("contact2").value;
+  launchConfetti(); // <-- TAMBAH INI
 
-  document.getElementById("summaryBox").innerHTML=
-    `<div><b>AGENCY NAME:</b> ${document.getElementById("agency").value.toUpperCase()}</div>
-     <div><b>ADDRESS:</b> ${document.getElementById("address").value.toUpperCase()}</div>
-     <div><b>OFFICER NAME-1:</b> ${document.getElementById("pic1").value.toUpperCase()}</div>
-     ${pic2Val?`<div><b>OFFICER NAME-2:</b> ${pic2Val.toUpperCase()}</div>`:""}
-     <div><b>CONTACT NO (MANDATORY):</b> ${document.getElementById("contact1").value}</div>
-     ${contact2Val?`<div><b>CONTACT NO (OPTIONAL):</b> ${contact2Val}</div>`:""}
-     <div><b>WHATSAPP NO:</b> ${document.getElementById("whatsapp").value}</div>`;
+  refDisplay.innerText="REFERENCE NO: "+ref;
 
-  return false; // Prevent default form submission reload
+  summaryBox.innerHTML=
+  `<div><b>AGENCY NAME:</b> ${agency.value.toUpperCase()}</div>
+   <div><b>OFFICER NAME 1:</b> ${pic1.value.toUpperCase()}</div>
+   ${pic2.value?`<div><b>OFFICER NAME 2 (OPTIONAL):</b> ${pic2.value.toUpperCase()}</div>`:""}
+   <div><b>CONTACT NO:</b> ${contact1.value}</div>
+   ${contact2.value?`<div><b>CONTACT NO (OPTIONAL):</b> ${contact2.value}</div>`:""}
+   <div><b>WHATSAPP NO:</b> ${whatsapp.value}</div>
+   <div><b>STATUS:</b> ${statusText}</div>`;
+
 }
 
 function generateRef(){
+
   const d=new Date();
-  return "AGY-"+d.getFullYear()
-    +String(d.getMonth()+1).padStart(2,"0")
-    +String(d.getDate()).padStart(2,"0")+"-"
-    +String(d.getHours()).padStart(2,"0")
-    +String(d.getMinutes()).padStart(2,"0")
-    +String(d.getSeconds()).padStart(2,"0");
+
+  let agy=agency.value
+  .trim()
+  .split(/\s+/)[0]
+  .replace(/[^A-Z0-9]/gi,"")
+  .toUpperCase();
+
+  if(!agy) agy="AGY";
+
+  return agy+"-"
+  +d.getFullYear()
+  +String(d.getMonth()+1).padStart(2,"0")
+  +String(d.getDate()).padStart(2,"0")+"-"
+  +String(d.getHours()).padStart(2,"0")
+  +String(d.getMinutes()).padStart(2,"0")
+  +String(d.getSeconds()).padStart(2,"0");
 }
 
-/* FOOTER */
-(function(){
-  const year=new Date().getFullYear();
-  document.getElementById("trademark").innerHTML=
-    `© ${year} <a href="https://sczpnet.org" target="_blank">sczpnet.org</a> • Official Agency Communication Portal • v1.2`;
-})();
+function returnToMain(){
+  location.reload();
+}function launchConfetti(){
+  const colors=["#1e88e5","#42a5f5","#66bb6a","#ffca28","#ef5350"];
+
+  for(let i=0;i<60;i++){
+    const c=document.createElement("div");
+    c.className="confetti";
+    c.style.left=Math.random()*100+"vw";
+    c.style.background=colors[Math.floor(Math.random()*colors.length)];
+    c.style.animationDuration=(Math.random()*2+2)+"s";
+
+    document.body.appendChild(c);
+
+    setTimeout(()=>c.remove(),3000);
+  }
+}
+
+function launchConfetti(){
+  const colors=["#1e88e5","#42a5f5","#66bb6a","#ffca28","#ef5350"];
+
+  for(let i=0;i<60;i++){
+    const c=document.createElement("div");
+    c.className="confetti";
+    c.style.left=Math.random()*100+"vw";
+    c.style.background=colors[Math.floor(Math.random()*colors.length)];
+    c.style.animationDuration=(Math.random()*2+2)+"s";
+
+    document.body.appendChild(c);
+
+    setTimeout(()=>c.remove(),3000);
+  }
+}
 </script>
 
 </body>
