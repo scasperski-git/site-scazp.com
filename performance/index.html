@@ -32,7 +32,7 @@
 }
         
         /* Container Fluid Scaling */
-.container { 
+        .container { 
     width: 100%; /* Mengarahkan kotak untuk mengembang 100% mengikut saiz skrin */
     max-width: none; /* Membuang had kelebaran (limit) pada skrin ultrawide */
     margin: 0 auto; 
@@ -409,9 +409,9 @@
 
             <div class="control-panel" style="margin-top: 20px;">
                 <div class="panel-title">&#128203; 5. Active Configuration Registry Summary</div>
-<div class="table-container" style="margin-top: 0; padding:5px;">
-                    <table id="batch-summary-table" class="dataTable" style="width: 100%;">
-                    <thead>
+                <div class="table-container" style="margin-top: 0; padding:5px;">
+                    <table class="dataTable" style="width: 100%;">
+                        <thead>
                             <tr>
                                 <th style="width: 40px; text-align: center; color:var(--text-muted);">NO.</th>
                                 <th style="text-align: left; color:var(--accent-gold);">DEPARTMENT SECTION</th>
@@ -712,26 +712,6 @@ function renderBatchSummary() {
                 </tr>`;
             });
             tbody.innerHTML = html;
-        }
-
-            // 2. Initialize DataTables
-            let summaryTable = $('#batch-summary-table').DataTable({
-                "paging": false, // Tutup pagination supaya semua list keluar terus memandangkan ini summary
-                "info": false,
-                "searching": true, // Boleh buka kalau nak ada fungsi search untuk batch
-                "columnDefs": [
-                    { "orderable": false, "targets": [0, 5] } // Kolum NO (0) dan ACTIONS (5) tak boleh di-sort
-                ],
-                "order": [[3, 'desc']] // Sort default pada kolum TIME INTERVAL (kolum index ke-3)
-            });
-
-            // 3. Logik Auto-Numbering. Bila user klik header untuk sort, nombor akan refresh balik jadi 1,2,3...
-            summaryTable.on('order.dt search.dt', function () {
-                let i = 1;
-                summaryTable.cells(null, 0, { search: 'applied', order: 'applied' }).every(function (cell) {
-                    this.data(i++);
-                });
-            }).draw();
         }
 
         function loadBatchToForm(batchName) {
