@@ -409,8 +409,8 @@
 
             <div class="control-panel" style="margin-top: 20px;">
                 <div class="panel-title">&#128203; 5. Active Configuration Registry Summary</div>
-                <div class="table-container" style="margin-top: 0; padding:5px;">
-                    <table class="dataTable" style="width: 100%;">
+<div class="table-container" style="margin-top: 0; padding:5px;">
+                    <table id="batch-summary-table" class="dataTable" style="width: 100%;">
                         <thead>
                             <tr>
                                 <th style="width: 40px; text-align: center; color:var(--text-muted);">NO.</th>
@@ -673,6 +673,12 @@
 
 function renderBatchSummary() {
             const tbody = document.getElementById('batch-summary-tbody');
+
+            // 1. CLEAR & DESTROY DataTable lama jika ada, untuk elak ralat bila jadual di-refresh
+            if ($.fn.DataTable.isDataTable('#batch-summary-table')) {
+                $('#batch-summary-table').DataTable().clear().destroy();
+            }
+
             if (window.allBatches.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No active batches found in registry.</td></tr>';
                 return;
@@ -680,31 +686,29 @@ function renderBatchSummary() {
 
             let html = '';
             
-            // Susun mengikut Section dahulu, kemudian ikut Tarikh Mula (lama ke baru)
+            // TAK NAK susun ikut section. Kita just susun default ikut Tarikh Mula (Paling baru di atas)
             let sortedBatches = window.allBatches.slice().sort((a,b) => {
-                if(a.section < b.section) return -1;
-                if(a.section > b.section) return 1;
-                
-                // Jika section sama, kita susun ikut start_date supaya nampak mana pertama & terakhir
                 let dateA = new Date(a.start_date || 0);
                 let dateB = new Date(b.start_date || 0);
-                return dateA - dateB; 
+                return dateB - dateA; 
             });
 
-            // Tambah parameter 'index' dalam loop untuk dapatkan nombor
-            sortedBatches.forEach((b, index) => {
+            sortedBatches.forEach((b) => {
                 let startStr = b.start_date ? new Date(b.start_date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : '-';
                 let endStr = b.end_date ? new Date(b.end_date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : '-';
                 let totalCycles = 0;
                 b.months.forEach(m => totalCycles += m.cycles.length);
                 let secColor = b.section === 'JV-AGENCY' ? '#10B981' : (b.section === 'JVBC-AGENCY' ? '#3B82F6' : '#EF4444');
                 
+                // Letak rawDate pada data-order supaya sistem boleh sort tarikh dengan tepat, bukan sort ikut abjad
+                let rawDate = b.start_date ? new Date(b.start_date).getTime() : 0;
+
                 html += `
                 <tr>
-                    <td style="text-align: center; font-weight:bold; color:var(--text-muted); font-size: 13px;">${index + 1}</td>
+                    <td style="text-align: center; font-weight:bold; color:var(--text-muted); font-size: 13px;"></td>
                     <td style="font-weight:bold; color:${secColor}; text-align: left;">${b.section || 'UNASSIGNED'}</td>
                     <td style="font-weight:bold; color:var(--accent-gold); text-align: left;">${b.batch_name}</td>
-                    <td style="text-align: center;">${startStr} to ${endStr}</td>
+                    <td data-order="${rawDate}" style="text-align: center;">${startStr} to ${endStr}</td>
                     <td style="text-align: center;">${b.months.length} Month Block(s) (${totalCycles} Cut-offs)</td>
                     <td style="text-align: center; display:flex; justify-content:center; gap:5px;">
                         <button class="btn-action btn-gold" style="padding: 4px 10px; font-size:11px;" onclick="loadBatchToForm('${b.batch_name}')">Edit</button>
@@ -712,7 +716,27 @@ function renderBatchSummary() {
                     </td>
                 </tr>`;
             });
+            
             tbody.innerHTML = html;
+
+            // 2. Initialize DataTables
+            let summaryTable = $('#batch-summary-table').DataTable({
+                "paging": false, // Tutup pagination supaya semua list keluar terus memandangkan ini summary
+                "info": false,
+                "searching": true, // Boleh buka kalau nak ada fungsi search untuk batch
+                "columnDefs": [
+                    { "orderable": false, "targets": [0, 5] } // Kolum NO (0) dan ACTIONS (5) tak boleh di-sort
+                ],
+                "order": [[3, 'desc']] // Sort default pada kolum TIME INTERVAL (kolum index ke-3)
+            });
+
+            // 3. Logik Auto-Numbering. Bila user klik header untuk sort, nombor akan refresh balik jadi 1,2,3...
+            summaryTable.on('order.dt search.dt', function () {
+                let i = 1;
+                summaryTable.cells(null, 0, { search: 'applied', order: 'applied' }).every(function (cell) {
+                    this.data(i++);
+                });
+            }).draw();
         }
 
         function loadBatchToForm(batchName) {
