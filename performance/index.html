@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DCA Portal & Performance Dashboard | scazp.com</title>
     
-    <!-- jQuery & DataTables Libraries -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     
-    <!-- SheetJS Excel Library -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
-    <!-- Firebase Legacy SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
@@ -27,11 +24,14 @@
         }
 
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 20px; }
-        .container { max-width: 1300px; margin: 0 auto; }
+        
+        /* Container Fluid Scaling */
+        .container { width: min(100% - 40px, 1400px); margin: 0 auto; }
+        .container-portal { max-width: 950px; margin: 0 auto; }
 
         /* Navigation Tabs */
         .tab-menu { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; overflow-x: auto; }
-        .tab-btn { background: transparent; color: var(--text-muted); border: none; padding: 10px 20px; font-size: 15px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: all 0.3s; white-space: nowrap; }
+        .tab-btn { background: transparent; color: var(--text-muted); border: none; padding: 10px 20px; font-size: 15px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: all 0.3s; white-space: nowrap; min-height: 44px;}
         .tab-btn:hover { color: var(--text-main); background-color: rgba(255,255,255,0.05); }
         .tab-btn.active { color: #000; background-color: var(--accent-gold); }
 
@@ -45,40 +45,52 @@
         .section-btn-mega:hover { background-color: var(--accent-gold); color: #000; transform: translateY(-3px); box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3); }
 
         .header { margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; text-align: center; position: relative;}
-        .header h1 { color: var(--accent-gold); margin: 0; font-size: 26px; text-transform: uppercase; letter-spacing: 1px; }
+        .header h1 { color: var(--accent-gold); margin: 0; font-size: clamp(20px, 3vw, 28px); text-transform: uppercase; letter-spacing: 1px; }
         .header p { color: var(--text-muted); font-size: 13px; margin-top: 5px; }
         .btn-back-section { position: absolute; left: 0; top: 0; background: transparent; color: var(--text-muted); border: 1px solid var(--text-muted); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: 0.3s; }
         .btn-back-section:hover { color: #FFF; border-color: #FFF; background: rgba(255,255,255,0.1);}
 
-        .control-panel { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; margin-bottom: 25px; }
+        /* Glassmorphism Panels */
+        .control-panel, .loc-card, .kpi-card {
+            background-color: rgba(21, 28, 44, 0.7); 
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .control-panel { padding: 20px; margin-bottom: 25px; }
+        .loc-card { padding: 15px; margin-bottom: 15px; }
+        .kpi-card { padding: 20px; text-align: center; margin-bottom: 0; }
+
+        .loc-card:hover, .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.08);
+            border-color: rgba(212, 175, 55, 0.3);
+        }
+
         .panel-title { color: var(--accent-gold); font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px; }
         label.panel-label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; font-weight: bold;}
         
+        /* Premium Inputs */
         input[type="date"], input[type="text"], input[type="number"], select, input[type="file"] {
-            width: 100%; padding: 10px; background-color: var(--bg-main); border: 1px solid var(--border-color);
+            width: 100%; padding: 10px; background-color: rgba(11, 15, 25, 0.6); border: 1px solid var(--border-color);
             color: var(--text-main); border-radius: 6px; font-size: 14px; margin-bottom: 15px; box-sizing: border-box; color-scheme: dark;
+            transition: all 0.3s ease; min-height: 44px;
         }
-        select:focus, input:focus { border-color: var(--accent-gold); outline: none; }
+        select:focus, input:focus { border-color: var(--accent-gold); outline: none; box-shadow: 0 0 12px var(--accent-glow); background-color: rgba(11, 15, 25, 0.9); }
 
-        .grid-2 { display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; }
-        .grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .grid-5-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
-        @media (min-width: 768px) { 
-            .grid-2 { grid-template-columns: repeat(2, 1fr); } 
-            .grid-3 { grid-template-columns: repeat(3, 1fr); }
-            .grid-4 { grid-template-columns: repeat(4, 1fr); }
-            .container-portal { max-width: 950px; margin: 0 auto; } 
-        }
+        /* Fluid Grids */
+        .grid-2, .grid-3, .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 15px; }
+        .grid-5-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 15px; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 15px; margin-bottom: 25px; }
 
-        .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
-        @media (min-width: 768px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
-        .kpi-card { background-color: var(--bg-card); padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; text-align: center; }
         .kpi-card h3 { display: block; font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin: 0 0 10px 0; }
         .kpi-value { font-size: 24px; font-weight: bold; color: #FFF; }
         .gold { color: var(--accent-gold); } .green { color: var(--success); } .red { color: var(--danger); }
 
-        .btn-action { background-color: var(--success); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; transition: opacity 0.2s; text-transform: uppercase;}
+        .btn-action { background-color: var(--success); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; transition: opacity 0.2s; text-transform: uppercase; min-height: 44px;}
         .btn-gold { background-color: var(--accent-gold); color: #000; }
         .btn-outline { background-color: transparent; border: 1px solid var(--success); color: var(--success); }
         .btn-danger-outline { background-color: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; border-radius: 6px; cursor: pointer; transition: 0.3s;}
@@ -93,7 +105,6 @@
         .month-setup-title { color: var(--success); font-size: 13px; font-weight: bold; margin-bottom: 10px; display: block;}
 
         .region-section-title { color: var(--accent-gold); font-size: 13px; text-transform: uppercase; margin: 35px 0 15px 0; padding-left: 8px; border-left: 3px solid var(--accent-gold); }
-        .loc-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
         .loc-title { font-size: 15px; font-weight: 600; color: #FFFFFF; }
         .loc-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
         
@@ -106,9 +117,8 @@
         .table-container { background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); padding: 15px; overflow-x: auto; margin-top: 20px; }
         table.dataTable { width: 100% !important; border-collapse: collapse; color: var(--text-main); }
         
-        /* TWEAKED: SMALLER FONT AND PADDING TO AUTO-FIT SCREEN */
         table.dataTable thead th { background-color: rgba(0,0,0,0.4); color: var(--accent-gold); border-bottom: 1px solid var(--border-color); padding: 8px 6px; white-space: nowrap !important; text-align: center; font-size: 10px; vertical-align: middle;}
-        table.dataTable tbody td { padding: 8px 6px; border-bottom: 1px solid var(--border-color); background-color: transparent !important; white-space: nowrap; text-align: center; font-size: 11px;}
+        table.dataTable tbody td { padding: 10px 8px; border-bottom: 1px solid var(--border-color); background-color: transparent !important; white-space: nowrap; text-align: center; font-size: clamp(11px, 1vw, 13px);}
         table.dataTable tbody tr:hover { background-color: rgba(255,255,255,0.03) !important; }
         div.dataTables_wrapper div.dataTables_filter { text-align: center; float: none; margin-bottom: 30px; }
         div.dataTables_wrapper div.dataTables_filter input { width: 100%; max-width: 400px; padding: 10px 15px; font-size: 14px; border-radius: 30px; border: 2px solid var(--accent-gold); background-color: var(--bg-main); color: white; margin-left: 15px; outline: none; }
@@ -148,10 +158,8 @@
             <button class="tab-btn" onclick="switchTab('admin')">Batch Settings (Admin)</button>
         </div>
 
-        <!-- TAB 1: DCA PORTAL -->
         <div id="view-portal" class="view-section active">
             
-            <!-- SECTION SELECTOR (New Multi-Department UI) -->
             <div id="portal-section-selector" class="section-selector-container">
                 <h2 style="color:var(--accent-gold); margin-bottom: 30px; text-transform:uppercase; letter-spacing: 1px;">Select Department Section</h2>
                 <button class="section-btn-mega" onclick="selectPortalSection('JV-AGENCY')">JV-AGENCY <span>&#10140;</span></button>
@@ -160,7 +168,6 @@
                 <p style="color: var(--text-muted); font-size: 12px; margin-top: 20px;">Please ensure you select the correct division before submitting your collection data.</p>
             </div>
 
-            <!-- MAIN PORTAL AREA -->
             <div class="container-portal" id="portal-main-area" style="display:none;">
                 <div class="header">
                     <button class="btn-back-section" onclick="resetPortalSection()">&#8592; Change Section</button>
@@ -184,7 +191,6 @@
             </div>
         </div>
 
-        <!-- TAB 2: MANAGEMENT DASHBOARD -->
         <div id="view-dashboard" class="view-section">
             <div class="header" style="text-align:left;">
                 <h1>DCA Performance Dashboard</h1>
@@ -248,7 +254,6 @@
             </div>
         </div>
 
-        <!-- TAB 3: ADMIN PANEL -->
         <div id="view-admin" class="view-section">
             <div class="header" style="text-align:left;">
                 <h1>System Administration Control Panel</h1>
@@ -257,7 +262,6 @@
 
             <div class="grid-2">
                 
-                <!-- LEFT COLUMN: Setup Panel -->
                 <div class="control-panel">
                     <div class="panel-title">&#9881;&#65039; 1. Register / Update Collection Batch Configuration</div>
                     
@@ -323,10 +327,8 @@
                     <button class="btn-action btn-gold" onclick="saveBatchSetup()">Save Batch Configuration</button>
                 </div>
 
-                <!-- RIGHT COLUMN: Stacked Panels -->
                 <div style="display: flex; flex-direction: column; gap: 20px;">
                     
-                    <!-- BOX 2: Upload Excel -->
                     <div class="control-panel" style="margin-bottom: 0;">
                         <div class="panel-title">&#128194; 2. Upload Baseline Assignment Database (Excel)</div>
                         
@@ -346,7 +348,6 @@
                         <input type="file" id="excel-file" accept=".xlsx, .xls" onchange="uploadExcelToFirestore(this)">
                     </div>
                     
-                    <!-- BOX 3: Export Data -->
                     <div class="control-panel" style="margin-bottom: 0;">
                         <div class="panel-title">&#128202; 3. Export Full Master Raw Data (Submitted + Pending)</div>
                         <div class="grid-2">
@@ -370,7 +371,6 @@
                         </p>
                     </div>
 
-                    <!-- BOX 4: Unlock Restrictions -->
                     <div class="control-panel" style="margin-bottom: 0;">
                         <div class="panel-title">&#128275; 4. Unlock DCA Submission Restrictions (Correction Overrides)</div>
                         <div class="grid-2">
@@ -396,7 +396,6 @@
                 </div>
             </div>
 
-            <!-- BOTTOM ROW: Registry Summary -->
             <div class="control-panel" style="margin-top: 20px;">
                 <div class="panel-title">&#128203; 5. Active Configuration Registry Summary</div>
                 <div class="table-container" style="margin-top: 0; padding:5px;">
@@ -421,7 +420,6 @@
 
     </div>
 
-    <!-- CENTER PRESTIGE TOAST ALERT -->
     <div id="toast">Operation successfully executed!</div>
 
     <script>
@@ -447,11 +445,9 @@
 
         window.onload = function() { 
             fetchBatchesList();
-            // populateDcaList() dikeluarkan dari sini kerana kita guna fungsi Dynamic Dropdowns
         };
 
         $(document).ready(function() {
-            // LAZY LOAD BILA USER KLIK BUTANG +
             $(document).off('click', '#report-table tbody td.details-control').on('click', '#report-table tbody td.details-control', async function () {
                 const tr = $(this).closest('tr');
                 const table = $('#report-table').DataTable();
@@ -465,7 +461,7 @@
                     $(this).html('&#x2295;'); 
                 } else {
                     if (!window.dcaDetailsMap[dcaName]) {
-                        $(this).html('&#8987;'); // Ikon Loading
+                        $(this).html('&#8987;'); 
                         let details = await fetchDcaDetailsFromDB(dcaName, window.dashboardActiveBatch.batch_name);
                         window.dcaDetailsMap[dcaName] = details;
                     }
@@ -497,7 +493,6 @@
             setTimeout(() => { toast.classList.remove("show"); }, 3000);
         }
 
-        /* --- FUNGSI DYNAMIC DROPDOWNS KHAS UNTUK SECTION (MENGGANTIKAN populateDcaList) --- */
         async function loadDcaDropdowns(section, targetSelectId, targetFilterId, targetRegionId) {
             const dcaSelect = targetSelectId ? document.getElementById(targetSelectId) : null;
             const filterDca = targetFilterId ? document.getElementById(targetFilterId) : null;
@@ -536,7 +531,6 @@
             } catch (e) { console.error("Dropdown error:", e); }
         }
 
-        /* --- LOGIK BAHARU: TAB 1 SECTION SELECTOR --- */
         function selectPortalSection(section) {
             window.activePortalSection = section;
             document.getElementById('portal-section-selector').style.display = 'none';
@@ -552,7 +546,6 @@
             document.getElementById('portal-section-selector').style.display = 'flex';
         }
 
-        /* --- LOGIK BAHARU: CASCADING DROPDOWNS --- */
         function populateDashboardBatches() {
             const sec = document.getElementById('filter-section').value;
             const batchSel = document.getElementById('filter-batch');
@@ -566,7 +559,6 @@
                 return;
             }
             
-            // Panggil senarai DCA khusus untuk Section Dashboard
             loadDcaDropdowns(sec, null, 'filter-dca', 'filter-region');
 
             let secBatches = window.allBatches.filter(b => b.section === sec);
@@ -591,7 +583,6 @@
             let secBatches = window.allBatches.filter(b => b.section === sec);
             secBatches.forEach(b => { batchSel.innerHTML += `<option value="${b.batch_name}">${b.batch_name}</option>`; });
         }
-
 
         async function saveBatchSetup() {
             const sectionVal = document.getElementById('setup-section').value;
@@ -866,7 +857,6 @@
             displayArea.innerHTML = '<div style="text-align:center; padding: 30px;">Loading matching asset registers...</div>';
             
             try {
-                // SEKARANG TAPIS MENGIKUT SECTION AKTIF DI PORTAL
                 const querySnapshot = await db.collection("assignments")
                                               .where("section", "==", window.activePortalSection)
                                               .where("dca_name", "==", selectedDca).get(); 
@@ -879,7 +869,7 @@
 
                 querySnapshot.forEach((doc) => {
                     let task = doc.data(); 
-                    task.loc_code = doc.id.split('_').pop(); // Buang prefix section untuk paparan
+                    task.loc_code = doc.id.split('_').pop(); 
                     window.currentDcaTasks.push(task); 
                     
                     if (!groupedByRegion[task.region]) groupedByRegion[task.region] = []; 
@@ -1131,18 +1121,16 @@
                             baselines[dcaName].ac += parseInt(row['TOTAL A/C ASSIGNED']) || 0;
                             baselines[dcaName].osb += parseFloat(row['TOTAL OSB ASSIGNED']) || 0;
 
-                            // ID DENGAN PREFIX SECTION UNTUK MENGELAKKAN OVERWRITE ANTARA SECTION
                             const docId = `${uploadSection}_${Math.floor(locCodeRaw).toString()}`;
                             
                             batch.set(db.collection("assignments").doc(docId), {
-                                section: uploadSection, // TAG SECTION
+                                section: uploadSection,
                                 dca_name: dcaName, region: row['REGION'] || '', area: row['AREA'] || '', loc_name: row['LOC NAME'] || '',
                                 total_ac_assigned: parseInt(row['TOTAL A/C ASSIGNED']) || 0, total_osb_assigned: parseFloat(row['TOTAL OSB ASSIGNED']) || 0
                             }, { merge: true }); count++;
                         }
                     });
 
-                    // BASELINES & DROPDOWNS KHUSUS UNTUK SECTION INI
                     let baseRef = db.collection("dca_live_summaries").doc(`GLOBAL_BASELINES_${uploadSection}`);
                     batch.set(baseRef, baselines); 
 
@@ -1154,9 +1142,8 @@
                     await batch.commit(); 
                     showToast(`Import complete for ${uploadSection}. Added ${count} entries. DCA names standardized!`); 
                     input.value = ""; 
-                    localStorage.removeItem(cacheKey); // Clear spesifik cache
+                    localStorage.removeItem(cacheKey);
                     
-                    // Kalau admin tengah tengok section tu kat dashboard, auto update
                     const dashSec = document.getElementById('filter-section').value;
                     if(dashSec === uploadSection) loadDcaDropdowns(uploadSection, null, 'filter-dca', 'filter-region');
 
@@ -1174,7 +1161,7 @@
             
             const fDcaVal = document.getElementById('filter-dca').value;
             const batchName = window.dashboardActiveBatch.batch_name;
-            const secVal = window.dashboardActiveBatch.section; // Gunakan section dari batch
+            const secVal = window.dashboardActiveBatch.section;
             const titleEl = document.getElementById('dashboard-dynamic-title');
 
             if ($.fn.DataTable.isDataTable('#report-table')) { $('#report-table').DataTable().clear().destroy(); }
@@ -1227,13 +1214,34 @@
                     showToast("Memuatkan data dari cache (Sistem Optimum)...");
                     const parsedCache = JSON.parse(cachedData);
                     window.dcaDetailsMap = parsedCache.dcaDetailsMap; 
-                    binaSemulaStrukturJadual(parsedCache.tableHtml, parsedCache.kpi); return; 
+                    binaSemulaStrukturJadual(parsedCache.tableHtml, parsedCache.kpi); 
+                    
+                    const kpiCards = document.querySelectorAll('.kpi-card');
+                    kpiCards.forEach((card, index) => {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(20px)';
+                        card.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                        card.style.borderColor = 'var(--border-color)';
+                        card.style.boxShadow = 'none';
+                        setTimeout(() => {
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                            setTimeout(() => {
+                                card.style.borderColor = 'var(--accent-gold)';
+                                card.style.boxShadow = '0 0 15px var(--accent-glow)';
+                                setTimeout(() => {
+                                    card.style.borderColor = 'var(--border-color)';
+                                    card.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.4)';
+                                }, 800);
+                            }, 300);
+                        }, index * 150);
+                    });
+                    return; 
                 }
 
                 tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;">Compiling summary datasets...</td></tr>`;
                 window.dcaDetailsMap = {}; 
                 
-                // MENGGUNAKAN BASELINES SPESIFIK UNTUK SECTION
                 const baseSnap = await db.collection("dca_live_summaries").doc(`GLOBAL_BASELINES_${secVal}`).get();
                 const sumSnap = await db.collection("dca_live_summaries").doc(batchName).get();
                 
@@ -1308,6 +1316,30 @@
                 };
 
                 binaSemulaStrukturJadual(htmlBodyContent, kpiValues);
+
+                const kpiCards = document.querySelectorAll('.kpi-card');
+                kpiCards.forEach((card, index) => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                    card.style.borderColor = 'var(--border-color)';
+                    card.style.boxShadow = 'none';
+                    
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                        
+                        setTimeout(() => {
+                            card.style.borderColor = 'var(--accent-gold)';
+                            card.style.boxShadow = '0 0 15px var(--accent-glow)';
+                            
+                            setTimeout(() => {
+                                card.style.borderColor = 'var(--border-color)';
+                                card.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.4)';
+                            }, 800);
+                        }, 300);
+                    }, index * 150);
+                });
 
                 if (serverLastUpdated) {
                     localStorage.setItem(cacheKeyData, JSON.stringify({ tableHtml: htmlBodyContent, kpi: kpiValues, dcaDetailsMap: window.dcaDetailsMap }));
