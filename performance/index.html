@@ -413,6 +413,7 @@
                     <table class="dataTable" style="width: 100%;">
                         <thead>
                             <tr>
+                                <th style="width: 40px; text-align: center; color:var(--text-muted);">NO.</th>
                                 <th style="text-align: left; color:var(--accent-gold);">DEPARTMENT SECTION</th>
                                 <th style="text-align: left;">BATCH ID CODE</th>
                                 <th style="text-align: center;">ASSIGNMENT TIME INTERVAL</th>
@@ -421,7 +422,7 @@
                             </tr>
                         </thead>
                         <tbody id="batch-summary-tbody">
-                            <tr><td colspan="5" style="text-align:center; padding:20px;">Populating registry logs...</td></tr>
+                            <tr><td colspan="6" style="text-align:center; padding:20px;">Populating registry logs...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -670,21 +671,28 @@
             } catch (e) { console.error("Data synchronization failed:", e); }
         }
 
-        function renderBatchSummary() {
+function renderBatchSummary() {
             const tbody = document.getElementById('batch-summary-tbody');
             if (window.allBatches.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No active batches found in registry.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No active batches found in registry.</td></tr>';
                 return;
             }
 
             let html = '';
+            
+            // Susun mengikut Section dahulu, kemudian ikut Tarikh Mula (lama ke baru)
             let sortedBatches = window.allBatches.slice().sort((a,b) => {
                 if(a.section < b.section) return -1;
                 if(a.section > b.section) return 1;
-                return 0;
+                
+                // Jika section sama, kita susun ikut start_date supaya nampak mana pertama & terakhir
+                let dateA = new Date(a.start_date || 0);
+                let dateB = new Date(b.start_date || 0);
+                return dateA - dateB; 
             });
 
-            sortedBatches.forEach(b => {
+            // Tambah parameter 'index' dalam loop untuk dapatkan nombor
+            sortedBatches.forEach((b, index) => {
                 let startStr = b.start_date ? new Date(b.start_date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : '-';
                 let endStr = b.end_date ? new Date(b.end_date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : '-';
                 let totalCycles = 0;
@@ -693,6 +701,7 @@
                 
                 html += `
                 <tr>
+                    <td style="text-align: center; font-weight:bold; color:var(--text-muted); font-size: 13px;">${index + 1}</td>
                     <td style="font-weight:bold; color:${secColor}; text-align: left;">${b.section || 'UNASSIGNED'}</td>
                     <td style="font-weight:bold; color:var(--accent-gold); text-align: left;">${b.batch_name}</td>
                     <td style="text-align: center;">${startStr} to ${endStr}</td>
