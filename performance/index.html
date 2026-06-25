@@ -411,7 +411,7 @@
                 <div class="panel-title">&#128203; 5. Active Configuration Registry Summary</div>
 <div class="table-container" style="margin-top: 0; padding:5px;">
                     <table id="batch-summary-table" class="dataTable" style="width: 100%;">
-                        <thead>
+                    <thead>
                             <tr>
                                 <th style="width: 40px; text-align: center; color:var(--text-muted);">NO.</th>
                                 <th style="text-align: left; color:var(--accent-gold);">DEPARTMENT SECTION</th>
@@ -680,23 +680,22 @@ function renderBatchSummary() {
 
             let html = '';
             
-            // Susun mengikut Section dahulu, kemudian ikut Tarikh Mula (lama ke baru)
+            // Susun ikut tarikh mula sahaja (terlama ke terbaru)
+            // Jadi kalau kau padam mana-mana, index akan auto susun balik ikut turutan masa
             let sortedBatches = window.allBatches.slice().sort((a,b) => {
-                if(a.section < b.section) return -1;
-                if(a.section > b.section) return 1;
-                
-                // Jika section sama, kita susun ikut start_date supaya nampak mana pertama & terakhir
                 let dateA = new Date(a.start_date || 0);
                 let dateB = new Date(b.start_date || 0);
                 return dateA - dateB; 
             });
 
-            // Tambah parameter 'index' dalam loop untuk dapatkan nombor
+            // Loop ni akan auto generate nombor 1, 2, 3... ikut urutan array
             sortedBatches.forEach((b, index) => {
                 let startStr = b.start_date ? new Date(b.start_date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : '-';
                 let endStr = b.end_date ? new Date(b.end_date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : '-';
                 let totalCycles = 0;
                 b.months.forEach(m => totalCycles += m.cycles.length);
+                
+                // Warna ikut section, tapi numbering tetap sambung ikut index array
                 let secColor = b.section === 'JV-AGENCY' ? '#10B981' : (b.section === 'JVBC-AGENCY' ? '#3B82F6' : '#EF4444');
                 
                 html += `
