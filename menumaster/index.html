@@ -1448,6 +1448,8 @@ async function manualMasterRefresh() {
         liveDataList = [];
 querySnapshot.forEach((doc) => {
             let rowData = doc.data();
+    // 🔴 TAMBAH BARIS INI: Sembunyikan status ARCHIVED dari table
+    if (rowData.status === "ARCHIVED") return;
             liveDataList.push({
                 dca: rowData.dca_id,
                 acc_no: rowData.acc_no,
