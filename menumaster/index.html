@@ -1490,8 +1490,6 @@ function switchView(viewType) {
     if(viewType === "PAID") document.getElementById("tabPaid").classList.add("active");
     if(viewType === "ALL") document.getElementById("tabAll").classList.add("active");
     
-    if(liveDataList.length === 0) return;
-
     filteredTableData = liveDataList.filter(d => {
         if(currentViewStatus === "ALL") return true;
         let status = (d.status || "").toString().toUpperCase();
