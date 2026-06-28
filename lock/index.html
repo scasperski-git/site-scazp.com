@@ -1363,7 +1363,14 @@ function renderBranchDropdown(data, select) {
 loadBranches();
 
 document.getElementById("dca_id").value = user || "";
-document.getElementById("promise_date").min = new Date().toISOString().split("T")[0];
+// Dapatkan tarikh hari ini mengikut waktu tempatan (Local Time)
+var now = new Date();
+var localYear = now.getFullYear();
+var localMonth = ("0" + (now.getMonth() + 1)).slice(-2);
+var localDay = ("0" + now.getDate()).slice(-2);
+var todayLocal = localYear + "-" + localMonth + "-" + localDay;
+
+document.getElementById("promise_date").min = todayLocal;
 
 const accField = document.getElementById("acc_no");
 accField.addEventListener("keypress", function(e){
