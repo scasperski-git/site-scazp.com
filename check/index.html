@@ -731,6 +731,41 @@ table tbody tr:hover td { background-color: #e2e8f0; }
 .remark-text.is-expanded {
     -webkit-line-clamp: unset;
 }
+
+/* ===== SUCCESS POPUP STYLES ===== */
+#successPaidPopup {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none;
+    align-items: center; justify-content: center; z-index: 9999;
+}
+.success-popup-box {
+    background: white; padding: 40px 30px; border-radius: 24px; text-align: center;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.25); max-width: 340px; width: 90%;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+.success-popup-box i {
+    font-size: 64px; color: #10b981; margin-bottom: 20px;
+    animation: scaleIn 0.5s ease-out;
+}
+.success-popup-box .btn-ok {
+    width: 100%; background: linear-gradient(135deg, #10b981, #059669); color: white;
+    border: none; padding: 14px; border-radius: 12px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(16,185,129,0.2); transition: all 0.3s ease; font-size: 15px;
+    margin-top: 10px;
+}
+.success-popup-box .btn-ok:hover {
+    transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.3);
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+@keyframes scaleIn {
+    0% { transform: scale(0); }
+    70% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
     
 </style>
 
@@ -1086,7 +1121,7 @@ async function checkLock(){
 }
 
 async function markAsPaid(docId, acc) {
-    if(!confirm("Are you sure you want to mark Account " + acc + " as PAID?")) return;
+    // 🔴 BUANG: if(!confirm("Are you sure...")) - Tidak lagi menyoal pengguna
 
     checkBtn.disabled = true;
     result.innerHTML = "<div class='loading'>Updating to PAID...<div class='spinner'></div></div>";
@@ -1103,7 +1138,11 @@ async function markAsPaid(docId, acc) {
         // Rekod CCTV di latar belakang tanpa ganggu proses pengguna
         systemLog("MARK_PAID", "SUCCESS", acc, "Marked account as PAID");
 
-        alert("Account " + acc + " successfully marked as PAID!");
+        // 🔴 BUANG: alert lama
+        // 🟢 MASUKKAN: Buka custom popup yang cantik
+        document.getElementById("successPaidAccNo").innerText = acc;
+        document.getElementById("successPaidPopup").style.display = "flex";
+
         input.value = acc; 
         checkLock(); 
         
@@ -1114,6 +1153,10 @@ async function markAsPaid(docId, acc) {
     }
 }
 
+// 🟢 FUNGSI BARU: Untuk tutup popup bila butang OK ditekan
+window.closeSuccessPopup = function() {
+    document.getElementById("successPaidPopup").style.display = "none";
+}
 function newSearch(){
     input.value=""; result.innerHTML=""; checkBtn.disabled=false; input.focus();
 }
@@ -1631,7 +1674,16 @@ async function systemLog(action, status, accNo, details) {
 }
     
 </script>
-
+<!-- SUCCESS PAID POPUP -->
+<div id="successPaidPopup">
+    <div class="success-popup-box">
+        <i class="fa fa-check-circle"></i>
+        <div style="font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #0f172a;">Success!</div>
+        <div style="font-size: 14px; color: #475569; margin-bottom: 24px; line-height: 1.5;">Account <b id="successPaidAccNo" style="color: #10b981;"></b> successfully marked as PAID!</div>
+        <button class="btn-ok" onclick="closeSuccessPopup()">OK</button>
+    </div>
+</div>
+    
 <div id="sessionPopup">
     <div class="session-box">
         <i class="fa fa-lock" style="font-size: 48px; color: #ef4444; margin-bottom: 16px;"></i>
