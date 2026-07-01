@@ -1347,7 +1347,7 @@ function renderTable() {
     let today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    pageData.forEach(d => {
+    pageData.forEach((d, index) => {
         let amount = "RM " + Number(d.amount || 0).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         
         let pDate = new Date(d.promise);
