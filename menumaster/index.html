@@ -1049,6 +1049,22 @@ th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
 .section:has(.fa-list-check)::before { background: linear-gradient(90deg, #0f172a, #475569, #cbd5e1); }
 .section:has(.fa-list-check) h3 i { background: #f1f5f9; color: #334155; }
 
+/* ===== ANIMASI INTERAKTIF KAD KPI ===== */
+@keyframes kpiGlowSequence {
+    0% { transform: scale(1); box-shadow: 0 4px 6px rgba(0,0,0,0.02); border-color: #e2e8f0; }
+    50% { 
+        transform: scale(1.03) translateY(-4px); 
+        box-shadow: 0 15px 30px rgba(56, 189, 248, 0.4); 
+        border-color: #38bdf8; 
+        z-index: 10; 
+    }
+    100% { transform: scale(1); box-shadow: 0 4px 6px rgba(0,0,0,0.02); border-color: #e2e8f0; }
+}
+
+.kpi-animated-glow {
+    animation: kpiGlowSequence 0.6s ease-in-out;
+}
+
     
 </style>
 
@@ -1418,6 +1434,9 @@ async function loadSummary(){
         var now = new Date();
         var time = now.toLocaleTimeString("en-MY", { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         document.getElementById("lastUpdate").innerText = "Last update: " + time;
+
+        // 🔴 TAMBAH BARIS INI: Cetuskan animasi selepas semua data KPI dimasukkan
+        playKpiAnimation();
 
     } catch (err) {
         console.error("Master Summary Error: ", err);
@@ -2572,6 +2591,27 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }, 1000); 
 });
+
+/* ==========================================
+   FUNGSI ANIMASI HIGHLIGHT SATU PERSATU
+   ========================================== */
+function playKpiAnimation() {
+    // Pilih semua kotak utama (Active Lock, Mark Paid, Top User, Top Branch)
+    const kpiCards = document.querySelectorAll('.kpi-box, .box-card');
+    
+    kpiCards.forEach((card, index) => {
+        // Jarakkan masa menyala sebanyak 200ms untuk setiap kotak
+        setTimeout(() => {
+            card.classList.add('kpi-animated-glow');
+            
+            // Buang kelas animasi selepas ia tamat (600ms) supaya ia boleh berulang jika user tekan Reload
+            setTimeout(() => {
+                card.classList.remove('kpi-animated-glow');
+            }, 600); 
+            
+        }, index * 200); 
+    });
+}
     
 </script>
 
