@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OSB & Findings Management System</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             --bg-color: #121212;
@@ -175,6 +176,12 @@
             color: var(--text-main); padding: 10px; border-radius: 4px; resize: vertical; min-height: 70px; font-family: inherit;
         }
 
+        /* Mapping Dropdown Form Layout */
+        .mapping-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; background: #121212; padding: 10px; border-radius: 6px;
+        }
+        .mapping-grid label { font-size: 12px; align-self: center; color: var(--text-main); font-weight: 500;}
+
         /* Mobile Optimization */
         @media (max-width: 768px) {
             .kpi-container { grid-template-columns: repeat(4, 1fr); gap: 6px; }
@@ -228,7 +235,8 @@
                 </div>
                 
                 <div id="upload-action-container" style="display: none;">
-                    <button class="btn-upload-trigger" onclick="simulateFirebaseUpload()">
+                    <input type="file" id="excel-file-input" style="display: none;" accept=".xlsx, .xls, .csv" onchange="handleExcelFileSelect(event)">
+                    <button class="btn-upload-trigger" onclick="document.getElementById('excel-file-input').click()">
                         <span>▲</span> Upload Excel Data
                     </button>
                 </div>
@@ -290,6 +298,35 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="mappingModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2>Map Excel Columns to Database Fields</h2>
+                <button class="close-btn" onclick="closeMappingModal()">&times;</button>
+            </div>
+            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">Match each system parameter with your uploaded Excel sheet headers.</p>
+            
+            <div class="mapping-grid">
+                <label>REGION Scope</label>
+                <select id="map-region" class="form-control mapping-select"></select>
+
+                <label>AREA Scope</label>
+                <select id="map-area" class="form-control mapping-select"></select>
+
+                <label>LOC CODE</label>
+                <select id="map-loc" class="form-control mapping-select"></select>
+
+                <label>ACCOUNT NO</label>
+                <select id="map-acct" class="form-control mapping-select"></select>
+
+                <label>OSB Balance</label>
+                <select id="map-osb" class="form-control mapping-select"></select>
+            </div>
+
+            <button class="btn-submit" style="width: 100%; background: #2e7d32;" onclick="processExcelUpload()">CONFIRM & START UPLOAD</button>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="updateModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -298,12 +335,7 @@
             </div>
             
             <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px;">Historical Audit Trail:</label>
-            <div class="history-box">
-                <div class="history-item">
-                    <div class="history-meta">System Audit | Init Setup</div>
-                    <div>Master document parsed into cloud architecture. Awaiting verification logs.</div>
-                </div>
-            </div>
+            <div class="history-box"></div>
 
             <div class="form-group">
                 <label for="newFinding">New Verification Finding Log:</label>
@@ -314,12 +346,10 @@
         </div>
     </div>
 
-<script type="module">
-        // 1. IMPORT FIREBASE SDK
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // 2. CONFIG FIREBASE KAU
         const firebaseConfig = {
             apiKey: "AIzaSyAW-Ylc2WSt0nO2Djjl832mEehR5jjiChE",
             authDomain: "findings-system.firebaseapp.com",
@@ -329,124 +359,87 @@
             appId: "1:1060357233000:web:582c1041bd142de32c9edd"
         };
 
-        // Initialize Firebase & Firestore
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // State variables
         let currentUser = null; 
         let currentRegion = null; 
         let currentArea = null;
         let loadedAccounts = []; 
+        let parsedExcelRows = []; 
+        
+        // KINI DIUBAH JADI KOSONG – AKAN DIJANA SECARA DINAMIK DARI DATA KAU
+        let regionsMap = {}; 
 
-        const regionsMap = {
-            'NORTH': ['ALOR SETAR AREA', 'SUNGAI PETANI AREA'],
-            'NORTHWEST': ['IPOH AREA', 'TAIPING AREA', 'PENANG AREA'],
-            'NORTHEAST': ['KOTA BHARU AREA'],
-            'CENTRAL': ['KL AREA', 'SHAH ALAM AREA'],
-            'MIDEAST': ['KUANTAN AREA', 'KEMAMAN AREA'],
-            'SOUTH': ['JB AREA', 'MELAKA AREA'],
-            'SABAH': ['KK AREA'],
-            'SARAWAK': ['KUCHING AREA']
-        };
-
-        // ==========================================
-        // FUNGSI SEMAK SESSION (SUPAYA TAK LOGOUT BILA REFRESH)
-        // ==========================================
         async function checkLoginSession() {
             const storedSession = localStorage.getItem('scazp_user_session');
             if (storedSession) {
-                // Kalau ada session tersimpan, terus login
                 currentUser = JSON.parse(storedSession);
                 document.getElementById('login-section').style.display = 'none';
                 document.getElementById('dashboard-section').style.display = 'block';
                 document.getElementById('display-username').innerText = "Logged in as: " + currentUser.username.toUpperCase();
-                
                 await fetchAccountsFromFirebase();
                 initDashboardView();
             }
         }
 
-        // ==========================================
-        // A. FUNGSI LOGIN DARI FIREBASE
-        // ==========================================
         window.handleLogin = async function() {
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
             const btn = document.querySelector('.btn-login');
-            
             btn.innerText = "CHECKING DATABASE..."; 
-            
             try {
                 const userRef = doc(db, "users", user);
                 const userSnap = await getDoc(userRef);
-
                 if (userSnap.exists() && userSnap.data().pass === pass) {
                     currentUser = userSnap.data();
                     currentUser.username = user;
-                    
-                    // SIMPAN SESSION DALAM BROWSER
                     localStorage.setItem('scazp_user_session', JSON.stringify(currentUser));
-                    
                     document.getElementById('login-error').style.display = 'none';
                     document.getElementById('login-section').style.display = 'none';
                     document.getElementById('dashboard-section').style.display = 'block';
                     document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
-                    
                     await fetchAccountsFromFirebase();
                     initDashboardView();
                 } else {
                     document.getElementById('login-error').style.display = 'block';
                 }
             } catch (error) {
-                console.error("Error logging in: ", error);
-                alert("Koneksi gagal: " + error.message);
+                alert("Connection status failed: " + error.message);
             }
             btn.innerText = "SIGN IN";
         };
 
         window.handleLogout = function() {
-            currentUser = null; loadedAccounts = [];
-            // BUANG SESSION DARI BROWSER BILA LOGOUT
+            currentUser = null; loadedAccounts = []; regionsMap = {};
             localStorage.removeItem('scazp_user_session');
-            
             document.getElementById('username').value = ''; document.getElementById('password').value = '';
             document.getElementById('dashboard-section').style.display = 'none';
             document.getElementById('login-section').style.display = 'flex';
         };
 
-        // ==========================================
-        // B. FUNGSI TAMBAH USER BARU KE FIREBASE
-        // ==========================================
         window.addNewUser = async function() {
             const id = document.getElementById('new-user-id').value.trim();
             const pass = document.getElementById('new-user-pass').value.trim();
             const role = document.getElementById('new-user-role').value;
             const region = document.getElementById('new-user-region').value;
-
-            if(!id || !pass) { alert("Sila lengkapkan ID dan Password."); return; }
-
+            if(!id || !pass) { alert("Please complete both User ID and Password fields."); return; }
             const btn = document.querySelector('.settings-box .btn-submit');
             btn.innerText = "SAVING TO CLOUD...";
-
             try {
                 const userRef = doc(db, "users", id);
                 const userSnap = await getDoc(userRef);
-                
                 if (userSnap.exists()) {
                     alert("User ID sudah wujud dalam sistem!");
                 } else {
                     let userData = { pass: pass, role: role };
                     if(role === 'user') { userData.assignedRegion = region; }
-                    
                     await setDoc(userRef, userData);
-                    alert(`Pendaftaran Berjaya!\nID: ${id.toUpperCase()} telah dimasukkan ke pangkalan data.`);
-                    
+                    alert(`Pendaftaran Berjaya!\nID: ${id.toUpperCase()} telah dimasukkan.`);
                     document.getElementById('new-user-id').value = ''; 
                     document.getElementById('new-user-pass').value = '';
                 }
             } catch (error) {
-                console.error("Error adding user: ", error);
                 alert("Gagal menyimpan user: " + error.message);
             }
             btn.innerText = "Save User Configuration";
@@ -458,54 +451,139 @@
         };
 
         // ==========================================
-        // C. FUNGSI UPLOAD DATA (DUMMY EXCEL) KE FIREBASE
+        // DYNAMIC EXCEL READING & HEADER MAPPING LOGIC
         // ==========================================
-        window.simulateFirebaseUpload = async function() {
-            const btn = document.querySelector('.btn-upload-trigger');
-            btn.innerHTML = "<span>⏳</span> Uploading to Firestore...";
-            
-            const rawExcelData = [
-                { region: 'NORTHWEST', area: 'IPOH AREA', loc: '8342', acct: '5923235', osb: 1200.50, status: 'PENDING' },
-                { region: 'NORTHWEST', area: 'TAIPING AREA', loc: '8345', acct: '5923236', osb: 800.00, status: 'PENDING' },
-                { region: 'MIDEAST', area: 'KUANTAN AREA', loc: '2059', acct: '8110090', osb: 3023.08, status: 'PENDING' },
-                { region: 'NORTH', area: 'ALOR SETAR AREA', loc: '1100', acct: '1002938', osb: 5450.00, status: 'PENDING' }
-            ];
+        window.handleExcelFileSelect = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                parsedExcelRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                
+                if(parsedExcelRows.length === 0) {
+                    alert("The uploaded sheet has no record lines detected.");
+                    return;
+                }
+
+                const headers = Object.keys(parsedExcelRows[0]);
+                populateMappingDropdowns(headers);
+                document.getElementById('mappingModal').style.display = 'flex';
+            };
+            reader.readAsArrayBuffer(file);
+        };
+
+        function populateMappingDropdowns(headers) {
+            const dropdowns = document.querySelectorAll('.mapping-select');
+            dropdowns.forEach(select => {
+                select.innerHTML = '';
+                headers.forEach(h => {
+                    let option = document.createElement('option');
+                    option.value = h;
+                    option.innerText = h;
+                    select.appendChild(option);
+                });
+
+                const id = select.id;
+                if(id === 'map-region') preSelectOption(select, ['region', 'REGION', 'Region']);
+                if(id === 'map-area') preSelectOption(select, ['area', 'AREA', 'Area']);
+                if(id === 'map-loc') preSelectOption(select, ['loc', 'loc cd', 'LOC CD', 'location', 'LOC_CD']);
+                if(id === 'map-acct') preSelectOption(select, ['acct', 'ACCT', 'account', 'ACCOUNT NO', 'account_no']);
+                if(id === 'map-osb') preSelectOption(select, ['osb', 'OSB', 'balance', 'OSB (RM)', 'osb_bal']);
+            });
+        }
+
+        function preSelectOption(select, guesses) {
+            for(let option of select.options) {
+                if(guesses.includes(option.value)) {
+                    select.value = option.value;
+                    break;
+                }
+            }
+        }
+
+        window.closeMappingModal = function() {
+            document.getElementById('mappingModal').style.display = 'none';
+            document.getElementById('excel-file-input').value = ''; 
+        };
+
+        window.processExcelUpload = async function() {
+            const mapRegion = document.getElementById('map-region').value;
+            const mapArea = document.getElementById('map-area').value;
+            const mapLoc = document.getElementById('map-loc').value;
+            const mapAcct = document.getElementById('map-acct').value;
+            const mapOsb = document.getElementById('map-osb').value;
+
+            const btn = document.querySelector('#mappingModal .btn-submit');
+            btn.innerText = "PARSING & STREAMING TO FIREBASE...";
+            btn.disabled = true;
 
             try {
                 const accountsCol = collection(db, "accounts");
                 let count = 0;
-                for (const row of rawExcelData) {
-                    await setDoc(doc(accountsCol, row.acct), row);
+
+                for (const row of parsedExcelRows) {
+                    const rawAccountNo = String(row[mapAcct]).trim();
+                    if (!rawAccountNo) continue; 
+
+                    const organizedAccountPackage = {
+                        region: String(row[mapRegion]).toUpperCase().trim(),
+                        area: String(row[mapArea]).toUpperCase().trim(),
+                        loc: String(row[mapLoc]).trim(),
+                        acct: rawAccountNo,
+                        osb: parseFloat(String(row[mapOsb]).replace(/[^0-9.-]+/g,"")) || 0, 
+                        status: 'PENDING' 
+                    };
+
+                    await setDoc(doc(accountsCol, rawAccountNo), organizedAccountPackage, { merge: true });
                     count++;
                 }
-                alert(`${count} rekod berjaya di-upload ke pangkalan data! Sila refresh dashboard.`);
+
+                alert(`Transaction pipeline committed successfully!\nProcessed ${count} account profiles into Firebase architecture.`);
+                closeMappingModal();
                 await fetchAccountsFromFirebase(); 
                 initDashboardView();
+
             } catch (error) {
-                console.error("Upload error: ", error);
-                alert("Gagal upload data: " + error.message);
+                alert("Upload array streaming fatal failure: " + error.message);
             }
-            btn.innerHTML = "<span>▲</span> Upload Excel Data";
+            btn.innerText = "CONFIRM & START UPLOAD";
+            btn.disabled = false;
         };
 
         // ==========================================
-        // D. FUNGSI TARIK DATA DARI FIREBASE KE JADUAL
+        // FETCH & DATA INTERFACE HANDLING LOGICS
         // ==========================================
         async function fetchAccountsFromFirebase() {
             loadedAccounts = [];
+            regionsMap = {}; // Reset map sebelum di-generate baru
+            
             try {
                 const querySnapshot = await getDocs(collection(db, "accounts"));
-                querySnapshot.forEach((doc) => {
-                    loadedAccounts.push(doc.data());
+                querySnapshot.forEach((doc) => { 
+                    const data = doc.data();
+                    loadedAccounts.push(data); 
+
+                    // FUNGSI UTAMA: BINA HUBUNGAN REGION & AREA SECARA DINAMIK TERUS DARI DATA
+                    if (data.region && data.area) {
+                        if (!regionsMap[data.region]) {
+                            regionsMap[data.region] = [];
+                        }
+                        if (!regionsMap[data.region].includes(data.area)) {
+                            regionsMap[data.region].push(data.area);
+                        }
+                    }
                 });
             } catch (error) {
-                console.error("Error fetching data: ", error);
+                console.error("Fetch failure: ", error);
             }
         }
 
-        // ==========================================
-        // E. LOGIK ANTARAMUKA (DASHBOARD & TABS)
-        // ==========================================
         window.switchTab = function(target) {
             document.querySelectorAll('.main-panel').forEach(p => p.style.display = 'none');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -532,7 +610,6 @@
                 document.getElementById('upload-action-container').style.display = 'none';
                 document.getElementById('region-filters-container').style.display = 'none';
                 document.getElementById('area-filters-container').style.display = 'block';
-                
                 currentRegion = currentUser.assignedRegion;
                 renderAreaSelectionUI(currentRegion);
                 renderTableData(loadedAccounts.filter(d => d.region === currentRegion));
@@ -569,13 +646,11 @@
             } else {
                 areaContainer.innerHTML = ''; 
             }
-            
             if(regionsMap[region]) {
                 regionsMap[region].forEach((area, index) => {
                     let activeStyle = (currentUser.role !== 'master' && index === 0) ? 'active' : '';
                     areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
                 });
-                
                 if(currentUser.role !== 'master') {
                     applyAreaFilter(regionsMap[region][0], areaContainer.querySelector('.btn-filter'));
                 }
@@ -612,7 +687,6 @@
                     let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
                     if(row.status === 'UPDATED') countDone++;
                     totalOsbValue += parseFloat(row.osb) || 0;
-
                     tbody.innerHTML += `
                         <tr>
                             <td>${row.region}</td><td>${row.area}</td><td>${row.loc}</td><td>${row.acct}</td>
@@ -623,7 +697,6 @@
                     `;
                 });
             }
-
             document.getElementById('kpi-total').innerText = data.length;
             document.getElementById('kpi-done').innerText = countDone;
             document.getElementById('kpi-pending').innerText = data.length - countDone;
@@ -631,34 +704,26 @@
         }
 
         // ==========================================
-        // F. LOGIK MODAL & DINAMIK KEMASKINI FINDING
+        // AUDIT TRAIL LOG ENTRY ENHANCEMENTS
         // ==========================================
         window.openModal = async function(accNo) {
             document.getElementById('modalAccNo').innerText = accNo;
             document.getElementById('updateModal').style.display = 'flex';
-            
             const historyBox = document.querySelector('.history-box');
             historyBox.innerHTML = '<div style="text-align:center; padding:10px;">Loading history trail...</div>';
-            
             try {
                 const q = query(collection(db, "findings"), where("acct", "==", accNo));
                 const querySnapshot = await getDocs(q);
-                
                 let findingsList = [];
-                querySnapshot.forEach((doc) => {
-                    findingsList.push(doc.data());
-                });
-
+                querySnapshot.forEach((doc) => { findingsList.push(doc.data()); });
                 findingsList.sort((a, b) => {
                     const timeA = a.updated_at ? a.updated_at.toDate() : 0;
                     const timeB = b.updated_at ? b.updated_at.toDate() : 0;
                     return timeB - timeA;
                 });
-
                 historyBox.innerHTML = ''; 
-                
                 if(findingsList.length === 0) {
-                    historyBox.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:10px;">No historical findings found for this account.</div>';
+                    historyBox.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:10px;">No historical findings found.</div>';
                 } else {
                     findingsList.forEach((data) => {
                         const dateFormatted = data.updated_at ? data.updated_at.toDate().toLocaleString() : 'N/A';
@@ -671,7 +736,6 @@
                     });
                 }
             } catch (error) {
-                console.error("Error loading history: ", error);
                 historyBox.innerHTML = '<div style="color: var(--error-red); padding:10px;">Failed to load history configuration.</div>';
             }
         };
@@ -684,12 +748,9 @@
         window.saveFinding = async function() {
             let log = document.getElementById('newFinding').value;
             let accNo = document.getElementById('modalAccNo').innerText;
-            
             if(!log.trim()) { alert("Please insert a finding remark."); return; }
-            
             const btn = document.querySelector('#updateModal .btn-submit');
             btn.innerText = "SAVING...";
-
             try {
                 await addDoc(collection(db, "findings"), {
                     acct: accNo,
@@ -697,25 +758,22 @@
                     updated_by: currentUser.username,
                     updated_at: new Date()
                 });
-
                 const accRef = doc(db, "accounts", accNo);
                 await setDoc(accRef, { status: 'UPDATED' }, { merge: true });
-
                 alert("Successfully saved to Firestore!");
                 closeModal();
-                
                 await fetchAccountsFromFirebase();
                 initDashboardView();
-
             } catch (error) {
-                console.error("Error saving finding: ", error);
                 alert("Failed to save entry: " + error.message);
             }
             btn.innerText = "COMMIT RECORD ENTRY";
         };
 
-        window.onclick = function(e) { if(e.target == document.getElementById('updateModal')) closeModal(); }
+        window.onclick = function(e) { 
+            if(e.target == document.getElementById('updateModal')) closeModal(); 
+            if(e.target == document.getElementById('mappingModal')) closeMappingModal();
+        }
 
-        // PANGGIL FUNGSI SEMAK SESSION MASA MULA-MULA BUKA PAGE
         checkLoginSession();
     </script>
