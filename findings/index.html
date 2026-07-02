@@ -314,26 +314,20 @@
         </div>
     </div>
 
-    <script>
 <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+        // 1. IMPORT FIREBASE SDK (Termasuk fungsi Firestore)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyAW-Ylc2WSt0nO2Djjl832mEehR5jjiChE",
-    authDomain: "findings-system.firebaseapp.com",
-    projectId: "findings-system",
-    storageBucket: "findings-system.firebasestorage.app",
-    messagingSenderId: "1060357233000",
-    appId: "1:1060357233000:web:582c1041bd142de32c9edd"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-</script>
+        // 2. CONFIG FIREBASE KAU (Dah dimasukkan dengan betul)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAW-Ylc2WSt0nO2Djjl832mEehR5jjiChE",
+            authDomain: "findings-system.firebaseapp.com",
+            projectId: "findings-system",
+            storageBucket: "findings-system.firebasestorage.app",
+            messagingSenderId: "1060357233000",
+            appId: "1:1060357233000:web:582c1041bd142de32c9edd"
+        };
 
         // Initialize Firebase & Firestore
         const app = initializeApp(firebaseConfig);
@@ -367,7 +361,6 @@
             btn.innerText = "CHECKING DATABASE..."; // Loading indicator
             
             try {
-                // Cari user dalam collection 'users' di Firestore
                 const userRef = doc(db, "users", user);
                 const userSnap = await getDoc(userRef);
 
@@ -380,7 +373,6 @@
                     document.getElementById('dashboard-section').style.display = 'block';
                     document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
                     
-                    // Tarik data akaun dari Firebase lepas berjaya login
                     await fetchAccountsFromFirebase();
                     initDashboardView();
                 } else {
@@ -424,7 +416,6 @@
                     let userData = { pass: pass, role: role };
                     if(role === 'user') { userData.assignedRegion = region; }
                     
-                    // Simpan data ke Firestore (Collection: users)
                     await setDoc(userRef, userData);
                     alert(`Pendaftaran Berjaya!\nID: ${id.toUpperCase()} telah dimasukkan ke pangkalan data.`);
                     
@@ -450,7 +441,6 @@
             const btn = document.querySelector('.btn-upload-trigger');
             btn.innerHTML = "<span>⏳</span> Uploading to Firestore...";
             
-            // Dummy data seolah-olah dibaca dari fail Excel
             const rawExcelData = [
                 { region: 'NORTHWEST', area: 'IPOH AREA', loc: '8342', acct: '5923235', osb: 1200.50, status: 'PENDING' },
                 { region: 'NORTHWEST', area: 'TAIPING AREA', loc: '8345', acct: '5923236', osb: 800.00, status: 'PENDING' },
@@ -461,13 +451,12 @@
             try {
                 const accountsCol = collection(db, "accounts");
                 let count = 0;
-                // Tembak data satu per satu menggunakan nombor akaun sebagai ID Dokumen
                 for (const row of rawExcelData) {
                     await setDoc(doc(accountsCol, row.acct), row);
                     count++;
                 }
                 alert(`${count} rekod berjaya di-upload ke pangkalan data! Sila refresh dashboard.`);
-                await fetchAccountsFromFirebase(); // Update jadual secara langsung
+                await fetchAccountsFromFirebase(); 
                 initDashboardView();
             } catch (error) {
                 console.error("Upload error: ", error);
@@ -594,7 +583,7 @@
             let countDone = 0; let totalOsbValue = 0;
 
             if(data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Tiada data dijumpai. Sila upload data.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No data found. Please upload records.</td></tr>`;
             } else {
                 data.forEach(row => {
                     let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
@@ -635,13 +624,12 @@
             let log = document.getElementById('newFinding').value;
             let accNo = document.getElementById('modalAccNo').innerText;
             
-            if(!log.trim()) { alert("Sila masukkan nota tindakan."); return; }
+            if(!log.trim()) { alert("Please insert a finding remark."); return; }
             
             const btn = document.querySelector('#updateModal .btn-submit');
             btn.innerText = "SAVING...";
 
             try {
-                // 1. Simpan Finding ke collection 'findings'
                 await addDoc(collection(db, "findings"), {
                     acct: accNo,
                     remark: log,
@@ -649,23 +637,23 @@
                     updated_at: new Date()
                 });
 
-                // 2. Update status akaun di collection 'accounts' kepada 'UPDATED'
                 const accRef = doc(db, "accounts", accNo);
                 await setDoc(accRef, { status: 'UPDATED' }, { merge: true });
 
-                alert("Tindakan berjaya disimpan ke Firestore!");
+                alert("Successfully saved to Firestore!");
                 closeModal();
                 
-                // Refresh data supaya warna status bertukar hijau
                 await fetchAccountsFromFirebase();
                 initDashboardView();
 
             } catch (error) {
                 console.error("Error saving finding: ", error);
-                alert("Gagal menyimpan tindakan.");
+                alert("Failed to save entry.");
             }
             btn.innerText = "COMMIT RECORD ENTRY";
         };
 
         window.onclick = function(e) { if(e.target == document.getElementById('updateModal')) closeModal(); }
     </script>
+</body>
+</html>
