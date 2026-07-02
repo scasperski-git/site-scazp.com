@@ -315,11 +315,11 @@
     </div>
 
 <script type="module">
-        // 1. IMPORT FIREBASE SDK (Termasuk fungsi Firestore)
+        // 1. IMPORT FIREBASE SDK (Ditambahkan query dan where untuk mencari riwayat)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // 2. CONFIG FIREBASE KAU (Dah dimasukkan dengan betul)
+        // 2. CONFIG FIREBASE ANDA
         const firebaseConfig = {
             apiKey: "AIzaSyAW-Ylc2WSt0nO2Djjl832mEehR5jjiChE",
             authDomain: "findings-system.firebaseapp.com",
@@ -337,7 +337,7 @@
         let currentUser = null; 
         let currentRegion = null; 
         let currentArea = null;
-        let loadedAccounts = []; // Simpan data akaun yang ditarik dari Firebase
+        let loadedAccounts = []; 
 
         const regionsMap = {
             'NORTH': ['ALOR SETAR AREA', 'SUNGAI PETANI AREA'],
@@ -351,14 +351,14 @@
         };
 
         // ==========================================
-        // A. FUNGSI LOGIN DARI FIREBASE
+        // A. FUNGSI LOGIN FROM FIREBASE
         // ==========================================
         window.handleLogin = async function() {
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
             const btn = document.querySelector('.btn-login');
             
-            btn.innerText = "CHECKING DATABASE..."; // Loading indicator
+            btn.innerText = "CHECKING DATABASE..."; 
             
             try {
                 const userRef = doc(db, "users", user);
@@ -380,7 +380,7 @@
                 }
             } catch (error) {
                 console.error("Error logging in: ", error);
-                alert("Ralat sambungan ke pangkalan data!");
+                alert("Koneksi gagal: " + error.message);
             }
             btn.innerText = "SIGN IN";
         };
@@ -393,7 +393,7 @@
         };
 
         // ==========================================
-        // B. FUNGSI TEMBAK NEW USER KE FIREBASE
+        // B. FUNGSI TAMBAH USER BARU KE FIREBASE
         // ==========================================
         window.addNewUser = async function() {
             const id = document.getElementById('new-user-id').value.trim();
@@ -424,7 +424,7 @@
                 }
             } catch (error) {
                 console.error("Error adding user: ", error);
-                alert("Gagal menyimpan ke pangkalan data.");
+                alert("Gagal menyimpan user: " + error.message);
             }
             btn.innerText = "Save User Configuration";
         };
@@ -460,7 +460,7 @@
                 initDashboardView();
             } catch (error) {
                 console.error("Upload error: ", error);
-                alert("Gagal upload data.");
+                alert("Gagal upload data: " + error.message); // Menampilkan error spesifik jika gagal
             }
             btn.innerHTML = "<span>▲</span> Upload Excel Data";
         };
@@ -608,11 +608,51 @@
         }
 
         // ==========================================
-        // F. LOGIK MODAL & KEMASKINI FINDING
+        // F. LOGIK MODAL & DINAMIK KEMASKINI FINDING
         // ==========================================
-        window.openModal = function(accNo) {
+        window.openModal = async function(accNo) {
             document.getElementById('modalAccNo').innerText = accNo;
             document.getElementById('updateModal').style.display = 'flex';
+            
+            const historyBox = document.querySelector('.history-box');
+            historyBox.innerHTML = '<div style="text-align:center; padding:10px;">Loading history trail...</div>';
+            
+            try {
+                // Mencari data riwayat findings di Firestore berdasarkan nomor akun (acct)
+                const q = query(collection(db, "findings"), where("acct", "==", accNo));
+                const querySnapshot = await getDocs(q);
+                
+                let findingsList = [];
+                querySnapshot.forEach((doc) => {
+                    findingsList.push(doc.data());
+                });
+
+                // Mengurutkan tanggal dari yang paling baru di sisi aplikasi
+                findingsList.sort((a, b) => {
+                    const timeA = a.updated_at ? a.updated_at.toDate() : 0;
+                    const timeB = b.updated_at ? b.updated_at.toDate() : 0;
+                    return timeB - timeA;
+                });
+
+                historyBox.innerHTML = ''; // Kosongkan loading
+                
+                if(findingsList.length === 0) {
+                    historyBox.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:10px;">No historical findings found for this account.</div>';
+                } else {
+                    findingsList.forEach((data) => {
+                        const dateFormatted = data.updated_at ? data.updated_at.toDate().toLocaleString() : 'N/A';
+                        historyBox.innerHTML += `
+                            <div class="history-item">
+                                <div class="history-meta">PIC: ${data.updated_by ? data.updated_by.toUpperCase() : 'SYSTEM'} | ${dateFormatted}</div>
+                                <div>${data.remark}</div>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (error) {
+                console.error("Error loading history: ", error);
+                historyBox.innerHTML = '<div style="color: var(--error-red); padding:10px;">Failed to load history configuration.</div>';
+            }
         };
         
         window.closeModal = function() {
@@ -630,6 +670,7 @@
             btn.innerText = "SAVING...";
 
             try {
+                // 1. Menyimpan data finding baru ke dalam koleksi 'findings'
                 await addDoc(collection(db, "findings"), {
                     acct: accNo,
                     remark: log,
@@ -637,18 +678,20 @@
                     updated_at: new Date()
                 });
 
+                // 2. Memperbarui status akun di koleksi 'accounts' menjadi 'UPDATED'
                 const accRef = doc(db, "accounts", accNo);
                 await setDoc(accRef, { status: 'UPDATED' }, { merge: true });
 
                 alert("Successfully saved to Firestore!");
                 closeModal();
                 
+                // Memuat ulang data tabel agar status langsung berubah warna hijau
                 await fetchAccountsFromFirebase();
                 initDashboardView();
 
             } catch (error) {
                 console.error("Error saving finding: ", error);
-                alert("Failed to save entry.");
+                alert("Failed to save entry: " + error.message);
             }
             btn.innerText = "COMMIT RECORD ENTRY";
         };
