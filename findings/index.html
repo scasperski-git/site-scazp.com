@@ -316,11 +316,12 @@
 
     <script>
 <script type="module">
-        // 1. IMPORT FIREBASE SDK (Versi Terkini V10)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-        // 2. MASUKKAN CONFIG FIREBASE KAU DI SINI
+  // Your web app's Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyAW-Ylc2WSt0nO2Djjl832mEehR5jjiChE",
     authDomain: "findings-system.firebaseapp.com",
@@ -329,6 +330,10 @@
     messagingSenderId: "1060357233000",
     appId: "1:1060357233000:web:582c1041bd142de32c9edd"
   };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+</script>
 
         // Initialize Firebase & Firestore
         const app = initializeApp(firebaseConfig);
