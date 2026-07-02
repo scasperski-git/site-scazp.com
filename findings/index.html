@@ -22,57 +22,79 @@
             padding: 20px;
         }
 
+        /* --- LOGIN PAGE STYLES --- */
+        #login-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 90vh;
+        }
+        .login-box {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid var(--accent-gold);
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.1);
+            text-align: center;
+        }
+        .login-box h2 { color: var(--accent-gold); margin-top: 0; }
+        .login-input {
+            width: 100%; box-sizing: border-box;
+            background-color: #121212; border: 1px solid var(--border-color);
+            color: white; padding: 10px; margin-bottom: 15px; border-radius: 4px;
+        }
+        .login-input:focus { outline: none; border-color: var(--accent-gold); }
+        .btn-login {
+            width: 100%; background-color: var(--accent-gold); color: var(--bg-color);
+            border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer;
+        }
+        .btn-login:hover { background-color: #e5c158; }
+
+        /* --- DASHBOARD STYLES --- */
+        #dashboard-section { display: none; }
+        
         .header {
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;
+        }
+        .header h1 { margin: 0; font-size: 20px; color: var(--accent-gold); letter-spacing: 1px; }
+        .btn-logout {
+            background-color: transparent; color: #e57373; border: 1px solid #e57373;
+            padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;
         }
 
-        .header h1 {
-            margin: 0;
-            font-size: 20px;
-            color: var(--accent-gold);
-            letter-spacing: 1px;
+        /* Filters Section */
+        .filter-section {
+            background-color: var(--card-bg); padding: 15px; border-radius: 8px;
+            border: 1px solid var(--border-color); margin-bottom: 20px;
         }
+        .filter-title { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; display: block; text-transform: uppercase; }
+        .btn-group {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;
+        }
+        .btn-filter {
+            background-color: #121212; color: var(--text-main); border: 1px solid var(--border-color);
+            padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: all 0.2s;
+        }
+        .btn-filter:hover { border-color: var(--accent-gold); }
+        .btn-filter.active { background-color: var(--accent-gold); color: var(--bg-color); border-color: var(--accent-gold); font-weight: bold; }
+
+        /* Area Filters (Hidden by default) */
+        #area-filters-container { display: none; padding-top: 10px; border-top: 1px dashed var(--border-color); }
 
         /* KPI Dashboard Grid */
         .kpi-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;
         }
-
         .kpi-card {
-            background-color: var(--card-bg);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease, border-color 0.3s ease;
+            background-color: var(--card-bg); padding: 15px; border-radius: 8px;
+            border: 1px solid var(--border-color); text-align: center;
             animation: glowHighlight 4s infinite alternate;
         }
-
-        .kpi-card:hover {
-            transform: translateY(-3px);
-            border-color: var(--accent-gold);
-        }
-
-        .kpi-card h3 {
-            margin: 0 0 5px 0;
-            font-size: 12px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-
-        .kpi-card p {
-            margin: 0;
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--text-main);
-        }
-
+        .kpi-card h3 { margin: 0 0 5px 0; font-size: 12px; color: var(--text-muted); text-transform: uppercase; }
+        .kpi-card p { margin: 0; font-size: 20px; font-weight: bold; color: var(--text-main); }
         @keyframes glowHighlight {
             0% { box-shadow: 0 0 0 rgba(212, 175, 55, 0); }
             100% { box-shadow: 0 0 10px rgba(212, 175, 55, 0.15); }
@@ -80,176 +102,23 @@
 
         /* Table Styles */
         .table-container {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            overflow-x: auto;
+            background-color: var(--card-bg); border-radius: 8px;
+            border: 1px solid var(--border-color); overflow-x: auto;
         }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        th {
-            background-color: #1a1a1a;
-            color: var(--accent-gold);
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        tr:hover {
-            background-color: #2a2a2a;
-        }
-
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { background-color: #1a1a1a; color: var(--accent-gold); font-weight: 600; white-space: nowrap; }
+        tr:hover { background-color: #2a2a2a; }
+        
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
         .status-done { background-color: rgba(46, 125, 50, 0.2); color: #81c784; border: 1px solid #2e7d32; }
         .status-pending { background-color: rgba(198, 40, 40, 0.2); color: #e57373; border: 1px solid #c62828; }
-
-        .btn-update {
-            background-color: transparent;
-            color: var(--accent-gold);
-            border: 1px solid var(--accent-gold);
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-            transition: all 0.2s;
-        }
-
-        .btn-update:hover {
-            background-color: var(--accent-gold);
-            color: var(--bg-color);
-        }
-
-        /* Modal / Popup Styles */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: var(--card-bg);
-            border: 1px solid var(--accent-gold);
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            position: relative;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            font-size: 16px;
-            color: var(--accent-gold);
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        .close-btn:hover { color: white; }
-
-        .history-box {
-            background-color: #1a1a1a;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            max-height: 150px;
-            overflow-y: auto;
-            font-size: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        .history-item {
-            border-bottom: 1px dashed var(--border-color);
-            padding-bottom: 5px;
-            margin-bottom: 5px;
-        }
         
-        .history-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
+        .btn-update {
+            background-color: transparent; color: var(--accent-gold); border: 1px solid var(--accent-gold);
+            padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;
         }
-
-        .history-meta {
-            color: var(--accent-gold);
-            font-size: 10px;
-            margin-bottom: 3px;
-        }
-
-        .form-group { margin-bottom: 15px; }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .form-group textarea {
-            width: 100%;
-            box-sizing: border-box;
-            background-color: #121212;
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 10px;
-            border-radius: 4px;
-            resize: vertical;
-            min-height: 80px;
-            font-family: inherit;
-        }
-
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--accent-gold);
-        }
-
-        .btn-save {
-            width: 100%;
-            background-color: var(--accent-gold);
-            color: var(--bg-color);
-            border: none;
-            padding: 10px;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .btn-save:hover { background-color: #e5c158; }
+        .btn-update:hover { background-color: var(--accent-gold); color: var(--bg-color); }
 
         /* Mobile Optimization */
         @media (max-width: 768px) {
@@ -258,146 +127,249 @@
             .kpi-card h3 { font-size: 9px; }
             .kpi-card p { font-size: 14px; }
             table { font-size: 11px; }
-            th, td { padding: 8px 10px; }
+            th, td { padding: 8px; }
+            .btn-filter { padding: 6px 10px; font-size: 11px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Dashboard Pemantauan OSB</h1>
-    </div>
-
-    <!-- KPI Section -->
-    <div class="kpi-container">
-        <div class="kpi-card">
-            <h3>Total Akaun</h3>
-            <p>1,245</p>
-        </div>
-        <div class="kpi-card">
-            <h3>Dah Update</h3>
-            <p style="color: #81c784;">830</p>
-        </div>
-        <div class="kpi-card">
-            <h3>Belum Update</h3>
-            <p style="color: #e57373;">415</p>
-        </div>
-        <div class="kpi-card">
-            <h3>Total OSB (RM)</h3>
-            <p>1.2M</p>
+    <div id="login-section">
+        <div class="login-box">
+            <h2>SCAZP WEB PORTAL</h2>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">Sistem Kemaskini OSB & Findings</p>
+            <input type="text" id="username" class="login-input" placeholder="User ID">
+            <input type="password" id="password" class="login-input" placeholder="Password">
+            <button class="btn-login" onclick="handleLogin()">LOG MASUK</button>
+            <p id="login-error" style="color: #e57373; font-size: 12px; display: none; margin-top: 10px;">ID atau Password salah!</p>
         </div>
     </div>
 
-    <!-- Data Table Section -->
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>REGION</th>
-                    <th>LOC CD</th>
-                    <th>ACCT</th>
-                    <th>V_DELQ</th>
-                    <th>ARR MTH</th>
-                    <th>OSB (RM)</th>
-                    <th>STATUS</th>
-                    <th>TINDAKAN</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>NORTH</td>
-                    <td>A101</td>
-                    <td class="acc-no">1002938475</td>
-                    <td>2</td>
-                    <td>3</td>
-                    <td>3,450.00</td>
-                    <td><span class="status-done">DAH UPDATE</span></td>
-                    <td><button class="btn-update" onclick="openModal('1002938475')">KEMASKINI</button></td>
-                </tr>
-                <tr>
-                    <td>SOUTH</td>
-                    <td>B205</td>
-                    <td class="acc-no">1009847563</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1,200.50</td>
-                    <td><span class="status-pending">BELUM</span></td>
-                    <td><button class="btn-update" onclick="openModal('1009847563')">KEMASKINI</button></td>
-                </tr>
-                 <tr>
-                    <td>CENTRAL</td>
-                    <td>C302</td>
-                    <td class="acc-no">1005566778</td>
-                    <td>4</td>
-                    <td>6</td>
-                    <td>8,900.25</td>
-                    <td><span class="status-done">DAH UPDATE</span></td>
-                    <td><button class="btn-update" onclick="openModal('1005566778')">KEMASKINI</button></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Modal Popup -->
-    <div class="modal-overlay" id="updateModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Kemaskini Finding: <span id="modalAccNo"></span></h2>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
+    <div id="dashboard-section">
+        <div class="header">
+            <h1>Dashboard Pemantauan OSB</h1>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span id="display-username" style="font-size: 12px; color: var(--text-muted);"></span>
+                <button class="btn-logout" onclick="handleLogout()">Log Keluar</button>
             </div>
-            
-            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">Sejarah Findings:</label>
-            <div class="history-box">
-                <!-- Contoh history statik -->
-                <div class="history-item">
-                    <div class="history-meta">PIC: Ali | 10 April 2026, 14:30</div>
-                    <div>Panggilan tak dijawab. Akan cuba lagi esok.</div>
-                </div>
-                <div class="history-item">
-                    <div class="history-meta">PIC: Siti | 05 Mac 2026, 09:15</div>
-                    <div>Akaun belum dijelaskan. Minta tempoh seminggu.</div>
-                </div>
+        </div>
+
+        <div class="filter-section">
+            <div id="region-filters-container">
+                <span class="filter-title">Pilih Region</span>
+                <div class="btn-group" id="region-buttons">
+                    </div>
             </div>
 
-            <div class="form-group">
-                <label for="newFinding">Tambah Finding Baru:</label>
-                <textarea id="newFinding" placeholder="Masukkan status atau tindakan terkini..."></textarea>
+            <div id="area-filters-container">
+                <span class="filter-title">Pilih Area</span>
+                <div class="btn-group" id="area-buttons">
+                    </div>
             </div>
+        </div>
 
-            <button class="btn-save" onclick="saveFinding()">SIMPAN REKOD</button>
+        <div class="kpi-container">
+            <div class="kpi-card"><h3>Total Akaun</h3><p id="kpi-total">0</p></div>
+            <div class="kpi-card"><h3>Dah Update</h3><p id="kpi-done" style="color: #81c784;">0</p></div>
+            <div class="kpi-card"><h3>Belum Update</h3><p id="kpi-pending" style="color: #e57373;">0</p></div>
+            <div class="kpi-card"><h3>Total OSB (RM)</h3><p id="kpi-osb">0.00</p></div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>REGION</th>
+                        <th>AREA</th>
+                        <th>LOC CD</th>
+                        <th>ACCT</th>
+                        <th>OSB (RM)</th>
+                        <th>STATUS</th>
+                        <th>TINDAKAN</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    </tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        // Fungsi buka modal dan papar nombor akaun
-        function openModal(accNo) {
-            document.getElementById('modalAccNo').innerText = accNo;
-            document.getElementById('updateModal').style.display = 'flex';
-        }
+        // --- 1. MOCK DATA (Data Contoh dari Excel) ---
+        const accountsData = [
+            { region: 'NORTHWEST', area: 'IPOH AREA', loc: '8342', acct: '5923235', osb: 1200.50, status: 'BELUM' },
+            { region: 'NORTHWEST', area: 'TAIPING AREA', loc: '8345', acct: '5923236', osb: 800.00, status: 'BELUM' },
+            { region: 'MIDEAST', area: 'KUANTAN AREA', loc: '2059', acct: '8110090', osb: 3023.08, status: 'DAH UPDATE' },
+            { region: 'NORTH', area: 'ALOR SETAR AREA', loc: '1100', acct: '1002938', osb: 5450.00, status: 'DAH UPDATE' },
+            { region: 'NORTH', area: 'SUNGAI PETANI AREA', loc: '1105', acct: '1002939', osb: 150.00, status: 'BELUM' }
+        ];
 
-        // Fungsi tutup modal
-        function closeModal() {
-            document.getElementById('updateModal').style.display = 'none';
-            document.getElementById('newFinding').value = ''; // clear textarea
-        }
+        // Definisi kawasan untuk setiap region
+        const regionsMap = {
+            'NORTH': ['ALOR SETAR AREA', 'SUNGAI PETANI AREA'],
+            'NORTHWEST': ['IPOH AREA', 'TAIPING AREA', 'PENANG AREA'],
+            'NORTHEAST': ['KOTA BHARU AREA'],
+            'CENTRAL': ['KL AREA', 'SHAH ALAM AREA'],
+            'MIDEAST': ['KUANTAN AREA', 'KEMAMAN AREA'],
+            'SOUTH': ['JB AREA', 'MELAKA AREA'],
+            'SABAH': ['KK AREA'],
+            'SARAWAK': ['KUCHING AREA']
+        };
 
-        // Fungsi simpan (dummy function buat masa ni)
-        function saveFinding() {
-            let remark = document.getElementById('newFinding').value;
-            if(remark.trim() === '') {
-                alert("Sila masukkan finding sebelum simpan.");
-                return;
+        // --- 2. SISTEM LOGIN & ROLES ---
+        const users = {
+            'admin': { pass: '123', role: 'master' },
+            'pic': { pass: '123', role: 'user', assignedAreas: ['IPOH AREA'] } // Cuma boleh akses Ipoh
+        };
+
+        let currentUser = null;
+        let currentRegion = null;
+        let currentArea = null;
+
+        function handleLogin() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            
+            if (users[user] && users[user].pass === pass) {
+                currentUser = users[user];
+                currentUser.username = user;
+                
+                document.getElementById('login-error').style.display = 'none';
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+                document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
+                
+                initDashboard();
+            } else {
+                document.getElementById('login-error').style.display = 'block';
             }
-            alert("Rekod berjaya disimpan untuk akaun " + document.getElementById('modalAccNo').innerText);
-            closeModal();
         }
 
-        // Tutup modal kalau klik luar kotak
-        window.onclick = function(event) {
-            let modal = document.getElementById('updateModal');
-            if (event.target == modal) {
-                closeModal();
+        function handleLogout() {
+            currentUser = null; currentRegion = null; currentArea = null;
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('dashboard-section').style.display = 'none';
+            document.getElementById('login-section').style.display = 'flex';
+        }
+
+        // --- 3. LOGIK DASHBOARD & FILTER ---
+        function initDashboard() {
+            if (currentUser.role === 'master') {
+                // Master nampak semua filter region
+                document.getElementById('region-filters-container').style.display = 'block';
+                document.getElementById('area-filters-container').style.display = 'none';
+                renderRegionButtons();
+                renderTable(accountsData); // Papar semua by default
+            } else {
+                // User biasa tak nampak Region, terus nampak Area dia sahaja
+                document.getElementById('region-filters-container').style.display = 'none';
+                document.getElementById('area-filters-container').style.display = 'block';
+                renderUserAreaButtons(currentUser.assignedAreas);
+                filterTableByArea(currentUser.assignedAreas[0]); // Auto load area pertama dia
             }
+        }
+
+        function renderRegionButtons() {
+            const container = document.getElementById('region-buttons');
+            container.innerHTML = '<button class="btn-filter active" onclick="selectAllRegions(this)">SEMUA REGION</button>';
+            Object.keys(regionsMap).forEach(region => {
+                container.innerHTML += `<button class="btn-filter" onclick="selectRegion('${region}', this)">${region}</button>`;
+            });
+        }
+
+        function selectAllRegions(btnElement) {
+            updateActiveButton('region-buttons', btnElement);
+            document.getElementById('area-filters-container').style.display = 'none';
+            currentRegion = null; currentArea = null;
+            renderTable(accountsData);
+        }
+
+        function selectRegion(region, btnElement) {
+            updateActiveButton('region-buttons', btnElement);
+            currentRegion = region;
+            currentArea = null; // Reset area
+            
+            // Tunjuk butang Area untuk region ni
+            document.getElementById('area-filters-container').style.display = 'block';
+            const areaContainer = document.getElementById('area-buttons');
+            areaContainer.innerHTML = '<button class="btn-filter active" onclick="selectAllAreasInRegion(this)">SEMUA AREA DI ' + region + '</button>';
+            
+            regionsMap[region].forEach(area => {
+                areaContainer.innerHTML += `<button class="btn-filter" onclick="selectArea('${area}', this)">${area}</button>`;
+            });
+
+            // Filter table untuk tunjuk data Region sahaja
+            const filteredData = accountsData.filter(d => d.region === region);
+            renderTable(filteredData);
+        }
+
+        function selectAllAreasInRegion(btnElement) {
+            updateActiveButton('area-buttons', btnElement);
+            currentArea = null;
+            const filteredData = accountsData.filter(d => d.region === currentRegion);
+            renderTable(filteredData);
+        }
+
+        function selectArea(area, btnElement) {
+            updateActiveButton('area-buttons', btnElement);
+            currentArea = area;
+            filterTableByArea(area);
+        }
+
+        function filterTableByArea(area) {
+            const filteredData = accountsData.filter(d => d.area === area);
+            renderTable(filteredData);
+        }
+
+        function renderUserAreaButtons(areas) {
+            const container = document.getElementById('area-buttons');
+            container.innerHTML = '';
+            areas.forEach((area, index) => {
+                let activeClass = index === 0 ? 'active' : '';
+                container.innerHTML += `<button class="btn-filter ${activeClass}" onclick="selectArea('${area}', this)">${area}</button>`;
+            });
+        }
+
+        function updateActiveButton(containerId, activeBtn) {
+            let btns = document.getElementById(containerId).getElementsByClassName('btn-filter');
+            for(let btn of btns) { btn.classList.remove('active'); }
+            activeBtn.classList.add('active');
+        }
+
+        // --- 4. RENDER JADUAL & KPI ---
+        function renderTable(data) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            
+            let countDone = 0; let totalOsb = 0;
+
+            data.forEach(row => {
+                let statusHtml = row.status === 'DAH UPDATE' 
+                    ? '<span class="status-done">DAH UPDATE</span>' 
+                    : '<span class="status-pending">BELUM</span>';
+                
+                if(row.status === 'DAH UPDATE') countDone++;
+                totalOsb += row.osb;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${row.region}</td>
+                        <td>${row.area}</td>
+                        <td>${row.loc}</td>
+                        <td>${row.acct}</td>
+                        <td>${row.osb.toFixed(2)}</td>
+                        <td>${statusHtml}</td>
+                        <td><button class="btn-update">KEMASKINI</button></td>
+                    </tr>
+                `;
+            });
+
+            // Update KPI
+            document.getElementById('kpi-total').innerText = data.length;
+            document.getElementById('kpi-done').innerText = countDone;
+            document.getElementById('kpi-pending').innerText = data.length - countDone;
+            document.getElementById('kpi-osb').innerText = (totalOsb / 1000).toFixed(2) + 'K'; // Format ringkas K
         }
     </script>
 </body>
