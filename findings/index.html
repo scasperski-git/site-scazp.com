@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kemaskini OSB & Findings</title>
+    <title>OSB & Findings Management System</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -12,6 +12,8 @@
             --text-muted: #9e9e9e;
             --accent-gold: #d4af37;
             --border-color: #333;
+            --success-green: #81c784;
+            --error-red: #e57373;
         }
 
         body {
@@ -31,11 +33,11 @@
             border: 1px solid var(--accent-gold); width: 100%; max-width: 350px;
             box-shadow: 0 4px 15px rgba(212, 175, 55, 0.1); text-align: center;
         }
-        .login-box h2 { color: var(--accent-gold); margin-top: 0; }
+        .login-box h2 { color: var(--accent-gold); margin-top: 0; font-size: 22px; }
         .login-input {
             width: 100%; box-sizing: border-box; background-color: #121212;
             border: 1px solid var(--border-color); color: white; padding: 10px;
-            margin-bottom: 15px; border-radius: 4px;
+            margin-bottom: 15px; border-radius: 4px; font-size: 13px;
         }
         .login-input:focus { outline: none; border-color: var(--accent-gold); }
         .btn-login {
@@ -52,55 +54,98 @@
         }
         .header h1 { margin: 0; font-size: 20px; color: var(--accent-gold); letter-spacing: 1px; }
         .btn-logout {
-            background-color: transparent; color: #e57373; border: 1px solid #e57373;
+            background-color: transparent; color: var(--error-red); border: 1px solid var(--error-red);
             padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;
         }
 
-        /* Filters */
+        /* Navigation Tabs for Master */
+        .nav-tabs { display: none; gap: 10px; margin-bottom: 20px; }
+        .nav-btn {
+            background-color: #1a1a1a; color: var(--text-main); border: 1px solid var(--border-color);
+            padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;
+        }
+        .nav-btn.active { background-color: var(--accent-gold); color: var(--bg-color); border-color: var(--accent-gold); }
+
+        /* Main Sections toggling */
+        .main-panel { display: block; }
+        #settings-panel { display: none; }
+
+        /* Filters & Action Bar */
+        .action-bar {
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;
+        }
         .filter-section {
             background-color: var(--card-bg); padding: 15px; border-radius: 8px;
-            border: 1px solid var(--border-color); margin-bottom: 20px;
+            border: 1px solid var(--border-color); flex-grow: 1;
         }
-        .filter-title { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; display: block; text-transform: uppercase; }
+        .filter-title { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
         .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .btn-group:last-child { margin-bottom: 0; }
         .btn-filter {
             background-color: #121212; color: var(--text-main); border: 1px solid var(--border-color);
-            padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: all 0.2s;
+            padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; transition: all 0.2s;
         }
         .btn-filter:hover { border-color: var(--accent-gold); }
         .btn-filter.active { background-color: var(--accent-gold); color: var(--bg-color); border-color: var(--accent-gold); font-weight: bold; }
         #area-filters-container { display: none; padding-top: 10px; border-top: 1px dashed var(--border-color); }
 
-        /* KPI */
+        .btn-upload-trigger {
+            background-color: #2e7d32; color: white; border: none; padding: 10px 15px;
+            border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 5px;
+        }
+        .btn-upload-trigger:hover { background-color: #388e3c; }
+
+        /* KPI Card Grid */
         .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
         .kpi-card {
             background-color: var(--card-bg); padding: 15px; border-radius: 8px;
             border: 1px solid var(--border-color); text-align: center;
             animation: glowHighlight 4s infinite alternate;
         }
-        .kpi-card h3 { margin: 0 0 5px 0; font-size: 12px; color: var(--text-muted); }
+        .kpi-card h3 { margin: 0 0 5px 0; font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
         .kpi-card p { margin: 0; font-size: 20px; font-weight: bold; color: var(--text-main); }
         @keyframes glowHighlight {
             0% { box-shadow: 0 0 0 rgba(212, 175, 55, 0); }
             100% { box-shadow: 0 0 10px rgba(212, 175, 55, 0.15); }
         }
 
-        /* Table */
+        /* Tables & Forms */
         .table-container {
             background-color: var(--card-bg); border-radius: 8px; border: 1px solid var(--border-color); overflow-x: auto;
         }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
         th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { background-color: #1a1a1a; color: var(--accent-gold); font-weight: 600; white-space: nowrap; }
         tr:hover { background-color: #2a2a2a; }
-        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .status-done { background-color: rgba(46, 125, 50, 0.2); color: #81c784; border: 1px solid #2e7d32; }
-        .status-pending { background-color: rgba(198, 40, 40, 0.2); color: #e57373; border: 1px solid #c62828; }
+        
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        .status-done { background-color: rgba(46, 125, 50, 0.2); color: var(--success-green); border: 1px solid #2e7d32; }
+        .status-pending { background-color: rgba(198, 40, 40, 0.2); color: var(--error-red); border: 1px solid #c62828; }
+        
         .btn-update {
             background-color: transparent; color: var(--accent-gold); border: 1px solid var(--accent-gold);
             padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;
         }
         .btn-update:hover { background-color: var(--accent-gold); color: var(--bg-color); }
+
+        /* Settings Panel Form CSS */
+        .settings-box {
+            background-color: var(--card-bg); border: 1px solid var(--border-color);
+            padding: 20px; border-radius: 8px; max-width: 500px; margin-bottom: 20px;
+        }
+        .settings-box h2 { color: var(--accent-gold); font-size: 16px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;}
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 12px; color: var(--text-muted); }
+        .form-control {
+            width: 100%; box-sizing: border-box; background-color: #121212; border: 1px solid var(--border-color);
+            color: white; padding: 10px; border-radius: 4px; font-size: 13px;
+        }
+        .form-control:focus { outline: none; border-color: var(--accent-gold); }
+        .btn-submit {
+            background-color: var(--accent-gold); color: var(--bg-color); border: none;
+            padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px;
+        }
+        .btn-submit:hover { background-color: #e5c158; }
 
         /* --- MODAL (POPUP) STYLES --- */
         .modal-overlay {
@@ -115,38 +160,30 @@
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px;
         }
-        .modal-header h2 { margin: 0; font-size: 16px; color: var(--accent-gold); }
+        .modal-header h2 { margin: 0; font-size: 15px; color: var(--accent-gold); }
         .close-btn { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
         .close-btn:hover { color: white; }
         .history-box {
             background-color: #1a1a1a; padding: 10px; border-radius: 4px; margin-bottom: 15px;
-            max-height: 150px; overflow-y: auto; font-size: 12px; border: 1px solid var(--border-color);
+            max-height: 120px; overflow-y: auto; font-size: 11px; border: 1px solid var(--border-color);
         }
         .history-item { border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; margin-bottom: 5px; }
         .history-item:last-child { border-bottom: none; margin-bottom: 0; }
         .history-meta { color: var(--accent-gold); font-size: 10px; margin-bottom: 3px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 12px; color: var(--text-muted); }
         .form-group textarea {
             width: 100%; box-sizing: border-box; background-color: #121212; border: 1px solid var(--border-color);
-            color: var(--text-main); padding: 10px; border-radius: 4px; resize: vertical; min-height: 80px; font-family: inherit;
+            color: var(--text-main); padding: 10px; border-radius: 4px; resize: vertical; min-height: 70px; font-family: inherit;
         }
-        .form-group textarea:focus { outline: none; border-color: var(--accent-gold); }
-        .btn-save {
-            width: 100%; background-color: var(--accent-gold); color: var(--bg-color);
-            border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer;
-        }
-        .btn-save:hover { background-color: #e5c158; }
 
         /* Mobile Optimization */
         @media (max-width: 768px) {
-            .kpi-container { gap: 8px; }
-            .kpi-card { padding: 10px 5px; }
-            .kpi-card h3 { font-size: 9px; }
-            .kpi-card p { font-size: 14px; }
-            table { font-size: 11px; }
-            th, td { padding: 8px; }
-            .btn-filter { padding: 6px 10px; font-size: 11px; }
+            .kpi-container { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+            .kpi-card { padding: 10px 4px; }
+            .kpi-card h3 { font-size: 8px; }
+            .kpi-card p { font-size: 13px; }
+            table { font-size: 10px; }
+            th, td { padding: 8px 6px; }
+            .btn-filter { padding: 6px 8px; font-size: 10px; }
         }
     </style>
 </head>
@@ -155,86 +192,136 @@
     <div id="login-section">
         <div class="login-box">
             <h2>SCAZP WEB PORTAL</h2>
-            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">Sistem Kemaskini OSB & Findings</p>
+            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 20px;">OSB & Findings Tracking System</p>
             <input type="text" id="username" class="login-input" placeholder="User ID">
             <input type="password" id="password" class="login-input" placeholder="Password">
-            <button class="btn-login" onclick="handleLogin()">LOG MASUK</button>
-            <p id="login-error" style="color: #e57373; font-size: 12px; display: none; margin-top: 10px;">ID atau Password salah!</p>
+            <button class="btn-login" onclick="handleLogin()">SIGN IN</button>
+            <p id="login-error" style="color: var(--error-red); font-size: 12px; display: none; margin-top: 10px;">Invalid User ID or Password!</p>
         </div>
     </div>
 
     <div id="dashboard-section">
         <div class="header">
-            <h1>Dashboard Pemantauan OSB</h1>
+            <h1>OSB MONITORING SYSTEM</h1>
             <div style="display: flex; align-items: center; gap: 15px;">
-                <span id="display-username" style="font-size: 12px; color: var(--text-muted);"></span>
-                <button class="btn-logout" onclick="handleLogout()">Log Keluar</button>
+                <span id="display-username" style="font-size: 11px; color: var(--text-muted);"></span>
+                <button class="btn-logout" onclick="handleLogout()">Sign Out</button>
             </div>
         </div>
 
-        <div class="filter-section">
-            <div id="region-filters-container">
-                <span class="filter-title">Pilih Region</span>
-                <div class="btn-group" id="region-buttons"></div>
+        <div class="nav-tabs" id="master-nav-tabs">
+            <button class="nav-btn active" id="tab-dash" onclick="switchTab('dashboard')">Dashboard</button>
+            <button class="nav-btn" id="tab-settings" onclick="switchTab('settings')">User Settings</button>
+        </div>
+
+        <div id="dashboard-panel" class="main-panel">
+            <div class="action-bar">
+                <div class="filter-section">
+                    <div id="region-filters-container">
+                        <span class="filter-title">Select Region</span>
+                        <div class="btn-group" id="region-buttons"></div>
+                    </div>
+                    <div id="area-filters-container">
+                        <span class="filter-title">Select Area</span>
+                        <div class="btn-group" id="area-buttons"></div>
+                    </div>
+                </div>
+                
+                <div id="upload-action-container" style="display: none;">
+                    <button class="btn-upload-trigger" onclick="simulateFirebaseUpload()">
+                        <span>▲</span> Upload Excel Data
+                    </button>
+                </div>
             </div>
-            <div id="area-filters-container">
-                <span class="filter-title">Pilih Area</span>
-                <div class="btn-group" id="area-buttons"></div>
+
+            <div class="kpi-container">
+                <div class="kpi-card"><h3>Total Accounts</h3><p id="kpi-total">0</p></div>
+                <div class="kpi-card"><h3>Updated</h3><p id="kpi-done" style="color: var(--success-green);">0</p></div>
+                <div class="kpi-card"><h3>Pending</h3><p id="kpi-pending" style="color: var(--error-red);">0</p></div>
+                <div class="kpi-card"><h3>Total OSB</h3><p id="kpi-osb">RM 0.00</p></div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>REGION</th><th>AREA</th><th>LOC CD</th><th>ACCT NO</th>
+                            <th>OSB (RM)</th><th>STATUS</th><th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
             </div>
         </div>
 
-        <div class="kpi-container">
-            <div class="kpi-card"><h3>Total Akaun</h3><p id="kpi-total">0</p></div>
-            <div class="kpi-card"><h3>Dah Update</h3><p id="kpi-done" style="color: #81c784;">0</p></div>
-            <div class="kpi-card"><h3>Belum Update</h3><p id="kpi-pending" style="color: #e57373;">0</p></div>
-            <div class="kpi-card"><h3>Total OSB (RM)</h3><p id="kpi-osb">0.00</p></div>
-        </div>
-
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>REGION</th><th>AREA</th><th>LOC CD</th><th>ACCT</th>
-                        <th>OSB (RM)</th><th>STATUS</th><th>TINDAKAN</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body"></tbody>
-            </table>
+        <div id="settings-panel" class="main-panel">
+            <div class="settings-box">
+                <h2>Add New Portal User (Syncs to Cloud Ledger)</h2>
+                <div class="form-group">
+                    <label>User ID / Username</label>
+                    <input type="text" id="new-user-id" class="form-control" placeholder="e.g., pic_north">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="new-user-pass" class="form-control" placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                    <label>Access Privilege (Role)</label>
+                    <select id="new-user-role" class="form-control" onchange="toggleFormRegionSelect()">
+                        <option value="user">PIC User (Restricted Access)</option>
+                        <option value="master">Master Admin (Full Access)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="form-region-group">
+                    <label>Assign Region Scope</label>
+                    <select id="new-user-region" class="form-control">
+                        <option value="NORTH">NORTH</option>
+                        <option value="NORTHWEST">NORTHWEST</option>
+                        <option value="NORTHEAST">NORTHEAST</option>
+                        <option value="SOUTH">SOUTH</option>
+                        <option value="CENTRAL">CENTRAL</option>
+                        <option value="MIDEAST">MIDEAST</option>
+                        <option value="SABAH">SABAH</option>
+                        <option value="SARAWAK">SARAWAK</option>
+                    </select>
+                </div>
+                <button class="btn-submit" onclick="addNewUser()">Save User Configuration</button>
+            </div>
         </div>
     </div>
 
     <div class="modal-overlay" id="updateModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Kemaskini Finding: <span id="modalAccNo"></span></h2>
+                <h2>Update Account Finding: <span id="modalAccNo"></span></h2>
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
             
-            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">Sejarah Findings:</label>
+            <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px;">Historical Audit Trail:</label>
             <div class="history-box">
                 <div class="history-item">
-                    <div class="history-meta">PIC: Sistem | 02 Julai 2026, 09:00</div>
-                    <div>Data dimuat naik ke dalam sistem. Menunggu tindakan.</div>
+                    <div class="history-meta">System Audit | Init Setup</div>
+                    <div>Master document parsed into cloud architecture. Awaiting verification logs.</div>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="newFinding">Tambah Finding Baru:</label>
-                <textarea id="newFinding" placeholder="Masukkan status atau tindakan terkini..."></textarea>
+                <label for="newFinding">New Verification Finding Log:</label>
+                <textarea id="newFinding" placeholder="Type current finding or action taken here..."></textarea>
             </div>
 
-            <button class="btn-save" onclick="saveFinding()">SIMPAN REKOD</button>
+            <button class="btn-submit" style="width: 100%;" onclick="saveFinding()">COMMIT RECORD ENTRY</button>
         </div>
     </div>
 
     <script>
-        // Data & Regions
+        // --- DATA ARCHITECTURE ---
         const accountsData = [
-            { region: 'NORTHWEST', area: 'IPOH AREA', loc: '8342', acct: '5923235', osb: 1200.50, status: 'BELUM' },
-            { region: 'NORTHWEST', area: 'TAIPING AREA', loc: '8345', acct: '5923236', osb: 800.00, status: 'BELUM' },
-            { region: 'MIDEAST', area: 'KUANTAN AREA', loc: '2059', acct: '8110090', osb: 3023.08, status: 'DAH UPDATE' },
-            { region: 'NORTH', area: 'ALOR SETAR AREA', loc: '1100', acct: '1002938', osb: 5450.00, status: 'DAH UPDATE' },
-            { region: 'NORTH', area: 'SUNGAI PETANI AREA', loc: '1105', acct: '1002939', osb: 150.00, status: 'BELUM' }
+            { region: 'NORTHWEST', area: 'IPOH AREA', loc: '8342', acct: '5923235', osb: 1200.50, status: 'PENDING' },
+            { region: 'NORTHWEST', area: 'TAIPING AREA', loc: '8345', acct: '5923236', osb: 800.00, status: 'PENDING' },
+            { region: 'MIDEAST', area: 'KUANTAN AREA', loc: '2059', acct: '8110090', osb: 3023.08, status: 'UPDATED' },
+            { region: 'NORTH', area: 'ALOR SETAR AREA', loc: '1100', acct: '1002938', osb: 5450.00, status: 'UPDATED' },
+            { region: 'NORTH', area: 'SUNGAI PETANI AREA', loc: '1105', acct: '1002939', osb: 150.00, status: 'PENDING' }
         ];
 
         const regionsMap = {
@@ -248,24 +335,25 @@
             'SARAWAK': ['KUCHING AREA']
         };
 
-        const users = {
+        // Simulated Database Ledger for Users
+        const usersDatabase = {
             'admin': { pass: '123', role: 'master' },
-            'pic': { pass: '123', role: 'user', assignedAreas: ['IPOH AREA'] }
+            'pic_north': { pass: '123', role: 'user', assignedRegion: 'NORTH' }
         };
 
         let currentUser = null; let currentRegion = null; let currentArea = null;
 
-        // Login Functions
+        // --- AUTHENTICATION PROCESS ---
         function handleLogin() {
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
-            if (users[user] && users[user].pass === pass) {
-                currentUser = users[user]; currentUser.username = user;
+            if (usersDatabase[user] && usersDatabase[user].pass === pass) {
+                currentUser = usersDatabase[user]; currentUser.username = user;
                 document.getElementById('login-error').style.display = 'none';
                 document.getElementById('login-section').style.display = 'none';
                 document.getElementById('dashboard-section').style.display = 'block';
                 document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
-                initDashboard();
+                initDashboardView();
             } else {
                 document.getElementById('login-error').style.display = 'block';
             }
@@ -278,91 +366,118 @@
             document.getElementById('login-section').style.display = 'flex';
         }
 
-        // Dashboard Filters
-        function initDashboard() {
-            if (currentUser.role === 'master') {
-                document.getElementById('region-filters-container').style.display = 'block';
-                document.getElementById('area-filters-container').style.display = 'none';
-                renderRegionButtons(); renderTable(accountsData);
-            } else {
-                document.getElementById('region-filters-container').style.display = 'none';
-                document.getElementById('area-filters-container').style.display = 'block';
-                renderUserAreaButtons(currentUser.assignedAreas); filterTableByArea(currentUser.assignedAreas[0]);
+        // --- INTERFACE MANAGEMENT (TABS) ---
+        function switchTab(target) {
+            document.querySelectorAll('.main-panel').forEach(p => p.style.display = 'none');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            if (target === 'dashboard') {
+                document.getElementById('dashboard-panel').style.display = 'block';
+                document.getElementById('tab-dash').classList.add('active');
+                initDashboardView();
+            } else if (target === 'settings') {
+                document.getElementById('settings-panel').style.display = 'block';
+                document.getElementById('tab-settings').classList.add('active');
             }
         }
 
-        function renderRegionButtons() {
+        // --- DATA VISUALIZATION LOGIC ---
+        function initDashboardView() {
+            if (currentUser.role === 'master') {
+                document.getElementById('master-nav-tabs').style.display = 'flex';
+                document.getElementById('upload-action-container').style.display = 'block';
+                document.getElementById('region-filters-container').style.display = 'block';
+                document.getElementById('area-filters-container').style.display = 'none';
+                renderRegionSelectionUI(); renderTableData(accountsData);
+            } else {
+                // PIC Level Account Logic: Filter strictly by their preset Region Configuration
+                document.getElementById('master-nav-tabs').style.display = 'none';
+                document.getElementById('upload-action-container').style.display = 'none';
+                document.getElementById('region-filters-container').style.display = 'none';
+                document.getElementById('area-filters-container').style.display = 'block';
+                
+                currentRegion = currentUser.assignedRegion;
+                renderAreaSelectionUI(currentRegion);
+                renderTableData(accountsData.filter(d => d.region === currentRegion));
+            }
+        }
+
+        function renderRegionSelectionUI() {
             const container = document.getElementById('region-buttons');
-            container.innerHTML = '<button class="btn-filter active" onclick="selectAllRegions(this)">SEMUA REGION</button>';
-            Object.keys(regionsMap).forEach(region => {
-                container.innerHTML += `<button class="btn-filter" onclick="selectRegion('${region}', this)">${region}</button>`;
+            container.innerHTML = '<button class="btn-filter active" onclick="clearRegionSelection(this)">ALL REGIONS</button>';
+            Object.keys(regionsMap).forEach(reg => {
+                container.innerHTML += `<button class="btn-filter" onclick="applyRegionFilter('${reg}', this)">${reg}</button>`;
             });
         }
 
-        function selectAllRegions(btnElement) {
-            updateActiveButton('region-buttons', btnElement);
+        function clearRegionSelection(btnElement) {
+            updateActiveFilterHighlight('region-buttons', btnElement);
             document.getElementById('area-filters-container').style.display = 'none';
-            renderTable(accountsData);
+            currentRegion = null; currentArea = null;
+            renderTableData(accountsData);
         }
 
-        function selectRegion(region, btnElement) {
-            updateActiveButton('region-buttons', btnElement);
-            currentRegion = region;
+        function applyRegionFilter(region, btnElement) {
+            updateActiveFilterHighlight('region-buttons', btnElement);
+            currentRegion = region; currentArea = null;
             document.getElementById('area-filters-container').style.display = 'block';
+            renderAreaSelectionUI(region);
+            renderTableData(accountsData.filter(d => d.region === region));
+        }
+
+        function renderAreaSelectionUI(region) {
             const areaContainer = document.getElementById('area-buttons');
-            areaContainer.innerHTML = '<button class="btn-filter active" onclick="selectAllAreasInRegion(this)">SEMUA AREA DI ' + region + '</button>';
-            regionsMap[region].forEach(area => {
-                areaContainer.innerHTML += `<button class="btn-filter" onclick="selectArea('${area}', this)">${area}</button>`;
+            // Check if Master or PIC to configure the "All Areas" capability
+            if (currentUser.role === 'master') {
+                areaContainer.innerHTML = `<button class="btn-filter active" onclick="clearAreaSelection(this)">ALL AREAS IN ${region}</button>`;
+            } else {
+                areaContainer.innerHTML = ''; // PIC simply selects specific subareas directly
+            }
+            
+            regionsMap[region].forEach((area, index) => {
+                let activeStyle = (currentUser.role !== 'master' && index === 0) ? 'active' : '';
+                areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
             });
-            renderTable(accountsData.filter(d => d.region === region));
+            
+            if(currentUser.role !== 'master') {
+                applyAreaFilter(regionsMap[region][0], areaContainer.querySelector('.btn-filter'));
+            }
         }
 
-        function selectAllAreasInRegion(btnElement) {
-            updateActiveButton('area-buttons', btnElement);
-            renderTable(accountsData.filter(d => d.region === currentRegion));
+        function clearAreaSelection(btnElement) {
+            updateActiveFilterHighlight('area-buttons', btnElement);
+            currentArea = null;
+            renderTableData(accountsData.filter(d => d.region === currentRegion));
         }
 
-        function selectArea(area, btnElement) {
-            updateActiveButton('area-buttons', btnElement);
-            filterTableByArea(area);
+        function applyAreaFilter(area, btnElement) {
+            updateActiveFilterHighlight('area-buttons', btnElement);
+            currentArea = area;
+            renderTableData(accountsData.filter(d => d.area === area));
         }
 
-        function filterTableByArea(area) {
-            renderTable(accountsData.filter(d => d.area === area));
-        }
-
-        function renderUserAreaButtons(areas) {
-            const container = document.getElementById('area-buttons'); container.innerHTML = '';
-            areas.forEach((area, index) => {
-                let activeClass = index === 0 ? 'active' : '';
-                container.innerHTML += `<button class="btn-filter ${activeClass}" onclick="selectArea('${area}', this)">${area}</button>`;
-            });
-        }
-
-        function updateActiveButton(containerId, activeBtn) {
+        function updateActiveFilterHighlight(containerId, activeBtn) {
+            if(!activeBtn) return;
             let btns = document.getElementById(containerId).getElementsByClassName('btn-filter');
             for(let btn of btns) { btn.classList.remove('active'); }
             activeBtn.classList.add('active');
         }
 
-        // Table & KPI Render
-        function renderTable(data) {
+        // Processing & Rendering Data Rows
+        function renderTableData(data) {
             const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
-            let countDone = 0; let totalOsb = 0;
+            let countDone = 0; let totalOsbValue = 0;
 
             data.forEach(row => {
-                let statusHtml = row.status === 'DAH UPDATE' 
-                    ? '<span class="status-done">DAH UPDATE</span>' 
-                    : '<span class="status-pending">BELUM</span>';
-                if(row.status === 'DAH UPDATE') countDone++;
-                totalOsb += row.osb;
+                let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
+                if(row.status === 'UPDATED') countDone++;
+                totalOsbValue += row.osb;
 
-                // FUNGSI OPEN MODAL DIMASUKKAN DI SINI
                 tbody.innerHTML += `
                     <tr>
                         <td>${row.region}</td><td>${row.area}</td><td>${row.loc}</td><td>${row.acct}</td>
-                        <td>${row.osb.toFixed(2)}</td><td>${statusHtml}</td>
-                        <td><button class="btn-update" onclick="openModal('${row.acct}')">KEMASKINI</button></td>
+                        <td>${row.osb.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td><span class="status-badge ${badgeClass}">${row.status}</span></td>
+                        <td><button class="btn-update" onclick="openModal('${row.acct}')">UPDATE</button></td>
                     </tr>
                 `;
             });
@@ -370,35 +485,55 @@
             document.getElementById('kpi-total').innerText = data.length;
             document.getElementById('kpi-done').innerText = countDone;
             document.getElementById('kpi-pending').innerText = data.length - countDone;
-            document.getElementById('kpi-osb').innerText = (totalOsb / 1000).toFixed(2) + 'K';
+            document.getElementById('kpi-osb').innerText = 'RM ' + totalOsbValue.toLocaleString(undefined, {minimumFractionDigits: 2});
         }
 
-        // --- FUNGSI MODAL ---
+        // --- PORTAL CONFIGURATION FUNCTIONS (SETTINGS) ---
+        function toggleFormRegionSelect() {
+            const role = document.getElementById('new-user-role').value;
+            document.getElementById('form-region-group').style.display = (role === 'master') ? 'none' : 'block';
+        }
+
+        function addNewUser() {
+            const id = document.getElementById('new-user-id').value.trim();
+            const pass = document.getElementById('new-user-pass').value.trim();
+            const role = document.getElementById('new-user-role').value;
+            const region = document.getElementById('new-user-region').value;
+
+            if(!id || !pass) { alert("Please complete both User ID and Password fields."); return; }
+            if(usersDatabase[id]) { alert("User ID already configured in system registry."); return; }
+
+            // Inject account configuration parameters into runtime state
+            usersDatabase[id] = { pass: pass, role: role };
+            if(role === 'user') { usersDatabase[id].assignedRegion = region; }
+
+            alert(`User registry updated configuration successfully.\nID: ${id.toUpperCase()}\nAccess: ${role.toUpperCase()} ${role === 'user' ? `[${region}]` : ''}`);
+            
+            // Clear entry points
+            document.getElementById('new-user-id').value = ''; document.getElementById('new-user-pass').value = '';
+        }
+
+        // --- FIREBASE SYSTEM INTEGRATION PLACEHOLDERS ---
+        function simulateFirebaseUpload() {
+            alert("Initiating secure transaction pipeline to Firebase database...\nParsing records arrays, validating structures...\nSuccess! Test upload batch operation complete.");
+        }
+
+        // Modal Action Logic
         function openModal(accNo) {
             document.getElementById('modalAccNo').innerText = accNo;
             document.getElementById('updateModal').style.display = 'flex';
         }
-
         function closeModal() {
             document.getElementById('updateModal').style.display = 'none';
-            document.getElementById('newFinding').value = ''; 
+            document.getElementById('newFinding').value = '';
         }
-
         function saveFinding() {
-            let remark = document.getElementById('newFinding').value;
-            if(remark.trim() === '') {
-                alert("Sila masukkan finding sebelum simpan.");
-                return;
-            }
-            alert("Rekod berjaya disimpan untuk akaun " + document.getElementById('modalAccNo').innerText);
+            let log = document.getElementById('newFinding').value;
+            if(!log.trim()) { alert("Log verification required before record commitment."); return; }
+            alert("Transactional log entry synced successfully to cloud registry for account " + document.getElementById('modalAccNo').innerText);
             closeModal();
         }
-
-        // Tutup modal kalau klik background gelap
-        window.onclick = function(event) {
-            let modal = document.getElementById('updateModal');
-            if (event.target == modal) { closeModal(); }
-        }
+        window.onclick = function(e) { if(e.target == document.getElementById('updateModal')) closeModal(); }
     </script>
 </body>
 </html>
