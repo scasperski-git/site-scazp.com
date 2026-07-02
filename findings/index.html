@@ -315,11 +315,11 @@
     </div>
 
 <script type="module">
-        // 1. IMPORT FIREBASE SDK (Ditambahkan query dan where untuk mencari riwayat)
+        // 1. IMPORT FIREBASE SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // 2. CONFIG FIREBASE ANDA
+        // 2. CONFIG FIREBASE KAU
         const firebaseConfig = {
             apiKey: "AIzaSyAW-Ylc2WSt0nO2Djjl832mEehR5jjiChE",
             authDomain: "findings-system.firebaseapp.com",
@@ -351,7 +351,24 @@
         };
 
         // ==========================================
-        // A. FUNGSI LOGIN FROM FIREBASE
+        // FUNGSI SEMAK SESSION (SUPAYA TAK LOGOUT BILA REFRESH)
+        // ==========================================
+        async function checkLoginSession() {
+            const storedSession = localStorage.getItem('scazp_user_session');
+            if (storedSession) {
+                // Kalau ada session tersimpan, terus login
+                currentUser = JSON.parse(storedSession);
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+                document.getElementById('display-username').innerText = "Logged in as: " + currentUser.username.toUpperCase();
+                
+                await fetchAccountsFromFirebase();
+                initDashboardView();
+            }
+        }
+
+        // ==========================================
+        // A. FUNGSI LOGIN DARI FIREBASE
         // ==========================================
         window.handleLogin = async function() {
             const user = document.getElementById('username').value.trim();
@@ -367,6 +384,9 @@
                 if (userSnap.exists() && userSnap.data().pass === pass) {
                     currentUser = userSnap.data();
                     currentUser.username = user;
+                    
+                    // SIMPAN SESSION DALAM BROWSER
+                    localStorage.setItem('scazp_user_session', JSON.stringify(currentUser));
                     
                     document.getElementById('login-error').style.display = 'none';
                     document.getElementById('login-section').style.display = 'none';
@@ -387,6 +407,9 @@
 
         window.handleLogout = function() {
             currentUser = null; loadedAccounts = [];
+            // BUANG SESSION DARI BROWSER BILA LOGOUT
+            localStorage.removeItem('scazp_user_session');
+            
             document.getElementById('username').value = ''; document.getElementById('password').value = '';
             document.getElementById('dashboard-section').style.display = 'none';
             document.getElementById('login-section').style.display = 'flex';
@@ -460,7 +483,7 @@
                 initDashboardView();
             } catch (error) {
                 console.error("Upload error: ", error);
-                alert("Gagal upload data: " + error.message); // Menampilkan error spesifik jika gagal
+                alert("Gagal upload data: " + error.message);
             }
             btn.innerHTML = "<span>▲</span> Upload Excel Data";
         };
@@ -618,7 +641,6 @@
             historyBox.innerHTML = '<div style="text-align:center; padding:10px;">Loading history trail...</div>';
             
             try {
-                // Mencari data riwayat findings di Firestore berdasarkan nomor akun (acct)
                 const q = query(collection(db, "findings"), where("acct", "==", accNo));
                 const querySnapshot = await getDocs(q);
                 
@@ -627,14 +649,13 @@
                     findingsList.push(doc.data());
                 });
 
-                // Mengurutkan tanggal dari yang paling baru di sisi aplikasi
                 findingsList.sort((a, b) => {
                     const timeA = a.updated_at ? a.updated_at.toDate() : 0;
                     const timeB = b.updated_at ? b.updated_at.toDate() : 0;
                     return timeB - timeA;
                 });
 
-                historyBox.innerHTML = ''; // Kosongkan loading
+                historyBox.innerHTML = ''; 
                 
                 if(findingsList.length === 0) {
                     historyBox.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:10px;">No historical findings found for this account.</div>';
@@ -670,7 +691,6 @@
             btn.innerText = "SAVING...";
 
             try {
-                // 1. Menyimpan data finding baru ke dalam koleksi 'findings'
                 await addDoc(collection(db, "findings"), {
                     acct: accNo,
                     remark: log,
@@ -678,14 +698,12 @@
                     updated_at: new Date()
                 });
 
-                // 2. Memperbarui status akun di koleksi 'accounts' menjadi 'UPDATED'
                 const accRef = doc(db, "accounts", accNo);
                 await setDoc(accRef, { status: 'UPDATED' }, { merge: true });
 
                 alert("Successfully saved to Firestore!");
                 closeModal();
                 
-                // Memuat ulang data tabel agar status langsung berubah warna hijau
                 await fetchAccountsFromFirebase();
                 initDashboardView();
 
@@ -697,6 +715,7 @@
         };
 
         window.onclick = function(e) { if(e.target == document.getElementById('updateModal')) closeModal(); }
+
+        // PANGGIL FUNGSI SEMAK SESSION MASA MULA-MULA BUKA PAGE
+        checkLoginSession();
     </script>
-</body>
-</html>
