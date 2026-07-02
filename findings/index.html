@@ -135,14 +135,126 @@
             color: var(--bg-color);
         }
 
+        /* Modal / Popup Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            border: 1px solid var(--accent-gold);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 16px;
+            color: var(--accent-gold);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .close-btn:hover { color: white; }
+
+        .history-box {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .history-item {
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .history-meta {
+            color: var(--accent-gold);
+            font-size: 10px;
+            margin-bottom: 3px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .form-group textarea {
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #121212;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 4px;
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+
+        .btn-save {
+            width: 100%;
+            background-color: var(--accent-gold);
+            color: var(--bg-color);
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-save:hover { background-color: #e5c158; }
+
         /* Mobile Optimization */
         @media (max-width: 768px) {
-            .kpi-container {
-                gap: 8px;
-            }
-            .kpi-card {
-                padding: 10px 5px;
-            }
+            .kpi-container { gap: 8px; }
+            .kpi-card { padding: 10px 5px; }
             .kpi-card h3 { font-size: 9px; }
             .kpi-card p { font-size: 14px; }
             table { font-size: 11px; }
@@ -192,42 +304,101 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Contoh Data 1 -->
                 <tr>
                     <td>NORTH</td>
                     <td>A101</td>
-                    <td>1002938475</td>
+                    <td class="acc-no">1002938475</td>
                     <td>2</td>
                     <td>3</td>
                     <td>3,450.00</td>
                     <td><span class="status-done">DAH UPDATE</span></td>
-                    <td><button class="btn-update">KEMASKINI</button></td>
+                    <td><button class="btn-update" onclick="openModal('1002938475')">KEMASKINI</button></td>
                 </tr>
-                <!-- Contoh Data 2 -->
                 <tr>
                     <td>SOUTH</td>
                     <td>B205</td>
-                    <td>1009847563</td>
+                    <td class="acc-no">1009847563</td>
                     <td>1</td>
                     <td>1</td>
                     <td>1,200.50</td>
                     <td><span class="status-pending">BELUM</span></td>
-                    <td><button class="btn-update">KEMASKINI</button></td>
+                    <td><button class="btn-update" onclick="openModal('1009847563')">KEMASKINI</button></td>
                 </tr>
-                 <!-- Contoh Data 3 -->
                  <tr>
                     <td>CENTRAL</td>
                     <td>C302</td>
-                    <td>1005566778</td>
+                    <td class="acc-no">1005566778</td>
                     <td>4</td>
                     <td>6</td>
                     <td>8,900.25</td>
                     <td><span class="status-done">DAH UPDATE</span></td>
-                    <td><button class="btn-update">KEMASKINI</button></td>
+                    <td><button class="btn-update" onclick="openModal('1005566778')">KEMASKINI</button></td>
                 </tr>
             </tbody>
         </table>
     </div>
 
+    <!-- Modal Popup -->
+    <div class="modal-overlay" id="updateModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Kemaskini Finding: <span id="modalAccNo"></span></h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">Sejarah Findings:</label>
+            <div class="history-box">
+                <!-- Contoh history statik -->
+                <div class="history-item">
+                    <div class="history-meta">PIC: Ali | 10 April 2026, 14:30</div>
+                    <div>Panggilan tak dijawab. Akan cuba lagi esok.</div>
+                </div>
+                <div class="history-item">
+                    <div class="history-meta">PIC: Siti | 05 Mac 2026, 09:15</div>
+                    <div>Akaun belum dijelaskan. Minta tempoh seminggu.</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="newFinding">Tambah Finding Baru:</label>
+                <textarea id="newFinding" placeholder="Masukkan status atau tindakan terkini..."></textarea>
+            </div>
+
+            <button class="btn-save" onclick="saveFinding()">SIMPAN REKOD</button>
+        </div>
+    </div>
+
+    <script>
+        // Fungsi buka modal dan papar nombor akaun
+        function openModal(accNo) {
+            document.getElementById('modalAccNo').innerText = accNo;
+            document.getElementById('updateModal').style.display = 'flex';
+        }
+
+        // Fungsi tutup modal
+        function closeModal() {
+            document.getElementById('updateModal').style.display = 'none';
+            document.getElementById('newFinding').value = ''; // clear textarea
+        }
+
+        // Fungsi simpan (dummy function buat masa ni)
+        function saveFinding() {
+            let remark = document.getElementById('newFinding').value;
+            if(remark.trim() === '') {
+                alert("Sila masukkan finding sebelum simpan.");
+                return;
+            }
+            alert("Rekod berjaya disimpan untuk akaun " + document.getElementById('modalAccNo').innerText);
+            closeModal();
+        }
+
+        // Tutup modal kalau klik luar kotak
+        window.onclick = function(event) {
+            let modal = document.getElementById('updateModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
 </body>
 </html>
