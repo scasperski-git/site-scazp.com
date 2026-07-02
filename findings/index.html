@@ -315,14 +315,30 @@
     </div>
 
     <script>
-        // --- DATA ARCHITECTURE ---
-        const accountsData = [
-            { region: 'NORTHWEST', area: 'IPOH AREA', loc: '8342', acct: '5923235', osb: 1200.50, status: 'PENDING' },
-            { region: 'NORTHWEST', area: 'TAIPING AREA', loc: '8345', acct: '5923236', osb: 800.00, status: 'PENDING' },
-            { region: 'MIDEAST', area: 'KUANTAN AREA', loc: '2059', acct: '8110090', osb: 3023.08, status: 'UPDATED' },
-            { region: 'NORTH', area: 'ALOR SETAR AREA', loc: '1100', acct: '1002938', osb: 5450.00, status: 'UPDATED' },
-            { region: 'NORTH', area: 'SUNGAI PETANI AREA', loc: '1105', acct: '1002939', osb: 150.00, status: 'PENDING' }
-        ];
+<script type="module">
+        // 1. IMPORT FIREBASE SDK (Versi Terkini V10)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // 2. MASUKKAN CONFIG FIREBASE KAU DI SINI
+  const firebaseConfig = {
+    apiKey: "AIzaSyAW-Ylc2WSt0nO2Djjl832mEehR5jjiChE",
+    authDomain: "findings-system.firebaseapp.com",
+    projectId: "findings-system",
+    storageBucket: "findings-system.firebasestorage.app",
+    messagingSenderId: "1060357233000",
+    appId: "1:1060357233000:web:582c1041bd142de32c9edd"
+  };
+
+        // Initialize Firebase & Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // State variables
+        let currentUser = null; 
+        let currentRegion = null; 
+        let currentArea = null;
+        let loadedAccounts = []; // Simpan data akaun yang ditarik dari Firebase
 
         const regionsMap = {
             'NORTH': ['ALOR SETAR AREA', 'SUNGAI PETANI AREA'],
@@ -335,39 +351,145 @@
             'SARAWAK': ['KUCHING AREA']
         };
 
-        // Simulated Database Ledger for Users
-        const usersDatabase = {
-            'admin': { pass: '123', role: 'master' },
-            'pic_north': { pass: '123', role: 'user', assignedRegion: 'NORTH' }
+        // ==========================================
+        // A. FUNGSI LOGIN DARI FIREBASE
+        // ==========================================
+        window.handleLogin = async function() {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            const btn = document.querySelector('.btn-login');
+            
+            btn.innerText = "CHECKING DATABASE..."; // Loading indicator
+            
+            try {
+                // Cari user dalam collection 'users' di Firestore
+                const userRef = doc(db, "users", user);
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists() && userSnap.data().pass === pass) {
+                    currentUser = userSnap.data();
+                    currentUser.username = user;
+                    
+                    document.getElementById('login-error').style.display = 'none';
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('dashboard-section').style.display = 'block';
+                    document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
+                    
+                    // Tarik data akaun dari Firebase lepas berjaya login
+                    await fetchAccountsFromFirebase();
+                    initDashboardView();
+                } else {
+                    document.getElementById('login-error').style.display = 'block';
+                }
+            } catch (error) {
+                console.error("Error logging in: ", error);
+                alert("Ralat sambungan ke pangkalan data!");
+            }
+            btn.innerText = "SIGN IN";
         };
 
-        let currentUser = null; let currentRegion = null; let currentArea = null;
-
-        // --- AUTHENTICATION PROCESS ---
-        function handleLogin() {
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-            if (usersDatabase[user] && usersDatabase[user].pass === pass) {
-                currentUser = usersDatabase[user]; currentUser.username = user;
-                document.getElementById('login-error').style.display = 'none';
-                document.getElementById('login-section').style.display = 'none';
-                document.getElementById('dashboard-section').style.display = 'block';
-                document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
-                initDashboardView();
-            } else {
-                document.getElementById('login-error').style.display = 'block';
-            }
-        }
-
-        function handleLogout() {
-            currentUser = null; currentRegion = null; currentArea = null;
+        window.handleLogout = function() {
+            currentUser = null; loadedAccounts = [];
             document.getElementById('username').value = ''; document.getElementById('password').value = '';
             document.getElementById('dashboard-section').style.display = 'none';
             document.getElementById('login-section').style.display = 'flex';
+        };
+
+        // ==========================================
+        // B. FUNGSI TEMBAK NEW USER KE FIREBASE
+        // ==========================================
+        window.addNewUser = async function() {
+            const id = document.getElementById('new-user-id').value.trim();
+            const pass = document.getElementById('new-user-pass').value.trim();
+            const role = document.getElementById('new-user-role').value;
+            const region = document.getElementById('new-user-region').value;
+
+            if(!id || !pass) { alert("Sila lengkapkan ID dan Password."); return; }
+
+            const btn = document.querySelector('.settings-box .btn-submit');
+            btn.innerText = "SAVING TO CLOUD...";
+
+            try {
+                const userRef = doc(db, "users", id);
+                const userSnap = await getDoc(userRef);
+                
+                if (userSnap.exists()) {
+                    alert("User ID sudah wujud dalam sistem!");
+                } else {
+                    let userData = { pass: pass, role: role };
+                    if(role === 'user') { userData.assignedRegion = region; }
+                    
+                    // Simpan data ke Firestore (Collection: users)
+                    await setDoc(userRef, userData);
+                    alert(`Pendaftaran Berjaya!\nID: ${id.toUpperCase()} telah dimasukkan ke pangkalan data.`);
+                    
+                    document.getElementById('new-user-id').value = ''; 
+                    document.getElementById('new-user-pass').value = '';
+                }
+            } catch (error) {
+                console.error("Error adding user: ", error);
+                alert("Gagal menyimpan ke pangkalan data.");
+            }
+            btn.innerText = "Save User Configuration";
+        };
+
+        window.toggleFormRegionSelect = function() {
+            const role = document.getElementById('new-user-role').value;
+            document.getElementById('form-region-group').style.display = (role === 'master') ? 'none' : 'block';
+        };
+
+        // ==========================================
+        // C. FUNGSI UPLOAD DATA (DUMMY EXCEL) KE FIREBASE
+        // ==========================================
+        window.simulateFirebaseUpload = async function() {
+            const btn = document.querySelector('.btn-upload-trigger');
+            btn.innerHTML = "<span>⏳</span> Uploading to Firestore...";
+            
+            // Dummy data seolah-olah dibaca dari fail Excel
+            const rawExcelData = [
+                { region: 'NORTHWEST', area: 'IPOH AREA', loc: '8342', acct: '5923235', osb: 1200.50, status: 'PENDING' },
+                { region: 'NORTHWEST', area: 'TAIPING AREA', loc: '8345', acct: '5923236', osb: 800.00, status: 'PENDING' },
+                { region: 'MIDEAST', area: 'KUANTAN AREA', loc: '2059', acct: '8110090', osb: 3023.08, status: 'PENDING' },
+                { region: 'NORTH', area: 'ALOR SETAR AREA', loc: '1100', acct: '1002938', osb: 5450.00, status: 'PENDING' }
+            ];
+
+            try {
+                const accountsCol = collection(db, "accounts");
+                let count = 0;
+                // Tembak data satu per satu menggunakan nombor akaun sebagai ID Dokumen
+                for (const row of rawExcelData) {
+                    await setDoc(doc(accountsCol, row.acct), row);
+                    count++;
+                }
+                alert(`${count} rekod berjaya di-upload ke pangkalan data! Sila refresh dashboard.`);
+                await fetchAccountsFromFirebase(); // Update jadual secara langsung
+                initDashboardView();
+            } catch (error) {
+                console.error("Upload error: ", error);
+                alert("Gagal upload data.");
+            }
+            btn.innerHTML = "<span>▲</span> Upload Excel Data";
+        };
+
+        // ==========================================
+        // D. FUNGSI TARIK DATA DARI FIREBASE KE JADUAL
+        // ==========================================
+        async function fetchAccountsFromFirebase() {
+            loadedAccounts = [];
+            try {
+                const querySnapshot = await getDocs(collection(db, "accounts"));
+                querySnapshot.forEach((doc) => {
+                    loadedAccounts.push(doc.data());
+                });
+            } catch (error) {
+                console.error("Error fetching data: ", error);
+            }
         }
 
-        // --- INTERFACE MANAGEMENT (TABS) ---
-        function switchTab(target) {
+        // ==========================================
+        // E. LOGIK ANTARAMUKA (DASHBOARD & TABS)
+        // ==========================================
+        window.switchTab = function(target) {
             document.querySelectorAll('.main-panel').forEach(p => p.style.display = 'none');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             if (target === 'dashboard') {
@@ -378,18 +500,17 @@
                 document.getElementById('settings-panel').style.display = 'block';
                 document.getElementById('tab-settings').classList.add('active');
             }
-        }
+        };
 
-        // --- DATA VISUALIZATION LOGIC ---
         function initDashboardView() {
             if (currentUser.role === 'master') {
                 document.getElementById('master-nav-tabs').style.display = 'flex';
                 document.getElementById('upload-action-container').style.display = 'block';
                 document.getElementById('region-filters-container').style.display = 'block';
                 document.getElementById('area-filters-container').style.display = 'none';
-                renderRegionSelectionUI(); renderTableData(accountsData);
+                renderRegionSelectionUI(); 
+                renderTableData(loadedAccounts);
             } else {
-                // PIC Level Account Logic: Filter strictly by their preset Region Configuration
                 document.getElementById('master-nav-tabs').style.display = 'none';
                 document.getElementById('upload-action-container').style.display = 'none';
                 document.getElementById('region-filters-container').style.display = 'none';
@@ -397,7 +518,7 @@
                 
                 currentRegion = currentUser.assignedRegion;
                 renderAreaSelectionUI(currentRegion);
-                renderTableData(accountsData.filter(d => d.region === currentRegion));
+                renderTableData(loadedAccounts.filter(d => d.region === currentRegion));
             }
         }
 
@@ -409,51 +530,52 @@
             });
         }
 
-        function clearRegionSelection(btnElement) {
+        window.clearRegionSelection = function(btnElement) {
             updateActiveFilterHighlight('region-buttons', btnElement);
             document.getElementById('area-filters-container').style.display = 'none';
             currentRegion = null; currentArea = null;
-            renderTableData(accountsData);
-        }
+            renderTableData(loadedAccounts);
+        };
 
-        function applyRegionFilter(region, btnElement) {
+        window.applyRegionFilter = function(region, btnElement) {
             updateActiveFilterHighlight('region-buttons', btnElement);
             currentRegion = region; currentArea = null;
             document.getElementById('area-filters-container').style.display = 'block';
             renderAreaSelectionUI(region);
-            renderTableData(accountsData.filter(d => d.region === region));
-        }
+            renderTableData(loadedAccounts.filter(d => d.region === region));
+        };
 
         function renderAreaSelectionUI(region) {
             const areaContainer = document.getElementById('area-buttons');
-            // Check if Master or PIC to configure the "All Areas" capability
             if (currentUser.role === 'master') {
                 areaContainer.innerHTML = `<button class="btn-filter active" onclick="clearAreaSelection(this)">ALL AREAS IN ${region}</button>`;
             } else {
-                areaContainer.innerHTML = ''; // PIC simply selects specific subareas directly
+                areaContainer.innerHTML = ''; 
             }
             
-            regionsMap[region].forEach((area, index) => {
-                let activeStyle = (currentUser.role !== 'master' && index === 0) ? 'active' : '';
-                areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
-            });
-            
-            if(currentUser.role !== 'master') {
-                applyAreaFilter(regionsMap[region][0], areaContainer.querySelector('.btn-filter'));
+            if(regionsMap[region]) {
+                regionsMap[region].forEach((area, index) => {
+                    let activeStyle = (currentUser.role !== 'master' && index === 0) ? 'active' : '';
+                    areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
+                });
+                
+                if(currentUser.role !== 'master') {
+                    applyAreaFilter(regionsMap[region][0], areaContainer.querySelector('.btn-filter'));
+                }
             }
         }
 
-        function clearAreaSelection(btnElement) {
+        window.clearAreaSelection = function(btnElement) {
             updateActiveFilterHighlight('area-buttons', btnElement);
             currentArea = null;
-            renderTableData(accountsData.filter(d => d.region === currentRegion));
-        }
+            renderTableData(loadedAccounts.filter(d => d.region === currentRegion));
+        };
 
-        function applyAreaFilter(area, btnElement) {
+        window.applyAreaFilter = function(area, btnElement) {
             updateActiveFilterHighlight('area-buttons', btnElement);
             currentArea = area;
-            renderTableData(accountsData.filter(d => d.area === area));
-        }
+            renderTableData(loadedAccounts.filter(d => d.area === area));
+        };
 
         function updateActiveFilterHighlight(containerId, activeBtn) {
             if(!activeBtn) return;
@@ -462,25 +584,28 @@
             activeBtn.classList.add('active');
         }
 
-        // Processing & Rendering Data Rows
         function renderTableData(data) {
             const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
             let countDone = 0; let totalOsbValue = 0;
 
-            data.forEach(row => {
-                let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
-                if(row.status === 'UPDATED') countDone++;
-                totalOsbValue += row.osb;
+            if(data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Tiada data dijumpai. Sila upload data.</td></tr>`;
+            } else {
+                data.forEach(row => {
+                    let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
+                    if(row.status === 'UPDATED') countDone++;
+                    totalOsbValue += parseFloat(row.osb) || 0;
 
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${row.region}</td><td>${row.area}</td><td>${row.loc}</td><td>${row.acct}</td>
-                        <td>${row.osb.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td><span class="status-badge ${badgeClass}">${row.status}</span></td>
-                        <td><button class="btn-update" onclick="openModal('${row.acct}')">UPDATE</button></td>
-                    </tr>
-                `;
-            });
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${row.region}</td><td>${row.area}</td><td>${row.loc}</td><td>${row.acct}</td>
+                            <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td><span class="status-badge ${badgeClass}">${row.status}</span></td>
+                            <td><button class="btn-update" onclick="openModal('${row.acct}')">UPDATE</button></td>
+                        </tr>
+                    `;
+                });
+            }
 
             document.getElementById('kpi-total').innerText = data.length;
             document.getElementById('kpi-done').innerText = countDone;
@@ -488,52 +613,54 @@
             document.getElementById('kpi-osb').innerText = 'RM ' + totalOsbValue.toLocaleString(undefined, {minimumFractionDigits: 2});
         }
 
-        // --- PORTAL CONFIGURATION FUNCTIONS (SETTINGS) ---
-        function toggleFormRegionSelect() {
-            const role = document.getElementById('new-user-role').value;
-            document.getElementById('form-region-group').style.display = (role === 'master') ? 'none' : 'block';
-        }
-
-        function addNewUser() {
-            const id = document.getElementById('new-user-id').value.trim();
-            const pass = document.getElementById('new-user-pass').value.trim();
-            const role = document.getElementById('new-user-role').value;
-            const region = document.getElementById('new-user-region').value;
-
-            if(!id || !pass) { alert("Please complete both User ID and Password fields."); return; }
-            if(usersDatabase[id]) { alert("User ID already configured in system registry."); return; }
-
-            // Inject account configuration parameters into runtime state
-            usersDatabase[id] = { pass: pass, role: role };
-            if(role === 'user') { usersDatabase[id].assignedRegion = region; }
-
-            alert(`User registry updated configuration successfully.\nID: ${id.toUpperCase()}\nAccess: ${role.toUpperCase()} ${role === 'user' ? `[${region}]` : ''}`);
-            
-            // Clear entry points
-            document.getElementById('new-user-id').value = ''; document.getElementById('new-user-pass').value = '';
-        }
-
-        // --- FIREBASE SYSTEM INTEGRATION PLACEHOLDERS ---
-        function simulateFirebaseUpload() {
-            alert("Initiating secure transaction pipeline to Firebase database...\nParsing records arrays, validating structures...\nSuccess! Test upload batch operation complete.");
-        }
-
-        // Modal Action Logic
-        function openModal(accNo) {
+        // ==========================================
+        // F. LOGIK MODAL & KEMASKINI FINDING
+        // ==========================================
+        window.openModal = function(accNo) {
             document.getElementById('modalAccNo').innerText = accNo;
             document.getElementById('updateModal').style.display = 'flex';
-        }
-        function closeModal() {
+        };
+        
+        window.closeModal = function() {
             document.getElementById('updateModal').style.display = 'none';
             document.getElementById('newFinding').value = '';
-        }
-        function saveFinding() {
+        };
+
+        window.saveFinding = async function() {
             let log = document.getElementById('newFinding').value;
-            if(!log.trim()) { alert("Log verification required before record commitment."); return; }
-            alert("Transactional log entry synced successfully to cloud registry for account " + document.getElementById('modalAccNo').innerText);
-            closeModal();
-        }
+            let accNo = document.getElementById('modalAccNo').innerText;
+            
+            if(!log.trim()) { alert("Sila masukkan nota tindakan."); return; }
+            
+            const btn = document.querySelector('#updateModal .btn-submit');
+            btn.innerText = "SAVING...";
+
+            try {
+                // 1. Simpan Finding ke collection 'findings'
+                await addDoc(collection(db, "findings"), {
+                    acct: accNo,
+                    remark: log,
+                    updated_by: currentUser.username,
+                    updated_at: new Date()
+                });
+
+                // 2. Update status akaun di collection 'accounts' kepada 'UPDATED'
+                const accRef = doc(db, "accounts", accNo);
+                await setDoc(accRef, { status: 'UPDATED' }, { merge: true });
+
+                alert("Tindakan berjaya disimpan ke Firestore!");
+                closeModal();
+                
+                // Refresh data supaya warna status bertukar hijau
+                await fetchAccountsFromFirebase();
+                initDashboardView();
+
+            } catch (error) {
+                console.error("Error saving finding: ", error);
+                alert("Gagal menyimpan tindakan.");
+            }
+            btn.innerText = "COMMIT RECORD ENTRY";
+        };
+
         window.onclick = function(e) { if(e.target == document.getElementById('updateModal')) closeModal(); }
     </script>
-</body>
-</html>
