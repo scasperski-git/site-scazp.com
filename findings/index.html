@@ -192,6 +192,40 @@
             th, td { padding: 8px 6px; }
             .btn-filter { padding: 6px 8px; font-size: 10px; }
         }
+
+        /* --- PROGRESS MODAL STYLES --- */
+        #progressModal .modal-content {
+            max-width: 400px;
+            text-align: center;
+            padding: 35px 25px;
+        }
+        .progress-wrapper {
+            background-color: #121212;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 20px 0 10px 0;
+            height: 16px;
+            width: 100%;
+        }
+        .progress-bar-fill {
+            background: linear-gradient(90deg, var(--accent-gold), #e5c158);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease-out;
+        }
+        .progress-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--accent-gold);
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+        .progress-subtext {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
     </style>
 </head>
 <body>
@@ -345,7 +379,16 @@
             <button class="btn-submit" style="width: 100%;" onclick="saveFinding()">COMMIT RECORD ENTRY</button>
         </div>
     </div>
-
+<div class="modal-overlay" id="progressModal">
+        <div class="modal-content">
+            <h2 style="margin-top: 0; font-size: 18px; color: var(--text-main);">DATA STREAMING PIPELINE</h2>
+            <div class="progress-wrapper">
+                <div class="progress-bar-fill" id="upload-progress-bar"></div>
+            </div>
+            <div class="progress-text" id="upload-progress-text">0%</div>
+            <div class="progress-subtext" id="upload-progress-subtext">Menyediakan profil data...</div>
+        </div>
+    </div>
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
@@ -490,17 +533,29 @@
             document.getElementById('excel-file-input').value = ''; 
         };
 
-        window.processExcelUpload = async function() {
+window.processExcelUpload = async function() {
             const mapRegion = document.getElementById('map-region').value;
             const mapArea = document.getElementById('map-area').value;
             const mapLoc = document.getElementById('map-loc').value;
             const mapAcct = document.getElementById('map-acct').value;
             const mapOsb = document.getElementById('map-osb').value;
 
-            const btn = document.querySelector('#mappingModal .btn-submit');
-            btn.innerText = "PARSING & STREAMING TO SUPABASE...";
-            btn.disabled = true;
+            // Panggil elemen UI Progress Popup
+            const progressModal = document.getElementById('progressModal');
+            const progressBar = document.getElementById('upload-progress-bar');
+            const progressText = document.getElementById('upload-progress-text');
+            const progressSubtext = document.getElementById('upload-progress-subtext');
+            
+            // Tutup modal mapping lama & buka popup progress baharu
+            document.getElementById('mappingModal').style.display = 'none';
+            progressModal.style.display = 'flex';
+            
+            // Reset status permulaan
+            progressBar.style.width = '0%';
+            progressText.innerText = '0%';
+            progressSubtext.innerText = 'Membaca fail Excel dan menyusun struktur rekod...';
 
+            // Membina pakej data dari baris Excel di peringkat Frontend
             let bulkData = [];
             for (const row of parsedExcelRows) {
                 const rawAccountNo = String(row[mapAcct]).trim();
@@ -515,26 +570,72 @@
                 });
             }
 
-            const { error } = await supabase.from('accounts').upsert(bulkData, { onConflict: 'acct' });
-
-            if(!error) {
-                alert(`Transaction pipeline committed successfully!\nProcessed ${bulkData.length} account profiles into Supabase.`);
-                closeMappingModal();
-                await fetchAccountsFromDatabase(); 
-                initDashboardView();
-            } else {
-                alert("Upload array streaming failure: " + error.message);
+            if (bulkData.length === 0) {
+                alert("Tiada data akaun yang sah dikesan.");
+                progressModal.style.display = 'none';
+                return;
             }
-            btn.innerText = "CONFIRM & START UPLOAD";
-            btn.disabled = false;
+
+            const CHUNK_SIZE = 1000; // Pembahagian kumpulan (1k rekod setiap hantaran)
+            let totalProcessed = 0;
+            let hasError = false;
+
+            // Gelung Pemrosesan Data Pukal (Bulk Batching Loop)
+            for (let i = 0; i < bulkData.length; i += CHUNK_SIZE) {
+                const chunk = bulkData.slice(i, i + CHUNK_SIZE);
+                
+                // Kira peratusan progres semasa hantaran dibuat
+                const currentProgress = Math.round((i / bulkData.length) * 100);
+                
+                // Kemas kini maklumat pada popup status secara 'real-time'
+                progressBar.style.width = `${currentProgress}%`;
+                progressText.innerText = `${currentProgress}%`;
+                progressSubtext.innerText = `Menghantar data: ${i.toLocaleString()} daripada ${bulkData.length.toLocaleString()} rekod...`;
+                
+                // Hantar data ke awan Supabase
+                const { error } = await supabase.from('accounts').upsert(chunk, { onConflict: 'acct' });
+                
+                if (error) {
+                    alert("Proses pemindahan terhenti akibat ralat: " + error.message);
+                    hasError = true;
+                    break;
+                }
+                totalProcessed += chunk.length;
+            }
+
+            // Jalur selesai tanpa sebarang ralat pangkalan data
+            if (!hasError) {
+                progressBar.style.width = '100%';
+                progressText.innerText = '100%';
+                progressSubtext.innerText = `Selesai sepenuhnya! Memuat semula struktur lejar...`;
+                
+                // Berikan jeda waktu 800ms untuk impak visual bar 100% sebelum ditutup
+                setTimeout(async () => {
+                    progressModal.style.display = 'none';
+                    alert(`Transaction pipeline committed successfully!\nBerjaya memproses ${totalProcessed.toLocaleString()} akaun ke dalam struktur cloud Supabase.`);
+                    
+                    // Bersihkan input file asal bagi membolehkan fail baharu dipilih semula nanti
+                    document.getElementById('excel-file-input').value = ''; 
+                    
+                    await fetchAccountsFromDatabase(); 
+                    initDashboardView();
+                }, 800);
+            } else {
+                progressModal.style.display = 'none';
+                document.getElementById('excel-file-input').value = '';
+            }
         };
 
         // --- FETCH DATA DENGAN SUPABASE ---
-        async function fetchAccountsFromDatabase() {
+async function fetchAccountsFromDatabase() {
             loadedAccounts = [];
             regionsMap = {}; 
             
-            const { data, error } = await supabase.from('accounts').select('*');
+            // --- SERTAKAN .limit(1000) SUPAYA WEB PORTAL TIDAK CRASH ---
+            const { data, error } = await supabase
+                .from('accounts')
+                .select('*')
+                .limit(100); // Browser hanya ambil 1k data teratas untuk paparan awal papan pemuka
             
             if(data) {
                 data.forEach((row) => { 
