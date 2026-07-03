@@ -157,11 +157,11 @@
             background-color: var(--card-bg); border: 1px solid var(--accent-gold); border-radius: 8px;
             width: 90%; max-width: 500px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); position: relative;
         }
-        .modal-header {
+        .modal-overlay .modal-header {
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px;
         }
-        .modal-header h2 { margin: 0; font-size: 15px; color: var(--accent-gold); }
+        .modal-overlay .modal-header h2 { margin: 0; font-size: 15px; color: var(--accent-gold); }
         .close-btn { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
         .close-btn:hover { color: white; }
         .history-box {
@@ -181,17 +181,6 @@
             display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; background: #121212; padding: 10px; border-radius: 6px;
         }
         .mapping-grid label { font-size: 12px; align-self: center; color: var(--text-main); font-weight: 500;}
-
-        /* Mobile Optimization */
-        @media (max-width: 768px) {
-            .kpi-container { grid-template-columns: repeat(4, 1fr); gap: 6px; }
-            .kpi-card { padding: 10px 4px; }
-            .kpi-card h3 { font-size: 8px; }
-            .kpi-card p { font-size: 13px; }
-            table { font-size: 10px; }
-            th, td { padding: 8px 6px; }
-            .btn-filter { padding: 6px 8px; font-size: 10px; }
-        }
 
         /* --- PROGRESS MODAL STYLES --- */
         #progressModal .modal-content {
@@ -411,7 +400,16 @@
                 document.getElementById('login-section').style.display = 'none';
                 document.getElementById('dashboard-section').style.display = 'block';
                 document.getElementById('display-username').innerText = "Logged in as: " + currentUser.username.toUpperCase();
-                await fetchAccountsFromDatabase();
+                
+                // 1. Ambil struktur wilayah unik dahulu
+                await fetchRegionsAndAreasStructure();
+                
+                // 2. Tarik data berasaskan hak akses wilayah
+                if (currentUser.role === 'master') {
+                    await fetchAccountsFromDatabase(null, null);
+                } else {
+                    await fetchAccountsFromDatabase(currentUser.assignedregion, null);
+                }
                 initDashboardView();
             }
         }
@@ -433,7 +431,13 @@
                     document.getElementById('login-section').style.display = 'none';
                     document.getElementById('dashboard-section').style.display = 'block';
                     document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
-                    await fetchAccountsFromDatabase();
+                    
+                    await fetchRegionsAndAreasStructure();
+                    if (currentUser.role === 'master') {
+                        await fetchAccountsFromDatabase(null, null);
+                    } else {
+                        await fetchAccountsFromDatabase(currentUser.assignedregion, null);
+                    }
                     initDashboardView();
                 } else {
                     document.getElementById('login-error').style.display = 'block';
@@ -532,7 +536,7 @@
             document.getElementById('excel-file-input').value = ''; 
         };
 
-        // --- UPLOAD DENGAN PROGRESS BAR ---
+        // --- UPLOAD DATA PUKAL ---
         window.processExcelUpload = async function() {
             const mapRegion = document.getElementById('map-region').value;
             const mapArea = document.getElementById('map-area').value;
@@ -603,7 +607,8 @@
                     progressModal.style.display = 'none';
                     alert(`Transaction pipeline committed successfully!\nBerjaya memproses ${totalProcessed.toLocaleString()} akaun ke dalam struktur cloud Supabase.`);
                     document.getElementById('excel-file-input').value = ''; 
-                    await fetchAccountsFromDatabase(); 
+                    await fetchRegionsAndAreasStructure();
+                    await fetchAccountsFromDatabase(null, null); 
                     initDashboardView();
                 }, 800);
             } else {
@@ -612,26 +617,34 @@
             }
         };
 
-        // --- FETCH DATA MENGGUNAKAN SUPABASE ---
-        async function fetchAccountsFromDatabase() {
-            loadedAccounts = [];
-            regionsMap = {}; 
-            
-            // Limit dinaikkan ke 1000 untuk lebih fleksibiliti pemaparan tanpa crash
-            const { data, error } = await supabase
-                .from('accounts')
-                .select('*')
-                .limit(1000); 
-            
-            if(data) {
-                data.forEach((row) => { 
-                    loadedAccounts.push(row); 
+        // --- DYNAMIC SERVER-SIDE SELECTION LOGIC ---
+        
+        // Fungsi AMBIL STRUKTUR SAHAJA (Ringan & Pantas)
+        async function fetchRegionsAndAreasStructure() {
+            regionsMap = {};
+            // Tarik ruang region dan area sahaja untuk bina menu butang tanpa beban memori
+            const { data, error } = await supabase.from('accounts').select('region, area');
+            if (data) {
+                data.forEach((row) => {
                     if (row.region && row.area) {
                         if (!regionsMap[row.region]) { regionsMap[row.region] = []; }
                         if (!regionsMap[row.region].includes(row.area)) { regionsMap[row.region].push(row.area); }
                     }
                 });
             }
+        }
+
+        // Fungsi AMBIL DATA REKOD SEBENAR (Berasaskan On-Demand & Had 1000)
+        async function fetchAccountsFromDatabase(region = null, area = null) {
+            loadedAccounts = [];
+            let rpcQuery = supabase.from('accounts').select('*');
+            
+            if (region) { rpcQuery = rpcQuery.eq('region', region); }
+            if (area) { rpcQuery = rpcQuery.eq('area', area); }
+            
+            // Mengambil had 1,000 baris rekod akaun khusus yang ditapis sahaja
+            const { data, error } = await rpcQuery.limit(1000);
+            if (data) { loadedAccounts = data; }
         }
 
         window.switchTab = function(target) {
@@ -662,9 +675,8 @@
                 document.getElementById('area-filters-container').style.display = 'block';
                 
                 currentRegion = currentUser.assignedregion;
-                
                 renderAreaSelectionUI(currentRegion);
-                renderTableData(loadedAccounts.filter(d => d.region === currentRegion));
+                renderTableData(loadedAccounts);
             }
         }
 
@@ -676,19 +688,25 @@
             });
         }
 
-        window.clearRegionSelection = function(btnElement) {
+        window.clearRegionSelection = async function(btnElement) {
             updateActiveFilterHighlight('region-buttons', btnElement);
             document.getElementById('area-filters-container').style.display = 'none';
             currentRegion = null; currentArea = null;
+            
+            // Server-side load balik data global
+            await fetchAccountsFromDatabase(null, null);
             renderTableData(loadedAccounts);
         };
 
-        window.applyRegionFilter = function(region, btnElement) {
+        window.applyRegionFilter = async function(region, btnElement) {
             updateActiveFilterHighlight('region-buttons', btnElement);
             currentRegion = region; currentArea = null;
             document.getElementById('area-filters-container').style.display = 'block';
             renderAreaSelectionUI(region);
-            renderTableData(loadedAccounts.filter(d => d.region === region));
+            
+            // Server-side load data mengikut Region terpilih
+            await fetchAccountsFromDatabase(region, null);
+            renderTableData(loadedAccounts);
         };
 
         function renderAreaSelectionUI(region) {
@@ -703,20 +721,24 @@
                     let activeStyle = (currentUser.role !== 'master' && index === 0) ? 'active' : '';
                     areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
                 });
-                if(currentUser.role !== 'master') { applyAreaFilter(regionsMap[region][0], areaContainer.querySelector('.btn-filter')); }
+                if(currentUser.role !== 'master' && !currentArea) { 
+                    applyAreaFilter(regionsMap[region][0], areaContainer.querySelector('.btn-filter')); 
+                }
             }
         }
 
-        window.clearAreaSelection = function(btnElement) {
+        window.clearAreaSelection = async function(btnElement) {
             updateActiveFilterHighlight('area-buttons', btnElement);
             currentArea = null;
-            renderTableData(loadedAccounts.filter(d => d.region === currentRegion));
+            await fetchAccountsFromDatabase(currentRegion, null);
+            renderTableData(loadedAccounts);
         };
 
-        window.applyAreaFilter = function(area, btnElement) {
+        window.applyAreaFilter = async function(area, btnElement) {
             updateActiveFilterHighlight('area-buttons', btnElement);
             currentArea = area;
-            renderTableData(loadedAccounts.filter(d => d.area === area));
+            await fetchAccountsFromDatabase(currentRegion, area);
+            renderTableData(loadedAccounts);
         };
 
         function updateActiveFilterHighlight(containerId, activeBtn) {
@@ -801,12 +823,11 @@
                 await supabase.from('accounts').update({ status: 'UPDATED' }).eq('acct', accNo);
                 alert("Successfully saved to Supabase!");
                 closeModal();
-                await fetchAccountsFromDatabase();
+                await fetchAccountsFromDatabase(currentRegion, currentArea);
                 initDashboardView();
             } else {
                 alert("Failed to save entry: " + insertError.message);
             }
-            
             btn.innerText = "COMMIT RECORD ENTRY";
         };
 
