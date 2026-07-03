@@ -347,28 +347,18 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        // Import Supabase SDK dari CDN
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAW-Ylc2WSt0nO2Djjl832mEehR5jjiChE",
-            authDomain: "findings-system.firebaseapp.com",
-            projectId: "findings-system",
-            storageBucket: "findings-system.firebasestorage.app",
-            messagingSenderId: "1060357233000",
-            appId: "1:1060357233000:web:582c1041bd142de32c9edd"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const supabaseUrl = 'https://awrarqugmkpahscpvewu.supabase.co/rest/v1/';
+        const supabaseKey = 'sb_publishable_nN7JOvHOInSCZUAy6tTYgQ_xGzJD9N2';
+        const supabase = createClient(supabaseUrl, supabaseKey);
 
         let currentUser = null; 
         let currentRegion = null; 
         let currentArea = null;
         let loadedAccounts = []; 
         let parsedExcelRows = []; 
-        
-        // KINI DIUBAH JADI KOSONG – AKAN DIJANA SECARA DINAMIK DARI DATA KAU
         let regionsMap = {}; 
 
         async function checkLoginSession() {
@@ -378,7 +368,7 @@
                 document.getElementById('login-section').style.display = 'none';
                 document.getElementById('dashboard-section').style.display = 'block';
                 document.getElementById('display-username').innerText = "Logged in as: " + currentUser.username.toUpperCase();
-                await fetchAccountsFromFirebase();
+                await fetchAccountsFromDatabase();
                 initDashboardView();
             }
         }
@@ -388,24 +378,26 @@
             const pass = document.getElementById('password').value.trim();
             const btn = document.querySelector('.btn-login');
             btn.innerText = "CHECKING DATABASE..."; 
+            
             try {
-                const userRef = doc(db, "users", user);
-                const userSnap = await getDoc(userRef);
-                if (userSnap.exists() && userSnap.data().pass === pass) {
-                    currentUser = userSnap.data();
+                // SUPABASE: Ganti getDoc()
+                const { data, error } = await supabase.from('users').select('*').eq('id', user).single();
+                
+                if (data && data.pass === pass) {
+                    currentUser = data;
                     currentUser.username = user;
                     localStorage.setItem('scazp_user_session', JSON.stringify(currentUser));
                     document.getElementById('login-error').style.display = 'none';
                     document.getElementById('login-section').style.display = 'none';
                     document.getElementById('dashboard-section').style.display = 'block';
                     document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
-                    await fetchAccountsFromFirebase();
+                    await fetchAccountsFromDatabase();
                     initDashboardView();
                 } else {
                     document.getElementById('login-error').style.display = 'block';
                 }
             } catch (error) {
-                alert("Connection status failed: " + error.message);
+                alert("Connection error!");
             }
             btn.innerText = "SIGN IN";
         };
@@ -424,23 +416,26 @@
             const role = document.getElementById('new-user-role').value;
             const region = document.getElementById('new-user-region').value;
             if(!id || !pass) { alert("Please complete both User ID and Password fields."); return; }
+            
             const btn = document.querySelector('.settings-box .btn-submit');
-            btn.innerText = "SAVING TO CLOUD...";
-            try {
-                const userRef = doc(db, "users", id);
-                const userSnap = await getDoc(userRef);
-                if (userSnap.exists()) {
-                    alert("User ID sudah wujud dalam sistem!");
-                } else {
-                    let userData = { pass: pass, role: role };
-                    if(role === 'user') { userData.assignedRegion = region; }
-                    await setDoc(userRef, userData);
+            btn.innerText = "SAVING TO SUPABASE...";
+            
+            // SUPABASE: Check jika user wujud, kemudian insert
+            const { data: existingUser } = await supabase.from('users').select('id').eq('id', id).single();
+            
+            if (existingUser) {
+                alert("User ID sudah wujud dalam sistem!");
+            } else {
+                const userData = { id: id, pass: pass, role: role, assignedRegion: role === 'user' ? region : null };
+                const { error } = await supabase.from('users').insert([userData]);
+                
+                if(!error) {
                     alert(`Pendaftaran Berjaya!\nID: ${id.toUpperCase()} telah dimasukkan.`);
                     document.getElementById('new-user-id').value = ''; 
                     document.getElementById('new-user-pass').value = '';
+                } else {
+                    alert("Gagal menyimpan user: " + error.message);
                 }
-            } catch (error) {
-                alert("Gagal menyimpan user: " + error.message);
             }
             btn.innerText = "Save User Configuration";
         };
@@ -450,27 +445,19 @@
             document.getElementById('form-region-group').style.display = (role === 'master') ? 'none' : 'block';
         };
 
-        // ==========================================
-        // DYNAMIC EXCEL READING & HEADER MAPPING LOGIC
-        // ==========================================
+        // --- EXCEL MAPPING LOGIC (Dikekalkan kerana ia proses Frontend) ---
         window.handleExcelFileSelect = function(e) {
             const file = e.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(event) {
                 const data = new Uint8Array(event.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
-                
                 parsedExcelRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
                 
-                if(parsedExcelRows.length === 0) {
-                    alert("The uploaded sheet has no record lines detected.");
-                    return;
-                }
-
+                if(parsedExcelRows.length === 0) { alert("The uploaded sheet has no record lines detected."); return; }
                 const headers = Object.keys(parsedExcelRows[0]);
                 populateMappingDropdowns(headers);
                 document.getElementById('mappingModal').style.display = 'flex';
@@ -482,13 +469,7 @@
             const dropdowns = document.querySelectorAll('.mapping-select');
             dropdowns.forEach(select => {
                 select.innerHTML = '';
-                headers.forEach(h => {
-                    let option = document.createElement('option');
-                    option.value = h;
-                    option.innerText = h;
-                    select.appendChild(option);
-                });
-
+                headers.forEach(h => { select.appendChild(new Option(h, h)); });
                 const id = select.id;
                 if(id === 'map-region') preSelectOption(select, ['region', 'REGION', 'Region']);
                 if(id === 'map-area') preSelectOption(select, ['area', 'AREA', 'Area']);
@@ -500,10 +481,7 @@
 
         function preSelectOption(select, guesses) {
             for(let option of select.options) {
-                if(guesses.includes(option.value)) {
-                    select.value = option.value;
-                    break;
-                }
+                if(guesses.includes(option.value)) { select.value = option.value; break; }
             }
         }
 
@@ -520,67 +498,53 @@
             const mapOsb = document.getElementById('map-osb').value;
 
             const btn = document.querySelector('#mappingModal .btn-submit');
-            btn.innerText = "PARSING & STREAMING TO FIREBASE...";
+            btn.innerText = "PARSING & STREAMING TO SUPABASE...";
             btn.disabled = true;
 
-            try {
-                const accountsCol = collection(db, "accounts");
-                let count = 0;
+            let bulkData = [];
+            for (const row of parsedExcelRows) {
+                const rawAccountNo = String(row[mapAcct]).trim();
+                if (!rawAccountNo) continue; 
+                bulkData.push({
+                    region: String(row[mapRegion]).toUpperCase().trim(),
+                    area: String(row[mapArea]).toUpperCase().trim(),
+                    loc: String(row[mapLoc]).trim(),
+                    acct: rawAccountNo,
+                    osb: parseFloat(String(row[mapOsb]).replace(/[^0-9.-]+/g,"")) || 0, 
+                    status: 'PENDING' 
+                });
+            }
 
-                for (const row of parsedExcelRows) {
-                    const rawAccountNo = String(row[mapAcct]).trim();
-                    if (!rawAccountNo) continue; 
+            // SUPABASE: 'Upsert' membolehkan ribuan data dihantar serentak tanpa loop satu per satu (Jauh lebih laju dari Firebase!)
+            const { error } = await supabase.from('accounts').upsert(bulkData, { onConflict: 'acct' });
 
-                    const organizedAccountPackage = {
-                        region: String(row[mapRegion]).toUpperCase().trim(),
-                        area: String(row[mapArea]).toUpperCase().trim(),
-                        loc: String(row[mapLoc]).trim(),
-                        acct: rawAccountNo,
-                        osb: parseFloat(String(row[mapOsb]).replace(/[^0-9.-]+/g,"")) || 0, 
-                        status: 'PENDING' 
-                    };
-
-                    await setDoc(doc(accountsCol, rawAccountNo), organizedAccountPackage, { merge: true });
-                    count++;
-                }
-
-                alert(`Transaction pipeline committed successfully!\nProcessed ${count} account profiles into Firebase architecture.`);
+            if(!error) {
+                alert(`Transaction pipeline committed successfully!\nProcessed ${bulkData.length} account profiles into Supabase.`);
                 closeMappingModal();
-                await fetchAccountsFromFirebase(); 
+                await fetchAccountsFromDatabase(); 
                 initDashboardView();
-
-            } catch (error) {
-                alert("Upload array streaming fatal failure: " + error.message);
+            } else {
+                alert("Upload array streaming failure: " + error.message);
             }
             btn.innerText = "CONFIRM & START UPLOAD";
             btn.disabled = false;
         };
 
-        // ==========================================
-        // FETCH & DATA INTERFACE HANDLING LOGICS
-        // ==========================================
-        async function fetchAccountsFromFirebase() {
+        // --- FETCH DATA MENGGUNAKAN SUPABASE ---
+        async function fetchAccountsFromDatabase() {
             loadedAccounts = [];
-            regionsMap = {}; // Reset map sebelum di-generate baru
+            regionsMap = {}; 
             
-            try {
-                const querySnapshot = await getDocs(collection(db, "accounts"));
-                querySnapshot.forEach((doc) => { 
-                    const data = doc.data();
-                    loadedAccounts.push(data); 
-
-                    // FUNGSI UTAMA: BINA HUBUNGAN REGION & AREA SECARA DINAMIK TERUS DARI DATA
-                    if (data.region && data.area) {
-                        if (!regionsMap[data.region]) {
-                            regionsMap[data.region] = [];
-                        }
-                        if (!regionsMap[data.region].includes(data.area)) {
-                            regionsMap[data.region].push(data.area);
-                        }
+            const { data, error } = await supabase.from('accounts').select('*');
+            
+            if(data) {
+                data.forEach((row) => { 
+                    loadedAccounts.push(row); 
+                    if (row.region && row.area) {
+                        if (!regionsMap[row.region]) { regionsMap[row.region] = []; }
+                        if (!regionsMap[row.region].includes(row.area)) { regionsMap[row.region].push(row.area); }
                     }
                 });
-            } catch (error) {
-                console.error("Fetch failure: ", error);
             }
         }
 
@@ -651,9 +615,7 @@
                     let activeStyle = (currentUser.role !== 'master' && index === 0) ? 'active' : '';
                     areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
                 });
-                if(currentUser.role !== 'master') {
-                    applyAreaFilter(regionsMap[region][0], areaContainer.querySelector('.btn-filter'));
-                }
+                if(currentUser.role !== 'master') { applyAreaFilter(regionsMap[region][0], areaContainer.querySelector('.btn-filter')); }
             }
         }
 
@@ -679,7 +641,6 @@
         function renderTableData(data) {
             const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
             let countDone = 0; let totalOsbValue = 0;
-
             if(data.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No data found. Please upload records.</td></tr>`;
             } else {
@@ -703,40 +664,34 @@
             document.getElementById('kpi-osb').innerText = 'RM ' + totalOsbValue.toLocaleString(undefined, {minimumFractionDigits: 2});
         }
 
-        // ==========================================
-        // AUDIT TRAIL LOG ENTRY ENHANCEMENTS
-        // ==========================================
+        // --- MENGURUSKAN FINDINGS DENGAN SUPABASE ---
         window.openModal = async function(accNo) {
             document.getElementById('modalAccNo').innerText = accNo;
             document.getElementById('updateModal').style.display = 'flex';
             const historyBox = document.querySelector('.history-box');
             historyBox.innerHTML = '<div style="text-align:center; padding:10px;">Loading history trail...</div>';
-            try {
-                const q = query(collection(db, "findings"), where("acct", "==", accNo));
-                const querySnapshot = await getDocs(q);
-                let findingsList = [];
-                querySnapshot.forEach((doc) => { findingsList.push(doc.data()); });
-                findingsList.sort((a, b) => {
-                    const timeA = a.updated_at ? a.updated_at.toDate() : 0;
-                    const timeB = b.updated_at ? b.updated_at.toDate() : 0;
-                    return timeB - timeA;
+            
+            // SUPABASE: Boleh order data terus dalam query, tak perlu sort manual macam Firestore
+            const { data: findingsList, error } = await supabase
+                .from('findings')
+                .select('*')
+                .eq('acct', accNo)
+                .order('updated_at', { ascending: false });
+
+            historyBox.innerHTML = ''; 
+            if(!findingsList || findingsList.length === 0) {
+                historyBox.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:10px;">No historical findings found.</div>';
+            } else {
+                findingsList.forEach((data) => {
+                    // Supabase memulangkan timestamp dalam format rentetan ISO
+                    const dateFormatted = data.updated_at ? new Date(data.updated_at).toLocaleString() : 'N/A';
+                    historyBox.innerHTML += `
+                        <div class="history-item">
+                            <div class="history-meta">PIC: ${data.updated_by ? data.updated_by.toUpperCase() : 'SYSTEM'} | ${dateFormatted}</div>
+                            <div>${data.remark}</div>
+                        </div>
+                    `;
                 });
-                historyBox.innerHTML = ''; 
-                if(findingsList.length === 0) {
-                    historyBox.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:10px;">No historical findings found.</div>';
-                } else {
-                    findingsList.forEach((data) => {
-                        const dateFormatted = data.updated_at ? data.updated_at.toDate().toLocaleString() : 'N/A';
-                        historyBox.innerHTML += `
-                            <div class="history-item">
-                                <div class="history-meta">PIC: ${data.updated_by ? data.updated_by.toUpperCase() : 'SYSTEM'} | ${dateFormatted}</div>
-                                <div>${data.remark}</div>
-                            </div>
-                        `;
-                    });
-                }
-            } catch (error) {
-                historyBox.innerHTML = '<div style="color: var(--error-red); padding:10px;">Failed to load history configuration.</div>';
             }
         };
         
@@ -751,22 +706,22 @@
             if(!log.trim()) { alert("Please insert a finding remark."); return; }
             const btn = document.querySelector('#updateModal .btn-submit');
             btn.innerText = "SAVING...";
-            try {
-                await addDoc(collection(db, "findings"), {
-                    acct: accNo,
-                    remark: log,
-                    updated_by: currentUser.username,
-                    updated_at: new Date()
-                });
-                const accRef = doc(db, "accounts", accNo);
-                await setDoc(accRef, { status: 'UPDATED' }, { merge: true });
-                alert("Successfully saved to Firestore!");
+            
+            // SUPABASE: Masukkan rekod baru dalam findings, kemudian update status di table accounts
+            const { error: insertError } = await supabase.from('findings').insert([{
+                acct: accNo, remark: log, updated_by: currentUser.username
+            }]);
+
+            if(!insertError) {
+                await supabase.from('accounts').update({ status: 'UPDATED' }).eq('acct', accNo);
+                alert("Successfully saved to Supabase!");
                 closeModal();
-                await fetchAccountsFromFirebase();
+                await fetchAccountsFromDatabase();
                 initDashboardView();
-            } catch (error) {
-                alert("Failed to save entry: " + error.message);
+            } else {
+                alert("Failed to save entry: " + insertError.message);
             }
+            
             btn.innerText = "COMMIT RECORD ENTRY";
         };
 
