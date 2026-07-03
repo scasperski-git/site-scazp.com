@@ -89,11 +89,24 @@
         }
         .btn-upload-trigger:hover { background-color: #388e3c; }
 
-        /* KPI Card Grid */
+        /* --- KPI CARD STYLES (UPDATED AS INTERACTIVE BUTTONS) --- */
         .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
         .kpi-card {
             background-color: var(--card-bg); padding: 15px; border-radius: 8px;
             border: 1px solid var(--border-color); text-align: center;
+            transition: all 0.25s ease;
+        }
+        .kpi-clickable { cursor: pointer; }
+        .kpi-clickable:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15);
+        }
+        /* Indikator Kad Aktif Dipilih */
+        .kpi-card.active {
+            border-color: var(--accent-gold);
+            background-color: #252525;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
         }
         .kpi-card h3 { margin: 0 0 5px 0; font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
         .kpi-card p { margin: 0; font-size: 20px; font-weight: bold; color: var(--text-main); }
@@ -235,10 +248,18 @@
             </div>
 
             <div class="kpi-container">
-                <div class="kpi-card"><h3>Total Accounts</h3><p id="kpi-total">0</p></div>
-                <div class="kpi-card"><h3>Updated</h3><p id="kpi-done" style="color: var(--success-green);">0</p></div>
-                <div class="kpi-card"><h3>Pending</h3><p id="kpi-pending" style="color: var(--error-red);">0</p></div>
-                <div class="kpi-card"><h3>Total OSB</h3><p id="kpi-osb">RM 0.00</p></div>
+                <div class="kpi-card kpi-clickable active" id="card-total" onclick="applyStatusFilter(null, this)">
+                    <h3>Total Accounts</h3><p id="kpi-total">0</p>
+                </div>
+                <div class="kpi-card kpi-clickable" id="card-done" onclick="applyStatusFilter('UPDATED', this)">
+                    <h3>Updated</h3><p id="kpi-done" style="color: var(--success-green);">0</p>
+                </div>
+                <div class="kpi-card kpi-clickable" id="card-pending" onclick="applyStatusFilter('PENDING', this)">
+                    <h3>Pending</h3><p id="kpi-pending" style="color: var(--error-red);">0</p>
+                </div>
+                <div class="kpi-card" style="cursor: default;">
+                    <h3>Total OSB</h3><p id="kpi-osb">RM 0.00</p>
+                </div>
             </div>
 
             <div class="table-container">
@@ -357,13 +378,13 @@
         let currentUser = null; 
         let currentRegion = null; 
         let currentArea = null;
+        let currentStatusFilter = null; // Status Filter Global: null, 'UPDATED', 'PENDING'
         
-        let globalAccounts = []; // Menyimpan semua 41k data dalam RAM Browser
-        let filteredAccounts = []; // Data yang ditapis mengikut klik butang
+        let globalAccounts = []; 
+        let filteredAccounts = []; 
         let regionsMap = {}; 
         let parsedExcelRows = []; 
         
-        // Pembolehubah Pagination
         let currentPage = 1;
         const rowsPerPage = 20;
 
@@ -414,26 +435,22 @@
             document.getElementById('login-section').style.display = 'flex';
         };
 
-        // --- SUPER FETCHER: MUAT TURUN 41K DATA TANPA LIMIT ---
+        // --- SUPER FETCHER: PARALLEL PROMISES ---
         async function fetchFullDatabaseData(region = null) {
             document.getElementById('loadingModal').style.display = 'flex';
             
-            // Dapatkan jumlah keseluruhan data terlebih dahulu
             let countQuery = supabase.from('accounts').select('*', { count: 'exact', head: true });
             if (region) countQuery = countQuery.eq('region', region);
             const { count } = await countQuery;
             
             let allData = [];
             if (count && count > 0) {
-                // Bina array of promises untuk menarik data serentak (1000 per request)
                 const promises = [];
                 for (let i = 0; i < count; i += 1000) {
                     let fetchQuery = supabase.from('accounts').select('*');
                     if (region) fetchQuery = fetchQuery.eq('region', region);
                     promises.push(fetchQuery.range(i, i + 999));
                 }
-                
-                // Eksekusi tarikan data secara serentak (Parallel) - Amat Pantas!
                 const results = await Promise.all(promises);
                 results.forEach(res => { if (res.data) allData = allData.concat(res.data); });
             }
@@ -441,7 +458,6 @@
             globalAccounts = allData;
             filteredAccounts = [...globalAccounts];
             
-            // Ekstrak peta wilayah dan area untuk butang dinamik
             regionsMap = {};
             globalAccounts.forEach(row => {
                 if (row.region && row.area) {
@@ -453,7 +469,6 @@
             document.getElementById('loadingModal').style.display = 'none';
         }
 
-        // --- INITIALIZE DASHBOARD ---
         function initDashboardView() {
             if (currentUser.role === 'master') {
                 document.getElementById('master-nav-tabs').style.display = 'flex';
@@ -474,27 +489,52 @@
             }
         }
 
-        // --- FAST FILTERING LOGIC (NO SERVER RELOAD) ---
+        // --- ADVANCED ADVANCED FILTER ARCHITECTURE ---
         function applyFilterAndRender() {
-            // Tapis data dari RAM browser secara terus (Instant Speed)
-            filteredAccounts = globalAccounts.filter(row => {
+            // Langkah A: Tapis mengikut skop geografi (Region & Area) dahulu
+            let scopedGeoData = globalAccounts.filter(row => {
                 let matchRegion = currentRegion ? row.region === currentRegion : true;
                 let matchArea = currentArea ? row.area === currentArea : true;
                 return matchRegion && matchArea;
             });
             
-            // Semak semula KPI Card bersandarkan keseluruhan data yang ditapis
-            updateKPICards(filteredAccounts);
+            // Langkah B: Kemas kini statistik KPI Card berdasarkan data wilayah terpilih
+            updateKPICards(scopedGeoData);
             
-            // Set ke muka surat 1 dan render jadual (20 rekod)
+            // Langkah C: Tapis pula mengikut status kad yang diklik (Quick Status Filter)
+            filteredAccounts = scopedGeoData.filter(row => {
+                return currentStatusFilter ? row.status === currentStatusFilter : true;
+            });
+            
             currentPage = 1;
             renderTablePage();
+        }
+
+        // Fungsi Khas Menukar Filter Status Menerusi Klik Kad KPI
+        window.applyStatusFilter = function(status, element) {
+            currentStatusFilter = status;
+            
+            // Buang kelas 'active' dari semua kad interaktif
+            document.querySelectorAll('.kpi-clickable').forEach(card => card.classList.remove('active'));
+            // Tambah semula kelas 'active' pada kad yang diklik
+            if (element) element.classList.add('active');
+            
+            applyFilterAndRender();
+        };
+
+        // Fungsi Reset Status Kad Apabila Butang Region/Area Ditukar
+        function resetStatusCardHighlight() {
+            currentStatusFilter = null;
+            document.querySelectorAll('.kpi-clickable').forEach(card => card.classList.remove('active'));
+            const totalCard = document.getElementById('card-total');
+            if (totalCard) totalCard.classList.add('active');
         }
 
         window.clearRegionSelection = function(btnElement) {
             updateActiveFilterHighlight('region-buttons', btnElement);
             document.getElementById('area-filters-container').style.display = 'none';
             currentRegion = null; currentArea = null;
+            resetStatusCardHighlight();
             applyFilterAndRender();
         };
 
@@ -503,18 +543,21 @@
             currentRegion = region; currentArea = null;
             document.getElementById('area-filters-container').style.display = 'block';
             renderAreaSelectionUI(region);
+            resetStatusCardHighlight();
             applyFilterAndRender();
         };
 
         window.clearAreaSelection = function(btnElement) {
             updateActiveFilterHighlight('area-buttons', btnElement);
             currentArea = null;
+            resetStatusCardHighlight();
             applyFilterAndRender();
         };
 
         window.applyAreaFilter = function(area, btnElement) {
             updateActiveFilterHighlight('area-buttons', btnElement);
             currentArea = area;
+            resetStatusCardHighlight();
             applyFilterAndRender();
         };
 
@@ -550,7 +593,6 @@
             activeBtn.classList.add('active');
         }
 
-        // --- UPDATE KPI CARD (ACCURATE TOTALS) ---
         function updateKPICards(dataArray) {
             let countDone = 0; let totalOsbValue = 0;
             dataArray.forEach(row => {
@@ -563,12 +605,12 @@
             document.getElementById('kpi-osb').innerText = 'RM ' + totalOsbValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
-        // --- PAGINATION & TABLE RENDER ---
+        // --- CLIENT-SIDE PAGINATION ENGINE (20 ROWS PER PAGE) ---
         function renderTablePage() {
             const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
             
             if(filteredAccounts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No data found. Please upload records.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No records match the active criteria.</td></tr>`;
                 document.getElementById('page-info').innerText = `Page 0 of 0`;
                 document.getElementById('btn-prev').disabled = true; document.getElementById('btn-next').disabled = true;
                 return;
@@ -607,7 +649,6 @@
             if(currentPage > 1) { currentPage--; renderTablePage(); }
         }
 
-        // --- USER SETTINGS LOGIC ---
         window.switchTab = function(target) {
             document.querySelectorAll('.main-panel').forEach(p => p.style.display = 'none');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -643,7 +684,7 @@
             document.getElementById('form-region-group').style.display = (role === 'master') ? 'none' : 'block';
         };
 
-        // --- EXCEL LOGIC ---
+        // --- EXCEL PIPELINE ---
         window.handleExcelFileSelect = function(e) {
             const file = e.target.files[0]; if (!file) return;
             const reader = new FileReader();
@@ -727,12 +768,13 @@
                     document.getElementById('excel-file-input').value = ''; 
                     alert(`Berjaya memproses ${totalProcessed.toLocaleString()} akaun.`);
                     await fetchFullDatabaseData(null); 
+                    resetStatusCardHighlight();
                     initDashboardView();
                 }, 800);
             } else { document.getElementById('progressModal').style.display = 'none'; }
         };
 
-        // --- UPDATE FINDING LOGIC ---
+        // --- FINDINGS ENGINE ---
         window.openModal = async function(accNo) {
             document.getElementById('modalAccNo').innerText = accNo;
             document.getElementById('updateModal').style.display = 'flex';
@@ -767,7 +809,7 @@
             if(!insertError) {
                 await supabase.from('accounts').update({ status: 'UPDATED' }).eq('acct', accNo);
                 
-                // Smart UI Update (Kemas kini status hijau di RAM tanpa memuat turun semula 41k data!)
+                // Kemas kini terus status dalam memori RAM (Instant UI update!)
                 let rowToUpdate = globalAccounts.find(a => a.acct === accNo);
                 if(rowToUpdate) rowToUpdate.status = 'UPDATED';
                 
@@ -785,4 +827,3 @@
     </script>
 </body>
 </html>
-
