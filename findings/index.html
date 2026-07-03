@@ -347,7 +347,6 @@
     </div>
 
     <script type="module">
-        // Import Supabase SDK dari CDN
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
         const supabaseUrl = 'https://awrarqugmkpahscpvewu.supabase.co';
@@ -374,13 +373,13 @@
         }
 
         window.handleLogin = async function() {
-            const user = document.getElementById('username').value.trim();
+            // FIX: Tambah .toLowerCase() supaya ID sentiasa dibaca huruf kecil
+            const user = document.getElementById('username').value.trim().toLowerCase();
             const pass = document.getElementById('password').value.trim();
             const btn = document.querySelector('.btn-login');
             btn.innerText = "CHECKING DATABASE..."; 
             
             try {
-                // SUPABASE: Ganti getDoc()
                 const { data, error } = await supabase.from('users').select('*').eq('id', user).single();
                 
                 if (data && data.pass === pass) {
@@ -411,16 +410,17 @@
         };
 
         window.addNewUser = async function() {
-            const id = document.getElementById('new-user-id').value.trim();
+            // FIX: Tambah .toLowerCase() supaya ID didaftarkan sebagai huruf kecil
+            const id = document.getElementById('new-user-id').value.trim().toLowerCase();
             const pass = document.getElementById('new-user-pass').value.trim();
             const role = document.getElementById('new-user-role').value;
             const region = document.getElementById('new-user-region').value;
+            
             if(!id || !pass) { alert("Please complete both User ID and Password fields."); return; }
             
             const btn = document.querySelector('.settings-box .btn-submit');
             btn.innerText = "SAVING TO SUPABASE...";
             
-            // SUPABASE: Check jika user wujud, kemudian insert
             const { data: existingUser } = await supabase.from('users').select('id').eq('id', id).single();
             
             if (existingUser) {
@@ -445,7 +445,7 @@
             document.getElementById('form-region-group').style.display = (role === 'master') ? 'none' : 'block';
         };
 
-        // --- EXCEL MAPPING LOGIC (Dikekalkan kerana ia proses Frontend) ---
+        // --- EXCEL MAPPING LOGIC ---
         window.handleExcelFileSelect = function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -515,7 +515,6 @@
                 });
             }
 
-            // SUPABASE: 'Upsert' membolehkan ribuan data dihantar serentak tanpa loop satu per satu (Jauh lebih laju dari Firebase!)
             const { error } = await supabase.from('accounts').upsert(bulkData, { onConflict: 'acct' });
 
             if(!error) {
@@ -530,7 +529,7 @@
             btn.disabled = false;
         };
 
-        // --- FETCH DATA MENGGUNAKAN SUPABASE ---
+        // --- FETCH DATA DENGAN SUPABASE ---
         async function fetchAccountsFromDatabase() {
             loadedAccounts = [];
             regionsMap = {}; 
@@ -574,7 +573,10 @@
                 document.getElementById('upload-action-container').style.display = 'none';
                 document.getElementById('region-filters-container').style.display = 'none';
                 document.getElementById('area-filters-container').style.display = 'block';
-                currentRegion = currentUser.assignedRegion;
+                
+                // FIX: Tukar huruf R kepada huruf r kecil di bawah ini
+                currentRegion = currentUser.assignedregion;
+                
                 renderAreaSelectionUI(currentRegion);
                 renderTableData(loadedAccounts.filter(d => d.region === currentRegion));
             }
@@ -671,7 +673,6 @@
             const historyBox = document.querySelector('.history-box');
             historyBox.innerHTML = '<div style="text-align:center; padding:10px;">Loading history trail...</div>';
             
-            // SUPABASE: Boleh order data terus dalam query, tak perlu sort manual macam Firestore
             const { data: findingsList, error } = await supabase
                 .from('findings')
                 .select('*')
@@ -683,7 +684,6 @@
                 historyBox.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:10px;">No historical findings found.</div>';
             } else {
                 findingsList.forEach((data) => {
-                    // Supabase memulangkan timestamp dalam format rentetan ISO
                     const dateFormatted = data.updated_at ? new Date(data.updated_at).toLocaleString() : 'N/A';
                     historyBox.innerHTML += `
                         <div class="history-item">
@@ -707,7 +707,6 @@
             const btn = document.querySelector('#updateModal .btn-submit');
             btn.innerText = "SAVING...";
             
-            // SUPABASE: Masukkan rekod baru dalam findings, kemudian update status di table accounts
             const { error: insertError } = await supabase.from('findings').insert([{
                 acct: accNo, remark: log, updated_by: currentUser.username
             }]);
@@ -732,3 +731,5 @@
 
         checkLoginSession();
     </script>
+</body>
+</html>
