@@ -426,7 +426,7 @@
             if (existingUser) {
                 alert("User ID sudah wujud dalam sistem!");
             } else {
-                const userData = { id: id, pass: pass, role: role, assignedRegion: role === 'user' ? region : null };
+                const userData = { id: id, pass: pass, role: role, assignedregion: role === 'user' ? region : null };
                 const { error } = await supabase.from('users').insert([userData]);
                 
                 if(!error) {
