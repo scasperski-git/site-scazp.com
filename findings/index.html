@@ -281,13 +281,13 @@
                 <h2>Senarai Pengguna Sistem (<span id="total-users-count" style="color: var(--text-main);">0</span> Pengguna)</h2>
                 <div class="table-container">
                     <table>
-                        <thead>
+                    <thead>
                             <tr>
                                 <th style="width: 50px; text-align: center;">NO</th>
                                 <th>USER ID</th>
                                 <th>PERANAN (ROLE)</th>
                                 <th>AKSES WILAYAH (REGION)</th>
-                            </tr>
+                                <th>STATUS</th> <th>TINDAKAN</th> </tr>
                         </thead>
                         <tbody id="users-table-body">
                         </tbody>
@@ -403,6 +403,13 @@
             try {
                 const { data, error } = await supabase.from('users').select('*').eq('id', user).single();
                 if (data && data.pass === pass) {
+                    // --- TAMBAH BLOK SEKATAN INI ---
+                    if (data.status === 'INACTIVE') {
+                        document.getElementById('login-error').innerText = "Akaun anda telah dinyahaktifkan. Sila hubungi Admin.";
+                        document.getElementById('login-error').style.display = 'block';
+                        btn.innerText = "SIGN IN";
+                        return; // Berhentikan proses login
+                    }
                     currentUser = data;
                     currentUser.username = user;
                     localStorage.setItem('scazp_user_session', JSON.stringify(currentUser));
@@ -702,29 +709,39 @@ pageData.forEach(row => {
         };
 
         // Fungsi untuk tarik dan render senarai pengguna
-        window.fetchAndRenderUsers = async function() {
+       window.fetchAndRenderUsers = async function() {
             try {
-                // Tarik semua pengguna dari Supabase, susun ikut ID
-                const { data, error } = await supabase.from('users').select('id, role, assignedregion').order('id', { ascending: true });
+                // Tarik sekali data 'status' dari cloud
+                const { data, error } = await supabase.from('users').select('id, role, assignedregion, status').order('id', { ascending: true });
                 if (error) throw error;
                 
                 const tbody = document.getElementById('users-table-body');
                 tbody.innerHTML = '';
-                
-                // Kemas kini jumlah keseluruhan pengguna
                 document.getElementById('total-users-count').innerText = data.length;
 
-                // Loop data dan masukkan ke dalam jadual
                 data.forEach((user, index) => {
-                    let regionDisp = user.assignedregion ? user.assignedregion.toUpperCase() : (user.role === 'master' ? 'SEMUA (FULL ACCESS)' : 'TIADA');
-                    let badgeClass = user.role === 'master' ? 'status-done' : 'status-pending';
+                    let regionDisp = user.assignedregion ? user.assignedregion.toUpperCase() : (user.role === 'master' ? 'SEMUA' : 'TIADA');
+                    let roleBadgeClass = user.role === 'master' ? 'status-done' : 'status-pending';
+                    
+                    // Logik Paparan Status
+                    let userStatus = user.status || 'ACTIVE'; // Default ke ACTIVE kalau data lama takde status
+                    let statusBadge = userStatus === 'ACTIVE' ? 'status-done' : 'status-pending';
+                    
+                    // Logik Butang Tindakan
+                    let toggleBtnText = userStatus === 'ACTIVE' ? 'DEACTIVATE' : 'ACTIVATE';
+                    let toggleBtnColor = userStatus === 'ACTIVE' ? 'var(--error-red)' : 'var(--success-green)';
                     
                     tbody.innerHTML += `
                         <tr>
                             <td style="text-align: center;">${index + 1}</td>
                             <td>${user.id.toUpperCase()}</td>
-                            <td><span class="status-badge ${badgeClass}">${user.role.toUpperCase()}</span></td>
+                            <td><span class="status-badge ${roleBadgeClass}">${user.role.toUpperCase()}</span></td>
                             <td>${regionDisp}</td>
+                            <td><span class="status-badge ${statusBadge}">${userStatus}</span></td>
+                            <td>
+                                <button class="btn-update" style="color: ${toggleBtnColor}; border-color: ${toggleBtnColor}; margin-right: 5px;" onclick="toggleUserStatus('${user.id}', '${userStatus}')">${toggleBtnText}</button>
+                                <button class="btn-update" style="color: #ff3333; border-color: #ff3333;" onclick="deleteUser('${user.id}')">DELETE</button>
+                            </td>
                         </tr>
                     `;
                 });
@@ -733,6 +750,37 @@ pageData.forEach(row => {
             }
         };
 
+        // FUNGSI 1: Aktif / Nyahaktif Akaun
+        window.toggleUserStatus = async function(userId, currentStatus) {
+            // Halang admin dari ter-deactivate diri sendiri
+            if (userId === currentUser.username) { 
+                alert("Ralat: Anda tidak boleh menukar status akaun anda sendiri!"); 
+                return; 
+            }
+            
+            const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+            if (confirm(`PENGESAHAN:\nTukar status akaun ${userId.toUpperCase()} kepada ${newStatus}?`)) {
+                const { error } = await supabase.from('users').update({ status: newStatus }).eq('id', userId);
+                if (!error) { fetchAndRenderUsers(); } 
+                else { alert("Ralat Kemas Kini: " + error.message); }
+            }
+        };
+
+        // FUNGSI 2: Padam Akaun Sepenuhnya
+        window.deleteUser = async function(userId) {
+            // Halang admin dari terpadam diri sendiri
+            if (userId === currentUser.username) { 
+                alert("Ralat: Anda tidak boleh memadam akaun anda sendiri!"); 
+                return; 
+            }
+            
+            if (confirm(`AMARAN KERAS:\nAnda pasti mahu memadam akaun ${userId.toUpperCase()} sepenuhnya dari pangkalan data?\nTindakan ini tidak boleh diundurkan.`)) {
+                const { error } = await supabase.from('users').delete().eq('id', userId);
+                if (!error) { fetchAndRenderUsers(); } 
+                else { alert("Ralat Pemadaman: " + error.message); }
+            }
+        };
+        
         window.addNewUser = async function() {
             const id = document.getElementById('new-user-id').value.trim().toLowerCase();
             const pass = document.getElementById('new-user-pass').value.trim();
