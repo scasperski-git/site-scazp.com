@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Singer Lock Portal - Premium Supabase Edition</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Supabase & SheetJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #09090b;
+            --surface: #18181b;
+            --surface-light: #27272a;
+            --primary: #0ea5e9;
+            --primary-glow: rgba(14, 165, 233, 0.5);
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.4);
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #3f3f46;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--surface-light); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+        /* ================= SPA CORE ================= */
+        .page-section { display: none; animation: fadeIn 0.4s ease-out; }
+        .page-section.active { display: block; }
+        #app-layout { display: none; height: 100vh; width: 100vw; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ================= LOGIN PAGE ================= */
+        #login-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: radial-gradient(circle at center, #1e1e24 0%, var(--bg-dark) 100%);
+        }
+
+        .login-box {
+            background: var(--surface);
+            padding: 40px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), 0 0 15px var(--primary-glow);
+            border: 1px solid var(--surface-light);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-box::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(transparent, var(--primary), transparent 30%);
+            animation: rotate 4s linear infinite;
+            z-index: 0; opacity: 0.1;
+        }
+
+        @keyframes rotate { 100% { transform: rotate(360deg); } }
+
+        .login-content { position: relative; z-index: 1; }
+
+        .login-box h2 {
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .input-group { margin-bottom: 20px; position: relative; }
+        .input-group i { position: absolute; left: 15px; top: 15px; color: var(--text-muted); }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        button.glow-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+        
+        button.glow-btn:hover {
+            background: #0284c7;
+            box-shadow: 0 0 25px var(--primary-glow);
+            transform: translateY(-2px);
+        }
+
+        /* ================= APP LAYOUT ================= */
+        .sidebar {
+            width: 260px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            transition: 0.3s;
+        }
+
+        .brand {
+            padding: 0 20px 20px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .user-profile {
+            padding: 20px;
+            font-size: 14px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 10px;
+        }
+
+        .nav-menu { flex: 1; padding: 0 10px; }
+        
+        .nav-btn {
+            width: 100%;
+            padding: 12px 15px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            text-align: left;
+            font-size: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 5px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-btn:hover { background: var(--surface-light); color: var(--text-main); }
+        .nav-btn.active {
+            background: rgba(14, 165, 233, 0.1);
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: var(--bg-dark);
+        }
+
+        /* ================= CARDS & FORMS ================= */
+        .card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            margin-bottom: 25px;
+        }
+
+        .card-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        /* ================= MASTER DASHBOARD ================= */
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .kpi-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+        }
+        .kpi-card.blue::after { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        .kpi-card.green::after { background: var(--success); box-shadow: 0 0 10px var(--success); }
+
+        .kpi-title { font-size: 13px; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
+        .kpi-value { font-size: 28px; font-weight: 700; color: var(--text-main); }
+
+        /* ================= RESPONSIVE TABLE ================= */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            background: var(--surface);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        th, td { padding: 15px; text-align: left; font-size: 13px; }
+        
+        th {
+            background: var(--surface-light);
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        td {
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-lock { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .status-paid { background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        .action-btn {
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .action-btn:hover { background: var(--primary); border-color: var(--primary); }
+
+        /* ================= POPUPS ================= */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%; max-width: 400px;
+            border: 1px solid var(--border);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 50px;
+            color: var(--success);
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px var(--success-glow);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #app-layout { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; padding: 10px; flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+            .brand { border-bottom: none; padding: 0; margin-bottom: 10px; width: 100%; }
+            .user-profile { display: none; }
+            .nav-menu { display: flex; width: 100%; gap: 5px; overflow-x: auto; padding: 0; }
+            .nav-btn { flex: 1; min-width: 100px; text-align: center; justify-content: center; font-size: 12px; padding: 10px 5px; }
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================= 1. LOGIN PAGE ================= -->
+    <div id="login-page" class="page-section active">
+        <div class="login-box">
+            <div class="login-content">
+                <h2>Singer Lock Portal</h2>
+                <div id="errorMsg" style="display:none; color:var(--danger); font-size: 13px; margin-bottom: 15px; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px;"></div>
+                
+                <div class="input-group">
+                    <i class="fa fa-user"></i>
+                    <input type="text" id="login_user" placeholder="User ID" onkeypress="if(event.key==='Enter') loginSupabase()">
+                </div>
+                <div class="input-group">
+                    <i class="fa fa-lock"></i>
+                    <input type="password" id="login_pass" placeholder="Password" onkeypress="if(event.key==='Enter') loginSupabase()">
+                </div>
+                
+                <button class="glow-btn" onclick="loginSupabase()" id="btnLogin">
+                    <i class="fa fa-sign-in-alt"></i> Login Securely
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= APP LAYOUT ================= -->
+    <div id="app-layout">
+        
+        <!-- SIDEBAR -->
+        <nav class="sidebar">
+            <div class="brand"><i class="fa-solid fa-shield-halved"></i> Lock Portal</div>
+            <div class="user-profile">
+                <div id="userInfo" style="font-weight: 600; color: #fff;"></div>
+                <div id="roleInfo" style="font-size: 12px; margin-top: 3px;"></div>
+            </div>
+            <div class="nav-menu">
+                <button class="nav-btn" id="navCheck" onclick="showSection('check-section')"><i class="fa fa-search"></i> Check Lock</button>
+                <button class="nav-btn" id="navLock" onclick="showSection('lock-section')"><i class="fa fa-lock"></i> New Lock</button>
+                <button class="nav-btn" id="navMaster" onclick="showSection('master-section')" style="display:none;"><i class="fa fa-chart-pie"></i> Dashboard</button>
+                <button class="nav-btn" onclick="logout()" style="color: #f87171; margin-top: auto;"><i class="fa fa-power-off"></i> Logout</button>
+            </div>
+        </nav>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            
+            <!-- ================= 2. CHECK LOCK ================= -->
+            <div id="check-section" class="page-section">
+                <div class="card">
+                    <div class="card-header"><i class="fa fa-search"></i> Check Account Lock Status</div>
+                    <div class="input-group" style="max-width: 400px; margin-bottom: 15px;">
+                        <i class="fa fa-file-invoice"></i>
+                        <input type="text" id="check_acc_no" placeholder="Enter Account Number">
+                    </div>
+                    <button class="glow-btn" style="max-width: 400px;" onclick="checkLock()">Search Account</button>
+                </div>
+                
+                <div id="check_result_area" style="display:none;">
+                    <div class="card">
+                        <div class="card-header">Search Result</div>
+                        <div id="check_result_content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= 3. NEW LOCK ================= -->
+            <div id="lock-section" class="page-section">
+                <div class="card">
+                    <div class="card-header"><i class="fa fa-lock"></i> Create New Lock</div>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <i class="fa fa-file-invoice"></i>
+                            <input type="text" id="lock_acc_no" placeholder="Account Number (e.g., K35100)">
+                        </div>
+                        <div class="input-group">
+                            <i class="fa fa-money-bill-wave"></i>
+                            <input type="number" id="lock_amount" placeholder="Amount (RM)">
+                        </div>
+                        <div class="input-group">
+                            <i class="fa fa-code-branch"></i>
+                            <input type="text" id="lock_branch" placeholder="Branch Code / Name">
+                        </div>
+                        <div class="input-group">
+                            <i class="fa fa-calendar-alt"></i>
+                            <input type="date" id="lock_promise_date" title="Promise Date">
+                        </div>
+                        <div class="input-group">
+                            <i class="fa fa-tags"></i>
+                            <select id="lock_category" style="padding-left: 45px;">
+                                <option value="">Select Category</option>
+                                <option value="INSTALLMENT">Installment</option>
+                                <option value="FULL SETTLEMENT">Full Settlement</option>
+                                <option value="DEPOSIT">Deposit</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <i class="fa fa-comment-dots"></i>
+                            <input type="text" id="lock_remarks" placeholder="Remarks (Optional)">
+                        </div>
+                    </div>
+                    <button class="glow-btn" style="margin-top: 15px;" onclick="submitLock()" id="btnSubmitLock">Submit Lock</button>
+                </div>
+            </div>
+
+            <!-- ================= 4. MASTER DASHBOARD ================= -->
+            <div id="master-section" class="page-section">
+                
+                <div class="kpi-container">
+                    <div class="kpi-card blue">
+                        <div class="kpi-title">Total Active Locks</div>
+                        <div class="kpi-value" id="kpi_active">0</div>
+                    </div>
+                    <div class="kpi-card green">
+                        <div class="kpi-title">Total Paid (Today)</div>
+                        <div class="kpi-value" id="kpi_paid">RM 0.00</div>
+                    </div>
+                    <div class="kpi-card blue" style="border-top: 4px solid #8b5cf6;">
+                        <div class="kpi-title">My Total Locks</div>
+                        <div class="kpi-value" id="kpi_mylocks">0</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header" style="justify-content: space-between;">
+                        <span><i class="fa fa-database"></i> Master Lock Database</span>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="action-btn" onclick="loadMasterData()"><i class="fa fa-sync-alt"></i> Refresh</button>
+                            <button class="action-btn" onclick="exportToExcel()"><i class="fa fa-file-excel" style="color: #10b981;"></i> Export</button>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group" style="max-width: 300px; margin-bottom: 15px;">
+                        <i class="fa fa-search"></i>
+                        <input type="text" id="table_search" placeholder="Search Account..." onkeyup="filterTable()">
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="masterTable">
+                            <thead>
+                                <tr>
+                                    <th>Acc No</th>
+                                    <th>DCA ID</th>
+                                    <th>Amount</th>
+                                    <th>Date Created</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="masterTableBody">
+                                <!-- Data injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ================= MODALS ================= -->
+    
+    <!-- Success Popup -->
+    <div id="successModal" class="modal-overlay">
+        <div class="modal-content">
+            <i class="fa fa-check-circle success-icon"></i>
+            <h3 style="margin-bottom: 10px;">Success!</h3>
+            <p id="successMsg" style="color: var(--text-muted); margin-bottom: 20px;"></p>
+            <button class="glow-btn" style="background: var(--success);" onclick="document.getElementById('successModal').style.display='none'">OK</button>
+        </div>
+    </div>
+
+    <!-- Delete/Passcode Popup -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-content">
+            <i class="fa fa-exclamation-triangle" style="font-size: 40px; color: var(--danger); margin-bottom: 15px;"></i>
+            <h3 style="margin-bottom: 10px;">Security Verification</h3>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Enter passcode to delete lock <b id="delAccNoTxt"></b></p>
+            
+            <input type="password" id="delPasscode" placeholder="Enter Passcode" style="margin-bottom: 15px; text-align: center;">
+            <div id="delError" style="display:none; color: var(--danger); font-size: 12px; margin-bottom: 10px;">Invalid Passcode!</div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button class="glow-btn" style="background: var(--surface-light);" onclick="document.getElementById('deleteModal').style.display='none'">Cancel</button>
+                <button class="glow-btn" style="background: var(--danger); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);" onclick="confirmDelete()">Confirm Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        // ---------------------------------------------------------
+        // 1. SUPABASE CONFIGURATION (REPLACE WITH YOURS)
+        // ---------------------------------------------------------
+        const SUPABASE_URL = 'https://vutchaspljmvtnisjoqt.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_J6BcCvKg2nuYwIIUxbhMVQ_BKGvfc30';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // GLOBAL VARIABLES
+        let currentUser = '';
+        let currentRole = '';
+        let currentType = '';
+        let lockToDelete = ''; // For delete action
+
+        // ---------------------------------------------------------
+        // 2. SPA ROUTING & SESSION INITIALIZATION
+        // ---------------------------------------------------------
+        window.onload = () => {
+            const token = localStorage.getItem("session_token");
+            if (token) {
+                currentUser = localStorage.getItem("lock_user");
+                currentRole = localStorage.getItem("lock_role");
+                currentType = localStorage.getItem("lock_type");
+                
+                document.getElementById('login-page').classList.remove('active');
+                document.getElementById('app-layout').style.display = 'flex';
+                
+                document.getElementById('userInfo').innerText = currentUser;
+                document.getElementById('roleInfo').innerText = currentRole;
+                
+                if (currentType === 'master') {
+                    document.getElementById('navMaster').style.display = 'flex';
+                }
+                
+                // Route based on user type
+                if (currentType === 'check') showSection('check-section');
+                else if (currentType === 'master') showSection('master-section');
+                else showSection('lock-section');
+                
+            }
+        };
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.main-content .page-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(sectionId).classList.add('active');
+            
+            if(sectionId === 'check-section') document.getElementById('navCheck').classList.add('active');
+            if(sectionId === 'lock-section') document.getElementById('navLock').classList.add('active');
+            if(sectionId === 'master-section') {
+                document.getElementById('navMaster').classList.add('active');
+                loadMasterData();
+            }
+        }
+
+        // ---------------------------------------------------------
+        // 3. AUTHENTICATION (LOGIN/LOGOUT)
+        // ---------------------------------------------------------
+        async function loginSupabase() {
+            const user = document.getElementById("login_user").value.trim().toUpperCase();
+            const pass = document.getElementById("login_pass").value.trim();
+            const err = document.getElementById("errorMsg");
+            const btn = document.getElementById("btnLogin");
+
+            if(!user || !pass) { 
+                err.innerText = "Please enter User ID and Password"; 
+                err.style.display="block"; 
+                return; 
+            }
+
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Authenticating...';
+            btn.disabled = true;
+
+            try {
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('user_id', user)
+                    .single();
+
+                if (error || !data || data.password !== pass) {
+                    err.innerText = "Invalid credentials!";
+                    err.style.display = "block";
+                } else if (data.status !== "ACTIVE") {
+                    err.innerText = "Account is inactive!";
+                    err.style.display = "block";
+                } else {
+                    // Success
+                    localStorage.setItem("session_token", 'supa_' + Date.now());
+                    localStorage.setItem("lock_user", data.user_id);
+                    localStorage.setItem("lock_role", data.role);
+                    localStorage.setItem("lock_type", data.type);
+                    
+                    systemLog("LOGIN", "SUCCESS", "-", "User logged into system");
+                    location.reload();
+                }
+            } catch (e) {
+                console.error(e);
+                err.innerText = "System error occurred.";
+                err.style.display = "block";
+            } finally {
+                btn.innerHTML = '<i class="fa fa-sign-in-alt"></i> Login Securely';
+                btn.disabled = false;
+            }
+        }
+
+        function logout() {
+            systemLog("LOGOUT", "SUCCESS", "-", "User logged out");
+            localStorage.clear();
+            location.reload();
+        }
+
+        // ---------------------------------------------------------
+        // 4. CHECK LOCK FUNCTION
+        // ---------------------------------------------------------
+        async function checkLock() {
+            const accNo = document.getElementById("check_acc_no").value.trim().toUpperCase();
+            if(!accNo) return;
+            
+            const resultArea = document.getElementById("check_result_area");
+            const resultContent = document.getElementById("check_result_content");
+            
+            resultArea.style.display = "block";
+            resultContent.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fa fa-spinner fa-spin fa-2x"></i><p>Checking database...</p></div>';
+
+            const { data, error } = await supabase
+                .from('lock_data')
+                .select('*')
+                .eq('acc_no', accNo)
+                .in('status', ['LOCK', 'PAID'])
+                .order('created_at', { ascending: false });
+
+            if (error || !data || data.length === 0) {
+                resultContent.innerHTML = `
+                    <div style="text-align: center; padding: 20px;">
+                        <i class="fa fa-check-circle" style="font-size: 40px; color: var(--success); margin-bottom: 10px;"></i>
+                        <h3 style="color: var(--success);">CLEARED / NO LOCK</h3>
+                        <p style="color: var(--text-muted); font-size: 13px;">Account ${accNo} is safe to process.</p>
+                    </div>`;
+                systemLog("CHECK_LOCK", "NOT_FOUND", accNo, "Account checked, no active lock");
+            } else {
+                const lock = data[0];
+                const badgeClass = lock.status === 'LOCK' ? 'status-lock' : 'status-paid';
+                
+                resultContent.innerHTML = `
+                    <div style="padding: 15px; background: var(--surface-light); border-radius: 10px; border-left: 4px solid ${lock.status === 'LOCK' ? '#ef4444' : '#10b981'};">
+                        <div style="display:flex; justify-content: space-between; margin-bottom: 15px;">
+                            <strong>Account: ${lock.acc_no}</strong>
+                            <span class="status-badge ${badgeClass}">${lock.status}</span>
+                        </div>
+                        <div class="grid-2" style="font-size: 13px; color: var(--text-muted);">
+                            <div><strong>DCA ID:</strong> <span style="color:var(--text-main);">${lock.dca_id}</span></div>
+                            <div><strong>Amount:</strong> <span style="color:var(--text-main);">RM ${lock.amount}</span></div>
+                            <div><strong>Date:</strong> <span style="color:var(--text-main);">${new Date(lock.created_at).toLocaleDateString('en-GB')}</span></div>
+                            <div><strong>Category:</strong> <span style="color:var(--text-main);">${lock.payment_category || '-'}</span></div>
+                        </div>
+                    </div>`;
+                systemLog("CHECK_LOCK", "FOUND", accNo, `Lock found, status: ${lock.status}`);
+            }
+        }
+
+        // ---------------------------------------------------------
+        // 5. CREATE NEW LOCK FUNCTION
+        // ---------------------------------------------------------
+        async function submitLock() {
+            const accNo = document.getElementById("lock_acc_no").value.trim().toUpperCase();
+            const amount = parseFloat(document.getElementById("lock_amount").value);
+            const branch = document.getElementById("lock_branch").value.trim().toUpperCase();
+            const category = document.getElementById("lock_category").value;
+            const promiseDate = document.getElementById("lock_promise_date").value;
+            const remarks = document.getElementById("lock_remarks").value.trim();
+            const btn = document.getElementById("btnSubmitLock");
+
+            if(!accNo || !amount) {
+                alert("Account Number and Amount are mandatory!");
+                return;
+            }
+
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Submitting...';
+            btn.disabled = true;
+
+            // Check if already locked
+            const { data: existData } = await supabase
+                .from('lock_data')
+                .select('id')
+                .eq('acc_no', accNo)
+                .eq('status', 'LOCK');
+                
+            if (existData && existData.length > 0) {
+                alert("This account is already LOCKED!");
+                btn.innerHTML = 'Submit Lock';
+                btn.disabled = false;
+                return;
+            }
+
+            // Insert new lock
+            const { data, error } = await supabase
+                .from('lock_data')
+                .insert([
+                    { 
+                        acc_no: accNo, 
+                        amount: amount,
+                        branch_name: branch,
+                        payment_category: category,
+                        promise_date: promiseDate || null,
+                        remarks: remarks,
+                        status: 'LOCK',
+                        dca_id: currentUser,
+                        created_at: new Date().toISOString()
+                    }
+                ]);
+
+            btn.innerHTML = 'Submit Lock';
+            btn.disabled = false;
+
+            if (error) {
+                alert("Error saving data: " + error.message);
+                systemLog("ADD_LOCK", "FAILED", accNo, error.message);
+            } else {
+                showSuccess(`Account <b>${accNo}</b> has been successfully LOCKED.`);
+                systemLog("ADD_LOCK", "SUCCESS", accNo, `Locked RM${amount}`);
+                
+                // Clear form
+                document.getElementById("lock_acc_no").value = "";
+                document.getElementById("lock_amount").value = "";
+                document.getElementById("lock_branch").value = "";
+                document.getElementById("lock_category").value = "";
+                document.getElementById("lock_promise_date").value = "";
+                document.getElementById("lock_remarks").value = "";
+            }
+        }
+
+        // ---------------------------------------------------------
+        // 6. MASTER DASHBOARD FUNCTIONS
+        // ---------------------------------------------------------
+        let globalMasterData = [];
+
+        async function loadMasterData() {
+            const tbody = document.getElementById("masterTableBody");
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><i class="fa fa-spinner fa-spin"></i> Loading Data...</td></tr>';
+
+            const { data, error } = await supabase
+                .from('lock_data')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(500);
+
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="6" style="color:red; text-align:center;">Error: ${error.message}</td></tr>`;
+                return;
+            }
+
+            globalMasterData = data;
+            calculateKPIs(data);
+            renderTable(data);
+        }
+
+        function calculateKPIs(data) {
+            let activeLocks = 0;
+            let paidToday = 0;
+            let myLocks = 0;
+            
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            data.forEach(row => {
+                if (row.status === 'LOCK') activeLocks++;
+                
+                if (row.status === 'PAID') {
+                    const paidDate = row.paid_date ? row.paid_date.split('T')[0] : '';
+                    if (paidDate === todayStr) {
+                        paidToday += parseFloat(row.amount || 0);
+                    }
+                }
+                
+                if (row.dca_id === currentUser) myLocks++;
+            });
+
+            document.getElementById("kpi_active").innerText = activeLocks;
+            document.getElementById("kpi_paid").innerText = "RM " + paidToday.toLocaleString('en-MY', {minimumFractionDigits: 2});
+            document.getElementById("kpi_mylocks").innerText = myLocks;
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById("masterTableBody");
+            tbody.innerHTML = "";
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No records found.</td></tr>';
+                return;
+            }
+
+            data.forEach(row => {
+                const dateStr = new Date(row.created_at).toLocaleString('en-GB', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+                const badgeClass = row.status === 'LOCK' ? 'status-lock' : 'status-paid';
+                
+                let actions = '';
+                if (row.status === 'LOCK') {
+                    actions = `
+                        <button class="action-btn" style="color:var(--success);" onclick="markAsPaid('${row.id}', '${row.acc_no}')" title="Mark Paid"><i class="fa fa-check"></i></button>
+                        <button class="action-btn" style="color:var(--danger);" onclick="promptDelete('${row.id}', '${row.acc_no}')" title="Delete"><i class="fa fa-trash"></i></button>
+                    `;
+                }
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td style="font-weight:600;">${row.acc_no}</td>
+                    <td>${row.dca_id}</td>
+                    <td>RM ${row.amount}</td>
+                    <td style="font-size:11px; color:var(--text-muted);">${dateStr}</td>
+                    <td><span class="status-badge ${badgeClass}">${row.status}</span></td>
+                    <td>${actions}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterTable() {
+            const query = document.getElementById("table_search").value.toLowerCase();
+            const filtered = globalMasterData.filter(row => 
+                row.acc_no.toLowerCase().includes(query) || 
+                row.dca_id.toLowerCase().includes(query)
+            );
+            renderTable(filtered);
+        }
+
+        // ---------------------------------------------------------
+        // 7. ACTIONS (MARK PAID, DELETE, EXCEL)
+        // ---------------------------------------------------------
+        async function markAsPaid(id, accNo) {
+            if(!confirm(`Mark account ${accNo} as PAID?`)) return;
+
+            const { error } = await supabase
+                .from('lock_data')
+                .update({ 
+                    status: 'PAID',
+                    paid_by: currentUser,
+                    paid_date: new Date().toISOString()
+                })
+                .eq('id', id);
+
+            if (!error) {
+                systemLog("MARK_PAID", "SUCCESS", accNo, "Account marked as paid");
+                showSuccess(`Account <b>${accNo}</b> marked as PAID!`);
+                loadMasterData();
+            } else {
+                alert("Error: " + error.message);
+            }
+        }
+
+        function promptDelete(id, accNo) {
+            lockToDelete = id;
+            document.getElementById('delAccNoTxt').innerText = accNo;
+            document.getElementById('delPasscode').value = "";
+            document.getElementById('delError').style.display = "none";
+            document.getElementById('deleteModal').style.display = "flex";
+        }
+
+        async function confirmDelete() {
+            const passcode = document.getElementById('delPasscode').value;
+            // HARDCODED PASSCODE AS PER ORIGINAL LOGIC (Or verify via Supabase if needed)
+            if (passcode !== "8888") { 
+                document.getElementById('delError').style.display = "block";
+                return;
+            }
+
+            const { error } = await supabase
+                .from('lock_data')
+                .delete()
+                .eq('id', lockToDelete);
+
+            if (!error) {
+                document.getElementById('deleteModal').style.display = "none";
+                systemLog("DELETE_LOCK", "SUCCESS", "-", `Deleted lock ID: ${lockToDelete}`);
+                showSuccess("Lock successfully deleted.");
+                loadMasterData();
+            } else {
+                alert("Error deleting: " + error.message);
+            }
+        }
+
+        function exportToExcel() {
+            if(globalMasterData.length === 0) return alert("No data to export");
+            
+            const ws = XLSX.utils.json_to_sheet(globalMasterData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "MasterData");
+            XLSX.writeFile(wb, `Lock_Portal_Export_${new Date().getTime()}.xlsx`);
+            systemLog("EXPORT_EXCEL", "SUCCESS", "-", "Exported Master Data");
+        }
+
+        // ---------------------------------------------------------
+        // 8. UTILITIES (SYSTEM LOG & ALERTS)
+        // ---------------------------------------------------------
+        function showSuccess(msg) {
+            document.getElementById("successMsg").innerHTML = msg;
+            document.getElementById("successModal").style.display = "flex";
+        }
+
+        async function systemLog(action, status, accNo, details) {
+            try {
+                await supabase.from('system_logs').insert([{
+                    timestamp: new Date().toISOString(),
+                    user_id: currentUser || "-",
+                    role: currentRole || "-",
+                    action: action,
+                    status: status,
+                    acc_no: accNo || "-",
+                    details: details || "-"
+                }]);
+            } catch (e) {
+                console.error("CCTV Log Failed:", e);
+            }
+        }
+
+    </script>
+</body>
+</html>
