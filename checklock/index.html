@@ -538,7 +538,6 @@
         const SUPABASE_URL = 'https://vutchaspljmvtnisjoqt.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_J6BcCvKg2nuYwIIUxbhMVQ_BKGvfc30';
         
-        // KITA GUNA NAMA BARU "supaClient" SUPAYA TAK BERTEMBUNG DENGAN SISTEM
         const supaClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // GLOBAL VARIABLES
@@ -557,7 +556,8 @@
                 currentRole = localStorage.getItem("lock_role");
                 currentType = localStorage.getItem("lock_type");
                 
-                document.getElementById('login-page').classList.remove('active');
+                // FIX: Paksa login-page hilang sepenuhnya
+                document.getElementById('login-page').style.display = 'none';
                 document.getElementById('app-layout').style.display = 'flex';
                 
                 document.getElementById('userInfo').innerText = currentUser;
@@ -567,7 +567,6 @@
                     document.getElementById('navMaster').style.display = 'flex';
                 }
                 
-                // Route based on user type
                 if (currentType === 'check') showSection('check-section');
                 else if (currentType === 'master') showSection('master-section');
                 else showSection('lock-section');
@@ -588,7 +587,8 @@
             }
         }
 
-        // 3. AUTHENTICATION (LOGIN/LOGOUT) - FIXED VERSION
+        // ---------------------------------------------------------
+        // 3. AUTHENTICATION (LOGIN/LOGOUT)
         // ---------------------------------------------------------
         async function loginSupabase() {
             const user = document.getElementById("login_user").value.trim().toUpperCase();
@@ -598,56 +598,48 @@
 
             if(!user || !pass) { 
                 err.innerText = "Sila masukkan User ID dan Password"; 
-                err.style.display = "block"; 
+                err.style.display="block"; 
                 return; 
             }
 
-            // Ubah butang jadi loading
             btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Authenticating...';
             btn.disabled = true;
-            err.style.display = "none"; // Sorok error lama
+            err.style.display = "none";
 
             try {
-                console.log("Mencari user di Supabase:", user);
-                
                 const { data, error } = await supaClient
                     .from('users')
                     .select('*')
                     .eq('user_id', user)
                     .single();
 
-                // Semakan ralat yang terperinci
                 if (error) {
-                    console.error("Supabase Error:", error);
-                    err.innerText = "Error DB: Pastikan jadual 'users' wujud dan RLS dimatikan.";
+                    err.innerText = "Error DB: Pastikan jadual wujud dan RLS dimatikan.";
                     err.style.display = "block";
                 } else if (!data) {
-                    err.innerText = "User ID tidak dijumpai dalam database!";
+                    err.innerText = "User ID tidak dijumpai!";
                     err.style.display = "block";
                 } else if (data.password !== pass) {
-                    err.innerText = "Password yang dimasukkan salah!";
+                    err.innerText = "Password salah!";
                     err.style.display = "block";
                 } else if (data.status !== "ACTIVE") {
                     err.innerText = "Akaun ini tidak aktif!";
                     err.style.display = "block";
                 } else {
-                    // JIKA BERJAYA LOGIN
-                    console.log("Login Berjaya!", data);
-                    
-                    // 1. Simpan sesi ke memori
+                    // LOGIN BERJAYA
                     localStorage.setItem("session_token", 'supa_' + Date.now());
                     localStorage.setItem("lock_user", data.user_id);
                     localStorage.setItem("lock_role", data.role);
                     localStorage.setItem("lock_type", data.type);
                     
-                    // 2. Kemaskini variable global
                     currentUser = data.user_id;
                     currentRole = data.role;
                     currentType = data.type;
 
-                    // 3. Transisi UI secara langsung (Tanpa reload!)
-                    document.getElementById('login-page').classList.remove('active');
+                    // FIX UTAMA: Sorok terus kotak login
+                    document.getElementById('login-page').style.display = 'none';
                     document.getElementById('app-layout').style.display = 'flex';
+                    
                     document.getElementById('userInfo').innerText = currentUser;
                     document.getElementById('roleInfo').innerText = currentRole;
                     
@@ -655,20 +647,17 @@
                         document.getElementById('navMaster').style.display = 'flex';
                     }
                     
-                    // 4. Buka halaman mengikut jenis pengguna
                     if (currentType === 'check') showSection('check-section');
                     else if (currentType === 'master') showSection('master-section');
                     else showSection('lock-section');
 
-                    // 5. Rekod log secara senyap (tidak ganggu login)
                     systemLog("LOGIN", "SUCCESS", "-", "User logged into system");
                 }
             } catch (e) {
-                console.error("Sistem Crash:", e);
+                console.error("Sistem Error:", e);
                 err.innerText = "Sistem Error: Sila periksa Console (F12)";
                 err.style.display = "block";
             } finally {
-                // Kembalikan butang ke asal
                 btn.innerHTML = '<i class="fa fa-sign-in-alt"></i> Login Securely';
                 btn.disabled = false;
             }
@@ -977,5 +966,4 @@
                 console.error("CCTV Log Failed:", e);
             }
         }
-
-    </script>  
+    </script>
