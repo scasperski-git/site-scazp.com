@@ -278,6 +278,29 @@
         </div>
     </div>
 
+    <div id="settings-panel" class="main-panel">
+            <div class="settings-box" style="margin-bottom: 20px;">
+                </div>
+
+            <div class="settings-box" style="max-width: 100%;">
+                <h2>Senarai Pengguna Sistem (<span id="total-users-count" style="color: var(--text-main);">0</span> Pengguna)</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 50px; text-align: center;">NO</th>
+                                <th>USER ID</th>
+                                <th>PERANAN (ROLE)</th>
+                                <th>AKSES WILAYAH (REGION)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     <div class="modal-overlay" id="loadingModal">
         <div class="modal-content">
             <h2 style="color: var(--accent-gold); margin-top:0;">LOADING CLOUD DATA</h2>
@@ -501,6 +524,7 @@
                 document.getElementById('area-filters-container').style.display = 'none';
                 renderRegionSelectionUI(); 
                 applyFilterAndRender(); 
+                fetchAndRenderUsers();
             } else {
                 document.getElementById('master-nav-tabs').style.display = 'none';
                 document.getElementById('upload-action-container').style.display = 'none';
@@ -682,6 +706,38 @@ pageData.forEach(row => {
             }
         };
 
+        // Fungsi untuk tarik dan render senarai pengguna
+        window.fetchAndRenderUsers = async function() {
+            try {
+                // Tarik semua pengguna dari Supabase, susun ikut ID
+                const { data, error } = await supabase.from('users').select('id, role, assignedregion').order('id', { ascending: true });
+                if (error) throw error;
+                
+                const tbody = document.getElementById('users-table-body');
+                tbody.innerHTML = '';
+                
+                // Kemas kini jumlah keseluruhan pengguna
+                document.getElementById('total-users-count').innerText = data.length;
+
+                // Loop data dan masukkan ke dalam jadual
+                data.forEach((user, index) => {
+                    let regionDisp = user.assignedregion ? user.assignedregion.toUpperCase() : (user.role === 'master' ? 'SEMUA (FULL ACCESS)' : 'TIADA');
+                    let badgeClass = user.role === 'master' ? 'status-done' : 'status-pending';
+                    
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="text-align: center;">${index + 1}</td>
+                            <td>${user.id.toUpperCase()}</td>
+                            <td><span class="status-badge ${badgeClass}">${user.role.toUpperCase()}</span></td>
+                            <td>${regionDisp}</td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                console.error("Gagal menarik senarai pengguna:", err);
+            }
+        };
+
         window.addNewUser = async function() {
             const id = document.getElementById('new-user-id').value.trim().toLowerCase();
             const pass = document.getElementById('new-user-pass').value.trim();
@@ -693,11 +749,16 @@ pageData.forEach(row => {
             if (existingUser) { alert("User ID sudah wujud dalam sistem!"); } 
             else {
                 const { error } = await supabase.from('users').insert([{ id: id, pass: pass, role: role, assignedregion: role === 'user' ? region : null }]);
-                if(!error) {
+            if(!error) {
                     alert(`Pendaftaran Berjaya!\nID: ${id.toUpperCase()} telah dimasukkan.`);
-                    document.getElementById('new-user-id').value = ''; document.getElementById('new-user-pass').value = '';
-                } else { alert("Ralat: " + error.message); }
-            }
+                    document.getElementById('new-user-id').value = ''; 
+                    document.getElementById('new-user-pass').value = '';
+                    
+                    // PANGGIL FUNGSI INI UNTUK UPDATE JADUAL SECARA AUTOMATIK
+                    fetchAndRenderUsers(); 
+                } else { 
+                    alert("Ralat: " + error.message); 
+                }
         };
 
         window.toggleFormRegionSelect = function() {
