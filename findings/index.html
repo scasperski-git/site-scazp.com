@@ -242,8 +242,8 @@
             </div>
         </div>
 
-        <div id="settings-panel" class="main-panel">
-            <div class="settings-box">
+<div id="settings-panel" class="main-panel">
+            <div class="settings-box" style="margin-bottom: 20px;">
                 <h2>Add New Portal User (Syncs to Cloud Ledger)</h2>
                 <div class="form-group">
                     <label>User ID / Username</label>
@@ -275,12 +275,6 @@
                 </div>
                 <button class="btn-submit" onclick="addNewUser()">Save User Configuration</button>
             </div>
-        </div>
-    </div>
-
-    <div id="settings-panel" class="main-panel">
-            <div class="settings-box" style="margin-bottom: 20px;">
-                </div>
 
             <div class="settings-box" style="max-width: 100%;">
                 <h2>Senarai Pengguna Sistem (<span id="total-users-count" style="color: var(--text-main);">0</span> Pengguna)</h2>
@@ -295,11 +289,11 @@
                             </tr>
                         </thead>
                         <tbody id="users-table-body">
-                            </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
-        </div>
+        </div> </div>
 
     <div class="modal-overlay" id="loadingModal">
         <div class="modal-content">
@@ -759,6 +753,7 @@ pageData.forEach(row => {
                 } else { 
                     alert("Ralat: " + error.message); 
                 }
+            }
         };
 
         window.toggleFormRegionSelect = function() {
