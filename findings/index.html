@@ -454,7 +454,7 @@
                 // Guna localforage (bukan sessionStorage yang selalu crash)
                 const cachedData = await localforage.getItem(cacheKey);
 
-                if (cachedData && localLastUpdate === dbLastUpdate && dbLastUpdate !== 'NODATA') {
+                if (cachedData && localLastUpdate === dbLastUpdate) {
                     console.log("Membaca dari storan IndexedDB (Percuma & Pantas!)...");
                     globalAccounts = cachedData;
                     filteredAccounts = [...globalAccounts];
@@ -491,7 +491,6 @@
                 
                 // Simpan dalam ruang unlimited browser menggunakan localForage
                 await localforage.setItem(cacheKey, globalAccounts);
-                if (dbLastUpdate !== 'NODATA') {
                     localStorage.setItem(timeKey, dbLastUpdate);
                 }
                 
