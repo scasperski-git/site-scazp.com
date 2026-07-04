@@ -533,17 +533,19 @@
 
 <script>
         // ---------------------------------------------------------
-        // 1. SUPABASE CONFIGURATION (REPLACE WITH YOURS)
+        // 1. SUPABASE CONFIGURATION
         // ---------------------------------------------------------
         const SUPABASE_URL = 'https://vutchaspljmvtnisjoqt.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_J6BcCvKg2nuYwIIUxbhMVQ_BKGvfc30';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // KITA GUNA NAMA BARU "supaClient" SUPAYA TAK BERTEMBUNG DENGAN SISTEM
+        const supaClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // GLOBAL VARIABLES
         let currentUser = '';
         let currentRole = '';
         let currentType = '';
-        let lockToDelete = ''; // For delete action
+        let lockToDelete = ''; 
 
         // ---------------------------------------------------------
         // 2. SPA ROUTING & SESSION INITIALIZATION
@@ -569,7 +571,6 @@
                 if (currentType === 'check') showSection('check-section');
                 else if (currentType === 'master') showSection('master-section');
                 else showSection('lock-section');
-                
             }
         };
 
@@ -606,7 +607,8 @@
             btn.disabled = true;
 
             try {
-                const { data, error } = await supabase
+                // Guna supaClient.from
+                const { data, error } = await supaClient
                     .from('users')
                     .select('*')
                     .eq('user_id', user)
@@ -619,7 +621,6 @@
                     err.innerText = "Account is inactive!";
                     err.style.display = "block";
                 } else {
-                    // Success
                     localStorage.setItem("session_token", 'supa_' + Date.now());
                     localStorage.setItem("lock_user", data.user_id);
                     localStorage.setItem("lock_role", data.role);
@@ -657,7 +658,7 @@
             resultArea.style.display = "block";
             resultContent.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fa fa-spinner fa-spin fa-2x"></i><p>Checking database...</p></div>';
 
-            const { data, error } = await supabase
+            const { data, error } = await supaClient
                 .from('lock_data')
                 .select('*')
                 .eq('acc_no', accNo)
@@ -713,8 +714,7 @@
             btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Submitting...';
             btn.disabled = true;
 
-            // Check if already locked
-            const { data: existData } = await supabase
+            const { data: existData } = await supaClient
                 .from('lock_data')
                 .select('id')
                 .eq('acc_no', accNo)
@@ -727,8 +727,7 @@
                 return;
             }
 
-            // Insert new lock
-            const { data, error } = await supabase
+            const { data, error } = await supaClient
                 .from('lock_data')
                 .insert([
                     { 
@@ -754,7 +753,6 @@
                 showSuccess(`Account <b>${accNo}</b> has been successfully LOCKED.`);
                 systemLog("ADD_LOCK", "SUCCESS", accNo, `Locked RM${amount}`);
                 
-                // Clear form
                 document.getElementById("lock_acc_no").value = "";
                 document.getElementById("lock_amount").value = "";
                 document.getElementById("lock_branch").value = "";
@@ -773,7 +771,7 @@
             const tbody = document.getElementById("masterTableBody");
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><i class="fa fa-spinner fa-spin"></i> Loading Data...</td></tr>';
 
-            const { data, error } = await supabase
+            const { data, error } = await supaClient
                 .from('lock_data')
                 .select('*')
                 .order('created_at', { ascending: false })
@@ -863,7 +861,7 @@
         async function markAsPaid(id, accNo) {
             if(!confirm(`Mark account ${accNo} as PAID?`)) return;
 
-            const { error } = await supabase
+            const { error } = await supaClient
                 .from('lock_data')
                 .update({ 
                     status: 'PAID',
@@ -891,13 +889,12 @@
 
         async function confirmDelete() {
             const passcode = document.getElementById('delPasscode').value;
-            // HARDCODED PASSCODE AS PER ORIGINAL LOGIC (Or verify via Supabase if needed)
             if (passcode !== "8888") { 
                 document.getElementById('delError').style.display = "block";
                 return;
             }
 
-            const { error } = await supabase
+            const { error } = await supaClient
                 .from('lock_data')
                 .delete()
                 .eq('id', lockToDelete);
@@ -932,7 +929,7 @@
 
         async function systemLog(action, status, accNo, details) {
             try {
-                await supabase.from('system_logs').insert([{
+                await supaClient.from('system_logs').insert([{
                     timestamp: new Date().toISOString(),
                     user_id: currentUser || "-",
                     role: currentRole || "-",
@@ -947,5 +944,3 @@
         }
 
     </script>
-</body>
-</html>
