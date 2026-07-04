@@ -492,7 +492,6 @@
                 // Simpan dalam ruang unlimited browser menggunakan localForage
                 await localforage.setItem(cacheKey, globalAccounts);
                     localStorage.setItem(timeKey, dbLastUpdate);
-                }
                 
                 rebuildRegionsMapFromData();
             } catch (err) {
