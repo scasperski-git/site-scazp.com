@@ -111,13 +111,49 @@
         
         #loadingModal .modal-content { text-align: center; padding: 40px; border: 1px solid var(--accent-gold); max-width: 350px;}
 
-        @media (max-width: 768px) {
+@media (max-width: 768px) {
+            /* KPI Card - Kekal 4 grid seperti sedia ada */
             .kpi-container { grid-template-columns: repeat(4, 1fr); gap: 6px; }
             .kpi-card { padding: 10px 4px; }
             .kpi-card h3 { font-size: 8px; }
             .kpi-card p { font-size: 13px; }
-            table { font-size: 10px; }
-            th, td { padding: 8px 6px; }
+
+            /* --- KEMAS KINI JADUAL UNTUK 10 KOLUM --- */
+            table { 
+                font-size: 9px; /* Kecilkan fon untuk maksimakan ruang */
+            }
+            th, td { 
+                padding: 8px 5px; /* Kurangkan padding kiri & kanan */
+                white-space: nowrap; /* Pastikan teks tak turun baris ke bawah */
+            }
+            th {
+                font-size: 9px;
+                letter-spacing: 0.5px;
+            }
+            
+            /* Kecilkan butang dan lencana status supaya tak makan ruang */
+            .status-badge { 
+                padding: 3px 6px; 
+                font-size: 8px; 
+            }
+            .btn-update { 
+                padding: 4px 6px; 
+                font-size: 9px; 
+            }
+            
+            /* Adjust saiz Pagination bar */
+            .pagination-container {
+                padding: 10px;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .page-info {
+                font-size: 10px;
+            }
+            .pagination-controls button {
+                padding: 5px 10px;
+                font-size: 10px;
+            }
         }
     </style>
 </head>
@@ -186,12 +222,13 @@
 
             <div class="table-container">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>REGION</th><th>AREA</th><th>LOC CD</th><th>ACCT NO</th>
-                            <th>OSB (RM)</th><th>STATUS</th><th>ACTION</th>
-                        </tr>
-                    </thead>
+<thead>
+    <tr>
+        <th>REGION</th><th>AREA</th><th>LOC CD</th>
+        <th>TYPE</th> <th>ACCT NO</th>
+        <th>DELQ</th> <th>ARRS MTH</th> <th>OSB (RM)</th><th>STATUS</th><th>ACTION</th>
+    </tr>
+</thead>
                     <tbody id="table-body"></tbody>
                 </table>
             </div>
@@ -254,13 +291,20 @@
                 <h2>Map Excel Columns to Database Fields</h2>
                 <button class="close-btn" onclick="closeMappingModal()">&times;</button>
             </div>
-            <div class="mapping-grid">
-                <label>REGION Scope</label><select id="map-region" class="form-control mapping-select"></select>
-                <label>AREA Scope</label><select id="map-area" class="form-control mapping-select"></select>
-                <label>LOC CODE</label><select id="map-loc" class="form-control mapping-select"></select>
-                <label>ACCOUNT NO</label><select id="map-acct" class="form-control mapping-select"></select>
-                <label>OSB Balance</label><select id="map-osb" class="form-control mapping-select"></select>
-            </div>
+<div class="mapping-grid">
+    <label>REGION Scope</label><select id="map-region" class="form-control mapping-select"></select>
+    <label>AREA Scope</label><select id="map-area" class="form-control mapping-select"></select>
+    <label>LOC CODE</label><select id="map-loc" class="form-control mapping-select"></select>
+    
+    <label>TYPE</label><select id="map-type" class="form-control mapping-select"></select>
+    
+    <label>ACCOUNT NO</label><select id="map-acct" class="form-control mapping-select"></select>
+    
+    <label>DELQ</label><select id="map-delq" class="form-control mapping-select"></select>
+    <label>ARRS MTH</label><select id="map-arrs" class="form-control mapping-select"></select>
+    
+    <label>OSB Balance</label><select id="map-osb" class="form-control mapping-select"></select>
+</div>
             <button class="btn-submit" style="width: 100%; background: #2e7d32;" onclick="processExcelUpload()">CONFIRM & START UPLOAD</button>
         </div>
     </div>
@@ -404,7 +448,7 @@
                 
                 // Gunakan Loop While yang jauh lebih stabil dari Promise.all (Mengelakkan isu cuma 1000 data ter-download)
                 while(true) {
-                    let fetchQuery = supabase.from('accounts').select('acct, region, area, loc, osb, status');
+                    let fetchQuery = supabase.from('accounts').select('acct, region, area, loc, type, delq, arrs_mth, osb, status');
                     if (region) fetchQuery = fetchQuery.eq('region', region);
                     
                     const { data, error } = await fetchQuery.range(page * pageSize, (page + 1) * pageSize - 1);
@@ -597,17 +641,21 @@
             const endIndex = startIndex + rowsPerPage;
             const pageData = filteredAccounts.slice(startIndex, endIndex);
 
-            pageData.forEach(row => {
-                let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${row.region}</td><td>${row.area}</td><td>${row.loc}</td><td>${row.acct}</td>
-                        <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td><span class="status-badge ${badgeClass}">${row.status}</span></td>
-                        <td><button class="btn-update" onclick="openModal('${row.acct}')">UPDATE</button></td>
-                    </tr>
-                `;
-            });
+pageData.forEach(row => {
+    let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
+    tbody.innerHTML += `
+        <tr>
+            <td>${row.region}</td><td>${row.area}</td><td>${row.loc}</td>
+            <td>${row.type || '-'}</td>
+            <td>${row.acct}</td>
+            <td>${row.delq || '-'}</td>
+            <td>${row.arrs_mth || '0'}</td>
+            <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td><span class="status-badge ${badgeClass}">${row.status}</span></td>
+            <td><button class="btn-update" onclick="openModal('${row.acct}')">UPDATE</button></td>
+        </tr>
+    `;
+});
 
             document.getElementById('page-info').innerText = `Page ${currentPage} of ${totalPages} (Total: ${filteredAccounts.length.toLocaleString()} Records)`;
             document.getElementById('btn-prev').disabled = currentPage === 1;
@@ -675,7 +723,10 @@
                     if(id === 'map-region') preSelectOption(select, ['region', 'REGION', 'Region']);
                     if(id === 'map-area') preSelectOption(select, ['area', 'AREA', 'Area']);
                     if(id === 'map-loc') preSelectOption(select, ['loc', 'loc cd', 'LOC CD']);
+                    if(id === 'map-type') preSelectOption(select, ['type', 'TYPE', 'Type']);
                     if(id === 'map-acct') preSelectOption(select, ['acct', 'ACCT', 'account']);
+                    if(id === 'map-delq') preSelectOption(select, ['delq', 'DELQ', 'Delq']);
+                    if(id === 'map-arrs') preSelectOption(select, ['arrs', 'ARRS MTH', 'arrs mth', 'Arrs']);
                     if(id === 'map-osb') preSelectOption(select, ['osb', 'OSB', 'balance', 'OSB (RM)']);
                 });
                 document.getElementById('mappingModal').style.display = 'flex';
@@ -697,6 +748,9 @@
             const mapArea = document.getElementById('map-area').value;
             const mapLoc = document.getElementById('map-loc').value;
             const mapAcct = document.getElementById('map-acct').value;
+            const mapType = document.getElementById('map-type').value;
+            const mapDelq = document.getElementById('map-delq').value;
+            const mapArrs = document.getElementById('map-arrs').value;
             const mapOsb = document.getElementById('map-osb').value;
 
             document.getElementById('mappingModal').style.display = 'none';
@@ -710,14 +764,17 @@
             for (const row of parsedExcelRows) {
                 const rawAccountNo = String(row[mapAcct]).trim();
                 if (!rawAccountNo) continue; 
-                bulkData.push({
-                    region: String(row[mapRegion]).toUpperCase().trim(),
-                    area: String(row[mapArea]).toUpperCase().trim(),
-                    loc: String(row[mapLoc]).trim(),
-                    acct: rawAccountNo,
-                    osb: parseFloat(String(row[mapOsb]).replace(/[^0-9.-]+/g,"")) || 0, 
-                    status: 'PENDING' 
-                });
+bulkData.push({
+    region: String(row[mapRegion]).toUpperCase().trim(),
+    area: String(row[mapArea]).toUpperCase().trim(),
+    loc: String(row[mapLoc]).trim(),
+    type: String(row[mapType]).trim(), // Kolum baharu
+    acct: rawAccountNo,
+    delq: String(row[mapDelq]).trim(), // Kolum baharu
+    arrs_mth: String(row[mapArrs]).trim(), // Kolum baharu
+    osb: parseFloat(String(row[mapOsb]).replace(/[^0-9.-]+/g,"")) || 0, 
+    status: 'PENDING' 
+});
             }
 
             const CHUNK_SIZE = 1000; let totalProcessed = 0; let hasError = false;
