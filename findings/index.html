@@ -89,7 +89,7 @@
         }
         .btn-upload-trigger:hover { background-color: #388e3c; }
 
-        /* --- KPI CARD STYLES (UPDATED AS INTERACTIVE BUTTONS) --- */
+        /* --- KPI CARD STYLES --- */
         .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
         .kpi-card {
             background-color: var(--card-bg); padding: 15px; border-radius: 8px;
@@ -102,7 +102,6 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15);
         }
-        /* Indikator Kad Aktif Dipilih */
         .kpi-card.active {
             border-color: var(--accent-gold);
             background-color: #252525;
@@ -378,7 +377,7 @@
         let currentUser = null; 
         let currentRegion = null; 
         let currentArea = null;
-        let currentStatusFilter = null; // Status Filter Global: null, 'UPDATED', 'PENDING'
+        let currentStatusFilter = null; 
         
         let globalAccounts = []; 
         let filteredAccounts = []; 
@@ -396,7 +395,10 @@
                 document.getElementById('dashboard-section').style.display = 'block';
                 document.getElementById('display-username').innerText = "Logged in as: " + currentUser.username.toUpperCase();
                 
-                await fetchFullDatabaseData(currentUser.role === 'master' ? null : currentUser.assignedregion);
+                // KESELAMATAN 1: Pastikan data region PIC sentiasa dibaca dengan format (HURUF BESAR & TIADA JARAK)
+                const safeRegion = currentUser.role === 'master' ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
+                
+                await fetchFullDatabaseData(safeRegion);
                 initDashboardView();
             }
         }
@@ -418,7 +420,10 @@
                     document.getElementById('dashboard-section').style.display = 'block';
                     document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
                     
-                    await fetchFullDatabaseData(currentUser.role === 'master' ? null : currentUser.assignedregion);
+                    // KESELAMATAN 1: Pastikan format konsisten sewaktu awal login
+                    const safeRegion = currentUser.role === 'master' ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
+                    
+                    await fetchFullDatabaseData(safeRegion);
                     initDashboardView();
                 } else {
                     document.getElementById('login-error').style.display = 'block';
@@ -435,16 +440,13 @@
             document.getElementById('login-section').style.display = 'flex';
         };
 
-// --- SUPER FETCHER DENGAN SISTEM AUTO-SYNC MULTI-PC ---
         async function fetchFullDatabaseData(region = null) {
             const cacheKey = region ? `scazp_cache_${region}` : 'scazp_cache_all';
             const timeKey = region ? `scazp_time_${region}` : 'scazp_time_all';
             
-            // Buka modal loading utama
             document.getElementById('loadingModal').style.display = 'flex';
             
             try {
-                // 1. Ambil cap masa (timestamp) tindakan terakhir daripada jadual findings di Supabase
                 const { data: lastFinding } = await supabase
                     .from('findings')
                     .select('updated_at')
@@ -452,10 +454,9 @@
                     .limit(1);
                 
                 const dbLastUpdate = lastFinding && lastFinding.length > 0 ? lastFinding[0].updated_at : 'NODATA';
-                const localLastUpdate = localStorage.getItem(timeKey); // Guna localStorage untuk simpanan masa yang kekal
+                const localLastUpdate = localStorage.getItem(timeKey);
                 const cachedData = sessionStorage.getItem(cacheKey);
 
-                // 2. JIKA data cache wujud DAN masa di database sepadan dengan komputer, guna cache (PERCUMA!)
                 if (cachedData && localLastUpdate === dbLastUpdate && dbLastUpdate !== 'NODATA') {
                     console.log("Multi-PC Sync: Data sepadan. Membaca dari cache komputer...");
                     globalAccounts = JSON.parse(cachedData);
@@ -465,8 +466,7 @@
                     return; 
                 }
 
-                // 3. JIKA data tidak sepadan (ada PC lain dah update), tarik data penuh dari Supabase
-                console.log("Multi-PC Sync: Data dikesan berubah atau cache kosong. Menarik data baharu dari awan...");
+                console.log("Multi-PC Sync: Menarik data baharu dari awan...");
                 let countQuery = supabase.from('accounts').select('acct', { count: 'exact', head: true });
                 if (region) countQuery = countQuery.eq('region', region);
                 const { count } = await countQuery;
@@ -486,10 +486,14 @@
                 globalAccounts = allData;
                 filteredAccounts = [...globalAccounts];
                 
-                // 4. Simpan salinan data baharu dan cap masa terkini ke dalam browser
-                sessionStorage.setItem(cacheKey, JSON.stringify(globalAccounts));
-                if (dbLastUpdate !== 'NODATA') {
-                    localStorage.setItem(timeKey, dbLastUpdate);
+                // KESELAMATAN 2: Tangkap Ralat "Storage Limit Exceeded" Secara Senyap
+                try {
+                    sessionStorage.setItem(cacheKey, JSON.stringify(globalAccounts));
+                    if (dbLastUpdate !== 'NODATA') {
+                        localStorage.setItem(timeKey, dbLastUpdate);
+                    }
+                } catch (e) {
+                    console.warn("Kapasiti Memori Browser Penuh. Sistem tidak dapat menggunakan cache.", e);
                 }
                 
                 rebuildRegionsMapFromData();
@@ -503,9 +507,13 @@
         function rebuildRegionsMapFromData() {
             regionsMap = {};
             globalAccounts.forEach(row => {
-                if (row.region && row.area) {
-                    if (!regionsMap[row.region]) { regionsMap[row.region] = []; }
-                    if (!regionsMap[row.region].includes(row.area)) { regionsMap[row.region].push(row.area); }
+                // KESELAMATAN 3: Formatkan semula region dari pangkalan data sekiranya wujud ralat ejaan (huruf kecil/jarak lebih)
+                let safeReg = row.region ? row.region.toUpperCase().trim() : '';
+                let safeArea = row.area ? row.area.toUpperCase().trim() : '';
+                
+                if (safeReg && safeArea) {
+                    if (!regionsMap[safeReg]) { regionsMap[safeReg] = []; }
+                    if (!regionsMap[safeReg].includes(safeArea)) { regionsMap[safeReg].push(safeArea); }
                 }
             });
         }
@@ -524,25 +532,25 @@
                 document.getElementById('region-filters-container').style.display = 'none';
                 document.getElementById('area-filters-container').style.display = 'block';
                 
-                currentRegion = currentUser.assignedregion;
+                // KESELAMATAN 4: Samakan nilai yang dimasukkan ke logik butang
+                currentRegion = currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null;
+                
                 renderAreaSelectionUI(currentRegion);
                 applyFilterAndRender();
             }
         }
 
-        // --- ADVANCED ADVANCED FILTER ARCHITECTURE ---
         function applyFilterAndRender() {
-            // Langkah A: Tapis mengikut skop geografi (Region & Area) dahulu
             let scopedGeoData = globalAccounts.filter(row => {
-                let matchRegion = currentRegion ? row.region === currentRegion : true;
-                let matchArea = currentArea ? row.area === currentArea : true;
+                let r = row.region ? row.region.toUpperCase().trim() : '';
+                let a = row.area ? row.area.toUpperCase().trim() : '';
+                let matchRegion = currentRegion ? r === currentRegion : true;
+                let matchArea = currentArea ? a === currentArea : true;
                 return matchRegion && matchArea;
             });
             
-            // Langkah B: Kemas kini statistik KPI Card berdasarkan data wilayah terpilih
             updateKPICards(scopedGeoData);
             
-            // Langkah C: Tapis pula mengikut status kad yang diklik (Quick Status Filter)
             filteredAccounts = scopedGeoData.filter(row => {
                 return currentStatusFilter ? row.status === currentStatusFilter : true;
             });
@@ -551,19 +559,13 @@
             renderTablePage();
         }
 
-        // Fungsi Khas Menukar Filter Status Menerusi Klik Kad KPI
         window.applyStatusFilter = function(status, element) {
             currentStatusFilter = status;
-            
-            // Buang kelas 'active' dari semua kad interaktif
             document.querySelectorAll('.kpi-clickable').forEach(card => card.classList.remove('active'));
-            // Tambah semula kelas 'active' pada kad yang diklik
             if (element) element.classList.add('active');
-            
             applyFilterAndRender();
         };
 
-        // Fungsi Reset Status Kad Apabila Butang Region/Area Ditukar
         function resetStatusCardHighlight() {
             currentStatusFilter = null;
             document.querySelectorAll('.kpi-clickable').forEach(card => card.classList.remove('active'));
@@ -616,14 +618,17 @@
                 areaContainer.innerHTML = `<button class="btn-filter active" onclick="clearAreaSelection(this)">ALL AREAS IN ${region}</button>`;
             } else { areaContainer.innerHTML = ''; }
             
-            if(regionsMap[region]) {
+            if(regionsMap[region] && regionsMap[region].length > 0) {
                 regionsMap[region].forEach((area, index) => {
                     let activeStyle = (currentUser.role !== 'master' && index === 0) ? 'active' : '';
                     areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
                 });
                 if(currentUser.role !== 'master' && !currentArea) { 
-                    applyAreaFilter(regionsMap[region][0], areaContainer.querySelector('.btn-filter')); 
+                    const firstBtn = areaContainer.querySelector('.btn-filter');
+                    if (firstBtn) applyAreaFilter(regionsMap[region][0], firstBtn); 
                 }
+            } else {
+                console.warn(`Tiada sub-kawasan dijumpai untuk region: ${region}`);
             }
         }
 
@@ -646,7 +651,7 @@
             document.getElementById('kpi-osb').innerText = 'RM ' + totalOsbValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
-        // --- CLIENT-SIDE PAGINATION ENGINE (20 ROWS PER PAGE) ---
+        // --- CLIENT-SIDE PAGINATION ENGINE ---
         function renderTablePage() {
             const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
             
@@ -801,11 +806,10 @@
                 totalProcessed += chunk.length;
             }
 
-if (!hasError) {
+            if (!hasError) {
                 progressBar.style.width = '100%'; progressText.innerText = '100%';
                 progressSubtext.innerText = `Selesai sepenuhnya! Memuat semula struktur lejar...`;
                 
-                // TAMBAH KOD INI: Hantar 1 baris log ke findings sebagai isyarat cap masa untuk PC lain
                 await supabase.from('findings').insert([{
                     acct: 'SYSTEM',
                     remark: 'BULK EXCEL LEDGER UPLOADED/REFRESHED By Master',
@@ -817,7 +821,6 @@ if (!hasError) {
                     document.getElementById('excel-file-input').value = ''; 
                     alert(`Berjaya memproses ${totalProcessed.toLocaleString()} akaun.`);
                     
-                    // Padam cache Master sendiri sahaja, PC lain akan auto-clear mengikut semakan masa nanti
                     sessionStorage.removeItem('scazp_cache_all');
                     localStorage.removeItem('scazp_time_all');
                     
@@ -853,42 +856,54 @@ if (!hasError) {
         
         window.closeModal = function() { document.getElementById('updateModal').style.display = 'none'; document.getElementById('newFinding').value = ''; };
 
-window.saveFinding = async function() {
+        // KESELAMATAN 5: Try-Catch Lengkap Untuk Mengelakkan Isu "Stuck" (Blocker Storage)
+        window.saveFinding = async function() {
             let log = document.getElementById('newFinding').value;
             let accNo = document.getElementById('modalAccNo').innerText;
             if(!log.trim()) { alert("Sila masukkan nota penemuan."); return; }
-            const btn = document.querySelector('#updateModal .btn-submit'); btn.innerText = "SAVING...";
             
-            // TAMBAHAN: Guna .select() untuk tangkap cap masa (timestamp) terbaru yang dijana oleh awan
-            const { data: insertedData, error: insertError } = await supabase
-                .from('findings')
-                .insert([{ acct: accNo, remark: log, updated_by: currentUser.username }])
-                .select('updated_at');
+            const btn = document.querySelector('#updateModal .btn-submit'); 
+            btn.innerText = "SAVING...";
+            
+            try {
+                const { data: insertedData, error: insertError } = await supabase
+                    .from('findings')
+                    .insert([{ acct: accNo, remark: log, updated_by: currentUser.username }])
+                    .select('updated_at');
 
-            if(!insertError) {
-                await supabase.from('accounts').update({ status: 'UPDATED' }).eq('acct', accNo);
-                
-                // 1. Kemas kini terus status dalam memori RAM (Instant UI update!)
-                let rowToUpdate = globalAccounts.find(a => a.acct === accNo);
-                if(rowToUpdate) rowToUpdate.status = 'UPDATED';
-                
-                // 2. KEMAS KINI CACHE & TIMESTAMP (Mengelakkan muat turun 41k data semula jika ditekan F5)
-                const cacheKey = currentUser.role === 'master' ? 'scazp_cache_all' : `scazp_cache_${currentUser.assignedregion}`;
-                const timeKey = currentUser.role === 'master' ? 'scazp_time_all' : `scazp_time_${currentUser.assignedregion}`;
-                
-                sessionStorage.setItem(cacheKey, JSON.stringify(globalAccounts));
-                
-                if (insertedData && insertedData.length > 0) {
-                    localStorage.setItem(timeKey, insertedData[0].updated_at);
+                if(!insertError) {
+                    await supabase.from('accounts').update({ status: 'UPDATED' }).eq('acct', accNo);
+                    
+                    let rowToUpdate = globalAccounts.find(a => a.acct === accNo);
+                    if(rowToUpdate) rowToUpdate.status = 'UPDATED';
+                    
+                    const safeRegion = currentUser.role === 'master' ? 'all' : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
+                    const cacheKey = `scazp_cache_${safeRegion}`;
+                    const timeKey = `scazp_time_${safeRegion}`;
+                    
+                    try {
+                        sessionStorage.setItem(cacheKey, JSON.stringify(globalAccounts));
+                    } catch (storageError) {
+                        console.warn("Storage Kapasiti Terlalu Besar, Cache Diketepikan.");
+                    }
+                    
+                    if (insertedData && insertedData.length > 0) {
+                        localStorage.setItem(timeKey, insertedData[0].updated_at);
+                    }
+                    
+                    alert("Berjaya disimpan!"); 
+                    closeModal(); 
+                    applyFilterAndRender();
+                } else { 
+                    alert("Ralat Pangkalan Data: " + insertError.message); 
                 }
-                
-                alert("Berjaya disimpan!"); 
-                closeModal(); 
-                applyFilterAndRender();
-            } else { 
-                alert("Ralat: " + insertError.message); 
+            } catch (err) {
+                alert("Ralat Kritikal Sistem: " + err.message);
+                console.error(err);
+            } finally {
+                // Sentiasa *reset* kembali butang kepada bentuk asal tidak kira jika ia Ralat mahupun Berjaya
+                btn.innerText = "COMMIT RECORD ENTRY";
             }
-            btn.innerText = "COMMIT RECORD ENTRY";
         };
 
         window.onclick = function(e) { 
