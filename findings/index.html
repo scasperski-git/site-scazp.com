@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OSB & Findings Management System</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
     <style>
         :root {
             --bg-color: #121212;
@@ -17,162 +18,84 @@
             --error-red: #e57373;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; }
 
         /* --- LOGIN STYLES --- */
         #login-section { display: flex; justify-content: center; align-items: center; height: 90vh; }
-        .login-box {
-            background-color: var(--card-bg); padding: 30px; border-radius: 8px;
-            border: 1px solid var(--accent-gold); width: 100%; max-width: 350px;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.1); text-align: center;
-        }
+        .login-box { background-color: var(--card-bg); padding: 30px; border-radius: 8px; border: 1px solid var(--accent-gold); width: 100%; max-width: 350px; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.1); text-align: center; }
         .login-box h2 { color: var(--accent-gold); margin-top: 0; font-size: 22px; }
-        .login-input {
-            width: 100%; box-sizing: border-box; background-color: #121212;
-            border: 1px solid var(--border-color); color: white; padding: 10px;
-            margin-bottom: 15px; border-radius: 4px; font-size: 13px;
-        }
+        .login-input { width: 100%; box-sizing: border-box; background-color: #121212; border: 1px solid var(--border-color); color: white; padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 13px; }
         .login-input:focus { outline: none; border-color: var(--accent-gold); }
-        .btn-login {
-            width: 100%; background-color: var(--accent-gold); color: var(--bg-color);
-            border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer;
-        }
+        .btn-login { width: 100%; background-color: var(--accent-gold); color: var(--bg-color); border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
         .btn-login:hover { background-color: #e5c158; }
 
         /* --- DASHBOARD STYLES --- */
         #dashboard-section { display: none; }
-        .header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
         .header h1 { margin: 0; font-size: 20px; color: var(--accent-gold); letter-spacing: 1px; }
-        .btn-logout {
-            background-color: transparent; color: var(--error-red); border: 1px solid var(--error-red);
-            padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;
-        }
+        .btn-logout { background-color: transparent; color: var(--error-red); border: 1px solid var(--error-red); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
 
         .nav-tabs { display: none; gap: 10px; margin-bottom: 20px; }
-        .nav-btn {
-            background-color: #1a1a1a; color: var(--text-main); border: 1px solid var(--border-color);
-            padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;
-        }
+        .nav-btn { background-color: #1a1a1a; color: var(--text-main); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; }
         .nav-btn.active { background-color: var(--accent-gold); color: var(--bg-color); border-color: var(--accent-gold); }
 
         .main-panel { display: block; }
         #settings-panel { display: none; }
 
         .action-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
-        .filter-section {
-            background-color: var(--card-bg); padding: 15px; border-radius: 8px;
-            border: 1px solid var(--border-color); flex-grow: 1;
-        }
+        .filter-section { background-color: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); flex-grow: 1; }
         .filter-title { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
         .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
         .btn-group:last-child { margin-bottom: 0; }
-        .btn-filter {
-            background-color: #121212; color: var(--text-main); border: 1px solid var(--border-color);
-            padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; transition: all 0.2s;
-        }
+        .btn-filter { background-color: #121212; color: var(--text-main); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; transition: all 0.2s; }
         .btn-filter:hover { border-color: var(--accent-gold); }
         .btn-filter.active { background-color: var(--accent-gold); color: var(--bg-color); border-color: var(--accent-gold); font-weight: bold; }
         #area-filters-container { display: none; padding-top: 10px; border-top: 1px dashed var(--border-color); }
 
-        .btn-upload-trigger {
-            background-color: #2e7d32; color: white; border: none; padding: 10px 15px;
-            border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 5px;
-        }
+        .btn-upload-trigger { background-color: #2e7d32; color: white; border: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 5px; }
         .btn-upload-trigger:hover { background-color: #388e3c; }
 
-        /* --- KPI CARD STYLES --- */
         .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
-        .kpi-card {
-            background-color: var(--card-bg); padding: 15px; border-radius: 8px;
-            border: 1px solid var(--border-color); text-align: center;
-            transition: all 0.25s ease;
-        }
+        .kpi-card { background-color: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center; transition: all 0.25s ease; }
         .kpi-clickable { cursor: pointer; }
-        .kpi-clickable:hover {
-            border-color: var(--accent-gold);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15);
-        }
-        .kpi-card.active {
-            border-color: var(--accent-gold);
-            background-color: #252525;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
-        }
+        .kpi-clickable:hover { border-color: var(--accent-gold); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15); }
+        .kpi-card.active { border-color: var(--accent-gold); background-color: #252525; box-shadow: 0 0 15px rgba(212, 175, 55, 0.25); }
         .kpi-card h3 { margin: 0 0 5px 0; font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
         .kpi-card p { margin: 0; font-size: 20px; font-weight: bold; color: var(--text-main); }
 
-        /* Tables & Pagination */
-        .table-container {
-            background-color: var(--card-bg); border-radius: 8px 8px 0 0; border: 1px solid var(--border-color); overflow-x: auto;
-        }
+        .table-container { background-color: var(--card-bg); border-radius: 8px 8px 0 0; border: 1px solid var(--border-color); overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
         th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { background-color: #1a1a1a; color: var(--accent-gold); font-weight: 600; white-space: nowrap; }
         tr:hover { background-color: #2a2a2a; }
         
-        .pagination-container {
-            display: flex; justify-content: space-between; align-items: center; padding: 12px 15px;
-            background-color: #1a1a1a; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px;
-            margin-bottom: 20px;
-        }
-        .pagination-controls button {
-            background-color: #121212; color: var(--accent-gold); border: 1px solid var(--accent-gold);
-            padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin: 0 5px;
-        }
+        .pagination-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background-color: #1a1a1a; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; margin-bottom: 20px; }
+        .pagination-controls button { background-color: #121212; color: var(--accent-gold); border: 1px solid var(--accent-gold); padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin: 0 5px; }
         .pagination-controls button:disabled { border-color: #555; color: #555; cursor: not-allowed; }
         .page-info { font-size: 12px; color: var(--text-muted); }
         
         .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
         .status-done { background-color: rgba(46, 125, 50, 0.2); color: var(--success-green); border: 1px solid #2e7d32; }
         .status-pending { background-color: rgba(198, 40, 40, 0.2); color: var(--error-red); border: 1px solid #c62828; }
-        
-        .btn-update {
-            background-color: transparent; color: var(--accent-gold); border: 1px solid var(--accent-gold);
-            padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;
-        }
+        .btn-update { background-color: transparent; color: var(--accent-gold); border: 1px solid var(--accent-gold); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
         .btn-update:hover { background-color: var(--accent-gold); color: var(--bg-color); }
 
         .settings-box { background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; max-width: 500px; }
         .settings-box h2 { color: var(--accent-gold); font-size: 16px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;}
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-size: 12px; color: var(--text-muted); }
-        .form-control {
-            width: 100%; box-sizing: border-box; background-color: #121212; border: 1px solid var(--border-color);
-            color: white; padding: 10px; border-radius: 4px; font-size: 13px;
-        }
+        .form-control { width: 100%; box-sizing: border-box; background-color: #121212; border: 1px solid var(--border-color); color: white; padding: 10px; border-radius: 4px; font-size: 13px; }
         .form-control:focus { outline: none; border-color: var(--accent-gold); }
-        .btn-submit {
-            background-color: var(--accent-gold); color: var(--bg-color); border: none;
-            padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px;
-        }
+        .btn-submit { background-color: var(--accent-gold); color: var(--bg-color); border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; }
 
-        /* --- MODALS --- */
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center;
-        }
-        .modal-content {
-            background-color: var(--card-bg); border: 1px solid var(--accent-gold); border-radius: 8px;
-            width: 90%; max-width: 500px; padding: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.8); position: relative;
-        }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background-color: var(--card-bg); border: 1px solid var(--accent-gold); border-radius: 8px; width: 90%; max-width: 500px; padding: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.8); position: relative; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; }
         .modal-header h2 { margin: 0; font-size: 15px; color: var(--accent-gold); }
         .close-btn { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
         .close-btn:hover { color: white; }
         
-        .history-box {
-            background-color: #1a1a1a; padding: 10px; border-radius: 4px; margin-bottom: 15px;
-            max-height: 120px; overflow-y: auto; font-size: 11px; border: 1px solid var(--border-color);
-        }
+        .history-box { background-color: #1a1a1a; padding: 10px; border-radius: 4px; margin-bottom: 15px; max-height: 120px; overflow-y: auto; font-size: 11px; border: 1px solid var(--border-color); }
         .history-item { border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; margin-bottom: 5px; }
         .history-item:last-child { border-bottom: none; margin-bottom: 0; }
         .history-meta { color: var(--accent-gold); font-size: 10px; margin-bottom: 3px; }
@@ -321,7 +244,7 @@
     <div class="modal-overlay" id="loadingModal">
         <div class="modal-content">
             <h2 style="color: var(--accent-gold); margin-top:0;">LOADING CLOUD DATA</h2>
-            <p style="color: var(--text-muted); font-size: 13px;">Sedang memuat turun puluhan ribu rekod pangkalan data. Sila tunggu seketika...</p>
+            <p style="color: var(--text-muted); font-size: 13px;" id="loadingText">Sedang menyegerak data dari pangkalan. Sila tunggu...</p>
         </div>
     </div>
 
@@ -374,6 +297,12 @@
         const supabaseKey = 'sb_publishable_nN7JOvHOInSCZUAy6tTYgQ_xGzJD9N2';
         const supabase = createClient(supabaseUrl, supabaseKey);
 
+        // --- Konfigurasi localForage (IndexedDB pengganti SessionStorage 5MB Limit) ---
+        localforage.config({
+            name: 'SCAZP_Portal',
+            storeName: 'account_data'
+        });
+
         let currentUser = null; 
         let currentRegion = null; 
         let currentArea = null;
@@ -395,7 +324,6 @@
                 document.getElementById('dashboard-section').style.display = 'block';
                 document.getElementById('display-username').innerText = "Logged in as: " + currentUser.username.toUpperCase();
                 
-                // KESELAMATAN 1: Pastikan data region PIC sentiasa dibaca dengan format (HURUF BESAR & TIADA JARAK)
                 const safeRegion = currentUser.role === 'master' ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
                 
                 await fetchFullDatabaseData(safeRegion);
@@ -404,6 +332,7 @@
         }
 
         window.handleLogin = async function() {
+            // Mengekalkan ID sentiasa huruf kecil
             const user = document.getElementById('username').value.trim().toLowerCase();
             const pass = document.getElementById('password').value.trim();
             const btn = document.querySelector('.btn-login');
@@ -420,7 +349,6 @@
                     document.getElementById('dashboard-section').style.display = 'block';
                     document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
                     
-                    // KESELAMATAN 1: Pastikan format konsisten sewaktu awal login
                     const safeRegion = currentUser.role === 'master' ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
                     
                     await fetchFullDatabaseData(safeRegion);
@@ -440,60 +368,63 @@
             document.getElementById('login-section').style.display = 'flex';
         };
 
+        // --- SUPER FETCHER (SEQUENTIAL LOOP + INDEXEDDB) ---
+        // Selamat dari API Rate Limit dan selamat dari Memory Crash!
         async function fetchFullDatabaseData(region = null) {
             const cacheKey = region ? `scazp_cache_${region}` : 'scazp_cache_all';
             const timeKey = region ? `scazp_time_${region}` : 'scazp_time_all';
             
-            document.getElementById('loadingModal').style.display = 'flex';
+            const loadingModal = document.getElementById('loadingModal');
+            const loadingText = document.getElementById('loadingText');
+            loadingModal.style.display = 'flex';
             
             try {
-                const { data: lastFinding } = await supabase
-                    .from('findings')
-                    .select('updated_at')
-                    .order('updated_at', { ascending: false })
-                    .limit(1);
-                
+                const { data: lastFinding } = await supabase.from('findings').select('updated_at').order('updated_at', { ascending: false }).limit(1);
                 const dbLastUpdate = lastFinding && lastFinding.length > 0 ? lastFinding[0].updated_at : 'NODATA';
                 const localLastUpdate = localStorage.getItem(timeKey);
-                const cachedData = sessionStorage.getItem(cacheKey);
+                
+                // Guna localforage (bukan sessionStorage yang selalu crash)
+                const cachedData = await localforage.getItem(cacheKey);
 
                 if (cachedData && localLastUpdate === dbLastUpdate && dbLastUpdate !== 'NODATA') {
-                    console.log("Multi-PC Sync: Data sepadan. Membaca dari cache komputer...");
-                    globalAccounts = JSON.parse(cachedData);
+                    console.log("Membaca dari storan IndexedDB (Percuma & Pantas!)...");
+                    globalAccounts = cachedData;
                     filteredAccounts = [...globalAccounts];
                     rebuildRegionsMapFromData();
-                    document.getElementById('loadingModal').style.display = 'none';
+                    loadingModal.style.display = 'none';
                     return; 
                 }
 
-                console.log("Multi-PC Sync: Menarik data baharu dari awan...");
-                let countQuery = supabase.from('accounts').select('acct', { count: 'exact', head: true });
-                if (region) countQuery = countQuery.eq('region', region);
-                const { count } = await countQuery;
+                console.log("Menarik data secara beratur (Sequential) dari awan supaya tidak disekat API...");
+                loadingText.innerText = "Memuat turun rekod dari pelayan (Ini mungkin mengambil masa untuk 41k rekod)...";
                 
                 let allData = [];
-                if (count && count > 0) {
-                    const promises = [];
-                    for (let i = 0; i < count; i += 1000) {
-                        let fetchQuery = supabase.from('accounts').select('acct, region, area, loc, osb, status');
-                        if (region) fetchQuery = fetchQuery.eq('region', region);
-                        promises.push(fetchQuery.range(i, i + 999));
-                    }
-                    const results = await Promise.all(promises);
-                    results.forEach(res => { if (res.data) allData = allData.concat(res.data); });
+                let page = 0;
+                const pageSize = 1000;
+                
+                // Gunakan Loop While yang jauh lebih stabil dari Promise.all (Mengelakkan isu cuma 1000 data ter-download)
+                while(true) {
+                    let fetchQuery = supabase.from('accounts').select('acct, region, area, loc, osb, status');
+                    if (region) fetchQuery = fetchQuery.eq('region', region);
+                    
+                    const { data, error } = await fetchQuery.range(page * pageSize, (page + 1) * pageSize - 1);
+                    
+                    if (error) { console.error("Error fetching data:", error); break; }
+                    if (!data || data.length === 0) break;
+                    
+                    allData = allData.concat(data);
+                    
+                    if (data.length < pageSize) break; // Keluar loop bila data dah habis
+                    page++;
                 }
                 
                 globalAccounts = allData;
                 filteredAccounts = [...globalAccounts];
                 
-                // KESELAMATAN 2: Tangkap Ralat "Storage Limit Exceeded" Secara Senyap
-                try {
-                    sessionStorage.setItem(cacheKey, JSON.stringify(globalAccounts));
-                    if (dbLastUpdate !== 'NODATA') {
-                        localStorage.setItem(timeKey, dbLastUpdate);
-                    }
-                } catch (e) {
-                    console.warn("Kapasiti Memori Browser Penuh. Sistem tidak dapat menggunakan cache.", e);
+                // Simpan dalam ruang unlimited browser menggunakan localForage
+                await localforage.setItem(cacheKey, globalAccounts);
+                if (dbLastUpdate !== 'NODATA') {
+                    localStorage.setItem(timeKey, dbLastUpdate);
                 }
                 
                 rebuildRegionsMapFromData();
@@ -501,13 +432,13 @@
                 console.error("Sync error:", err);
             }
             
-            document.getElementById('loadingModal').style.display = 'none';
+            loadingText.innerText = "Selesai.";
+            loadingModal.style.display = 'none';
         }
 
         function rebuildRegionsMapFromData() {
             regionsMap = {};
             globalAccounts.forEach(row => {
-                // KESELAMATAN 3: Formatkan semula region dari pangkalan data sekiranya wujud ralat ejaan (huruf kecil/jarak lebih)
                 let safeReg = row.region ? row.region.toUpperCase().trim() : '';
                 let safeArea = row.area ? row.area.toUpperCase().trim() : '';
                 
@@ -532,7 +463,6 @@
                 document.getElementById('region-filters-container').style.display = 'none';
                 document.getElementById('area-filters-container').style.display = 'block';
                 
-                // KESELAMATAN 4: Samakan nilai yang dimasukkan ke logik butang
                 currentRegion = currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null;
                 
                 renderAreaSelectionUI(currentRegion);
@@ -627,8 +557,6 @@
                     const firstBtn = areaContainer.querySelector('.btn-filter');
                     if (firstBtn) applyAreaFilter(regionsMap[region][0], firstBtn); 
                 }
-            } else {
-                console.warn(`Tiada sub-kawasan dijumpai untuk region: ${region}`);
             }
         }
 
@@ -651,7 +579,6 @@
             document.getElementById('kpi-osb').innerText = 'RM ' + totalOsbValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
-        // --- CLIENT-SIDE PAGINATION ENGINE ---
         function renderTablePage() {
             const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
             
@@ -730,7 +657,6 @@
             document.getElementById('form-region-group').style.display = (role === 'master') ? 'none' : 'block';
         };
 
-        // --- EXCEL PIPELINE ---
         window.handleExcelFileSelect = function(e) {
             const file = e.target.files[0]; if (!file) return;
             const reader = new FileReader();
@@ -821,7 +747,8 @@
                     document.getElementById('excel-file-input').value = ''; 
                     alert(`Berjaya memproses ${totalProcessed.toLocaleString()} akaun.`);
                     
-                    sessionStorage.removeItem('scazp_cache_all');
+                    // Bersihkan memori tempatan menggunakan API localForage
+                    await localforage.removeItem('scazp_cache_all');
                     localStorage.removeItem('scazp_time_all');
                     
                     await fetchFullDatabaseData(null); 
@@ -831,7 +758,6 @@
             } else { document.getElementById('progressModal').style.display = 'none'; }
         };
 
-        // --- FINDINGS ENGINE ---
         window.openModal = async function(accNo) {
             document.getElementById('modalAccNo').innerText = accNo;
             document.getElementById('updateModal').style.display = 'flex';
@@ -856,7 +782,6 @@
         
         window.closeModal = function() { document.getElementById('updateModal').style.display = 'none'; document.getElementById('newFinding').value = ''; };
 
-        // KESELAMATAN 5: Try-Catch Lengkap Untuk Mengelakkan Isu "Stuck" (Blocker Storage)
         window.saveFinding = async function() {
             let log = document.getElementById('newFinding').value;
             let accNo = document.getElementById('modalAccNo').innerText;
@@ -881,11 +806,8 @@
                     const cacheKey = `scazp_cache_${safeRegion}`;
                     const timeKey = `scazp_time_${safeRegion}`;
                     
-                    try {
-                        sessionStorage.setItem(cacheKey, JSON.stringify(globalAccounts));
-                    } catch (storageError) {
-                        console.warn("Storage Kapasiti Terlalu Besar, Cache Diketepikan.");
-                    }
+                    // Simpan terus ke ruang unlimted IndexedDB menggunakan localForage
+                    await localforage.setItem(cacheKey, globalAccounts);
                     
                     if (insertedData && insertedData.length > 0) {
                         localStorage.setItem(timeKey, insertedData[0].updated_at);
@@ -901,7 +823,6 @@
                 alert("Ralat Kritikal Sistem: " + err.message);
                 console.error(err);
             } finally {
-                // Sentiasa *reset* kembali butang kepada bentuk asal tidak kira jika ia Ralat mahupun Berjaya
                 btn.innerText = "COMMIT RECORD ENTRY";
             }
         };
