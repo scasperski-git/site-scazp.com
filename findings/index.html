@@ -447,7 +447,7 @@
             if (count && count > 0) {
                 const promises = [];
                 for (let i = 0; i < count; i += 1000) {
-                    let fetchQuery = supabase.from('accounts').select('*');
+                    let fetchQuery = supabase.from('accounts').select('acct, region, area, loc, osb, status');
                     if (region) fetchQuery = fetchQuery.eq('region', region);
                     promises.push(fetchQuery.range(i, i + 999));
                 }
