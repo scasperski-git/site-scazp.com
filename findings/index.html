@@ -435,11 +435,28 @@
             document.getElementById('login-section').style.display = 'flex';
         };
 
-        // --- SUPER FETCHER: PARALLEL PROMISES ---
+// --- SUPER FETCHER DENGAN SISTEM ANTI-F5 SPAM (SMART CACHE) ---
         async function fetchFullDatabaseData(region = null) {
+            // Bina kunci unik berdasarkan skop wilayah pengguna
+            const cacheKey = region ? `scazp_cache_${region}` : 'scazp_cache_all';
+            
+            // 1. Cuba baca data daripada memori browser dahulu
+            const cachedData = sessionStorage.getItem(cacheKey);
+            
+            if (cachedData) {
+                console.log("Anti-F5 Active: Membaca data dari cache browser (Percuma!)");
+                globalAccounts = JSON.parse(cachedData);
+                filteredAccounts = [...globalAccounts];
+                
+                // Bina semula peta butang wilayah dari data cache
+                rebuildRegionsMapFromData();
+                return; // Berhenti di sini, tidak perlu ganggu kuota Supabase
+            }
+
+            // 2. Jika cache tiada (contoh: baru login kali pertama), barulah tarik dari Supabase
             document.getElementById('loadingModal').style.display = 'flex';
             
-            let countQuery = supabase.from('accounts').select('*', { count: 'exact', head: true });
+            let countQuery = supabase.from('accounts').select('acct', { count: 'exact', head: true });
             if (region) countQuery = countQuery.eq('region', region);
             const { count } = await countQuery;
             
@@ -447,6 +464,7 @@
             if (count && count > 0) {
                 const promises = [];
                 for (let i = 0; i < count; i += 1000) {
+                    // Tarik lajur yang telah anda optimumkan sahaja
                     let fetchQuery = supabase.from('accounts').select('acct, region, area, loc, osb, status');
                     if (region) fetchQuery = fetchQuery.eq('region', region);
                     promises.push(fetchQuery.range(i, i + 999));
@@ -458,6 +476,15 @@
             globalAccounts = allData;
             filteredAccounts = [...globalAccounts];
             
+            // 3. Simpan data yang baru ditarik tadi ke dalam memori browser untuk simpanan F5 nanti
+            sessionStorage.setItem(cacheKey, JSON.stringify(globalAccounts));
+            
+            rebuildRegionsMapFromData();
+            document.getElementById('loadingModal').style.display = 'none';
+        }
+
+        // Fungsi sokongan untuk mengekstrak struktur butang
+        function rebuildRegionsMapFromData() {
             regionsMap = {};
             globalAccounts.forEach(row => {
                 if (row.region && row.area) {
@@ -465,8 +492,6 @@
                     if (!regionsMap[row.region].includes(row.area)) { regionsMap[row.region].push(row.area); }
                 }
             });
-            
-            document.getElementById('loadingModal').style.display = 'none';
         }
 
         function initDashboardView() {
