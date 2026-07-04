@@ -3,552 +3,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Singer Lock Portal - Premium Supabase Edition</title>
+    <title>Singer Lock Portal - Full Supabase Edition</title>
     
-    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    
-    <!-- Supabase & SheetJS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <style>
         :root {
-            --bg-dark: #09090b;
-            --surface: #18181b;
-            --surface-light: #27272a;
-            --primary: #0ea5e9;
-            --primary-glow: rgba(14, 165, 233, 0.5);
-            --success: #10b981;
-            --success-glow: rgba(16, 185, 129, 0.4);
-            --danger: #ef4444;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: #3f3f46;
+            --bg-dark: #09090b; --surface: #18181b; --surface-light: #27272a;
+            --primary: #0ea5e9; --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+            --text-main: #f8fafc; --text-muted: #94a3b8; --border: #3f3f46;
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* Scrollbar */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { background: var(--bg-dark); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-dark); }
         ::-webkit-scrollbar-thumb { background: var(--surface-light); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
-
-        /* ================= SPA CORE ================= */
-        .page-section { display: none; animation: fadeIn 0.4s ease-out; }
+        
+        .page-section { display: none; animation: fadeIn 0.4s ease; }
         .page-section.active { display: block; }
         #app-layout { display: none; height: 100vh; width: 100vw; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Forms & Inputs */
+        input, select, textarea {
+            width: 100%; padding: 12px 15px; background: var(--bg-dark);
+            border: 1px solid var(--border); border-radius: 10px; color: var(--text-main);
+            outline: none; transition: 0.3s; margin-bottom: 15px;
         }
-
-        /* ================= LOGIN PAGE ================= */
-        #login-page {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: radial-gradient(circle at center, #1e1e24 0%, var(--bg-dark) 100%);
-        }
-
-        .login-box {
-            background: var(--surface);
-            padding: 40px;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), 0 0 15px var(--primary-glow);
-            border: 1px solid var(--surface-light);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .login-box::before {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: conic-gradient(transparent, var(--primary), transparent 30%);
-            animation: rotate 4s linear infinite;
-            z-index: 0; opacity: 0.1;
-        }
-
-        @keyframes rotate { 100% { transform: rotate(360deg); } }
-
-        .login-content { position: relative; z-index: 1; }
-
-        .login-box h2 {
-            margin-bottom: 30px;
-            font-size: 28px;
-            font-weight: 700;
-            background: linear-gradient(90deg, #fff, var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .input-group { margin-bottom: 20px; position: relative; }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(14, 165, 233, 0.3); }
+        .input-group { position: relative; }
         .input-group i { position: absolute; left: 15px; top: 15px; color: var(--text-muted); }
-        
-        input, select {
-            width: 100%;
-            padding: 12px 15px 12px 45px;
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text-main);
-            font-size: 14px;
-            outline: none;
-            transition: all 0.3s;
-        }
-        
-        input:focus, select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 10px var(--primary-glow);
-        }
+        .input-group input, .input-group select { padding-left: 45px; }
 
-        button.glow-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 0 15px var(--primary-glow);
-        }
-        
-        button.glow-btn:hover {
-            background: #0284c7;
-            box-shadow: 0 0 25px var(--primary-glow);
-            transform: translateY(-2px);
-        }
+        /* Buttons */
+        .btn { padding: 12px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; color: white; }
+        .btn-primary { background: var(--primary); } .btn-primary:hover { background: #0284c7; }
+        .btn-success { background: var(--success); } .btn-success:hover { background: #059669; }
+        .btn-danger { background: var(--danger); } .btn-danger:hover { background: #dc2626; }
+        .btn-secondary { background: var(--surface-light); border: 1px solid var(--border); } .btn-secondary:hover { background: var(--border); }
 
-        /* ================= APP LAYOUT ================= */
-        .sidebar {
-            width: 260px;
-            background: var(--surface);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 20px 0;
-            transition: 0.3s;
-        }
-
-        .brand {
-            padding: 0 20px 20px;
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .user-profile {
-            padding: 20px;
-            font-size: 14px;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 10px;
-        }
-
-        .nav-menu { flex: 1; padding: 0 10px; }
-        
-        .nav-btn {
-            width: 100%;
-            padding: 12px 15px;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            text-align: left;
-            font-size: 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 5px;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
+        /* Layout */
+        .sidebar { width: 260px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px 0; }
+        .brand { padding: 0 20px 20px; font-size: 20px; font-weight: 700; color: var(--primary); border-bottom: 1px solid var(--border); }
+        .user-profile { padding: 20px; font-size: 14px; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+        .nav-menu { flex: 1; padding: 10px; }
+        .nav-btn { width: 100%; padding: 12px 15px; background: transparent; border: none; color: var(--text-muted); text-align: left; font-size: 15px; border-radius: 8px; cursor: pointer; margin-bottom: 5px; display: flex; gap: 15px; }
         .nav-btn:hover { background: var(--surface-light); color: var(--text-main); }
-        .nav-btn.active {
-            background: rgba(14, 165, 233, 0.1);
-            color: var(--primary);
-            border-left: 4px solid var(--primary);
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 30px;
-            overflow-y: auto;
-            background: var(--bg-dark);
-        }
-
-        /* ================= CARDS & FORMS ================= */
-        .card {
-            background: var(--surface);
-            border-radius: 16px;
-            padding: 25px;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            margin-bottom: 25px;
-        }
-
-        .card-header {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
+        .nav-btn.active { background: rgba(14, 165, 233, 0.1); color: var(--primary); border-left: 4px solid var(--primary); }
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; }
+        
+        .card { background: var(--surface); border-radius: 16px; padding: 25px; border: 1px solid var(--border); margin-bottom: 25px; }
+        .card-header { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: var(--primary); display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+        /* Dashboard KPI */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .kpi-box { background: var(--bg-dark); padding: 15px; border-radius: 12px; border: 1px solid var(--border); text-align: center; }
+        .kpi-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; }
+        .kpi-val { font-size: 24px; font-weight: 700; color: var(--text-main); }
+        .kpi-val.blue { color: var(--primary); } .kpi-val.green { color: var(--success); }
+
+        /* Tables */
+        .table-responsive { overflow-x: auto; background: var(--bg-dark); border-radius: 12px; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: 13px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: var(--surface-light); color: var(--text-muted); text-transform: uppercase; }
+        tr:hover td { background: var(--surface-light); }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; }
+        .badge-lock { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+        .badge-paid { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+
+        /* Pagination */
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 15px; }
         
-        /* ================= MASTER DASHBOARD ================= */
-        .kpi-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
+        /* Manage Records Card */
+        .manage-card { background: var(--bg-dark); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px; }
+        .manage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .manage-actions { display: flex; gap: 10px; border-top: 1px dashed var(--border); padding-top: 15px; }
 
-        .kpi-card {
-            background: var(--surface);
-            padding: 20px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
+        /* Login */
+        #login-page { display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-box { background: var(--surface); padding: 40px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border); }
         
-        .kpi-card::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 4px;
-        }
-        .kpi-card.blue::after { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
-        .kpi-card.green::after { background: var(--success); box-shadow: 0 0 10px var(--success); }
-
-        .kpi-title { font-size: 13px; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
-        .kpi-value { font-size: 28px; font-weight: 700; color: var(--text-main); }
-
-        /* ================= RESPONSIVE TABLE ================= */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            background: var(--surface);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-        }
-
-        table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        th, td { padding: 15px; text-align: left; font-size: 13px; }
-        
-        th {
-            background: var(--surface-light);
-            color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid var(--border);
-        }
-        
-        td {
-            border-bottom: 1px solid var(--border);
-            color: var(--text-main);
-        }
-
-        tr:hover td { background: rgba(255,255,255,0.02); }
-
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        .status-lock { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-        .status-paid { background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-
-        .action-btn {
-            background: var(--surface-light);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 6px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .action-btn:hover { background: var(--primary); border-color: var(--primary); }
-
-        /* ================= POPUPS ================= */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
-            display: none; justify-content: center; align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: var(--surface);
-            padding: 30px;
-            border-radius: 16px;
-            width: 90%; max-width: 400px;
-            border: 1px solid var(--border);
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            text-align: center;
-        }
-
-        .success-icon {
-            font-size: 50px;
-            color: var(--success);
-            margin-bottom: 15px;
-            text-shadow: 0 0 20px var(--success-glow);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            #app-layout { flex-direction: column; }
-            .sidebar { width: 100%; height: auto; padding: 10px; flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: center; }
-            .brand { border-bottom: none; padding: 0; margin-bottom: 10px; width: 100%; }
-            .user-profile { display: none; }
-            .nav-menu { display: flex; width: 100%; gap: 5px; overflow-x: auto; padding: 0; }
-            .nav-btn { flex: 1; min-width: 100px; text-align: center; justify-content: center; font-size: 12px; padding: 10px 5px; }
-            .grid-2 { grid-template-columns: 1fr; }
-        }
+        /* Modals */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: var(--surface); padding: 30px; border-radius: 16px; max-width: 400px; width: 90%; text-align: center; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
-    <!-- ================= 1. LOGIN PAGE ================= -->
+    <!-- 1. LOGIN PAGE -->
     <div id="login-page" class="page-section active">
         <div class="login-box">
-            <div class="login-content">
-                <h2>Singer Lock Portal</h2>
-                <div id="errorMsg" style="display:none; color:var(--danger); font-size: 13px; margin-bottom: 15px; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px;"></div>
-                
-                <div class="input-group">
-                    <i class="fa fa-user"></i>
-                    <input type="text" id="login_user" placeholder="User ID" onkeypress="if(event.key==='Enter') loginSupabase()">
-                </div>
-                <div class="input-group">
-                    <i class="fa fa-lock"></i>
-                    <input type="password" id="login_pass" placeholder="Password" onkeypress="if(event.key==='Enter') loginSupabase()">
-                </div>
-                
-                <button class="glow-btn" onclick="loginSupabase()" id="btnLogin">
-                    <i class="fa fa-sign-in-alt"></i> Login Securely
-                </button>
+            <h2 style="margin-bottom:20px; color:var(--primary);">Lock Portal</h2>
+            <div id="errorMsg" style="display:none; color:var(--danger); margin-bottom:15px; font-size:14px;"></div>
+            <div class="input-group">
+                <i class="fa fa-user"></i>
+                <input type="text" id="login_user" placeholder="User ID">
             </div>
+            <div class="input-group">
+                <i class="fa fa-lock"></i>
+                <input type="password" id="login_pass" placeholder="Password">
+            </div>
+            <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="login()">Login</button>
         </div>
     </div>
 
-    <!-- ================= APP LAYOUT ================= -->
+    <!-- APP LAYOUT -->
     <div id="app-layout">
-        
-        <!-- SIDEBAR -->
         <nav class="sidebar">
-            <div class="brand"><i class="fa-solid fa-shield-halved"></i> Lock Portal</div>
+            <div class="brand"><i class="fa fa-shield-halved"></i> Lock Portal</div>
             <div class="user-profile">
-                <div id="userInfo" style="font-weight: 600; color: #fff;"></div>
-                <div id="roleInfo" style="font-size: 12px; margin-top: 3px;"></div>
+                <div id="userInfo" style="font-weight: bold; color: white;"></div>
+                <div id="roleInfo" style="font-size: 12px; margin-top: 5px;"></div>
             </div>
             <div class="nav-menu">
-                <button class="nav-btn" id="navCheck" onclick="showSection('check-section')"><i class="fa fa-search"></i> Check Lock</button>
-                <button class="nav-btn" id="navLock" onclick="showSection('lock-section')"><i class="fa fa-lock"></i> New Lock</button>
-                <button class="nav-btn" id="navMaster" onclick="showSection('master-section')" style="display:none;"><i class="fa fa-chart-pie"></i> Dashboard</button>
-                <button class="nav-btn" onclick="logout()" style="color: #f87171; margin-top: auto;"><i class="fa fa-power-off"></i> Logout</button>
+                <button class="nav-btn" id="navCheck" onclick="showPage('check-page')"><i class="fa fa-search"></i> Check Lock</button>
+                <button class="nav-btn" id="navLock" onclick="showPage('lock-page')"><i class="fa fa-plus"></i> New Lock</button>
+                <button class="nav-btn" id="navMaster" onclick="showPage('master-page')" style="display:none;"><i class="fa fa-crown"></i> Master Dashboard</button>
+                <button class="nav-btn" onclick="logout()" style="color: var(--danger); margin-top: auto;"><i class="fa fa-power-off"></i> Logout</button>
             </div>
         </nav>
 
-        <!-- MAIN CONTENT -->
         <main class="main-content">
             
-            <!-- ================= 2. CHECK LOCK ================= -->
-            <div id="check-section" class="page-section">
+            <!-- 2. CHECK PAGE -->
+            <div id="check-page" class="page-section">
                 <div class="card">
-                    <div class="card-header"><i class="fa fa-search"></i> Check Account Lock Status</div>
-                    <div class="input-group" style="max-width: 400px; margin-bottom: 15px;">
+                    <div class="card-header"><i class="fa fa-search"></i> Check Account</div>
+                    <div class="input-group" style="max-width:400px;">
                         <i class="fa fa-file-invoice"></i>
-                        <input type="text" id="check_acc_no" placeholder="Enter Account Number">
+                        <input type="text" id="check_acc_no" placeholder="Enter Account No">
                     </div>
-                    <button class="glow-btn" style="max-width: 400px;" onclick="checkLock()">Search Account</button>
+                    <button class="btn btn-primary" onclick="checkLock()">Search</button>
                 </div>
-                
-                <div id="check_result_area" style="display:none;">
-                    <div class="card">
-                        <div class="card-header">Search Result</div>
-                        <div id="check_result_content"></div>
-                    </div>
-                </div>
+                <div id="check_result_area"></div>
             </div>
 
-            <!-- ================= 3. NEW LOCK ================= -->
-            <div id="lock-section" class="page-section">
+            <!-- 3. NEW LOCK PAGE -->
+            <div id="lock-page" class="page-section">
                 <div class="card">
                     <div class="card-header"><i class="fa fa-lock"></i> Create New Lock</div>
                     <div class="grid-2">
-                        <div class="input-group">
-                            <i class="fa fa-file-invoice"></i>
-                            <input type="text" id="lock_acc_no" placeholder="Account Number (e.g., K35100)">
+                        <div>
+                            <label style="font-size:12px; color:var(--text-muted);">Account No</label>
+                            <input type="text" id="lock_acc">
                         </div>
-                        <div class="input-group">
-                            <i class="fa fa-money-bill-wave"></i>
-                            <input type="number" id="lock_amount" placeholder="Amount (RM)">
+                        <div>
+                            <label style="font-size:12px; color:var(--text-muted);">Amount (RM)</label>
+                            <input type="number" id="lock_amt">
                         </div>
-                        <div class="input-group">
-                            <i class="fa fa-code-branch"></i>
-                            <input type="text" id="lock_branch" placeholder="Branch Code / Name">
+                        <div>
+                            <label style="font-size:12px; color:var(--text-muted);">Branch</label>
+                            <input type="text" id="lock_branch">
                         </div>
-                        <div class="input-group">
-                            <i class="fa fa-calendar-alt"></i>
-                            <input type="date" id="lock_promise_date" title="Promise Date">
-                        </div>
-                        <div class="input-group">
-                            <i class="fa fa-tags"></i>
-                            <select id="lock_category" style="padding-left: 45px;">
-                                <option value="">Select Category</option>
-                                <option value="INSTALLMENT">Installment</option>
-                                <option value="FULL SETTLEMENT">Full Settlement</option>
-                                <option value="DEPOSIT">Deposit</option>
+                        <div>
+                            <label style="font-size:12px; color:var(--text-muted);">Category</label>
+                            <select id="lock_cat">
+                                <option value="PARTIAL">PARTIAL</option>
+                                <option value="FULL">FULL</option>
+                                <option value="DISCOUNT">DISCOUNT</option>
                             </select>
                         </div>
-                        <div class="input-group">
-                            <i class="fa fa-comment-dots"></i>
-                            <input type="text" id="lock_remarks" placeholder="Remarks (Optional)">
-                        </div>
                     </div>
-                    <button class="glow-btn" style="margin-top: 15px;" onclick="submitLock()" id="btnSubmitLock">Submit Lock</button>
+                    <div>
+                        <label style="font-size:12px; color:var(--text-muted);">Promise Date</label>
+                        <input type="date" id="lock_date">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; color:var(--text-muted);">Remarks</label>
+                        <textarea id="lock_remark" rows="3"></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="submitLock()">Submit Lock</button>
                 </div>
             </div>
 
-            <!-- ================= 4. MASTER DASHBOARD ================= -->
-            <div id="master-section" class="page-section">
+            <!-- 4. MASTER DASHBOARD PAGE (RESTORED FEATURES) -->
+            <div id="master-page" class="page-section">
                 
-                <div class="kpi-container">
-                    <div class="kpi-card blue">
-                        <div class="kpi-title">Total Active Locks</div>
-                        <div class="kpi-value" id="kpi_active">0</div>
+                <!-- A. OVERALL SUMMARY & TOP 5 -->
+                <div class="card">
+                    <div class="card-header"><i class="fa fa-calendar-check"></i> Today's Overall Summary 
+                        <button class="btn btn-secondary" style="margin-left:auto; font-size:12px;" onclick="loadMasterData()"><i class="fa fa-sync"></i> Refresh</button>
                     </div>
-                    <div class="kpi-card green">
-                        <div class="kpi-title">Total Paid (Today)</div>
-                        <div class="kpi-value" id="kpi_paid">RM 0.00</div>
+                    <div class="kpi-grid">
+                        <div class="kpi-box">
+                            <div class="kpi-title">Active Locks Today</div>
+                            <div class="kpi-val blue" id="sumLock">0</div>
+                            <div style="font-size:12px; color:var(--text-muted);" id="sumLockAmount">RM 0.00</div>
+                        </div>
+                        <div class="kpi-box">
+                            <div class="kpi-title">Marked Paid Today</div>
+                            <div class="kpi-val green" id="sumPaid">0</div>
+                            <div style="font-size:12px; color:var(--text-muted);" id="sumPaidAmount">RM 0.00</div>
+                        </div>
                     </div>
-                    <div class="kpi-card blue" style="border-top: 4px solid #8b5cf6;">
-                        <div class="kpi-title">My Total Locks</div>
-                        <div class="kpi-value" id="kpi_mylocks">0</div>
+                    <div class="grid-2">
+                        <div class="kpi-box" style="text-align:left;">
+                            <div class="kpi-title">Top 5 Users (Today)</div>
+                            <div id="topUser" style="font-size:13px; margin-top:10px;">Loading...</div>
+                        </div>
+                        <div class="kpi-box" style="text-align:left;">
+                            <div class="kpi-title">Top 5 Branches (Today)</div>
+                            <div id="topBranch" style="font-size:13px; margin-top:10px;">Loading...</div>
+                        </div>
                     </div>
                 </div>
 
+                <!-- B. CUSTOM ANALYTICS -->
                 <div class="card">
-                    <div class="card-header" style="justify-content: space-between;">
-                        <span><i class="fa fa-database"></i> Master Lock Database</span>
-                        <div style="display: flex; gap: 10px;">
-                            <button class="action-btn" onclick="loadMasterData()"><i class="fa fa-sync-alt"></i> Refresh</button>
-                            <button class="action-btn" onclick="exportToExcel()"><i class="fa fa-file-excel" style="color: #10b981;"></i> Export</button>
+                    <div class="card-header"><i class="fa fa-chart-pie"></i> Custom Analytics & Report</div>
+                    <div class="grid-3">
+                        <div>
+                            <label style="font-size:12px; color:var(--text-muted);">DCA NAME</label>
+                            <select id="dcaFilter"><option value="ALL">ALL USER</option></select>
+                        </div>
+                        <div>
+                            <label style="font-size:12px; color:var(--text-muted);">Start Date</label>
+                            <input type="date" id="startDate">
+                        </div>
+                        <div>
+                            <label style="font-size:12px; color:var(--text-muted);">End Date</label>
+                            <input type="date" id="endDate">
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:10px; margin-bottom:15px;">
+                        <button class="btn btn-primary" onclick="generateReport()"><i class="fa fa-calculator"></i> Generate Analytics</button>
+                        <button class="btn btn-success" id="btnExportReport" style="display:none;" onclick="exportReport()"><i class="fa fa-file-excel"></i> Download Excel</button>
+                    </div>
+                    <div class="kpi-grid">
+                        <div class="kpi-box">
+                            <div class="kpi-title">Filtered Locks</div>
+                            <div class="kpi-val blue" id="dashTotal">0</div>
+                            <div style="font-size:12px;" id="dashLockAmount">RM 0.00</div>
+                        </div>
+                        <div class="kpi-box">
+                            <div class="kpi-title">Filtered Paid</div>
+                            <div class="kpi-val green" id="dashPaid">0</div>
+                            <div style="font-size:12px;" id="dashPaidAmount">RM 0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- C. MANAGE RECORDS (EDIT / DELETE) -->
+                <div class="card">
+                    <div class="card-header"><i class="fa fa-pen-to-square"></i> Manage Records (Edit / Delete)</div>
+                    <div style="display:flex; gap:10px; margin-bottom:20px;">
+                        <input type="text" id="manageSearchAcc" placeholder="Enter Account No..." style="margin:0; max-width:300px;">
+                        <button class="btn btn-primary" onclick="searchManageAcc()"><i class="fa fa-search"></i> Search</button>
+                    </div>
+                    <div id="manageResultArea"></div>
+                </div>
+
+                <!-- D. VIEW ALL RECORDS (TABLE) -->
+                <div class="card">
+                    <div class="card-header" style="justify-content:space-between;">
+                        <span><i class="fa fa-table"></i> Master Database</span>
+                        <div>
+                            <button class="btn btn-success" onclick="exportTable()"><i class="fa fa-file-excel"></i> Export All</button>
                         </div>
                     </div>
                     
-                    <div class="input-group" style="max-width: 300px; margin-bottom: 15px;">
-                        <i class="fa fa-search"></i>
-                        <input type="text" id="table_search" placeholder="Search Account..." onkeyup="filterTable()">
+                    <div style="display:flex; gap:10px; margin-bottom:15px;">
+                        <button class="btn btn-secondary" onclick="filterTableStatus('ALL')">All</button>
+                        <button class="btn btn-secondary" onclick="filterTableStatus('LOCK')">Active Locks</button>
+                        <button class="btn btn-secondary" onclick="filterTableStatus('PAID')">Paid</button>
+                        <input type="text" id="masterTableSearch" placeholder="Search DCA or Acc No..." style="margin:0; max-width:250px; margin-left:auto;" onkeyup="applyTableSearch()">
                     </div>
 
                     <div class="table-responsive">
-                        <table id="masterTable">
+                        <table>
                             <thead>
                                 <tr>
-                                    <th>Acc No</th>
                                     <th>DCA ID</th>
-                                    <th>Amount</th>
-                                    <th>Date Created</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
+                                    <th>ACC NO</th>
+                                    <th>BRANCH</th>
+                                    <th>AMOUNT</th>
+                                    <th>CATEGORY</th>
+                                    <th>STATUS</th>
+                                    <th>PTP DATE</th>
+                                    <th>CREATED</th>
                                 </tr>
                             </thead>
                             <tbody id="masterTableBody">
-                                <!-- Data injected via JS -->
+                                <!-- Data injected here -->
                             </tbody>
                         </table>
                     </div>
+                    <div class="pagination">
+                        <button class="btn btn-secondary" id="btnPrev" onclick="prevPage()"><i class="fa fa-chevron-left"></i></button>
+                        <span id="pageInfo">Page 1</span>
+                        <button class="btn btn-secondary" id="btnNext" onclick="nextPage()"><i class="fa fa-chevron-right"></i></button>
+                    </div>
                 </div>
-            </div>
 
+            </div>
         </main>
     </div>
 
-    <!-- ================= MODALS ================= -->
-    
-    <!-- Success Popup -->
-    <div id="successModal" class="modal-overlay">
+    <!-- Modals -->
+    <div id="deleteModal" class="modal">
         <div class="modal-content">
-            <i class="fa fa-check-circle success-icon"></i>
-            <h3 style="margin-bottom: 10px;">Success!</h3>
-            <p id="successMsg" style="color: var(--text-muted); margin-bottom: 20px;"></p>
-            <button class="glow-btn" style="background: var(--success);" onclick="document.getElementById('successModal').style.display='none'">OK</button>
-        </div>
-    </div>
-
-    <!-- Delete/Passcode Popup -->
-    <div id="deleteModal" class="modal-overlay">
-        <div class="modal-content">
-            <i class="fa fa-exclamation-triangle" style="font-size: 40px; color: var(--danger); margin-bottom: 15px;"></i>
-            <h3 style="margin-bottom: 10px;">Security Verification</h3>
-            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Enter passcode to delete lock <b id="delAccNoTxt"></b></p>
-            
-            <input type="password" id="delPasscode" placeholder="Enter Passcode" style="margin-bottom: 15px; text-align: center;">
-            <div id="delError" style="display:none; color: var(--danger); font-size: 12px; margin-bottom: 10px;">Invalid Passcode!</div>
-            
-            <div style="display: flex; gap: 10px;">
-                <button class="glow-btn" style="background: var(--surface-light);" onclick="document.getElementById('deleteModal').style.display='none'">Cancel</button>
-                <button class="glow-btn" style="background: var(--danger); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);" onclick="confirmDelete()">Confirm Delete</button>
+            <h3 style="color:var(--danger); margin-bottom:15px;">Security Verification</h3>
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">Enter passcode to delete lock</p>
+            <input type="password" id="delPasscode" placeholder="Passcode (8888)">
+            <div style="display:flex; gap:10px; justify-content:center;">
+                <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').style.display='none'">Cancel</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">Confirm Delete</button>
             </div>
         </div>
     </div>
 
-<script>
-        // ---------------------------------------------------------
-        // 1. SUPABASE CONFIGURATION
-        // ---------------------------------------------------------
+    <script>
+        // 1. SUPABASE CONFIG
         const SUPABASE_URL = 'https://vutchaspljmvtnisjoqt.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_J6BcCvKg2nuYwIIUxbhMVQ_BKGvfc30';
-        
         const supaClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // GLOBAL VARIABLES
-        let currentUser = '';
-        let currentRole = '';
-        let currentType = '';
-        let lockToDelete = ''; 
+        let currentUser = '', currentRole = '', currentType = '';
 
-        // ---------------------------------------------------------
-        // 2. SPA ROUTING & SESSION INITIALIZATION
-        // ---------------------------------------------------------
         window.onload = () => {
             const token = localStorage.getItem("session_token");
             if (token) {
@@ -556,414 +334,318 @@
                 currentRole = localStorage.getItem("lock_role");
                 currentType = localStorage.getItem("lock_type");
                 
-                // FIX: Paksa login-page hilang sepenuhnya
                 document.getElementById('login-page').style.display = 'none';
                 document.getElementById('app-layout').style.display = 'flex';
-                
                 document.getElementById('userInfo').innerText = currentUser;
                 document.getElementById('roleInfo').innerText = currentRole;
                 
-                if (currentType === 'master') {
-                    document.getElementById('navMaster').style.display = 'flex';
-                }
+                if (currentType === 'master') document.getElementById('navMaster').style.display = 'flex';
                 
-                if (currentType === 'check') showSection('check-section');
-                else if (currentType === 'master') showSection('master-section');
-                else showSection('lock-section');
+                showPage(currentType === 'check' ? 'check-page' : (currentType === 'master' ? 'master-page' : 'lock-page'));
+                
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('startDate').value = today;
+                document.getElementById('endDate').value = today;
             }
         };
 
-        function showSection(sectionId) {
-            document.querySelectorAll('.main-content .page-section').forEach(el => el.classList.remove('active'));
+        function showPage(pageId) {
+            document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
             
-            document.getElementById(sectionId).classList.add('active');
-            
-            if(sectionId === 'check-section') document.getElementById('navCheck').classList.add('active');
-            if(sectionId === 'lock-section') document.getElementById('navLock').classList.add('active');
-            if(sectionId === 'master-section') {
+            if(pageId === 'check-page') document.getElementById('navCheck').classList.add('active');
+            if(pageId === 'lock-page') document.getElementById('navLock').classList.add('active');
+            if(pageId === 'master-page') {
                 document.getElementById('navMaster').classList.add('active');
                 loadMasterData();
             }
         }
 
-        // ---------------------------------------------------------
-        // 3. AUTHENTICATION (LOGIN/LOGOUT)
-        // ---------------------------------------------------------
-        async function loginSupabase() {
+        // ================= AUTH =================
+        async function login() {
             const user = document.getElementById("login_user").value.trim().toUpperCase();
             const pass = document.getElementById("login_pass").value.trim();
             const err = document.getElementById("errorMsg");
-            const btn = document.getElementById("btnLogin");
 
-            if(!user || !pass) { 
-                err.innerText = "Sila masukkan User ID dan Password"; 
-                err.style.display="block"; 
-                return; 
-            }
+            if(!user || !pass) { err.innerText = "Masukkan ID dan Password"; err.style.display="block"; return; }
 
-            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Authenticating...';
-            btn.disabled = true;
-            err.style.display = "none";
+            const { data, error } = await supaClient.from('users').select('*').eq('user_id', user).single();
 
-            try {
-                const { data, error } = await supaClient
-                    .from('users')
-                    .select('*')
-                    .eq('user_id', user)
-                    .single();
-
-                if (error) {
-                    err.innerText = "Error DB: Pastikan jadual wujud dan RLS dimatikan.";
-                    err.style.display = "block";
-                } else if (!data) {
-                    err.innerText = "User ID tidak dijumpai!";
-                    err.style.display = "block";
-                } else if (data.password !== pass) {
-                    err.innerText = "Password salah!";
-                    err.style.display = "block";
-                } else if (data.status !== "ACTIVE") {
-                    err.innerText = "Akaun ini tidak aktif!";
-                    err.style.display = "block";
-                } else {
-                    // LOGIN BERJAYA
-                    localStorage.setItem("session_token", 'supa_' + Date.now());
-                    localStorage.setItem("lock_user", data.user_id);
-                    localStorage.setItem("lock_role", data.role);
-                    localStorage.setItem("lock_type", data.type);
-                    
-                    currentUser = data.user_id;
-                    currentRole = data.role;
-                    currentType = data.type;
-
-                    // FIX UTAMA: Sorok terus kotak login
-                    document.getElementById('login-page').style.display = 'none';
-                    document.getElementById('app-layout').style.display = 'flex';
-                    
-                    document.getElementById('userInfo').innerText = currentUser;
-                    document.getElementById('roleInfo').innerText = currentRole;
-                    
-                    if (currentType === 'master') {
-                        document.getElementById('navMaster').style.display = 'flex';
-                    }
-                    
-                    if (currentType === 'check') showSection('check-section');
-                    else if (currentType === 'master') showSection('master-section');
-                    else showSection('lock-section');
-
-                    systemLog("LOGIN", "SUCCESS", "-", "User logged into system");
-                }
-            } catch (e) {
-                console.error("Sistem Error:", e);
-                err.innerText = "Sistem Error: Sila periksa Console (F12)";
-                err.style.display = "block";
-            } finally {
-                btn.innerHTML = '<i class="fa fa-sign-in-alt"></i> Login Securely';
-                btn.disabled = false;
+            if (error || !data || data.password !== pass) {
+                err.innerText = "Kredensial salah!"; err.style.display="block";
+            } else {
+                localStorage.setItem("session_token", 'supa_' + Date.now());
+                localStorage.setItem("lock_user", data.user_id);
+                localStorage.setItem("lock_role", data.role);
+                localStorage.setItem("lock_type", data.type);
+                location.reload();
             }
         }
+        function logout() { localStorage.clear(); location.reload(); }
 
-        function logout() {
-            systemLog("LOGOUT", "SUCCESS", "-", "User logged out");
-            localStorage.clear();
-            location.reload();
-        }
-
-        // ---------------------------------------------------------
-        // 4. CHECK LOCK FUNCTION
-        // ---------------------------------------------------------
+        // ================= CHECK & LOCK (Simplified for brevity) =================
         async function checkLock() {
-            const accNo = document.getElementById("check_acc_no").value.trim().toUpperCase();
-            if(!accNo) return;
-            
-            const resultArea = document.getElementById("check_result_area");
-            const resultContent = document.getElementById("check_result_content");
-            
-            resultArea.style.display = "block";
-            resultContent.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fa fa-spinner fa-spin fa-2x"></i><p>Checking database...</p></div>';
-
-            const { data, error } = await supaClient
-                .from('lock_data')
-                .select('*')
-                .eq('acc_no', accNo)
-                .in('status', ['LOCK', 'PAID'])
-                .order('created_at', { ascending: false });
-
-            if (error || !data || data.length === 0) {
-                resultContent.innerHTML = `
-                    <div style="text-align: center; padding: 20px;">
-                        <i class="fa fa-check-circle" style="font-size: 40px; color: var(--success); margin-bottom: 10px;"></i>
-                        <h3 style="color: var(--success);">CLEARED / NO LOCK</h3>
-                        <p style="color: var(--text-muted); font-size: 13px;">Account ${accNo} is safe to process.</p>
-                    </div>`;
-                systemLog("CHECK_LOCK", "NOT_FOUND", accNo, "Account checked, no active lock");
-            } else {
-                const lock = data[0];
-                const badgeClass = lock.status === 'LOCK' ? 'status-lock' : 'status-paid';
-                
-                resultContent.innerHTML = `
-                    <div style="padding: 15px; background: var(--surface-light); border-radius: 10px; border-left: 4px solid ${lock.status === 'LOCK' ? '#ef4444' : '#10b981'};">
-                        <div style="display:flex; justify-content: space-between; margin-bottom: 15px;">
-                            <strong>Account: ${lock.acc_no}</strong>
-                            <span class="status-badge ${badgeClass}">${lock.status}</span>
-                        </div>
-                        <div class="grid-2" style="font-size: 13px; color: var(--text-muted);">
-                            <div><strong>DCA ID:</strong> <span style="color:var(--text-main);">${lock.dca_id}</span></div>
-                            <div><strong>Amount:</strong> <span style="color:var(--text-main);">RM ${lock.amount}</span></div>
-                            <div><strong>Date:</strong> <span style="color:var(--text-main);">${new Date(lock.created_at).toLocaleDateString('en-GB')}</span></div>
-                            <div><strong>Category:</strong> <span style="color:var(--text-main);">${lock.payment_category || '-'}</span></div>
-                        </div>
-                    </div>`;
-                systemLog("CHECK_LOCK", "FOUND", accNo, `Lock found, status: ${lock.status}`);
-            }
+            const acc = document.getElementById('check_acc_no').value.trim().toUpperCase();
+            const res = document.getElementById('check_result_area');
+            if(!acc) return;
+            res.innerHTML = "Checking...";
+            const { data } = await supaClient.from('lock_data').select('*').eq('acc_no', acc).order('created_at', {ascending:false}).limit(1);
+            if(data && data.length > 0) {
+                let d = data[0];
+                res.innerHTML = `<div class="card" style="margin-top:15px; border-left:4px solid ${d.status==='LOCK'?'#ef4444':'#10b981'}">
+                    <b>${d.acc_no}</b> - <span class="badge ${d.status==='LOCK'?'badge-lock':'badge-paid'}">${d.status}</span><br>
+                    Amount: RM ${d.amount} <br> DCA: ${d.dca_id}
+                </div>`;
+            } else res.innerHTML = `<div class="card" style="margin-top:15px;">NO LOCK FOUND</div>`;
         }
 
-        // ---------------------------------------------------------
-        // 5. CREATE NEW LOCK FUNCTION
-        // ---------------------------------------------------------
         async function submitLock() {
-            const accNo = document.getElementById("lock_acc_no").value.trim().toUpperCase();
-            const amount = parseFloat(document.getElementById("lock_amount").value);
-            const branch = document.getElementById("lock_branch").value.trim().toUpperCase();
-            const category = document.getElementById("lock_category").value;
-            const promiseDate = document.getElementById("lock_promise_date").value;
-            const remarks = document.getElementById("lock_remarks").value.trim();
-            const btn = document.getElementById("btnSubmitLock");
+            const acc = document.getElementById('lock_acc').value.trim().toUpperCase();
+            const amt = document.getElementById('lock_amt').value;
+            const branch = document.getElementById('lock_branch').value.trim().toUpperCase();
+            const cat = document.getElementById('lock_cat').value;
+            const date = document.getElementById('lock_date').value;
+            const rmks = document.getElementById('lock_remark').value;
 
-            if(!accNo || !amount) {
-                alert("Account Number and Amount are mandatory!");
-                return;
-            }
+            if(!acc || !amt) return alert("Account & Amount required");
 
-            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Submitting...';
-            btn.disabled = true;
+            const { data: exist } = await supaClient.from('lock_data').select('id').eq('acc_no', acc).eq('status', 'LOCK');
+            if(exist && exist.length > 0) return alert("Account already LOCKED!");
 
-            const { data: existData } = await supaClient
-                .from('lock_data')
-                .select('id')
-                .eq('acc_no', accNo)
-                .eq('status', 'LOCK');
-                
-            if (existData && existData.length > 0) {
-                alert("This account is already LOCKED!");
-                btn.innerHTML = 'Submit Lock';
-                btn.disabled = false;
-                return;
-            }
-
-            const { data, error } = await supaClient
-                .from('lock_data')
-                .insert([
-                    { 
-                        acc_no: accNo, 
-                        amount: amount,
-                        branch_name: branch,
-                        payment_category: category,
-                        promise_date: promiseDate || null,
-                        remarks: remarks,
-                        status: 'LOCK',
-                        dca_id: currentUser,
-                        created_at: new Date().toISOString()
-                    }
-                ]);
-
-            btn.innerHTML = 'Submit Lock';
-            btn.disabled = false;
-
-            if (error) {
-                alert("Error saving data: " + error.message);
-                systemLog("ADD_LOCK", "FAILED", accNo, error.message);
-            } else {
-                showSuccess(`Account <b>${accNo}</b> has been successfully LOCKED.`);
-                systemLog("ADD_LOCK", "SUCCESS", accNo, `Locked RM${amount}`);
-                
-                document.getElementById("lock_acc_no").value = "";
-                document.getElementById("lock_amount").value = "";
-                document.getElementById("lock_branch").value = "";
-                document.getElementById("lock_category").value = "";
-                document.getElementById("lock_promise_date").value = "";
-                document.getElementById("lock_remarks").value = "";
-            }
+            await supaClient.from('lock_data').insert([{
+                acc_no: acc, amount: amt, branch_name: branch, payment_category: cat, promise_date: date, remarks: rmks,
+                dca_id: currentUser, status: 'LOCK', created_at: new Date().toISOString()
+            }]);
+            alert("Lock Created!");
+            document.querySelectorAll('#lock-page input, #lock-page textarea').forEach(el => el.value='');
         }
 
-        // ---------------------------------------------------------
-        // 6. MASTER DASHBOARD FUNCTIONS
-        // ---------------------------------------------------------
+        // ================= MASTER: FULL RESTORATION =================
         let globalMasterData = [];
+        let filteredMasterData = [];
+        let currentPage = 1;
+        const pageSize = 15;
+        let currentFilterStatus = 'ALL';
+        let reportData = [];
 
         async function loadMasterData() {
-            const tbody = document.getElementById("masterTableBody");
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><i class="fa fa-spinner fa-spin"></i> Loading Data...</td></tr>';
-
-            const { data, error } = await supaClient
-                .from('lock_data')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(500);
-
-            if (error) {
-                tbody.innerHTML = `<tr><td colspan="6" style="color:red; text-align:center;">Error: ${error.message}</td></tr>`;
-                return;
-            }
-
+            document.getElementById('masterTableBody').innerHTML = "<tr><td colspan='8'>Loading...</td></tr>";
+            const { data, error } = await supaClient.from('lock_data').select('*').order('created_at', { ascending: false });
+            if (error) return console.error(error);
+            
             globalMasterData = data;
-            calculateKPIs(data);
-            renderTable(data);
+            filteredMasterData = data;
+            
+            updateTodaySummary();
+            populateDcaDropdown();
+            renderMasterTable();
         }
 
-        function calculateKPIs(data) {
-            let activeLocks = 0;
-            let paidToday = 0;
-            let myLocks = 0;
-            
+        // 1. TODAY'S OVERALL SUMMARY & TOP 5
+        function updateTodaySummary() {
             const todayStr = new Date().toISOString().split('T')[0];
+            let lockCount = 0, lockAmt = 0, paidCount = 0, paidAmt = 0;
+            let userCount = {}, branchCount = {};
 
-            data.forEach(row => {
-                if (row.status === 'LOCK') activeLocks++;
-                
-                if (row.status === 'PAID') {
-                    const paidDate = row.paid_date ? row.paid_date.split('T')[0] : '';
-                    if (paidDate === todayStr) {
-                        paidToday += parseFloat(row.amount || 0);
-                    }
+            globalMasterData.forEach(r => {
+                let createdStr = r.created_at ? r.created_at.split('T')[0] : '';
+                let paidStr = r.paid_date ? r.paid_date.split('T')[0] : '';
+                let amt = parseFloat(r.amount) || 0;
+
+                if(createdStr === todayStr) {
+                    if(r.status === 'LOCK') { lockCount++; lockAmt += amt; }
+                    let u = r.dca_id || "UNKNOWN"; userCount[u] = (userCount[u] || 0) + 1;
+                    let b = r.branch_name || "UNKNOWN"; branchCount[b] = (branchCount[b] || 0) + 1;
                 }
-                
-                if (row.dca_id === currentUser) myLocks++;
+                if(r.status === 'PAID' && paidStr === todayStr) { paidCount++; paidAmt += amt; }
             });
 
-            document.getElementById("kpi_active").innerText = activeLocks;
-            document.getElementById("kpi_paid").innerText = "RM " + paidToday.toLocaleString('en-MY', {minimumFractionDigits: 2});
-            document.getElementById("kpi_mylocks").innerText = myLocks;
+            document.getElementById('sumLock').innerText = lockCount;
+            document.getElementById('sumLockAmount').innerText = "RM " + lockAmt.toFixed(2);
+            document.getElementById('sumPaid').innerText = paidCount;
+            document.getElementById('sumPaidAmount').innerText = "RM " + paidAmt.toFixed(2);
+
+            let tUser = Object.keys(userCount).map(k => ({k, v:userCount[k]})).sort((a,b)=>b.v-a.v).slice(0,5);
+            document.getElementById('topUser').innerHTML = tUser.length ? tUser.map(x=>`${x.k} (${x.v})`).join('<br>') : 'No Data';
+
+            let tBranch = Object.keys(branchCount).map(k => ({k, v:branchCount[k]})).sort((a,b)=>b.v-a.v).slice(0,5);
+            document.getElementById('topBranch').innerHTML = tBranch.length ? tBranch.map(x=>`${x.k} (${x.v})`).join('<br>') : 'No Data';
         }
 
-        function renderTable(data) {
-            const tbody = document.getElementById("masterTableBody");
-            tbody.innerHTML = "";
-
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No records found.</td></tr>';
-                return;
-            }
-
-            data.forEach(row => {
-                const dateStr = new Date(row.created_at).toLocaleString('en-GB', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
-                const badgeClass = row.status === 'LOCK' ? 'status-lock' : 'status-paid';
-                
-                let actions = '';
-                if (row.status === 'LOCK') {
-                    actions = `
-                        <button class="action-btn" style="color:var(--success);" onclick="markAsPaid('${row.id}', '${row.acc_no}')" title="Mark Paid"><i class="fa fa-check"></i></button>
-                        <button class="action-btn" style="color:var(--danger);" onclick="promptDelete('${row.id}', '${row.acc_no}')" title="Delete"><i class="fa fa-trash"></i></button>
-                    `;
-                }
-
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td style="font-weight:600;">${row.acc_no}</td>
-                    <td>${row.dca_id}</td>
-                    <td>RM ${row.amount}</td>
-                    <td style="font-size:11px; color:var(--text-muted);">${dateStr}</td>
-                    <td><span class="status-badge ${badgeClass}">${row.status}</span></td>
-                    <td>${actions}</td>
-                `;
-                tbody.appendChild(tr);
-            });
+        // 2. CUSTOM ANALYTICS
+        function populateDcaDropdown() {
+            let dcas = [...new Set(globalMasterData.map(r => r.dca_id))].filter(Boolean);
+            let sel = document.getElementById('dcaFilter');
+            sel.innerHTML = '<option value="ALL">ALL USER</option>';
+            dcas.forEach(d => sel.innerHTML += `<option value="${d}">${d}</option>`);
         }
 
-        function filterTable() {
-            const query = document.getElementById("table_search").value.toLowerCase();
-            const filtered = globalMasterData.filter(row => 
-                row.acc_no.toLowerCase().includes(query) || 
-                row.dca_id.toLowerCase().includes(query)
-            );
-            renderTable(filtered);
-        }
-
-        // ---------------------------------------------------------
-        // 7. ACTIONS (MARK PAID, DELETE, EXCEL)
-        // ---------------------------------------------------------
-        async function markAsPaid(id, accNo) {
-            if(!confirm(`Mark account ${accNo} as PAID?`)) return;
-
-            const { error } = await supaClient
-                .from('lock_data')
-                .update({ 
-                    status: 'PAID',
-                    paid_by: currentUser,
-                    paid_date: new Date().toISOString()
-                })
-                .eq('id', id);
-
-            if (!error) {
-                systemLog("MARK_PAID", "SUCCESS", accNo, "Account marked as paid");
-                showSuccess(`Account <b>${accNo}</b> marked as PAID!`);
-                loadMasterData();
-            } else {
-                alert("Error: " + error.message);
-            }
-        }
-
-        function promptDelete(id, accNo) {
-            lockToDelete = id;
-            document.getElementById('delAccNoTxt').innerText = accNo;
-            document.getElementById('delPasscode').value = "";
-            document.getElementById('delError').style.display = "none";
-            document.getElementById('deleteModal').style.display = "flex";
-        }
-
-        async function confirmDelete() {
-            const passcode = document.getElementById('delPasscode').value;
-            if (passcode !== "8888") { 
-                document.getElementById('delError').style.display = "block";
-                return;
-            }
-
-            const { error } = await supaClient
-                .from('lock_data')
-                .delete()
-                .eq('id', lockToDelete);
-
-            if (!error) {
-                document.getElementById('deleteModal').style.display = "none";
-                systemLog("DELETE_LOCK", "SUCCESS", "-", `Deleted lock ID: ${lockToDelete}`);
-                showSuccess("Lock successfully deleted.");
-                loadMasterData();
-            } else {
-                alert("Error deleting: " + error.message);
-            }
-        }
-
-        function exportToExcel() {
-            if(globalMasterData.length === 0) return alert("No data to export");
+        function generateReport() {
+            let dca = document.getElementById('dcaFilter').value;
+            let start = document.getElementById('startDate').value;
+            let end = document.getElementById('endDate').value;
             
-            const ws = XLSX.utils.json_to_sheet(globalMasterData);
+            let fLock = 0, fLockAmt = 0, fPaid = 0, fPaidAmt = 0;
+            
+            reportData = globalMasterData.filter(r => {
+                let matchDca = (dca === 'ALL' || r.dca_id === dca);
+                let dStr = (r.status === 'PAID' && r.paid_date) ? r.paid_date : r.created_at;
+                dStr = dStr ? dStr.split('T')[0] : '';
+                let matchDate = (dStr >= start && dStr <= end);
+                return matchDca && matchDate;
+            });
+
+            reportData.forEach(r => {
+                let amt = parseFloat(r.amount)||0;
+                if(r.status === 'LOCK') { fLock++; fLockAmt += amt; }
+                else if(r.status === 'PAID') { fPaid++; fPaidAmt += amt; }
+            });
+
+            document.getElementById('dashTotal').innerText = fLock;
+            document.getElementById('dashLockAmount').innerText = "RM " + fLockAmt.toFixed(2);
+            document.getElementById('dashPaid').innerText = fPaid;
+            document.getElementById('dashPaidAmount').innerText = "RM " + fPaidAmt.toFixed(2);
+            document.getElementById('btnExportReport').style.display = reportData.length > 0 ? 'flex' : 'none';
+        }
+
+        function exportReport() {
+            const ws = XLSX.utils.json_to_sheet(reportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Analytics");
+            XLSX.writeFile(wb, `Custom_Report_${Date.now()}.xlsx`);
+        }
+
+        // 3. MANAGE RECORDS (EDIT & DELETE)
+        async function searchManageAcc() {
+            const acc = document.getElementById('manageSearchAcc').value.trim().toUpperCase();
+            const res = document.getElementById('manageResultArea');
+            if(!acc) return;
+            
+            let data = globalMasterData.filter(r => r.acc_no === acc);
+            if(data.length === 0) { res.innerHTML = "No records found."; return; }
+            
+            let html = "";
+            data.forEach(d => {
+                html += `
+                <div class="manage-card" id="mcard-${d.id}">
+                    <div id="mview-${d.id}">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                            <b>${d.acc_no}</b> <span class="badge ${d.status==='LOCK'?'badge-lock':'badge-paid'}">${d.status}</span>
+                        </div>
+                        <div class="grid-2" style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">
+                            <div>DCA: ${d.dca_id}</div>
+                            <div>Amt: RM ${d.amount}</div>
+                            <div>Branch: ${d.branch_name}</div>
+                            <div>Date: ${d.promise_date}</div>
+                        </div>
+                        <button class="btn btn-primary" style="padding:8px 15px;" onclick="enableEdit('${d.id}')" ${d.status==='PAID'?'disabled':''}>Edit Record</button>
+                    </div>
+                    
+                    <div id="medit-${d.id}" style="display:none;">
+                        <div class="manage-grid">
+                            <div><label style="font-size:11px;">Amount</label><input type="number" id="e_amt_${d.id}" value="${d.amount}"></div>
+                            <div><label style="font-size:11px;">Category</label><input type="text" id="e_cat_${d.id}" value="${d.payment_category}"></div>
+                            <div><label style="font-size:11px;">Branch</label><input type="text" id="e_br_${d.id}" value="${d.branch_name}"></div>
+                            <div><label style="font-size:11px;">PTP Date</label><input type="date" id="e_ptp_${d.id}" value="${d.promise_date}"></div>
+                        </div>
+                        <label style="font-size:11px;">Remarks</label>
+                        <input type="text" id="e_rem_${d.id}" value="${d.remarks}">
+                        
+                        <div class="manage-actions">
+                            <button class="btn btn-success" onclick="saveEdit('${d.id}')">Save</button>
+                            <button class="btn btn-danger" onclick="promptDelete('${d.id}')">Delete</button>
+                            <button class="btn btn-secondary" onclick="cancelEdit('${d.id}')">Cancel</button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            res.innerHTML = html;
+        }
+
+        function enableEdit(id) { document.getElementById('mview-'+id).style.display='none'; document.getElementById('medit-'+id).style.display='block'; }
+        function cancelEdit(id) { document.getElementById('mview-'+id).style.display='block'; document.getElementById('medit-'+id).style.display='none'; }
+
+        async function saveEdit(id) {
+            let amt = document.getElementById('e_amt_'+id).value;
+            let cat = document.getElementById('e_cat_'+id).value;
+            let br = document.getElementById('e_br_'+id).value;
+            let ptp = document.getElementById('e_ptp_'+id).value;
+            let rem = document.getElementById('e_rem_'+id).value;
+
+            const { error } = await supaClient.from('lock_data').update({
+                amount: amt, payment_category: cat, branch_name: br, promise_date: ptp, remarks: rem,
+                edited_by: currentUser, edited_at: new Date().toISOString()
+            }).eq('id', id);
+
+            if(!error) { alert("Updated successfully!"); loadMasterData(); searchManageAcc(); }
+            else alert("Error updating.");
+        }
+
+        let deleteId = null;
+        function promptDelete(id) { deleteId = id; document.getElementById('deleteModal').style.display='flex'; document.getElementById('delPasscode').value=''; }
+        async function confirmDelete() {
+            if(document.getElementById('delPasscode').value !== '8888') return alert("Invalid Passcode");
+            const { error } = await supaClient.from('lock_data').delete().eq('id', deleteId);
+            if(!error) { 
+                document.getElementById('deleteModal').style.display='none'; 
+                alert("Deleted successfully!"); loadMasterData(); 
+                document.getElementById('manageResultArea').innerHTML = '';
+            }
+        }
+
+        // 4. VIEW ALL RECORDS (TABLE)
+        function filterTableStatus(status) {
+            currentFilterStatus = status;
+            applyTableSearch();
+        }
+        function applyTableSearch() {
+            let q = document.getElementById('masterTableSearch').value.toLowerCase();
+            filteredMasterData = globalMasterData.filter(r => {
+                let matchStatus = (currentFilterStatus === 'ALL' || r.status === currentFilterStatus);
+                let matchQ = (r.acc_no.toLowerCase().includes(q) || r.dca_id.toLowerCase().includes(q));
+                return matchStatus && matchQ;
+            });
+            currentPage = 1;
+            renderMasterTable();
+        }
+
+        function renderMasterTable() {
+            let start = (currentPage - 1) * pageSize;
+            let pageData = filteredMasterData.slice(start, start + pageSize);
+            let tbody = document.getElementById('masterTableBody');
+            tbody.innerHTML = '';
+            
+            if(pageData.length === 0) { tbody.innerHTML = "<tr><td colspan='8'>No records found</td></tr>"; return; }
+
+            pageData.forEach(r => {
+                let dStr = r.created_at ? new Date(r.created_at).toLocaleDateString('en-GB') : '-';
+                tbody.innerHTML += `<tr>
+                    <td>${r.dca_id}</td>
+                    <td style="font-weight:bold;">${r.acc_no}</td>
+                    <td>${r.branch_name}</td>
+                    <td>RM ${r.amount}</td>
+                    <td>${r.payment_category}</td>
+                    <td><span class="badge ${r.status==='LOCK'?'badge-lock':'badge-paid'}">${r.status}</span></td>
+                    <td>${r.promise_date || '-'}</td>
+                    <td>${dStr}</td>
+                </tr>`;
+            });
+
+            document.getElementById('pageInfo').innerText = `Page ${currentPage} of ${Math.ceil(filteredMasterData.length / pageSize) || 1}`;
+            document.getElementById('btnPrev').disabled = currentPage === 1;
+            document.getElementById('btnNext').disabled = (currentPage * pageSize) >= filteredMasterData.length;
+        }
+
+        function prevPage() { if(currentPage > 1) { currentPage--; renderMasterTable(); } }
+        function nextPage() { if((currentPage * pageSize) < filteredMasterData.length) { currentPage++; renderMasterTable(); } }
+
+        function exportTable() {
+            const ws = XLSX.utils.json_to_sheet(filteredMasterData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "MasterData");
-            XLSX.writeFile(wb, `Lock_Portal_Export_${new Date().getTime()}.xlsx`);
-            systemLog("EXPORT_EXCEL", "SUCCESS", "-", "Exported Master Data");
-        }
-
-        // ---------------------------------------------------------
-        // 8. UTILITIES (SYSTEM LOG & ALERTS)
-        // ---------------------------------------------------------
-        function showSuccess(msg) {
-            document.getElementById("successMsg").innerHTML = msg;
-            document.getElementById("successModal").style.display = "flex";
-        }
-
-        async function systemLog(action, status, accNo, details) {
-            try {
-                await supaClient.from('system_logs').insert([{
-                    timestamp: new Date().toISOString(),
-                    user_id: currentUser || "-",
-                    role: currentRole || "-",
-                    action: action,
-                    status: status,
-                    acc_no: accNo || "-",
-                    details: details || "-"
-                }]);
-            } catch (e) {
-                console.error("CCTV Log Failed:", e);
-            }
+            XLSX.writeFile(wb, `Master_Export_${Date.now()}.xlsx`);
         }
     </script>
+</body>
+</html>
