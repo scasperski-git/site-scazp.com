@@ -588,8 +588,7 @@
             }
         }
 
-        // ---------------------------------------------------------
-        // 3. AUTHENTICATION (LOGIN/LOGOUT)
+        // 3. AUTHENTICATION (LOGIN/LOGOUT) - FIXED VERSION
         // ---------------------------------------------------------
         async function loginSupabase() {
             const user = document.getElementById("login_user").value.trim().toUpperCase();
@@ -598,42 +597,78 @@
             const btn = document.getElementById("btnLogin");
 
             if(!user || !pass) { 
-                err.innerText = "Please enter User ID and Password"; 
-                err.style.display="block"; 
+                err.innerText = "Sila masukkan User ID dan Password"; 
+                err.style.display = "block"; 
                 return; 
             }
 
+            // Ubah butang jadi loading
             btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Authenticating...';
             btn.disabled = true;
+            err.style.display = "none"; // Sorok error lama
 
             try {
-                // Guna supaClient.from
+                console.log("Mencari user di Supabase:", user);
+                
                 const { data, error } = await supaClient
                     .from('users')
                     .select('*')
                     .eq('user_id', user)
                     .single();
 
-                if (error || !data || data.password !== pass) {
-                    err.innerText = "Invalid credentials!";
+                // Semakan ralat yang terperinci
+                if (error) {
+                    console.error("Supabase Error:", error);
+                    err.innerText = "Error DB: Pastikan jadual 'users' wujud dan RLS dimatikan.";
+                    err.style.display = "block";
+                } else if (!data) {
+                    err.innerText = "User ID tidak dijumpai dalam database!";
+                    err.style.display = "block";
+                } else if (data.password !== pass) {
+                    err.innerText = "Password yang dimasukkan salah!";
                     err.style.display = "block";
                 } else if (data.status !== "ACTIVE") {
-                    err.innerText = "Account is inactive!";
+                    err.innerText = "Akaun ini tidak aktif!";
                     err.style.display = "block";
                 } else {
+                    // JIKA BERJAYA LOGIN
+                    console.log("Login Berjaya!", data);
+                    
+                    // 1. Simpan sesi ke memori
                     localStorage.setItem("session_token", 'supa_' + Date.now());
                     localStorage.setItem("lock_user", data.user_id);
                     localStorage.setItem("lock_role", data.role);
                     localStorage.setItem("lock_type", data.type);
                     
+                    // 2. Kemaskini variable global
+                    currentUser = data.user_id;
+                    currentRole = data.role;
+                    currentType = data.type;
+
+                    // 3. Transisi UI secara langsung (Tanpa reload!)
+                    document.getElementById('login-page').classList.remove('active');
+                    document.getElementById('app-layout').style.display = 'flex';
+                    document.getElementById('userInfo').innerText = currentUser;
+                    document.getElementById('roleInfo').innerText = currentRole;
+                    
+                    if (currentType === 'master') {
+                        document.getElementById('navMaster').style.display = 'flex';
+                    }
+                    
+                    // 4. Buka halaman mengikut jenis pengguna
+                    if (currentType === 'check') showSection('check-section');
+                    else if (currentType === 'master') showSection('master-section');
+                    else showSection('lock-section');
+
+                    // 5. Rekod log secara senyap (tidak ganggu login)
                     systemLog("LOGIN", "SUCCESS", "-", "User logged into system");
-                    location.reload();
                 }
             } catch (e) {
-                console.error(e);
-                err.innerText = "System error occurred.";
+                console.error("Sistem Crash:", e);
+                err.innerText = "Sistem Error: Sila periksa Console (F12)";
                 err.style.display = "block";
             } finally {
+                // Kembalikan butang ke asal
                 btn.innerHTML = '<i class="fa fa-sign-in-alt"></i> Login Securely';
                 btn.disabled = false;
             }
