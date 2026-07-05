@@ -182,9 +182,10 @@
             </div>
         </div>
 
-        <div class="nav-tabs" id="master-nav-tabs">
+<div class="nav-tabs" id="master-nav-tabs">
             <button class="nav-btn active" id="tab-dash" onclick="switchTab('dashboard')">Dashboard</button>
             <button class="nav-btn" id="tab-settings" onclick="switchTab('settings')">User Settings</button>
+            <button class="nav-btn" id="tab-report" onclick="switchTab('report')" style="display: none;">Report Center</button>
         </div>
 
         <div id="dashboard-panel" class="main-panel">
@@ -293,7 +294,25 @@
                                 <th>TINDAKAN</th> 
                             </tr>
                         </thead>
-                        <tbody id="users-table-body">
+<tbody id="users-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div> <div id="report-panel" class="main-panel" style="display: none;">
+            <div class="settings-box" style="max-width: 100%;">
+                <h2>Daily Export Queue (Senarai 30 Hari Terkini)</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="text-align: center; width: 120px;">TARIKH</th>
+                                <th style="text-align: center;">STATUS EXPORT</th>
+                                <th style="text-align: center; width: 150px;">TINDAKAN</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-table-body">
+                            <tr><td colspan="3" style="text-align:center;">Memuatkan pangkalan data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -593,15 +612,21 @@ window.handleLogout = function() {
             });
         }
         
-        function initDashboardView() {
-            if (currentUser.role === 'master') {
+function initDashboardView() {
+            if (currentUser.role === 'master' || currentUser.role === 'super') {
                 document.getElementById('master-nav-tabs').style.display = 'flex';
                 document.getElementById('upload-action-container').style.display = 'block';
                 document.getElementById('region-filters-container').style.display = 'block';
                 document.getElementById('area-filters-container').style.display = 'none';
+                
+                // Hanya SUPER nampak butang Report Center
+                document.getElementById('tab-report').style.display = currentUser.role === 'super' ? 'block' : 'none';
+
                 renderRegionSelectionUI(); 
                 applyFilterAndRender(); 
                 fetchAndRenderUsers();
+                
+                if(currentUser.role === 'super') renderReportCenter(); 
             } else {
                 document.getElementById('master-nav-tabs').style.display = 'none';
                 document.getElementById('upload-action-container').style.display = 'none';
@@ -609,7 +634,6 @@ window.handleLogout = function() {
                 document.getElementById('area-filters-container').style.display = 'block';
                 
                 currentRegion = currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null;
-                
                 renderAreaSelectionUI(currentRegion);
                 applyFilterAndRender();
             }
@@ -775,11 +799,9 @@ window.handleLogout = function() {
         }
 
 window.switchTab = function(target) {
-            // --- SEKATAN KESELAMATAN KHAS ---
-            // Jika user cuba buka tab settings tapi dia bukan master, tendang dia balik ke dashboard!
-            if (target === 'settings' && currentUser.role !== 'master') {
-                target = 'dashboard';
-            }
+            // SEKATAN KESELAMATAN KHAS
+            if (target === 'settings' && (currentUser.role !== 'master' && currentUser.role !== 'super')) target = 'dashboard';
+            if (target === 'report' && currentUser.role !== 'super') target = 'dashboard';
 
             document.querySelectorAll('.main-panel').forEach(p => p.style.display = 'none');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -790,6 +812,9 @@ window.switchTab = function(target) {
             } else if (target === 'settings') {
                 document.getElementById('settings-panel').style.display = 'block';
                 document.getElementById('tab-settings').classList.add('active');
+            } else if (target === 'report') {
+                document.getElementById('report-panel').style.display = 'block';
+                document.getElementById('tab-report').classList.add('active');
             }
             
             localStorage.setItem('scazp_active_tab', target);
@@ -866,6 +891,156 @@ window.switchTab = function(target) {
                 showNotification("BERJAYA DIMUSNAHKAN", `Akaun pengguna <b>${userId.toUpperCase()}</b> telah dipadam sepenuhnya.`);
             } else { 
                 showNotification("RALAT PEMADAMAN", error.message, true); 
+            }
+        };
+
+        window.renderReportCenter = async function() {
+            const tbody = document.getElementById('report-table-body');
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Menyemak log trafik pangkalan data...</td></tr>';
+            
+            // Limit query ke 30 hari lepas
+            let thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            let startDateStr = thirtyDaysAgo.toISOString().split('T')[0] + 'T00:00:00+08:00';
+
+            try {
+                const { data, error } = await supabase
+                    .from('findings')
+                    .select('updated_at, is_exported')
+                    .gte('updated_at', startDateStr)
+                    .neq('acct', 'SYSTEM'); 
+                
+                if (error) throw error;
+
+                // Kira status untuk setiap tarikh
+                let dateMap = {};
+                if (data) {
+                    data.forEach(item => {
+                        if (!item.updated_at) return;
+                        let d = new Date(item.updated_at);
+                        let year = d.getFullYear();
+                        let month = String(d.getMonth() + 1).padStart(2, '0');
+                        let day = String(d.getDate()).padStart(2, '0');
+                        let dateKey = `${year}-${month}-${day}`;
+                        
+                        if (!dateMap[dateKey]) { dateMap[dateKey] = { total: 0, pending: 0 }; }
+                        dateMap[dateKey].total++;
+                        if (!item.is_exported) dateMap[dateKey].pending++;
+                    });
+                }
+
+                tbody.innerHTML = '';
+                
+                // Susun 30 baris kalendar ke belakang
+                for (let i = 0; i < 30; i++) {
+                    let loopDate = new Date();
+                    loopDate.setDate(loopDate.getDate() - i);
+                    
+                    let yyyy = loopDate.getFullYear();
+                    let mm = String(loopDate.getMonth() + 1).padStart(2, '0');
+                    let dd = String(loopDate.getDate()).padStart(2, '0');
+                    let rowDate = `${yyyy}-${mm}-${dd}`;
+                    let displayDate = `${dd}/${mm}/${yyyy}`;
+
+                    let statusObj = dateMap[rowDate];
+                    let statusHtml = ''; let actionHtml = '-';
+
+                    if (!statusObj || statusObj.total === 0) {
+                        statusHtml = '<span style="color: #777;">⚪ TIADA REKOD</span>';
+                    } else if (statusObj.pending > 0) {
+                        statusHtml = `<span style="color: var(--accent-gold); font-weight: bold;">🟡 PENDING (${statusObj.pending} Akaun)</span>`;
+                        actionHtml = `<button class="btn-update" style="color: var(--bg-color); background-color: var(--accent-gold); border-color: var(--accent-gold);" onclick="exportDataByDate('${rowDate}')">EKSPORT</button>`;
+                    } else {
+                        statusHtml = `<span style="color: var(--success-green); font-weight: bold;">✅ DONE (Telah dihantar)</span>`;
+                    }
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="text-align: center; font-weight: bold;">${displayDate}</td>
+                            <td style="text-align: center;">${statusHtml}</td>
+                            <td style="text-align: center;">${actionHtml}</td>
+                        </tr>
+                    `;
+                }
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: var(--error-red);">Ralat Sistem: ${err.message}</td></tr>`;
+            }
+        };
+
+        window.exportDataByDate = async function(dateStr) {
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
+
+            document.getElementById('loadingText').innerText = "Menjana fail Excel dan menyusun data mengikut wilayah...";
+            document.getElementById('loadingModal').style.display = 'flex';
+
+            try {
+                // Filter masa bermula 12AM hingga 11:59PM untuk tarikh dipilih (Zon Masa Malaysia)
+                let startOfDay = `${dateStr}T00:00:00+08:00`;
+                let endOfDay = `${dateStr}T23:59:59+08:00`;
+
+                const { data, error } = await supabase
+                    .from('findings')
+                    .select('id, acct, remark1, remark2, remark3, remark4, region')
+                    .gte('updated_at', startOfDay)
+                    .lte('updated_at', endOfDay)
+                    .eq('is_exported', false)
+                    .neq('acct', 'SYSTEM');
+
+                if (error) throw error;
+                
+                if (!data || data.length === 0) {
+                    showNotification("TIADA DATA", "Ralat logik: Tiada rekod pending dijumpai.", true);
+                    document.getElementById('loadingModal').style.display = 'none';
+                    return;
+                }
+
+                // Susun dan asingkan fail mengikut Region
+                let groupedData = {};
+                let idsToUpdate = [];
+
+                data.forEach(row => {
+                    let reg = row.region ? row.region.toUpperCase() : 'UNKNOWN';
+                    if (!groupedData[reg]) groupedData[reg] = [];
+                    
+                    groupedData[reg].push({
+                        "ACCOUNT NO": row.acct,
+                        "REMARK 1": row.remark1 || '',
+                        "REMARK 2": row.remark2 || '',
+                        "REMARK 3": row.remark3 || '',
+                        "REMARK 4": row.remark4 || ''
+                    });
+                    idsToUpdate.push(row.id);
+                });
+
+                let formattedDate = dateStr.replace(/-/g, ''); // Cth: 20260706
+                
+                Object.keys(groupedData).forEach(reg => {
+                    const ws = XLSX.utils.json_to_sheet(groupedData[reg]);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "Findings");
+                    
+                    // NAMA FAIL MACHINE-READABLE IT DEPT
+                    const fileName = `${reg}_FINDINGS_${formattedDate}.xlsx`;
+                    XLSX.writeFile(wb, fileName);
+                });
+
+                // Auto-update ke pangkalan data Supabase (Tandakan ✅ DONE)
+                const { error: updateError } = await supabase
+                    .from('findings')
+                    .update({ is_exported: true })
+                    .in('id', idsToUpdate);
+                
+                if (updateError) throw updateError;
+
+                document.getElementById('loadingModal').style.display = 'none';
+                showNotification("EKSPORT BERJAYA", "Semua fail Excel telah dimuat turun dan status telah dikunci.");
+                
+                renderReportCenter(); // Refresh jadual terus
+
+            } catch (err) {
+                document.getElementById('loadingModal').style.display = 'none';
+                showNotification("RALAT EKSPORT", err.message, true);
             }
         };
         
