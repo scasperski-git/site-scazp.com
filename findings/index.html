@@ -1004,11 +1004,11 @@ window.switchTab = function(target) {
                     if (!groupedData[reg]) groupedData[reg] = [];
                     
                     groupedData[reg].push({
-                        "ACCOUNT NO": row.acct,
-                        "REMARK 1": row.remark1 || '',
-                        "REMARK 2": row.remark2 || '',
-                        "REMARK 3": row.remark3 || '',
-                        "REMARK 4": row.remark4 || ''
+                        "ACCT": row.acct,
+                        "REMARK1": row.remark1 || '',
+                        "REMARK2": row.remark2 || '',
+                        "REMARK3": row.remark3 || '',
+                        "REMARK4": row.remark4 || ''
                     });
                     idsToUpdate.push(row.id);
                 });
