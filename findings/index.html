@@ -301,7 +301,12 @@
             <p style="color: var(--text-muted); font-size: 13px;" id="loadingText">Menyemak versi data terkini. Sila tunggu sebentar...</p>
         </div>
     </div>
-
+<div class="modal-overlay" id="readingExcelModal">
+        <div class="modal-content" style="text-align: center; padding: 40px; border: 1px solid var(--success-green); max-width: 350px;">
+            <h2 style="color: var(--success-green); margin-top:0;">MEMBACA FAIL EXCEL</h2>
+            <p style="color: var(--text-muted); font-size: 13px;">Sila tunggu sebentar, sistem sedang memproses baris data...</p>
+        </div>
+    </div>
     <div class="modal-overlay" id="mappingModal">
         <div class="modal-content" style="max-width: 450px;">
             <div class="modal-header">
@@ -807,33 +812,57 @@ pageData.forEach(row => {
             document.getElementById('form-region-group').style.display = (role === 'master') ? 'none' : 'block';
         };
 
-        window.handleExcelFileSelect = function(e) {
-            const file = e.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const data = new Uint8Array(event.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                parsedExcelRows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
-                
-                if(parsedExcelRows.length === 0) return;
-                const headers = Object.keys(parsedExcelRows[0]);
-                const dropdowns = document.querySelectorAll('.mapping-select');
-                dropdowns.forEach(select => {
-                    select.innerHTML = '';
-                    headers.forEach(h => { select.appendChild(new Option(h, h)); });
-                    const id = select.id;
-                    if(id === 'map-region') preSelectOption(select, ['region', 'REGION', 'Region']);
-                    if(id === 'map-area') preSelectOption(select, ['area', 'AREA', 'Area']);
-                    if(id === 'map-loc') preSelectOption(select, ['loc', 'loc cd', 'LOC CD']);
-                    if(id === 'map-type') preSelectOption(select, ['type', 'TYPE', 'Type']);
-                    if(id === 'map-acct') preSelectOption(select, ['acct', 'ACCT', 'account']);
-                    if(id === 'map-delq') preSelectOption(select, ['delq', 'DELQ', 'Delq']);
-                    if(id === 'map-arrs') preSelectOption(select, ['arrs', 'ARRS MTH', 'arrs mth', 'Arrs']);
-                    if(id === 'map-osb') preSelectOption(select, ['osb', 'OSB', 'balance', 'OSB (RM)']);
-                });
-                document.getElementById('mappingModal').style.display = 'flex';
-            };
-            reader.readAsArrayBuffer(file);
+window.handleExcelFileSelect = function(e) {
+            const file = e.target.files[0]; 
+            if (!file) return;
+            
+            // 1. Tunjuk popup "MEMBACA FAIL" dahulu
+            document.getElementById('readingExcelModal').style.display = 'flex';
+            
+            // 2. Guna setTimeout (delay 50ms) supaya skrin sempat papar popup sebelum 'hang' sekejap
+            setTimeout(() => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const data = new Uint8Array(event.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        parsedExcelRows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
+                        
+                        if(parsedExcelRows.length === 0) {
+                            alert("Fail Excel kosong atau tiada data!");
+                            document.getElementById('readingExcelModal').style.display = 'none';
+                            return;
+                        }
+                        
+                        const headers = Object.keys(parsedExcelRows[0]);
+                        const dropdowns = document.querySelectorAll('.mapping-select');
+                        
+                        dropdowns.forEach(select => {
+                            select.innerHTML = '';
+                            headers.forEach(h => { select.appendChild(new Option(h, h)); });
+                            
+                            const id = select.id;
+                            if(id === 'map-region') preSelectOption(select, ['region', 'REGION', 'Region']);
+                            if(id === 'map-area') preSelectOption(select, ['area', 'AREA', 'Area']);
+                            if(id === 'map-loc') preSelectOption(select, ['loc', 'loc cd', 'LOC CD']);
+                            if(id === 'map-type') preSelectOption(select, ['type', 'TYPE', 'Type']);
+                            if(id === 'map-acct') preSelectOption(select, ['acct', 'ACCT', 'account']);
+                            if(id === 'map-delq') preSelectOption(select, ['delq', 'DELQ', 'Delq']);
+                            if(id === 'map-arrs') preSelectOption(select, ['arrs', 'ARRS MTH', 'arrs mth', 'Arrs']);
+                            if(id === 'map-osb') preSelectOption(select, ['osb', 'OSB', 'balance', 'OSB (RM)']);
+                        });
+                        
+                        // 3. Tutup popup membaca, dan buka popup Mapping
+                        document.getElementById('readingExcelModal').style.display = 'none';
+                        document.getElementById('mappingModal').style.display = 'flex';
+                        
+                    } catch (err) {
+                        alert("Ralat semasa memproses Excel: " + err.message);
+                        document.getElementById('readingExcelModal').style.display = 'none';
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }, 50); // 50 millisecond sudah cukup untuk browser bernafas
         };
         
         function preSelectOption(select, guesses) {
