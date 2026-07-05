@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Singer Check Portal - Ultimate Supabase Edition</title>
+    <title>Singer Lock Portal - Ultimate Supabase Edition</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -38,8 +38,9 @@
         }
 
         /* ==============================================================
-           EXACT CSS FROM MASTER.TXT & CHECK.TXT
+           EXACT CSS FROM MASTER.TXT
            ============================================================== */
+        /* Auto-potong remark kepada 2 baris tanpa limit character */
         .remark-text {
             display: -webkit-box;
             -webkit-box-orient: vertical;
@@ -255,7 +256,7 @@
         @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes scaleIn { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
-        /* Basic form */
+        /* Basic form for Check/Lock */
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 5px; text-transform: uppercase; }
         .form-control { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-family: 'Poppins'; }
@@ -263,9 +264,12 @@
 </head>
 <body>
 
+    <!-- ==========================================
+         1. LOGIN PAGE 
+         ========================================== -->
     <div id="login-page" class="page-section active">
         <div class="login-box">
-            <h2>Singer Check Portal</h2>
+            <h2>Singer Lock Portal</h2>
             <div id="loginError" style="display:none; color: #ef4444; margin-bottom:15px; font-size:14px; font-weight:600;"></div>
             <input type="text" id="login_user" class="login-input" placeholder="User ID">
             <input type="password" id="login_pass" class="login-input" placeholder="Password">
@@ -273,22 +277,25 @@
         </div>
     </div>
 
+    <!-- ==========================================
+         APP LAYOUT (Sidebar + Content)
+         ========================================== -->
     <div id="app-layout" class="app-layout">
         
         <nav class="sidebar">
-            <div class="brand"><i class="fa-solid fa-magnifying-glass" title="System Sync"></i> Portal</div>
+            <div class="brand"><i class="fa-solid fa-crown" title="System Sync"></i> Portal</div>
             <div class="user-profile">
                 <div id="userInfo"></div>
             </div>
             <div class="nav-menu">
                 <button class="nav-btn" id="navMaster" onclick="showSection('master-page')" style="display:none;">
-                    <i class="fa fa-chart-pie"></i> <span>Dashboard</span>
+                    <i class="fa fa-table"></i> <span>Dashboard</span>
                 </button>
                 <button class="nav-btn" id="navCheck" onclick="showSection('check-page')">
                     <i class="fa fa-search"></i> <span>Check Lock</span>
                 </button>
-                <button class="nav-btn" id="navRecords" onclick="showSection('records-page')">
-                    <i class="fa fa-list-check"></i> <span>View Records</span>
+                <button class="nav-btn" id="navLock" onclick="showSection('lock-page')">
+                    <i class="fa fa-lock"></i> <span>New Lock</span>
                 </button>
                 <button class="nav-btn logout-btn" onclick="logout()">
                     <i class="fa fa-right-from-bracket"></i> <span>Logout</span>
@@ -298,6 +305,9 @@
 
         <main class="main-content">
             
+            <!-- ==========================================
+                 2. CHECK PAGE (EXACT FROM CHECK.TXT)
+                 ========================================== -->
             <div id="check-page" class="page-section container-box">
                 <div class="page-title"><i class="fa fa-search" style="color: #4f46e5;"></i> Check Lock Status</div>
                 <div class="section" style="max-width: 700px; margin: 0 auto;">
@@ -312,12 +322,118 @@
                 </div>
             </div>
 
-            <div id="records-page" class="page-section container-box">
-                <div class="page-title"><i class="fa fa-list-check" style="color: #4f46e5;"></i> View Records</div>
-                
+            <!-- ==========================================
+                 3. NEW LOCK PAGE 
+                 ========================================== -->
+            <div id="lock-page" class="page-section container-box">
+                <div class="page-title"><i class="fa fa-lock" style="color: #4f46e5;"></i> Create New Lock</div>
+                <div class="section">
+                    <div class="dash-grid">
+                        <div class="form-group"><label>Account No</label><input type="text" id="new_acc_no" class="form-control" placeholder="E.g K35100"></div>
+                        <div class="form-group"><label>Amount (RM)</label><input type="number" id="new_amount" class="form-control" placeholder="0.00" step="0.01"></div>
+                        <div class="form-group"><label>Branch Name</label><input type="text" id="new_branch" class="form-control" placeholder="E.g KOTA BHARU"></div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="new_category" class="form-control">
+                                <option value="PARTIAL">PARTIAL</option>
+                                <option value="FULL">FULL</option>
+                                <option value="DISCOUNT">DISCOUNT</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Promise Date</label><input type="date" id="new_promise" class="form-control"></div>
+                        <div class="form-group"><label>Remarks</label><input type="text" id="new_remarks" class="form-control"></div>
+                    </div>
+                    <button class="btn-search-modern" style="margin-top: 15px;" onclick="submitLockSupabase()"><i class="fa fa-save"></i> Submit Lock</button>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 4. MASTER PAGE (EXACT FROM MASTER.TXT)
+                 ========================================== -->
+            <div id="master-page" class="page-section container-box">
+                <div class="page-title">Master Overview</div>
+
+                <!-- A. OVERALL SUMMARY -->
+                <div class="section summary">
+                    <h3><i class="fa fa-calendar-check"></i> Today's Overall Summary</h3>
+                    <div id="refreshInfo" onclick="manualRefresh()">
+                        <i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i> 
+                        <span id="refreshText">CLICK TO REFRESH</span> &nbsp;|&nbsp; <span id="lastUpdate">Last update: -</span>
+                    </div>
+
+                    <div class="summary-grid">
+                        <div class="box-card-split kpi-box" onclick="openKpiModal('active_lock')">
+                            <div class="box-half">
+                                <div class="box-half-title">Active Lock</div>
+                                <div id="sumLock" class="box-half-val text-blue">0</div>
+                            </div>
+                            <div class="box-half">
+                                <div class="box-half-title">Lock Amount</div>
+                                <div id="sumLockAmount" class="box-half-val text-purple">RM 0.00</div>
+                            </div>
+                        </div>
+
+                        <div class="box-card-split kpi-box" onclick="openKpiModal('mark_paid')">
+                            <div class="box-half">
+                                <div class="box-half-title">Mark Paid</div>
+                                <div id="sumPaid" class="box-half-val text-green">0</div>
+                            </div>
+                            <div class="box-half">
+                                <div class="box-half-title">Paid Amount</div>
+                                <div id="sumPaidAmount" class="box-half-val text-emerald">RM 0.00</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="summary-grid">
+                        <div class="box-card"><div>Top User</div><div id="topUser"></div></div>
+                        <div class="box-card"><div>Top Branch</div><div id="topBranch"></div></div>
+                    </div>
+                </div>
+
+                <!-- B. CUSTOM ANALYTICS -->
+                <div class="section dashboard">
+                    <h3><i class="fa fa-chart-pie"></i> Custom Analytics & Report</h3>
+                    <div class="dash-grid">
+                        <div><label>DCA NAME</label><select id="dcaFilter"><option value="ALL">ALL USER</option></select></div>
+                        <div><label>Start Date</label><input type="date" id="startDate"></div>
+                        <div><label>End Date</label><input type="date" id="endDate"></div>
+                    </div>
+                    <div class="action-row">
+                        <button class="load-btn" id="loadBtn" onclick="calculateReport()"><i class="fa fa-calculator"></i> Generate Analytics</button>
+                        <button class="btn-export" id="exportReportBtn" onclick="exportReport()" style="display:none; flex: 1;"><i class="fa fa-file-excel"></i> Download Report</button>
+                        <button class="btn-reset" onclick="resetAnalytics()"><i class="fa fa-rotate-left"></i> Reset</button>
+                    </div>
+                    <div class="dash-card">
+                        <div class="summary-grid" style="margin-bottom: 0;">
+                            <div class="box-card-split">
+                                <div class="box-half"><div class="box-half-title">Filtered Lock</div><div id="dashTotal" class="box-half-val text-blue">0</div></div>
+                                <div class="box-half"><div class="box-half-title">Lock Amount</div><div id="dashLockAmount" class="box-half-val text-purple">RM 0.00</div></div>
+                            </div>
+                            <div class="box-card-split">
+                                <div class="box-half"><div class="box-half-title">Filtered Paid</div><div id="dashPaid" class="box-half-val text-green">0</div></div>
+                                <div class="box-half"><div class="box-half-title">Paid Amount</div><div id="dashPaidAmount" class="box-half-val text-emerald">RM 0.00</div></div>
+                            </div>
+                        </div>
+                        <div id="dashStatus" class="dash-status" style="margin-top: 15px;"></div>
+                    </div>
+                </div>
+
+                <!-- C. MANAGE RECORDS (EDIT/DELETE) -->
+                <div class="section">
+                    <h3><i class="fa fa-pen-to-square"></i> Manage Records (Edit / Delete)</h3>
+                    <div class="search-action-bar">
+                        <input type="number" id="manageSearchAcc" placeholder="ENTER ACCOUNT NO..." inputmode="numeric" autocomplete="off">
+                        <button class="btn-search-modern" onclick="searchManageAcc()"><i class="fa fa-search"></i> Search</button>
+                        <button class="btn-clear-modern" onclick="clearManageSearch()"><i class="fa fa-xmark"></i> Clear</button>
+                    </div>
+                    <div id="manageResultArea"></div>
+                </div>
+
+                <!-- D. VIEW ALL RECORDS (TABLE) -->
                 <div class="section">
                     <div class="table-header-row">
-                        <h3 style="margin-bottom: 0; border: none; padding-bottom: 0;"><i class="fa fa-list-check"></i> All Records</h3>
+                        <h3 style="margin-bottom: 0; border: none; padding-bottom: 0;"><i class="fa fa-list-check"></i> View All Records</h3>
                         <div class="table-actions">
                             <button class="btn-refresh-premium" id="btnReloadMaster" onclick="manualMasterRefresh()"><i class="fa-solid fa-arrows-rotate" id="masterSyncIcon"></i> Reload Data</button>
                             <button class="btn-export-small" onclick="exportTable()"><i class="fa fa-file-excel" style="color: #10b981;"></i> Export Table</button>
@@ -357,89 +473,14 @@
                         <button id="nextBtn" onclick="nextPage()" class="page-btn" disabled><i class="fa fa-chevron-right"></i></button>
                     </div>
                 </div>
-            </div>
-
-            <div id="master-page" class="page-section container-box">
-                <div class="page-title">Master Overview</div>
-
-                <div class="section summary">
-                    <h3><i class="fa fa-calendar-check"></i> Today's Overall Summary</h3>
-                    <div id="refreshInfo" onclick="manualRefresh()">
-                        <i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i> 
-                        <span id="refreshText">CLICK TO REFRESH</span> &nbsp;|&nbsp; <span id="lastUpdate">Last update: -</span>
-                    </div>
-
-                    <div class="summary-grid">
-                        <div class="box-card-split kpi-box" onclick="openKpiModal('active_lock')">
-                            <div class="box-half">
-                                <div class="box-half-title">Active Lock</div>
-                                <div id="sumLock" class="box-half-val text-blue">0</div>
-                            </div>
-                            <div class="box-half">
-                                <div class="box-half-title">Lock Amount</div>
-                                <div id="sumLockAmount" class="box-half-val text-purple">RM 0.00</div>
-                            </div>
-                        </div>
-
-                        <div class="box-card-split kpi-box" onclick="openKpiModal('mark_paid')">
-                            <div class="box-half">
-                                <div class="box-half-title">Mark Paid</div>
-                                <div id="sumPaid" class="box-half-val text-green">0</div>
-                            </div>
-                            <div class="box-half">
-                                <div class="box-half-title">Paid Amount</div>
-                                <div id="sumPaidAmount" class="box-half-val text-emerald">RM 0.00</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="summary-grid">
-                        <div class="box-card"><div>Top User</div><div id="topUser"></div></div>
-                        <div class="box-card"><div>Top Branch</div><div id="topBranch"></div></div>
-                    </div>
-                </div>
-
-                <div class="section dashboard">
-                    <h3><i class="fa fa-chart-pie"></i> Custom Analytics & Report</h3>
-                    <div class="dash-grid">
-                        <div><label>DCA NAME</label><select id="dcaFilter"><option value="ALL">ALL USER</option></select></div>
-                        <div><label>Start Date</label><input type="date" id="startDate"></div>
-                        <div><label>End Date</label><input type="date" id="endDate"></div>
-                    </div>
-                    <div class="action-row">
-                        <button class="load-btn" id="loadBtn" onclick="calculateReport()"><i class="fa fa-calculator"></i> Generate Analytics</button>
-                        <button class="btn-export" id="exportReportBtn" onclick="exportReport()" style="display:none; flex: 1;"><i class="fa fa-file-excel"></i> Download Report</button>
-                        <button class="btn-reset" onclick="resetAnalytics()"><i class="fa fa-rotate-left"></i> Reset</button>
-                    </div>
-                    <div class="dash-card">
-                        <div class="summary-grid" style="margin-bottom: 0;">
-                            <div class="box-card-split">
-                                <div class="box-half"><div class="box-half-title">Filtered Lock</div><div id="dashTotal" class="box-half-val text-blue">0</div></div>
-                                <div class="box-half"><div class="box-half-title">Lock Amount</div><div id="dashLockAmount" class="box-half-val text-purple">RM 0.00</div></div>
-                            </div>
-                            <div class="box-card-split">
-                                <div class="box-half"><div class="box-half-title">Filtered Paid</div><div id="dashPaid" class="box-half-val text-green">0</div></div>
-                                <div class="box-half"><div class="box-half-title">Paid Amount</div><div id="dashPaidAmount" class="box-half-val text-emerald">RM 0.00</div></div>
-                            </div>
-                        </div>
-                        <div id="dashStatus" class="dash-status" style="margin-top: 15px;"></div>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <h3><i class="fa fa-pen-to-square"></i> Manage Records (Edit / Delete)</h3>
-                    <div class="search-action-bar">
-                        <input type="number" id="manageSearchAcc" placeholder="ENTER ACCOUNT NO..." inputmode="numeric" autocomplete="off">
-                        <button class="btn-search-modern" onclick="searchManageAcc()"><i class="fa fa-search"></i> Search</button>
-                        <button class="btn-clear-modern" onclick="clearManageSearch()"><i class="fa fa-xmark"></i> Clear</button>
-                    </div>
-                    <div id="manageResultArea"></div>
-                </div>
 
             </div>
         </main>
     </div>
 
+    <!-- ==========================================
+         MODALS (KPI Detail & Delete Verification)
+         ========================================== -->
     <div id="kpiDetailModal" class="modal-overlay" onclick="this.style.display='none'; document.body.style.overflow='auto';">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -479,6 +520,9 @@
         </div>
     </div>
 
+    <!-- ==========================================
+         JAVASCRIPT LOGIC
+         ========================================== -->
     <script>
         const SUPABASE_URL = 'https://vutchaspljmvtnisjoqt.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_J6BcCvKg2nuYwIIUxbhMVQ_BKGvfc30';
@@ -495,7 +539,7 @@
         let reportDataList = [];
         let currentSort = { col: null, dir: 'asc' };
 
-        // Helper date format function
+        // Helper date format function from previous iteration
         function formatCustomDate(dateString) {
             if (!dateString) return "-";
             let d = new Date(dateString);
@@ -530,8 +574,7 @@
                 
                 if (currentType === 'master') document.getElementById('navMaster').style.display = 'flex';
                 
-                // Paparan awal: Master pergi ke Dashboard, User pergi ke Check Lock
-                showSection(currentType === 'master' ? 'master-page' : 'check-page');
+                showSection(currentType === 'check' ? 'check-page' : (currentType === 'master' ? 'master-page' : 'lock-page'));
                 
                 let today = new Date().toISOString().split('T')[0];
                 document.getElementById("startDate").value = today;
@@ -540,8 +583,8 @@
                 if(currentType === 'master') {
                     populateDCA();
                     loadSummary();
+                    initTableUpgrades();
                 }
-                initTableUpgrades();
             }
         };
 
@@ -551,7 +594,7 @@
             document.getElementById(sectionId).classList.add('active');
             
             if(sectionId === 'check-page') document.getElementById('navCheck').classList.add('active');
-            if(sectionId === 'records-page') document.getElementById('navRecords').classList.add('active');
+            if(sectionId === 'lock-page') document.getElementById('navLock').classList.add('active');
             if(sectionId === 'master-page') document.getElementById('navMaster').classList.add('active');
         }
 
@@ -717,7 +760,31 @@
             document.getElementById("successPaidPopup").style.display = "none";
         }
 
-        // ================= MASTER DASHBOARD & ANALYTICS =================
+        // ================= NEW LOCK =================
+        async function submitLockSupabase() {
+            const acc = document.getElementById("new_acc_no").value.trim().toUpperCase();
+            const amt = parseFloat(document.getElementById("new_amount").value);
+            const br = document.getElementById("new_branch").value.trim().toUpperCase();
+            const cat = document.getElementById("new_category").value;
+            const prom = document.getElementById("new_promise").value;
+            const rem = document.getElementById("new_remarks").value;
+
+            if(!acc || !amt) return alert("Sila masukkan Account No & Amount");
+            const { data: exist } = await supaClient.from('lock_data').select('id').eq('acc_no', acc).eq('status', 'LOCK');
+            if(exist && exist.length > 0) return alert("Account already LOCKED!");
+
+            const { error } = await supaClient.from('lock_data').insert([{
+                acc_no: acc, amount: amt, branch_name: br, payment_category: cat, promise_date: prom || null, remarks: rem,
+                status: 'LOCK', dca_id: currentUser, created_at: new Date().toISOString()
+            }]);
+            if(!error) {
+                alert("Lock Created Successfully!");
+                systemLog("NEW_LOCK", "SUCCESS", acc, "Created RM "+amt);
+                document.querySelectorAll('#lock-page input').forEach(i => i.value='');
+            } else alert("Error: " + error.message);
+        }
+
+        // ================= MASTER DASHBOARD =================
         async function populateDCA() {
             const { data } = await supaClient.from('lock_data').select('dca_id');
             if(data) {
@@ -806,6 +873,7 @@
             modal.style.display = 'flex'; document.body.style.overflow = 'hidden';
         }
 
+        // ================= CUSTOM ANALYTICS =================
         async function calculateReport() {
             var btn = document.getElementById("loadBtn");
             btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Calculating...'; btn.disabled = true;
@@ -1027,5 +1095,3 @@
     </script>
 </body>
 </html>
-
-
