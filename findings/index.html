@@ -340,7 +340,7 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="updateModal">
+<div class="modal-overlay" id="updateModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Update Account Finding: <span id="modalAccNo"></span></h2>
@@ -348,11 +348,15 @@
             </div>
             <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px;">Historical Audit Trail:</label>
             <div class="history-box"></div>
+            
             <div class="form-group">
-                <label for="newFinding">New Verification Finding Log:</label>
-                <textarea id="newFinding" placeholder="Type current finding or action taken here..."></textarea>
+                <label style="color: var(--accent-gold);">New Verification Finding Log (Max 50 Char / Line):</label>
+                <input type="text" id="remark1" class="form-control" maxlength="50" placeholder="Row 1: Taip dan tekan Enter..." style="margin-bottom: 8px;" onkeypress="handleEnter(event, 'remark2')">
+                <input type="text" id="remark2" class="form-control" maxlength="50" placeholder="Row 2: Sambungan..." style="margin-bottom: 8px;" onkeypress="handleEnter(event, 'remark3')">
+                <input type="text" id="remark3" class="form-control" maxlength="50" placeholder="Row 3: Sambungan..." onkeypress="handleEnter(event, 'btnSaveFinding')">
             </div>
-            <button class="btn-submit" style="width: 100%;" onclick="saveFinding()">COMMIT RECORD ENTRY</button>
+            
+            <button id="btnSaveFinding" class="btn-submit" style="width: 100%;" onclick="saveFinding()">COMMIT RECORD ENTRY</button>
         </div>
     </div>
 
@@ -979,7 +983,7 @@ bulkData.push({
             } else { document.getElementById('progressModal').style.display = 'none'; }
         };
 
-        window.openModal = async function(accNo) {
+window.openModal = async function(accNo) {
             document.getElementById('modalAccNo').innerText = accNo;
             document.getElementById('updateModal').style.display = 'flex';
             const historyBox = document.querySelector('.history-box');
@@ -992,29 +996,83 @@ bulkData.push({
             } else {
                 findingsList.forEach((data) => {
                     const dateFormatted = data.updated_at ? new Date(data.updated_at).toLocaleString() : 'N/A';
+                    
+                    // Logik untuk papar rekod lama (remark) dan rekod baru (remark1, 2, 3, 4)
+                    let histRemark = '';
+                    if(data.remark1 || data.remark2 || data.remark3) {
+                        if(data.remark1) histRemark += `<div>${data.remark1}</div>`;
+                        if(data.remark2) histRemark += `<div>${data.remark2}</div>`;
+                        if(data.remark3) histRemark += `<div>${data.remark3}</div>`;
+                        if(data.remark4) histRemark += `<div style="color: var(--success-green); font-size: 9px; margin-top: 4px;">${data.remark4}</div>`;
+                    } else {
+                        histRemark = `<div>${data.remark || ''}</div>`;
+                    }
+
                     historyBox.innerHTML += `
                         <div class="history-item">
                             <div class="history-meta">PIC: ${data.updated_by ? data.updated_by.toUpperCase() : 'SYSTEM'} | ${dateFormatted}</div>
-                            <div>${data.remark}</div>
+                            ${histRemark}
                         </div>`;
                 });
             }
+            // Auto fokus pada baris pertama bila modal dibuka
+            setTimeout(() => document.getElementById('remark1').focus(), 100);
+        };
+
+        window.handleEnter = function(e, nextElementId) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const nextEl = document.getElementById(nextElementId);
+                if (nextEl) nextEl.focus();
+            }
         };
         
-        window.closeModal = function() { document.getElementById('updateModal').style.display = 'none'; document.getElementById('newFinding').value = ''; };
+        window.closeModal = function() { 
+            document.getElementById('updateModal').style.display = 'none'; 
+            document.getElementById('remark1').value = ''; 
+            document.getElementById('remark2').value = ''; 
+            document.getElementById('remark3').value = ''; 
+        };
 
-        window.saveFinding = async function() {
-            let log = document.getElementById('newFinding').value;
+window.saveFinding = async function() {
+            let r1 = document.getElementById('remark1').value.trim();
+            let r2 = document.getElementById('remark2').value.trim();
+            let r3 = document.getElementById('remark3').value.trim();
             let accNo = document.getElementById('modalAccNo').innerText;
-            if(!log.trim()) { alert("Sila masukkan nota penemuan."); return; }
             
-            const btn = document.querySelector('#updateModal .btn-submit'); 
+            if(!r1 && !r2 && !r3) { 
+                alert("Sila masukkan sekurang-kurangnya satu baris nota penemuan."); 
+                return; 
+            }
+            
+            const btn = document.getElementById('btnSaveFinding'); 
             btn.innerText = "SAVING...";
+            
+            // Tarik data TYPE, LOC, REGION dari cache jadual yang sedia ada
+            let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
+            let acctType = accountInfo.type || '';
+            let acctLoc = accountInfo.loc || '';
+            let acctRegion = accountInfo.region || '';
+            
+            // Jana REMARK4 Auto (USER ID & DATE - Format: DD/MM/YYYY)
+            let today = new Date();
+            let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
+            let r4Auto = `${currentUser.username.toUpperCase()} - ${dateStr}`;
             
             try {
                 const { data: insertedData, error: insertError } = await supabase
                     .from('findings')
-                    .insert([{ acct: accNo, remark: log, updated_by: currentUser.username }])
+                    .insert([{ 
+                        acct: accNo, 
+                        remark1: r1,
+                        remark2: r2,
+                        remark3: r3,
+                        remark4: r4Auto,
+                        type: acctType,
+                        loc: acctLoc,
+                        region: acctRegion,
+                        updated_by: currentUser.username 
+                    }])
                     .select('updated_at');
 
                 if(!insertError) {
@@ -1027,21 +1085,21 @@ bulkData.push({
                     const cacheKey = `scazp_cache_${safeRegion}`;
                     const timeKey = `scazp_time_${safeRegion}`;
                     
-                    // Simpan terus ke ruang unlimted IndexedDB menggunakan localForage
                     await localforage.setItem(cacheKey, globalAccounts);
                     
                     if (insertedData && insertedData.length > 0) {
                         localStorage.setItem(timeKey, insertedData[0].updated_at);
                     }
                     
-                    alert("Berjaya disimpan!"); 
+                    // Guna notification popup yang kita buat sebelum ni
+                    showNotification("REKOD DISIMPAN", `Tindakan untuk akaun <b>${accNo}</b> berjaya dikemas kini.`); 
                     closeModal(); 
                     applyFilterAndRender();
                 } else { 
-                    alert("Ralat Pangkalan Data: " + insertError.message); 
+                    showNotification("RALAT PANGKALAN DATA", insertError.message, true); 
                 }
             } catch (err) {
-                alert("Ralat Kritikal Sistem: " + err.message);
+                showNotification("RALAT KRITIKAL SISTEM", err.message, true);
                 console.error(err);
             } finally {
                 btn.innerText = "COMMIT RECORD ENTRY";
