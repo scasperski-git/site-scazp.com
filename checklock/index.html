@@ -2,303 +2,435 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>Singer Lock Portal - Ultimate Supabase Edition</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Singer Lock Portal - Full Supabase Edition</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <style>
-        :root {
-            --bg-dark: #09090b; --surface: #18181b; --surface-light: #27272a;
-            --primary: #0ea5e9; --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
-            --text-main: #f8fafc; --text-muted: #94a3b8; --border: #3f3f46;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-        body { background: var(--bg-dark); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-dark); }
-        ::-webkit-scrollbar-thumb { background: var(--surface-light); border-radius: 4px; }
-        
+        /* ==============================================================
+           SPA CORE CSS
+           ============================================================== */
         .page-section { display: none; animation: fadeIn 0.4s ease; }
         .page-section.active { display: block; }
-        #app-layout { display: none; height: 100vh; width: 100vw; }
-        
+        #app-layout { display: none; }
+        #login-page {
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; background: #0f172a;
+        }
+        .login-box {
+            background: white; padding: 40px; border-radius: 20px; 
+            width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        .login-box h2 { margin-bottom: 20px; color: #1e293b; }
+        .login-input {
+            width: 100%; padding: 12px 15px; margin-bottom: 15px;
+            border: 1px solid #cbd5e1; border-radius: 10px; font-family: 'Poppins';
+        }
+        .login-btn {
+            width: 100%; padding: 12px; background: #4f46e5; color: white;
+            border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
+        }
+
+        /* ==============================================================
+           EXACT CSS FROM MASTER.TXT
+           ============================================================== */
+        /* Auto-potong remark kepada 2 baris tanpa limit character */
+        .remark-text {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .remark-text.is-expanded { -webkit-line-clamp: unset; }
+
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; font-family: 'Poppins', Arial, sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        html { scroll-behavior: smooth; }
+        body { background: #f1f5f9; margin: 0; padding: 0; color: #334155; }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Forms & Inputs */
-        input, select, textarea {
-            width: 100%; padding: 12px 15px; background: var(--bg-dark);
-            border: 1px solid var(--border); border-radius: 10px; color: var(--text-main);
-            outline: none; transition: 0.3s; margin-bottom: 15px;
+        .app-layout { display: flex; min-height: 100vh; }
+        .sidebar {
+            width: 280px; background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            color: white; display: flex; flex-direction: column; padding: 24px 20px;
+            position: fixed; height: 100vh; left: 0; top: 0; z-index: 50;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
         }
-        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(14, 165, 233, 0.3); }
-        .input-group { position: relative; }
-        .input-group i { position: absolute; left: 15px; top: 15px; color: var(--text-muted); }
-        .input-group input, .input-group select { padding-left: 45px; }
+        .brand { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; color: #fff; }
+        .brand i { color: #3b82f6; font-size: 24px; }
+        .user-profile { background: rgba(255, 255, 255, 0.05); padding: 16px; border-radius: 16px; margin-bottom: 30px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        #userInfo { font-size: 12px; font-weight: 500; color: #cbd5e1; }
+        #userInfo b { color: #ffffff; font-size: 14px; }
+        .nav-menu { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+        .nav-btn {
+            width: 100%; padding: 14px 16px; font-size: 14px; font-weight: 500; border: none;
+            border-radius: 12px; cursor: pointer; background: transparent; color: #94a3b8;
+            display: flex; align-items: center; justify-content: flex-start; gap: 12px; transition: all 0.3s ease;
+        }
+        .nav-btn i { font-size: 18px; width: 24px; text-align: center; }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; transform: translateX(4px); }
+        .nav-btn.active { background: linear-gradient(135deg, #4f46e5, #3b82f6); color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+        .logout-btn { margin-top: auto; color: #fca5a5 !important; }
+        .logout-btn:hover { background: rgba(239, 68, 68, 0.15); color: #ef4444 !important; }
 
-        /* Buttons */
-        .btn { padding: 12px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; color: white; }
-        .btn-primary { background: var(--primary); } .btn-primary:hover { background: #0284c7; }
-        .btn-success { background: var(--success); } .btn-success:hover { background: #059669; }
-        .btn-danger { background: var(--danger); } .btn-danger:hover { background: #dc2626; }
-        .btn-secondary { background: var(--surface-light); border: 1px solid var(--border); } .btn-secondary:hover { background: var(--border); }
-
-        /* Layout */
-        .sidebar { width: 260px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px 0; }
-        .brand { padding: 0 20px 20px; font-size: 20px; font-weight: 700; color: var(--primary); border-bottom: 1px solid var(--border); }
-        .user-profile { padding: 20px; font-size: 14px; color: var(--text-muted); border-bottom: 1px solid var(--border); }
-        .nav-menu { flex: 1; padding: 10px; }
-        .nav-btn { width: 100%; padding: 12px 15px; background: transparent; border: none; color: var(--text-muted); text-align: left; font-size: 15px; border-radius: 8px; cursor: pointer; margin-bottom: 5px; display: flex; gap: 15px; }
-        .nav-btn:hover { background: var(--surface-light); color: var(--text-main); }
-        .nav-btn.active { background: rgba(14, 165, 233, 0.1); color: var(--primary); border-left: 4px solid var(--primary); }
-        .main-content { flex: 1; padding: 30px; overflow-y: auto; }
+        .main-content { flex: 1; margin-left: 280px; padding: 20px 40px; display: block; }
+        .container-box { width: 100%; max-width: 100%; animation: fadeIn 0.4s ease; }
+        .page-title { font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
         
-        .card { background: var(--surface); border-radius: 16px; padding: 25px; border: 1px solid var(--border); margin-bottom: 25px; }
-        .card-header { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: var(--primary); display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        .section {
+            background: #ffffff; border-radius: 20px; padding: 24px; margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03), 0 1px 3px rgba(0,0,0,0.02);
+            border: 1px solid #e2e8f0; position: relative; overflow: hidden; transition: all 0.3s ease;
+        }
+        .section:hover { transform: translateY(-4px); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08); }
+        .section::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; }
+        .section.summary::before { background: linear-gradient(90deg, #1e3a8a, #3b82f6, #93c5fd); }
+        .section.summary h3 i { background: #eff6ff; color: #3b82f6; }
+        .section.dashboard::before { background: linear-gradient(90deg, #064e3b, #10b981, #6ee7b7); }
+        .section.dashboard h3 i { background: #ecfdf5; color: #10b981; }
+        .section:has(.fa-pen-to-square)::before { background: linear-gradient(90deg, #881337, #f43f5e, #fda4af); }
+        .section:has(.fa-pen-to-square) h3 i { background: #fff1f2; color: #f43f5e; }
+        .section:has(.fa-list-check)::before { background: linear-gradient(90deg, #0f172a, #475569, #cbd5e1); }
+        .section:has(.fa-list-check) h3 i { background: #f1f5f9; color: #334155; }
 
-        /* Dashboard KPI */
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .kpi-box { background: var(--bg-dark); padding: 15px; border-radius: 12px; border: 1px solid var(--border); text-align: center; }
-        .kpi-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; }
-        .kpi-val { font-size: 24px; font-weight: 700; color: var(--text-main); }
-        .kpi-val.blue { color: var(--primary); } .kpi-val.green { color: var(--success); }
+        h3 {
+            display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600;
+            margin-top: 0; margin-bottom: 20px; color: #1e293b; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;
+        }
+        h3 i { color: #4f46e5; background: #e0e7ff; padding: 8px; border-radius: 8px; font-size: 14px; }
 
-        /* Tables */
-        .table-responsive { overflow-x: auto; background: var(--bg-dark); border-radius: 12px; border: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: 13px; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); }
-        th { background: var(--surface-light); color: var(--text-muted); text-transform: uppercase; }
-        tr:hover td { background: var(--surface-light); }
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; }
-        .badge-lock { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
-        .badge-paid { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
-
-        /* Pagination */
-        .pagination { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 15px; }
+        .table-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; }
+        .table-actions { display: flex; gap: 10px; }
+        .tab-container { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 12px; border: 1px solid #e2e8f0; background: white; color: #64748b; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+        .tab-btn:hover { background: #f8fafc; color: #4f46e5; border-color: #cbd5e1; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        .tab-btn.active { background: #4f46e5; color: white; border-color: #4f46e5; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); }
         
-        /* Manage Records Card */
-        .manage-card { background: var(--bg-dark); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px; }
-        .manage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        .manage-actions { display: flex; gap: 10px; border-top: 1px dashed var(--border); padding-top: 15px; }
-
-        /* Login */
-        #login-page { display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .login-box { background: var(--surface); padding: 40px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border); }
+        .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }
+        .dash-grid div { display: flex; flex-direction: column; }
+        .dash-grid label { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .dash-grid select, .dash-grid input { width: 100%; padding: 12px 14px; font-size: 14px; border-radius: 12px; border: 1px solid #cbd5e1; background: #f8fafc; color: #334155; transition: 0.3s; }
+        .dash-grid select:focus, .dash-grid input:focus { outline: none; border-color: #4f46e5; background: white; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
         
-        /* Modals */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: var(--surface); padding: 30px; border-radius: 16px; max-width: 400px; width: 90%; text-align: center; border: 1px solid var(--border); }
+        .action-row { display: flex; gap: 12px; }
+        .load-btn { flex: 1; padding: 14px; font-size: 14px; font-weight: 600; background: linear-gradient(135deg, #4f46e5, #3b82f6); color: white; border: none; border-radius: 12px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.3s; }
+        .load-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3); }
+        .dash-card { margin-top: 24px; background: linear-gradient(135deg, #f8fafc, #f1f5f9); padding: 20px; border-radius: 16px; border: 1px dashed #cbd5e1; }
+        .dash-status { font-size: 12px; font-weight: 500; color: #64748b; text-align: center; }
+
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; border: 1px solid #e2e8f0; background: white; max-height: 60vh; }
+        table { width: 100%; border-collapse: collapse; font-size: 11.5px; min-width: 600px; }
+        table th, table td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+        table th { position: sticky !important; top: 0; z-index: 10; background: #f8fafc !important; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: pointer; white-space: nowrap; }
+        table th:hover { background: #f1f5f9 !important; }
+        table tr:last-child td { border-bottom: none; }
+        table tbody tr:nth-child(even) { background-color: #f8fafc; }
+        table tbody tr:hover td { background-color: #e2e8f0; }
+        th:nth-child(4), td:nth-child(4) { text-align: center; font-weight: 600; }
+        .pagination-bar { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 20px; background: #f8fafc; padding: 10px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .page-btn { padding: 10px 18px; font-size: 13px; border-radius: 8px; background: white; border: 1px solid #e2e8f0; color: #4f46e5; cursor: pointer; }
+        .page-btn:disabled { color: #94a3b8; cursor: not-allowed; }
+        #pageInfo { flex: 1; text-align: center; font-weight: 600; font-size: 13px; }
+        
+        #refreshInfo { font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 16px; background: #f8fafc; display: inline-block; padding: 8px 16px; border-radius: 20px; cursor: pointer; border: 1px solid #e2e8f0; }
+        
+        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .box-card { background: #ffffff; border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .box-card div:first-child { color: #64748b; font-size: 11px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .box-card div:last-child { font-size: 15px; font-weight: 600; color: #1e293b; line-height: 1.5; }
+        
+        .box-card-split { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; display: flex; overflow: hidden; cursor: pointer; transition: 0.3s; }
+        .box-card-split:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: #3b82f6; }
+        .box-half { flex: 1; padding: 16px 10px; text-align: center; }
+        .box-half:first-child { border-right: 1px dashed #cbd5e1; background: #f8fafc; }
+        .box-half-title { color: #64748b; font-size: 11px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; }
+        .box-half-val { font-size: 20px; font-weight: 700; }
+        .text-blue { color: #3b82f6; } .text-purple { color: #8b5cf6; } .text-green { color: #10b981; } .text-emerald { color: #059669; }
+
+        @keyframes kpiGlowSequence {
+            0% { transform: scale(1); box-shadow: 0 4px 6px rgba(0,0,0,0.02); border-color: #e2e8f0; }
+            50% { transform: scale(1.03) translateY(-4px); box-shadow: 0 15px 30px rgba(56, 189, 248, 0.4); border-color: #38bdf8; z-index: 10; }
+            100% { transform: scale(1); box-shadow: 0 4px 6px rgba(0,0,0,0.02); border-color: #e2e8f0; }
+        }
+        .kpi-animated-glow { animation: kpiGlowSequence 0.6s ease-in-out; }
+
+        .spinner { width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .icon-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .btn-refresh-premium, .btn-export, .btn-export-small, .btn-reset, .btn-reset-small {
+            color: white; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-refresh-premium { background: linear-gradient(135deg, #0ea5e9, #0284c7); padding: 8px 16px; border-radius: 8px; font-size: 13px; }
+        .btn-export { background: linear-gradient(135deg, #22c55e, #16a34a); padding: 14px; border-radius: 12px; font-size: 14px; }
+        .btn-export-small { background: linear-gradient(135deg, #22c55e, #16a34a); padding: 8px 16px; border-radius: 8px; font-size: 13px; }
+        .btn-reset { background: linear-gradient(135deg, #64748b, #475569); padding: 14px; border-radius: 12px; font-size: 14px; flex: 1; }
+        .btn-reset-small { background: linear-gradient(135deg, #64748b, #475569); padding: 8px 16px; border-radius: 8px; font-size: 13px; }
+
+        /* MANAGE RECORDS SECTION */
+        .manage-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: 0.3s; }
+        .manage-card.edit-active { border-color: #4f46e5; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.1); }
+        .manage-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
+        .manage-item label { font-size: 11px; color: #64748b; margin-bottom: 4px; text-transform: uppercase; font-weight: 600; display: block; }
+        .manage-item .val { font-size: 14px; font-weight: 600; color: #1e293b; padding: 8px 0; }
+        .manage-item input, .manage-item select { padding: 8px 12px; font-size: 13px; border-radius: 8px; border: 1px solid #cbd5e1; width: 100%; font-weight: 600; }
+        .manage-actions { display: flex; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #e2e8f0; }
+        .btn-m-edit { background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; flex: 1; font-weight: 600; }
+        .btn-m-delete { background: #ef4444; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; flex: 1; font-weight: 600; }
+        .btn-m-save { background: #10b981; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; flex: 1; font-weight: 600; }
+        .btn-m-cancel { background: #64748b; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; flex: 1; font-weight: 600; }
+
+        .search-action-bar { display: flex; gap: 12px; margin-bottom: 24px; }
+        .search-action-bar input { flex: 1; padding: 14px 16px; font-size: 15px; border-radius: 12px; border: 1px solid #cbd5e1; font-weight: 600; outline: none; }
+        .btn-search-modern { background: linear-gradient(135deg, #4f46e5, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .btn-clear-modern { background: #64748b; color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+
+        /* MODALS */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 9999;
+            justify-content: center; align-items: center; padding: 15px;
+        }
+        .modal-content {
+            background: #1e293b; border: 1px solid #334155; border-radius: 12px; width: 100%; max-width: 450px;
+            padding: 20px; color: #f8fafc; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: modalFadeIn 0.3s ease-out forwards;
+        }
+        @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #334155; }
+        .modal-title { font-size: 1.1rem; font-weight: 600; color: #e2e8f0; }
+        .modal-body { max-height: 60vh; overflow-y: auto; }
+        .close-btn { cursor: pointer; color: #94a3b8; font-size: 1.2rem; } .close-btn:hover { color: #ef4444; }
+
+        .session-box { background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 340px; width: 90%; }
+        
+        .resizer { position: absolute; top: 0; right: 0; width: 6px; cursor: col-resize; user-select: none; height: 100%; border-right: 1px solid #cbd5e1; }
+        .resizer:hover, .resizer.resizing { border-right: 2px solid #4f46e5; }
+
+        /* Basic form for Check/Lock */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 5px; text-transform: uppercase; }
+        .form-control { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-family: 'Poppins'; }
     </style>
 </head>
 <body>
 
-    <!-- 1. LOGIN PAGE -->
+    <!-- ==========================================
+         1. LOGIN PAGE 
+         ========================================== -->
     <div id="login-page" class="page-section active">
         <div class="login-box">
-            <h2 style="margin-bottom:20px; color:var(--primary);">Lock Portal</h2>
-            <div id="errorMsg" style="display:none; color:var(--danger); margin-bottom:15px; font-size:14px;"></div>
-            <div class="input-group">
-                <i class="fa fa-user"></i>
-                <input type="text" id="login_user" placeholder="User ID">
-            </div>
-            <div class="input-group">
-                <i class="fa fa-lock"></i>
-                <input type="password" id="login_pass" placeholder="Password">
-            </div>
-            <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="login()">Login</button>
+            <h2>Singer Lock Portal</h2>
+            <div id="loginError" style="display:none; color: #ef4444; margin-bottom:15px; font-size:14px; font-weight:600;"></div>
+            <input type="text" id="login_user" class="login-input" placeholder="User ID">
+            <input type="password" id="login_pass" class="login-input" placeholder="Password">
+            <button class="login-btn" id="btnLogin" onclick="loginSupabase()">Login</button>
         </div>
     </div>
 
-    <!-- APP LAYOUT -->
-    <div id="app-layout">
+    <!-- ==========================================
+         APP LAYOUT (Sidebar + Content)
+         ========================================== -->
+    <div id="app-layout" class="app-layout">
+        
         <nav class="sidebar">
-            <div class="brand"><i class="fa fa-shield-halved"></i> Lock Portal</div>
+            <div class="brand"><i class="fa-solid fa-crown" title="System Sync"></i> Portal</div>
             <div class="user-profile">
-                <div id="userInfo" style="font-weight: bold; color: white;"></div>
-                <div id="roleInfo" style="font-size: 12px; margin-top: 5px;"></div>
+                <div id="userInfo"></div>
             </div>
             <div class="nav-menu">
-                <button class="nav-btn" id="navCheck" onclick="showPage('check-page')"><i class="fa fa-search"></i> Check Lock</button>
-                <button class="nav-btn" id="navLock" onclick="showPage('lock-page')"><i class="fa fa-plus"></i> New Lock</button>
-                <button class="nav-btn" id="navMaster" onclick="showPage('master-page')" style="display:none;"><i class="fa fa-crown"></i> Master Dashboard</button>
-                <button class="nav-btn" onclick="logout()" style="color: var(--danger); margin-top: auto;"><i class="fa fa-power-off"></i> Logout</button>
+                <button class="nav-btn" id="navMaster" onclick="showSection('master-page')" style="display:none;">
+                    <i class="fa fa-table"></i> <span>Dashboard</span>
+                </button>
+                <button class="nav-btn" id="navCheck" onclick="showSection('check-page')">
+                    <i class="fa fa-search"></i> <span>Check Lock</span>
+                </button>
+                <button class="nav-btn" id="navLock" onclick="showSection('lock-page')">
+                    <i class="fa fa-lock"></i> <span>New Lock</span>
+                </button>
+                <button class="nav-btn logout-btn" onclick="logout()">
+                    <i class="fa fa-right-from-bracket"></i> <span>Logout</span>
+                </button>
             </div>
         </nav>
 
         <main class="main-content">
             
-            <!-- 2. CHECK PAGE -->
-            <div id="check-page" class="page-section">
-                <div class="card">
-                    <div class="card-header"><i class="fa fa-search"></i> Check Account</div>
-                    <div class="input-group" style="max-width:400px;">
-                        <i class="fa fa-file-invoice"></i>
-                        <input type="text" id="check_acc_no" placeholder="Enter Account No">
+            <!-- ==========================================
+                 2. CHECK PAGE 
+                 ========================================== -->
+            <div id="check-page" class="page-section container-box">
+                <div class="page-title"><i class="fa fa-search" style="color: #4f46e5;"></i> Check Lock Status</div>
+                <div class="section">
+                    <div class="search-action-bar" style="max-width: 500px;">
+                        <input type="text" id="check_acc_no" placeholder="ENTER ACCOUNT NO...">
+                        <button class="btn-search-modern" onclick="checkLockSupabase()"><i class="fa fa-search"></i> Check</button>
                     </div>
-                    <button class="btn btn-primary" onclick="checkLock()">Search</button>
+                    <div id="check_result_area"></div>
                 </div>
-                <div id="check_result_area"></div>
             </div>
 
-            <!-- 3. NEW LOCK PAGE -->
-            <div id="lock-page" class="page-section">
-                <div class="card">
-                    <div class="card-header"><i class="fa fa-lock"></i> Create New Lock</div>
-                    <div class="grid-2">
-                        <div>
-                            <label style="font-size:12px; color:var(--text-muted);">Account No</label>
-                            <input type="text" id="lock_acc">
-                        </div>
-                        <div>
-                            <label style="font-size:12px; color:var(--text-muted);">Amount (RM)</label>
-                            <input type="number" id="lock_amt">
-                        </div>
-                        <div>
-                            <label style="font-size:12px; color:var(--text-muted);">Branch</label>
-                            <input type="text" id="lock_branch">
-                        </div>
-                        <div>
-                            <label style="font-size:12px; color:var(--text-muted);">Category</label>
-                            <select id="lock_cat">
+            <!-- ==========================================
+                 3. NEW LOCK PAGE 
+                 ========================================== -->
+            <div id="lock-page" class="page-section container-box">
+                <div class="page-title"><i class="fa fa-lock" style="color: #4f46e5;"></i> Create New Lock</div>
+                <div class="section">
+                    <div class="dash-grid">
+                        <div class="form-group"><label>Account No</label><input type="text" id="new_acc_no" class="form-control" placeholder="E.g K35100"></div>
+                        <div class="form-group"><label>Amount (RM)</label><input type="number" id="new_amount" class="form-control" placeholder="0.00" step="0.01"></div>
+                        <div class="form-group"><label>Branch Name</label><input type="text" id="new_branch" class="form-control" placeholder="E.g KOTA BHARU"></div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="new_category" class="form-control">
                                 <option value="PARTIAL">PARTIAL</option>
                                 <option value="FULL">FULL</option>
                                 <option value="DISCOUNT">DISCOUNT</option>
                             </select>
                         </div>
+                        <div class="form-group"><label>Promise Date</label><input type="date" id="new_promise" class="form-control"></div>
+                        <div class="form-group"><label>Remarks</label><input type="text" id="new_remarks" class="form-control"></div>
                     </div>
-                    <div>
-                        <label style="font-size:12px; color:var(--text-muted);">Promise Date</label>
-                        <input type="date" id="lock_date">
-                    </div>
-                    <div>
-                        <label style="font-size:12px; color:var(--text-muted);">Remarks</label>
-                        <textarea id="lock_remark" rows="3"></textarea>
-                    </div>
-                    <button class="btn btn-primary" onclick="submitLock()">Submit Lock</button>
+                    <button class="btn-search-modern" style="margin-top: 15px;" onclick="submitLockSupabase()"><i class="fa fa-save"></i> Submit Lock</button>
                 </div>
             </div>
 
-            <!-- 4. MASTER DASHBOARD PAGE (RESTORED FEATURES) -->
-            <div id="master-page" class="page-section">
-                
-                <!-- A. OVERALL SUMMARY & TOP 5 -->
-                <div class="card">
-                    <div class="card-header"><i class="fa fa-calendar-check"></i> Today's Overall Summary 
-                        <button class="btn btn-secondary" style="margin-left:auto; font-size:12px;" onclick="loadMasterData()"><i class="fa fa-sync"></i> Refresh</button>
+            <!-- ==========================================
+                 4. MASTER PAGE (EXACT FROM MASTER.TXT)
+                 ========================================== -->
+            <div id="master-page" class="page-section container-box">
+                <div class="page-title">Master Overview</div>
+
+                <!-- A. OVERALL SUMMARY -->
+                <div class="section summary">
+                    <h3><i class="fa fa-calendar-check"></i> Today's Overall Summary</h3>
+                    <div id="refreshInfo" onclick="manualRefresh()">
+                        <i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i> 
+                        <span id="refreshText">CLICK TO REFRESH</span> &nbsp;|&nbsp; <span id="lastUpdate">Last update: -</span>
                     </div>
-                    <div class="kpi-grid">
-                        <div class="kpi-box">
-                            <div class="kpi-title">Active Locks Today</div>
-                            <div class="kpi-val blue" id="sumLock">0</div>
-                            <div style="font-size:12px; color:var(--text-muted);" id="sumLockAmount">RM 0.00</div>
+
+                    <div class="summary-grid">
+                        <div class="box-card-split kpi-box" onclick="openKpiModal('active_lock')">
+                            <div class="box-half">
+                                <div class="box-half-title">Active Lock</div>
+                                <div id="sumLock" class="box-half-val text-blue">0</div>
+                            </div>
+                            <div class="box-half">
+                                <div class="box-half-title">Lock Amount</div>
+                                <div id="sumLockAmount" class="box-half-val text-purple">RM 0.00</div>
+                            </div>
                         </div>
-                        <div class="kpi-box">
-                            <div class="kpi-title">Marked Paid Today</div>
-                            <div class="kpi-val green" id="sumPaid">0</div>
-                            <div style="font-size:12px; color:var(--text-muted);" id="sumPaidAmount">RM 0.00</div>
+
+                        <div class="box-card-split kpi-box" onclick="openKpiModal('mark_paid')">
+                            <div class="box-half">
+                                <div class="box-half-title">Mark Paid</div>
+                                <div id="sumPaid" class="box-half-val text-green">0</div>
+                            </div>
+                            <div class="box-half">
+                                <div class="box-half-title">Paid Amount</div>
+                                <div id="sumPaidAmount" class="box-half-val text-emerald">RM 0.00</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="grid-2">
-                        <div class="kpi-box" style="text-align:left;">
-                            <div class="kpi-title">Top 5 Users (Today)</div>
-                            <div id="topUser" style="font-size:13px; margin-top:10px;">Loading...</div>
-                        </div>
-                        <div class="kpi-box" style="text-align:left;">
-                            <div class="kpi-title">Top 5 Branches (Today)</div>
-                            <div id="topBranch" style="font-size:13px; margin-top:10px;">Loading...</div>
-                        </div>
+
+                    <div class="summary-grid">
+                        <div class="box-card"><div>Top User</div><div id="topUser"></div></div>
+                        <div class="box-card"><div>Top Branch</div><div id="topBranch"></div></div>
                     </div>
                 </div>
 
                 <!-- B. CUSTOM ANALYTICS -->
-                <div class="card">
-                    <div class="card-header"><i class="fa fa-chart-pie"></i> Custom Analytics & Report</div>
-                    <div class="grid-3">
-                        <div>
-                            <label style="font-size:12px; color:var(--text-muted);">DCA NAME</label>
-                            <select id="dcaFilter"><option value="ALL">ALL USER</option></select>
-                        </div>
-                        <div>
-                            <label style="font-size:12px; color:var(--text-muted);">Start Date</label>
-                            <input type="date" id="startDate">
-                        </div>
-                        <div>
-                            <label style="font-size:12px; color:var(--text-muted);">End Date</label>
-                            <input type="date" id="endDate">
-                        </div>
+                <div class="section dashboard">
+                    <h3><i class="fa fa-chart-pie"></i> Custom Analytics & Report</h3>
+                    <div class="dash-grid">
+                        <div><label>DCA NAME</label><select id="dcaFilter"><option value="ALL">ALL USER</option></select></div>
+                        <div><label>Start Date</label><input type="date" id="startDate"></div>
+                        <div><label>End Date</label><input type="date" id="endDate"></div>
                     </div>
-                    <div style="display:flex; gap:10px; margin-bottom:15px;">
-                        <button class="btn btn-primary" onclick="generateReport()"><i class="fa fa-calculator"></i> Generate Analytics</button>
-                        <button class="btn btn-success" id="btnExportReport" style="display:none;" onclick="exportReport()"><i class="fa fa-file-excel"></i> Download Excel</button>
+                    <div class="action-row">
+                        <button class="load-btn" id="loadBtn" onclick="calculateReport()"><i class="fa fa-calculator"></i> Generate Analytics</button>
+                        <button class="btn-export" id="exportReportBtn" onclick="exportReport()" style="display:none; flex: 1;"><i class="fa fa-file-excel"></i> Download Report</button>
+                        <button class="btn-reset" onclick="resetAnalytics()"><i class="fa fa-rotate-left"></i> Reset</button>
                     </div>
-                    <div class="kpi-grid">
-                        <div class="kpi-box">
-                            <div class="kpi-title">Filtered Locks</div>
-                            <div class="kpi-val blue" id="dashTotal">0</div>
-                            <div style="font-size:12px;" id="dashLockAmount">RM 0.00</div>
+                    <div class="dash-card">
+                        <div class="summary-grid" style="margin-bottom: 0;">
+                            <div class="box-card-split">
+                                <div class="box-half"><div class="box-half-title">Filtered Lock</div><div id="dashTotal" class="box-half-val text-blue">0</div></div>
+                                <div class="box-half"><div class="box-half-title">Lock Amount</div><div id="dashLockAmount" class="box-half-val text-purple">RM 0.00</div></div>
+                            </div>
+                            <div class="box-card-split">
+                                <div class="box-half"><div class="box-half-title">Filtered Paid</div><div id="dashPaid" class="box-half-val text-green">0</div></div>
+                                <div class="box-half"><div class="box-half-title">Paid Amount</div><div id="dashPaidAmount" class="box-half-val text-emerald">RM 0.00</div></div>
+                            </div>
                         </div>
-                        <div class="kpi-box">
-                            <div class="kpi-title">Filtered Paid</div>
-                            <div class="kpi-val green" id="dashPaid">0</div>
-                            <div style="font-size:12px;" id="dashPaidAmount">RM 0.00</div>
-                        </div>
+                        <div id="dashStatus" class="dash-status" style="margin-top: 15px;"></div>
                     </div>
                 </div>
 
-                <!-- C. MANAGE RECORDS (EDIT / DELETE) -->
-                <div class="card">
-                    <div class="card-header"><i class="fa fa-pen-to-square"></i> Manage Records (Edit / Delete)</div>
-                    <div style="display:flex; gap:10px; margin-bottom:20px;">
-                        <input type="text" id="manageSearchAcc" placeholder="Enter Account No..." style="margin:0; max-width:300px;">
-                        <button class="btn btn-primary" onclick="searchManageAcc()"><i class="fa fa-search"></i> Search</button>
+                <!-- C. MANAGE RECORDS (EDIT/DELETE) -->
+                <div class="section">
+                    <h3><i class="fa fa-pen-to-square"></i> Manage Records (Edit / Delete)</h3>
+                    <div class="search-action-bar">
+                        <input type="number" id="manageSearchAcc" placeholder="ENTER ACCOUNT NO..." inputmode="numeric" autocomplete="off">
+                        <button class="btn-search-modern" onclick="searchManageAcc()"><i class="fa fa-search"></i> Search</button>
+                        <button class="btn-clear-modern" onclick="clearManageSearch()"><i class="fa fa-xmark"></i> Clear</button>
                     </div>
                     <div id="manageResultArea"></div>
                 </div>
 
                 <!-- D. VIEW ALL RECORDS (TABLE) -->
-                <div class="card">
-                    <div class="card-header" style="justify-content:space-between;">
-                        <span><i class="fa fa-table"></i> Master Database</span>
-                        <div>
-                            <button class="btn btn-success" onclick="exportTable()"><i class="fa fa-file-excel"></i> Export All</button>
+                <div class="section">
+                    <div class="table-header-row">
+                        <h3 style="margin-bottom: 0; border: none; padding-bottom: 0;"><i class="fa fa-list-check"></i> View All Records</h3>
+                        <div class="table-actions">
+                            <button class="btn-refresh-premium" id="btnReloadMaster" onclick="manualMasterRefresh()"><i class="fa-solid fa-arrows-rotate" id="masterSyncIcon"></i> Reload Data</button>
+                            <button class="btn-export-small" onclick="exportTable()"><i class="fa fa-file-excel" style="color: #10b981;"></i> Export Table</button>
+                            <button class="btn-reset-small" onclick="resetMasterTable()"><i class="fa fa-rotate-left"></i> Reset</button>
                         </div>
                     </div>
-                    
-                    <div style="display:flex; gap:10px; margin-bottom:15px;">
-                        <button class="btn btn-secondary" onclick="filterTableStatus('ALL')">All</button>
-                        <button class="btn btn-secondary" onclick="filterTableStatus('LOCK')">Active Locks</button>
-                        <button class="btn btn-secondary" onclick="filterTableStatus('PAID')">Paid</button>
-                        <input type="text" id="masterTableSearch" placeholder="Search DCA or Acc No..." style="margin:0; max-width:250px; margin-left:auto;" onkeyup="applyTableSearch()">
+
+                    <div class="tab-container">
+                        <button id="tabActive" class="tab-btn" onclick="switchView('LOCK')">Active Locks</button>
+                        <button id="tabPaid" class="tab-btn" onclick="switchView('PAID')">Paid History</button>
+                        <button id="tabAll" class="tab-btn active" onclick="switchView('ALL')">View All</button>
                     </div>
 
-                    <div class="table-responsive">
+                    <div class="table-scroll">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>DCA ID</th>
-                                    <th>ACC NO</th>
-                                    <th>BRANCH</th>
-                                    <th>AMOUNT</th>
-                                    <th>CATEGORY</th>
-                                    <th>STATUS</th>
-                                    <th>PTP DATE</th>
-                                    <th>CREATED</th>
+                                    <th data-sort="dca">DCA <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                    <th data-sort="acc_no">ACC NO <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                    <th data-sort="branch">BRANCH <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                    <th data-sort="amount">AMOUNT <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                    <th data-sort="category">CATEGORY <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                    <th data-sort="status">STATUS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                    <th data-sort="promise">PTP DATE <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                    <th data-sort="created">CREATED <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
+                                    <th data-sort="remarks">REMARKS <i class="fa fa-sort sort-icon"></i><div class="resizer"></div></th>
                                 </tr>
                             </thead>
                             <tbody id="masterTableBody">
-                                <!-- Data injected here -->
+                                <tr><td colspan='9' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-cloud-arrow-down' style='font-size:28px;margin-bottom:12px;display:block;color:#4f46e5;'></i>Click <b>Reload Data</b> to view full database</td></tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="pagination">
-                        <button class="btn btn-secondary" id="btnPrev" onclick="prevPage()"><i class="fa fa-chevron-left"></i></button>
-                        <span id="pageInfo">Page 1</span>
-                        <button class="btn btn-secondary" id="btnNext" onclick="nextPage()"><i class="fa fa-chevron-right"></i></button>
+                    <div class="pagination-bar">
+                        <button id="prevBtn" onclick="prevPage()" class="page-btn" disabled><i class="fa fa-chevron-left"></i></button>
+                        <span id="pageInfo">Page 1 of 1</span>
+                        <button id="nextBtn" onclick="nextPage()" class="page-btn" disabled><i class="fa fa-chevron-right"></i></button>
                     </div>
                 </div>
 
@@ -306,26 +438,56 @@
         </main>
     </div>
 
-    <!-- Modals -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <h3 style="color:var(--danger); margin-bottom:15px;">Security Verification</h3>
-            <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">Enter passcode to delete lock</p>
-            <input type="password" id="delPasscode" placeholder="Passcode (8888)">
-            <div style="display:flex; gap:10px; justify-content:center;">
-                <button class="btn btn-secondary" onclick="document.getElementById('deleteModal').style.display='none'">Cancel</button>
-                <button class="btn btn-danger" onclick="confirmDelete()">Confirm Delete</button>
+    <!-- ==========================================
+         MODALS (KPI Detail & Delete Verification)
+         ========================================== -->
+    <div id="kpiDetailModal" class="modal-overlay" onclick="this.style.display='none'; document.body.style.overflow='auto';">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title" id="kpiModalTitle">Detail</div>
+                <i class="fa fa-times close-btn" onclick="document.getElementById('kpiDetailModal').style.display='none'; document.body.style.overflow='auto';"></i>
+            </div>
+            <div class="modal-body" id="kpiModalBody"></div>
+        </div>
+    </div>
+
+    <div id="deleteVerifyPopup" class="modal-overlay">
+        <div class="session-box">
+            <i class="fa fa-triangle-exclamation" style="font-size: 48px; color: #ef4444; margin-bottom: 16px;"></i>
+            <div style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #0f172a;">Verify Deletion</div>
+            <div style="font-size: 13px; color: #475569; margin-bottom: 16px; line-height: 1.5;">Enter Master Passcode to permanently delete Account <b id="delPopupAcc" style="color: #ef4444;"></b></div>
+            
+            <div style="position: relative; width: 100%; margin-bottom: 8px;">
+                <input type="text" id="deletePasscode" placeholder="ENTER PASSCODE" autocomplete="off" style="width: 100%; padding: 12px; padding-right: 40px; border-radius: 8px; border: 1px solid #cbd5e1; text-align: center; letter-spacing: 2px; font-weight: bold; -webkit-text-security: disc; box-sizing: border-box;">
+                <i class="fa fa-eye" id="togglePasscodeIcon" onclick="toggleViewPasscode()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #94a3b8; font-size: 18px; transition: 0.3s;"></i>
+            </div>
+            <div id="delError" style="display:none; color:#ef4444; margin-bottom:16px; font-size:12px; font-weight: 600;">Invalid Passcode!</div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button onclick="closeDeletePopup()" style="flex:1; background:#64748b; color:white; border:none; padding:12px; border-radius:8px; font-weight:600; cursor:pointer;">Cancel</button>
+                <button onclick="confirmDeleteAction()" style="flex:1; background:#ef4444; color:white; border:none; padding:12px; border-radius:8px; font-weight:600; cursor:pointer;">Delete</button>
             </div>
         </div>
     </div>
 
+    <!-- ==========================================
+         JAVASCRIPT LOGIC (SUPABASE + SPA)
+         ========================================== -->
     <script>
-        // 1. SUPABASE CONFIG
         const SUPABASE_URL = 'https://vutchaspljmvtnisjoqt.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_J6BcCvKg2nuYwIIUxbhMVQ_BKGvfc30';
         const supaClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentUser = '', currentRole = '', currentType = '';
+        
+        // Master variables
+        let liveDataList = [], filteredTableData = [];
+        let modalActiveLocks = [], modalPaidLocks = [];
+        let currentViewStatus = "ALL";
+        let currentPage = 1;
+        const pageSize = 10;
+        let reportDataList = [];
+        let currentSort = { col: null, dir: 'asc' };
 
         window.onload = () => {
             const token = localStorage.getItem("session_token");
@@ -336,226 +498,282 @@
                 
                 document.getElementById('login-page').style.display = 'none';
                 document.getElementById('app-layout').style.display = 'flex';
-                document.getElementById('userInfo').innerText = currentUser;
-                document.getElementById('roleInfo').innerText = currentRole;
+                document.getElementById("userInfo").innerHTML = "<i class='fa fa-user'></i> <b>" + (currentUser || "-") + "</b> &nbsp;|&nbsp; " + (currentRole || "-");
                 
                 if (currentType === 'master') document.getElementById('navMaster').style.display = 'flex';
                 
-                showPage(currentType === 'check' ? 'check-page' : (currentType === 'master' ? 'master-page' : 'lock-page'));
+                showSection(currentType === 'check' ? 'check-page' : (currentType === 'master' ? 'master-page' : 'lock-page'));
                 
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('startDate').value = today;
-                document.getElementById('endDate').value = today;
+                let today = new Date().toISOString().split('T')[0];
+                document.getElementById("startDate").value = today;
+                document.getElementById("endDate").value = today;
+                
+                if(currentType === 'master') {
+                    populateDCA();
+                    loadSummary();
+                    initTableUpgrades();
+                }
             }
         };
 
-        function showPage(pageId) {
-            document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+        function showSection(sectionId) {
+            document.querySelectorAll('.main-content .page-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
+            document.getElementById(sectionId).classList.add('active');
             
-            if(pageId === 'check-page') document.getElementById('navCheck').classList.add('active');
-            if(pageId === 'lock-page') document.getElementById('navLock').classList.add('active');
-            if(pageId === 'master-page') {
-                document.getElementById('navMaster').classList.add('active');
-                loadMasterData();
-            }
+            if(sectionId === 'check-page') document.getElementById('navCheck').classList.add('active');
+            if(sectionId === 'lock-page') document.getElementById('navLock').classList.add('active');
+            if(sectionId === 'master-page') document.getElementById('navMaster').classList.add('active');
         }
 
-        // ================= AUTH =================
-        async function login() {
+        async function loginSupabase() {
             const user = document.getElementById("login_user").value.trim().toUpperCase();
             const pass = document.getElementById("login_pass").value.trim();
-            const err = document.getElementById("errorMsg");
+            const err = document.getElementById("loginError");
+            const btn = document.getElementById("btnLogin");
 
-            if(!user || !pass) { err.innerText = "Masukkan ID dan Password"; err.style.display="block"; return; }
+            if(!user || !pass) { err.innerText = "Masukkan ID & Password"; err.style.display="block"; return; }
+            btn.innerHTML = "Authenticating..."; btn.disabled = true; err.style.display = "none";
 
-            const { data, error } = await supaClient.from('users').select('*').eq('user_id', user).single();
-
-            if (error || !data || data.password !== pass) {
-                err.innerText = "Kredensial salah!"; err.style.display="block";
-            } else {
-                localStorage.setItem("session_token", 'supa_' + Date.now());
-                localStorage.setItem("lock_user", data.user_id);
-                localStorage.setItem("lock_role", data.role);
-                localStorage.setItem("lock_type", data.type);
-                location.reload();
+            try {
+                const { data, error } = await supaClient.from('users').select('*').eq('user_id', user).single();
+                if (error || !data || data.password !== pass) {
+                    err.innerText = "Kredensial salah atau RLS aktif."; err.style.display = "block";
+                } else {
+                    localStorage.setItem("session_token", 'supa_' + Date.now());
+                    localStorage.setItem("lock_user", data.user_id);
+                    localStorage.setItem("lock_role", data.role);
+                    localStorage.setItem("lock_type", data.type);
+                    systemLog("LOGIN", "SUCCESS", "-", "Login system");
+                    location.reload();
+                }
+            } catch (e) {
+                err.innerText = "Sistem Error!"; err.style.display = "block";
+            } finally {
+                btn.innerHTML = "Login"; btn.disabled = false;
             }
         }
         function logout() { localStorage.clear(); location.reload(); }
 
-        // ================= CHECK & LOCK (Simplified for brevity) =================
-        async function checkLock() {
-            const acc = document.getElementById('check_acc_no').value.trim().toUpperCase();
-            const res = document.getElementById('check_result_area');
+        // ================= CHECK LOCK =================
+        async function checkLockSupabase() {
+            const acc = document.getElementById("check_acc_no").value.trim().toUpperCase();
+            const res = document.getElementById("check_result_area");
             if(!acc) return;
             res.innerHTML = "Checking...";
-            const { data } = await supaClient.from('lock_data').select('*').eq('acc_no', acc).order('created_at', {ascending:false}).limit(1);
+            const { data } = await supaClient.from('lock_data').select('*').eq('acc_no', acc).in('status', ['LOCK', 'PAID']).order('created_at', { ascending: false }).limit(1);
             if(data && data.length > 0) {
                 let d = data[0];
-                res.innerHTML = `<div class="card" style="margin-top:15px; border-left:4px solid ${d.status==='LOCK'?'#ef4444':'#10b981'}">
-                    <b>${d.acc_no}</b> - <span class="badge ${d.status==='LOCK'?'badge-lock':'badge-paid'}">${d.status}</span><br>
-                    Amount: RM ${d.amount} <br> DCA: ${d.dca_id}
+                let cl = d.status === 'LOCK' ? '#ef4444' : '#10b981';
+                res.innerHTML = `<div style="padding:15px; background:white; border-radius:10px; border-left:4px solid ${cl}; border: 1px solid #e2e8f0; margin-top:15px;">
+                    <div style="display:flex; justify-content:space-between;"><b>${d.acc_no}</b> <b style="color:${cl};">${d.status}</b></div>
+                    <div style="font-size:13px; color:#64748b; margin-top:10px;">DCA: ${d.dca_id} <br> Amount: RM ${d.amount} <br> Category: ${d.payment_category || '-'}</div>
                 </div>`;
-            } else res.innerHTML = `<div class="card" style="margin-top:15px;">NO LOCK FOUND</div>`;
+            } else { res.innerHTML = `<div style="padding:15px; text-align:center; color:#10b981; font-weight:bold; margin-top:15px; border:1px solid #10b981; border-radius:10px;">CLEARED / NO LOCK</div>`; }
         }
 
-        async function submitLock() {
-            const acc = document.getElementById('lock_acc').value.trim().toUpperCase();
-            const amt = document.getElementById('lock_amt').value;
-            const branch = document.getElementById('lock_branch').value.trim().toUpperCase();
-            const cat = document.getElementById('lock_cat').value;
-            const date = document.getElementById('lock_date').value;
-            const rmks = document.getElementById('lock_remark').value;
+        // ================= NEW LOCK =================
+        async function submitLockSupabase() {
+            const acc = document.getElementById("new_acc_no").value.trim().toUpperCase();
+            const amt = parseFloat(document.getElementById("new_amount").value);
+            const br = document.getElementById("new_branch").value.trim().toUpperCase();
+            const cat = document.getElementById("new_category").value;
+            const prom = document.getElementById("new_promise").value;
+            const rem = document.getElementById("new_remarks").value;
 
-            if(!acc || !amt) return alert("Account & Amount required");
-
+            if(!acc || !amt) return alert("Sila masukkan Account No & Amount");
             const { data: exist } = await supaClient.from('lock_data').select('id').eq('acc_no', acc).eq('status', 'LOCK');
             if(exist && exist.length > 0) return alert("Account already LOCKED!");
 
-            await supaClient.from('lock_data').insert([{
-                acc_no: acc, amount: amt, branch_name: branch, payment_category: cat, promise_date: date, remarks: rmks,
-                dca_id: currentUser, status: 'LOCK', created_at: new Date().toISOString()
+            const { error } = await supaClient.from('lock_data').insert([{
+                acc_no: acc, amount: amt, branch_name: br, payment_category: cat, promise_date: prom || null, remarks: rem,
+                status: 'LOCK', dca_id: currentUser, created_at: new Date().toISOString()
             }]);
-            alert("Lock Created!");
-            document.querySelectorAll('#lock-page input, #lock-page textarea').forEach(el => el.value='');
+            if(!error) {
+                alert("Lock Created Successfully!");
+                systemLog("NEW_LOCK", "SUCCESS", acc, "Created RM "+amt);
+                document.querySelectorAll('#lock-page input').forEach(i => i.value='');
+            } else alert("Error: " + error.message);
         }
 
-        // ================= MASTER: FULL RESTORATION =================
-        let globalMasterData = [];
-        let filteredMasterData = [];
-        let currentPage = 1;
-        const pageSize = 15;
-        let currentFilterStatus = 'ALL';
-        let reportData = [];
-
-        async function loadMasterData() {
-            document.getElementById('masterTableBody').innerHTML = "<tr><td colspan='8'>Loading...</td></tr>";
-            const { data, error } = await supaClient.from('lock_data').select('*').order('created_at', { ascending: false });
-            if (error) return console.error(error);
-            
-            globalMasterData = data;
-            filteredMasterData = data;
-            
-            updateTodaySummary();
-            populateDcaDropdown();
-            renderMasterTable();
+        // ================= MASTER DASHBOARD =================
+        async function populateDCA() {
+            const { data } = await supaClient.from('lock_data').select('dca_id');
+            if(data) {
+                let dcas = [...new Set(data.map(r => r.dca_id))].filter(Boolean);
+                let sel = document.getElementById('dcaFilter');
+                dcas.forEach(d => sel.innerHTML += `<option value="${d}">${d}</option>`);
+            }
         }
 
-        // 1. TODAY'S OVERALL SUMMARY & TOP 5
-        function updateTodaySummary() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            let lockCount = 0, lockAmt = 0, paidCount = 0, paidAmt = 0;
-            let userCount = {}, branchCount = {};
+        async function loadSummary() {
+            try {
+                let d = new Date();
+                let todayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString();
+                const { data } = await supaClient.from('lock_data').select('*');
+                
+                let totalLock = 0, totalLockAmt = 0, totalPaid = 0, totalPaidAmt = 0;
+                let userCount = {}, branchCount = {};
+                modalActiveLocks = []; modalPaidLocks = [];
 
-            globalMasterData.forEach(r => {
-                let createdStr = r.created_at ? r.created_at.split('T')[0] : '';
-                let paidStr = r.paid_date ? r.paid_date.split('T')[0] : '';
-                let amt = parseFloat(r.amount) || 0;
-
-                if(createdStr === todayStr) {
-                    if(r.status === 'LOCK') { lockCount++; lockAmt += amt; }
-                    let u = r.dca_id || "UNKNOWN"; userCount[u] = (userCount[u] || 0) + 1;
-                    let b = r.branch_name || "UNKNOWN"; branchCount[b] = (branchCount[b] || 0) + 1;
+                if(data) {
+                    data.forEach(row => {
+                        let amount = Number(row.amount) || 0;
+                        if(row.created_at >= todayStart && row.status === 'LOCK') {
+                            totalLock++; totalLockAmt += amount; modalActiveLocks.push(row);
+                            let user = row.dca_id || "UNKNOWN"; userCount[user] = (userCount[user] || 0) + 1;
+                            let branch = row.branch_name || "UNKNOWN"; branchCount[branch] = (branchCount[branch] || 0) + 1;
+                        }
+                        if(row.status === 'PAID' && row.paid_date && row.paid_date >= todayStart) {
+                            totalPaid++; totalPaidAmt += amount; modalPaidLocks.push(row);
+                        }
+                    });
                 }
-                if(r.status === 'PAID' && paidStr === todayStr) { paidCount++; paidAmt += amt; }
+                document.getElementById("sumLock").innerText = totalLock;
+                document.getElementById("sumLockAmount").innerText = "RM " + totalLockAmt.toLocaleString("en-MY", {minimumFractionDigits: 2});
+                document.getElementById("sumPaid").innerText = totalPaid;
+                document.getElementById("sumPaidAmount").innerText = "RM " + totalPaidAmt.toLocaleString("en-MY", {minimumFractionDigits: 2});
+
+                let uHtml = ""; Object.keys(userCount).map(k=>({k,v:userCount[k]})).sort((a,b)=>b.v-a.v).slice(0,5).forEach(x=>uHtml+=`${x.k} (${x.v})<br>`);
+                document.getElementById("topUser").innerHTML = uHtml || "NO DATA TODAY";
+                let bHtml = ""; Object.keys(branchCount).map(k=>({k,v:branchCount[k]})).sort((a,b)=>b.v-a.v).slice(0,5).forEach(x=>bHtml+=`${x.k} (${x.v})<br>`);
+                document.getElementById("topBranch").innerHTML = bHtml || "NO DATA TODAY";
+                
+                document.getElementById("lastUpdate").innerText = "Last update: " + new Date().toLocaleTimeString("en-MY");
+                playKpiAnimation();
+            } catch(e) { console.error(e); }
+        }
+
+        function manualRefresh() {
+            var icon = document.getElementById("refreshIcon"); var text = document.getElementById("refreshText");
+            icon.classList.add("fa-spin"); text.innerText = "REFRESHING...";
+            loadSummary(); if(liveDataList.length > 0) manualMasterRefresh();
+            setTimeout(() => { icon.classList.remove("fa-spin"); text.innerText = "CLICK TO REFRESH"; }, 1500);
+        }
+
+        function playKpiAnimation() {
+            document.querySelectorAll('.kpi-box, .box-card').forEach((card, i) => {
+                setTimeout(() => { card.classList.add('kpi-animated-glow'); setTimeout(() => card.classList.remove('kpi-animated-glow'), 600); }, i * 200);
             });
-
-            document.getElementById('sumLock').innerText = lockCount;
-            document.getElementById('sumLockAmount').innerText = "RM " + lockAmt.toFixed(2);
-            document.getElementById('sumPaid').innerText = paidCount;
-            document.getElementById('sumPaidAmount').innerText = "RM " + paidAmt.toFixed(2);
-
-            let tUser = Object.keys(userCount).map(k => ({k, v:userCount[k]})).sort((a,b)=>b.v-a.v).slice(0,5);
-            document.getElementById('topUser').innerHTML = tUser.length ? tUser.map(x=>`${x.k} (${x.v})`).join('<br>') : 'No Data';
-
-            let tBranch = Object.keys(branchCount).map(k => ({k, v:branchCount[k]})).sort((a,b)=>b.v-a.v).slice(0,5);
-            document.getElementById('topBranch').innerHTML = tBranch.length ? tBranch.map(x=>`${x.k} (${x.v})`).join('<br>') : 'No Data';
         }
 
-        // 2. CUSTOM ANALYTICS
-        function populateDcaDropdown() {
-            let dcas = [...new Set(globalMasterData.map(r => r.dca_id))].filter(Boolean);
-            let sel = document.getElementById('dcaFilter');
-            sel.innerHTML = '<option value="ALL">ALL USER</option>';
-            dcas.forEach(d => sel.innerHTML += `<option value="${d}">${d}</option>`);
-        }
-
-        function generateReport() {
-            let dca = document.getElementById('dcaFilter').value;
-            let start = document.getElementById('startDate').value;
-            let end = document.getElementById('endDate').value;
+        function openKpiModal(type) {
+            const modal = document.getElementById('kpiDetailModal');
+            const title = document.getElementById('kpiModalTitle');
+            const body = document.getElementById('kpiModalBody');
+            body.innerHTML = ''; 
+            let html = '<div style="display: flex; flex-direction: column; gap: 10px;">';
             
-            let fLock = 0, fLockAmt = 0, fPaid = 0, fPaidAmt = 0;
-            
-            reportData = globalMasterData.filter(r => {
-                let matchDca = (dca === 'ALL' || r.dca_id === dca);
-                let dStr = (r.status === 'PAID' && r.paid_date) ? r.paid_date : r.created_at;
-                dStr = dStr ? dStr.split('T')[0] : '';
-                let matchDate = (dStr >= start && dStr <= end);
-                return matchDca && matchDate;
-            });
-
-            reportData.forEach(r => {
-                let amt = parseFloat(r.amount)||0;
-                if(r.status === 'LOCK') { fLock++; fLockAmt += amt; }
-                else if(r.status === 'PAID') { fPaid++; fPaidAmt += amt; }
-            });
-
-            document.getElementById('dashTotal').innerText = fLock;
-            document.getElementById('dashLockAmount').innerText = "RM " + fLockAmt.toFixed(2);
-            document.getElementById('dashPaid').innerText = fPaid;
-            document.getElementById('dashPaidAmount').innerText = "RM " + fPaidAmt.toFixed(2);
-            document.getElementById('btnExportReport').style.display = reportData.length > 0 ? 'flex' : 'none';
+            if (type === 'active_lock') {
+                title.innerHTML = '<i class="fa fa-lock" style="color:#8b5cf6;"></i> Senarai Active Lock (Hari Ini)';
+                if(modalActiveLocks.length === 0) html += '<div style="text-align:center; padding:20px; color:#94a3b8;">Tiada rekod.</div>';
+                else modalActiveLocks.forEach(d => {
+                    html += `<div style="background: rgba(255,255,255,0.05); border-left: 4px solid #8b5cf6; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between;">
+                        <div><div style="font-size:10px; color:#94a3b8;">DCA: ${d.dca_id}</div><div style="font-weight:700;">${d.acc_no}</div></div>
+                        <div style="text-align:right;"><div style="color:#c084fc; font-weight:700;">RM ${d.amount}</div><div style="font-size:10px; color:#cbd5e1;">PTP: ${d.promise_date||'-'}</div></div></div>`;
+                });
+            } else {
+                title.innerHTML = '<i class="fa fa-check-circle" style="color:#10b981;"></i> Senarai Mark Paid (Hari Ini)';
+                if(modalPaidLocks.length === 0) html += '<div style="text-align:center; padding:20px; color:#94a3b8;">Tiada rekod.</div>';
+                else modalPaidLocks.forEach(d => {
+                    html += `<div style="background: rgba(255,255,255,0.05); border-left: 4px solid #10b981; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between;">
+                        <div><div style="font-size:10px; color:#94a3b8;">DCA: ${d.dca_id}</div><div style="font-weight:700;">${d.acc_no}</div></div>
+                        <div style="text-align:right;"><div style="color:#34d399; font-weight:700;">RM ${d.amount}</div><div style="font-size:10px; color:#cbd5e1;">Selesai</div></div></div>`;
+                });
+            }
+            body.innerHTML = html + '</div>';
+            modal.style.display = 'flex'; document.body.style.overflow = 'hidden';
         }
 
+        // ================= CUSTOM ANALYTICS =================
+        async function calculateReport() {
+            var btn = document.getElementById("loadBtn");
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Calculating...'; btn.disabled = true;
+            
+            let dca = document.getElementById("dcaFilter").value;
+            let start = document.getElementById("startDate").value; 
+            let end = document.getElementById("endDate").value;
+            
+            const { data } = await supaClient.from('lock_data').select('*');
+            if(data) {
+                reportDataList = data.filter(r => {
+                    let matchDca = (dca === "ALL" || r.dca_id === dca);
+                    let dStr = (r.status === 'PAID' && r.paid_date) ? r.paid_date : r.created_at;
+                    dStr = dStr ? dStr.split('T')[0] : '';
+                    let matchDate = (dStr >= start && dStr <= end);
+                    return matchDca && matchDate;
+                });
+                
+                let tL=0, aL=0, tP=0, aP=0;
+                reportDataList.forEach(r => {
+                    let amt = Number(r.amount)||0;
+                    if(r.status==='LOCK') { tL++; aL+=amt; } else if(r.status==='PAID') { tP++; aP+=amt; }
+                });
+                document.getElementById("dashTotal").innerText = tL; document.getElementById("dashLockAmount").innerText = "RM "+aL.toFixed(2);
+                document.getElementById("dashPaid").innerText = tP; document.getElementById("dashPaidAmount").innerText = "RM "+aP.toFixed(2);
+                document.getElementById("exportReportBtn").style.display = reportDataList.length>0?"flex":"none";
+                document.getElementById("dashStatus").innerText = reportDataList.length>0?"":"No records found.";
+            }
+            btn.innerHTML = '<i class="fa fa-calculator"></i> Generate Analytics'; btn.disabled = false;
+        }
+
+        function resetAnalytics() {
+            let today = new Date().toISOString().split('T')[0];
+            document.getElementById("startDate").value = today; document.getElementById("endDate").value = today;
+            document.getElementById("dcaFilter").value = "ALL"; reportDataList=[];
+            document.getElementById("dashTotal").innerText = "0"; document.getElementById("dashLockAmount").innerText = "RM 0.00";
+            document.getElementById("dashPaid").innerText = "0"; document.getElementById("dashPaidAmount").innerText = "RM 0.00";
+            document.getElementById("exportReportBtn").style.display = "none";
+        }
         function exportReport() {
-            const ws = XLSX.utils.json_to_sheet(reportData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Analytics");
-            XLSX.writeFile(wb, `Custom_Report_${Date.now()}.xlsx`);
+            const ws = XLSX.utils.json_to_sheet(reportDataList); const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Analytics"); XLSX.writeFile(wb, `CustomReport_${Date.now()}.xlsx`);
         }
 
-        // 3. MANAGE RECORDS (EDIT & DELETE)
+        // ================= MANAGE RECORDS (EDIT/DELETE) =================
+        function clearManageSearch() { document.getElementById("manageSearchAcc").value = ""; document.getElementById("manageResultArea").innerHTML = ""; }
+        
         async function searchManageAcc() {
-            const acc = document.getElementById('manageSearchAcc').value.trim().toUpperCase();
-            const res = document.getElementById('manageResultArea');
-            if(!acc) return;
+            let acc = document.getElementById("manageSearchAcc").value.trim().toUpperCase();
+            let res = document.getElementById("manageResultArea");
+            if(!acc) return; res.innerHTML = "Searching...";
+            const { data } = await supaClient.from('lock_data').select('*').eq('acc_no', acc);
             
-            let data = globalMasterData.filter(r => r.acc_no === acc);
-            if(data.length === 0) { res.innerHTML = "No records found."; return; }
+            if(!data || data.length === 0) { res.innerHTML = `<div style="color:#ef4444; padding:20px; background:#fef2f2; text-align:center; border-radius:12px;">No records found.</div>`; return; }
             
             let html = "";
             data.forEach(d => {
-                html += `
-                <div class="manage-card" id="mcard-${d.id}">
-                    <div id="mview-${d.id}">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                            <b>${d.acc_no}</b> <span class="badge ${d.status==='LOCK'?'badge-lock':'badge-paid'}">${d.status}</span>
+                let id = d.id; let sColor = d.status==='PAID'?'#10b981':'#f59e0b';
+                html += `<div class="manage-card" id="card-${id}">
+                    <div id="view-${id}">
+                        <div style="display:flex;justify-content:space-between;border-bottom:1px solid #e2e8f0;padding-bottom:10px;margin-bottom:15px;">
+                            <div><span style="font-size:11px;color:#64748b;font-weight:600;">DCA: ${d.dca_id}</span><br><span style="font-size:16px;font-weight:700;">${d.acc_no}</span></div>
+                            <div style="color:${sColor}; font-weight:700;">${d.status}</div>
                         </div>
-                        <div class="grid-2" style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">
-                            <div>DCA: ${d.dca_id}</div>
-                            <div>Amt: RM ${d.amount}</div>
-                            <div>Branch: ${d.branch_name}</div>
-                            <div>Date: ${d.promise_date}</div>
-                        </div>
-                        <button class="btn btn-primary" style="padding:8px 15px;" onclick="enableEdit('${d.id}')" ${d.status==='PAID'?'disabled':''}>Edit Record</button>
-                    </div>
-                    
-                    <div id="medit-${d.id}" style="display:none;">
                         <div class="manage-grid">
-                            <div><label style="font-size:11px;">Amount</label><input type="number" id="e_amt_${d.id}" value="${d.amount}"></div>
-                            <div><label style="font-size:11px;">Category</label><input type="text" id="e_cat_${d.id}" value="${d.payment_category}"></div>
-                            <div><label style="font-size:11px;">Branch</label><input type="text" id="e_br_${d.id}" value="${d.branch_name}"></div>
-                            <div><label style="font-size:11px;">PTP Date</label><input type="date" id="e_ptp_${d.id}" value="${d.promise_date}"></div>
+                            <div class="manage-item"><label>Amount</label><div class="val">RM ${d.amount}</div></div>
+                            <div class="manage-item"><label>Branch</label><div class="val">${d.branch_name||"-"}</div></div>
+                            <div class="manage-item"><label>Promise Date</label><div class="val">${d.promise_date||"-"}</div></div>
+                            <div class="manage-item"><label>Category</label><div class="val">${d.payment_category||"-"}</div></div>
                         </div>
-                        <label style="font-size:11px;">Remarks</label>
-                        <input type="text" id="e_rem_${d.id}" value="${d.remarks}">
-                        
+                        <div class="manage-item"><label>Remarks</label><div class="val">${d.remarks||"-"}</div></div>
                         <div class="manage-actions">
-                            <button class="btn btn-success" onclick="saveEdit('${d.id}')">Save</button>
-                            <button class="btn btn-danger" onclick="promptDelete('${d.id}')">Delete</button>
-                            <button class="btn btn-secondary" onclick="cancelEdit('${d.id}')">Cancel</button>
+                            <button class="btn-m-edit" onclick="enableEdit('${id}')"><i class="fa fa-pen"></i> Edit</button>
+                            <button class="btn-m-delete" onclick="deleteRecord('${id}','${d.acc_no}')"><i class="fa fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                    <div id="edit-${id}" style="display:none;">
+                        <div class="manage-grid">
+                            <div class="manage-item"><label>Amount</label><input type="number" id="e_amt_${id}" value="${d.amount}"></div>
+                            <div class="manage-item"><label>Branch</label><input type="text" id="e_br_${id}" value="${d.branch_name||''}"></div>
+                            <div class="manage-item"><label>Promise Date</label><input type="date" id="e_ptp_${id}" value="${d.promise_date}"></div>
+                            <div class="manage-item"><label>Status</label><select id="e_stat_${id}"><option value="LOCK" ${d.status==='LOCK'?'selected':''}>LOCK</option><option value="PAID" ${d.status==='PAID'?'selected':''}>PAID</option></select></div>
+                            <div class="manage-item"><label>Category</label><input type="text" id="e_cat_${id}" value="${d.payment_category||''}"></div>
+                        </div>
+                        <div class="manage-item" style="margin-bottom:15px;"><label>Remarks</label><input type="text" id="e_rem_${id}" value="${d.remarks||''}"></div>
+                        <div class="manage-actions">
+                            <button class="btn-m-save" onclick="saveRecord('${id}')"><i class="fa fa-save"></i> Save</button>
+                            <button class="btn-m-cancel" onclick="cancelEdit('${id}')"><i class="fa fa-times"></i> Cancel</button>
                         </div>
                     </div>
                 </div>`;
@@ -563,90 +781,129 @@
             res.innerHTML = html;
         }
 
-        function enableEdit(id) { document.getElementById('mview-'+id).style.display='none'; document.getElementById('medit-'+id).style.display='block'; }
-        function cancelEdit(id) { document.getElementById('mview-'+id).style.display='block'; document.getElementById('medit-'+id).style.display='none'; }
+        function enableEdit(id) { document.getElementById('view-'+id).style.display='none'; document.getElementById('edit-'+id).style.display='block'; document.getElementById('card-'+id).classList.add('edit-active');}
+        function cancelEdit(id) { document.getElementById('view-'+id).style.display='block'; document.getElementById('edit-'+id).style.display='none'; document.getElementById('card-'+id).classList.remove('edit-active');}
 
-        async function saveEdit(id) {
+        async function saveRecord(id) {
             let amt = document.getElementById('e_amt_'+id).value;
-            let cat = document.getElementById('e_cat_'+id).value;
             let br = document.getElementById('e_br_'+id).value;
             let ptp = document.getElementById('e_ptp_'+id).value;
+            let stat = document.getElementById('e_stat_'+id).value;
+            let cat = document.getElementById('e_cat_'+id).value;
             let rem = document.getElementById('e_rem_'+id).value;
 
+            // Audit Trail Logic
+            const { data: old } = await supaClient.from('lock_data').select('*').eq('id', id).single();
+            if(old) {
+                let changes = [];
+                if(old.amount != amt) changes.push(`Amt: ${old.amount}->${amt}`);
+                if(old.status != stat) changes.push(`Stat: ${old.status}->${stat}`);
+                if(changes.length > 0) {
+                    await supaClient.from('edit_history').insert({...old, changes_made: changes.join(" | "), edited_by_user: currentUser});
+                }
+            }
+
             const { error } = await supaClient.from('lock_data').update({
-                amount: amt, payment_category: cat, branch_name: br, promise_date: ptp, remarks: rem,
+                amount: amt, branch_name: br, promise_date: ptp, status: stat, payment_category: cat, remarks: rem,
                 edited_by: currentUser, edited_at: new Date().toISOString()
             }).eq('id', id);
 
-            if(!error) { alert("Updated successfully!"); loadMasterData(); searchManageAcc(); }
-            else alert("Error updating.");
+            if(!error) { alert("Updated successfully!"); searchManageAcc(); manualMasterRefresh(); }
+            else alert("Error: " + error.message);
         }
 
-        let deleteId = null;
-        function promptDelete(id) { deleteId = id; document.getElementById('deleteModal').style.display='flex'; document.getElementById('delPasscode').value=''; }
-        async function confirmDelete() {
-            if(document.getElementById('delPasscode').value !== '8888') return alert("Invalid Passcode");
-            const { error } = await supaClient.from('lock_data').delete().eq('id', deleteId);
-            if(!error) { 
-                document.getElementById('deleteModal').style.display='none'; 
-                alert("Deleted successfully!"); loadMasterData(); 
-                document.getElementById('manageResultArea').innerHTML = '';
-            }
-        }
-
-        // 4. VIEW ALL RECORDS (TABLE)
-        function filterTableStatus(status) {
-            currentFilterStatus = status;
-            applyTableSearch();
-        }
-        function applyTableSearch() {
-            let q = document.getElementById('masterTableSearch').value.toLowerCase();
-            filteredMasterData = globalMasterData.filter(r => {
-                let matchStatus = (currentFilterStatus === 'ALL' || r.status === currentFilterStatus);
-                let matchQ = (r.acc_no.toLowerCase().includes(q) || r.dca_id.toLowerCase().includes(q));
-                return matchStatus && matchQ;
-            });
-            currentPage = 1;
-            renderMasterTable();
-        }
-
-        function renderMasterTable() {
-            let start = (currentPage - 1) * pageSize;
-            let pageData = filteredMasterData.slice(start, start + pageSize);
-            let tbody = document.getElementById('masterTableBody');
-            tbody.innerHTML = '';
+        let delId = null, delAcc = null;
+        function deleteRecord(id, acc) { delId = id; delAcc = acc; document.getElementById('delPopupAcc').innerText=acc; document.getElementById('deleteVerifyPopup').style.display='flex'; document.getElementById('deletePasscode').value=''; document.getElementById('delError').style.display='none'; }
+        function closeDeletePopup() { document.getElementById('deleteVerifyPopup').style.display='none'; }
+        function toggleViewPasscode() { let i = document.getElementById('deletePasscode'), ic = document.getElementById('togglePasscodeIcon'); if(i.type==='password'){i.type='text';ic.classList.replace('fa-eye','fa-eye-slash');}else{i.type='password';ic.classList.replace('fa-eye-slash','fa-eye');} }
+        
+        async function confirmDeleteAction() {
+            let pass = document.getElementById('deletePasscode').value;
+            if(pass !== "8888") { document.getElementById('delError').style.display='block'; return; }
             
-            if(pageData.length === 0) { tbody.innerHTML = "<tr><td colspan='8'>No records found</td></tr>"; return; }
+            const { data: old } = await supaClient.from('lock_data').select('*').eq('id', delId).single();
+            if(old) await supaClient.from('deleted_records').insert({...old, deleted_by: currentUser});
+            
+            const { error } = await supaClient.from('lock_data').delete().eq('id', delId);
+            if(!error) { closeDeletePopup(); alert("Deleted successfully!"); searchManageAcc(); manualMasterRefresh(); }
+        }
 
-            pageData.forEach(r => {
-                let dStr = r.created_at ? new Date(r.created_at).toLocaleDateString('en-GB') : '-';
+        // ================= VIEW ALL RECORDS TABLE =================
+        async function manualMasterRefresh() {
+            let btn = document.getElementById("btnReloadMaster"); let icon = document.getElementById("masterSyncIcon");
+            btn.disabled=true; icon.classList.add("fa-spin");
+            document.getElementById("masterTableBody").innerHTML = "<tr><td colspan='9' style='text-align:center;padding:40px;color:#64748b;'><i class='fa fa-circle-notch fa-spin'></i> Loading...</td></tr>";
+            
+            const { data } = await supaClient.from('lock_data').select('*').order('created_at', { ascending: false });
+            if(data) { liveDataList = data; switchView(currentViewStatus); }
+            btn.disabled=false; icon.classList.remove("fa-spin");
+        }
+
+        function switchView(type) {
+            currentViewStatus = type;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if(type==='LOCK') document.getElementById('tabActive').classList.add('active');
+            else if(type==='PAID') document.getElementById('tabPaid').classList.add('active');
+            else document.getElementById('tabAll').classList.add('active');
+            
+            filteredTableData = liveDataList.filter(d => type==='ALL' || d.status === type);
+            currentPage = 1; renderTable();
+        }
+
+        function toggleRemark(el){ let textEl = el.querySelector(".remark-text"); if(textEl) textEl.classList.toggle("is-expanded"); }
+
+        function renderTable() {
+            let start = (currentPage - 1) * pageSize;
+            let pageData = filteredTableData.slice(start, start + pageSize);
+            let tbody = document.getElementById("masterTableBody"); tbody.innerHTML = "";
+            
+            if(pageData.length === 0) { tbody.innerHTML="<tr><td colspan='9' style='text-align:center;padding:40px;'>No Records Found</td></tr>"; return; }
+            
+            pageData.forEach(d => {
+                let badge = d.status==='PAID'?`<span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span>`:`<span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span>`;
+                let rem = d.remarks || "-";
+                let remHtml = rem.length>40 ? `<div style="cursor:pointer;" onclick="toggleRemark(this)"><div class="remark-text">${rem}</div><div style="font-size:10px;color:#3b82f6;"><i class='fa fa-hand-pointer'></i> tap to view</div></div>` : `<div class="remark-text">${rem}</div>`;
+                let ed = d.edited_by ? `<div style="margin-top:4px; font-size:8.5px; background:#f8fafc; padding:2px; border-radius:4px; border:1px dashed #cbd5e1;">Edited by ${d.edited_by}</div>` : "";
+                
                 tbody.innerHTML += `<tr>
-                    <td>${r.dca_id}</td>
-                    <td style="font-weight:bold;">${r.acc_no}</td>
-                    <td>${r.branch_name}</td>
-                    <td>RM ${r.amount}</td>
-                    <td>${r.payment_category}</td>
-                    <td><span class="badge ${r.status==='LOCK'?'badge-lock':'badge-paid'}">${r.status}</span></td>
-                    <td>${r.promise_date || '-'}</td>
-                    <td>${dStr}</td>
+                    <td>${d.dca_id||"-"}</td> <td style="font-weight:600;">${d.acc_no}</td> <td>${d.branch_name||"-"}</td>
+                    <td style="text-align:center; font-weight:700;">RM ${d.amount}</td> <td style="font-size:11px; font-weight:600;">${d.payment_category||"-"}</td>
+                    <td>${badge}</td> <td>${d.promise_date||"-"}</td> <td>${new Date(d.created_at).toLocaleDateString('en-GB')}</td>
+                    <td style="vertical-align:top;">${remHtml} ${ed}</td>
                 </tr>`;
             });
-
-            document.getElementById('pageInfo').innerText = `Page ${currentPage} of ${Math.ceil(filteredMasterData.length / pageSize) || 1}`;
-            document.getElementById('btnPrev').disabled = currentPage === 1;
-            document.getElementById('btnNext').disabled = (currentPage * pageSize) >= filteredMasterData.length;
+            
+            let tot = filteredTableData.length; let maxP = Math.ceil(tot/pageSize)||1;
+            document.getElementById("pageInfo").innerHTML = `Showing ${tot===0?0:start+1} to ${Math.min(start+pageSize, tot)} of ${tot}`;
+            document.getElementById("prevBtn").disabled = currentPage === 1;
+            document.getElementById("nextBtn").disabled = currentPage === maxP || tot === 0;
+        }
+        function nextPage() { if(currentPage*pageSize < filteredTableData.length) { currentPage++; renderTable(); } }
+        function prevPage() { if(currentPage>1) { currentPage--; renderTable(); } }
+        function resetMasterTable() { liveDataList=[]; filteredTableData=[]; renderTable(); }
+        function exportTable() {
+            const ws = XLSX.utils.json_to_sheet(filteredTableData); const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "MasterData"); XLSX.writeFile(wb, `Export_${Date.now()}.xlsx`);
+        }
+        
+        function sortTableData(col) {
+            if(currentSort.col === col) currentSort.dir = currentSort.dir==='asc'?'desc':'asc'; else { currentSort.col=col; currentSort.dir='asc'; }
+            filteredTableData.sort((a,b) => {
+                let vA = a[col]||"", vB = b[col]||"";
+                if(col==='amount') { vA=Number(vA)||0; vB=Number(vB)||0; }
+                if(vA<vB) return currentSort.dir==='asc'?-1:1; if(vA>vB) return currentSort.dir==='asc'?1:-1; return 0;
+            });
+            currentPage=1; renderTable();
+        }
+        function initTableUpgrades() {
+            document.querySelectorAll('th').forEach(th => {
+                th.addEventListener('click', (e) => { if(!e.target.classList.contains('resizer')) { let s = th.getAttribute('data-sort'); if(s) sortTableData(s); } });
+            });
         }
 
-        function prevPage() { if(currentPage > 1) { currentPage--; renderMasterTable(); } }
-        function nextPage() { if((currentPage * pageSize) < filteredMasterData.length) { currentPage++; renderMasterTable(); } }
-
-        function exportTable() {
-            const ws = XLSX.utils.json_to_sheet(filteredMasterData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "MasterData");
-            XLSX.writeFile(wb, `Master_Export_${Date.now()}.xlsx`);
+        async function systemLog(action, status, accNo, details) {
+            await supaClient.from('system_logs').insert([{ timestamp: new Date().toISOString(), user_id: currentUser||"-", role: currentRole||"-", action: action, status: status, acc_no: accNo||"-", details: details||"-" }]);
         }
     </script>
 </body>
 </html>
-
