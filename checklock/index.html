@@ -649,7 +649,8 @@
         const checkInput = document.getElementById("check_acc_no");
         
         checkInput.addEventListener("input", function() {
-            this.value = this.value.replace(/[^0-9]/g,'');
+            // BENARKAN HURUF DAN NOMBOR SAHAJA (Cth: K35100)
+            this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '').toUpperCase();
             clearTimeout(liveCheckTimeout);
             let currentAcc = this.value.trim();
             if(currentAcc === "") {
@@ -677,21 +678,44 @@
         }
 
         async function checkLockSupabase() {
-            const acc = document.getElementById("check_acc_no").value.trim().toUpperCase();
+            const accInput = document.getElementById("check_acc_no");
+            const acc = accInput.value.trim().toUpperCase();
             const res = document.getElementById("check_result_area");
-            if(!acc) { alert("Enter Account No"); document.getElementById("check_acc_no").focus(); return; }
+            
+            if(!acc) { 
+                alert("Enter Account No"); 
+                accInput.focus(); 
+                return; 
+            }
 
             res.innerHTML = "<div class='loading'>Checking Lock Status<div class='spinner'></div></div>";
 
             try {
-                const { data, error } = await supaClient.from('lock_data').select('*').eq('acc_no', acc).in('status', ['LOCK', 'PAID']).order('created_at', { ascending: false }).limit(1);
+                // Fetch direct supaya tak sangkut cache filter Supabase .in()
+                const { data, error } = await supaClient
+                    .from('lock_data')
+                    .select('*')
+                    .eq('acc_no', acc)
+                    .order('created_at', { ascending: false });
                 
-                if(error || !data || data.length === 0) {
+                if (error) {
+                    console.error("Supabase Error:", error);
+                    throw new Error(error.message || "Database Error");
+                }
+                
+                if(!data || data.length === 0) {
                     res.innerHTML = "<div class='no-lock'>NO LOCK FOUND</div>";
                     return;
                 }
 
-                let d = data[0];
+                // Cari rekod yang berstatus LOCK atau PAID di bahagian Javascript
+                let d = data.find(row => row.status === 'LOCK' || row.status === 'PAID');
+                
+                if (!d) {
+                    res.innerHTML = "<div class='no-lock'>NO LOCK FOUND</div>";
+                    return;
+                }
+
                 let docId = d.id;
 
                 const formattedDate = formatCustomDate(d.promise_date);
@@ -700,15 +724,17 @@
                 const createdStr = `${createdDate} ${createdTime}`;
                 const amount = "RM " + Number(d.amount || 0).toLocaleString("en-MY", { minimumFractionDigits:2, maximumFractionDigits:2 });
 
-                const promiseDate = new Date(d.promise_date);
+                // Cegah masalah "Invalid Date"
+                const promiseDate = new Date(d.promise_date || null);
                 const today = new Date();
-                today.setHours(0,0,0,0); promiseDate.setHours(0,0,0,0);
+                today.setHours(0,0,0,0); 
+                if(!isNaN(promiseDate.getTime())) promiseDate.setHours(0,0,0,0);
 
                 let isPaid = (d.status === "PAID");
                 let statusText = isPaid ? "ALREADY PAID" : "LOCKED";
                 let statusColor = isPaid ? "#10b981" : "#f59e0b"; 
 
-                if (!isPaid && today > promiseDate) { 
+                if (!isPaid && !isNaN(promiseDate.getTime()) && today > promiseDate) { 
                     statusText = "EXPIRED"; statusColor = "#ef4444";
                 }
 
@@ -726,14 +752,16 @@
 
                 let actionButton = "";
                 if (d.status === "LOCK") {
-                    actionButton = `<button class='paid-btn' onclick="markAsPaidFromCheck('${docId}', '${d.acc_no}')"><i class='fa-solid fa-check-circle'></i> Mark as PAID</button>`;
+                    let safeDocId = (docId || "").toString().replace(/'/g, "\'");
+                    let safeAcc = (d.acc_no || "").toString().replace(/'/g, "\'");
+                    actionButton = `<button class='paid-btn' onclick="markAsPaidFromCheck('${safeDocId}', '${safeAcc}')"><i class='fa-solid fa-check-circle'></i> Mark as PAID</button>`;
                 }
 
                 res.innerHTML =
                 `<div class='result-card' style='border: 1px solid ${statusColor}40; border-top: 4px solid ${statusColor}; box-shadow: 0 10px 25px ${statusColor}15;'>` +
                 `<div class='status-box'><span style='background:${statusColor}'>${statusText}</span>${paidByInfo}</div>` +
                 metaSection + 
-                `<div class='row'><div class='col'><div class='label'>ACCOUNT NO</div><div class='value'>${d.acc_no}</div></div>` +
+                `<div class='row'><div class='col'><div class='label'>ACCOUNT NO</div><div class='value'>${d.acc_no || "-"}</div></div>` +
                 `<div class='col'><div class='label'>BRANCH</div><div class='value'>${d.branch_name || "-"}</div></div></div>` +
                 `<div class='row'><div class='col'><div class='label'>LOCK AMOUNT</div><div class='amount'>${amount}</div></div>` +
                 `<div class='col'><div class='label'>PROMISE DATE</div><div class='value'>${formattedDate}</div></div></div>` +
@@ -742,8 +770,8 @@
                 actionButton + `</div>`;
 
             } catch (err) { 
-                console.error(err);
-                res.innerHTML = "<div class='no-lock'>SYSTEM ERROR. TRY AGAIN.</div>"; 
+                console.error("Check Error:", err);
+                res.innerHTML = `<div class='no-lock' style='color:#ef4444; border-color:#fecaca;'>SYSTEM ERROR: ${err.message || 'Check Console (F12)'}</div>`; 
             }
         }
 
