@@ -844,11 +844,16 @@ window.deleteUser = async function(userId) {
             }
         };
 
-        window.deleteSingleFinding = async function(findingId, accNo) {
+window.deleteSingleFinding = async function(findingId, accNo) {
             if(!confirm("Padam baris nota penemuan ini sahaja?")) return;
             
+            // --- MINTA PASSCODE SEBELUM TERUSKAN ---
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
+
             const { error } = await supabase.from('findings').delete().eq('id', findingId);
             if(!error) {
+                showNotification("BERJAYA DIPADAM", "Baris penemuan tersebut telah dikeluarkan dari pangkalan data.");
                 openModal(accNo); // Refresh modal untuk tunjuk ia dah hilang
             } else {
                 showNotification("RALAT", error.message, true);
