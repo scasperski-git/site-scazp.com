@@ -354,7 +354,8 @@
             width: 100%; padding: 12px 16px; margin-bottom: 12px; border: 1px solid #cbd5e1;
             border-radius: 12px; font-size: 14px; background: #f8fafc; color: #1e293b; transition: all 0.3s ease;
         }
-        input[type="text"]:not(#deletePasscode):not(#syncPasscode), textarea { text-transform: uppercase; }
+        input[type="text"]:not(#deletePasscode):not(#syncPasscode):not(#login-pass), textarea { text-transform: uppercase; }
+#login-pass, #deletePasscode, #syncPasscode { text-transform: none !important; font-family: sans-serif; letter-spacing: 2px; }
         textarea { resize: vertical; min-height: 70px; }
         input:focus, select:focus, textarea:focus {
             background: #ffffff; border-color: #4f46e5; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15); outline: none;
@@ -930,10 +931,15 @@
     <!-- ==========================================================================
        JAVASCRIPT ARCHITECTURE ENGINE (CORE MIGRATED TO SUPABASE REST API)
        ========================================================================== */ -->
+<script src="../lockconfig.js"></script>
+
     <script>
         // 🚨 CONFIGURATION PARAMETERS (PASTE SUPABASE PARAMS HERE)
         const SUPABASE_URL = "https://yigfwckhvdqmejvesbmv.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpZ2Z3Y2todmRxbWVqdmVzYm12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMTY2OTMsImV4cCI6MjA5ODc5MjY5M30.7o8EZUxwZDbnFRmUv5ZNOy3qtRkUqf0tC59Iah3g5Cg";
+        
+        // 2. PANGGIL API URL DARI LOCKCONFIG
+        const api = API_URL;
         
         // Connect and build the direct headers context wrapper
         const sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
