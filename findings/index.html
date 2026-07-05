@@ -967,9 +967,10 @@ window.switchTab = function(target) {
             }
         };
 
-        window.exportDataByDate = async function(dateStr) {
-            let isVerified = await verifyAdminPasscode();
-            if (!isVerified) return;
+window.exportDataByDate = async function(dateStr) {
+            // --- GANTIKAN DUA BARIS INI ---
+            let isConfirmed = await customConfirm(`Anda pasti mahu mengeksport data penemuan untuk tarikh ${dateStr}?`);
+            if (!isConfirmed) return;
 
             document.getElementById('loadingText').innerText = "Menjana fail Excel dan menyusun data mengikut wilayah...";
             document.getElementById('loadingModal').style.display = 'flex';
@@ -1005,10 +1006,10 @@ window.switchTab = function(target) {
                     
                     groupedData[reg].push({
                         "ACCT": row.acct,
-                        "REMARK1": row.remark1 || '',
-                        "REMARK2": row.remark2 || '',
-                        "REMARK3": row.remark3 || '',
-                        "REMARK4": row.remark4 || ''
+                        "REMARK1": row.remark4 || '',
+                        "REMARK2": row.remark1 || '',
+                        "REMARK3": row.remark2 || '',
+                        "REMARK4": row.remark3 || ''
                     });
                     idsToUpdate.push(row.id);
                 });
