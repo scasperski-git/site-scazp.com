@@ -850,25 +850,97 @@
             currentPage = 1; renderTable();
         }
 
-        function toggleRemark(el){ let textEl = el.querySelector(".remark-text"); if(textEl) textEl.classList.toggle("is-expanded"); }
+// ==============================================================
+        // GANTIKAN KOD DARI SINI ...
+        // ==============================================================
+        function toggleRemark(el) {
+            let textEl = el.querySelector(".remark-text");
+            let hintEl = el.querySelector(".tap-hint");
+            if (!textEl) return;
+            
+            if (textEl.classList.contains("is-expanded")) {
+                textEl.classList.remove("is-expanded");
+                if (hintEl) hintEl.innerHTML = "<i class='fa fa-hand-pointer'></i> tap to view";
+            } else {
+                textEl.classList.add("is-expanded");
+                if (hintEl) hintEl.innerHTML = "<i class='fa fa-times'></i> tap to minimize";
+            }
+        }
+
+        // Fungsi khas tukar format tarikh jadi 5-JULY-26
+        function formatCustomDate(dateString) {
+            if (!dateString) return "-";
+            let d = new Date(dateString);
+            if (isNaN(d.getTime())) return dateString;
+            let day = d.getDate();
+            let mths = ["JAN","FEB","MAR","APR","MAY","JUN","JULY","AUG","SEP","OCT","NOV","DEC"];
+            let mth = mths[d.getMonth()];
+            let yr = d.getFullYear().toString().slice(-2); // Ambil 2 digit tahun
+            return `${day}-${mth}-${yr}`;
+        }
+
+        // Fungsi khas tukar masa AM/PM
+        function formatCustomTime(dateString) {
+            if (!dateString) return "";
+            let d = new Date(dateString);
+            if (isNaN(d.getTime())) return "";
+            let hr = d.getHours();
+            let min = ("0" + d.getMinutes()).slice(-2);
+            let ampm = hr >= 12 ? 'PM' : 'AM';
+            hr = hr % 12; hr = hr ? hr : 12;
+            return `${hr}:${min} ${ampm}`;
+        }
 
         function renderTable() {
             let start = (currentPage - 1) * pageSize;
             let pageData = filteredTableData.slice(start, start + pageSize);
-            let tbody = document.getElementById("masterTableBody"); tbody.innerHTML = "";
+            let tbody = document.getElementById("masterTableBody"); 
+            tbody.innerHTML = "";
             
-            if(pageData.length === 0) { tbody.innerHTML="<tr><td colspan='9' style='text-align:center;padding:40px;'>No Records Found</td></tr>"; return; }
+            if(pageData.length === 0) { 
+                tbody.innerHTML="<tr><td colspan='9' style='text-align:center;padding:40px;'><i class='fa fa-folder-open' style='font-size:28px;color:#94a3b8;margin-bottom:10px;display:block;'></i>No Records Found</td></tr>"; 
+                return; 
+            }
             
             pageData.forEach(d => {
-                let badge = d.status==='PAID'?`<span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span>`:`<span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span>`;
+                // 1. Badge Status
+                let badge = d.status === 'PAID' 
+                    ? `<span style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">PAID</span>` 
+                    : `<span style="background:#f59e0b; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">LOCK</span>`;
+                
+                // 2. Remarks + Tap to View (Sama macam MASTER.txt)
                 let rem = d.remarks || "-";
-                let remHtml = rem.length>40 ? `<div style="cursor:pointer;" onclick="toggleRemark(this)"><div class="remark-text">${rem}</div><div style="font-size:10px;color:#3b82f6;"><i class='fa fa-hand-pointer'></i> tap to view</div></div>` : `<div class="remark-text">${rem}</div>`;
-                let ed = d.edited_by ? `<div style="margin-top:4px; font-size:8.5px; background:#f8fafc; padding:2px; border-radius:4px; border:1px dashed #cbd5e1;">Edited by ${d.edited_by}</div>` : "";
+                let remHtml = rem.length > 40 
+                    ? `<div style="cursor: pointer; width: 100%; word-break: break-word;" onclick="toggleRemark(this)">
+                         <div class="remark-text">${rem}</div>
+                         <div class="tap-hint" style="font-size: 10px; color: #3b82f6; margin-top: 4px; font-style: italic;">
+                            <i class='fa fa-hand-pointer'></i> tap to view
+                         </div>
+                       </div>`
+                    : `<div class="remark-text" style="width: 100%; word-break: break-word;">${rem}</div>`;
+                
+                // 3. Badge Edited By + Time
+                let ed = "";
+                if (d.edited_by) {
+                    let editTimeStr = d.edited_at ? ` &bull; ${formatCustomDate(d.edited_at)} ${formatCustomTime(d.edited_at)}` : "";
+                    ed = `<div style="margin-top: 6px; display: inline-block; background: #f8fafc; border: 1px dashed #cbd5e1; color: #475569; font-size: 8.5px; padding: 2px 5px; border-radius: 4px; font-weight: 600; line-height: 1.2;"><i class="fa fa-pen" style="font-size:8px; margin-right:3px;"></i>Edited by ${d.edited_by}${editTimeStr}</div>`;
+                }
+
+                // 4. Custom Date Format (5-JULY-26)
+                let ptpDate = formatCustomDate(d.promise_date);
+                let createdDate = formatCustomDate(d.created_at);
+                let createdTime = formatCustomTime(d.created_at);
+                let createdHtml = `${createdDate} <span style="display:block; font-size:10px; color:#94a3b8; font-weight:600; margin-top:2px;">${createdTime}</span>`;
                 
                 tbody.innerHTML += `<tr>
-                    <td>${d.dca_id||"-"}</td> <td style="font-weight:600;">${d.acc_no}</td> <td>${d.branch_name||"-"}</td>
-                    <td style="text-align:center; font-weight:700;">RM ${d.amount}</td> <td style="font-size:11px; font-weight:600;">${d.payment_category||"-"}</td>
-                    <td>${badge}</td> <td>${d.promise_date||"-"}</td> <td>${new Date(d.created_at).toLocaleDateString('en-GB')}</td>
+                    <td>${d.dca_id||"-"}</td> 
+                    <td style="font-weight:600;">${d.acc_no}</td> 
+                    <td>${d.branch_name||"-"}</td>
+                    <td style="text-align:center; font-weight:700;">RM ${d.amount}</td> 
+                    <td style="font-size:11px; font-weight:600;">${d.payment_category||"-"}</td>
+                    <td>${badge}</td> 
+                    <td>${ptpDate}</td> 
+                    <td>${createdHtml}</td>
                     <td style="vertical-align:top;">${remHtml} ${ed}</td>
                 </tr>`;
             });
@@ -878,6 +950,9 @@
             document.getElementById("prevBtn").disabled = currentPage === 1;
             document.getElementById("nextBtn").disabled = currentPage === maxP || tot === 0;
         }
+        // ==============================================================
+        // ... SEHINGGA SINI
+        // ==============================================================
         function nextPage() { if(currentPage*pageSize < filteredTableData.length) { currentPage++; renderTable(); } }
         function prevPage() { if(currentPage>1) { currentPage--; renderTable(); } }
         function resetMasterTable() { liveDataList=[]; filteredTableData=[]; renderTable(); }
