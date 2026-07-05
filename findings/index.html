@@ -111,6 +111,37 @@
         
         #loadingModal .modal-content { text-align: center; padding: 40px; border: 1px solid var(--accent-gold); max-width: 350px;}
 
+        /* Gaya Butang Padam Moden */
+        .btn-delete-finding {
+            float: right;
+            background-color: rgba(229, 115, 115, 0.1);
+            border: 1px solid var(--error-red);
+            color: var(--error-red);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 9px;
+            padding: 3px 8px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn-delete-finding:hover {
+            background-color: var(--error-red);
+            color: white;
+        }
+        
+        /* Gaya Butang Batal Untuk Modal Custom */
+        .btn-cancel {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-cancel:hover { background-color: #333; color: white; }
+
 @media (max-width: 768px) {
             /* KPI Card - Kekal 4 grid seperti sedia ada */
             .kpi-container { grid-template-columns: repeat(4, 1fr); gap: 6px; }
@@ -371,6 +402,29 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="customConfirmModal" style="z-index: 1100;">
+        <div class="modal-content" style="text-align: center; max-width: 350px; border: 1px solid var(--error-red);">
+            <h2 style="color: var(--error-red); margin-top: 0; font-size: 18px;">PENGESAHAN TINDAKAN</h2>
+            <p id="confirmMessage" style="color: var(--text-main); font-size: 13px; margin: 15px 0 20px 0; line-height: 1.5; white-space: pre-wrap;"></p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-cancel" style="flex: 1;" id="btnConfirmCancel">BATAL</button>
+                <button class="btn-submit" style="flex: 1; background-color: var(--error-red);" id="btnConfirmOk">TERUSKAN</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="customPromptModal" style="z-index: 1100;">
+        <div class="modal-content" style="text-align: center; max-width: 350px; border: 1px solid var(--accent-gold);">
+            <h2 style="color: var(--accent-gold); margin-top: 0; font-size: 18px;">PASSCODE KESELAMATAN</h2>
+            <p id="promptMessage" style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;"></p>
+            <input type="password" id="promptInput" class="form-control" placeholder="••••••••" style="text-align: center; margin-bottom: 20px; font-size: 18px; letter-spacing: 3px;">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-cancel" style="flex: 1;" id="btnPromptCancel">BATAL</button>
+                <button class="btn-submit" style="flex: 1;" id="btnPromptOk">PENGESAHAN</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
@@ -411,6 +465,47 @@
                 initDashboardView();
             }
         }
+
+        // Enjin Pengganti 'confirm()'
+        window.customConfirm = function(message) {
+            return new Promise((resolve) => {
+                document.getElementById('confirmMessage').innerText = message;
+                document.getElementById('customConfirmModal').style.display = 'flex';
+                
+                document.getElementById('btnConfirmOk').onclick = function() {
+                    document.getElementById('customConfirmModal').style.display = 'none';
+                    resolve(true);
+                };
+                document.getElementById('btnConfirmCancel').onclick = function() {
+                    document.getElementById('customConfirmModal').style.display = 'none';
+                    resolve(false);
+                };
+            });
+        };
+
+        // Enjin Pengganti 'prompt()'
+        window.customPrompt = function(message) {
+            return new Promise((resolve) => {
+                document.getElementById('promptMessage').innerText = message;
+                document.getElementById('promptInput').value = '';
+                document.getElementById('customPromptModal').style.display = 'flex';
+                setTimeout(() => document.getElementById('promptInput').focus(), 100);
+                
+                document.getElementById('btnPromptOk').onclick = function() {
+                    let val = document.getElementById('promptInput').value.trim();
+                    document.getElementById('customPromptModal').style.display = 'none';
+                    resolve(val);
+                };
+                document.getElementById('btnPromptCancel').onclick = function() {
+                    document.getElementById('customPromptModal').style.display = 'none';
+                    resolve(null);
+                };
+                
+                document.getElementById('promptInput').onkeypress = function(e) {
+                    if (e.key === 'Enter') document.getElementById('btnPromptOk').click();
+                };
+            });
+        };
 
         window.handleLogin = async function() {
             const user = document.getElementById('username').value.trim();
@@ -797,9 +892,9 @@ window.deleteUser = async function(userId) {
                 return; 
             }
             
-            if (!confirm(`AMARAN KERAS:\nAnda pasti mahu memadam akaun ${userId.toUpperCase()} sepenuhnya dari pangkalan data?`)) return;
+            let isConfirmed = await customConfirm(`AMARAN KERAS:\nAnda pasti mahu memadam akaun ${userId.toUpperCase()} sepenuhnya dari pangkalan data?`);
+            if (!isConfirmed) return;
             
-            // --- MINTA PASSCODE SEBELUM TERUSKAN ---
             let isVerified = await verifyAdminPasscode();
             if (!isVerified) return;
 
@@ -820,10 +915,10 @@ window.deleteUser = async function(userId) {
             document.getElementById('notificationModal').style.display = 'flex';
         };
 
-        window.verifyAdminPasscode = async function() {
-            // Guna kotak prompt pantas dari pelayar web
-            let pwd = prompt("TINDAKAN SENSITIF:\nSila masukkan Passcode Keselamatan Admin:");
-            if (!pwd) return false; // Batal jika kosong
+window.verifyAdminPasscode = async function() {
+            // Memanggil UI Custom Prompt
+            let pwd = await customPrompt("Tindakan ini sensitif. Sila masukkan Passcode Master Admin untuk pengesahan:");
+            if (!pwd) return false; 
 
             try {
                 const { data, error } = await supabase.from('settings').select('val').eq('id', 'admin_pass').single();
@@ -833,10 +928,10 @@ window.deleteUser = async function(userId) {
                 }
                 
                 if (pwd === data.val) {
-                    return true; // Passcode Betul
+                    return true; 
                 } else {
                     showNotification("AKSES DITOLAK", "Passcode yang dimasukkan adalah SALAH.", true);
-                    return false; // Passcode Salah
+                    return false; 
                 }
             } catch (err) {
                 console.error(err);
@@ -844,17 +939,18 @@ window.deleteUser = async function(userId) {
             }
         };
 
-window.deleteSingleFinding = async function(findingId, accNo) {
-            if(!confirm("Padam baris nota penemuan ini sahaja?")) return;
+        window.deleteSingleFinding = async function(findingId, accNo) {
+            // Memanggil UI Custom Confirm
+            let isConfirmed = await customConfirm("Anda pasti mahu memadam baris nota penemuan ini?");
+            if(!isConfirmed) return;
             
-            // --- MINTA PASSCODE SEBELUM TERUSKAN ---
             let isVerified = await verifyAdminPasscode();
             if (!isVerified) return;
 
             const { error } = await supabase.from('findings').delete().eq('id', findingId);
             if(!error) {
                 showNotification("BERJAYA DIPADAM", "Baris penemuan tersebut telah dikeluarkan dari pangkalan data.");
-                openModal(accNo); // Refresh modal untuk tunjuk ia dah hilang
+                openModal(accNo); 
             } else {
                 showNotification("RALAT", error.message, true);
             }
@@ -1053,8 +1149,7 @@ window.openModal = async function(accNo) {
                     // BUTANG DELETE KHAS UNTUK ADMIN SAHAJA (Letak jika role == master)
                     let deleteBtnHTML = '';
                     if(currentUser.role === 'master') {
-                        // Pastikan jadual findings kau ada kolum 'id' (Primary Key auto-generate)
-                        deleteBtnHTML = `<button style="float:right; background:transparent; border:1px solid #777; color:#ccc; border-radius:3px; cursor:pointer; font-size:9px;" onclick="deleteSingleFinding('${data.id}', '${accNo}')">X PADAM</button>`;
+                        deleteBtnHTML = `<button class="btn-delete-finding" onclick="deleteSingleFinding('${data.id}', '${accNo}')">🗑️ PADAM</button>`;
                     }
 
                     let histRemark = '';
@@ -1171,9 +1266,9 @@ window.saveFinding = async function() {
 
 window.resetAccountStatus = async function() {
             let accNo = document.getElementById('modalAccNo').innerText;
-            if(!confirm(`AMARAN:\nAnda pasti mahu memadam SEMUA sejarah penemuan untuk akaun ${accNo} dan kembalikan statusnya kepada PENDING?`)) return;
+            let isConfirmed = await customConfirm(`AMARAN:\nAnda pasti mahu memadam SEMUA sejarah penemuan untuk akaun ${accNo} dan kembalikan statusnya kepada PENDING?`);
+            if(!isConfirmed) return;
 
-            // --- MINTA PASSCODE SEBELUM TERUSKAN ---
             let isVerified = await verifyAdminPasscode();
             if (!isVerified) return;
 
@@ -1194,8 +1289,10 @@ window.resetAccountStatus = async function() {
                 showNotification("RESET BERJAYA", `Akaun <b>${accNo}</b> telah dikembalikan kepada status PENDING dan sejarah log telah dibersihkan.`);
                 closeModal();
                 applyFilterAndRender();
+
             } catch (err) {
                 showNotification("RALAT KRITIKAL SISTEM", err.message, true);
+                console.error(err);
             }
         };
         
