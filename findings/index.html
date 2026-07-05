@@ -997,15 +997,20 @@ window.openModal = async function(accNo) {
                 findingsList.forEach((data) => {
                     const dateFormatted = data.updated_at ? new Date(data.updated_at).toLocaleString() : 'N/A';
                     
-                    // Logik untuk papar rekod lama (remark) dan rekod baru (remark1, 2, 3, 4)
+                // Logik untuk papar rekod lama (remark) dan rekod baru (remark1, 2, 3, 4)
                     let histRemark = '';
                     if(data.remark1 || data.remark2 || data.remark3) {
+                        // Buka pembalut untuk remark utama dengan font lebih besar
+                        histRemark += `<div style="font-size: 13px; line-height: 1.4; margin-top: 5px; color: var(--text-main);">`;
                         if(data.remark1) histRemark += `<div>${data.remark1}</div>`;
                         if(data.remark2) histRemark += `<div>${data.remark2}</div>`;
                         if(data.remark3) histRemark += `<div>${data.remark3}</div>`;
-                        if(data.remark4) histRemark += `<div style="color: var(--success-green); font-size: 9px; margin-top: 4px;">${data.remark4}</div>`;
+                        histRemark += `</div>`; // Tutup pembalut
+                        
+                        // Remark 4 (Tarik & ID) kekal kecil dan hijau
+                        if(data.remark4) histRemark += `<div style="color: var(--success-green); font-size: 9px; margin-top: 6px;">${data.remark4}</div>`;
                     } else {
-                        histRemark = `<div>${data.remark || ''}</div>`;
+                        histRemark = `<div style="font-size: 13px; margin-top: 5px;">${data.remark || ''}</div>`;
                     }
 
                     historyBox.innerHTML += `
