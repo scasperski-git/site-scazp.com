@@ -99,7 +99,6 @@
         .history-item { border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; margin-bottom: 5px; }
         .history-item:last-child { border-bottom: none; margin-bottom: 0; }
         .history-meta { color: var(--accent-gold); font-size: 10px; margin-bottom: 3px; }
-        textarea { width: 100%; box-sizing: border-box; background-color: #121212; border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; border-radius: 4px; resize: vertical; min-height: 70px; font-family: inherit;}
 
         .mapping-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; background: #121212; padding: 10px; border-radius: 6px;}
         .mapping-grid label { font-size: 12px; align-self: center; color: var(--text-main); font-weight: 500;}
@@ -142,49 +141,22 @@
         }
         .btn-cancel:hover { background-color: #333; color: white; }
 
-@media (max-width: 768px) {
-            /* KPI Card - Kekal 4 grid seperti sedia ada */
+        @media (max-width: 768px) {
             .kpi-container { grid-template-columns: repeat(4, 1fr); gap: 6px; }
             .kpi-card { padding: 10px 4px; }
             .kpi-card h3 { font-size: 8px; }
             .kpi-card p { font-size: 13px; }
 
-            /* --- KEMAS KINI JADUAL UNTUK 10 KOLUM --- */
-            table { 
-                font-size: 9px; /* Kecilkan fon untuk maksimakan ruang */
-            }
-            th, td { 
-                padding: 8px 5px; /* Kurangkan padding kiri & kanan */
-                white-space: nowrap; /* Pastikan teks tak turun baris ke bawah */
-            }
-            th {
-                font-size: 9px;
-                letter-spacing: 0.5px;
-            }
+            table { font-size: 9px; }
+            th, td { padding: 8px 5px; white-space: nowrap; }
+            th { font-size: 9px; letter-spacing: 0.5px; }
             
-            /* Kecilkan butang dan lencana status supaya tak makan ruang */
-            .status-badge { 
-                padding: 3px 6px; 
-                font-size: 8px; 
-            }
-            .btn-update { 
-                padding: 4px 6px; 
-                font-size: 9px; 
-            }
+            .status-badge { padding: 3px 6px; font-size: 8px; }
+            .btn-update { padding: 4px 6px; font-size: 9px; }
             
-            /* Adjust saiz Pagination bar */
-            .pagination-container {
-                padding: 10px;
-                flex-direction: column;
-                gap: 10px;
-            }
-            .page-info {
-                font-size: 10px;
-            }
-            .pagination-controls button {
-                padding: 5px 10px;
-                font-size: 10px;
-            }
+            .pagination-container { padding: 10px; flex-direction: column; gap: 10px; }
+            .page-info { font-size: 10px; }
+            .pagination-controls button { padding: 5px 10px; font-size: 10px; }
         }
     </style>
 </head>
@@ -253,13 +225,13 @@
 
             <div class="table-container">
                 <table>
-<thead>
-    <tr>
-        <th>REGION</th><th>AREA</th><th>LOC CD</th>
-        <th>TYPE</th> <th>ACCT NO</th>
-        <th>DELQ</th> <th>ARRS MTH</th> <th>OSB (RM)</th><th>STATUS</th><th>ACTION</th>
-    </tr>
-</thead>
+                    <thead>
+                        <tr>
+                            <th>REGION</th><th>AREA</th><th>LOC CD</th>
+                            <th>TYPE</th> <th>ACCT NO</th>
+                            <th>DELQ</th> <th>ARRS MTH</th> <th>OSB (RM)</th><th>STATUS</th><th>ACTION</th>
+                        </tr>
+                    </thead>
                     <tbody id="table-body"></tbody>
                 </table>
             </div>
@@ -273,7 +245,7 @@
             </div>
         </div>
 
-<div id="settings-panel" class="main-panel">
+        <div id="settings-panel" class="main-panel">
             <div class="settings-box" style="margin-bottom: 20px;">
                 <h2>Add New Portal User (Syncs to Cloud Ledger)</h2>
                 <div class="form-group">
@@ -311,35 +283,37 @@
                 <h2>Senarai Pengguna Sistem (<span id="total-users-count" style="color: var(--text-main);">0</span> Pengguna)</h2>
                 <div class="table-container">
                     <table>
-                    <thead>
+                        <thead>
                             <tr>
                                 <th style="width: 50px; text-align: center;">NO</th>
                                 <th>USER ID</th>
                                 <th>PERANAN (ROLE)</th>
                                 <th>AKSES WILAYAH (REGION)</th>
-                                <th>STATUS</th> <th>TINDAKAN</th> </tr>
+                                <th>STATUS</th> 
+                                <th>TINDAKAN</th> 
+                            </tr>
                         </thead>
                         <tbody id="users-table-body">
                         </tbody>
                     </table>
                 </div>
             </div>
-        </div> </div>
-
-<div class="modal-overlay" id="loadingModal">
+        </div>
+    </div> <div class="modal-overlay" id="loadingModal">
         <div class="modal-content">
             <h2 style="color: var(--accent-gold); margin-top:0;">SYSTEM CHECK</h2>
             <p style="color: var(--text-muted); font-size: 13px;" id="loadingText">Menyemak versi data terkini. Sila tunggu sebentar...</p>
         </div>
     </div>
-<div class="modal-overlay" id="readingExcelModal">
+    
+    <div class="modal-overlay" id="readingExcelModal">
         <div class="modal-content" style="text-align: center; padding: 40px; border: 1px solid var(--success-green); max-width: 350px;">
             <h2 style="color: var(--success-green); margin-top:0;">MEMBACA FAIL EXCEL</h2>
             <p style="color: var(--text-muted); font-size: 13px;">Sila tunggu sebentar, sistem sedang memproses baris data...</p>
         </div>
     </div>
 
-<div class="modal-overlay" id="notificationModal">
+    <div class="modal-overlay" id="notificationModal" style="z-index: 1200;">
         <div class="modal-content" style="text-align: center; max-width: 350px; border: 1px solid var(--accent-gold);">
             <h2 id="notif-title" style="margin-top: 0; font-size: 18px;">TAJUK NOTIFIKASI</h2>
             <p id="notif-message" style="color: var(--text-main); font-size: 13px; margin: 15px 0 20px 0; line-height: 1.5;"></p>
@@ -353,25 +327,21 @@
                 <h2>Map Excel Columns to Database Fields</h2>
                 <button class="close-btn" onclick="closeMappingModal()">&times;</button>
             </div>
-<div class="mapping-grid">
-    <label>REGION Scope</label><select id="map-region" class="form-control mapping-select"></select>
-    <label>AREA Scope</label><select id="map-area" class="form-control mapping-select"></select>
-    <label>LOC CODE</label><select id="map-loc" class="form-control mapping-select"></select>
-    
-    <label>TYPE</label><select id="map-type" class="form-control mapping-select"></select>
-    
-    <label>ACCOUNT NO</label><select id="map-acct" class="form-control mapping-select"></select>
-    
-    <label>DELQ</label><select id="map-delq" class="form-control mapping-select"></select>
-    <label>ARRS MTH</label><select id="map-arrs" class="form-control mapping-select"></select>
-    
-    <label>OSB Balance</label><select id="map-osb" class="form-control mapping-select"></select>
-</div>
+            <div class="mapping-grid">
+                <label>REGION Scope</label><select id="map-region" class="form-control mapping-select"></select>
+                <label>AREA Scope</label><select id="map-area" class="form-control mapping-select"></select>
+                <label>LOC CODE</label><select id="map-loc" class="form-control mapping-select"></select>
+                <label>TYPE</label><select id="map-type" class="form-control mapping-select"></select>
+                <label>ACCOUNT NO</label><select id="map-acct" class="form-control mapping-select"></select>
+                <label>DELQ</label><select id="map-delq" class="form-control mapping-select"></select>
+                <label>ARRS MTH</label><select id="map-arrs" class="form-control mapping-select"></select>
+                <label>OSB Balance</label><select id="map-osb" class="form-control mapping-select"></select>
+            </div>
             <button class="btn-submit" style="width: 100%; background: #2e7d32;" onclick="processExcelUpload()">CONFIRM & START UPLOAD</button>
         </div>
     </div>
 
-<div class="modal-overlay" id="updateModal">
+    <div class="modal-overlay" id="updateModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Update Account Finding: <span id="modalAccNo"></span></h2>
@@ -380,17 +350,18 @@
             <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px;">Historical Audit Trail:</label>
             <div class="history-box"></div>
             
-<div class="form-group">
+            <div class="form-group">
                 <label style="color: var(--accent-gold);">New Verification Finding Log (Max 50 Char / Line):</label>
                 <input type="text" id="remark1" class="form-control" maxlength="50" placeholder="Row 1: Taip dan tekan Enter..." style="margin-bottom: 8px;" onkeypress="handleEnter(event, 'remark2')">
                 <input type="text" id="remark2" class="form-control" maxlength="50" placeholder="Row 2: Sambungan..." style="margin-bottom: 8px;" onkeypress="handleEnter(event, 'remark3')">
                 <input type="text" id="remark3" class="form-control" maxlength="50" placeholder="Row 3: Sambungan..." onkeypress="handleEnter(event, 'btnSaveFinding')">
             </div>
             
-<div style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 10px;">
                 <button id="btnSaveFinding" class="btn-submit" style="flex: 2;" onclick="saveFinding()">COMMIT ENTRY</button>
                 <button id="btnResetPending" class="btn-submit" style="flex: 1; background-color: var(--error-red); color: white; display: none;" onclick="resetAccountStatus()">RESET PENDING</button>
             </div>
+        </div>
     </div>
 
     <div class="modal-overlay" id="progressModal">
@@ -432,7 +403,6 @@
         const supabaseKey = 'sb_publishable_nN7JOvHOInSCZUAy6tTYgQ_xGzJD9N2';
         const supabase = createClient(supabaseUrl, supabaseKey);
 
-        // --- Konfigurasi localForage (IndexedDB pengganti SessionStorage 5MB Limit) ---
         localforage.config({
             name: 'SCAZP_Portal',
             storeName: 'account_data'
@@ -466,7 +436,6 @@
             }
         }
 
-        // Enjin Pengganti 'confirm()'
         window.customConfirm = function(message) {
             return new Promise((resolve) => {
                 document.getElementById('confirmMessage').innerText = message;
@@ -483,7 +452,6 @@
             });
         };
 
-        // Enjin Pengganti 'prompt()'
         window.customPrompt = function(message) {
             return new Promise((resolve) => {
                 document.getElementById('promptMessage').innerText = message;
@@ -516,12 +484,11 @@
             try {
                 const { data, error } = await supabase.from('users').select('*').eq('id', user).single();
                 if (data && data.pass === pass) {
-                    // --- TAMBAH BLOK SEKATAN INI ---
                     if (data.status === 'INACTIVE') {
                         document.getElementById('login-error').innerText = "Akaun anda telah dinyahaktifkan. Sila hubungi Admin.";
                         document.getElementById('login-error').style.display = 'block';
                         btn.innerText = "SIGN IN";
-                        return; // Berhentikan proses login
+                        return; 
                     }
                     currentUser = data;
                     currentUser.username = user;
@@ -550,8 +517,6 @@
             document.getElementById('login-section').style.display = 'flex';
         };
 
-        // --- SUPER FETCHER (SEQUENTIAL LOOP + INDEXEDDB) ---
-        // Selamat dari API Rate Limit dan selamat dari Memory Crash!
         async function fetchFullDatabaseData(region = null) {
             const cacheKey = region ? `scazp_cache_${region}` : 'scazp_cache_all';
             const timeKey = region ? `scazp_time_${region}` : 'scazp_time_all';
@@ -565,11 +530,10 @@
                 const dbLastUpdate = lastFinding && lastFinding.length > 0 ? lastFinding[0].updated_at : 'NODATA';
                 const localLastUpdate = localStorage.getItem(timeKey);
                 
-                // Guna localforage (bukan sessionStorage yang selalu crash)
                 const cachedData = await localforage.getItem(cacheKey);
 
                 if (cachedData && localLastUpdate === dbLastUpdate) {
-                    console.log("Membaca dari storan IndexedDB (Percuma & Pantas!)...");
+                    console.log("Membaca dari storan IndexedDB...");
                     globalAccounts = cachedData;
                     filteredAccounts = [...globalAccounts];
                     rebuildRegionsMapFromData();
@@ -577,14 +541,13 @@
                     return; 
                 }
 
-                console.log("Menarik data secara beratur (Sequential) dari awan supaya tidak disekat API...");
+                console.log("Menarik data secara beratur (Sequential) dari awan...");
                 loadingText.innerText = "Memuat turun rekod dari pelayan (Ini mungkin mengambil masa untuk 41k rekod)...";
                 
                 let allData = [];
                 let page = 0;
                 const pageSize = 1000;
                 
-                // Gunakan Loop While yang jauh lebih stabil dari Promise.all (Mengelakkan isu cuma 1000 data ter-download)
                 while(true) {
                     let fetchQuery = supabase.from('accounts').select('acct, region, area, loc, type, delq, arrs_mth, osb, status');
                     if (region) fetchQuery = fetchQuery.eq('region', region);
@@ -596,16 +559,15 @@
                     
                     allData = allData.concat(data);
                     
-                    if (data.length < pageSize) break; // Keluar loop bila data dah habis
+                    if (data.length < pageSize) break; 
                     page++;
                 }
                 
                 globalAccounts = allData;
                 filteredAccounts = [...globalAccounts];
                 
-                // Simpan dalam ruang unlimited browser menggunakan localForage
                 await localforage.setItem(cacheKey, globalAccounts);
-                    localStorage.setItem(timeKey, dbLastUpdate);
+                localStorage.setItem(timeKey, dbLastUpdate);
                 
                 rebuildRegionsMapFromData();
             } catch (err) {
@@ -629,7 +591,7 @@
             });
         }
         
-function initDashboardView() {
+        function initDashboardView() {
             if (currentUser.role === 'master') {
                 document.getElementById('master-nav-tabs').style.display = 'flex';
                 document.getElementById('upload-action-container').style.display = 'block';
@@ -650,7 +612,6 @@ function initDashboardView() {
                 applyFilterAndRender();
             }
 
-            // --- TAMBAHAN BARU: Arahkan sistem buka tab memori ---
             const lastActiveTab = localStorage.getItem('scazp_active_tab') || 'dashboard';
             switchTab(lastActiveTab);
         }
@@ -782,21 +743,21 @@ function initDashboardView() {
             const endIndex = startIndex + rowsPerPage;
             const pageData = filteredAccounts.slice(startIndex, endIndex);
 
-pageData.forEach(row => {
-    let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
-    tbody.innerHTML += `
-        <tr>
-            <td>${row.region}</td><td>${row.area}</td><td>${row.loc}</td>
-            <td>${row.type || '-'}</td>
-            <td>${row.acct}</td>
-            <td>${row.delq || '-'}</td>
-            <td>${row.arrs_mth || '0'}</td>
-            <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td><span class="status-badge ${badgeClass}">${row.status}</span></td>
-            <td><button class="btn-update" onclick="openModal('${row.acct}')">UPDATE</button></td>
-        </tr>
-    `;
-});
+            pageData.forEach(row => {
+                let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${row.region}</td><td>${row.area}</td><td>${row.loc}</td>
+                        <td>${row.type || '-'}</td>
+                        <td>${row.acct}</td>
+                        <td>${row.delq || '-'}</td>
+                        <td>${row.arrs_mth || '0'}</td>
+                        <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td><span class="status-badge ${badgeClass}">${row.status}</span></td>
+                        <td><button class="btn-update" onclick="openModal('${row.acct}')">UPDATE</button></td>
+                    </tr>
+                `;
+            });
 
             document.getElementById('page-info').innerText = `Page ${currentPage} of ${totalPages} (Total: ${filteredAccounts.length.toLocaleString()} Records)`;
             document.getElementById('btn-prev').disabled = currentPage === 1;
@@ -811,7 +772,7 @@ pageData.forEach(row => {
             if(currentPage > 1) { currentPage--; renderTablePage(); }
         }
 
-window.switchTab = function(target) {
+        window.switchTab = function(target) {
             document.querySelectorAll('.main-panel').forEach(p => p.style.display = 'none');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             
@@ -823,14 +784,11 @@ window.switchTab = function(target) {
                 document.getElementById('tab-settings').classList.add('active');
             }
             
-            // TAMBAHAN BARU: Simpan tab terakhir ke dalam memori
             localStorage.setItem('scazp_active_tab', target);
         };
 
-        // Fungsi untuk tarik dan render senarai pengguna
        window.fetchAndRenderUsers = async function() {
             try {
-                // Tarik sekali data 'status' dari cloud
                 const { data, error } = await supabase.from('users').select('id, role, assignedregion, status').order('id', { ascending: true });
                 if (error) throw error;
                 
@@ -842,11 +800,9 @@ window.switchTab = function(target) {
                     let regionDisp = user.assignedregion ? user.assignedregion.toUpperCase() : (user.role === 'master' ? 'SEMUA' : 'TIADA');
                     let roleBadgeClass = user.role === 'master' ? 'status-done' : 'status-pending';
                     
-                    // Logik Paparan Status
-                    let userStatus = user.status || 'ACTIVE'; // Default ke ACTIVE kalau data lama takde status
+                    let userStatus = user.status || 'ACTIVE';
                     let statusBadge = userStatus === 'ACTIVE' ? 'status-done' : 'status-pending';
                     
-                    // Logik Butang Tindakan
                     let toggleBtnText = userStatus === 'ACTIVE' ? 'DEACTIVATE' : 'ACTIVATE';
                     let toggleBtnColor = userStatus === 'ACTIVE' ? 'var(--error-red)' : 'var(--success-green)';
                     
@@ -869,24 +825,22 @@ window.switchTab = function(target) {
             }
         };
 
-        // FUNGSI 1: Aktif / Nyahaktif Akaun
         window.toggleUserStatus = async function(userId, currentStatus) {
-            // Halang admin dari ter-deactivate diri sendiri
             if (userId === currentUser.username) { 
-                alert("Ralat: Anda tidak boleh menukar status akaun anda sendiri!"); 
+                showNotification("RALAT TINDAKAN", "Anda tidak boleh menukar status akaun anda sendiri!", true); 
                 return; 
             }
             
             const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-            if (confirm(`PENGESAHAN:\nTukar status akaun ${userId.toUpperCase()} kepada ${newStatus}?`)) {
-                const { error } = await supabase.from('users').update({ status: newStatus }).eq('id', userId);
-                if (!error) { fetchAndRenderUsers(); } 
-                else { alert("Ralat Kemas Kini: " + error.message); }
-            }
+            let isConfirmed = await customConfirm(`PENGESAHAN:\nTukar status akaun ${userId.toUpperCase()} kepada ${newStatus}?`);
+            if (!isConfirmed) return;
+
+            const { error } = await supabase.from('users').update({ status: newStatus }).eq('id', userId);
+            if (!error) { fetchAndRenderUsers(); } 
+            else { showNotification("RALAT KEMAS KINI", error.message, true); }
         };
 
-        // FUNGSI 2: Padam Akaun Sepenuhnya
-window.deleteUser = async function(userId) {
+        window.deleteUser = async function(userId) {
             if (userId === currentUser.username) { 
                 showNotification("RALAT TINDAKAN", "Anda tidak boleh memadam akaun anda sendiri!", true); 
                 return; 
@@ -907,7 +861,6 @@ window.deleteUser = async function(userId) {
             }
         };
         
-// Fungsi Panggil Popup Notifikasi
         window.showNotification = function(title, message, isError = false) {
             document.getElementById('notif-title').innerText = title;
             document.getElementById('notif-message').innerHTML = message;
@@ -915,8 +868,7 @@ window.deleteUser = async function(userId) {
             document.getElementById('notificationModal').style.display = 'flex';
         };
 
-window.verifyAdminPasscode = async function() {
-            // Memanggil UI Custom Prompt
+        window.verifyAdminPasscode = async function() {
             let pwd = await customPrompt("Tindakan ini sensitif. Sila masukkan Passcode Master Admin untuk pengesahan:");
             if (!pwd) return false; 
 
@@ -940,7 +892,6 @@ window.verifyAdminPasscode = async function() {
         };
 
         window.deleteSingleFinding = async function(findingId, accNo) {
-            // Memanggil UI Custom Confirm
             let isConfirmed = await customConfirm("Anda pasti mahu memadam baris nota penemuan ini?");
             if(!isConfirmed) return;
             
@@ -956,7 +907,6 @@ window.verifyAdminPasscode = async function() {
             }
         };
 
-        // Fungsi Daftar User Yang Telah Dikemas Kini
         window.addNewUser = async function() {
             const id = document.getElementById('new-user-id').value.trim();
             const pass = document.getElementById('new-user-pass').value.trim();
@@ -976,12 +926,9 @@ window.verifyAdminPasscode = async function() {
                 const { error } = await supabase.from('users').insert([{ id: id, pass: pass, role: role, assignedregion: role === 'user' ? region : null }]);
                 
                 if(!error) {
-                    // Masalah ${id} dah diselesaikan menggunakan backticks dan custom popup!
                     showNotification("PENDAFTARAN BERJAYA", `Akaun pengguna baharu dengan ID <b>${id}</b> telah berjaya didaftarkan ke dalam pangkalan data.`);
-                    
                     document.getElementById('new-user-id').value = ''; 
                     document.getElementById('new-user-pass').value = '';
-                    
                     fetchAndRenderUsers(); 
                 } else { 
                     showNotification("RALAT PANGKALAN DATA", error.message, true); 
@@ -994,14 +941,12 @@ window.verifyAdminPasscode = async function() {
             document.getElementById('form-region-group').style.display = (role === 'master') ? 'none' : 'block';
         };
 
-window.handleExcelFileSelect = function(e) {
+        window.handleExcelFileSelect = function(e) {
             const file = e.target.files[0]; 
             if (!file) return;
             
-            // 1. Tunjuk popup "MEMBACA FAIL" dahulu
             document.getElementById('readingExcelModal').style.display = 'flex';
             
-            // 2. Guna setTimeout (delay 50ms) supaya skrin sempat papar popup sebelum 'hang' sekejap
             setTimeout(() => {
                 const reader = new FileReader();
                 reader.onload = function(event) {
@@ -1034,7 +979,6 @@ window.handleExcelFileSelect = function(e) {
                             if(id === 'map-osb') preSelectOption(select, ['osb', 'OSB', 'balance', 'OSB (RM)']);
                         });
                         
-                        // 3. Tutup popup membaca, dan buka popup Mapping
                         document.getElementById('readingExcelModal').style.display = 'none';
                         document.getElementById('mappingModal').style.display = 'flex';
                         
@@ -1044,7 +988,7 @@ window.handleExcelFileSelect = function(e) {
                     }
                 };
                 reader.readAsArrayBuffer(file);
-            }, 50); // 50 millisecond sudah cukup untuk browser bernafas
+            }, 50); 
         };
         
         function preSelectOption(select, guesses) {
@@ -1077,17 +1021,17 @@ window.handleExcelFileSelect = function(e) {
             for (const row of parsedExcelRows) {
                 const rawAccountNo = String(row[mapAcct]).trim();
                 if (!rawAccountNo) continue; 
-bulkData.push({
-    region: String(row[mapRegion]).toUpperCase().trim(),
-    area: String(row[mapArea]).toUpperCase().trim(),
-    loc: String(row[mapLoc]).trim(),
-    type: String(row[mapType]).trim(), // Kolum baharu
-    acct: rawAccountNo,
-    delq: String(row[mapDelq]).trim(), // Kolum baharu
-    arrs_mth: String(row[mapArrs]).trim(), // Kolum baharu
-    osb: parseFloat(String(row[mapOsb]).replace(/[^0-9.-]+/g,"")) || 0, 
-    status: 'PENDING' 
-});
+                bulkData.push({
+                    region: String(row[mapRegion]).toUpperCase().trim(),
+                    area: String(row[mapArea]).toUpperCase().trim(),
+                    loc: String(row[mapLoc]).trim(),
+                    type: String(row[mapType]).trim(), 
+                    acct: rawAccountNo,
+                    delq: String(row[mapDelq]).trim(), 
+                    arrs_mth: String(row[mapArrs]).trim(), 
+                    osb: parseFloat(String(row[mapOsb]).replace(/[^0-9.-]+/g,"")) || 0, 
+                    status: 'PENDING' 
+                });
             }
 
             const CHUNK_SIZE = 1000; let totalProcessed = 0; let hasError = false;
@@ -1117,7 +1061,6 @@ bulkData.push({
                     document.getElementById('excel-file-input').value = ''; 
                     alert(`Berjaya memproses ${totalProcessed.toLocaleString()} akaun.`);
                     
-                    // Bersihkan memori tempatan menggunakan API localForage
                     await localforage.removeItem('scazp_cache_all');
                     localStorage.removeItem('scazp_time_all');
                     
@@ -1128,11 +1071,10 @@ bulkData.push({
             } else { document.getElementById('progressModal').style.display = 'none'; }
         };
 
-window.openModal = async function(accNo) {
+        window.openModal = async function(accNo) {
             document.getElementById('modalAccNo').innerText = accNo;
             document.getElementById('updateModal').style.display = 'flex';
             
-            // Papar butang RESET hanya untuk Master Admin
             document.getElementById('btnResetPending').style.display = currentUser.role === 'master' ? 'block' : 'none';
 
             const historyBox = document.querySelector('.history-box');
@@ -1146,7 +1088,6 @@ window.openModal = async function(accNo) {
                 findingsList.forEach((data) => {
                     const dateFormatted = data.updated_at ? new Date(data.updated_at).toLocaleString() : 'N/A';
                     
-                    // BUTANG DELETE KHAS UNTUK ADMIN SAHAJA (Letak jika role == master)
                     let deleteBtnHTML = '';
                     if(currentUser.role === 'master') {
                         deleteBtnHTML = `<button class="btn-delete-finding" onclick="deleteSingleFinding('${data.id}', '${accNo}')">🗑️ PADAM</button>`;
@@ -1192,7 +1133,7 @@ window.openModal = async function(accNo) {
             document.getElementById('remark3').value = ''; 
         };
 
-window.saveFinding = async function() {
+        window.saveFinding = async function() {
             let r1 = document.getElementById('remark1').value.trim();
             let r2 = document.getElementById('remark2').value.trim();
             let r3 = document.getElementById('remark3').value.trim();
@@ -1206,13 +1147,11 @@ window.saveFinding = async function() {
             const btn = document.getElementById('btnSaveFinding'); 
             btn.innerText = "SAVING...";
             
-            // Tarik data TYPE, LOC, REGION dari cache jadual yang sedia ada
             let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
             let acctType = accountInfo.type || '';
             let acctLoc = accountInfo.loc || '';
             let acctRegion = accountInfo.region || '';
             
-            // Jana REMARK4 Auto (USER ID & DATE - Format: DD/MM/YYYY)
             let today = new Date();
             let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
             let r4Auto = `${currentUser.username.toUpperCase()} - ${dateStr}`;
@@ -1249,7 +1188,6 @@ window.saveFinding = async function() {
                         localStorage.setItem(timeKey, insertedData[0].updated_at);
                     }
                     
-                    // Guna notification popup yang kita buat sebelum ni
                     showNotification("REKOD DISIMPAN", `Tindakan untuk akaun <b>${accNo}</b> berjaya dikemas kini.`); 
                     closeModal(); 
                     applyFilterAndRender();
@@ -1264,7 +1202,7 @@ window.saveFinding = async function() {
             }
         };
 
-window.resetAccountStatus = async function() {
+        window.resetAccountStatus = async function() {
             let accNo = document.getElementById('modalAccNo').innerText;
             let isConfirmed = await customConfirm(`AMARAN:\nAnda pasti mahu memadam SEMUA sejarah penemuan untuk akaun ${accNo} dan kembalikan statusnya kepada PENDING?`);
             if(!isConfirmed) return;
@@ -1305,6 +1243,3 @@ window.resetAccountStatus = async function() {
     </script>
 </body>
 </html>
-
-
-
