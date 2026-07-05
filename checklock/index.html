@@ -219,6 +219,7 @@
         .resizer { position: absolute; top: 0; right: 0; width: 6px; cursor: col-resize; user-select: none; height: 100%; border-right: 1px solid #cbd5e1; }
         .resizer:hover, .resizer.resizing { border-right: 2px solid #4f46e5; }
 
+        
         /* ==============================================================
            CHECK PAGE & POPUP CSS (FROM CHECK.TXT)
            ============================================================== */
@@ -297,6 +298,9 @@
                 <button class="nav-btn" id="navLock" onclick="showSection('lock-page')">
                     <i class="fa fa-lock"></i> <span>New Lock</span>
                 </button>
+                <button class="nav-btn" id="navRecords" onclick="showSection('master-page')" style="display:none;">
+                    <i class="fa fa-list-check"></i> <span>View Records</span>
+                </button>
                 <button class="nav-btn logout-btn" onclick="logout()">
                     <i class="fa fa-right-from-bracket"></i> <span>Logout</span>
                 </button>
@@ -351,10 +355,10 @@
                  4. MASTER PAGE (EXACT FROM MASTER.TXT)
                  ========================================== -->
             <div id="master-page" class="page-section container-box">
-                <div class="page-title">Master Overview</div>
+                <div class="page-title" id="masterPageTitle">Master Overview</div>
 
                 <!-- A. OVERALL SUMMARY -->
-                <div class="section summary">
+                <div id="summarySection" class="section summary">
                     <h3><i class="fa fa-calendar-check"></i> Today's Overall Summary</h3>
                     <div id="refreshInfo" onclick="manualRefresh()">
                         <i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i> 
@@ -392,7 +396,7 @@
                 </div>
 
                 <!-- B. CUSTOM ANALYTICS -->
-                <div class="section dashboard">
+                <div id="analyticsSection" class="section dashboard">
                     <h3><i class="fa fa-chart-pie"></i> Custom Analytics & Report</h3>
                     <div class="dash-grid">
                         <div><label>DCA NAME</label><select id="dcaFilter"><option value="ALL">ALL USER</option></select></div>
@@ -420,7 +424,7 @@
                 </div>
 
                 <!-- C. MANAGE RECORDS (EDIT/DELETE) -->
-                <div class="section">
+                <div id="manageSection" class="section">
                     <h3><i class="fa fa-pen-to-square"></i> Manage Records (Edit / Delete)</h3>
                     <div class="search-action-bar">
                         <input type="number" id="manageSearchAcc" placeholder="ENTER ACCOUNT NO..." inputmode="numeric" autocomplete="off">
@@ -521,7 +525,7 @@
     </div>
 
     <!-- ==========================================
-         JAVASCRIPT LOGIC
+         JAVASCRIPT LOGIC (SUPABASE + SPA)
          ========================================== -->
     <script>
         const SUPABASE_URL = 'https://vutchaspljmvtnisjoqt.supabase.co';
@@ -539,28 +543,6 @@
         let reportDataList = [];
         let currentSort = { col: null, dir: 'asc' };
 
-        // Helper date format function from previous iteration
-        function formatCustomDate(dateString) {
-            if (!dateString) return "-";
-            let d = new Date(dateString);
-            if (isNaN(d.getTime())) return dateString;
-            let day = d.getDate();
-            let mths = ["JAN","FEB","MAR","APR","MAY","JUN","JULY","AUG","SEP","OCT","NOV","DEC"];
-            let mth = mths[d.getMonth()];
-            let yr = d.getFullYear().toString().slice(-2);
-            return `${day}-${mth}-${yr}`;
-        }
-        function formatCustomTime(dateString) {
-            if (!dateString) return "";
-            let d = new Date(dateString);
-            if (isNaN(d.getTime())) return "";
-            let hr = d.getHours();
-            let min = ("0" + d.getMinutes()).slice(-2);
-            let ampm = hr >= 12 ? 'PM' : 'AM';
-            hr = hr % 12; hr = hr ? hr : 12;
-            return `${hr}:${min} ${ampm}`;
-        }
-
         window.onload = () => {
             const token = localStorage.getItem("session_token");
             if (token) {
@@ -572,7 +554,16 @@
                 document.getElementById('app-layout').style.display = 'flex';
                 document.getElementById("userInfo").innerHTML = "<i class='fa fa-user'></i> <b>" + (currentUser || "-") + "</b> &nbsp;|&nbsp; " + (currentRole || "-");
                 
-                if (currentType === 'master') document.getElementById('navMaster').style.display = 'flex';
+                // 🟢 LOGIK BARU: Kawal butang Navigation Menu mengikut Jenis Akaun
+                if (currentType === 'master') {
+                    document.getElementById('navMaster').style.display = 'flex';
+                    document.getElementById('navLock').style.display = 'flex';
+                } else if (currentType === 'lock') {
+                    document.getElementById('navLock').style.display = 'flex';
+                } else if (currentType === 'check') {
+                    document.getElementById('navLock').style.display = 'none';
+                    document.getElementById('navRecords').style.display = 'flex';
+                }
                 
                 showSection(currentType === 'check' ? 'check-page' : (currentType === 'master' ? 'master-page' : 'lock-page'));
                 
@@ -584,6 +575,8 @@
                     populateDCA();
                     loadSummary();
                     initTableUpgrades();
+                } else if (currentType === 'check') {
+                    initTableUpgrades(); // Sediakan fungsi sort jadual untuk view records
                 }
             }
         };
@@ -593,9 +586,33 @@
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(sectionId).classList.add('active');
             
-            if(sectionId === 'check-page') document.getElementById('navCheck').classList.add('active');
-            if(sectionId === 'lock-page') document.getElementById('navLock').classList.add('active');
-            if(sectionId === 'master-page') document.getElementById('navMaster').classList.add('active');
+            if(sectionId === 'check-page') {
+                document.getElementById('navCheck').classList.add('active');
+            }
+            if(sectionId === 'lock-page') {
+                document.getElementById('navLock').classList.add('active');
+            }
+            if(sectionId === 'master-page') {
+                // 🟢 LOGIK BARU: Jika user Check masuk ke Master Page (View Records), sembunyikan dashboard Master!
+                if(currentType === 'check') {
+                    document.getElementById('navRecords').classList.add('active');
+                    document.getElementById('summarySection').style.display = 'none';
+                    document.getElementById('analyticsSection').style.display = 'none';
+                    document.getElementById('manageSection').style.display = 'none';
+                    document.getElementById('masterPageTitle').innerHTML = '<i class="fa fa-list-check" style="color: #4f46e5;"></i> Record List';
+                    
+                    // Auto-load data jadual untuk User Check
+                    if(filteredTableData.length === 0) {
+                        manualMasterRefresh(); 
+                    }
+                } else {
+                    document.getElementById('navMaster').classList.add('active');
+                    document.getElementById('summarySection').style.display = 'block';
+                    document.getElementById('analyticsSection').style.display = 'block';
+                    document.getElementById('manageSection').style.display = 'block';
+                    document.getElementById('masterPageTitle').innerText = 'Master Overview';
+                }
+            }
         }
 
         async function loginSupabase() {
@@ -1056,7 +1073,7 @@
                 tbody.innerHTML += `<tr>
                     <td>${d.dca_id||"-"}</td> <td style="font-weight:600;">${d.acc_no}</td> <td>${d.branch_name||"-"}</td>
                     <td style="text-align:center; font-weight:700;">RM ${d.amount}</td> <td style="font-size:11px; font-weight:600;">${d.payment_category||"-"}</td>
-                    <td>${badge}</td> <td>${formatCustomDate(d.promise_date)}</td> <td>${formatCustomDate(d.created_at)}</td>
+                    <td>${badge}</td> <td>${d.promise_date||"-"}</td> <td>${new Date(d.created_at).toLocaleDateString('en-GB')}</td>
                     <td style="vertical-align:top;">${remHtml} ${ed}</td>
                 </tr>`;
             });
@@ -1095,5 +1112,3 @@
     </script>
 </body>
 </html>
-
-
