@@ -528,7 +528,7 @@
             });
         }
         
-        function initDashboardView() {
+function initDashboardView() {
             if (currentUser.role === 'master') {
                 document.getElementById('master-nav-tabs').style.display = 'flex';
                 document.getElementById('upload-action-container').style.display = 'block';
@@ -548,6 +548,10 @@
                 renderAreaSelectionUI(currentRegion);
                 applyFilterAndRender();
             }
+
+            // --- TAMBAHAN BARU: Arahkan sistem buka tab memori ---
+            const lastActiveTab = localStorage.getItem('scazp_active_tab') || 'dashboard';
+            switchTab(lastActiveTab);
         }
 
         function applyFilterAndRender() {
@@ -706,9 +710,10 @@ pageData.forEach(row => {
             if(currentPage > 1) { currentPage--; renderTablePage(); }
         }
 
-        window.switchTab = function(target) {
+window.switchTab = function(target) {
             document.querySelectorAll('.main-panel').forEach(p => p.style.display = 'none');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
             if (target === 'dashboard') {
                 document.getElementById('dashboard-panel').style.display = 'block';
                 document.getElementById('tab-dash').classList.add('active');
@@ -716,6 +721,9 @@ pageData.forEach(row => {
                 document.getElementById('settings-panel').style.display = 'block';
                 document.getElementById('tab-settings').classList.add('active');
             }
+            
+            // TAMBAHAN BARU: Simpan tab terakhir ke dalam memori
+            localStorage.setItem('scazp_active_tab', target);
         };
 
         // Fungsi untuk tarik dan render senarai pengguna
