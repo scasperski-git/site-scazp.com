@@ -349,15 +349,18 @@
             <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px;">Historical Audit Trail:</label>
             <div class="history-box"></div>
             
-            <div class="form-group">
+<div class="form-group">
                 <label style="color: var(--accent-gold);">New Verification Finding Log (Max 50 Char / Line):</label>
                 <input type="text" id="remark1" class="form-control" maxlength="50" placeholder="Row 1: Taip dan tekan Enter..." style="margin-bottom: 8px;" onkeypress="handleEnter(event, 'remark2')">
                 <input type="text" id="remark2" class="form-control" maxlength="50" placeholder="Row 2: Sambungan..." style="margin-bottom: 8px;" onkeypress="handleEnter(event, 'remark3')">
                 <input type="text" id="remark3" class="form-control" maxlength="50" placeholder="Row 3: Sambungan..." onkeypress="handleEnter(event, 'btnSaveFinding')">
             </div>
             
-            <button id="btnSaveFinding" class="btn-submit" style="width: 100%;" onclick="saveFinding()">COMMIT RECORD ENTRY</button>
-        </div>
+            <!-- GANTIKAN BAHAGIAN BUTANG INI -->
+            <div style="display: flex; gap: 10px;">
+                <button id="btnSaveFinding" class="btn-submit" style="flex: 2;" onclick="saveFinding()">COMMIT ENTRY</button>
+                <button class="btn-submit" style="flex: 1; background-color: var(--error-red); color: white;" onclick="resetAccountStatus()">RESET PENDING</button>
+            </div>
     </div>
 
     <div class="modal-overlay" id="progressModal">
@@ -1111,6 +1114,43 @@ window.saveFinding = async function() {
             }
         };
 
+        window.resetAccountStatus = async function() {
+            let accNo = document.getElementById('modalAccNo').innerText;
+
+            // Minta pengesahan sebelum padam supaya tak tertekan tak sengaja
+            if(!confirm(`AMARAN:\nAnda pasti mahu memadam SEMUA sejarah penemuan untuk akaun ${accNo} dan kembalikan statusnya kepada PENDING?`)) {
+                return;
+            }
+
+            try {
+                // 1. Padam semua rekod akaun ini dalam jadual findings
+                const { error: delError } = await supabase.from('findings').delete().eq('acct', accNo);
+                if (delError) throw delError;
+
+                // 2. Tukar status akaun kembali kepada PENDING dalam jadual accounts
+                const { error: updError } = await supabase.from('accounts').update({ status: 'PENDING' }).eq('acct', accNo);
+                if (updError) throw updError;
+
+                // 3. Kemas kini cache di skrin (supaya tak perlu F12/Clear Data)
+                let rowToUpdate = globalAccounts.find(a => a.acct === accNo);
+                if(rowToUpdate) rowToUpdate.status = 'PENDING';
+
+                const safeRegion = currentUser.role === 'master' ? 'all' : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
+                const cacheKey = `scazp_cache_${safeRegion}`;
+
+                await localforage.setItem(cacheKey, globalAccounts);
+
+                // 4. Tutup modal dan refresh jadual
+                showNotification("RESET BERJAYA", `Akaun <b>${accNo}</b> telah dikembalikan kepada status PENDING dan sejarah log telah dibersihkan.`);
+                closeModal();
+                applyFilterAndRender();
+
+            } catch (err) {
+                showNotification("RALAT KRITIKAL SISTEM", err.message, true);
+                console.error(err);
+            }
+        };
+        
         window.onclick = function(e) { 
             if(e.target == document.getElementById('updateModal')) closeModal(); 
             if(e.target == document.getElementById('mappingModal')) closeMappingModal();
