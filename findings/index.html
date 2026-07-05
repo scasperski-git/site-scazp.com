@@ -307,6 +307,17 @@
             <p style="color: var(--text-muted); font-size: 13px;">Sila tunggu sebentar, sistem sedang memproses baris data...</p>
         </div>
     </div>
+
+    <!-- POPUP BERJAYA DAFTAR USER -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-content" style="text-align: center; max-width: 350px; border-color: var(--success-green);">
+            <div style="font-size: 40px; color: var(--success-green); margin-bottom: 10px;">✓</div>
+            <h2 style="color: var(--success-green); margin-top: 0; font-size: 18px;">PENDAFTARAN BERJAYA</h2>
+            <p id="successModalMessage" style="color: var(--text-main); font-size: 13px; margin: 15px 0 20px 0; line-height: 1.5;"></p>
+            <button class="btn-submit" style="background-color: var(--success-green); width: 100%; color: #121212;" onclick="document.getElementById('successModal').style.display='none'">TUTUP</button>
+        </div>
+    </div>
+    
     <div class="modal-overlay" id="mappingModal">
         <div class="modal-content" style="max-width: 450px;">
             <div class="modal-header">
@@ -782,26 +793,43 @@ pageData.forEach(row => {
             }
         };
         
+// Fungsi Panggil Popup Notifikasi
+        window.showNotification = function(title, message, isError = false) {
+            document.getElementById('notif-title').innerText = title;
+            document.getElementById('notif-message').innerHTML = message;
+            document.getElementById('notif-title').style.color = isError ? 'var(--error-red)' : 'var(--success-green)';
+            document.getElementById('notificationModal').style.display = 'flex';
+        };
+
+        // Fungsi Daftar User Yang Telah Dikemas Kini
         window.addNewUser = async function() {
             const id = document.getElementById('new-user-id').value.trim();
             const pass = document.getElementById('new-user-pass').value.trim();
             const role = document.getElementById('new-user-role').value;
             const region = document.getElementById('new-user-region').value;
-            if(!id || !pass) { alert("Please complete both fields."); return; }
+            
+            if(!id || !pass) { 
+                showNotification("RALAT", "Sila lengkapkan ruangan User ID dan Password.", true); 
+                return; 
+            }
             
             const { data: existingUser } = await supabase.from('users').select('id').eq('id', id).single();
-            if (existingUser) { alert("User ID sudah wujud dalam sistem!"); } 
-            else {
+            
+            if (existingUser) { 
+                showNotification("RALAT", "User ID sudah wujud dalam sistem!", true); 
+            } else {
                 const { error } = await supabase.from('users').insert([{ id: id, pass: pass, role: role, assignedregion: role === 'user' ? region : null }]);
-            if(!error) {
-                    alert('Pendaftaran Berjaya!\nID: ${id} telah dimasukkan.');
+                
+                if(!error) {
+                    // Masalah ${id} dah diselesaikan menggunakan backticks dan custom popup!
+                    showNotification("PENDAFTARAN BERJAYA", `Akaun pengguna baharu dengan ID <b>${id}</b> telah berjaya didaftarkan ke dalam pangkalan data.`);
+                    
                     document.getElementById('new-user-id').value = ''; 
                     document.getElementById('new-user-pass').value = '';
                     
-                    // PANGGIL FUNGSI INI UNTUK UPDATE JADUAL SECARA AUTOMATIK
                     fetchAndRenderUsers(); 
                 } else { 
-                    alert("Ralat: " + error.message); 
+                    showNotification("RALAT PANGKALAN DATA", error.message, true); 
                 }
             }
         };
