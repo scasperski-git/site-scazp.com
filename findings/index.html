@@ -509,9 +509,11 @@
             btn.innerText = "SIGN IN";
         };
 
-        window.handleLogout = function() {
+window.handleLogout = function() {
             currentUser = null; globalAccounts = []; filteredAccounts = []; regionsMap = {};
             localStorage.removeItem('scazp_user_session');
+            localStorage.removeItem('scazp_active_tab'); // <-- TAMBAHAN BARU: Padam memori tab
+            
             document.getElementById('username').value = ''; document.getElementById('password').value = '';
             document.getElementById('dashboard-section').style.display = 'none';
             document.getElementById('login-section').style.display = 'flex';
@@ -772,7 +774,13 @@
             if(currentPage > 1) { currentPage--; renderTablePage(); }
         }
 
-        window.switchTab = function(target) {
+window.switchTab = function(target) {
+            // --- SEKATAN KESELAMATAN KHAS ---
+            // Jika user cuba buka tab settings tapi dia bukan master, tendang dia balik ke dashboard!
+            if (target === 'settings' && currentUser.role !== 'master') {
+                target = 'dashboard';
+            }
+
             document.querySelectorAll('.main-panel').forEach(p => p.style.display = 'none');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             
