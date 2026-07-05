@@ -356,10 +356,9 @@
                 <input type="text" id="remark3" class="form-control" maxlength="50" placeholder="Row 3: Sambungan..." onkeypress="handleEnter(event, 'btnSaveFinding')">
             </div>
             
-            <!-- GANTIKAN BAHAGIAN BUTANG INI -->
-            <div style="display: flex; gap: 10px;">
+<div style="display: flex; gap: 10px;">
                 <button id="btnSaveFinding" class="btn-submit" style="flex: 2;" onclick="saveFinding()">COMMIT ENTRY</button>
-                <button class="btn-submit" style="flex: 1; background-color: var(--error-red); color: white;" onclick="resetAccountStatus()">RESET PENDING</button>
+                <button id="btnResetPending" class="btn-submit" style="flex: 1; background-color: var(--error-red); color: white; display: none;" onclick="resetAccountStatus()">RESET PENDING</button>
             </div>
     </div>
 
@@ -792,17 +791,24 @@ window.switchTab = function(target) {
         };
 
         // FUNGSI 2: Padam Akaun Sepenuhnya
-        window.deleteUser = async function(userId) {
-            // Halang admin dari terpadam diri sendiri
+window.deleteUser = async function(userId) {
             if (userId === currentUser.username) { 
-                alert("Ralat: Anda tidak boleh memadam akaun anda sendiri!"); 
+                showNotification("RALAT TINDAKAN", "Anda tidak boleh memadam akaun anda sendiri!", true); 
                 return; 
             }
             
-            if (confirm(`AMARAN KERAS:\nAnda pasti mahu memadam akaun ${userId.toUpperCase()} sepenuhnya dari pangkalan data?\nTindakan ini tidak boleh diundurkan.`)) {
-                const { error } = await supabase.from('users').delete().eq('id', userId);
-                if (!error) { fetchAndRenderUsers(); } 
-                else { alert("Ralat Pemadaman: " + error.message); }
+            if (!confirm(`AMARAN KERAS:\nAnda pasti mahu memadam akaun ${userId.toUpperCase()} sepenuhnya dari pangkalan data?`)) return;
+            
+            // --- MINTA PASSCODE SEBELUM TERUSKAN ---
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
+
+            const { error } = await supabase.from('users').delete().eq('id', userId);
+            if (!error) { 
+                fetchAndRenderUsers(); 
+                showNotification("BERJAYA DIMUSNAHKAN", `Akaun pengguna <b>${userId.toUpperCase()}</b> telah dipadam sepenuhnya.`);
+            } else { 
+                showNotification("RALAT PEMADAMAN", error.message, true); 
             }
         };
         
@@ -812,6 +818,41 @@ window.switchTab = function(target) {
             document.getElementById('notif-message').innerHTML = message;
             document.getElementById('notif-title').style.color = isError ? 'var(--error-red)' : 'var(--success-green)';
             document.getElementById('notificationModal').style.display = 'flex';
+        };
+
+        window.verifyAdminPasscode = async function() {
+            // Guna kotak prompt pantas dari pelayar web
+            let pwd = prompt("TINDAKAN SENSITIF:\nSila masukkan Passcode Keselamatan Admin:");
+            if (!pwd) return false; // Batal jika kosong
+
+            try {
+                const { data, error } = await supabase.from('settings').select('val').eq('id', 'admin_pass').single();
+                if (error || !data) {
+                    showNotification("RALAT SISTEM", "Tetapan passcode tidak dijumpai di Supabase.", true);
+                    return false;
+                }
+                
+                if (pwd === data.val) {
+                    return true; // Passcode Betul
+                } else {
+                    showNotification("AKSES DITOLAK", "Passcode yang dimasukkan adalah SALAH.", true);
+                    return false; // Passcode Salah
+                }
+            } catch (err) {
+                console.error(err);
+                return false;
+            }
+        };
+
+        window.deleteSingleFinding = async function(findingId, accNo) {
+            if(!confirm("Padam baris nota penemuan ini sahaja?")) return;
+            
+            const { error } = await supabase.from('findings').delete().eq('id', findingId);
+            if(!error) {
+                openModal(accNo); // Refresh modal untuk tunjuk ia dah hilang
+            } else {
+                showNotification("RALAT", error.message, true);
+            }
         };
 
         // Fungsi Daftar User Yang Telah Dikemas Kini
@@ -989,6 +1030,10 @@ bulkData.push({
 window.openModal = async function(accNo) {
             document.getElementById('modalAccNo').innerText = accNo;
             document.getElementById('updateModal').style.display = 'flex';
+            
+            // Papar butang RESET hanya untuk Master Admin
+            document.getElementById('btnResetPending').style.display = currentUser.role === 'master' ? 'block' : 'none';
+
             const historyBox = document.querySelector('.history-box');
             historyBox.innerHTML = '<div style="text-align:center; padding:10px;">Loading history trail...</div>';
             
@@ -1000,33 +1045,38 @@ window.openModal = async function(accNo) {
                 findingsList.forEach((data) => {
                     const dateFormatted = data.updated_at ? new Date(data.updated_at).toLocaleString() : 'N/A';
                     
-                // Logik untuk papar rekod lama (remark) dan rekod baru (remark1, 2, 3, 4)
+                    // BUTANG DELETE KHAS UNTUK ADMIN SAHAJA (Letak jika role == master)
+                    let deleteBtnHTML = '';
+                    if(currentUser.role === 'master') {
+                        // Pastikan jadual findings kau ada kolum 'id' (Primary Key auto-generate)
+                        deleteBtnHTML = `<button style="float:right; background:transparent; border:1px solid #777; color:#ccc; border-radius:3px; cursor:pointer; font-size:9px;" onclick="deleteSingleFinding('${data.id}', '${accNo}')">X PADAM</button>`;
+                    }
+
                     let histRemark = '';
                     if(data.remark1 || data.remark2 || data.remark3) {
-                        // Buka pembalut untuk remark utama dengan font lebih besar
                         histRemark += `<div style="font-size: 13px; line-height: 1.4; margin-top: 5px; color: var(--text-main);">`;
                         if(data.remark1) histRemark += `<div>${data.remark1}</div>`;
                         if(data.remark2) histRemark += `<div>${data.remark2}</div>`;
                         if(data.remark3) histRemark += `<div>${data.remark3}</div>`;
-                        histRemark += `</div>`; // Tutup pembalut
-                        
-                        // Remark 4 (Tarik & ID) kekal kecil dan hijau
+                        histRemark += `</div>`;
                         if(data.remark4) histRemark += `<div style="color: var(--success-green); font-size: 9px; margin-top: 6px;">${data.remark4}</div>`;
                     } else {
                         histRemark = `<div style="font-size: 13px; margin-top: 5px;">${data.remark || ''}</div>`;
                     }
 
                     historyBox.innerHTML += `
-                        <div class="history-item">
-                            <div class="history-meta">PIC: ${data.updated_by ? data.updated_by.toUpperCase() : 'SYSTEM'} | ${dateFormatted}</div>
+                        <div class="history-item" style="overflow: hidden;">
+                            <div class="history-meta">
+                                PIC: ${data.updated_by ? data.updated_by.toUpperCase() : 'SYSTEM'} | ${dateFormatted}
+                                ${deleteBtnHTML}
+                            </div>
                             ${histRemark}
                         </div>`;
                 });
             }
-            // Auto fokus pada baris pertama bila modal dibuka
             setTimeout(() => document.getElementById('remark1').focus(), 100);
         };
-
+        
         window.handleEnter = function(e, nextElementId) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -1114,40 +1164,33 @@ window.saveFinding = async function() {
             }
         };
 
-        window.resetAccountStatus = async function() {
+window.resetAccountStatus = async function() {
             let accNo = document.getElementById('modalAccNo').innerText;
+            if(!confirm(`AMARAN:\nAnda pasti mahu memadam SEMUA sejarah penemuan untuk akaun ${accNo} dan kembalikan statusnya kepada PENDING?`)) return;
 
-            // Minta pengesahan sebelum padam supaya tak tertekan tak sengaja
-            if(!confirm(`AMARAN:\nAnda pasti mahu memadam SEMUA sejarah penemuan untuk akaun ${accNo} dan kembalikan statusnya kepada PENDING?`)) {
-                return;
-            }
+            // --- MINTA PASSCODE SEBELUM TERUSKAN ---
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
 
             try {
-                // 1. Padam semua rekod akaun ini dalam jadual findings
                 const { error: delError } = await supabase.from('findings').delete().eq('acct', accNo);
                 if (delError) throw delError;
 
-                // 2. Tukar status akaun kembali kepada PENDING dalam jadual accounts
                 const { error: updError } = await supabase.from('accounts').update({ status: 'PENDING' }).eq('acct', accNo);
                 if (updError) throw updError;
 
-                // 3. Kemas kini cache di skrin (supaya tak perlu F12/Clear Data)
                 let rowToUpdate = globalAccounts.find(a => a.acct === accNo);
                 if(rowToUpdate) rowToUpdate.status = 'PENDING';
 
                 const safeRegion = currentUser.role === 'master' ? 'all' : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
                 const cacheKey = `scazp_cache_${safeRegion}`;
-
                 await localforage.setItem(cacheKey, globalAccounts);
 
-                // 4. Tutup modal dan refresh jadual
                 showNotification("RESET BERJAYA", `Akaun <b>${accNo}</b> telah dikembalikan kepada status PENDING dan sejarah log telah dibersihkan.`);
                 closeModal();
                 applyFilterAndRender();
-
             } catch (err) {
                 showNotification("RALAT KRITIKAL SISTEM", err.message, true);
-                console.error(err);
             }
         };
         
