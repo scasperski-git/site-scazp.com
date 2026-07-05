@@ -443,7 +443,7 @@
         .remark { margin-top: 6px; line-height: 1.5; font-size: 13px; color: #334155; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
         
         .no-lock { margin-top: 24px; padding: 24px; background: #fef2f2; border: 1px solid #fecdd3; border-radius: 16px; text-align: center; font-weight: 600; color: #be123c; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
-        .no-lock::before { content: '071'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 24px; color: #ef4444; }
+        .no-lock::before { content: '\f071'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 24px; color: #ef4444; }
         
         .loading { margin-top: 30px; text-align: center; font-weight: 600; color: #475569; width: 100%; }
         .spinner { margin: 16px auto 0; width: 40px; height: 40px; border: 4px solid #f1f5f9; border-top: 4px solid #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -519,9 +519,9 @@
         /* ==========================================================================
            MODALS & OVERLAYS STYLING
            ========================================================================== */
-        .modal-overlay, #overlay, #sessionPopup, #lockedPopup, #successPaidPopup {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 15px;
-        }
+        .modal-overlay, #overlay, #sessionPopup, #lockedPopup, #successPaidPopup, #deleteVerifyPopup, #syncVerifyPopup {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 15px;
+}
         .modal-content { background: #1e293b; border: 1px solid #334155; border-radius: 12px; width: 100%; max-width: 450px; padding: 20px; color: #f8fafc; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); animation: modalFadeIn 0.3s ease-out forwards; }
         @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #334155; }
@@ -933,7 +933,7 @@
     <script>
         // 🚨 CONFIGURATION PARAMETERS (PASTE SUPABASE PARAMS HERE)
         const SUPABASE_URL = "https://yigfwckhvdqmejvesbmv.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_cuOsnHco1SVwBwIoQ2Hx8w_DIurtgSh";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpZ2Z3Y2todmRxbWVqdmVzYm12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMTY2OTMsImV4cCI6MjA5ODc5MjY5M30.7o8EZUxwZDbnFRmUv5ZNOy3qtRkUqf0tC59Iah3g5Cg";
         
         // Connect and build the direct headers context wrapper
         const sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
