@@ -375,7 +375,7 @@
                 <input type="text" id="remark1" class="form-control" maxlength="50" placeholder="Row 1: Mula menaip di sini..." style="margin-bottom: 8px;" oninput="handleAutoJump(this, 'remark2')" onkeypress="handleEnter(event, 'remark2')">
                 <input type="text" id="remark2" class="form-control" maxlength="50" placeholder="Row 2: Auto-sambung..." style="margin-bottom: 8px;" oninput="handleAutoJump(this, 'remark3')" onkeypress="handleEnter(event, 'remark3')">
                 <input type="text" id="remark3" class="form-control" maxlength="50" placeholder="Row 3: Auto-sambung..." style="margin-bottom: 8px;" oninput="handleAutoJump(this, 'remark4')" onkeypress="handleEnter(event, 'remark4')">
-                <input type="text" id="remark4" class="form-control" maxlength="50" placeholder="Row 4: Auto-sambung..." onkeypress="handleEnter(event, 'btnSaveFinding')">
+                <input type="text" id="remark4" class="form-control" maxlength="50" placeholder="Row 4: Auto-sambung..." oninput="handleAutoJump(this, null)" onkeypress="handleEnter(event, 'btnSaveFinding')">
             </div>
             
             <div style="display: flex; gap: 10px;">
@@ -1318,12 +1318,15 @@ if(currentUser.role === 'master' || currentUser.role === 'super') {
             }
         };
 
-        window.handleAutoJump = function(currentElement, nextElementId) {
-            // Jika panjang teks yang ditaip dah capai had maksimum (50)
-            if (currentElement.value.length >= currentElement.maxLength) {
+window.handleAutoJump = function(currentElement, nextElementId) {
+            // 1. Paksa teks bertukar jadi HURUF BESAR setiap kali menaip
+            currentElement.value = currentElement.value.toUpperCase();
+
+            // 2. Jika panjang teks capai had maksimum (50) dan ada kotak seterusnya
+            if (currentElement.value.length >= currentElement.maxLength && nextElementId) {
                 const nextEl = document.getElementById(nextElementId);
                 if (nextEl) {
-                    nextEl.focus(); // Auto lompat ke kotak seterusnya
+                    nextEl.focus(); // Auto lompat
                 }
             }
         };
