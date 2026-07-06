@@ -1336,9 +1336,17 @@ window.exportDataByDate = async function(dateStr) {
             let acctLoc = accountInfo.loc || '';
             let acctRegion = accountInfo.region || '';
             
+// Jana REMARK4 Auto (Format: ATTENDED BY (ID)-DATE & TIME)
             let today = new Date();
             let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
-            let r4Auto = `${currentUser.username.toUpperCase()} - ${dateStr}`;
+            
+            // Dapatkan masa (Format 24 Jam: HH:MM:SS)
+            let hh = String(today.getHours()).padStart(2, '0');
+            let mm = String(today.getMinutes()).padStart(2, '0');
+            let ss = String(today.getSeconds()).padStart(2, '0');
+            let timeStr = `${hh}:${mm}:${ss}`;
+            
+            let r4Auto = `ATTENDED BY (${currentUser.username.toUpperCase()})-${dateStr} ${timeStr}`;
             
             try {
                 const { data: insertedData, error: insertError } = await supabase
