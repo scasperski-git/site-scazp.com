@@ -145,7 +145,7 @@
         .expand-btn { background: #333; color: var(--accent-gold); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-right: 5px; }
         .expand-btn:hover { background: var(--accent-gold); color: #121212; }
         .details-row { background-color: #1a1a1a; }
-        .details-wrapper { padding: 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; border-bottom: 2px solid var(--accent-gold); border-left: 2px solid var(--accent-gold); }
+        .details-wrapper { padding: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; border-bottom: 2px solid var(--accent-gold); border-left: 2px solid var(--accent-gold); }
         .details-box { background: #121212; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); }
         .details-box h4 { margin: 0 0 10px 0; color: var(--accent-gold); font-size: 11px; border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; }
         .details-box p { margin: 4px 0; font-size: 11px; color: var(--text-main); }
@@ -377,11 +377,12 @@
                     </div>
                 </div>
 
-                <div class="mapping-section">
+<div class="mapping-section">
                     <h3>2. HIRER DETAILS</h3>
                     <div class="mapping-grid">
                         <label>Name</label><select id="map-h-name" class="form-control mapping-select"></select>
-                        <label>NRIC</label><select id="map-h-nric" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">New NRIC</label><select id="map-h-nric-new" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">Old NRIC</label><select id="map-h-nric-old" class="form-control mapping-select"></select>
                         <label>Tel No</label><select id="map-h-tel" class="form-control mapping-select"></select>
                         <label>Home Add 1</label><select id="map-h-add1" class="form-control mapping-select"></select>
                         <label>Home Add 2</label><select id="map-h-add2" class="form-control mapping-select"></select>
@@ -397,10 +398,12 @@
                     <h3>3. SPOUSE & GUARANTOR DETAILS</h3>
                     <div class="mapping-grid">
                         <label>Spouse Name</label><select id="map-s-name" class="form-control mapping-select"></select>
-                        <label>Spouse NRIC</label><select id="map-s-nric" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">Spouse New IC</label><select id="map-s-nric-new" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">Spouse Old IC</label><select id="map-s-nric-old" class="form-control mapping-select"></select>
                         <label>Spouse Tel</label><select id="map-s-tel" class="form-control mapping-select"></select>
                         <label>Gtor Name</label><select id="map-g-name" class="form-control mapping-select"></select>
-                        <label>Gtor NRIC</label><select id="map-g-nric" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">Gtor New IC</label><select id="map-g-nric-new" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">Gtor Old IC</label><select id="map-g-nric-old" class="form-control mapping-select"></select>
                         <label>Gtor Tel</label><select id="map-g-tel" class="form-control mapping-select"></select>
                         <label>Gtor Add 1</label><select id="map-g-add1" class="form-control mapping-select"></select>
                         <label>Gtor Add 2</label><select id="map-g-add2" class="form-control mapping-select"></select>
@@ -857,28 +860,32 @@ function renderTablePage() {
                     </tr>
                 `;
 
-                // 2. BARIS TERSEMBUNYI (EXPANDED DETAILS)
+// 2. BARIS TERSEMBUNYI (EXPANDED DETAILS) - Susunan Baru 3 Kolum
                 tbody.innerHTML += `
                     <tr id="details-${row.acct}" class="details-row" style="display: none;">
                         <td colspan="10" style="padding: 0;">
                             <div class="details-wrapper">
-                                <div class="details-box">
-                                    <h4>HIRER INFO</h4>
-                                    <p><span class="lbl">NAME</span>: ${d.h_name || '-'}</p>
-                                    <p><span class="lbl">NRIC</span>: ${d.h_nric || '-'}</p>
-                                    <p><span class="lbl">TEL</span>: ${d.h_tel || '-'}</p>
-                                    <p><span class="lbl">HOME ADD</span>: ${d.h_add1 || '-'} ${d.h_add2 || ''} ${d.h_add3 || ''}</p>
-                                    <br>
-                                    <p><span class="lbl">CO. NAME</span>: ${d.hc_name || '-'}</p>
-                                    <p><span class="lbl">CO. TEL</span>: ${d.hc_tel || '-'}</p>
-                                    <p><span class="lbl">CO. ADD</span>: ${d.hc_add1 || '-'} ${d.hc_add2 || ''}</p>
+                                
+                                <div style="display: flex; flex-direction: column; gap: 15px;">
+                                    <div class="details-box">
+                                        <h4>HIRER INFO</h4>
+                                        <p><span class="lbl">NAME</span>: ${d.h_name || '-'}</p>
+                                        <p><span class="lbl">NRIC</span>: ${d.h_nric || '-'}</p>
+                                        <p><span class="lbl">TEL</span>: ${d.h_tel || '-'}</p>
+                                        <p><span class="lbl">HOME ADD</span>: ${d.h_add1 || '-'} ${d.h_add2 || ''} ${d.h_add3 || ''}</p>
+                                        <br>
+                                        <p><span class="lbl">CO. NAME</span>: ${d.hc_name || '-'}</p>
+                                        <p><span class="lbl">CO. TEL</span>: ${d.hc_tel || '-'}</p>
+                                        <p><span class="lbl">CO. ADD</span>: ${d.hc_add1 || '-'} ${d.hc_add2 || ''}</p>
+                                    </div>
+                                    <div class="details-box">
+                                        <h4>SPOUSE INFO</h4>
+                                        <p><span class="lbl">NAME</span>: ${d.s_name || '-'}</p>
+                                        <p><span class="lbl">NRIC</span>: ${d.s_nric || '-'}</p>
+                                        <p><span class="lbl">TEL</span>: ${d.s_tel || '-'}</p>
+                                    </div>
                                 </div>
-                                <div class="details-box">
-                                    <h4>SPOUSE INFO</h4>
-                                    <p><span class="lbl">NAME</span>: ${d.s_name || '-'}</p>
-                                    <p><span class="lbl">NRIC</span>: ${d.s_nric || '-'}</p>
-                                    <p><span class="lbl">TEL</span>: ${d.s_tel || '-'}</p>
-                                </div>
+
                                 <div class="details-box">
                                     <h4>GUARANTOR INFO</h4>
                                     <p><span class="lbl">NAME</span>: ${d.g_name || '-'}</p>
@@ -889,6 +896,7 @@ function renderTablePage() {
                                     <p><span class="lbl">CO. NAME</span>: ${d.gc_name || '-'}</p>
                                     <p><span class="lbl">CO. TEL</span>: ${d.gc_tel || '-'}</p>
                                 </div>
+
                                 <div class="details-box">
                                     <h4>ACCOUNT BALANCES</h4>
                                     <p><span class="lbl" style="width: 80px;">PRODUCT</span>: ${d.prod || '-'}</p>
@@ -896,6 +904,7 @@ function renderTablePage() {
                                     <p><span class="lbl" style="width: 80px;">ODP BAL</span>: ${d.odp || '-'}</p>
                                     <p><span class="lbl" style="width: 80px;">ADCH BAL</span>: ${d.adch || '-'}</p>
                                 </div>
+
                             </div>
                         </td>
                     </tr>
@@ -1259,7 +1268,7 @@ window.handleExcelFileSelect = function(e) {
                         const dropdowns = document.querySelectorAll('.mapping-select');
                         
                         dropdowns.forEach(select => {
-                            select.innerHTML = '<option value="">-- KOSONG (Biarkan) --</option>'; // Opsyen kosong
+                            select.innerHTML = '<option value="">-- KOSONG (Biarkan) --</option>'; 
                             headers.forEach(h => { select.appendChild(new Option(h, h)); });
                             
                             const id = select.id;
@@ -1274,7 +1283,8 @@ window.handleExcelFileSelect = function(e) {
                             if(id === 'map-osb') preSelectOption(select, ['osb', 'OSB', 'OSB OR FS AMT']);
                             // 2. HIRER
                             if(id === 'map-h-name') preSelectOption(select, ['HIRER_NAME']);
-                            if(id === 'map-h-nric') preSelectOption(select, ['HIRER_NEW_IC_NO', 'HIRER_OLD_IC_NO']);
+                            if(id === 'map-h-nric-new') preSelectOption(select, ['HIRER_NEW_IC_NO']);
+                            if(id === 'map-h-nric-old') preSelectOption(select, ['HIRER_OLD_IC_NO']);
                             if(id === 'map-h-tel') preSelectOption(select, ['HIRER_TEL_NO']);
                             if(id === 'map-h-add1') preSelectOption(select, ['HIRER_ADDR1']);
                             if(id === 'map-h-add2') preSelectOption(select, ['HIRER_ADDR2']);
@@ -1282,13 +1292,15 @@ window.handleExcelFileSelect = function(e) {
                             if(id === 'map-hc-name') preSelectOption(select, ['HIRER_CO_NAME']);
                             if(id === 'map-hc-tel') preSelectOption(select, ['HIRER_CO_TEL']);
                             if(id === 'map-hc-add1') preSelectOption(select, ['HIRER_CO_ADDR1']);
-                            if(id === 'map-hc-add2') preSelectOption(select, ['HIRER_CO_ADDR21', 'HIRER_CO_ADDR2']); // Ikut gambar typo 21
+                            if(id === 'map-hc-add2') preSelectOption(select, ['HIRER_CO_ADDR21', 'HIRER_CO_ADDR2']); 
                             // 3. SPOUSE & GTOR
                             if(id === 'map-s-name') preSelectOption(select, ['SPOUSE_NAME']);
-                            if(id === 'map-s-nric') preSelectOption(select, ['SPOUSE_NEW_IC_NO', 'SPOUSE_OLD_IC_NO']);
+                            if(id === 'map-s-nric-new') preSelectOption(select, ['SPOUSE_NEW_IC_NO']);
+                            if(id === 'map-s-nric-old') preSelectOption(select, ['SPOUSE_OLD_IC_NO']);
                             if(id === 'map-s-tel') preSelectOption(select, ['SPOUSE_TEL_NO']);
                             if(id === 'map-g-name') preSelectOption(select, ['GUAR_NAME']);
-                            if(id === 'map-g-nric') preSelectOption(select, ['GUAR_NEW_IC_NO', 'GUAR_OLD_IC_NO']);
+                            if(id === 'map-g-nric-new') preSelectOption(select, ['GUAR_NEW_IC_NO']);
+                            if(id === 'map-g-nric-old') preSelectOption(select, ['GUAR_OLD_IC_NO']);
                             if(id === 'map-g-tel') preSelectOption(select, ['GUAR_TEL_NO']);
                             if(id === 'map-g-add1') preSelectOption(select, ['GUAR_ADDR1']);
                             if(id === 'map-g-add2') preSelectOption(select, ['GUAR_ADDR2']);
@@ -1330,18 +1342,26 @@ window.processExcelUpload = async function() {
             const progressText = document.getElementById('upload-progress-text');
             const progressSubtext = document.getElementById('upload-progress-subtext');
 
-            // Ambil semua value dari dropdown
             const getVal = (id) => document.getElementById(id).value;
+            
+            // Fungsi gabung IC dengan Slash ( / )
+            const formatIC = (newIcKey, oldIcKey, rowData) => {
+                let n = String(rowData[getVal(newIcKey)] || '').trim();
+                let o = String(rowData[getVal(oldIcKey)] || '').trim();
+                if(n && n !== 'undefined' && o && o !== 'undefined') return `${n} / ${o}`;
+                if(n && n !== 'undefined') return n;
+                if(o && o !== 'undefined') return o;
+                return '';
+            };
 
             let bulkData = [];
             for (const row of parsedExcelRows) {
                 const rawAccountNo = String(row[getVal('map-acct')]).trim();
                 if (!rawAccountNo || rawAccountNo === "undefined") continue; 
                 
-                // Himpun details ke dalam objek JSON
                 let detailsJSON = {
                     h_name: row[getVal('map-h-name')] || '',
-                    h_nric: row[getVal('map-h-nric')] || '',
+                    h_nric: formatIC('map-h-nric-new', 'map-h-nric-old', row),
                     h_tel: row[getVal('map-h-tel')] || '',
                     h_add1: row[getVal('map-h-add1')] || '',
                     h_add2: row[getVal('map-h-add2')] || '',
@@ -1351,10 +1371,10 @@ window.processExcelUpload = async function() {
                     hc_add1: row[getVal('map-hc-add1')] || '',
                     hc_add2: row[getVal('map-hc-add2')] || '',
                     s_name: row[getVal('map-s-name')] || '',
-                    s_nric: row[getVal('map-s-nric')] || '',
+                    s_nric: formatIC('map-s-nric-new', 'map-s-nric-old', row),
                     s_tel: row[getVal('map-s-tel')] || '',
                     g_name: row[getVal('map-g-name')] || '',
-                    g_nric: row[getVal('map-g-nric')] || '',
+                    g_nric: formatIC('map-g-nric-new', 'map-g-nric-old', row),
                     g_tel: row[getVal('map-g-tel')] || '',
                     g_add1: row[getVal('map-g-add1')] || '',
                     g_add2: row[getVal('map-g-add2')] || '',
@@ -1376,7 +1396,7 @@ window.processExcelUpload = async function() {
                     arrs_mth: String(row[getVal('map-arrs')]).trim(), 
                     osb: parseFloat(String(row[getVal('map-osb')]).replace(/[^0-9.-]+/g,"")) || 0, 
                     status: 'PENDING',
-                    details: detailsJSON // <-- Simpan bungkusan sini
+                    details: detailsJSON 
                 });
             }
 
