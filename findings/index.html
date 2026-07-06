@@ -141,6 +141,20 @@
         }
         .btn-cancel:hover { background-color: #333; color: white; }
 
+        /* Gaya Expandable Row & Scrollable Mapping Modal */
+        .expand-btn { background: #333; color: var(--accent-gold); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-right: 5px; }
+        .expand-btn:hover { background: var(--accent-gold); color: #121212; }
+        .details-row { background-color: #1a1a1a; }
+        .details-wrapper { padding: 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; border-bottom: 2px solid var(--accent-gold); border-left: 2px solid var(--accent-gold); }
+        .details-box { background: #121212; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); }
+        .details-box h4 { margin: 0 0 10px 0; color: var(--accent-gold); font-size: 11px; border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; }
+        .details-box p { margin: 4px 0; font-size: 11px; color: var(--text-main); }
+        .details-box span.lbl { color: var(--text-muted); display: inline-block; width: 65px; font-weight: bold; }
+        
+        .mapping-container { max-height: 60vh; overflow-y: auto; padding-right: 10px; text-align: left; }
+        .mapping-section { border: 1px solid var(--border-color); padding: 10px; margin-bottom: 15px; border-radius: 6px; background: #1a1a1a; }
+        .mapping-section h3 { margin-top: 0; margin-bottom: 10px; font-size: 12px; color: var(--success-green); border-bottom: 1px solid var(--border-color); padding-bottom: 5px;}
+
         @media (max-width: 768px) {
             .kpi-container { grid-template-columns: repeat(4, 1fr); gap: 6px; }
             .kpi-card { padding: 10px 4px; }
@@ -341,26 +355,75 @@
         </div>
     </div>
     
-    <div class="modal-overlay" id="mappingModal">
-        <div class="modal-content" style="max-width: 450px;">
+<div class="modal-overlay" id="mappingModal">
+        <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
                 <h2>Map Excel Columns to Database Fields</h2>
                 <button class="close-btn" onclick="closeMappingModal()">&times;</button>
             </div>
-            <div class="mapping-grid">
-                <label>REGION Scope</label><select id="map-region" class="form-control mapping-select"></select>
-                <label>AREA Scope</label><select id="map-area" class="form-control mapping-select"></select>
-                <label>LOC CODE</label><select id="map-loc" class="form-control mapping-select"></select>
-                <label>TYPE</label><select id="map-type" class="form-control mapping-select"></select>
-                <label>ACCOUNT NO</label><select id="map-acct" class="form-control mapping-select"></select>
-                <label>DELQ</label><select id="map-delq" class="form-control mapping-select"></select>
-                <label>ARRS MTH</label><select id="map-arrs" class="form-control mapping-select"></select>
-                <label>OSB Balance</label><select id="map-osb" class="form-control mapping-select"></select>
+            
+            <div class="mapping-container">
+                <div class="mapping-section">
+                    <h3>1. MAIN ACCOUNT INFO</h3>
+                    <div class="mapping-grid">
+                        <label>REGION</label><select id="map-region" class="form-control mapping-select"></select>
+                        <label>AREA</label><select id="map-area" class="form-control mapping-select"></select>
+                        <label>LOC CODE</label><select id="map-loc" class="form-control mapping-select"></select>
+                        <label>TYPE</label><select id="map-type" class="form-control mapping-select"></select>
+                        <label>ACCOUNT NO</label><select id="map-acct" class="form-control mapping-select"></select>
+                        <label>DELQ</label><select id="map-delq" class="form-control mapping-select"></select>
+                        <label>ARRS MTH</label><select id="map-arrs" class="form-control mapping-select"></select>
+                        <label>OSB Balance</label><select id="map-osb" class="form-control mapping-select"></select>
+                    </div>
+                </div>
+
+                <div class="mapping-section">
+                    <h3>2. HIRER DETAILS</h3>
+                    <div class="mapping-grid">
+                        <label>Name</label><select id="map-h-name" class="form-control mapping-select"></select>
+                        <label>NRIC</label><select id="map-h-nric" class="form-control mapping-select"></select>
+                        <label>Tel No</label><select id="map-h-tel" class="form-control mapping-select"></select>
+                        <label>Home Add 1</label><select id="map-h-add1" class="form-control mapping-select"></select>
+                        <label>Home Add 2</label><select id="map-h-add2" class="form-control mapping-select"></select>
+                        <label>Home Add 3</label><select id="map-h-add3" class="form-control mapping-select"></select>
+                        <label>Company Name</label><select id="map-hc-name" class="form-control mapping-select"></select>
+                        <label>Company Tel</label><select id="map-hc-tel" class="form-control mapping-select"></select>
+                        <label>Company Add 1</label><select id="map-hc-add1" class="form-control mapping-select"></select>
+                        <label>Company Add 2</label><select id="map-hc-add2" class="form-control mapping-select"></select>
+                    </div>
+                </div>
+
+                <div class="mapping-section">
+                    <h3>3. SPOUSE & GUARANTOR DETAILS</h3>
+                    <div class="mapping-grid">
+                        <label>Spouse Name</label><select id="map-s-name" class="form-control mapping-select"></select>
+                        <label>Spouse NRIC</label><select id="map-s-nric" class="form-control mapping-select"></select>
+                        <label>Spouse Tel</label><select id="map-s-tel" class="form-control mapping-select"></select>
+                        <label>Gtor Name</label><select id="map-g-name" class="form-control mapping-select"></select>
+                        <label>Gtor NRIC</label><select id="map-g-nric" class="form-control mapping-select"></select>
+                        <label>Gtor Tel</label><select id="map-g-tel" class="form-control mapping-select"></select>
+                        <label>Gtor Add 1</label><select id="map-g-add1" class="form-control mapping-select"></select>
+                        <label>Gtor Add 2</label><select id="map-g-add2" class="form-control mapping-select"></select>
+                        <label>Gtor Co Name</label><select id="map-gc-name" class="form-control mapping-select"></select>
+                        <label>Gtor Co Tel</label><select id="map-gc-tel" class="form-control mapping-select"></select>
+                    </div>
+                </div>
+
+                <div class="mapping-section">
+                    <h3>4. EXTRA ACCOUNT BALANCES</h3>
+                    <div class="mapping-grid">
+                        <label>Product Desc</label><select id="map-prod" class="form-control mapping-select"></select>
+                        <label>Total Balance</label><select id="map-bal" class="form-control mapping-select"></select>
+                        <label>ODP (Late) Bal</label><select id="map-odp" class="form-control mapping-select"></select>
+                        <label>ADCH Bal</label><select id="map-adch" class="form-control mapping-select"></select>
+                    </div>
+                </div>
             </div>
-            <button class="btn-submit" style="width: 100%; background: #2e7d32;" onclick="processExcelUpload()">CONFIRM & START UPLOAD</button>
+
+            <button class="btn-submit" style="width: 100%; background: #2e7d32; margin-top: 15px;" onclick="processExcelUpload()">CONFIRM & START UPLOAD</button>
         </div>
     </div>
-
+    
     <div class="modal-overlay" id="updateModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -572,7 +635,7 @@ window.handleLogout = function() {
                 const pageSize = 1000;
                 
                 while(true) {
-                    let fetchQuery = supabase.from('accounts').select('acct, region, area, loc, type, delq, arrs_mth, osb, status');
+                    let fetchQuery = supabase.from('accounts').select('acct, region, area, loc, type, delq, arrs_mth, osb, status, details');
                     if (region) fetchQuery = fetchQuery.eq('region', region);
                     
                     const { data, error } = await fetchQuery.range(page * pageSize, (page + 1) * pageSize - 1);
@@ -753,11 +816,11 @@ function renderAreaSelectionUI(region) {
             document.getElementById('kpi-osb').innerText = 'RM ' + totalOsbValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
-        function renderTablePage() {
+function renderTablePage() {
             const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
             
             if(filteredAccounts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No records match the active criteria.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No records match the active criteria.</td></tr>`;
                 document.getElementById('page-info').innerText = `Page 0 of 0`;
                 document.getElementById('btn-prev').disabled = true; document.getElementById('btn-next').disabled = true;
                 return;
@@ -773,16 +836,68 @@ function renderAreaSelectionUI(region) {
 
             pageData.forEach(row => {
                 let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
+                
+                // Sediakan data backup jika tak jumpa details
+                let d = row.details || {};
+
+                // 1. BARIS ASAL
                 tbody.innerHTML += `
                     <tr>
-                        <td>${row.region}</td><td>${row.area}</td><td>${row.loc}</td>
+                        <td>${row.region || '-'}</td><td>${row.area || '-'}</td><td>${row.loc || '-'}</td>
                         <td>${row.type || '-'}</td>
                         <td>${row.acct}</td>
                         <td>${row.delq || '-'}</td>
                         <td>${row.arrs_mth || '0'}</td>
                         <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td><span class="status-badge ${badgeClass}">${row.status}</span></td>
-                        <td><button class="btn-update" onclick="openModal('${row.acct}')">UPDATE</button></td>
+                        <td style="white-space: nowrap;">
+                            <button class="expand-btn" onclick="toggleExpand('${row.acct}')">▼ DETAILS</button>
+                            <button class="btn-update" onclick="openModal('${row.acct}')">UPDATE</button>
+                        </td>
+                    </tr>
+                `;
+
+                // 2. BARIS TERSEMBUNYI (EXPANDED DETAILS)
+                tbody.innerHTML += `
+                    <tr id="details-${row.acct}" class="details-row" style="display: none;">
+                        <td colspan="10" style="padding: 0;">
+                            <div class="details-wrapper">
+                                <div class="details-box">
+                                    <h4>HIRER INFO</h4>
+                                    <p><span class="lbl">NAME</span>: ${d.h_name || '-'}</p>
+                                    <p><span class="lbl">NRIC</span>: ${d.h_nric || '-'}</p>
+                                    <p><span class="lbl">TEL</span>: ${d.h_tel || '-'}</p>
+                                    <p><span class="lbl">HOME ADD</span>: ${d.h_add1 || '-'} ${d.h_add2 || ''} ${d.h_add3 || ''}</p>
+                                    <br>
+                                    <p><span class="lbl">CO. NAME</span>: ${d.hc_name || '-'}</p>
+                                    <p><span class="lbl">CO. TEL</span>: ${d.hc_tel || '-'}</p>
+                                    <p><span class="lbl">CO. ADD</span>: ${d.hc_add1 || '-'} ${d.hc_add2 || ''}</p>
+                                </div>
+                                <div class="details-box">
+                                    <h4>SPOUSE INFO</h4>
+                                    <p><span class="lbl">NAME</span>: ${d.s_name || '-'}</p>
+                                    <p><span class="lbl">NRIC</span>: ${d.s_nric || '-'}</p>
+                                    <p><span class="lbl">TEL</span>: ${d.s_tel || '-'}</p>
+                                </div>
+                                <div class="details-box">
+                                    <h4>GUARANTOR INFO</h4>
+                                    <p><span class="lbl">NAME</span>: ${d.g_name || '-'}</p>
+                                    <p><span class="lbl">NRIC</span>: ${d.g_nric || '-'}</p>
+                                    <p><span class="lbl">TEL</span>: ${d.g_tel || '-'}</p>
+                                    <p><span class="lbl">GTOR ADD</span>: ${d.g_add1 || '-'} ${d.g_add2 || ''}</p>
+                                    <br>
+                                    <p><span class="lbl">CO. NAME</span>: ${d.gc_name || '-'}</p>
+                                    <p><span class="lbl">CO. TEL</span>: ${d.gc_tel || '-'}</p>
+                                </div>
+                                <div class="details-box">
+                                    <h4>ACCOUNT BALANCES</h4>
+                                    <p><span class="lbl" style="width: 80px;">PRODUCT</span>: ${d.prod || '-'}</p>
+                                    <p><span class="lbl" style="width: 80px;">BALANCE</span>: ${d.bal || '-'}</p>
+                                    <p><span class="lbl" style="width: 80px;">ODP BAL</span>: ${d.odp || '-'}</p>
+                                    <p><span class="lbl" style="width: 80px;">ADCH BAL</span>: ${d.adch || '-'}</p>
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                 `;
             });
@@ -790,14 +905,6 @@ function renderAreaSelectionUI(region) {
             document.getElementById('page-info').innerText = `Page ${currentPage} of ${totalPages} (Total: ${filteredAccounts.length.toLocaleString()} Records)`;
             document.getElementById('btn-prev').disabled = currentPage === 1;
             document.getElementById('btn-next').disabled = currentPage === totalPages;
-        }
-
-        window.nextPage = function() {
-            const totalPages = Math.ceil(filteredAccounts.length / rowsPerPage);
-            if(currentPage < totalPages) { currentPage++; renderTablePage(); }
-        }
-        window.prevPage = function() {
-            if(currentPage > 1) { currentPage--; renderTablePage(); }
         }
 
 window.switchTab = function(target) {
@@ -1128,7 +1235,7 @@ window.toggleFormRegionSelect = function() {
             document.getElementById('form-region-group').style.display = (role === 'master' || role === 'super') ? 'none' : 'block';
         };
 
-        window.handleExcelFileSelect = function(e) {
+window.handleExcelFileSelect = function(e) {
             const file = e.target.files[0]; 
             if (!file) return;
             
@@ -1152,18 +1259,46 @@ window.toggleFormRegionSelect = function() {
                         const dropdowns = document.querySelectorAll('.mapping-select');
                         
                         dropdowns.forEach(select => {
-                            select.innerHTML = '';
+                            select.innerHTML = '<option value="">-- KOSONG (Biarkan) --</option>'; // Opsyen kosong
                             headers.forEach(h => { select.appendChild(new Option(h, h)); });
                             
                             const id = select.id;
+                            // 1. BASIC
                             if(id === 'map-region') preSelectOption(select, ['region', 'REGION', 'Region']);
                             if(id === 'map-area') preSelectOption(select, ['area', 'AREA', 'Area']);
                             if(id === 'map-loc') preSelectOption(select, ['loc', 'loc cd', 'LOC CD']);
-                            if(id === 'map-type') preSelectOption(select, ['type', 'TYPE', 'Type']);
+                            if(id === 'map-type') preSelectOption(select, ['type', 'TYPE', 'Type', 'ACCT_TYPE']);
                             if(id === 'map-acct') preSelectOption(select, ['acct', 'ACCT', 'account']);
                             if(id === 'map-delq') preSelectOption(select, ['delq', 'DELQ', 'Delq']);
-                            if(id === 'map-arrs') preSelectOption(select, ['arrs', 'ARRS MTH', 'arrs mth', 'Arrs']);
-                            if(id === 'map-osb') preSelectOption(select, ['osb', 'OSB', 'balance', 'OSB (RM)']);
+                            if(id === 'map-arrs') preSelectOption(select, ['arrs', 'ARRS MTH', 'arrs mth']);
+                            if(id === 'map-osb') preSelectOption(select, ['osb', 'OSB', 'OSB OR FS AMT']);
+                            // 2. HIRER
+                            if(id === 'map-h-name') preSelectOption(select, ['HIRER_NAME']);
+                            if(id === 'map-h-nric') preSelectOption(select, ['HIRER_NEW_IC_NO', 'HIRER_OLD_IC_NO']);
+                            if(id === 'map-h-tel') preSelectOption(select, ['HIRER_TEL_NO']);
+                            if(id === 'map-h-add1') preSelectOption(select, ['HIRER_ADDR1']);
+                            if(id === 'map-h-add2') preSelectOption(select, ['HIRER_ADDR2']);
+                            if(id === 'map-h-add3') preSelectOption(select, ['HIRER_ADDR3']);
+                            if(id === 'map-hc-name') preSelectOption(select, ['HIRER_CO_NAME']);
+                            if(id === 'map-hc-tel') preSelectOption(select, ['HIRER_CO_TEL']);
+                            if(id === 'map-hc-add1') preSelectOption(select, ['HIRER_CO_ADDR1']);
+                            if(id === 'map-hc-add2') preSelectOption(select, ['HIRER_CO_ADDR21', 'HIRER_CO_ADDR2']); // Ikut gambar typo 21
+                            // 3. SPOUSE & GTOR
+                            if(id === 'map-s-name') preSelectOption(select, ['SPOUSE_NAME']);
+                            if(id === 'map-s-nric') preSelectOption(select, ['SPOUSE_NEW_IC_NO', 'SPOUSE_OLD_IC_NO']);
+                            if(id === 'map-s-tel') preSelectOption(select, ['SPOUSE_TEL_NO']);
+                            if(id === 'map-g-name') preSelectOption(select, ['GUAR_NAME']);
+                            if(id === 'map-g-nric') preSelectOption(select, ['GUAR_NEW_IC_NO', 'GUAR_OLD_IC_NO']);
+                            if(id === 'map-g-tel') preSelectOption(select, ['GUAR_TEL_NO']);
+                            if(id === 'map-g-add1') preSelectOption(select, ['GUAR_ADDR1']);
+                            if(id === 'map-g-add2') preSelectOption(select, ['GUAR_ADDR2']);
+                            if(id === 'map-gc-name') preSelectOption(select, ['GUAR_CO_NAME']);
+                            if(id === 'map-gc-tel') preSelectOption(select, ['GUAR_CO_TEL']);
+                            // 4. EXTRA BALANCES
+                            if(id === 'map-prod') preSelectOption(select, ['EP_SALES_DESC']);
+                            if(id === 'map-bal') preSelectOption(select, ['BALANCE']);
+                            if(id === 'map-odp') preSelectOption(select, ['LATE_BAL']);
+                            if(id === 'map-adch') preSelectOption(select, ['ADCH_BAL']);
                         });
                         
                         document.getElementById('readingExcelModal').style.display = 'none';
@@ -1187,16 +1322,7 @@ window.toggleFormRegionSelect = function() {
             document.getElementById('excel-file-input').value = ''; 
         };
 
-        window.processExcelUpload = async function() {
-            const mapRegion = document.getElementById('map-region').value;
-            const mapArea = document.getElementById('map-area').value;
-            const mapLoc = document.getElementById('map-loc').value;
-            const mapAcct = document.getElementById('map-acct').value;
-            const mapType = document.getElementById('map-type').value;
-            const mapDelq = document.getElementById('map-delq').value;
-            const mapArrs = document.getElementById('map-arrs').value;
-            const mapOsb = document.getElementById('map-osb').value;
-
+window.processExcelUpload = async function() {
             document.getElementById('mappingModal').style.display = 'none';
             document.getElementById('progressModal').style.display = 'flex';
             
@@ -1204,20 +1330,53 @@ window.toggleFormRegionSelect = function() {
             const progressText = document.getElementById('upload-progress-text');
             const progressSubtext = document.getElementById('upload-progress-subtext');
 
+            // Ambil semua value dari dropdown
+            const getVal = (id) => document.getElementById(id).value;
+
             let bulkData = [];
             for (const row of parsedExcelRows) {
-                const rawAccountNo = String(row[mapAcct]).trim();
-                if (!rawAccountNo) continue; 
+                const rawAccountNo = String(row[getVal('map-acct')]).trim();
+                if (!rawAccountNo || rawAccountNo === "undefined") continue; 
+                
+                // Himpun details ke dalam objek JSON
+                let detailsJSON = {
+                    h_name: row[getVal('map-h-name')] || '',
+                    h_nric: row[getVal('map-h-nric')] || '',
+                    h_tel: row[getVal('map-h-tel')] || '',
+                    h_add1: row[getVal('map-h-add1')] || '',
+                    h_add2: row[getVal('map-h-add2')] || '',
+                    h_add3: row[getVal('map-h-add3')] || '',
+                    hc_name: row[getVal('map-hc-name')] || '',
+                    hc_tel: row[getVal('map-hc-tel')] || '',
+                    hc_add1: row[getVal('map-hc-add1')] || '',
+                    hc_add2: row[getVal('map-hc-add2')] || '',
+                    s_name: row[getVal('map-s-name')] || '',
+                    s_nric: row[getVal('map-s-nric')] || '',
+                    s_tel: row[getVal('map-s-tel')] || '',
+                    g_name: row[getVal('map-g-name')] || '',
+                    g_nric: row[getVal('map-g-nric')] || '',
+                    g_tel: row[getVal('map-g-tel')] || '',
+                    g_add1: row[getVal('map-g-add1')] || '',
+                    g_add2: row[getVal('map-g-add2')] || '',
+                    gc_name: row[getVal('map-gc-name')] || '',
+                    gc_tel: row[getVal('map-gc-tel')] || '',
+                    prod: row[getVal('map-prod')] || '',
+                    bal: row[getVal('map-bal')] || '',
+                    odp: row[getVal('map-odp')] || '',
+                    adch: row[getVal('map-adch')] || ''
+                };
+
                 bulkData.push({
-                    region: String(row[mapRegion]).toUpperCase().trim(),
-                    area: String(row[mapArea]).toUpperCase().trim(),
-                    loc: String(row[mapLoc]).trim(),
-                    type: String(row[mapType]).trim(), 
+                    region: String(row[getVal('map-region')]).toUpperCase().trim(),
+                    area: String(row[getVal('map-area')]).toUpperCase().trim(),
+                    loc: String(row[getVal('map-loc')]).trim(),
+                    type: String(row[getVal('map-type')]).trim(), 
                     acct: rawAccountNo,
-                    delq: String(row[mapDelq]).trim(), 
-                    arrs_mth: String(row[mapArrs]).trim(), 
-                    osb: parseFloat(String(row[mapOsb]).replace(/[^0-9.-]+/g,"")) || 0, 
-                    status: 'PENDING' 
+                    delq: String(row[getVal('map-delq')]).trim(), 
+                    arrs_mth: String(row[getVal('map-arrs')]).trim(), 
+                    osb: parseFloat(String(row[getVal('map-osb')]).replace(/[^0-9.-]+/g,"")) || 0, 
+                    status: 'PENDING',
+                    details: detailsJSON // <-- Simpan bungkusan sini
                 });
             }
 
@@ -1256,6 +1415,15 @@ window.toggleFormRegionSelect = function() {
                     initDashboardView();
                 }, 800);
             } else { document.getElementById('progressModal').style.display = 'none'; }
+        };
+
+        window.toggleExpand = function(acct) {
+            const row = document.getElementById('details-' + acct);
+            if (row.style.display === 'none') {
+                row.style.display = 'table-row';
+            } else {
+                row.style.display = 'none';
+            }
         };
 
         window.openModal = async function(accNo) {
