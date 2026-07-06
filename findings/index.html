@@ -970,7 +970,6 @@ window.switchTab = function(target) {
         };
 
 window.exportDataByDate = async function(dateStr) {
-            // --- GANTIKAN DUA BARIS INI ---
             let isConfirmed = await customConfirm(`Anda pasti mahu mengeksport data penemuan untuk tarikh ${dateStr}?`);
             if (!isConfirmed) return;
 
@@ -982,7 +981,7 @@ window.exportDataByDate = async function(dateStr) {
                 let startOfDay = `${dateStr}T00:00:00+08:00`;
                 let endOfDay = `${dateStr}T23:59:59+08:00`;
 
-const { data, error } = await supabase
+                const { data, error } = await supabase
                     .from('findings')
                     .select('id, acct, remark1, remark2, remark3, remark4, remark5, region')
                     .gte('updated_at', startOfDay)
@@ -1006,7 +1005,7 @@ const { data, error } = await supabase
                     let reg = row.region ? row.region.toUpperCase() : 'UNKNOWN';
                     if (!groupedData[reg]) groupedData[reg] = [];
                     
-groupedData[reg].push({
+                    groupedData[reg].push({
                         "ACCT": row.acct,
                         "REMARK5": row.remark5 || '',
                         "REMARK1": row.remark1 || '',
@@ -1014,6 +1013,10 @@ groupedData[reg].push({
                         "REMARK3": row.remark3 || '',
                         "REMARK4": row.remark4 || ''
                     });
+                    
+                    idsToUpdate.push(row.id); // <-- KAU TERPADAM BARIS NI TADI
+                }); // <-- DAN KAU TERPADAM KURUNGAN PENUTUP NI
+
                 let formattedDate = dateStr.replace(/-/g, ''); // Cth: 20260706
                 
                 Object.keys(groupedData).forEach(reg => {
