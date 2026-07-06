@@ -1354,10 +1354,15 @@ window.processExcelUpload = async function() {
                 return '';
             };
 
-            let bulkData = [];
+let bulkData = [];
             for (const row of parsedExcelRows) {
                 const rawAccountNo = String(row[getVal('map-acct')]).trim();
                 if (!rawAccountNo || rawAccountNo === "undefined") continue; 
+                
+                // --- LOGIK BARU: SEMAK STATUS SEDIA ADA ---
+                // Kita check kalau akaun ni dah wujud dalam cache sistem sekarang
+                let existingAcc = globalAccounts.find(a => a.acct === rawAccountNo);
+                let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; // Kekalkan status lama, atau set PENDING jika akaun baru
                 
                 let detailsJSON = {
                     h_name: row[getVal('map-h-name')] || '',
@@ -1395,7 +1400,7 @@ window.processExcelUpload = async function() {
                     delq: String(row[getVal('map-delq')]).trim(), 
                     arrs_mth: String(row[getVal('map-arrs')]).trim(), 
                     osb: parseFloat(String(row[getVal('map-osb')]).replace(/[^0-9.-]+/g,"")) || 0, 
-                    status: 'PENDING',
+                    status: currentStatus, // <-- Guna status yang disemak tadi
                     details: detailsJSON 
                 });
             }
