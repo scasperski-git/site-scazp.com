@@ -262,6 +262,7 @@
                     <select id="new-user-role" class="form-control" onchange="toggleFormRegionSelect()">
                         <option value="user">PIC User (Restricted Access)</option>
                         <option value="master">Master Admin (Full Access)</option>
+                        <option value="super">Super Admin (Master + Report Center)</option>
                     </select>
                 </div>
                 <div class="form-group" id="form-region-group">
@@ -715,18 +716,18 @@ function initDashboardView() {
             });
         }
 
-        function renderAreaSelectionUI(region) {
+function renderAreaSelectionUI(region) {
             const areaContainer = document.getElementById('area-buttons');
-            if (currentUser.role === 'master') {
+            if (currentUser.role === 'master' || currentUser.role === 'super') {
                 areaContainer.innerHTML = `<button class="btn-filter active" onclick="clearAreaSelection(this)">ALL AREAS IN ${region}</button>`;
             } else { areaContainer.innerHTML = ''; }
             
             if(regionsMap[region] && regionsMap[region].length > 0) {
                 regionsMap[region].forEach((area, index) => {
-                    let activeStyle = (currentUser.role !== 'master' && index === 0) ? 'active' : '';
+                    let activeStyle = ((currentUser.role !== 'master' && currentUser.role !== 'super') && index === 0) ? 'active' : '';
                     areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
                 });
-                if(currentUser.role !== 'master' && !currentArea) { 
+                if((currentUser.role !== 'master' && currentUser.role !== 'super') && !currentArea) { 
                     const firstBtn = areaContainer.querySelector('.btn-filter');
                     if (firstBtn) applyAreaFilter(regionsMap[region][0], firstBtn); 
                 }
@@ -831,7 +832,7 @@ window.switchTab = function(target) {
                 document.getElementById('total-users-count').innerText = data.length;
 
                 data.forEach((user, index) => {
-                    let regionDisp = user.assignedregion ? user.assignedregion.toUpperCase() : (user.role === 'master' ? 'SEMUA' : 'TIADA');
+                    let regionDisp = user.assignedregion ? user.assignedregion.toUpperCase() : ((user.role === 'master' || user.role === 'super') ? 'SEMUA' : 'TIADA');
                     let roleBadgeClass = user.role === 'master' ? 'status-done' : 'status-pending';
                     
                     let userStatus = user.status || 'ACTIVE';
@@ -1119,9 +1120,9 @@ groupedData[reg].push({
             }
         };
 
-        window.toggleFormRegionSelect = function() {
+window.toggleFormRegionSelect = function() {
             const role = document.getElementById('new-user-role').value;
-            document.getElementById('form-region-group').style.display = (role === 'master') ? 'none' : 'block';
+            document.getElementById('form-region-group').style.display = (role === 'master' || role === 'super') ? 'none' : 'block';
         };
 
         window.handleExcelFileSelect = function(e) {
@@ -1258,7 +1259,7 @@ groupedData[reg].push({
             document.getElementById('modalAccNo').innerText = accNo;
             document.getElementById('updateModal').style.display = 'flex';
             
-            document.getElementById('btnResetPending').style.display = currentUser.role === 'master' ? 'block' : 'none';
+            document.getElementById('btnResetPending').style.display = (currentUser.role === 'master' || currentUser.role === 'super') ? 'block' : 'none';
 
             const historyBox = document.querySelector('.history-box');
             historyBox.innerHTML = '<div style="text-align:center; padding:10px;">Loading history trail...</div>';
@@ -1272,9 +1273,10 @@ groupedData[reg].push({
                     const dateFormatted = data.updated_at ? new Date(data.updated_at).toLocaleString() : 'N/A';
                     
                     let deleteBtnHTML = '';
-                    if(currentUser.role === 'master') {
-                        deleteBtnHTML = `<button class="btn-delete-finding" onclick="deleteSingleFinding('${data.id}', '${accNo}')">🗑️ PADAM</button>`;
-                    }
+                    
+if(currentUser.role === 'master' || currentUser.role === 'super') {
+    deleteBtnHTML = `<button class="btn-delete-finding" onclick="deleteSingleFinding('${data.id}', '${accNo}')">🗑️ PADAM</button>`;
+}
 
 // Logik untuk papar rekod lama
                     let histRemark = '';
@@ -1426,7 +1428,7 @@ window.saveFinding = async function() {
                 let rowToUpdate = globalAccounts.find(a => a.acct === accNo);
                 if(rowToUpdate) rowToUpdate.status = 'PENDING';
 
-                const safeRegion = currentUser.role === 'master' ? 'all' : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
+                const safeRegion = (currentUser.role === 'master' || currentUser.role === 'super') ? 'all' : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
                 const cacheKey = `scazp_cache_${safeRegion}`;
                 await localforage.setItem(cacheKey, globalAccounts);
 
