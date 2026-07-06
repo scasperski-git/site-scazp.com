@@ -369,11 +369,12 @@
             <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px;">Historical Audit Trail:</label>
             <div class="history-box"></div>
             
-            <div class="form-group">
+<div class="form-group">
                 <label style="color: var(--accent-gold);">New Verification Finding Log (Max 50 Char / Line):</label>
-                <input type="text" id="remark1" class="form-control" maxlength="50" placeholder="Row 1: Taip dan tekan Enter..." style="margin-bottom: 8px;" onkeypress="handleEnter(event, 'remark2')">
-                <input type="text" id="remark2" class="form-control" maxlength="50" placeholder="Row 2: Sambungan..." style="margin-bottom: 8px;" onkeypress="handleEnter(event, 'remark3')">
-                <input type="text" id="remark3" class="form-control" maxlength="50" placeholder="Row 3: Sambungan..." onkeypress="handleEnter(event, 'btnSaveFinding')">
+                <input type="text" id="remark1" class="form-control" maxlength="50" placeholder="Row 1: Mula menaip di sini..." style="margin-bottom: 8px;" oninput="handleAutoJump(this, 'remark2')" onkeypress="handleEnter(event, 'remark2')">
+                <input type="text" id="remark2" class="form-control" maxlength="50" placeholder="Row 2: Auto-sambung..." style="margin-bottom: 8px;" oninput="handleAutoJump(this, 'remark3')" onkeypress="handleEnter(event, 'remark3')">
+                <input type="text" id="remark3" class="form-control" maxlength="50" placeholder="Row 3: Auto-sambung..." style="margin-bottom: 8px;" oninput="handleAutoJump(this, 'remark4')" onkeypress="handleEnter(event, 'remark4')">
+                <input type="text" id="remark4" class="form-control" maxlength="50" placeholder="Row 4: Auto-sambung..." onkeypress="handleEnter(event, 'btnSaveFinding')">
             </div>
             
             <div style="display: flex; gap: 10px;">
@@ -980,9 +981,9 @@ window.exportDataByDate = async function(dateStr) {
                 let startOfDay = `${dateStr}T00:00:00+08:00`;
                 let endOfDay = `${dateStr}T23:59:59+08:00`;
 
-                const { data, error } = await supabase
+const { data, error } = await supabase
                     .from('findings')
-                    .select('id, acct, remark1, remark2, remark3, remark4, region')
+                    .select('id, acct, remark1, remark2, remark3, remark4, remark5, region')
                     .gte('updated_at', startOfDay)
                     .lte('updated_at', endOfDay)
                     .eq('is_exported', false)
@@ -1004,16 +1005,14 @@ window.exportDataByDate = async function(dateStr) {
                     let reg = row.region ? row.region.toUpperCase() : 'UNKNOWN';
                     if (!groupedData[reg]) groupedData[reg] = [];
                     
-                    groupedData[reg].push({
+groupedData[reg].push({
                         "ACCT": row.acct,
-                        "REMARK1": row.remark4 || '',
-                        "REMARK2": row.remark1 || '',
-                        "REMARK3": row.remark2 || '',
-                        "REMARK4": row.remark3 || ''
+                        "REMARK5": row.remark5 || '',
+                        "REMARK1": row.remark1 || '',
+                        "REMARK2": row.remark2 || '',
+                        "REMARK3": row.remark3 || '',
+                        "REMARK4": row.remark4 || ''
                     });
-                    idsToUpdate.push(row.id);
-                });
-
                 let formattedDate = dateStr.replace(/-/g, ''); // Cth: 20260706
                 
                 Object.keys(groupedData).forEach(reg => {
@@ -1277,14 +1276,18 @@ window.exportDataByDate = async function(dateStr) {
                         deleteBtnHTML = `<button class="btn-delete-finding" onclick="deleteSingleFinding('${data.id}', '${accNo}')">🗑️ PADAM</button>`;
                     }
 
+// Logik untuk papar rekod lama
                     let histRemark = '';
-                    if(data.remark1 || data.remark2 || data.remark3) {
+                    if(data.remark1 || data.remark2 || data.remark3 || data.remark4) {
                         histRemark += `<div style="font-size: 13px; line-height: 1.4; margin-top: 5px; color: var(--text-main);">`;
                         if(data.remark1) histRemark += `<div>${data.remark1}</div>`;
                         if(data.remark2) histRemark += `<div>${data.remark2}</div>`;
                         if(data.remark3) histRemark += `<div>${data.remark3}</div>`;
+                        if(data.remark4) histRemark += `<div>${data.remark4}</div>`;
                         histRemark += `</div>`;
-                        if(data.remark4) histRemark += `<div style="color: var(--success-green); font-size: 9px; margin-top: 6px;">${data.remark4}</div>`;
+                        
+                        // Remark 5 (Tarik & ID) kekal kecil dan hijau
+                        if(data.remark5) histRemark += `<div style="color: var(--success-green); font-size: 9px; margin-top: 6px;">${data.remark5}</div>`;
                     } else {
                         histRemark = `<div style="font-size: 13px; margin-top: 5px;">${data.remark || ''}</div>`;
                     }
@@ -1309,21 +1312,33 @@ window.exportDataByDate = async function(dateStr) {
                 if (nextEl) nextEl.focus();
             }
         };
+
+        window.handleAutoJump = function(currentElement, nextElementId) {
+            // Jika panjang teks yang ditaip dah capai had maksimum (50)
+            if (currentElement.value.length >= currentElement.maxLength) {
+                const nextEl = document.getElementById(nextElementId);
+                if (nextEl) {
+                    nextEl.focus(); // Auto lompat ke kotak seterusnya
+                }
+            }
+        };
         
-        window.closeModal = function() { 
+    window.closeModal = function() { 
             document.getElementById('updateModal').style.display = 'none'; 
             document.getElementById('remark1').value = ''; 
             document.getElementById('remark2').value = ''; 
             document.getElementById('remark3').value = ''; 
+            document.getElementById('remark4').value = ''; 
         };
 
-        window.saveFinding = async function() {
+window.saveFinding = async function() {
             let r1 = document.getElementById('remark1').value.trim();
             let r2 = document.getElementById('remark2').value.trim();
             let r3 = document.getElementById('remark3').value.trim();
+            let r4 = document.getElementById('remark4').value.trim();
             let accNo = document.getElementById('modalAccNo').innerText;
             
-            if(!r1 && !r2 && !r3) { 
+            if(!r1 && !r2 && !r3 && !r4) { 
                 alert("Sila masukkan sekurang-kurangnya satu baris nota penemuan."); 
                 return; 
             }
@@ -1336,17 +1351,16 @@ window.exportDataByDate = async function(dateStr) {
             let acctLoc = accountInfo.loc || '';
             let acctRegion = accountInfo.region || '';
             
-// Jana REMARK4 Auto (Format: ATTENDED BY (ID)-DATE & TIME)
+            // Jana REMARK 5 Auto (Format: ATTENDED BY (ID)-DATE & TIME)
             let today = new Date();
             let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
             
-            // Dapatkan masa (Format 24 Jam: HH:MM:SS)
             let hh = String(today.getHours()).padStart(2, '0');
             let mm = String(today.getMinutes()).padStart(2, '0');
             let ss = String(today.getSeconds()).padStart(2, '0');
             let timeStr = `${hh}:${mm}:${ss}`;
             
-            let r4Auto = `ATTENDED BY (${currentUser.username.toUpperCase()})-${dateStr} ${timeStr}`;
+            let r5Auto = `ATTENDED BY (${currentUser.username.toUpperCase()})-${dateStr} ${timeStr}`;
             
             try {
                 const { data: insertedData, error: insertError } = await supabase
@@ -1356,7 +1370,8 @@ window.exportDataByDate = async function(dateStr) {
                         remark1: r1,
                         remark2: r2,
                         remark3: r3,
-                        remark4: r4Auto,
+                        remark4: r4,
+                        remark5: r5Auto,
                         type: acctType,
                         loc: acctLoc,
                         region: acctRegion,
@@ -1370,7 +1385,7 @@ window.exportDataByDate = async function(dateStr) {
                     let rowToUpdate = globalAccounts.find(a => a.acct === accNo);
                     if(rowToUpdate) rowToUpdate.status = 'UPDATED';
                     
-                    const safeRegion = currentUser.role === 'master' ? 'all' : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
+                    const safeRegion = currentUser.role === 'master' || currentUser.role === 'super' ? 'all' : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
                     const cacheKey = `scazp_cache_${safeRegion}`;
                     const timeKey = `scazp_time_${safeRegion}`;
                     
@@ -1390,10 +1405,9 @@ window.exportDataByDate = async function(dateStr) {
                 showNotification("RALAT KRITIKAL SISTEM", err.message, true);
                 console.error(err);
             } finally {
-                btn.innerText = "COMMIT RECORD ENTRY";
+                btn.innerText = "COMMIT ENTRY";
             }
         };
-
         window.resetAccountStatus = async function() {
             let accNo = document.getElementById('modalAccNo').innerText;
             let isConfirmed = await customConfirm(`AMARAN:\nAnda pasti mahu memadam SEMUA sejarah penemuan untuk akaun ${accNo} dan kembalikan statusnya kepada PENDING?`);
