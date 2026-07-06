@@ -1007,11 +1007,11 @@ window.exportDataByDate = async function(dateStr) {
                     
                     groupedData[reg].push({
                         "ACCT": row.acct,
-                        "REMARK5": row.remark5 || '',
-                        "REMARK1": row.remark1 || '',
-                        "REMARK2": row.remark2 || '',
-                        "REMARK3": row.remark3 || '',
-                        "REMARK4": row.remark4 || ''
+                        "REMARK1": row.remark5 || '',
+                        "REMARK2": row.remark1 || '',
+                        "REMARK3": row.remark2 || '',
+                        "REMARK4": row.remark3 || '',
+                        "REMARK5": row.remark4 || ''
                     });
                     
                     idsToUpdate.push(row.id); // <-- KAU TERPADAM BARIS NI TADI
