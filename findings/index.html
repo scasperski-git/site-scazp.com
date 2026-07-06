@@ -416,6 +416,7 @@
                     <h3>4. EXTRA ACCOUNT BALANCES</h3>
                     <div class="mapping-grid">
                         <label>Product Desc</label><select id="map-prod" class="form-control mapping-select"></select>
+                        <label>Plate No</label><select id="map-plate" class="form-control mapping-select"></select>
                         <label>Total Balance</label><select id="map-bal" class="form-control mapping-select"></select>
                         <label>ODP (Late) Bal</label><select id="map-odp" class="form-control mapping-select"></select>
                         <label>ADCH Bal</label><select id="map-adch" class="form-control mapping-select"></select>
@@ -900,6 +901,7 @@ function renderTablePage() {
                                 <div class="details-box">
                                     <h4>ACCOUNT BALANCES</h4>
                                     <p><span class="lbl" style="width: 80px;">PRODUCT</span>: ${d.prod || '-'}</p>
+                                    <p><span class="lbl" style="width: 80px;">PLATE NO</span>: ${d.plate || '-'}</p>
                                     <p><span class="lbl" style="width: 80px;">BALANCE</span>: ${d.bal || '-'}</p>
                                     <p><span class="lbl" style="width: 80px;">ODP BAL</span>: ${d.odp || '-'}</p>
                                     <p><span class="lbl" style="width: 80px;">ADCH BAL</span>: ${d.adch || '-'}</p>
@@ -1308,6 +1310,7 @@ window.handleExcelFileSelect = function(e) {
                             if(id === 'map-gc-tel') preSelectOption(select, ['GUAR_CO_TEL']);
                             // 4. EXTRA BALANCES
                             if(id === 'map-prod') preSelectOption(select, ['EP_SALES_DESC']);
+                            if(id === 'map-plate') preSelectOption(select, ['PLATE_NO', 'PLATE NO']);
                             if(id === 'map-bal') preSelectOption(select, ['BALANCE']);
                             if(id === 'map-odp') preSelectOption(select, ['LATE_BAL']);
                             if(id === 'map-adch') preSelectOption(select, ['ADCH_BAL']);
@@ -1386,6 +1389,7 @@ let bulkData = [];
                     gc_name: row[getVal('map-gc-name')] || '',
                     gc_tel: row[getVal('map-gc-tel')] || '',
                     prod: row[getVal('map-prod')] || '',
+                    plate: row[getVal('map-plate')] || '',
                     bal: row[getVal('map-bal')] || '',
                     odp: row[getVal('map-odp')] || '',
                     adch: row[getVal('map-adch')] || ''
