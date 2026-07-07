@@ -196,34 +196,6 @@
                 gap: 12px; 
                 padding: 12px;
             }
-
-            /* Bar Palang Maintenance Mode */
-#maintenance-bar {
-    display: none; /* Sentiasa sorok dulu, script akan trigger */
-    background: linear-gradient(90deg, #b71c1c, #e57373);
-    color: white;
-    text-align: center;
-    padding: 10px;
-    font-size: 13px;
-    font-weight: bold;
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    position: sticky;
-    top: 0;
-    z-index: 9999;
-}
-.blink-dot {
-    height: 8px;
-    width: 8px;
-    background-color: white;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 8px;
-    animation: blinker 1.5s linear infinite;
-}
-@keyframes blinker {
-    50% { opacity: 0; }
-}
             .details-box {
                 width: 100% !important;
                 box-sizing: border-box;
@@ -245,16 +217,9 @@
             .page-info { font-size: 10px; }
             .pagination-controls button { padding: 5px 10px; font-size: 10px; }
         }
-    
     </style>
 </head>
 <body>
-
-    <!-- BAR PALANG MAINTENANCE DI BAHAGIAN PALING ATAS WEB -->
-<div id="maintenance-bar">
-    <span class="blink-dot"></span> 
-    SYSTEM UNDER MAINTENANCE: SEMUA USER DI-SEKAT SEMENTARA.
-</div>
 
     <div id="login-section">
         <div class="login-box">
@@ -628,43 +593,20 @@
         let currentSortColumn = null;
         let currentSortDirection = 'asc';
 
-async function checkLoginSession() {
-    const storedSession = localStorage.getItem('scazp_user_session');
-    if (storedSession) {
-        currentUser = JSON.parse(storedSession);
-        
-        // --- LOGIK SEKATAN MAINTENANCE MODE (HANYA SUPER BOLEH MASUK) ---
-        if (currentUser.role !== 'super') {
-            // Paparkan bar palang amaran
-            document.getElementById('maintenance-bar').style.display = 'block';
-            document.getElementById('maintenance-bar').innerHTML = `<span class="blink-dot"></span> MAAF ${currentUser.username.toUpperCase()}, SISTEM SEDANG DISELENGGARA. AKSES ANDA DI-SEKAT SEMENTARA.`;
-            
-            // Tendang keluar atau sorok terus dashboard, paksa stay kat login section dengan error
-            document.getElementById('login-section').style.display = 'flex';
-            document.getElementById('dashboard-section').style.display = 'none';
-            document.getElementById('login-error').innerText = "Akses ditolak! Sistem dalam mod selenggara (Maintenance Mode).";
-            document.getElementById('login-error').style.display = 'block';
-            
-            // Clear session supaya dia tak auto-bypass kalau refresh
-            currentUser = null;
-            localStorage.removeItem('scazp_user_session');
-            return;
+        async function checkLoginSession() {
+            const storedSession = localStorage.getItem('scazp_user_session');
+            if (storedSession) {
+                currentUser = JSON.parse(storedSession);
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+                document.getElementById('display-username').innerText = "Logged in as: " + currentUser.username.toUpperCase();
+                
+                const safeRegion = currentUser.role === 'master' ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
+                
+                await fetchFullDatabaseData(safeRegion);
+                initDashboardView();
+            }
         }
-
-        // --- JIKA USER ADALAH 'SUPER', DIA BOLEH MASUK MACAM BIASA ---
-        // Paparkan bar palang untuk inform Super Admin yang maintenance tengah on
-        document.getElementById('maintenance-bar').style.display = 'block';
-        
-        document.getElementById('login-section').style.display = 'none';
-        document.getElementById('dashboard-section').style.display = 'block';
-        document.getElementById('display-username').innerText = "Logged in as: " + currentUser.username.toUpperCase() + " (SUPER)";
-        
-        const safeRegion = null; // Super sentiasa dapat full access / data all regions
-        
-        await fetchFullDatabaseData(safeRegion);
-        initDashboardView();
-    }
-}
 
         window.customConfirm = function(message) {
             return new Promise((resolve) => {
@@ -705,53 +647,39 @@ async function checkLoginSession() {
             });
         };
 
-window.handleLogin = async function() {
-    const user = document.getElementById('username').value.trim();
-    const pass = document.getElementById('password').value.trim();
-    const btn = document.querySelector('.btn-login');
-    btn.innerText = "CHECKING DATABASE..."; 
-    
-    try {
-        const { data, error } = await supabase.from('users').select('*').eq('id', user).single();
-        if (data && data.pass === pass) {
-            if (data.status === 'INACTIVE') {
-                document.getElementById('login-error').innerText = "Akaun anda telah dinyahaktifkan. Sila hubungi Admin.";
-                document.getElementById('login-error').style.display = 'block';
-                btn.innerText = "SIGN IN";
-                return; 
-            }
-
-            // --- SEKATAN MAINTENANCE MODE WAKTU LIVE LOGIN ---
-            if (data.role !== ''MAINTENANCE_OFF_DONG')') {
-                document.getElementById('maintenance-bar').style.display = 'block';
-                document.getElementById('maintenance-bar').innerHTML = `<span class="blink-dot"></span> MAAF, SISTEM SEDANG DISELENGGARA. AKSES UNTUK ROLE ${data.role.toUpperCase()} DI-SEKAT SEMENTARA.`;
-                
-                document.getElementById('login-error').innerText = "Akses ditolak! Sistem dalam mod selenggara.";
-                document.getElementById('login-error').style.display = 'block';
-                btn.innerText = "SIGN IN";
-                return;
-            }
-
-            // JIKA 'SUPER', JALANKAN PROSES LOGIN SEPERTI BIASA
-            currentUser = data;
-            currentUser.username = user;
-            localStorage.setItem('scazp_user_session', JSON.stringify(currentUser));
-            document.getElementById('login-error').style.display = 'none';
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('dashboard-section').style.display = 'block';
-            document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
+        window.handleLogin = async function() {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            const btn = document.querySelector('.btn-login');
+            btn.innerText = "CHECKING DATABASE..."; 
             
-            // Set paparan bar palang untuk super admin tahu sistem tengah lock
-            document.getElementById('maintenance-bar').style.display = 'block';
-            
-            await fetchFullDatabaseData(null);
-            initDashboardView();
-        } else {
-            document.getElementById('login-error').style.display = 'block';
-        }
-    } catch (error) { alert("Connection error!"); }
-    btn.innerText = "SIGN IN";
-};
+            try {
+                const { data, error } = await supabase.from('users').select('*').eq('id', user).single();
+                if (data && data.pass === pass) {
+                    if (data.status === 'INACTIVE') {
+                        document.getElementById('login-error').innerText = "Akaun anda telah dinyahaktifkan. Sila hubungi Admin.";
+                        document.getElementById('login-error').style.display = 'block';
+                        btn.innerText = "SIGN IN";
+                        return; 
+                    }
+                    currentUser = data;
+                    currentUser.username = user;
+                    localStorage.setItem('scazp_user_session', JSON.stringify(currentUser));
+                    document.getElementById('login-error').style.display = 'none';
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('dashboard-section').style.display = 'block';
+                    document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
+                    
+                    const safeRegion = currentUser.role === 'master' ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
+                    
+                    await fetchFullDatabaseData(safeRegion);
+                    initDashboardView();
+                } else {
+                    document.getElementById('login-error').style.display = 'block';
+                }
+            } catch (error) { alert("Connection error!"); }
+            btn.innerText = "SIGN IN";
+        };
 
         window.handleLogout = function() {
             currentUser = null; globalAccounts = []; filteredAccounts = []; regionsMap = {};
