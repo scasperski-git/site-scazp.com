@@ -1845,6 +1845,23 @@
         }
 
         checkLoginSession();
+
+        // --- FUNGSI PAGINATION UNTUK BUTANG PREV & NEXT ---
+window.nextPage = function() {
+    const totalPages = Math.ceil(filteredAccounts.length / rowsPerPage);
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderTablePage();
+    }
+};
+
+window.prevPage = function() {
+    if (currentPage > 1) {
+        currentPage--;
+        renderTablePage();
+    }
+};
+
     </script>
 </body>
 </html>
