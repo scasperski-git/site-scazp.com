@@ -438,7 +438,7 @@
             <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px;">Historical Audit Trail:</label>
             <div class="history-box"></div>
             
-            <div class="form-group">
+<div class="form-group">
                 <label style="color: var(--accent-gold);">New Verification Finding Log (Max 50 Char / Line):</label>
                 
                 <input type="text" id="remark1" class="form-control" maxlength="50" placeholder="Row 1: Mula menaip..." 
@@ -621,25 +621,32 @@ window.handleLogout = function() {
             document.getElementById('login-section').style.display = 'flex';
         };
 
-        window.forceSyncData = async function() {
+window.forceSyncData = async function() {
             if (!currentUser) return;
             
-            // 1. Kenal pasti region user untuk cuci memori yang betul
+            // 1. TAMBAH LOCK: Disable butang supaya tak boleh tekan berkali-kali
+            const syncBtn = event.target;
+            syncBtn.disabled = true;
+            syncBtn.innerText = "SYNCING..."; // Tukar label butang
+            
             const safeRegion = (currentUser.role === 'master' || currentUser.role === 'super') ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
             const cacheKey = safeRegion ? `scazp_cache_${safeRegion}` : 'scazp_cache_all';
             const timeKey = safeRegion ? `scazp_time_${safeRegion}` : 'scazp_time_all';
 
-            // 2. Buang memori degil dari peranti
             await localforage.removeItem(cacheKey);
             localStorage.removeItem(timeKey);
 
-            // 3. Paksa tarik data segar dari pangkalan data Supabase
             await fetchFullDatabaseData(safeRegion);
             applyFilterAndRender();
             
-            showNotification("SYNC BERJAYA", "Semua memori lama telah dicuci. Peranti anda kini membaca data terkini dari Cloud.");
-        };
+            showNotification("SYNC BERJAYA", "Data telah dikemas kini.");
 
+            // 2. COOL-DOWN: Lepas 60 saat baru boleh tekan balik
+            setTimeout(() => {
+                syncBtn.disabled = false;
+                syncBtn.innerText = "⟳ SYNC";
+            }, 60000); // 60,000 milisaat = 60 saat
+        };
         async function fetchFullDatabaseData(region = null) {
             const cacheKey = region ? `scazp_cache_${region}` : 'scazp_cache_all';
             const timeKey = region ? `scazp_time_${region}` : 'scazp_time_all';
