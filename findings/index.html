@@ -441,23 +441,20 @@
 <div class="form-group">
                 <label style="color: var(--accent-gold);">New Verification Finding Log (Max 50 Char / Line):</label>
                 
-                <input type="text" style="display:none" name="fake-field-to-prevent-autofill">
-                <input type="password" style="display:none" name="fake-pass-to-prevent-autofill">
-
-                <input type="text" id="log-r1" class="form-control" maxlength="50" placeholder="Row 1: Mula menaip..." 
-                       style="margin-bottom: 8px;" autocomplete="new-password" inputmode="text" 
-                       oninput="handleAutoJump(this, 'log-r2')" onkeypress="handleEnter(event, 'log-r2')">
+                <input type="text" id="nota-1" class="form-control" maxlength="50" placeholder="Row 1: Mula menaip..." 
+                       style="margin-bottom: 8px;" autocomplete="off" spellcheck="true" autocorrect="on" autocapitalize="characters"
+                       oninput="handleAutoJump(this, 'nota-2')" onkeypress="handleEnter(event, 'nota-2')">
                 
-                <input type="text" id="log-r2" class="form-control" maxlength="50" placeholder="Row 2: Auto-sambung..." 
-                       style="margin-bottom: 8px;" autocomplete="new-password" inputmode="text" 
-                       oninput="handleAutoJump(this, 'log-r3')" onkeypress="handleEnter(event, 'log-r3')">
+                <input type="text" id="nota-2" class="form-control" maxlength="50" placeholder="Row 2: Auto-sambung..." 
+                       style="margin-bottom: 8px;" autocomplete="off" spellcheck="true" autocorrect="on" autocapitalize="characters"
+                       oninput="handleAutoJump(this, 'nota-3')" onkeypress="handleEnter(event, 'nota-3')">
                 
-                <input type="text" id="log-r3" class="form-control" maxlength="50" placeholder="Row 3: Auto-sambung..." 
-                       style="margin-bottom: 8px;" autocomplete="new-password" inputmode="text" 
-                       oninput="handleAutoJump(this, 'log-r4')" onkeypress="handleEnter(event, 'log-r4')">
+                <input type="text" id="nota-3" class="form-control" maxlength="50" placeholder="Row 3: Auto-sambung..." 
+                       style="margin-bottom: 8px;" autocomplete="off" spellcheck="true" autocorrect="on" autocapitalize="characters"
+                       oninput="handleAutoJump(this, 'nota-4')" onkeypress="handleEnter(event, 'nota-4')">
                 
-                <input type="text" id="log-r4" class="form-control" maxlength="50" placeholder="Row 4: Auto-sambung..." 
-                       autocomplete="new-password" inputmode="text" 
+                <input type="text" id="nota-4" class="form-control" maxlength="50" placeholder="Row 4: Auto-sambung..." 
+                       autocomplete="off" spellcheck="true" autocorrect="on" autocapitalize="characters"
                        oninput="handleAutoJump(this, null)" onkeypress="handleEnter(event, 'btnSaveFinding')">
             </div>
 
@@ -1547,7 +1544,7 @@ if(currentUser.role === 'master' || currentUser.role === 'super') {
                         </div>`;
                 });
             }
-            setTimeout(() => document.getElementById('remark1').focus(), 100);
+            setTimeout(() => document.getElementById('nota-1').focus(), 100);
         };
         
         window.handleEnter = function(e, nextElementId) {
@@ -1571,12 +1568,13 @@ window.handleAutoJump = function(currentElement, nextElementId) {
             }
         };
         
-    window.closeModal = function() { 
+JavaScript
+        window.closeModal = function() { 
             document.getElementById('updateModal').style.display = 'none'; 
-            document.getElementById('log-r1').value = '';
-            document.getElementById('log-r2').value = '';
-            document.getElementById('log-r3').value = ''; 
-            document.getElementById('log-r4').value = '';
+            document.getElementById('nota-1').value = ''; 
+            document.getElementById('nota-2').value = ''; 
+            document.getElementById('nota-3').value = ''; 
+            document.getElementById('nota-4').value = ''; 
         };
 
 window.saveFinding = async function() {
