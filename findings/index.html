@@ -217,9 +217,44 @@
             .page-info { font-size: 10px; }
             .pagination-controls button { padding: 5px 10px; font-size: 10px; }
         }
+
+        /* Bar Palang Maintenance Mode */
+#maintenance-bar {
+    display: none; /* Sentiasa sorok dulu, script akan trigger */
+    background: linear-gradient(90deg, #b71c1c, #e57373);
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+}
+.blink-dot {
+    height: 8px;
+    width: 8px;
+    background-color: white;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    animation: blinker 1.5s linear infinite;
+}
+@keyframes blinker {
+    50% { opacity: 0; }
+}
+        
     </style>
 </head>
 <body>
+
+    <!-- BAR PALANG MAINTENANCE DI BAHAGIAN PALING ATAS WEB -->
+<div id="maintenance-bar">
+    <span class="blink-dot"></span> 
+    SYSTEM UNDER MAINTENANCE: HANYA SUPER ADMIN BENAR MASUK. USER BIASA & MASTER DI-SEKAT SEMENTARA.
+</div>
 
     <div id="login-section">
         <div class="login-box">
@@ -566,9 +601,15 @@
     </div>
 
     <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-        const supabaseUrl = 'https://awrarqugmkpahscpvewu.supabase.co';
+// =================================================================
+// 🎛️ SUIS GLOBAL MAINTENANCE MODE (UBAH DI SINI SAHAJA)
+// =================================================================
+const IS_MAINTENANCE = true; // Set 'true' untuk ON, Set 'false' untuk OFF
+// =================================================================
+
+const supabaseUrl = 'https://awrarqugmkpahscpvewu.supabase.co';
         const supabaseKey = 'sb_publishable_nN7JOvHOInSCZUAy6tTYgQ_xGzJD9N2';
         const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -593,20 +634,42 @@
         let currentSortColumn = null;
         let currentSortDirection = 'asc';
 
-        async function checkLoginSession() {
-            const storedSession = localStorage.getItem('scazp_user_session');
-            if (storedSession) {
-                currentUser = JSON.parse(storedSession);
-                document.getElementById('login-section').style.display = 'none';
-                document.getElementById('dashboard-section').style.display = 'block';
-                document.getElementById('display-username').innerText = "Logged in as: " + currentUser.username.toUpperCase();
-                
-                const safeRegion = currentUser.role === 'master' ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
-                
-                await fetchFullDatabaseData(safeRegion);
-                initDashboardView();
-            }
+async function checkLoginSession() {
+    const storedSession = localStorage.getItem('scazp_user_session');
+    if (storedSession) {
+        currentUser = JSON.parse(storedSession);
+        
+        // 1. Jika Maintenance ON dan user BUKAN super, sekat & tendang keluar
+        if (IS_MAINTENANCE && currentUser.role !== 'super') {
+            document.getElementById('maintenance-bar').style.display = 'block';
+            document.getElementById('maintenance-bar').innerHTML = `<span class="blink-dot"></span> MAAF ${currentUser.username.toUpperCase()}, SISTEM SEDANG DISELENGGARA.`;
+            document.getElementById('login-section').style.display = 'flex';
+            document.getElementById('dashboard-section').style.display = 'none';
+            document.getElementById('login-error').innerText = "Akses ditolak! Sistem dalam mod selenggara.";
+            document.getElementById('login-error').style.display = 'block';
+            
+            currentUser = null;
+            localStorage.removeItem('scazp_user_session');
+            return;
         }
+
+        // 2. Jika Maintenance ON dan user adalah 'super', bagi masuk tapi tunjuk palang amaran
+        if (IS_MAINTENANCE && currentUser.role === 'super') {
+            document.getElementById('maintenance-bar').style.display = 'block';
+            document.getElementById('maintenance-bar').innerHTML = `<span class="blink-dot"></span> MOD SELENGGARA AKTIF (Akses Super Admin sahaja)`;
+        } else {
+            // Jika maintenance OFF, sorok terus bar palang
+            document.getElementById('maintenance-bar').style.display = 'none';
+        }
+        
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('dashboard-section').style.display = 'block';
+        document.getElementById('display-username').innerText = "Logged in as: " + currentUser.username.toUpperCase();
+        
+        await fetchFullDatabaseData(null);
+        initDashboardView();
+    }
+}
 
         window.customConfirm = function(message) {
             return new Promise((resolve) => {
@@ -647,39 +710,55 @@
             });
         };
 
-        window.handleLogin = async function() {
-            const user = document.getElementById('username').value.trim();
-            const pass = document.getElementById('password').value.trim();
-            const btn = document.querySelector('.btn-login');
-            btn.innerText = "CHECKING DATABASE..."; 
+window.handleLogin = async function() {
+    const user = document.getElementById('username').value.trim();
+    const pass = document.getElementById('password').value.trim();
+    const btn = document.querySelector('.btn-login');
+    btn.innerText = "CHECKING DATABASE..."; 
+    
+    try {
+        const { data, error } = await supabase.from('users').select('*').eq('id', user).single();
+        if (data && data.pass === pass) {
+            if (data.status === 'INACTIVE') {
+                document.getElementById('login-error').innerText = "Akaun anda telah dinyahaktifkan. Sila hubungi Admin.";
+                document.getElementById('login-error').style.display = 'block';
+                btn.innerText = "SIGN IN";
+                return; 
+            }
+
+            // JIKA MAINTENANCE AKTIF DAN BUKAN SUPER, SEKAT LIVE LOGIN
+            if (IS_MAINTENANCE && data.role !== 'super') {
+                document.getElementById('maintenance-bar').style.display = 'block';
+                document.getElementById('maintenance-bar').innerHTML = `<span class="blink-dot"></span> MAAF, SISTEM SEDANG DISELENGGARA. AKSES DI-SEKAT SEMENTARA.`;
+                document.getElementById('login-error').innerText = "Akses ditolak! Sistem dalam mod selenggara.";
+                document.getElementById('login-error').style.display = 'block';
+                btn.innerText = "SIGN IN";
+                return;
+            }
+
+            currentUser = data;
+            currentUser.username = user;
+            localStorage.setItem('scazp_user_session', JSON.stringify(currentUser));
+            document.getElementById('login-error').style.display = 'none';
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('dashboard-section').style.display = 'block';
+            document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
             
-            try {
-                const { data, error } = await supabase.from('users').select('*').eq('id', user).single();
-                if (data && data.pass === pass) {
-                    if (data.status === 'INACTIVE') {
-                        document.getElementById('login-error').innerText = "Akaun anda telah dinyahaktifkan. Sila hubungi Admin.";
-                        document.getElementById('login-error').style.display = 'block';
-                        btn.innerText = "SIGN IN";
-                        return; 
-                    }
-                    currentUser = data;
-                    currentUser.username = user;
-                    localStorage.setItem('scazp_user_session', JSON.stringify(currentUser));
-                    document.getElementById('login-error').style.display = 'none';
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('dashboard-section').style.display = 'block';
-                    document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
-                    
-                    const safeRegion = currentUser.role === 'master' ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
-                    
-                    await fetchFullDatabaseData(safeRegion);
-                    initDashboardView();
-                } else {
-                    document.getElementById('login-error').style.display = 'block';
-                }
-            } catch (error) { alert("Connection error!"); }
-            btn.innerText = "SIGN IN";
-        };
+            if (IS_MAINTENANCE && data.role === 'super') {
+                document.getElementById('maintenance-bar').style.display = 'block';
+                document.getElementById('maintenance-bar').innerHTML = `<span class="blink-dot"></span> MOD SELENGGARA AKTIF (Akses Super Admin sahaja)`;
+            } else {
+                document.getElementById('maintenance-bar').style.display = 'none';
+            }
+            
+            await fetchFullDatabaseData(null);
+            initDashboardView();
+        } else {
+            document.getElementById('login-error').style.display = 'block';
+        }
+    } catch (error) { alert("Connection error!"); }
+    btn.innerText = "SIGN IN";
+};
 
         window.handleLogout = function() {
             currentUser = null; globalAccounts = []; filteredAccounts = []; regionsMap = {};
