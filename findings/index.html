@@ -441,9 +441,9 @@
 <div class="form-group">
     <label style="color: var(--accent-gold);">New Verification Finding Log (Max 50 Char / Line):</label>
     
-<input type="text" id="remark1" name="rmk_x99" class="form-control" maxlength="50" placeholder="Row 1: Mula menaip..." 
-       style="margin-bottom: 8px;" autocomplete="one-time-code" autocorrect="on" inputmode="text" 
-       oninput="handleAutoJump(this, 'remark2')" onkeypress="handleEnter(event, 'remark2')">
+<input type="text" id="remark1" class="form-control" maxlength="50" placeholder="Row 1: Mula menaip..." 
+           style="margin-bottom: 8px;" autocomplete="new-remark" autocorrect="on" inputmode="text" 
+           oninput="handleAutoJump(this, 'remark2')" onkeypress="handleEnter(event, 'remark2')">
     
     <input type="text" id="remark2" class="form-control" maxlength="50" placeholder="Row 2: Auto-sambung..." 
            style="margin-bottom: 8px;" autocomplete="new-remark" autocorrect="on" inputmode="text" 
