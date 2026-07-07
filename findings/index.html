@@ -441,20 +441,23 @@
 <div class="form-group">
                 <label style="color: var(--accent-gold);">New Verification Finding Log (Max 50 Char / Line):</label>
                 
-                <input type="text" id="remark1" class="form-control" maxlength="50" placeholder="Row 1: Mula menaip..." 
-                       style="margin-bottom: 8px;" autocomplete="off" inputmode="text" 
-                       oninput="handleAutoJump(this, 'remark2')" onkeypress="handleEnter(event, 'remark2')">
+                <input type="text" style="display:none" name="fake-field-to-prevent-autofill">
+                <input type="password" style="display:none" name="fake-pass-to-prevent-autofill">
+
+                <input type="text" id="log-r1" class="form-control" maxlength="50" placeholder="Row 1: Mula menaip..." 
+                       style="margin-bottom: 8px;" autocomplete="new-password" inputmode="text" 
+                       oninput="handleAutoJump(this, 'log-r2')" onkeypress="handleEnter(event, 'log-r2')">
                 
-                <input type="text" id="remark2" class="form-control" maxlength="50" placeholder="Row 2: Auto-sambung..." 
-                       style="margin-bottom: 8px;" autocomplete="off" inputmode="text" 
-                       oninput="handleAutoJump(this, 'remark3')" onkeypress="handleEnter(event, 'remark3')">
+                <input type="text" id="log-r2" class="form-control" maxlength="50" placeholder="Row 2: Auto-sambung..." 
+                       style="margin-bottom: 8px;" autocomplete="new-password" inputmode="text" 
+                       oninput="handleAutoJump(this, 'log-r3')" onkeypress="handleEnter(event, 'log-r3')">
                 
-                <input type="text" id="remark3" class="form-control" maxlength="50" placeholder="Row 3: Auto-sambung..." 
-                       style="margin-bottom: 8px;" autocomplete="off" inputmode="text" 
-                       oninput="handleAutoJump(this, 'remark4')" onkeypress="handleEnter(event, 'remark4')">
+                <input type="text" id="log-r3" class="form-control" maxlength="50" placeholder="Row 3: Auto-sambung..." 
+                       style="margin-bottom: 8px;" autocomplete="new-password" inputmode="text" 
+                       oninput="handleAutoJump(this, 'log-r4')" onkeypress="handleEnter(event, 'log-r4')">
                 
-                <input type="text" id="remark4" class="form-control" maxlength="50" placeholder="Row 4: Auto-sambung..." 
-                       autocomplete="off" inputmode="text" 
+                <input type="text" id="log-r4" class="form-control" maxlength="50" placeholder="Row 4: Auto-sambung..." 
+                       autocomplete="new-password" inputmode="text" 
                        oninput="handleAutoJump(this, null)" onkeypress="handleEnter(event, 'btnSaveFinding')">
             </div>
 
@@ -1570,17 +1573,17 @@ window.handleAutoJump = function(currentElement, nextElementId) {
         
     window.closeModal = function() { 
             document.getElementById('updateModal').style.display = 'none'; 
-            document.getElementById('remark1').value = ''; 
-            document.getElementById('remark2').value = ''; 
-            document.getElementById('remark3').value = ''; 
-            document.getElementById('remark4').value = ''; 
+            document.getElementById('log-r1').value = '';
+            document.getElementById('log-r2').value = '';
+            document.getElementById('log-r3').value = ''; 
+            document.getElementById('log-r4').value = '';
         };
 
 window.saveFinding = async function() {
-            let r1 = document.getElementById('remark1').value.trim();
-            let r2 = document.getElementById('remark2').value.trim();
-            let r3 = document.getElementById('remark3').value.trim();
-            let r4 = document.getElementById('remark4').value.trim();
+            let r1 = document.getElementById('log-r1').value.trim();
+            let r2 = document.getElementById('log-r2').value.trim();
+            let r3 = document.getElementById('log-r3').value.trim();
+            let r4 = document.getElementById('log-r4').value.trim();
             let accNo = document.getElementById('modalAccNo').innerText;
             
             if(!r1 && !r2 && !r3 && !r4) { 
