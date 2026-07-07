@@ -441,20 +441,20 @@
 <div class="form-group">
                 <label style="color: var(--accent-gold);">New Verification Finding Log (Max 50 Char / Line):</label>
                 
-                <input type="text" id="nota-1" class="form-control" maxlength="50" placeholder="Row 1: Mula menaip..." 
-                       style="margin-bottom: 8px;" autocomplete="off" spellcheck="true" autocorrect="on" autocapitalize="characters"
-                       oninput="handleAutoJump(this, 'nota-2')" onkeypress="handleEnter(event, 'nota-2')">
+                <input type="text" id="remark1" class="form-control" maxlength="50" placeholder="Row 1: Mula menaip..." 
+                       style="margin-bottom: 8px;" autocomplete="off" inputmode="text" 
+                       oninput="handleAutoJump(this, 'remark2')" onkeypress="handleEnter(event, 'remark2')">
                 
-                <input type="text" id="nota-2" class="form-control" maxlength="50" placeholder="Row 2: Auto-sambung..." 
-                       style="margin-bottom: 8px;" autocomplete="off" spellcheck="true" autocorrect="on" autocapitalize="characters"
-                       oninput="handleAutoJump(this, 'nota-3')" onkeypress="handleEnter(event, 'nota-3')">
+                <input type="text" id="remark2" class="form-control" maxlength="50" placeholder="Row 2: Auto-sambung..." 
+                       style="margin-bottom: 8px;" autocomplete="off" inputmode="text" 
+                       oninput="handleAutoJump(this, 'remark3')" onkeypress="handleEnter(event, 'remark3')">
                 
-                <input type="text" id="nota-3" class="form-control" maxlength="50" placeholder="Row 3: Auto-sambung..." 
-                       style="margin-bottom: 8px;" autocomplete="off" spellcheck="true" autocorrect="on" autocapitalize="characters"
-                       oninput="handleAutoJump(this, 'nota-4')" onkeypress="handleEnter(event, 'nota-4')">
+                <input type="text" id="remark3" class="form-control" maxlength="50" placeholder="Row 3: Auto-sambung..." 
+                       style="margin-bottom: 8px;" autocomplete="off" inputmode="text" 
+                       oninput="handleAutoJump(this, 'remark4')" onkeypress="handleEnter(event, 'remark4')">
                 
-                <input type="text" id="nota-4" class="form-control" maxlength="50" placeholder="Row 4: Auto-sambung..." 
-                       autocomplete="off" spellcheck="true" autocorrect="on" autocapitalize="characters"
+                <input type="text" id="remark4" class="form-control" maxlength="50" placeholder="Row 4: Auto-sambung..." 
+                       autocomplete="off" inputmode="text" 
                        oninput="handleAutoJump(this, null)" onkeypress="handleEnter(event, 'btnSaveFinding')">
             </div>
 
@@ -1544,7 +1544,7 @@ if(currentUser.role === 'master' || currentUser.role === 'super') {
                         </div>`;
                 });
             }
-            setTimeout(() => document.getElementById('nota-1').focus(), 100);
+            setTimeout(() => document.getElementById('remark1').focus(), 100);
         };
         
         window.handleEnter = function(e, nextElementId) {
@@ -1568,20 +1568,19 @@ window.handleAutoJump = function(currentElement, nextElementId) {
             }
         };
         
-JavaScript
-        window.closeModal = function() { 
+    window.closeModal = function() { 
             document.getElementById('updateModal').style.display = 'none'; 
-            document.getElementById('nota-1').value = ''; 
-            document.getElementById('nota-2').value = ''; 
-            document.getElementById('nota-3').value = ''; 
-            document.getElementById('nota-4').value = ''; 
+            document.getElementById('remark1').value = ''; 
+            document.getElementById('remark2').value = ''; 
+            document.getElementById('remark3').value = ''; 
+            document.getElementById('remark4').value = ''; 
         };
 
 window.saveFinding = async function() {
-            let r1 = document.getElementById('log-r1').value.trim();
-            let r2 = document.getElementById('log-r2').value.trim();
-            let r3 = document.getElementById('log-r3').value.trim();
-            let r4 = document.getElementById('log-r4').value.trim();
+            let r1 = document.getElementById('remark1').value.trim();
+            let r2 = document.getElementById('remark2').value.trim();
+            let r3 = document.getElementById('remark3').value.trim();
+            let r4 = document.getElementById('remark4').value.trim();
             let accNo = document.getElementById('modalAccNo').innerText;
             
             if(!r1 && !r2 && !r3 && !r4) { 
@@ -1695,5 +1694,3 @@ window.saveFinding = async function() {
     </script>
 </body>
 </html>
-
-
