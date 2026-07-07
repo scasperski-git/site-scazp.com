@@ -1406,20 +1406,24 @@ data.forEach((user, index) => {
             }
         };
 
-        window.toggleUserStatus = async function(userId, currentStatus) {
-            if (userId === currentUser.username) { 
-                showNotification("RALAT TINDAKAN", "Anda tidak boleh menukar status akaun anda sendiri!", true); 
-                return; 
-            }
-            
-            const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-            let isConfirmed = await customConfirm(`PENGESAHAN:\nTukar status akaun ${userId.toUpperCase()} kepada ${newStatus}?`);
-            if (!isConfirmed) return;
+window.toggleUserStatus = async function(userId, currentStatus) {
+    if (userId === currentUser.username) { 
+        showNotification("RALAT TINDAKAN", "Anda tidak boleh menukar status akaun anda sendiri!", true); 
+        return; 
+    }
+    
+    const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    let isConfirmed = await customConfirm(`PENGESAHAN:\nTukar status akaun ${userId.toUpperCase()} kepada ${newStatus}?`);
+    if (!isConfirmed) return;
 
-            const { error } = await supabase.from('users').update({ status: newStatus }).eq('id', userId);
-            if (!error) { fetchAndRenderUsers(); } 
-            else { showNotification("RALAT KEMAS KINI", error.message, true); }
-        };
+    // --- TAMBAHAN: MINTA PASSCODE SEBELUM TERUSKAN ---
+    let isVerified = await verifyAdminPasscode();
+    if (!isVerified) return;
+
+    const { error } = await supabase.from('users').update({ status: newStatus }).eq('id', userId);
+    if (!error) { fetchAndRenderUsers(); } 
+    else { showNotification("RALAT KEMAS KINI", error.message, true); }
+};
 
         window.deleteUser = async function(userId) {
             if (userId === currentUser.username) { 
@@ -1633,34 +1637,38 @@ data.forEach((user, index) => {
             }
         };
 
-        window.addNewUser = async function() {
-            const id = document.getElementById('new-user-id').value.trim();
-            const pass = document.getElementById('new-user-pass').value.trim();
-            const role = document.getElementById('new-user-role').value;
-            const region = document.getElementById('new-user-region').value;
-            
-            if(!id || !pass) { 
-                showNotification("RALAT", "Sila lengkapkan ruangan User ID dan Password.", true); 
-                return; 
-            }
-            
-            const { data: existingUser } = await supabase.from('users').select('id').eq('id', id).single();
-            
-            if (existingUser) { 
-                showNotification("RALAT", "User ID sudah wujud dalam sistem!", true); 
-            } else {
-                const { error } = await supabase.from('users').insert([{ id: id, pass: pass, role: role, assignedregion: role === 'user' ? region : null }]);
-                
-                if(!error) {
-                    showNotification("PENDAFTARAN BERJAYA", `Akaun pengguna baharu dengan ID <b>${id}</b> telah berjaya didaftarkan ke dalam pangkalan data.`);
-                    document.getElementById('new-user-id').value = ''; 
-                    document.getElementById('new-user-pass').value = '';
-                    fetchAndRenderUsers(); 
-                } else { 
-                    showNotification("RALAT PANGKALAN DATA", error.message, true); 
-                }
-            }
-        };
+window.addNewUser = async function() {
+    const id = document.getElementById('new-user-id').value.trim();
+    const pass = document.getElementById('new-user-pass').value.trim();
+    const role = document.getElementById('new-user-role').value;
+    const region = document.getElementById('new-user-region').value;
+    
+    if(!id || !pass) { 
+        showNotification("RALAT", "Sila lengkapkan ruangan User ID dan Password.", true); 
+        return; 
+    }
+
+    // --- TAMBAHAN: MINTA PASSCODE SEBELUM TERUSKAN ---
+    let isVerified = await verifyAdminPasscode();
+    if (!isVerified) return;
+    
+    const { data: existingUser } = await supabase.from('users').select('id').eq('id', id).single();
+    
+    if (existingUser) { 
+        showNotification("RALAT", "User ID sudah wujud dalam sistem!", true); 
+    } else {
+        const { error } = await supabase.from('users').insert([{ id: id, pass: pass, role: role, assignedregion: role === 'user' ? region : null }]);
+        
+        if(!error) {
+            showNotification("PENDAFTARAN BERJAYA", `Akaun pengguna baharu dengan ID <b>${id}</b> telah berjaya didaftarkan ke dalam pangkalan data.`);
+            document.getElementById('new-user-id').value = ''; 
+            document.getElementById('new-user-pass').value = '';
+            fetchAndRenderUsers(); 
+        } else { 
+            showNotification("RALAT PANGKALAN DATA", error.message, true); 
+        }
+    }
+};
 
         window.toggleFormRegionSelect = function() {
             const role = document.getElementById('new-user-role').value;
