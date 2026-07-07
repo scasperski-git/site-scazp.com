@@ -301,31 +301,36 @@
 
         <div id="dashboard-panel" class="main-panel">
             
-            <div class="filter-section" style="flex-grow: 2;">
-                <span class="filter-title">Advanced Search</span>
-                <div style="display: flex; gap: 10px;">
-                    <select id="search-type" class="form-control" style="width: 140px; border-color: var(--accent-gold);" onchange="toggleSearchInput()">
-                        <option value="acct">Account No</option>
-                        <option value="nric">NRIC (All Linked)</option>
-                        <option value="plate">Plate No</option>
-                        <option value="finding_status">Action Status</option>
-                    </select>
-                    
-                    <input type="search" id="search-query" class="form-control" placeholder="Masukkan carian di sini..." style="flex: 1;" autocomplete="off" onkeypress="if(event.key==='Enter') executeSearch()">
-                    
-                    <select id="search-status-dropdown" class="form-control" style="flex: 1; display: none; color: white; font-weight: bold; border-color: #555;">
-                        <option value="">-- PILIH ACTION STATUS CARIAN --</option>
-                        <option value="CALL">CALL (Panggilan Telefon)</option>
-                        <option value="UCT">UCT (Gagal Hubungi / Uncontactable)</option>
-                        <option value="PTP">PTP (Promise To Pay)</option>
-                        <option value="PV">PV (Physical Visit / Turun Padang)</option>
-                        <option value="PAID">PAID (Sudah Selesai Bayar)</option>
-                    </select>
-
-                    <button class="btn-submit" onclick="executeSearch()">CARI</button>
-                    <button class="btn-cancel" onclick="clearSearch()" style="padding: 10px; font-size: 11px;">CLEAR</button>
-                </div>
-            </div>
+<!-- KOTAK CARIAN ADVANCED DENGAN LAYOUT MOBILE-FRIENDLY -->
+<div class="filter-section" style="flex-grow: 2;">
+    <span class="filter-title">Advanced Search</span>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+        <!-- Barisan 1: Dropdown Type -->
+        <select id="search-type" class="form-control" style="border-color: var(--accent-gold);" onchange="toggleSearchInput()">
+            <option value="acct">Search by Account No</option>
+            <option value="nric">Search by NRIC (All Linked)</option>
+            <option value="plate">Search by Plate No</option>
+            <option value="finding_status">Search by Action Status</option>
+        </select>
+        
+        <!-- Barisan 2: Input & Butang -->
+        <div style="display: flex; gap: 8px;">
+            <input type="search" id="search-query" class="form-control" placeholder="Input carian..." style="flex: 1;" autocomplete="off" onkeypress="if(event.key==='Enter') executeSearch()">
+            
+            <select id="search-status-dropdown" class="form-control" style="flex: 1; display: none; color: white; font-weight: bold; border-color: #555;">
+                <option value="">-- Pilih Status --</option>
+                <option value="CALL">CALL</option>
+                <option value="UCT">UCT</option>
+                <option value="PTP">PTP</option>
+                <option value="PV">PV</option>
+                <option value="PAID">PAID</option>
+            </select>
+            
+            <button class="btn-submit" onclick="executeSearch()" style="padding: 10px 15px;">CARI</button>
+            <button class="btn-cancel" onclick="clearSearch()" style="padding: 10px 15px;">X</button>
+        </div>
+    </div>
+</div>
 
             <div class="action-bar">
                 <div class="filter-section">
