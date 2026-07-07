@@ -301,6 +301,19 @@
         </div>
 
         <div id="dashboard-panel" class="main-panel">
+            <div class="filter-section" style="flex-grow: 2;">
+    <span class="filter-title">Advanced Search</span>
+    <div style="display: flex; gap: 10px;">
+        <select id="search-type" class="form-control" style="width: 140px; border-color: var(--accent-gold);">
+            <option value="acct">Account No</option>
+            <option value="nric">NRIC (All Linked)</option>
+            <option value="plate">Plate No</option>
+        </select>
+        <input type="search" id="search-query" class="form-control" placeholder="Masukkan carian di sini..." style="flex: 1;" autocomplete="off" onkeypress="if(event.key==='Enter') executeSearch()">
+        <button class="btn-submit" onclick="executeSearch()">CARI</button>
+        <button class="btn-cancel" onclick="clearSearch()" style="padding: 10px; font-size: 11px;">CLEAR</button>
+    </div>
+</div>
             <div class="action-bar">
                 <div class="filter-section">
                     <div id="region-filters-container">
@@ -920,27 +933,58 @@ window.handleLogin = async function() {
             switchTab(lastActiveTab);
         }
 
-        function applyFilterAndRender() {
-            let scopedGeoData = globalAccounts.filter(row => {
-                let r = row.region ? row.region.toUpperCase().trim() : '';
-                let a = row.area ? row.area.toUpperCase().trim() : '';
-                let matchRegion = currentRegion ? r === currentRegion : true;
-                let matchArea = currentArea ? a === currentArea : true;
-                return matchRegion && matchArea;
-            });
+function applyFilterAndRender() {
+    let scopedGeoData = globalAccounts.filter(row => {
+        
+        // 1. LOGIK PENAPIS CARIAN (SEARCH FILTER)
+        if (activeSearchQuery) {
+            let d = row.details || {};
+            // Buang semua space dan dash untuk mudahkan carian
+            let q = activeSearchQuery.replace(/[\s-]/g, ''); 
             
-            updateKPICards(scopedGeoData);
-            
-            filteredAccounts = scopedGeoData.filter(row => {
-                return currentStatusFilter ? row.status === currentStatusFilter : true;
-            });
-            
-            currentSortColumn = null; 
-            resetHeaderArrows();
-
-            currentPage = 1;
-            renderTablePage();
+            if (activeSearchType === 'acct') {
+                let a = row.acct ? String(row.acct).toUpperCase().replace(/[\s-]/g, '') : '';
+                if (!a.includes(q)) return false;
+            } 
+            else if (activeSearchType === 'plate') {
+                let p = d.plate ? String(d.plate).toUpperCase().replace(/[\s-]/g, '') : '';
+                if (!p.includes(q)) return false;
+            }
+            else if (activeSearchType === 'nric') {
+                // Ambil IC Hirer, Spouse, & Guarantor (Buang space dan simbol)
+                let h_ic = d.h_nric ? String(d.h_nric).toUpperCase().replace(/[\s-/]/g, '') : '';
+                let s_ic = d.s_nric ? String(d.s_nric).toUpperCase().replace(/[\s-/]/g, '') : '';
+                let g_ic = d.g_nric ? String(d.g_nric).toUpperCase().replace(/[\s-/]/g, '') : '';
+                
+                // Jika carian tak match pada mana-mana IC, sembunyikan rekod
+                if (!h_ic.includes(q) && !s_ic.includes(q) && !g_ic.includes(q)) {
+                    return false; 
+                }
+            }
         }
+
+        // 2. LOGIK PENAPIS WILAYAH (REGION / AREA)
+        let r = row.region ? row.region.toUpperCase().trim() : '';
+        let a = row.area ? row.area.toUpperCase().trim() : '';
+        let matchRegion = currentRegion ? r === currentRegion : true;
+        let matchArea = currentArea ? a === currentArea : true;
+        
+        return matchRegion && matchArea;
+    });
+    
+    updateKPICards(scopedGeoData);
+    
+    // 3. LOGIK PENAPIS STATUS (PENDING / UPDATED)
+    filteredAccounts = scopedGeoData.filter(row => {
+        return currentStatusFilter ? row.status === currentStatusFilter : true;
+    });
+    
+    currentSortColumn = null; 
+    resetHeaderArrows();
+
+    currentPage = 1;
+    renderTablePage();
+}
 
         window.applyStatusFilter = function(status, element) {
             currentStatusFilter = status;
@@ -972,6 +1016,43 @@ window.handleLogin = async function() {
             resetStatusCardHighlight();
             applyFilterAndRender();
         };
+
+        // --- SISTEM CARIAN ADVANCED ---
+let activeSearchType = null;
+let activeSearchQuery = '';
+
+window.executeSearch = function() {
+    activeSearchType = document.getElementById('search-type').value;
+    activeSearchQuery = document.getElementById('search-query').value.trim().toUpperCase();
+    
+    if(!activeSearchQuery) {
+        showNotification("RUANGAN KOSONG", "Sila masukkan nombor akaun, NRIC, atau plat untuk dicari.", true);
+        return;
+    }
+
+    // Reset butang filter wilayah supaya carian meliputi semua kawasan yang PIC tu ada akses
+    currentRegion = null;
+    currentArea = null;
+    resetStatusCardHighlight();
+    
+    let regBtns = document.getElementById('region-buttons');
+    if (regBtns) {
+        let btns = regBtns.getElementsByClassName('btn-filter');
+        for(let btn of btns) btn.classList.remove('active');
+        if(btns.length > 0) btns[0].classList.add('active'); // Aktifkan balik butang "ALL REGIONS"
+    }
+    const areaContainer = document.getElementById('area-filters-container');
+    if(areaContainer) areaContainer.style.display = 'none';
+
+    applyFilterAndRender();
+};
+
+window.clearSearch = function() {
+    document.getElementById('search-query').value = '';
+    activeSearchType = null;
+    activeSearchQuery = '';
+    applyFilterAndRender();
+};
 
         window.clearAreaSelection = function(btnElement) {
             updateActiveFilterHighlight('area-buttons', btnElement);
