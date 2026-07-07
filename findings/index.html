@@ -155,31 +155,7 @@
         .mapping-section { border: 1px solid var(--border-color); padding: 10px; margin-bottom: 15px; border-radius: 6px; background: #1a1a1a; }
         .mapping-section h3 { margin-top: 0; margin-bottom: 10px; font-size: 12px; color: var(--success-green); border-bottom: 1px solid var(--border-color); padding-bottom: 5px;}
 
-        .details-box { 
-    background: #121212; 
-    padding: 10px; 
-    border-radius: 6px; 
-    border: 1px solid var(--border-color);
-    position: relative; /* Penting untuk watermark */
-    overflow: hidden;
-}
-
-/* Watermark Confidential */
-.details-box::after {
-    content: "CONFIDENTIAL";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-20deg);
-    font-size: 20px;
-    font-weight: bold;
-    color: rgba(212, 175, 55, 0.05); /* Warna emas, sangat pudar supaya tak ganggu bacaan */
-    pointer-events: none; /* Supaya tak mengganggu kalau user nak highlight/copy teks */
-    white-space: nowrap;
-    z-index: 1;
-}
-
-
+    
         @media (max-width: 768px) {
             .kpi-container { grid-template-columns: repeat(4, 1fr); gap: 6px; }
             .kpi-card { padding: 10px 4px; }
