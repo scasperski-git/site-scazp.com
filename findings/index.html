@@ -1032,36 +1032,41 @@ window.handleLogin = async function() {
             document.getElementById('kpi-osb').innerText = 'RM ' + totalOsbValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
-        window.sortTable = function(columnName) {
-            if (currentSortColumn === columnName) {
-                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                currentSortColumn = columnName;
-                currentSortDirection = 'asc';
-            }
+// --- SISTEM SORTING ENGINE YANG TELAH DIPERBAIKI (FIX DELQ) ---
+window.sortTable = function(columnName) {
+    if (currentSortColumn === columnName) {
+        currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSortColumn = columnName;
+        currentSortDirection = 'asc';
+    }
 
-            filteredAccounts.sort((a, b) => {
-                let valueA = a[columnName];
-                let valueB = b[columnName];
+    filteredAccounts.sort((a, b) => {
+        let valueA = a[columnName];
+        let valueB = b[columnName];
 
-                if (columnName === 'osb' || columnName === 'arrs_mth') {
-                    let numA = parseFloat(valueA) || 0;
-                    let numB = parseFloat(valueB) || 0;
-                    return currentSortDirection === 'asc' ? numA - numB : numB - numA;
-                } 
-                
-                let strA = valueA ? String(valueA).toUpperCase().trim() : '';
-                let strB = valueB ? String(valueB).toUpperCase().trim() : '';
-                
-                if (strA < strB) return currentSortDirection === 'asc' ? -1 : 1;
-                if (strA > strB) return currentSortDirection === 'asc' ? 1 : -1;
-                return 0;
-            });
+        // TAMBAH KAN 'delq' DI SINI SUPAYA DIA SORT IKUT NOMBOR, BUKAN STRING Teks
+        if (columnName === 'osb' || columnName === 'arrs_mth' || columnName === 'delq') {
+            // parseFloat atau parseInt akan buang segala teks merepek dan ambil angka bersih sahaja
+            let numA = parseFloat(valueA) || 0;
+            let numB = parseFloat(valueB) || 0;
+            return currentSortDirection === 'asc' ? numA - numB : numB - numA;
+        } 
+        
+        // Jika rentetan biasa (string/teks untuk Region, Area, Acct No, dll)
+        let strA = valueA ? String(valueA).toUpperCase().trim() : '';
+        let strB = valueB ? String(valueB).toUpperCase().trim() : '';
+        
+        if (strA < strB) return currentSortDirection === 'asc' ? -1 : 1;
+        if (strA > strB) return currentSortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
 
-            updateHeaderArrows(columnName);
-            currentPage = 1;
-            renderTablePage();
-        };
+    // Kemas kini visual anak panah pada th header
+    updateHeaderArrows(columnName);
+    currentPage = 1;
+    renderTablePage();
+};
 
         function resetHeaderArrows() {
             const cols = ['region', 'area', 'loc', 'type', 'acct', 'delq', 'arrs_mth', 'osb', 'status', 'finding_status'];
