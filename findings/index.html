@@ -245,6 +245,23 @@
 @keyframes blinker {
     50% { opacity: 0; }
 }
+
+    /* Gaya Badge Khusus Untuk Peranan (Role) */
+.role-super { 
+    background-color: rgba(229, 115, 115, 0.15); 
+    color: var(--error-red); 
+    border: 1px solid var(--error-red); 
+}
+.role-master { 
+    background-color: rgba(212, 175, 55, 0.15); 
+    color: var(--accent-gold); 
+    border: 1px solid var(--accent-gold); 
+}
+.role-user { 
+    background-color: rgba(33, 150, 243, 0.15); 
+    color: #64b5f6; 
+    border: 1px solid #2196f3; 
+}
         
     </style>
 </head>
@@ -1204,30 +1221,43 @@ window.handleLogin = async function() {
                 tbody.innerHTML = '';
                 document.getElementById('total-users-count').innerText = data.length;
 
-                data.forEach((user, index) => {
-                    let regionDisp = user.assignedregion ? user.assignedregion.toUpperCase() : ((user.role === 'master' || user.role === 'super') ? 'SEMUA' : 'TIADA');
-                    let roleBadgeClass = user.role === 'master' ? 'status-done' : 'status-pending';
-                    
-                    let userStatus = user.status || 'ACTIVE';
-                    let statusBadge = userStatus === 'ACTIVE' ? 'status-done' : 'status-pending';
-                    
-                    let toggleBtnText = userStatus === 'ACTIVE' ? 'DEACTIVATE' : 'ACTIVATE';
-                    let toggleBtnColor = userStatus === 'ACTIVE' ? 'var(--error-red)' : 'var(--success-green)';
-                    
-                    tbody.innerHTML += `
-                        <tr>
-                            <td style="text-align: center;">${index + 1}</td>
-                            <td>${user.id}</td>
-                            <td><span class="status-badge ${roleBadgeClass}">${user.role.toUpperCase()}</span></td>
-                            <td>${regionDisp}</td>
-                            <td><span class="status-badge ${statusBadge}">${userStatus}</span></td>
-                            <td>
-                                <button class="btn-update" style="color: ${toggleBtnColor}; border-color: ${toggleBtnColor}; margin-right: 5px;" onclick="toggleUserStatus('${user.id}', '${userStatus}')">${toggleBtnText}</button>
-                                <button class="btn-update" style="color: #ff3333; border-color: #ff3333;" onclick="deleteUser('${user.id}')">DELETE</button>
-                            </td>
-                        </tr>
-                    `;
-                });
+data.forEach((user, index) => {
+    let regionDisp = user.assignedregion ? user.assignedregion.toUpperCase() : ((user.role === 'master' || user.role === 'super') ? 'SEMUA' : 'TIADA');
+    
+    // LOGIK DINAMIK BARU UNTUK WARNA PERANAN
+    let roleBadgeClass = '';
+    let rName = user.role ? user.role.toUpperCase().trim() : '';
+    
+    if (rName === 'SUPER') {
+        roleBadgeClass = 'role-super';
+    } else if (rName === 'MASTER') {
+        roleBadgeClass = 'role-master';
+    } else {
+        roleBadgeClass = 'role-user';
+    }
+    
+    let userStatus = user.status || 'ACTIVE';
+    let statusBadge = userStatus === 'ACTIVE' ? 'status-done' : 'status-pending';
+    
+    let toggleBtnText = userStatus === 'ACTIVE' ? 'DEACTIVATE' : 'ACTIVATE';
+    let toggleBtnColor = userStatus === 'ACTIVE' ? 'var(--error-red)' : 'var(--success-green)';
+    
+    tbody.innerHTML += `
+        <tr>
+            <td style="text-align: center;">${index + 1}</td>
+            <td>${user.id}</td>
+            <!-- BADGE BARU IKUT PERANAN SEPERTI CADANGAN USER -->
+            <td><span class="status-badge ${roleBadgeClass}">${rName}</span></td>
+            <td>${regionDisp}</td>
+            <td><span class="status-badge ${statusBadge}">${userStatus}</span></td>
+            <td>
+                <button class="btn-update" style="color: ${toggleBtnColor}; border-color: ${toggleBtnColor}; margin-right: 5px;" onclick="toggleUserStatus('${user.id}', '${userStatus}')">${toggleBtnText}</button>
+                <button class="btn-update" style="color: #ff3333; border-color: #ff3333;" onclick="deleteUser('${user.id}')">DELETE</button>
+            </td>
+        </tr>
+    `;
+});
+                
             } catch (err) {
                 console.error("Gagal menarik senarai pengguna:", err);
             }
