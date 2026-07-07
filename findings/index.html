@@ -262,6 +262,20 @@
     color: #64b5f6; 
     border: 1px solid #2196f3; 
 }
+
+    /* Layout Desktop (Default) - Sebaris & Kemas */
+.search-container {
+    display: flex; 
+    gap: 10px; 
+    align-items: center;
+}
+
+/* Layout Mobile - Bertindih supaya tak terhimpit */
+@media (max-width: 768px) {
+    .search-container {
+        flex-direction: column;
+    }
+}
         
     </style>
 </head>
@@ -301,31 +315,29 @@
 
         <div id="dashboard-panel" class="main-panel">
             
-<!-- KOTAK CARIAN ADVANCED DENGAN LAYOUT MOBILE-FRIENDLY -->
 <div class="filter-section" style="flex-grow: 2;">
-    <span class="filter-title">Advanced Search</span>
-    <div style="display: flex; flex-direction: column; gap: 8px;">
-        <!-- Barisan 1: Dropdown Type -->
-        <select id="search-type" class="form-control" style="border-color: var(--accent-gold);" onchange="toggleSearchInput()">
-            <option value="acct">Search by Account No</option>
-            <option value="nric">Search by NRIC (All Linked)</option>
-            <option value="plate">Search by Plate No</option>
-            <option value="finding_status">Search by Action Status</option>
+    <span class="filter-title">Advanced Search By:</span>
+    
+    <div class="search-container">
+        <select id="search-type" class="form-control" style="width: 100%; max-width: 200px; border-color: var(--accent-gold);" onchange="toggleSearchInput()">
+            <option value="acct">Account No</option>
+            <option value="nric">NRIC (All Linked)</option>
+            <option value="plate">Plate No</option>
+            <option value="finding_status">Action Status</option>
         </select>
         
-        <!-- Barisan 2: Input & Butang -->
-        <div style="display: flex; gap: 8px;">
-            <input type="search" id="search-query" class="form-control" placeholder="Input carian..." style="flex: 1;" autocomplete="off" onkeypress="if(event.key==='Enter') executeSearch()">
-            
-            <select id="search-status-dropdown" class="form-control" style="flex: 1; display: none; color: white; font-weight: bold; border-color: #555;">
-                <option value="">-- Pilih Status --</option>
-                <option value="CALL">CALL</option>
-                <option value="UCT">UCT</option>
-                <option value="PTP">PTP</option>
-                <option value="PV">PV</option>
-                <option value="PAID">PAID</option>
-            </select>
-            
+        <input type="search" id="search-query" class="form-control" placeholder="Masukkan carian..." style="flex: 1;" autocomplete="off" onkeypress="if(event.key==='Enter') executeSearch()">
+        
+        <select id="search-status-dropdown" class="form-control" style="flex: 1; display: none; color: white; font-weight: bold; border-color: #555;">
+            <option value="">-- PILIH STATUS --</option>
+            <option value="CALL">CALL</option>
+            <option value="UCT">UCT</option>
+            <option value="PTP">PTP</option>
+            <option value="PV">PV</option>
+            <option value="PAID">PAID</option>
+        </select>
+        
+        <div style="display: flex; gap: 5px;">
             <button class="btn-submit" onclick="executeSearch()" style="padding: 10px 15px;">CARI</button>
             <button class="btn-cancel" onclick="clearSearch()" style="padding: 10px 15px;">X</button>
         </div>
