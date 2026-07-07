@@ -294,6 +294,9 @@
             <input type="password" id="password" class="login-input" placeholder="Password">
             <button class="btn-login" onclick="handleLogin()">SIGN IN</button>
             <p id="login-error" style="color: var(--error-red); font-size: 12px; display: none; margin-top: 10px;">Invalid User ID or Password!</p>
+<div style="margin-top: 25px; padding-top: 15px; font-size: 10px; color: var(--text-muted); border-top: 1px dashed var(--border-color); letter-spacing: 0.5px;">
+                Copyright &copy; <span id="auto-year-login"></span> belongs to <a href="https://scazp.com" target="_blank" style="color: var(--accent-gold); font-weight: bold; text-decoration: none;">scazp.com</a>.
+            </div>
         </div>
     </div>
 
@@ -483,6 +486,9 @@
                 </div>
             </div>
         </div>
+        <div style="text-align: center; padding: 25px 10px 15px 10px; margin-top: 30px; font-size: 11px; color: var(--text-muted); border-top: 1px dashed var(--border-color); letter-spacing: 0.5px;">
+                Copyright &copy; <span id="auto-year"></span> belongs to <a href="https://scazp.com" target="_blank" style="color: var(--accent-gold); font-weight: bold; text-decoration: none;">scazp.com</a>. All Rights Reserved.
+            </div>
     </div> 
 
     <div class="modal-overlay" id="loadingModal">
@@ -695,6 +701,9 @@ const supabaseUrl = 'https://awrarqugmkpahscpvewu.supabase.co';
         let currentSortDirection = 'asc';
 
 async function checkLoginSession() {
+        const currentYear = new Date().getFullYear();
+        if(document.getElementById('auto-year')) document.getElementById('auto-year').innerText = currentYear;
+        if(document.getElementById('auto-year-login')) document.getElementById('auto-year-login').innerText = currentYear;
     const storedSession = localStorage.getItem('scazp_user_session');
     if (storedSession) {
         currentUser = JSON.parse(storedSession);
