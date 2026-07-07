@@ -441,20 +441,21 @@
 <div class="form-group">
     <label style="color: var(--accent-gold);">New Verification Finding Log (Max 50 Char / Line):</label>
     
-<input type="text" id="remark1" class="form-control" maxlength="50" placeholder="Row 1: Mula menaip..." 
-           style="margin-bottom: 8px;" autocomplete="new-remark" autocorrect="on" inputmode="text" 
+    <!-- Tukar type="text" kepada type="search", tapi kekalkan inputmode="text" -->
+    <input type="search" id="remark1" name="s_rmk1" class="form-control" maxlength="50" placeholder="Row 1: Mula menaip..." 
+           style="margin-bottom: 8px;" autocomplete="off" inputmode="text" 
            oninput="handleAutoJump(this, 'remark2')" onkeypress="handleEnter(event, 'remark2')">
     
-    <input type="text" id="remark2" class="form-control" maxlength="50" placeholder="Row 2: Auto-sambung..." 
-           style="margin-bottom: 8px;" autocomplete="new-remark" autocorrect="on" inputmode="text" 
+    <input type="search" id="remark2" name="s_rmk2" class="form-control" maxlength="50" placeholder="Row 2: Auto-sambung..." 
+           style="margin-bottom: 8px;" autocomplete="off" inputmode="text" 
            oninput="handleAutoJump(this, 'remark3')" onkeypress="handleEnter(event, 'remark3')">
     
-    <input type="text" id="remark3" class="form-control" maxlength="50" placeholder="Row 3: Auto-sambung..." 
-           style="margin-bottom: 8px;" autocomplete="new-remark" autocorrect="on" inputmode="text" 
+    <input type="search" id="remark3" name="s_rmk3" class="form-control" maxlength="50" placeholder="Row 3: Auto-sambung..." 
+           style="margin-bottom: 8px;" autocomplete="off" inputmode="text" 
            oninput="handleAutoJump(this, 'remark4')" onkeypress="handleEnter(event, 'remark4')">
     
-    <input type="text" id="remark4" class="form-control" maxlength="50" placeholder="Row 4: Auto-sambung..." 
-           autocomplete="new-remark" autocorrect="on" inputmode="text" 
+    <input type="search" id="remark4" name="s_rmk4" class="form-control" maxlength="50" placeholder="Row 4: Auto-sambung..." 
+           autocomplete="off" inputmode="text" 
            oninput="handleAutoJump(this, null)" onkeypress="handleEnter(event, 'btnSaveFinding')">
 </div>
 
