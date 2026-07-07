@@ -722,7 +722,7 @@ window.handleLogin = async function() {
             }
 
             // --- SEKATAN MAINTENANCE MODE WAKTU LIVE LOGIN ---
-            //if (data.role !== 'super') {
+            if (data.role !== ''MAINTENANCE_OFF_DONG')') {
                 document.getElementById('maintenance-bar').style.display = 'block';
                 document.getElementById('maintenance-bar').innerHTML = `<span class="blink-dot"></span> MAAF, SISTEM SEDANG DISELENGGARA. AKSES UNTUK ROLE ${data.role.toUpperCase()} DI-SEKAT SEMENTARA.`;
                 
