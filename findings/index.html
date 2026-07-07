@@ -173,6 +173,32 @@
             .page-info { font-size: 10px; }
             .pagination-controls button { padding: 5px 10px; font-size: 10px; }
         }
+
+.details-box { 
+    background: #121212; 
+    padding: 10px; 
+    border-radius: 6px; 
+    border: 1px solid var(--border-color);
+    position: relative; /* Penting untuk watermark */
+    overflow: hidden;
+}
+
+/* Watermark Confidential */
+.details-box::after {
+    content: "CONFIDENTIAL";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-20deg);
+    font-size: 20px;
+    font-weight: bold;
+    color: rgba(212, 175, 55, 0.05); /* Warna emas, sangat pudar supaya tak ganggu bacaan */
+    pointer-events: none; /* Supaya tak mengganggu kalau user nak highlight/copy teks */
+    white-space: nowrap;
+    z-index: 1;
+}
+
+        
     </style>
 </head>
 <body>
