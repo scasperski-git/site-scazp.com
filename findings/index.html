@@ -178,25 +178,37 @@
             overflow: hidden;
         }
 
+        /* WATERMARK DINAMIK ANTI-SCREENSHOT (FIXED FOR MOBILE & DESKTOP) */
         .details-box::before {
             content: attr(data-watermark);
             position: absolute;
-            top: -20%;
-            left: -20%;
-            width: 160%;
-            height: 160%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             font-family: 'Segoe UI', sans-serif;
-            font-size: 8px; /* [UPDATE]: Kecilkan font ke 8px supaya halus */
+            font-size: 8px;
             font-weight: 900;
-            color: rgba(16, 42, 67, 0.08); /* Kekalkan pudar supaya tak sakit mata membaca */
-            line-height: 2.2; /* [UPDATE]: Rapatkan jarak antara baris (dari 3.5 ke 2.2) */
+            
+            /* [UPDATE]: Kita tukar warna text ke solid gray pudar */
+            color: rgba(16, 42, 67, 0.09); 
+            
+            /* [FIX]: Sifat jaring melimpah yang takkan patah di skrin sempit */
+            white-space: normal;
+            word-break: break-all;
+            line-height: 2.2;
             letter-spacing: 1px;
-            transform: rotate(-15deg);
-            transform-origin: top left;
+            padding: 10px;
+            box-sizing: border-box;
+            
+            /* [FIX]: Tambah kesan condong tanpa merosakkan luas container */
+            transform: rotate(-10deg) scale(1.2);
+            transform-origin: center center;
+            
             pointer-events: none;
-            white-space: pre-wrap;
             z-index: 0;
         }
+
         
         /* Naikkan z-index content asal supaya duduk di atas watermark */
         .details-box h4, .details-box p {
