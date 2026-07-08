@@ -1126,7 +1126,7 @@ window.executeSearch = function() {
             document.getElementById('kpi-osb').innerText = 'RM ' + totalOsbValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
-        window.sortTable = function(columnName) {
+window.sortTable = function(columnName) {
             if (currentSortColumn === columnName) {
                 currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
             } else {
@@ -1137,6 +1137,14 @@ window.executeSearch = function() {
             filteredAccounts.sort((a, b) => {
                 let valueA = a[columnName];
                 let valueB = b[columnName];
+
+                if (columnName === 'last_date') {
+                    let dateA = (a.details && a.details.last_remark_date) ? a.details.last_remark_date : '';
+                    let dateB = (b.details && b.details.last_remark_date) ? b.details.last_remark_date : '';
+                    
+                    valueA = dateA ? dateA.split('/').reverse().join('') : '';
+                    valueB = dateB ? dateB.split('/').reverse().join('') : '';
+                }
 
                 if (columnName === 'osb' || columnName === 'arrs_mth' || columnName === 'delq') {
                     let numA = parseFloat(valueA) || 0;
