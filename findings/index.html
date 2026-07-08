@@ -178,23 +178,22 @@
             overflow: hidden;
         }
 
-        /* WATERMARK DINAMIK ANTI-SCREENSHOT */
         .details-box::before {
-            content: attr(data-watermark); /* Ambil teks dari HTML tag dynamically */
+            content: attr(data-watermark);
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 150%;
-            height: 150%;
+            top: -20%;
+            left: -20%;
+            width: 160%;
+            height: 160%;
             font-family: 'Segoe UI', sans-serif;
-            font-size: 10px;
+            font-size: 8px; /* [UPDATE]: Kecilkan font ke 8px supaya halus */
             font-weight: 900;
-            color: rgba(16, 42, 67, 0.06); /* Warna navy sangat pudar supaya tak ganggu bacaan data */
-            line-height: 3.5;
-            letter-spacing: 2px;
+            color: rgba(16, 42, 67, 0.05); /* Kekalkan pudar supaya tak sakit mata membaca */
+            line-height: 2.2; /* [UPDATE]: Rapatkan jarak antara baris (dari 3.5 ke 2.2) */
+            letter-spacing: 1px;
             transform: rotate(-15deg);
             transform-origin: top left;
-            pointer-events: none; /* Supaya tak kacau user bila nak highlight/copy text */
+            pointer-events: none;
             white-space: pre-wrap;
             z-index: 0;
         }
@@ -1248,9 +1247,8 @@ function resetHeaderArrows() {
                     </tr>
                 `;
 
-            // [GANTI BAHAGIAN RENDER ROW DETAILS DI DALAM FUNCTION renderTablePage]
                 let todayDate = new Date().toLocaleDateString('en-GB');
-                let wText = `INTERNAL DATA - PIC: ${currentUser.username.toUpperCase()} - ${todayDate}       `.repeat(15);
+                let wText = `INTERNAL DATA - PIC: ${currentUser.username.toUpperCase()} - ${todayDate}      `.repeat(60);
 
                 tbody.innerHTML += `
                     <tr id="details-${row.acct}" class="details-row" style="display: none;">
