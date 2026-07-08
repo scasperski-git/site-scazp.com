@@ -576,21 +576,19 @@
         </div>
     </div>
     
-<div class="modal-overlay" id="updateModal">
-        <div class="modal-content" style="max-width: 480px; padding: 15px;">
-            <div class="modal-header" style="margin-bottom: 10px; padding-bottom: 5px;">
+    <div class="modal-overlay" id="updateModal">
+        <div class="modal-content">
+            <div class="modal-header">
                 <h2>Update Account Finding: <span id="modalAccNo"></span></h2>
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
+            <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px;">Historical Audit Trail:</label>
+            <div class="history-box"></div>
             
-            <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 3px;">Historical Audit Trail:</label>
-            <div class="history-box" style="max-height: 180px; margin-bottom: 10px;"></div> <!-- [UPDATE]: Box history dinaikkan ketinggian -->
-            
-            <!-- [UPDATE]: Kotak Status dikecilkan, buang padding tebal, jimat space -->
-            <div class="form-group" style="margin-bottom: 10px; background: #e8f0f8; padding: 6px 10px; border-radius: 4px; border: 1px dashed var(--accent-gold); display: flex; align-items: center; gap: 10px;">
-                <label style="color: var(--accent-gold); font-weight: bold; font-size: 11px; margin-bottom: 0; white-space: nowrap;">ACTION STATUS:</label>
-                <select id="finding-status-select" class="form-control" style="padding: 4px 8px; font-size: 12px; font-weight: bold; height: auto; width: auto; flex: 1; background-color: #ffffff !important; border-color: var(--accent-gold) !important;">
-                    <option value="">-- SELECT --</option>
+            <div class="form-group" style="margin-bottom: 15px; background: #e8f0f8; padding: 10px; border-radius: 6px; border: 1px dashed var(--accent-gold);">
+                <label style="color: var(--accent-gold); font-weight: bold; font-size: 12px;">SELECT ACTION STATUS (Required):</label>
+                <select id="finding-status-select" class="form-control" style="color: white; font-weight: bold; border-color: #555;">
+                    <option value="">-- SELECT ACTION STATUS --</option>
                     <option value="CALL" style="color: var(--status-call);">CALL (Phone Call)</option>
                     <option value="UCT" style="color: var(--status-uct);">UCT (Uncontactable)</option>
                     <option value="PTP" style="color: var(--status-ptp);">PTP (Promise To Pay)</option>
@@ -599,21 +597,29 @@
                 </select>
             </div>
 
-            <!-- [UPDATE]: 4 Kotak input digabungkan menjadi SATU BOX TEXTAREA (Max 50 Char x 4 Baris) -->
-            <div class="form-group" style="margin-bottom: 12px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-                    <label style="color: var(--text-main); font-size: 11px; font-weight: bold;">Verification Finding Log:</label>
-                    <span id="textarea-info" style="font-size: 10px; color: var(--text-muted);">Baris: 1/4 | Karakter: 0/50</span>
-                </div>
-                <textarea id="single-remark-box" class="form-control" rows="4" 
-                          placeholder="Taip nota di sini...&#10;• Maksimum 50 huruf per baris&#10;• Maksimum 4 baris sahaja"
-                          style="font-size: 11px; font-family: monospace; resize: none; line-height: 1.4; padding: 8px; background-color: #ffffff !important;"
-                          oninput="validateRemarkTextarea(this)"></textarea>
+            <div class="form-group">
+                <label style="color: var(--text-main);">New Verification Finding Log (Max 50 Char / Line):</label>
+                
+                <input type="text" id="remark1" class="form-control" maxlength="50" placeholder="Row 1: Start typing..." 
+                       style="margin-bottom: 8px;" autocomplete="off" inputmode="text" 
+                       oninput="handleAutoJump(this, 'remark2')" onkeypress="handleEnter(event, 'remark2')">
+                
+                <input type="text" id="remark2" class="form-control" maxlength="50" placeholder="Row 2: Auto-continue..." 
+                       style="margin-bottom: 8px;" autocomplete="off" inputmode="text" 
+                       oninput="handleAutoJump(this, 'remark3')" onkeypress="handleEnter(event, 'remark3')">
+                
+                <input type="text" id="remark3" class="form-control" maxlength="50" placeholder="Row 3: Auto-continue..." 
+                       style="margin-bottom: 8px;" autocomplete="off" inputmode="text" 
+                       oninput="handleAutoJump(this, 'remark4')" onkeypress="handleEnter(event, 'remark4')">
+                
+                <input type="text" id="remark4" class="form-control" maxlength="50" placeholder="Row 4: Auto-continue..." 
+                       autocomplete="off" inputmode="text" 
+                       oninput="handleAutoJump(this, null)" onkeypress="handleEnter(event, 'btnSaveFinding')">
             </div>
 
             <div style="display: flex; gap: 10px;">
-                <button id="btnSaveFinding" class="btn-submit" style="flex: 2; padding: 8px;" onclick="saveFinding()">COMMIT ENTRY</button>
-                <button id="btnResetPending" class="btn-submit" style="flex: 1; background-color: var(--error-red); color: white; display: none; padding: 8px;" onclick="resetAccountStatus()">RESET PENDING</button>
+                <button id="btnSaveFinding" class="btn-submit" style="flex: 2;" onclick="saveFinding()">COMMIT ENTRY</button>
+                <button id="btnResetPending" class="btn-submit" style="flex: 1; background-color: var(--error-red); color: white; display: none;" onclick="resetAccountStatus()">RESET PENDING</button>
             </div>
         </div>
     </div>
@@ -679,33 +685,6 @@
 
         let currentSortColumn = null;
         let currentSortDirection = 'asc';
-
-        window.validateRemarkTextarea = function(el) {
-            let lines = el.value.split('\n');
-            let modified = false;
-
-            if (lines.length > 4) {
-                lines = lines.slice(0, 4);
-                modified = true;
-            }
-
-            for (let i = 0; i < lines.length; i++) {
-                if (lines[i].length > 50) {
-                    lines[i] = lines[i].substring(0, 50);
-                    modified = true;
-                }
-            }
-
-            if (modified) {
-                el.value = lines.join('\n');
-            }
-
-               let currentLineOpt = el.value.split('\n');
-            let activeLineIndex = el.value.substring(0, el.selectionStart).split('\n').length;
-            let activeLineText = currentLineOpt[activeLineIndex - 1] || "";
-            
-            document.getElementById('textarea-info').innerText = `Baris: ${activeLineIndex}/4 | Karakter: ${activeLineText.length}/50`;
-        };
 
         async function checkLoginSession() {
             const currentYear = new Date().getFullYear();
@@ -1926,7 +1905,7 @@ function resetHeaderArrows() {
                         </div>`;
                 });
             }
-            setTimeout(() => document.getElementById('single-remark-box').focus(), 100);
+            setTimeout(() => document.getElementById('remark1').focus(), 100);
         };
         
         window.handleEnter = function(e, nextElementId) {
@@ -1947,33 +1926,27 @@ function resetHeaderArrows() {
             }
         };
         
-window.closeModal = function() { 
+        window.closeModal = function() { 
             document.getElementById('updateModal').style.display = 'none'; 
-            document.getElementById('single-remark-box').value = ''; // Clear satu box sahaja
+            document.getElementById('remark1').value = ''; 
+            document.getElementById('remark2').value = ''; 
+            document.getElementById('remark3').value = ''; 
+            document.getElementById('remark4').value = ''; 
             document.getElementById('finding-status-select').value = '';
-            document.getElementById('textarea-info').innerText = `Baris: 1/4 | Karakter: 0/50`;
         };
 
         window.saveFinding = async function() {
             let selectedStatus = document.getElementById('finding-status-select').value;
+            let r1 = document.getElementById('remark1').value.trim();
+            let r2 = document.getElementById('remark2').value.trim();
+            let r3 = document.getElementById('remark3').value.trim();
+            let r4 = document.getElementById('remark4').value.trim();
             let accNo = document.getElementById('modalAccNo').innerText;
             
-            // Pecahkan semula teks dari satu kotak tadi untuk masuk ke format column remark1-4 database
-            let lines = document.getElementById('single-remark-box').value.split('\n');
-            let r1 = (lines[0] || '').trim();
-            let r2 = (lines[1] || '').trim();
-            let r3 = (lines[2] || '').trim();
-            let r4 = (lines[3] || '').trim();
-
             if(!selectedStatus) {
-                alert("Please SELECT ACTION STATUS first!");
+                alert("Please SELECT ACTION STATUS (CALL/UCT/PTP/PV/PAID) first!");
                 document.getElementById('finding-status-select').focus();
                 return;
-            }
-
-            if(!r1 && !r2 && !r3 && !r4) { 
-                alert("Please enter findings notes before committing."); 
-                return; 
             }
 
             if(!r1 && !r2 && !r3 && !r4) { 
