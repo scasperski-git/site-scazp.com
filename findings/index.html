@@ -168,23 +168,43 @@
         .details-row { background-color: #d9e2ec; box-shadow: inset 0 3px 6px rgba(16,42,67,0.04); }
         .details-wrapper { padding: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; border-bottom: 2px solid var(--accent-gold); border-left: 4px solid var(--accent-gold); }
         
-        .details-box { 
+.details-box { 
             background-color: #ffffff !important; 
             padding: 10px; 
             border-radius: 6px; 
             border: 1px solid var(--border-color);
-            position: relative;
+            position: relative; /* Wajib ada untuk position watermark */
             z-index: 1;
             overflow: hidden;
-            /* Saiz SVG dikecilkan (80x50) dan teks dipadatkan */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='50'%3E%3Ctext x='50%25' y='50%25' transform='rotate(-25 40 25)' text-anchor='middle' font-family='sans-serif' font-size='9' font-weight='800' fill='rgba(16,42,67,0.05)'%3ECONFIDENTIAL%3C/text%3E%3C/svg%3E");
-            background-repeat: repeat;
         }
+
+        /* WATERMARK DINAMIK ANTI-SCREENSHOT */
+        .details-box::before {
+            content: attr(data-watermark); /* Ambil teks dari HTML tag dynamically */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 150%;
+            height: 150%;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 10px;
+            font-weight: 900;
+            color: rgba(16, 42, 67, 0.06); /* Warna navy sangat pudar supaya tak ganggu bacaan data */
+            line-height: 3.5;
+            letter-spacing: 2px;
+            transform: rotate(-15deg);
+            transform-origin: top left;
+            pointer-events: none; /* Supaya tak kacau user bila nak highlight/copy text */
+            white-space: pre-wrap;
+            z-index: 0;
+        }
+        
+        /* Naikkan z-index content asal supaya duduk di atas watermark */
         .details-box h4, .details-box p {
             position: relative;
             z-index: 2;
-            text-shadow: none;
         }
+    
         .details-box h4 { margin: 0 0 10px 0; color: var(--accent-gold); font-size: 11px; border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; text-transform: uppercase; }
         .details-box p { margin: 4px 0; font-size: 11px; color: var(--text-main); }
         .details-box span.lbl { color: var(--text-muted); display: inline-block; width: 65px; font-weight: bold; }
@@ -1228,13 +1248,17 @@ function resetHeaderArrows() {
                     </tr>
                 `;
 
+            // [GANTI BAHAGIAN RENDER ROW DETAILS DI DALAM FUNCTION renderTablePage]
+                let todayDate = new Date().toLocaleDateString('en-GB');
+                let wText = `INTERNAL DATA - PIC: ${currentUser.username.toUpperCase()} - ${todayDate}       `.repeat(15);
+
                 tbody.innerHTML += `
                     <tr id="details-${row.acct}" class="details-row" style="display: none;">
                         <td colspan="11" style="padding: 0;">
                             <div class="details-wrapper">
                                 
                                 <div style="display: flex; flex-direction: column; gap: 15px;">
-                                    <div class="details-box">
+                                    <div class="details-box" data-watermark="${wText}">
                                         <h4>HIRER INFO</h4>
                                         <p><span class="lbl">NAME</span>: ${d.h_name || '-'}</p>
                                         <p><span class="lbl">NRIC</span>: ${d.h_nric || '-'}</p>
@@ -1245,7 +1269,7 @@ function resetHeaderArrows() {
                                         <p><span class="lbl">CO. TEL</span>: ${d.hc_tel || '-'}</p>
                                         <p><span class="lbl">CO. ADD</span>: ${d.hc_add1 || '-'} ${d.hc_add2 || ''}</p>
                                     </div>
-                                    <div class="details-box">
+                                    <div class="details-box" data-watermark="${wText}">
                                         <h4>SPOUSE INFO</h4>
                                         <p><span class="lbl">NAME</span>: ${d.s_name || '-'}</p>
                                         <p><span class="lbl">NRIC</span>: ${d.s_nric || '-'}</p>
@@ -1253,7 +1277,7 @@ function resetHeaderArrows() {
                                     </div>
                                 </div>
 
-                                <div class="details-box">
+                                <div class="details-box" data-watermark="${wText}">
                                     <h4>GUARANTOR INFO</h4>
                                     <p><span class="lbl">NAME</span>: ${d.g_name || '-'}</p>
                                     <p><span class="lbl">NRIC</span>: ${d.g_nric || '-'}</p>
@@ -1262,9 +1286,10 @@ function resetHeaderArrows() {
                                     <br>
                                     <p><span class="lbl">CO. NAME</span>: ${d.gc_name || '-'}</p>
                                     <p><span class="lbl">CO. TEL</span>: ${d.gc_tel || '-'}</p>
+                                    <p><span class="lbl">CO. ADD</span>: ${d.gc_add1 || '-'} ${d.gc_add2 || ''}</p>
                                 </div>
 
-                                <div class="details-box">
+                                <div class="details-box" data-watermark="${wText}">
                                     <h4>ACCOUNT BALANCES</h4>
                                     <p><span class="lbl" style="width: 80px;">PRODUCT</span>: ${d.prod || '-'}</p>
                                     <p><span class="lbl" style="width: 80px;">PLATE NO</span>: ${d.plate || '-'}</p>
