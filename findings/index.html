@@ -1850,31 +1850,59 @@ function resetHeaderArrows() {
                 historyBox.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:10px;">No historical findings found.</div>';
             } else {
                 findingsList.forEach((data) => {
-                    const dateFormatted = data.updated_at ? new Date(data.updated_at).toLocaleString() : 'N/A';
+                    // 1. FORMAT MASA: Tukar daripada 24-jam (20:08:26) kepada AM/PM format (8:08:26 PM)
+                    let dateFormatted = 'N/A';
+                    if (data.updated_at) {
+                        dateFormatted = new Date(data.updated_at).toLocaleString('en-US', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: true
+                        });
+                    }
                     
+                    // 2. EKSTRAK STATUS BADGE: Ambil [UCT], [CALL] dsb daripada remark5 jika ada
+                    let statusBadgeHTML = '';
+                    if (data.remark5 && data.remark5.startsWith('[')) {
+                        let extractedStatus = data.remark5.substring(1, data.remark5.indexOf(']'));
+                        
+                        // Set warna badge mengikut status (Ikut root CSS kau)
+                        let badgeColor = 'var(--text-muted)';
+                        if (extractedStatus === 'CALL') badgeColor = 'var(--status-call)';
+                        if (extractedStatus === 'UCT') badgeColor = 'var(--status-uct)';
+                        if (extractedStatus === 'PTP') badgeColor = 'var(--status-ptp)';
+                        if (extractedStatus === 'PV') badgeColor = 'var(--status-pv)';
+                        if (extractedStatus === 'PAID') badgeColor = 'var(--status-paid)';
+
+                        statusBadgeHTML = ` | <span style="background-color: ${badgeColor}; color: white; padding: 1px 5px; border-radius: 3px; font-weight: 900; font-size: 9px; display: inline-block; vertical-align: middle;">${extractedStatus}</span>`;
+                    }
+
                     let deleteBtnHTML = '';
                     if(currentUser.role === 'master' || currentUser.role === 'super') {
                         deleteBtnHTML = `<button class="btn-delete-finding" onclick="deleteSingleFinding('${data.id}', '${accNo}')">🗑️ DELETE</button>`;
                     }
 
+                    // 3. RENDER REMARK: Tampilkan nota row 1-4 tanpa paparkan baris auto-generated remark5 kat bawah
                     let histRemark = '';
                     if(data.remark1 || data.remark2 || data.remark3 || data.remark4) {
-                        histRemark += `<div style="font-size: 13px; line-height: 1.4; margin-top: 5px; color: var(--text-main);">`;
+                        histRemark += `<div style="font-size: 13px; line-height: 1.4; margin-top: 5px; color: var(--text-main); font-weight: 500;">`;
                         if(data.remark1) histRemark += `<div>${data.remark1}</div>`;
                         if(data.remark2) histRemark += `<div>${data.remark2}</div>`;
                         if(data.remark3) histRemark += `<div>${data.remark3}</div>`;
                         if(data.remark4) histRemark += `<div>${data.remark4}</div>`;
                         histRemark += `</div>`;
-                        
-                        if(data.remark5) histRemark += `<div style="color: var(--success-green); font-size: 9px; margin-top: 6px;">${data.remark5}</div>`;
                     } else {
-                        histRemark = `<div style="font-size: 13px; margin-top: 5px;">${data.remark || ''}</div>`;
+                        histRemark = `<div style="font-size: 13px; margin-top: 5px; color: var(--text-main); font-weight: 500;">${data.remark || ''}</div>`;
                     }
 
+                    // Masukkan ke dalam box history (Tukar PIC: ke UPDATE BY:)
                     historyBox.innerHTML += `
-                        <div class="history-item" style="overflow: hidden;">
-                            <div class="history-meta">
-                                PIC: ${data.updated_by ? data.updated_by.toUpperCase() : 'SYSTEM'} | ${dateFormatted}
+                        <div class="history-item" style="overflow: hidden; padding: 8px 0; border-bottom: 1px dashed var(--border-color);">
+                            <div class="history-meta" style="font-weight: bold; font-size: 10px; color: var(--text-muted);">
+                                UPDATE BY: ${data.updated_by ? data.updated_by.toUpperCase() : 'SYSTEM'} | ${dateFormatted}${statusBadgeHTML}
                                 ${deleteBtnHTML}
                             </div>
                             ${histRemark}
@@ -1941,17 +1969,12 @@ function resetHeaderArrows() {
 let updatedDetailsObj = accountInfo.details || {};
             updatedDetailsObj.finding_status = selectedStatus; 
 
-            let today = new Date();
-            let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
-            
-            updatedDetailsObj.last_remark_date = dateStr;
-            
-            let hh = String(today.getHours()).padStart(2, '0');
-            let mm = String(today.getMinutes()).padStart(2, '0');
-            let ss = String(today.getSeconds()).padStart(2, '0');
-            let timeStr = `${hh}:${mm}:${ss}`;
-            
-            let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()})-${dateStr} ${timeStr}`;
+let today = new Date();
+let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
+
+updatedDetailsObj.last_remark_date = dateStr;
+
+let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()})`;
             
             try {
                 const { data: insertedData, error: insertError } = await supabase
