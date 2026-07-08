@@ -315,27 +315,26 @@
             <button class="nav-btn" id="tab-report" onclick="switchTab('report')" style="display: none;">MIS Remark</button>
         </div>
 
-        <div id="dashboard-panel" class="main-panel">
+<div id="dashboard-panel" class="main-panel">
             
             <div class="filter-section" style="flex-grow: 2;">
                 <span class="filter-title">Advanced Search By:</span>
                 
-<div class="search-container">
-    <select id="search-type" class="form-control" style="width: 100%; max-width: 200px; border-color: var(--accent-gold);">
-        <option value="acct">Account No</option>
-        <option value="nric">NRIC (All Linked)</option>
-        <option value="plate">Plate No</option>
-    </select>
-    
-    <input type="search" id="search-query" class="form-control" placeholder="Enter search..." style="flex: 1;" autocomplete="off" onkeypress="if(event.key==='Enter') executeSearch()">
-    
-    <div style="display: flex; gap: 5px;">
-        <button class="btn-submit" onclick="executeSearch()" style="padding: 10px 15px;">SEARCH</button>
-        <button class="btn-cancel" onclick="clearSearch()" style="padding: 10px 15px;">X</button>
-    </div>
-</div>
-
-            <div class="action-bar">
+                <div class="search-container">
+                    <select id="search-type" class="form-control" style="width: 100%; max-width: 200px; border-color: var(--accent-gold);">
+                        <option value="acct">Account No</option>
+                        <option value="nric">NRIC (All Linked)</option>
+                        <option value="plate">Plate No</option>
+                    </select>
+                    
+                    <input type="search" id="search-query" class="form-control" placeholder="Enter search..." style="flex: 1;" autocomplete="off" onkeypress="if(event.key==='Enter') executeSearch()">
+                    
+                    <div style="display: flex; gap: 5px;">
+                        <button class="btn-submit" onclick="executeSearch()" style="padding: 10px 15px;">SEARCH</button>
+                        <button class="btn-cancel" onclick="clearSearch()" style="padding: 10px 15px;">X</button>
+                    </div>
+                </div>
+            </div> <div class="action-bar">
                 <div class="filter-section">
                     <div id="region-filters-container">
                         <span class="filter-title">Select Region</span>
