@@ -350,7 +350,7 @@
                     
                     <div style="display: flex; gap: 5px;">
                         <button class="btn-submit" onclick="executeSearch()" style="padding: 10px 15px;">SEARCH</button>
-                        <button class="btn-cancel" onclick="clearSearch()" style="padding: 10px 15px;">X</button>
+                        <button class="btn-cancel" onclick="clearSearch()" style="padding: 10px 15px;"> X </button>
                     </div>
                 </div>
             </div> <div class="action-bar">
@@ -402,7 +402,7 @@
                             <th class="sortable" onclick="sortTable('osb')" id="th-osb">OSB (RM) ⇅</th>
                             <th class="sortable" onclick="sortTable('status')" id="th-status">STATUS ⇅</th>
                             <th class="sortable" onclick="sortTable('last_date')" id="th-last_date" style="color: var(--accent-gold);">LAST REMARK ⇅</th>
-                            <th>INFO/REMARK</th>
+                            <th>DETAIL & REMARK</th>
                         </tr>
                     </thead>
                     <tbody id="table-body"></tbody>
@@ -440,7 +440,7 @@
                 <div class="form-group" id="form-region-group">
                     <label>Assign Region Scope</label>
                     <select id="new-user-region" class="form-control">
-                        <option value="BC">BC</option>
+                        <option value="BC">BERJAYA CREDIT</option>
                         <option value="NORTH">NORTH</option>
                         <option value="NORTHWEST">NORTHWEST</option>
                         <option value="NORTHEAST">NORTHEAST</option>
@@ -483,7 +483,7 @@
                         <thead>
                             <tr>
                                 <th style="text-align: center; width: 120px;">DATE</th>
-                                <th style="text-align: center;">EXPORT STATUS</th>
+                                <th style="text-align: center;">EXPORT REMARK</th>
                                 <th style="text-align: center; width: 150px;">ACTION</th>
                             </tr>
                         </thead>
@@ -554,10 +554,10 @@
                         <label>Home Add 1</label><select id="map-h-add1" class="form-control mapping-select"></select>
                         <label>Home Add 2</label><select id="map-h-add2" class="form-control mapping-select"></select>
                         <label>Home Add 3</label><select id="map-h-add3" class="form-control mapping-select"></select>
-                        <label>Company Name</label><select id="map-hc-name" class="form-control mapping-select"></select>
-                        <label>Company Tel</label><select id="map-hc-tel" class="form-control mapping-select"></select>
-                        <label>Company Add 1</label><select id="map-hc-add1" class="form-control mapping-select"></select>
-                        <label>Company Add 2</label><select id="map-hc-add2" class="form-control mapping-select"></select>
+                        <label>Co. Name</label><select id="map-hc-name" class="form-control mapping-select"></select>
+                        <label>Co. Tel</label><select id="map-hc-tel" class="form-control mapping-select"></select>
+                        <label>Co. Add 1</label><select id="map-hc-add1" class="form-control mapping-select"></select>
+                        <label>Co. Add 2</label><select id="map-hc-add2" class="form-control mapping-select"></select>
                     </div>
                 </div>
 
@@ -574,18 +574,18 @@
                         <label>Gtor Tel</label><select id="map-g-tel" class="form-control mapping-select"></select>
                         <label>Gtor Add 1</label><select id="map-g-add1" class="form-control mapping-select"></select>
                         <label>Gtor Add 2</label><select id="map-g-add2" class="form-control mapping-select"></select>
-                        <label>Gtor Co Name</label><select id="map-gc-name" class="form-control mapping-select"></select>
-                        <label>Gtor Co Tel</label><select id="map-gc-tel" class="form-control mapping-select"></select>
+                        <label>Gtor Co. Name</label><select id="map-gc-name" class="form-control mapping-select"></select>
+                        <label>Gtor Co. Tel</label><select id="map-gc-tel" class="form-control mapping-select"></select>
                     </div>
                 </div>
 
                 <div class="mapping-section">
-                    <h3>4. EXTRA ACCOUNT BALANCES</h3>
+                    <h3>4. ACCOUNT INFO & BALANCES</h3>
                     <div class="mapping-grid">
                         <label>Product Desc</label><select id="map-prod" class="form-control mapping-select"></select>
                         <label>Plate No</label><select id="map-plate" class="form-control mapping-select"></select>
-                        <label>Total Balance</label><select id="map-bal" class="form-control mapping-select"></select>
-                        <label>ODP (Late) Bal</label><select id="map-odp" class="form-control mapping-select"></select>
+                        <label>EP Balance</label><select id="map-bal" class="form-control mapping-select"></select>
+                        <label>ODP Bal</label><select id="map-odp" class="form-control mapping-select"></select>
                         <label>ADCH Bal</label><select id="map-adch" class="form-control mapping-select"></select>
                     </div>
                 </div>
@@ -605,19 +605,19 @@
             <div class="history-box"></div>
             
             <div class="form-group" style="margin-bottom: 15px; background: #e8f0f8; padding: 10px; border-radius: 6px; border: 1px dashed var(--accent-gold);">
-                <label style="color: var(--accent-gold); font-weight: bold; font-size: 12px;">SELECT ACTION STATUS (Required):</label>
+                <label style="color: var(--accent-gold); font-weight: bold; font-size: 12px;">SELECT STATUS (Required):</label>
                 <select id="finding-status-select" class="form-control" style="color: white; font-weight: bold; border-color: #555;">
-                    <option value="">-- SELECT ACTION STATUS --</option>
-                    <option value="CALL" style="color: var(--status-call);">CALL (Phone Call)</option>
+                    <option value="">-- SELECT STATUS --</option>
+                    <option value="CALL" style="color: var(--status-call);">CL (Phone Call)</option>
                     <option value="UCT" style="color: var(--status-uct);">UCT (Uncontactable)</option>
                     <option value="PTP" style="color: var(--status-ptp);">PTP (Promise To Pay)</option>
                     <option value="PV" style="color: var(--status-pv);">PV (Physical Visit)</option>
-                    <option value="PAID" style="color: var(--status-paid);">PAID (Payment Settled)</option>
+                    <option value="PAID" style="color: var(--status-paid);">PAID (Payment)</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label style="color: var(--text-main);">New Verification Finding Log (Max 50 Char / Line):</label>
+                <label style="color: var(--text-main);">New Finding Log (Max 50 Char / Line):</label>
                 
                 <input type="text" id="remark1" class="form-control" maxlength="50" placeholder="Row 1: Start typing..." 
                        style="margin-bottom: 8px;" autocomplete="off" inputmode="text" 
