@@ -1931,12 +1931,16 @@ function resetHeaderArrows() {
             let acctLoc = accountInfo.loc || '';
             let acctRegion = accountInfo.region || '';
             
-            let updatedDetailsObj = accountInfo.details || {};
+let updatedDetailsObj = accountInfo.details || {};
             updatedDetailsObj.finding_status = selectedStatus; 
-            updatedDetailsObj.last_remark_date = dateStr;
 
             let today = new Date();
             let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
+            
+            updatedDetailsObj.last_remark_date = dateStr;
+
+            let hh = String(today.getHours()).padStart(2, '0');
+            let mm = String(today.getMinutes()).padStart(2, '0');
             
             let hh = String(today.getHours()).padStart(2, '0');
             let mm = String(today.getMinutes()).padStart(2, '0');
