@@ -67,8 +67,8 @@
         .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
         .kpi-card { background-color: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center; transition: all 0.25s ease; }
         .kpi-clickable { cursor: pointer; }
-        .kpi-clickable:hover { border-color: var(--accent-gold); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
-        .kpi-card.active { border-color: var(--accent-gold); background-color: #e8f0f8; box-shadow: 0 0 15px rgba(37, 99, 235, 0.15); }
+        .kpi-clickable:hover { border-color: var(--accent-gold); background-color: #e8f0f8; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
+        .kpi-card.active { border-color: var(--accent-gold); background-color: #d9e2ec; box-shadow: 0 0 15px rgba(37, 99, 235, 0.2); }
         .kpi-card h3 { margin: 0 0 5px 0; font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
         .kpi-card p { margin: 0; font-size: 20px; font-weight: bold; color: var(--text-main); }
 
@@ -80,7 +80,7 @@
         th.sortable { cursor: pointer; transition: background 0.2s; }
         th.sortable:hover { background-color: #d9e2ec; color: var(--accent-gold); }
         
-        tr:hover { background-color: #f0f4f8; }
+        tr:hover { background-color: #e2e8f0; }
         
         .pagination-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background-color: #e8f0f8; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; margin-bottom: 20px; }
         .pagination-controls button { background-color: #ffffff; color: var(--accent-gold); border: 1px solid var(--accent-gold); padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin: 0 5px; }
@@ -594,7 +594,7 @@
             <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px;">Historical Audit Trail:</label>
             <div class="history-box"></div>
             
-            <div class="form-group" style="margin-bottom: 15px; background: #121212; padding: 10px; border-radius: 6px; border: 1px dashed var(--accent-gold);">
+            <div class="form-group" style="margin-bottom: 15px; background: #e8f0f8; padding: 10px; border-radius: 6px; border: 1px dashed var(--accent-gold);">
                 <label style="color: var(--accent-gold); font-weight: bold; font-size: 12px;">SELECT ACTION STATUS (Required):</label>
                 <select id="finding-status-select" class="form-control" style="color: white; font-weight: bold; border-color: #555;">
                     <option value="">-- SELECT ACTION STATUS --</option>
