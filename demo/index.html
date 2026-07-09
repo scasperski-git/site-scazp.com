@@ -478,7 +478,7 @@
                 <button class="btn-submit" onclick="addNewUser()" style="width: 100%; margin-top: 10px;">Save User Configuration</button>
             </div>
 
-            <div class="settings-box" style="max-width: 100%;">
+<div class="settings-box" style="max-width: 100%;">
                 <h2>System User List (<span id="total-users-count" style="color: var(--text-main);">0</span> Users)</h2>
                 <div class="table-container">
                     <table>
@@ -496,9 +496,7 @@
                     </table>
                 </div>
             </div>
-        </div> 
-        
-        <div id="report-panel" class="main-panel" style="display: none;">
+        </div> <div id="report-panel" class="main-panel" style="display: none;">
             <div class="settings-box" style="max-width: 100%;">
                 <h2>Daily Export Queue (Latest 30 Days)</h2>
                 <div class="table-container">
@@ -2170,25 +2168,32 @@ let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCas
 
         let refRegionsData = [];
 
-        window.loadSettingsDropdowns = async function() {
-            // Tarik senarai Region
+window.loadSettingsDropdowns = async function() {
+            // 1. Tarik senarai Region dari database
             const { data: regData } = await supabase.from('ref_regions').select('*');
             if (regData) {
                 refRegionsData = regData;
                 let uniqueRegions = [...new Set(regData.map(item => item.region_name))];
                 let regSelect = document.getElementById('new-user-region');
-                regSelect.innerHTML = '<option value="ALL">ALL REGIONS</option>'; // Tambah pilihan ALL
+                regSelect.innerHTML = '<option value="ALL">ALL REGIONS</option>';
                 uniqueRegions.forEach(r => {
                     if(r) regSelect.innerHTML += `<option value="${r}">${r}</option>`;
                 });
             }
 
-            // Tarik senarai Admin
-            const { data: adminData } = await supabase.from('users').select('id, role').in('role', ['master', 'super']).eq('status', 'ACTIVE');
+            // 2. Tarik senarai Admin (Tukar cara panggil supaya kebal isu huruf besar/kecil)
+            const { data: adminData } = await supabase.from('users').select('id, role').eq('status', 'ACTIVE');
             if (adminData) {
                 let repSelect = document.getElementById('new-user-reporting');
                 repSelect.innerHTML = '<option value="">-- PILIH ADMIN --</option>';
-                adminData.forEach(a => {
+                
+                // Filter hanya master atau super menggunakan JavaScript
+                let filteredAdmins = adminData.filter(a => {
+                    let r = a.role ? a.role.toLowerCase().trim() : '';
+                    return r === 'master' || r === 'super';
+                });
+
+                filteredAdmins.forEach(a => {
                     repSelect.innerHTML += `<option value="${a.id}">${a.id.toUpperCase()} (${a.role.toUpperCase()})</option>`;
                 });
             }
