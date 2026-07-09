@@ -413,7 +413,7 @@
                             <th class="sortable" onclick="sortTable('arrs_mth')" id="th-arrs_mth">ARRS MTH ⇅</th>
                             <th class="sortable" onclick="sortTable('osb')" id="th-osb">OSB (RM) ⇅</th>
                             <th class="sortable" onclick="sortTable('status')" id="th-status">STATUS ⇅</th>
-                            <th class="sortable" onclick="sortTable('last_date')" id="th-last_date" style="color: var(--accent-gold);">ATTENDED DT ⇅</th>
+                            <th class="sortable" onclick="sortTable('last_date')" id="th-last_date" style="color: var(--accent-gold);">ATTEND DATE ⇅</th>
                             <th>DETAIL & REMARK</th>
                         </tr>
                     </thead>
@@ -1200,7 +1200,7 @@ function resetHeaderArrows() {
             cols.forEach(c => {
                 const el = document.getElementById(`th-${c}`);
                 if (el) {
-                    if(c === 'last_date') el.innerHTML = "LAST REMARK ⇅";
+                    if(c === 'last_date') el.innerHTML = "ATTEND DATE ⇅";
                     else el.innerHTML = `${el.innerText.split(' ')[0]} ⇅`;
                 }
             });
@@ -1211,7 +1211,7 @@ function resetHeaderArrows() {
             const el = document.getElementById(`th-${activeCol}`);
             if (el) {
                 let text = el.innerText.split(' ')[0];
-                if(activeCol === 'last_date') text = "LAST REMARK";
+                if(activeCol === 'last_date') text = "ATTEND DATE";
                 let arrow = currentSortDirection === 'asc' ? '▲' : '▼';
                 el.innerHTML = `<span style="color:var(--text-main);">${text} ${arrow}</span>`;
             }
