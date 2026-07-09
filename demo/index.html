@@ -1863,7 +1863,7 @@ window.toggleFormRegionSelect = function() {
                     arrs_mth: String(row[getVal('map-arrs')]).trim(), 
                     osb: parseFloat(String(row[getVal('map-osb')]).replace(/[^0-9.-]+/g,"")) || 0, 
                     status: currentStatus, 
-                    details: detailsJSON 
+                    details: detailsJSON,
                     assigned_to: String(row[getVal('map-assign')] || '').toLowerCase().trim(),
                     is_aborted: existingAcc ? existingAcc.is_aborted : false
                 });
