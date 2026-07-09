@@ -1886,9 +1886,9 @@ function resetHeaderArrows() {
             } else {
                 findingsList.forEach((data) => {
 
-                    let dateFormatted = 'N/A';
+            let dateFormatted = 'N/A';
                     if (data.updated_at) {
-                        dateFormatted = new Date(data.updated_at).toLocaleString('en-US', {
+                        dateFormatted = new Date(data.updated_at).toLocaleString('en-GB', {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric',
