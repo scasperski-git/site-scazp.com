@@ -421,20 +421,20 @@
                 </table>
             </div>
             
-<div class="pagination-container">
+            <div class="pagination-container">
                 <div class="page-info" id="page-info">Page 0 of 0</div>
                 <div class="pagination-controls">
                     <button id="btn-prev" onclick="prevPage()" disabled>◄ PREV</button>
                     <button id="btn-next" onclick="nextPage()" disabled>NEXT ►</button>
                 </div>
             </div>
-        </div> <div id="settings-panel" class="main-panel" style="display: none;">
+        </div>
 
+        <div id="settings-panel" class="main-panel" style="display: none;">
             <div class="settings-box" style="margin-bottom: 20px;">
                 <h2>Add New Portal User</h2>
                 
                 <div class="mapping-grid" style="grid-template-columns: 1fr 1fr; background: transparent; border: none; padding: 0; margin-bottom: 0;">
-                    </div>
                     <div class="form-group">
                         <label>User ID / Username</label>
                         <input type="text" id="new-user-id" class="form-control" placeholder="e.g., pic_north">
@@ -479,11 +479,9 @@
                 <button class="btn-submit" onclick="addNewUser()" style="width: 100%; margin-top: 10px;">Save User Configuration</button>
             </div>
 
-<div class="settings-box" style="max-width: 100%;">
+            <div class="settings-box" style="max-width: 100%;">
                 <h2>System User List (<span id="total-users-count" style="color: var(--text-main);">0</span> Users)</h2>
                 <div class="table-container">
-                    </div>
-            </div>
                     <table>
                         <thead>
                             <tr>
@@ -499,7 +497,9 @@
                     </table>
                 </div>
             </div>
-        </div> <div id="report-panel" class="main-panel" style="display: none;">
+        </div> 
+        
+        <div id="report-panel" class="main-panel" style="display: none;">
             <div class="settings-box" style="max-width: 100%;">
                 <h2>Daily Export Queue (Latest 30 Days)</h2>
                 <div class="table-container">
@@ -2190,12 +2190,12 @@ window.loadSettingsDropdowns = async function() {
                 let repSelect = document.getElementById('new-user-reporting');
                 repSelect.innerHTML = '<option value="">-- PILIH ADMIN --</option>';
                 
-            // Filter hanya master atau super menggunakan JavaScript (Dikemaskini)
-            let filteredAdmins = adminData.filter(a => {
-                let r = String(a.role || '').toLowerCase();
-                // Menggunakan includes untuk menangkap sebarang variasi nama seperti 'Master Admin'
-                return r.includes('master') || r.includes('super');
-            });
+                // Filter hanya master atau super menggunakan JavaScript (Dikemaskini)
+                let filteredAdmins = adminData.filter(a => {
+                    let r = String(a.role || '').toLowerCase();
+                    // Menggunakan includes untuk menangkap sebarang variasi nama seperti 'Master Admin'
+                    return r.includes('master') || r.includes('super');
+                });
 
                 filteredAdmins.forEach(a => {
                     repSelect.innerHTML += `<option value="${a.id}">${a.id.toUpperCase()} (${a.role.toUpperCase()})</option>`;
@@ -2220,4 +2220,3 @@ window.loadSettingsDropdowns = async function() {
     </script>
 </body>
 </html>
-
