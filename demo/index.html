@@ -630,7 +630,7 @@
             
             <div class="form-group" style="margin-bottom: 15px; background: #e8f0f8; padding: 10px; border-radius: 6px; border: 1px dashed var(--accent-gold);">
                 <label style="color: var(--accent-gold); font-weight: bold; font-size: 12px;">SELECT STATUS (Required):</label>
-                <select id="finding-status-select" class="form-control" style="color: white; font-weight: bold; border-color: #555;">
+                <select id="finding-status-select" class="form-control" style="font-weight: bold;">
                     <option value="">-- SELECT STATUS --</option>
                     <option value="CALL" style="color: var(--status-call);">CALL (Phone Call)</option>
                     <option value="UCT" style="color: var(--status-uct);">UCT (Uncontactable)</option>
@@ -2051,7 +2051,12 @@ let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getM
 
 updatedDetailsObj.last_remark_date = dateStr;
 
-let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()})`;
+let hh = String(today.getHours()).padStart(2, '0');
+let mm = String(today.getMinutes()).padStart(2, '0');
+let ss = String(today.getSeconds()).padStart(2, '0');
+let timeStr = `${hh}:${mm}:${ss}`;
+
+let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${dateStr} ${timeStr}`;
             
             try {
                 const { data: insertedData, error: insertError } = await supabase
