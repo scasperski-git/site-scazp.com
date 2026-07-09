@@ -453,24 +453,24 @@
                     </select>
                 </div>
                 
-                <div class="form-group">
+                <div class="form-group" id="form-reporting-group">
                     <label>Reporting To (Admin/Manager)</label>
                     <select id="new-user-reporting" class="form-control">
-                        <option value="">-- TIADA (DIRECT HQ) --</option>
+                        <option value="">-- PILIH ADMIN --</option>
                     </select>
                 </div>
 
-                <div class="mapping-grid" id="form-region-group" style="grid-template-columns: 1fr 1fr; background: transparent; border: none; padding: 0;">
+                <div class="mapping-grid" id="form-region-group" style="display: none; grid-template-columns: 1fr 1fr; background: transparent; border: none; padding: 0;">
                     <div class="form-group">
                         <label>Assign Region</label>
                         <select id="new-user-region" class="form-control" onchange="loadAreasForRegion()">
-                            <option value="">-- PILIH REGION --</option>
+                            <option value="ALL">ALL REGIONS</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Assign Area</label>
                         <select id="new-user-area" class="form-control">
-                            <option value="">-- PILIH AREA --</option>
+                            <option value="ALL">ALL AREAS</option>
                         </select>
                     </div>
                 </div>
@@ -1635,11 +1635,19 @@ window.addNewUser = async function() {
             const id = document.getElementById('new-user-id').value.trim();
             const pass = document.getElementById('new-user-pass').value.trim();
             const role = document.getElementById('new-user-role').value;
+            
             const region = document.getElementById('new-user-region').value;
-            const reportingTo = document.getElementById('new-user-reporting').value; // Ambil nilai Admin
+            const area = document.getElementById('new-user-area').value;
+            const reportingTo = document.getElementById('new-user-reporting').value; 
             
             if(!id || !pass) { 
                 showNotification("ERROR", "Please fill in the User ID and Password fields.", true); 
+                return; 
+            }
+
+            // Wajibkan PIC User pilih Admin
+            if (role === 'user' && !reportingTo) {
+                showNotification("ERROR", "Please select an Admin for this user to report to.", true); 
                 return; 
             }
 
@@ -1651,13 +1659,20 @@ window.addNewUser = async function() {
             if (existingUser) { 
                 showNotification("ERROR", "User ID already exists in the system!", true); 
             } else {
-                // Simpan user baru sekali dengan column reporting_to
+                
+                let assignedReg = null;
+                // Kalau admin/super, kita simpan Region (atau ALL). Boleh digabung dengan Area jika perlu.
+                if (role === 'master' || role === 'super') {
+                    if (region === 'ALL') assignedReg = 'ALL';
+                    else assignedReg = area === 'ALL' ? region : `${region} (${area})`;
+                }
+
                 const { error } = await supabase.from('users').insert([{ 
                     id: id, 
                     pass: pass, 
                     role: role, 
-                    assignedregion: role === 'user' ? region : null,
-                    reporting_to: reportingTo ? reportingTo : null
+                    assignedregion: assignedReg,
+                    reporting_to: role === 'user' ? reportingTo : null
                 }]);
                 
                 if(!error) {
@@ -1671,9 +1686,18 @@ window.addNewUser = async function() {
             }
         };
 
-        window.toggleFormRegionSelect = function() {
+window.toggleFormRegionSelect = function() {
             const role = document.getElementById('new-user-role').value;
-            document.getElementById('form-region-group').style.display = (role === 'master' || role === 'super') ? 'none' : 'block';
+            const reportingGroup = document.getElementById('form-reporting-group');
+            const regionGroup = document.getElementById('form-region-group');
+
+            if (role === 'master' || role === 'super') {
+                reportingGroup.style.display = 'none';
+                regionGroup.style.display = 'grid'; // Papar Region & Area
+            } else {
+                reportingGroup.style.display = 'block'; // Papar Reporting To
+                regionGroup.style.display = 'none';
+            }
         };
 
         window.handleExcelFileSelect = function(e) {
@@ -2147,23 +2171,23 @@ let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCas
         let refRegionsData = [];
 
         window.loadSettingsDropdowns = async function() {
-            // 1. Tarik senarai Region dari database
+            // Tarik senarai Region
             const { data: regData } = await supabase.from('ref_regions').select('*');
             if (regData) {
                 refRegionsData = regData;
                 let uniqueRegions = [...new Set(regData.map(item => item.region_name))];
                 let regSelect = document.getElementById('new-user-region');
-                regSelect.innerHTML = '<option value="">-- PILIH REGION --</option>';
+                regSelect.innerHTML = '<option value="ALL">ALL REGIONS</option>'; // Tambah pilihan ALL
                 uniqueRegions.forEach(r => {
                     if(r) regSelect.innerHTML += `<option value="${r}">${r}</option>`;
                 });
             }
 
-            // 2. Tarik senarai Master/Super untuk dropdown 'Reporting To'
+            // Tarik senarai Admin
             const { data: adminData } = await supabase.from('users').select('id, role').in('role', ['master', 'super']).eq('status', 'ACTIVE');
             if (adminData) {
                 let repSelect = document.getElementById('new-user-reporting');
-                repSelect.innerHTML = '<option value="">-- TIADA (DIRECT HQ) --</option>';
+                repSelect.innerHTML = '<option value="">-- PILIH ADMIN --</option>';
                 adminData.forEach(a => {
                     repSelect.innerHTML += `<option value="${a.id}">${a.id.toUpperCase()} (${a.role.toUpperCase()})</option>`;
                 });
@@ -2173,9 +2197,9 @@ let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCas
         window.loadAreasForRegion = function() {
             let selectedReg = document.getElementById('new-user-region').value;
             let areaSelect = document.getElementById('new-user-area');
-            areaSelect.innerHTML = '<option value="">-- PILIH AREA --</option>';
+            areaSelect.innerHTML = '<option value="ALL">ALL AREAS</option>'; // Tambah pilihan ALL
             
-            if (selectedReg) {
+            if (selectedReg && selectedReg !== 'ALL') {
                 let filteredAreas = refRegionsData.filter(item => item.region_name === selectedReg);
                 let uniqueAreas = [...new Set(filteredAreas.map(item => item.area_name))];
                 uniqueAreas.forEach(a => {
