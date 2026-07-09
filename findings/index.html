@@ -1260,7 +1260,7 @@ function resetHeaderArrows() {
                 `;
 
                 let todayDate = new Date().toLocaleDateString('en-GB');
-                let wText = `INTERNAL DATA - PIC: ${currentUser.username.toUpperCase()} - ${todayDate}      `.repeat(60);
+                let wText = `INTERNAL DATA - ID: ${currentUser.username.toUpperCase()} - ${todayDate}      `.repeat(60);
 
                 tbody.innerHTML += `
                     <tr id="details-${row.acct}" class="details-row" style="display: none;">
