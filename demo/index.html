@@ -1668,12 +1668,13 @@ window.addNewUser = async function() {
                     else assignedReg = area === 'ALL' ? region : `${region} (${area})`;
                 }
 
-                const { error } = await supabase.from('users').insert([{ 
+const { error } = await supabase.from('users').insert([{ 
                     id: id, 
                     pass: pass, 
                     role: role, 
                     assignedregion: assignedReg,
-                    reporting_to: role === 'user' ? reportingTo : null
+                    reporting_to: role === 'user' ? reportingTo : null,
+                    status: 'ACTIVE'
                 }]);
                 
                 if(!error) {
