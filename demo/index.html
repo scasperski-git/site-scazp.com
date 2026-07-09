@@ -347,25 +347,23 @@
         </div>
 
 <div id="dashboard-panel" class="main-panel">
-            
             <div class="filter-section" style="flex-grow: 2;">
                 <span class="filter-title">Advanced Search By:</span>
-                
                 <div class="search-container">
                     <select id="search-type" class="form-control" style="width: 100%; max-width: 200px; border-color: var(--accent-gold);">
                         <option value="acct">Account No</option>
                         <option value="nric">NRIC (All Linked)</option>
                         <option value="plate">Plate No</option>
                     </select>
-                    
                     <input type="search" id="search-query" class="form-control" placeholder="Enter search..." style="flex: 1;" autocomplete="off" onkeypress="if(event.key==='Enter') executeSearch()">
-                    
                     <div style="display: flex; gap: 5px;">
                         <button class="btn-submit" onclick="executeSearch()" style="padding: 10px 15px;">SEARCH</button>
-                        <button class="btn-cancel" onclick="clearSearch()" style="padding: 10px 15px;"> X </button>
+                        <button class="btn-cancel" onclick="clearSearch()" style="padding: 10px 15px;">X</button>
                     </div>
                 </div>
-            </div> <div class="action-bar">
+            </div>
+
+            <div class="action-bar">
                 <div class="filter-section">
                     <div id="region-filters-container">
                         <span class="filter-title">Select Region</span>
@@ -376,7 +374,6 @@
                         <div class="btn-group" id="area-buttons"></div>
                     </div>
                 </div>
-                
                 <div id="upload-action-container" style="display: none;">
                     <input type="file" id="excel-file-input" style="display: none;" accept=".xlsx, .xls, .csv" onchange="handleExcelFileSelect(event)">
                     <button class="btn-upload-trigger" onclick="document.getElementById('excel-file-input').click()">
@@ -386,18 +383,10 @@
             </div>
 
             <div class="kpi-container">
-                <div class="kpi-card kpi-clickable active" id="card-total" onclick="applyStatusFilter(null, this)">
-                    <h3>Total Accounts</h3><p id="kpi-total">0</p>
-                </div>
-                <div class="kpi-card kpi-clickable" id="card-done" onclick="applyStatusFilter('UPDATED', this)">
-                    <h3>ATTENDED</h3><p id="kpi-done" style="color: var(--success-green);">0</p>
-                </div>
-                <div class="kpi-card kpi-clickable" id="card-pending" onclick="applyStatusFilter('PENDING', this)">
-                    <h3>Pending</h3><p id="kpi-pending" style="color: var(--error-red);">0</p>
-                </div>
-                <div class="kpi-card" style="cursor: default;">
-                    <h3>Total OSB</h3><p id="kpi-osb">RM 0.00</p>
-                </div>
+                <div class="kpi-card kpi-clickable active" id="card-total" onclick="applyStatusFilter(null, this)"><h3>Total Accounts</h3><p id="kpi-total">0</p></div>
+                <div class="kpi-card kpi-clickable" id="card-done" onclick="applyStatusFilter('UPDATED', this)"><h3>ATTENDED</h3><p id="kpi-done" style="color: var(--success-green);">0</p></div>
+                <div class="kpi-card kpi-clickable" id="card-pending" onclick="applyStatusFilter('PENDING', this)"><h3>Pending</h3><p id="kpi-pending" style="color: var(--error-red);">0</p></div>
+                <div class="kpi-card" style="cursor: default;"><h3>Total OSB</h3><p id="kpi-osb">RM 0.00</p></div>
             </div>
 
             <div class="table-container">
@@ -420,7 +409,7 @@
                     <tbody id="table-body"></tbody>
                 </table>
             </div>
-            
+
             <div class="pagination-container">
                 <div class="page-info" id="page-info">Page 0 of 0</div>
                 <div class="pagination-controls">
@@ -430,89 +419,41 @@
             </div>
         </div>
 
-<div class="settings-box" style="margin-bottom: 20px;">
+        <div id="settings-panel" class="main-panel" style="display: none;">
+            <div class="settings-box" style="margin-bottom: 20px;">
                 <h2>Add New Portal User</h2>
-                
                 <div class="mapping-grid" style="grid-template-columns: 1fr 1fr; background: transparent; border: none; padding: 0; margin-bottom: 0;">
-                    <div class="form-group">
-                        <label>User ID / Username</label>
-                        <input type="text" id="new-user-id" class="form-control" placeholder="e.g., pic_north">
-                    </div>
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" id="new-user-pass" class="form-control" placeholder="••••••••">
-                    </div>
+                    <div class="form-group"><label>User ID</label><input type="text" id="new-user-id" class="form-control"></div>
+                    <div class="form-group"><label>Password</label><input type="password" id="new-user-pass" class="form-control"></div>
                 </div>
-
                 <div class="form-group">
                     <label>Access Privilege (Role)</label>
                     <select id="new-user-role" class="form-control" onchange="toggleFormRegionSelect()">
-                        <option value="user">PIC User (Restricted Access)</option>
-                        <option value="master">Master Admin (Full Access)</option>
-                        <option value="super">Super Admin (Master + Report Center)</option>
+                        <option value="user">PIC User</option>
+                        <option value="master">Master Admin</option>
+                        <option value="super">Super Admin</option>
                     </select>
                 </div>
-                
                 <div class="form-group" id="form-reporting-group">
-                    <label>Reporting To (Admin/Manager)</label>
-                    <select id="new-user-reporting" class="form-control">
-                        <option value="">-- PILIH ADMIN --</option>
-                    </select>
+                    <label>Reporting To (Admin)</label>
+                    <select id="new-user-reporting" class="form-control"><option value="">-- PILIH ADMIN --</option></select>
                 </div>
-
                 <div class="mapping-grid" id="form-region-group" style="display: none; grid-template-columns: 1fr 1fr; background: transparent; border: none; padding: 0;">
-                    <div class="form-group">
-                        <label>Assign Region</label>
-                        <select id="new-user-region" class="form-control" onchange="loadAreasForRegion()">
-                            <option value="ALL">ALL REGIONS</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Assign Area</label>
-                        <select id="new-user-area" class="form-control">
-                            <option value="ALL">ALL AREAS</option>
-                        </select>
-                    </div>
+                    <div class="form-group"><label>Assign Region</label><select id="new-user-region" class="form-control" onchange="loadAreasForRegion()"><option value="ALL">ALL REGIONS</option></select></div>
+                    <div class="form-group"><label>Assign Area</label><select id="new-user-area" class="form-control"><option value="ALL">ALL AREAS</option></select></div>
                 </div>
-
-                <button class="btn-submit" onclick="addNewUser()" style="width: 100%; margin-top: 10px;">Save User Configuration</button>
+                <button class="btn-submit" onclick="addNewUser()" style="width: 100%;">Save User</button>
             </div>
-
-<div class="settings-box" style="max-width: 100%;">
-                <h2>System User List (<span id="total-users-count" style="color: var(--text-main);">0</span> Users)</h2>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 50px; text-align: center;">NO</th>
-                                <th>USER ID</th>
-                                <th>ROLE</th>
-                                <th>REGION ACCESS</th>
-                                <th>STATUS</th> 
-                                <th>ACTION</th> 
-                            </tr>
-                        </thead>
-                        <tbody id="users-table-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div> <div id="report-panel" class="main-panel" style="display: none;">
             <div class="settings-box" style="max-width: 100%;">
-                <h2>Daily Export Queue (Latest 30 Days)</h2>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="text-align: center; width: 120px;">DATE</th>
-                                <th style="text-align: center;">EXPORT REMARK</th>
-                                <th style="text-align: center; width: 150px;">ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody id="report-table-body">
-                            <tr><td colspan="3" style="text-align:center;">Loading database...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <h2>System User List (<span id="total-users-count">0</span> Users)</h2>
+                <div class="table-container"><table><thead><tr><th>USER ID</th><th>ROLE</th><th>REGION</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody id="users-table-body"></tbody></table></div>
+            </div>
+        </div>
+
+        <div id="report-panel" class="main-panel" style="display: none;">
+            <div class="settings-box" style="max-width: 100%;">
+                <h2>Daily Export Queue</h2>
+                <div class="table-container"><table><thead><tr><th>DATE</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody id="report-table-body"></tbody></table></div>
             </div>
         </div>
 
@@ -2169,7 +2110,7 @@ let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCas
         let refRegionsData = [];
 
 window.loadSettingsDropdowns = async function() {
-            // 1. Tarik senarai Region dari database
+            // 1. Tarik Region
             const { data: regData } = await supabase.from('ref_regions').select('*');
             if (regData) {
                 refRegionsData = regData;
@@ -2181,34 +2122,18 @@ window.loadSettingsDropdowns = async function() {
                 });
             }
 
-            // 2. Tarik senarai Admin (Tukar cara panggil supaya kebal isu huruf besar/kecil)
-            const { data: adminData } = await supabase.from('users').select('id, role').eq('status', 'ACTIVE');
-            if (adminData) {
+            // 2. Tarik Admin - FIX LOGIC
+            const { data: allUsers } = await supabase.from('users').select('id, role').eq('status', 'ACTIVE');
+            if (allUsers) {
                 let repSelect = document.getElementById('new-user-reporting');
                 repSelect.innerHTML = '<option value="">-- PILIH ADMIN --</option>';
                 
-                // Filter hanya master atau super menggunakan JavaScript
-                let filteredAdmins = adminData.filter(a => {
-                    let r = a.role ? a.role.toLowerCase().trim() : '';
-                    return r === 'master' || r === 'super';
-                });
-
-                filteredAdmins.forEach(a => {
-                    repSelect.innerHTML += `<option value="${a.id}">${a.id.toUpperCase()} (${a.role.toUpperCase()})</option>`;
-                });
-            }
-        };
-
-        window.loadAreasForRegion = function() {
-            let selectedReg = document.getElementById('new-user-region').value;
-            let areaSelect = document.getElementById('new-user-area');
-            areaSelect.innerHTML = '<option value="ALL">ALL AREAS</option>'; // Tambah pilihan ALL
-            
-            if (selectedReg && selectedReg !== 'ALL') {
-                let filteredAreas = refRegionsData.filter(item => item.region_name === selectedReg);
-                let uniqueAreas = [...new Set(filteredAreas.map(item => item.area_name))];
-                uniqueAreas.forEach(a => {
-                    if(a) areaSelect.innerHTML += `<option value="${a}">${a}</option>`;
+                allUsers.forEach(a => {
+                    // .trim() buang space, .toLowerCase() samakan huruf
+                    let role = a.role ? a.role.trim().toLowerCase() : '';
+                    if (role === 'master' || role === 'super') {
+                        repSelect.innerHTML += `<option value="${a.id}">${a.id.toUpperCase()} (${a.role.toUpperCase()})</option>`;
+                    }
                 });
             }
         };
