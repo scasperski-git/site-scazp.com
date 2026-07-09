@@ -609,8 +609,9 @@
                         <label>Product Desc</label><select id="map-prod" class="form-control mapping-select"></select>
                         <label>Plate No</label><select id="map-plate" class="form-control mapping-select"></select>
                         <label>EP Balance</label><select id="map-bal" class="form-control mapping-select"></select>
-                        <label>ODP Bal</label><select id="map-odp" class="form-control mapping-select"></select>
+<label>ODP Bal</label><select id="map-odp" class="form-control mapping-select"></select>
                         <label>ADCH Bal</label><select id="map-adch" class="form-control mapping-select"></select>
+                        <label style="color: var(--error-red); font-weight: bold;">Assign To (PIC ID)</label><select id="map-assign" class="form-control mapping-select"></select>
                     </div>
                 </div>
             </div>
@@ -660,8 +661,9 @@
                        oninput="handleAutoJump(this, null)" onkeypress="handleEnter(event, 'btnSaveFinding')">
             </div>
 
-            <div style="display: flex; gap: 10px;">
+<div style="display: flex; gap: 10px;">
                 <button id="btnSaveFinding" class="btn-submit" style="flex: 2;" onclick="saveFinding()">COMMIT ENTRY</button>
+                <button id="btnAbortAccount" class="btn-submit" style="flex: 1; background-color: #ff9800; color: white; display: none;" onclick="abortAccount()">ABORT</button>
                 <button id="btnResetPending" class="btn-submit" style="flex: 1; background-color: var(--error-red); color: white; display: none;" onclick="resetAccountStatus()">RESET PENDING</button>
             </div>
         </div>
@@ -889,9 +891,10 @@
             }, 60000); 
         };
 
-        async function fetchFullDatabaseData(region = null) {
-            const cacheKey = region ? `scazp_cache_${region}` : 'scazp_cache_all';
-            const timeKey = region ? `scazp_time_${region}` : 'scazp_time_all';
+async function fetchFullDatabaseData(region = null) {
+            // Gunakan username sebagai cache supaya data tak bercampur browser
+            const cacheKey = `scazp_cache_${currentUser.username}`;
+            const timeKey = `scazp_time_${currentUser.username}`;
             
             const loadingModal = document.getElementById('loadingModal');
             const loadingText = document.getElementById('loadingText');
@@ -901,11 +904,9 @@
                 const { data: lastFinding } = await supabase.from('findings').select('updated_at').order('updated_at', { ascending: false }).limit(1);
                 const dbLastUpdate = lastFinding && lastFinding.length > 0 ? lastFinding[0].updated_at : 'NODATA';
                 const localLastUpdate = localStorage.getItem(timeKey);
-                
                 const cachedData = await localforage.getItem(cacheKey);
 
                 if (cachedData && localLastUpdate === dbLastUpdate) {
-                    console.log("Reading from IndexedDB storage...");
                     globalAccounts = cachedData;
                     filteredAccounts = [...globalAccounts];
                     rebuildRegionsMapFromData();
@@ -913,20 +914,27 @@
                     return; 
                 }
 
-                console.log("Fetching data sequentially from the cloud...");
                 loadingText.innerText = "Downloading records from the server (This may take a while)...";
-                
                 let allData = [];
                 let page = 0;
                 const pageSize = 1000;
                 
                 while(true) {
-                    let fetchQuery = supabase.from('accounts').select('acct, region, area, loc, type, delq, arrs_mth, osb, status, details');
-                    if (region) fetchQuery = fetchQuery.eq('region', region);
+                    // Minta data is_aborted dan assigned_to sekali
+                    let fetchQuery = supabase.from('accounts').select('acct, region, area, loc, type, delq, arrs_mth, osb, status, details, assigned_to, is_aborted');
+                    
+                    // --- KUNCI KESELAMATAN (VISIBILITY) ---
+                    if (currentUser.role === 'user') {
+                        // User biasa: Tarik akaun yg assign pada dia, dan yg belum abort sahaja
+                        fetchQuery = fetchQuery.eq('assigned_to', currentUser.username).eq('is_aborted', false);
+                    } else {
+                        // Admin/Master: Nampak semua yg tak abort (dan filter ikut region kalau perlu)
+                        fetchQuery = fetchQuery.eq('is_aborted', false);
+                        if (region && region !== 'ALL') fetchQuery = fetchQuery.eq('region', region);
+                    }
                     
                     const { data, error } = await fetchQuery.range(page * pageSize, (page + 1) * pageSize - 1);
-                    
-                    if (error) { console.error("Error fetching data:", error); break; }
+                    if (error) break;
                     if (!data || data.length === 0) break;
                     
                     const mappedData = data.map(item => {
@@ -935,22 +943,17 @@
                     });
 
                     allData = allData.concat(mappedData);
-                    
                     if (data.length < pageSize) break; 
                     page++;
                 }
                 
                 globalAccounts = allData;
                 filteredAccounts = [...globalAccounts];
-                
                 await localforage.setItem(cacheKey, globalAccounts);
                 localStorage.setItem(timeKey, dbLastUpdate);
-                
                 rebuildRegionsMapFromData();
-            } catch (err) {
-                console.error("Sync error:", err);
-            }
-            
+                
+            } catch (err) { console.error("Sync error:", err); }
             loadingText.innerText = "Done.";
             loadingModal.style.display = 'none';
         }
@@ -1769,6 +1772,7 @@ window.toggleFormRegionSelect = function() {
                             if(id === 'map-bal') preSelectOption(select, ['BALANCE']);
                             if(id === 'map-odp') preSelectOption(select, ['LATE_BAL']);
                             if(id === 'map-adch') preSelectOption(select, ['ADCH_BAL']);
+                            if(id === 'map-assign') preSelectOption(select, ['assign_to', 'ASSIGN_TO', 'PIC', 'pic', 'pic_id']);
                         });
                         
                         document.getElementById('readingExcelModal').style.display = 'none';
@@ -1860,6 +1864,8 @@ window.toggleFormRegionSelect = function() {
                     osb: parseFloat(String(row[getVal('map-osb')]).replace(/[^0-9.-]+/g,"")) || 0, 
                     status: currentStatus, 
                     details: detailsJSON 
+                    assigned_to: String(row[getVal('map-assign')] || '').toLowerCase().trim(),
+                    is_aborted: existingAcc ? existingAcc.is_aborted : false
                 });
             }
 
@@ -1914,6 +1920,7 @@ window.toggleFormRegionSelect = function() {
             document.getElementById('updateModal').style.display = 'flex';
             
             document.getElementById('btnResetPending').style.display = (currentUser.role === 'master' || currentUser.role === 'super') ? 'block' : 'none';
+            document.getElementById('btnAbortAccount').style.display = (currentUser.role === 'master' || currentUser.role === 'super') ? 'block' : 'none';
 
             document.getElementById('finding-status-select').value = "";
 
@@ -2150,6 +2157,36 @@ let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCas
             } catch (err) {
                 showNotification("CRITICAL SYSTEM ERROR", err.message, true);
                 console.error(err);
+            }
+        };
+
+        window.abortAccount = async function() {
+            let accNo = document.getElementById('modalAccNo').innerText;
+            let isConfirmed = await customConfirm(`WARNING:\nAre you sure you want to ABORT account ${accNo}? This will hide it from the user's view.`);
+            if(!isConfirmed) return;
+
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
+
+            try {
+                // Update ke database
+                const { error: updError } = await supabase.from('accounts').update({ is_aborted: true }).eq('acct', accNo);
+                if (updError) throw updError;
+
+                // Tulis satu remark history
+                let r5Auto = `[ABORTED] BY (${currentUser.username.toUpperCase()})`;
+                await supabase.from('findings').insert([{ acct: accNo, remark1: "Account Action Aborted.", remark5: r5Auto, updated_by: currentUser.username }]);
+
+                // Buang terus dari cache memori sementara supaya hilang dari skrin
+                globalAccounts = globalAccounts.filter(a => a.acct !== accNo);
+                await localforage.setItem(`scazp_cache_${currentUser.username}`, globalAccounts);
+
+                showNotification("ABORT SUCCESSFUL", `Account <b>${accNo}</b> has been successfully aborted and removed from the active list.`);
+                closeModal();
+                applyFilterAndRender();
+
+            } catch (err) {
+                showNotification("CRITICAL SYSTEM ERROR", err.message, true);
             }
         };
         
