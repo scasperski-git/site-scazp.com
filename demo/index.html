@@ -131,17 +131,18 @@
         
         #loadingModal .modal-content { text-align: center; padding: 40px; border: 1px solid var(--accent-gold); max-width: 350px;}
 
-        .btn-delete-finding {
+.btn-delete-finding {
             float: right;
             background-color: rgba(229, 57, 53, 0.1);
             border: 1px solid var(--error-red);
             color: var(--error-red);
-            border-radius: 4px;
+            border-radius: 3px; /* Kurangkan lengkung sikit */
             cursor: pointer;
-            font-size: 9px;
-            padding: 3px 8px;
+            font-size: 8px; /* [UPDATE]: Font dikecilkan ke 8px */
+            padding: 2px 5px; /* [UPDATE]: Ruang dalam butang dinipiskan */
             font-weight: bold;
             transition: all 0.2s;
+            margin-left: 5px;
         }
         .btn-delete-finding:hover {
             background-color: var(--error-red);
@@ -1946,7 +1947,7 @@ pageData.forEach(row => {
 
                     let deleteBtnHTML = '';
                     if(currentUser.role === 'master' || currentUser.role === 'super') {
-                        deleteBtnHTML = `<button class="btn-delete-finding" onclick="deleteSingleFinding('${data.id}', '${accNo}')">🗑️ DELETE</button>`;
+                        deleteBtnHTML = `<button class="btn-delete-finding" onclick="deleteSingleFinding('${data.id}', '${accNo}')">🗑️ DEL</button>`;
                     }
 
                     let histRemark = '';
