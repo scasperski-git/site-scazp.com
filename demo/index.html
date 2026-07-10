@@ -2272,30 +2272,28 @@
             }
         };
 
-        // =========================================================================
-        // 🚀 MODULE BARU: MANAGEMENT TASK ASSIGNMENT CENTER (FOR SUPER & MASTER)
+// =========================================================================
+        // 🚀 KOD REKABENTUK BAHARU: MANAGEMENT TASK ASSIGNMENT CENTER (IKUT WORKFLOW KAU)
         // =========================================================================
         async function initAssignmentFilters() {
-            // Dropdown 1: Ambil region unik dari database global cache
+            // 1. Ambil region unik dari database global cache
             let uniqueRegions = [...new Set(globalAccounts.map(a => a.region).filter(Boolean))];
             let regSel = document.getElementById('assign-filter-region');
             regSel.innerHTML = '<option value="">-- SELECT REGION --</option>';
             uniqueRegions.forEach(r => regSel.innerHTML += `<option value="${r}">${r}</option>`);
 
             document.getElementById('assign-filter-area').innerHTML = '<option value="">-- SELECT AREA --</option>';
+            
+            // Dropdown filter PIC asal (Excel) kita default kan dulu
+            document.getElementById('assign-filter-pic').innerHTML = '<option value="ALL">ALL PIC FROM DATA</option>';
 
-            // Dropdown 2: Ambil list semua PIC Active untuk penapis semasa & target agihan baru
+            // 2. Dropdown SASARAN (Target PIC) tetap guna list user aktif sistem untuk kita agih tugas baru
             try {
-                const { data: userList } = await supabase.from('users').select('id, role').eq('status', 'ACTIVE');
+                const { data: userList } = await supabase.from('users').select('id').eq('status', 'ACTIVE');
                 if (userList) {
-                    let picFilter = document.getElementById('assign-filter-pic');
                     let picTarget = document.getElementById('assign-target-pic');
-                    
-                    picFilter.innerHTML = '<option value="ALL">ALL CURRENT STATUS</option><option value="UNASSIGNED">[UNASSIGNED ACCOUNTS]</option>';
                     picTarget.innerHTML = '<option value="">-- SELECT TARGET PIC --</option>';
-
                     userList.forEach(u => {
-                        picFilter.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
                         picTarget.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()}</option>`;
                     });
                 }
@@ -2311,6 +2309,9 @@
                 let uniqueAreas = [...new Set(globalAccounts.filter(a => a.region === reg).map(a => a.area).filter(Boolean))];
                 uniqueAreas.forEach(area => areaSel.innerHTML += `<option value="${area}">${area}</option>`);
             }
+            
+            // Bila region tukar, reset filter PIC
+            document.getElementById('assign-filter-pic').innerHTML = '<option value="ALL">ALL PIC FROM DATA</option>';
             renderAssignmentTable();
         };
 
@@ -2323,14 +2324,35 @@
             document.getElementById('assign-select-all').checked = false;
 
             if (!rSel || !aSel) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted);">Sila select Region & Area dahulu.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted);">Sila select Region & Area untuk memulakan tugasan agihan pukal.</td></tr>`;
                 document.getElementById('assign-total-count').innerText = "0";
                 return;
             }
 
-            // Tapis accounts dari master list memori
+            // Tapis akaun mengikut kawasan dahulu (Auto-load pool)
             let pool = globalAccounts.filter(a => a.region === rSel && a.area === aSel);
 
+            // [DINAMIK DROPDOWN]: Kutip senarai assigned_to yang wujud dalam DATA EXCEL daerah ini sahaja
+            // Kita run ni masa mula-mula load 'ALL' supaya dropdown tu terisi automatik
+            if (!pSel || pSel === 'ALL') {
+                let picsInPool = [...new Set(pool.map(a => a.assigned_to).filter(Boolean))];
+                let picFilterDropdown = document.getElementById('assign-filter-pic');
+                
+                // Simpan value lama sebelum rebuild dropdown
+                let currentSelectedPic = picFilterDropdown.value || 'ALL';
+                
+                picFilterDropdown.innerHTML = '<option value="ALL">ALL PIC FROM DATA</option>';
+                picFilterDropdown.innerHTML += '<option value="UNASSIGNED">[NOT ASSIGNED YET]</option>';
+                picsInPool.forEach(p => {
+                    picFilterDropdown.innerHTML += `<option value="${p}">${p.toUpperCase()}</option>`;
+                });
+                
+                // Kekalkan selection jika ada
+                picFilterDropdown.value = currentSelectedPic;
+                pSel = picFilterDropdown.value;
+            }
+
+            // Saring mengikut filter PIC (Lajur Excel assigned_to)
             if (pSel === 'UNASSIGNED') {
                 pool = pool.filter(a => !a.assigned_to || a.assigned_to.trim() === '');
             } else if (pSel && pSel !== 'ALL') {
@@ -2354,7 +2376,7 @@
                         <td>${row.region}</td>
                         <td>${row.area}</td>
                         <td>${row.delq || '-'}</td>
-                        <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                        <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                         <td>${picName}</td>
                     </tr>
                 `;
