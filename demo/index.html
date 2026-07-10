@@ -307,6 +307,64 @@
                 flex-direction: column;
             }
         }
+
+    /* --- STYLES UNTUK FAKE NEW PAGE (FULL SCREEN MODAL) --- */
+        .full-page-modal {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            border-radius: 0 !important;
+            border: none !important;
+            background-color: var(--bg-color) !important;
+            display: flex;
+            flex-direction: column;
+            padding: 0 !important;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        
+        .fp-header {
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            border-bottom: 2px solid var(--accent-gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+        
+        .fp-header h2 { margin: 0; font-size: 16px; color: var(--accent-gold); }
+        .fp-btn-back { background: var(--accent-gold); color: white; border: none; padding: 6px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .fp-btn-back:hover { background: #1d4ed8; }
+
+        .fp-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Desktop: 2 Kolum */
+            gap: 20px;
+            align-items: start;
+        }
+        
+        .fp-panel { 
+            background: var(--card-bg); 
+            padding: 15px; 
+            border-radius: 8px; 
+            border: 1px solid var(--border-color); 
+        }
+
+        /* Responsive Mobile: Susun Atas & Bawah */
+        @media (max-width: 768px) {
+            .fp-body { 
+                grid-template-columns: 1fr; 
+                padding: 10px;
+                gap: 15px;
+            }
+        }
+    
     </style>
 </head>
 <body>
@@ -607,54 +665,60 @@
         </div>
     </div>
     
-    <div class="modal-overlay" id="updateModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Update Account Finding: <span id="modalAccNo"></span></h2>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
-            </div>
-            <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px;">Historical Trail:</label>
-            <div class="history-box"></div>
+<div class="modal-overlay" id="updateModal" style="align-items: flex-start; padding: 0;">
+        <div class="modal-content full-page-modal">
             
-            <div class="form-group" style="margin-bottom: 15px; background: #e8f0f8; padding: 10px; border-radius: 6px; border: 1px dashed var(--accent-gold);">
-                <label style="color: var(--accent-gold); font-weight: bold; font-size: 12px;">SELECT STATUS (Required):</label>
-                <select id="finding-status-select" class="form-control" style="color: white; font-weight: bold; border-color: #555;">
-                    <option value="">-- SELECT STATUS --</option>
-                    <option value="CALL" style="color: var(--status-call);">CALL (Phone Call)</option>
-                    <option value="UCT" style="color: var(--status-uct);">UCT (Uncontactable)</option>
-                    <option value="PTP" style="color: var(--status-ptp);">PTP (Promise To Pay)</option>
-                    <option value="PV" style="color: var(--status-pv);">PV (Physical Visit)</option>
-                    <option value="PAID" style="color: var(--status-paid);">PAID (Payment)</option>
-                </select>
+            <div class="fp-header">
+                <h2>ACCT: <span id="modalAccNo"></span></h2>
+                <button class="fp-btn-back" onclick="closeModal()">❮ KEMBALI</button>
             </div>
+            
+            <div class="fp-body">
+                
+                <div class="fp-panel" style="background: transparent; border: none; padding: 0;">
+                    <div id="modal-details-container" style="display: flex; flex-direction: column; gap: 15px;">
+                        </div>
+                </div>
 
-            <div class="form-group">
-                <label style="color: var(--text-main);">New Finding Log (Max 50 Char / Line):</label>
-                
-                <input type="text" id="remark1" class="form-control" maxlength="50" placeholder="Row 1: Start typing..." 
-                       style="margin-bottom: 8px;" autocomplete="off" inputmode="text" 
-                       oninput="handleAutoJump(this, 'remark2')" onkeypress="handleEnter(event, 'remark2')">
-                
-                <input type="text" id="remark2" class="form-control" maxlength="50" placeholder="Row 2: Auto-continue..." 
-                       style="margin-bottom: 8px;" autocomplete="off" inputmode="text" 
-                       oninput="handleAutoJump(this, 'remark3')" onkeypress="handleEnter(event, 'remark3')">
-                
-                <input type="text" id="remark3" class="form-control" maxlength="50" placeholder="Row 3: Auto-continue..." 
-                       style="margin-bottom: 8px;" autocomplete="off" inputmode="text" 
-                       oninput="handleAutoJump(this, 'remark4')" onkeypress="handleEnter(event, 'remark4')">
-                
-                <input type="text" id="remark4" class="form-control" maxlength="50" placeholder="Row 4: Auto-continue..." 
-                       autocomplete="off" inputmode="text" 
-                       oninput="handleAutoJump(this, null)" onkeypress="handleEnter(event, 'btnSaveFinding')">
-            </div>
+                <div class="fp-panel" style="position: sticky; top: 0;">
+                    
+                    <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px; font-weight: bold;">HISTORICAL AUDIT TRAIL:</label>
+                    <div class="history-box" style="max-height: 250px; margin-bottom: 15px; background: #f8fafc;"></div>
+                    
+                    <div class="form-group" style="margin-bottom: 15px; background: #e8f0f8; padding: 10px; border-radius: 6px; border: 1px dashed var(--accent-gold); display: flex; align-items: center; gap: 10px;">
+                        <label style="color: var(--accent-gold); font-weight: bold; font-size: 12px; margin-bottom: 0;">ACTION STATUS:</label>
+                        <select id="finding-status-select" class="form-control" style="font-weight: bold; flex: 1; background-color: #ffffff !important; border-color: var(--accent-gold) !important;">
+                            <option value="">-- SELECT STATUS --</option>
+                            <option value="CALL" style="color: var(--status-call);">CALL (Phone Call)</option>
+                            <option value="UCT" style="color: var(--status-uct);">UCT (Uncontactable)</option>
+                            <option value="PTP" style="color: var(--status-ptp);">PTP (Promise To Pay)</option>
+                            <option value="PV" style="color: var(--status-pv);">PV (Physical Visit)</option>
+                            <option value="PAID" style="color: var(--status-paid);">PAID (Payment Settled)</option>
+                        </select>
+                    </div>
 
-            <div style="display: flex; gap: 10px;">
-                <button id="btnSaveFinding" class="btn-submit" style="flex: 2;" onclick="saveFinding()">COMMIT ENTRY</button>
-                <button id="btnResetPending" class="btn-submit" style="flex: 1; background-color: var(--error-red); color: white; display: none;" onclick="resetAccountStatus()">RESET PENDING</button>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <label style="color: var(--text-main); font-size: 12px; font-weight: bold;">VERIFICATION FINDING LOG:</label>
+                            <span id="textarea-info" style="font-size: 11px; color: var(--text-muted); font-weight: bold;">Jumlah Karakter: 0/200</span>
+                        </div>
+                        <textarea id="single-remark-box" class="form-control" rows="4" 
+                                  placeholder="Taip satu cerita panjang di sini... Sistem akan automatik susun dan potong kepada maksimum 4 baris × 50 karakter dengan kemas semasa disimpan."
+                                  style="font-size: 12px; resize: none; line-height: 1.5; padding: 10px; background-color: #ffffff !important;"
+                                  oninput="updateTextareaInfo(this)"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button id="btnSaveFinding" class="btn-submit" style="flex: 2; padding: 12px; font-size: 14px;" onclick="saveFinding()">COMMIT ENTRY</button>
+                        <button id="btnResetPending" class="btn-submit" style="flex: 1; background-color: var(--error-red); color: white; display: none; padding: 12px;" onclick="resetAccountStatus()">RESET LOG</button>
+                    </div>
+                    
+                </div>
             </div>
+            
         </div>
     </div>
-
+ 
     <div class="modal-overlay" id="progressModal">
         <div class="modal-content">
             <h2 style="margin-top: 0; font-size: 18px; color: var(--text-main);">DATA STREAMING PIPELINE</h2>
@@ -1870,6 +1934,57 @@ function resetHeaderArrows() {
             document.getElementById('btnResetPending').style.display = (currentUser.role === 'master' || currentUser.role === 'super') ? 'block' : 'none';
 
             document.getElementById('finding-status-select').value = "";
+
+            // --- JANA MAKLUMAT AKAUN & WATERMARK KE DALAM MODAL ---
+            let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
+            if(accountInfo.finding_status) {
+                document.getElementById('finding-status-select').value = accountInfo.finding_status;
+            }
+
+            let d = accountInfo.details || {};
+            let todayDate = new Date().toLocaleDateString('en-GB');
+            let singleLine = `INTERNAL DATA - PIC: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
+            let wText = `${singleLine.repeat(3)}\n`.repeat(25);
+
+            document.getElementById('modal-details-container').innerHTML = `
+                <div class="details-box" data-watermark="${wText}">
+                    <h4>HIRER INFO</h4>
+                    <p><span class="lbl">NAME</span>: ${d.h_name || '-'}</p>
+                    <p><span class="lbl">NRIC</span>: ${d.h_nric || '-'}</p>
+                    <p><span class="lbl">TEL</span>: ${d.h_tel || '-'}</p>
+                    <p><span class="lbl">HOME ADD</span>: ${d.h_add1 || '-'} ${d.h_add2 || ''} ${d.h_add3 || ''}</p>
+                    <br>
+                    <p><span class="lbl">CO. NAME</span>: ${d.hc_name || '-'}</p>
+                    <p><span class="lbl">CO. TEL</span>: ${d.hc_tel || '-'}</p>
+                    <p><span class="lbl">CO. ADD</span>: ${d.hc_add1 || '-'} ${d.hc_add2 || ''}</p>
+                </div>
+                <div class="details-box" data-watermark="${wText}">
+                    <h4>SPOUSE INFO</h4>
+                    <p><span class="lbl">NAME</span>: ${d.s_name || '-'}</p>
+                    <p><span class="lbl">NRIC</span>: ${d.s_nric || '-'}</p>
+                    <p><span class="lbl">TEL</span>: ${d.s_tel || '-'}</p>
+                </div>
+                <div class="details-box" data-watermark="${wText}">
+                    <h4>GUARANTOR INFO</h4>
+                    <p><span class="lbl">NAME</span>: ${d.g_name || '-'}</p>
+                    <p><span class="lbl">NRIC</span>: ${d.g_nric || '-'}</p>
+                    <p><span class="lbl">TEL</span>: ${d.g_tel || '-'}</p>
+                    <p><span class="lbl">GTOR ADD</span>: ${d.g_add1 || '-'} ${d.g_add2 || ''}</p>
+                    <br>
+                    <p><span class="lbl">CO. NAME</span>: ${d.gc_name || '-'}</p>
+                    <p><span class="lbl">CO. TEL</span>: ${d.gc_tel || '-'}</p>
+                    <p><span class="lbl">CO. ADD</span>: ${d.gc_add1 || '-'} ${d.gc_add2 || ''}</p>
+                </div>
+                <div class="details-box" data-watermark="${wText}">
+                    <h4>ACCOUNT BALANCES</h4>
+                    <p><span class="lbl" style="width: 80px;">PRODUCT</span>: ${d.prod || '-'}</p>
+                    <p><span class="lbl" style="width: 80px;">PLATE NO</span>: ${d.plate || '-'}</p>
+                    <p><span class="lbl" style="width: 80px;">BALANCE</span>: ${d.bal || '-'}</p>
+                    <p><span class="lbl" style="width: 80px;">ODP BAL</span>: ${d.odp || '-'}</p>
+                    <p><span class="lbl" style="width: 80px;">ADCH BAL</span>: ${d.adch || '-'}</p>
+                </div>
+            `;
+            // --------------------------------------------------------
 
             let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
             if(accountInfo.finding_status) {
