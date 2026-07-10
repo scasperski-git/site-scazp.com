@@ -6,7 +6,7 @@
     <title>Findings Management System</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
-<style>
+    <style>
         :root {
             --bg-color: #f0f4f8;      /* Biru ais cair (Frost Blue) */
             --card-bg: #ffffff;       /* Putih bersih untuk kad/kotak */
@@ -160,25 +160,23 @@
         }
         .btn-cancel:hover { background-color: #d9e2ec; color: var(--text-main); }
 
-/* --- STYLES FOR EXPANDABLE DATA & CONFIDENTIAL WATERMARK --- */
+        /* --- STYLES FOR EXPANDABLE DATA & CONFIDENTIAL WATERMARK --- */
         .expand-btn { background: #e8f0f8; color: var(--text-main); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-right: 5px; font-weight: 600; }
         .expand-btn:hover { background: var(--accent-gold); color: #ffffff; }
         
-        /* Gelapkan row dan tambah shadow dalam supaya nampak beza/terlekuk */
         .details-row { background-color: #d9e2ec; box-shadow: inset 0 3px 6px rgba(16,42,67,0.04); }
         .details-wrapper { padding: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; border-bottom: 2px solid var(--accent-gold); border-left: 4px solid var(--accent-gold); }
         
-.details-box { 
+        .details-box { 
             background-color: #ffffff !important; 
             padding: 10px; 
             border-radius: 6px; 
             border: 1px solid var(--border-color);
-            position: relative; /* Wajib ada untuk position watermark */
+            position: relative;
             z-index: 1;
             overflow: hidden;
         }
 
-        /* WATERMARK DINAMIK ANTI-SCREENSHOT (FIXED FOR MOBILE & DESKTOP) */
         .details-box::before {
             content: attr(data-watermark);
             position: absolute;
@@ -189,28 +187,19 @@
             font-family: 'Segoe UI', sans-serif;
             font-size: 8px;
             font-weight: 900;
-            
-            /* [UPDATE]: Kita tukar warna text ke solid gray pudar */
             color: rgba(16, 42, 67, 0.09); 
-            
-            /* [FIX]: Sifat jaring melimpah yang takkan patah di skrin sempit */
             white-space: normal;
             word-break: break-all;
             line-height: 2.2;
             letter-spacing: 1px;
             padding: 10px;
             box-sizing: border-box;
-            
-            /* [FIX]: Tambah kesan condong tanpa merosakkan luas container */
             transform: rotate(-10deg) scale(1.2);
             transform-origin: center center;
-            
             pointer-events: none;
             z-index: 0;
         }
 
-        
-        /* Naikkan z-index content asal supaya duduk di atas watermark */
         .details-box h4, .details-box p {
             position: relative;
             z-index: 2;
@@ -251,6 +240,8 @@
             .pagination-container { padding: 10px; flex-direction: column; gap: 10px; }
             .page-info { font-size: 10px; }
             .pagination-controls button { padding: 5px 10px; font-size: 10px; }
+            
+            .search-container { flex-direction: column; }
         }
 
         #maintenance-bar {
@@ -280,33 +271,11 @@
             50% { opacity: 0; }
         }
 
-        .role-super { 
-            background-color: rgba(229, 57, 53, 0.15); 
-            color: var(--error-red); 
-            border: 1px solid rgba(229, 57, 53, 0.3); 
-        }
-        .role-master { 
-            background-color: rgba(37, 99, 235, 0.15); 
-            color: var(--accent-gold); 
-            border: 1px solid rgba(37, 99, 235, 0.3); 
-        }
-        .role-user { 
-            background-color: rgba(33, 150, 243, 0.15); 
-            color: #1976d2; 
-            border: 1px solid rgba(33, 150, 243, 0.3); 
-        }
+        .role-super { background-color: rgba(229, 57, 53, 0.15); color: var(--error-red); border: 1px solid rgba(229, 57, 53, 0.3); }
+        .role-master { background-color: rgba(37, 99, 235, 0.15); color: var(--accent-gold); border: 1px solid rgba(37, 99, 235, 0.3); }
+        .role-user { background-color: rgba(33, 150, 243, 0.15); color: #1976d2; border: 1px solid rgba(33, 150, 243, 0.3); }
 
-        .search-container {
-            display: flex; 
-            gap: 10px; 
-            align-items: center;
-        }
-
-        @media (max-width: 768px) {
-            .search-container {
-                flex-direction: column;
-            }
-        }
+        .search-container { display: flex; gap: 10px; align-items: center; }
     </style>
 </head>
 <body>
@@ -346,7 +315,7 @@
             <button class="nav-btn" id="tab-report" onclick="switchTab('report')" style="display: none;">MIS Remark</button>
         </div>
 
-<div id="dashboard-panel" class="main-panel">
+        <div id="dashboard-panel" class="main-panel">
             
             <div class="filter-section" style="flex-grow: 2;">
                 <span class="filter-title">Advanced Search By:</span>
@@ -365,7 +334,9 @@
                         <button class="btn-cancel" onclick="clearSearch()" style="padding: 10px 15px;"> X </button>
                     </div>
                 </div>
-            </div> <div class="action-bar">
+            </div> 
+            
+            <div class="action-bar">
                 <div class="filter-section">
                     <div id="region-filters-container">
                         <span class="filter-title">Select Region</span>
@@ -443,24 +414,30 @@
                 </div>
                 <div class="form-group">
                     <label>Access Privilege (Role)</label>
-                    <select id="new-user-role" class="form-control" onchange="toggleFormRegionSelect()">
+                    <select id="new-user-role" class="form-control" onchange="toggleFormRegionSelect('new')">
                         <option value="user">PIC User (Restricted Access)</option>
                         <option value="master">Master Admin (Full Access)</option>
                         <option value="super">Super Admin (Master + Report Center)</option>
                     </select>
                 </div>
-                <div class="form-group" id="form-region-group">
+                
+                <div class="form-group" id="form-region-group-new">
                     <label>Assign Region Scope</label>
-                    <select id="new-user-region" class="form-control">
-                        <option value="BC">BERJAYA CREDIT</option>
-                        <option value="NORTH">NORTH</option>
-                        <option value="NORTHWEST">NORTHWEST</option>
-                        <option value="NORTHEAST">NORTHEAST</option>
-                        <option value="SOUTH">SOUTH</option>
-                        <option value="CENTRAL">CENTRAL</option>
-                        <option value="MIDEAST">MIDEAST</option>
-                        <option value="SABAH">SABAH</option>
-                        <option value="SARAWAK">SARAWAK</option>
+                    <select id="new-user-region" class="form-control" onchange="populateDynamicArea('new')">
+                        <option value="ALL">ALL REGIONS</option>
+                    </select>
+                </div>
+                <div class="form-group" id="form-area-group-new">
+                    <label>Assign Area Scope</label>
+                    <select id="new-user-area" class="form-control">
+                        <option value="ALL">ALL AREAS</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Reporting To (Bos / Supervisor)</label>
+                    <select id="new-user-report" class="form-control">
+                        <option value="">-- SELECT SUPERVISOR --</option>
                     </select>
                 </div>
 
@@ -476,9 +453,10 @@
                                 <th style="width: 50px; text-align: center;">NO</th>
                                 <th>USER ID</th>
                                 <th>ROLE</th>
-                                <th>REGION ACCESS</th>
+                                <th>REGION / AREA</th>
+                                <th>REPORTING TO</th>
                                 <th>STATUS</th> 
-                                <th>ACTION</th> 
+                                <th style="text-align: center;">ACTION</th> 
                             </tr>
                         </thead>
                         <tbody id="users-table-body"></tbody>
@@ -687,6 +665,49 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="editUserModal" style="z-index: 1050;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Update User: <span id="edit-user-title" style="color: var(--text-main);"></span></h2>
+                <button class="close-btn" onclick="document.getElementById('editUserModal').style.display='none'">&times;</button>
+            </div>
+            
+            <input type="hidden" id="edit-user-id-hidden">
+            
+            <div class="form-group">
+                <label>Change Access Privilege (Role)</label>
+                <select id="edit-user-role" class="form-control" onchange="toggleFormRegionSelect('edit')">
+                    <option value="user">PIC User (Restricted Access)</option>
+                    <option value="master">Master Admin (Full Access)</option>
+                    <option value="super">Super Admin (Master + Report Center)</option>
+                </select>
+            </div>
+            <div class="form-group" id="form-region-group-edit">
+                <label>Change Region Scope</label>
+                <select id="edit-user-region" class="form-control" onchange="populateDynamicArea('edit')">
+                    <option value="ALL">ALL REGIONS</option>
+                </select>
+            </div>
+            <div class="form-group" id="form-area-group-edit">
+                <label>Change Area Scope</label>
+                <select id="edit-user-area" class="form-control">
+                    <option value="ALL">ALL AREAS</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Change Reporting To</label>
+                <select id="edit-user-report" class="form-control">
+                    <option value="">-- SELECT SUPERVISOR --</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn-cancel" style="flex: 1;" onclick="document.getElementById('editUserModal').style.display='none'">CANCEL</button>
+                <button class="btn-submit" style="flex: 2;" onclick="saveEditedUser()">VERIFY & UPDATE</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
@@ -710,6 +731,7 @@
         let filteredAccounts = []; 
         let regionsMap = {}; 
         let parsedExcelRows = []; 
+        let dynamicRegionsMap = {}; // Simpan struktur region -> [area1, area2] dari DB
         
         let currentPage = 1;
         const rowsPerPage = 20;
@@ -982,7 +1004,7 @@
             }
 
             const lastActiveTab = localStorage.getItem('scazp_active_tab') || 'dashboard';
-            switchTab(lastActiveTab);
+            window.switchTab(lastActiveTab);
         }
 
         function applyFilterAndRender() {
@@ -1065,7 +1087,7 @@
         let activeSearchType = null;
         let activeSearchQuery = '';
 
-window.executeSearch = function() {
+        window.executeSearch = function() {
             activeSearchType = document.getElementById('search-type').value;
             activeSearchQuery = document.getElementById('search-query').value.trim().toUpperCase();
             
@@ -1156,7 +1178,7 @@ window.executeSearch = function() {
             document.getElementById('kpi-osb').innerText = 'RM ' + totalOsbValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
-window.sortTable = function(columnName) {
+        window.sortTable = function(columnName) {
             if (currentSortColumn === columnName) {
                 currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
             } else {
@@ -1195,7 +1217,7 @@ window.sortTable = function(columnName) {
             renderTablePage();
         };
 
-function resetHeaderArrows() {
+        function resetHeaderArrows() {
             const cols = ['region', 'area', 'loc', 'type', 'acct', 'delq', 'arrs_mth', 'osb', 'status', 'last_date'];
             cols.forEach(c => {
                 const el = document.getElementById(`th-${c}`);
@@ -1237,7 +1259,6 @@ function resetHeaderArrows() {
 
             pageData.forEach(row => {
                 let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
-                
                 let d = row.details || {};
 
                 tbody.innerHTML += `
@@ -1319,6 +1340,67 @@ function resetHeaderArrows() {
             document.getElementById('btn-next').disabled = currentPage === totalPages;
         }
 
+        // ==========================================
+        // LOGIK DROPDOWN SETTINGS & FUNGSI UPDATE USER
+        // ==========================================
+
+        window.loadSettingsDropdowns = async function() {
+            try {
+                const { data: bosses } = await supabase.from('users').select('id, role').in('role', ['master', 'super']);
+                let reportToHTML = '<option value="">-- SELECT SUPERVISOR --</option>';
+                if(bosses) {
+                    bosses.forEach(b => {
+                        reportToHTML += `<option value="${b.id}">${b.id.toUpperCase()} (${b.role.toUpperCase()})</option>`;
+                    });
+                }
+                document.getElementById('new-user-report').innerHTML = reportToHTML;
+                document.getElementById('edit-user-report').innerHTML = reportToHTML;
+
+                const { data: refs } = await supabase.from('ref_regions').select('region, area');
+                dynamicRegionsMap = {};
+                
+                if (refs) {
+                    refs.forEach(r => {
+                        let reg = r.region ? r.region.toUpperCase().trim() : 'UNASSIGNED';
+                        let area = r.area ? r.area.toUpperCase().trim() : 'UNASSIGNED';
+                        
+                        if (!dynamicRegionsMap[reg]) dynamicRegionsMap[reg] = [];
+                        if (area && !dynamicRegionsMap[reg].includes(area)) {
+                            dynamicRegionsMap[reg].push(area);
+                        }
+                    });
+                }
+
+                let regionHTML = '<option value="ALL">ALL REGIONS</option>';
+                Object.keys(dynamicRegionsMap).forEach(reg => {
+                    regionHTML += `<option value="${reg}">${reg}</option>`;
+                });
+                
+                document.getElementById('new-user-region').innerHTML = regionHTML;
+                document.getElementById('edit-user-region').innerHTML = regionHTML;
+                
+                populateDynamicArea('new');
+                populateDynamicArea('edit');
+                
+            } catch (err) {
+                console.error("Error loading dynamic settings dropdowns: ", err);
+            }
+        };
+
+        window.populateDynamicArea = function(prefix) {
+            const selectedRegion = document.getElementById(`${prefix}-user-region`).value;
+            const areaSelect = document.getElementById(`${prefix}-user-area`);
+            
+            let areaHTML = '<option value="ALL">ALL AREAS</option>';
+            
+            if (selectedRegion !== 'ALL' && dynamicRegionsMap[selectedRegion]) {
+                dynamicRegionsMap[selectedRegion].forEach(area => {
+                    areaHTML += `<option value="${area}">${area}</option>`;
+                });
+            }
+            areaSelect.innerHTML = areaHTML;
+        };
+
         window.switchTab = function(target) {
             if (target === 'settings' && (currentUser.role !== 'master' && currentUser.role !== 'super')) target = 'dashboard';
             if (target === 'report' && currentUser.role !== 'super') target = 'dashboard';
@@ -1332,6 +1414,9 @@ function resetHeaderArrows() {
             } else if (target === 'settings') {
                 document.getElementById('settings-panel').style.display = 'block';
                 document.getElementById('tab-settings').classList.add('active');
+                if (currentUser.role === 'master' || currentUser.role === 'super') {
+                    loadSettingsDropdowns();
+                }
             } else if (target === 'report') {
                 document.getElementById('report-panel').style.display = 'block';
                 document.getElementById('tab-report').classList.add('active');
@@ -1342,7 +1427,7 @@ function resetHeaderArrows() {
 
         window.fetchAndRenderUsers = async function() {
             try {
-                const { data, error } = await supabase.from('users').select('id, role, assignedregion, status').order('id', { ascending: true });
+                const { data, error } = await supabase.from('users').select('id, role, assignedregion, assignedarea, reporting_to, status').order('id', { ascending: true });
                 if (error) throw error;
                 
                 const tbody = document.getElementById('users-table-body');
@@ -1350,19 +1435,13 @@ function resetHeaderArrows() {
                 document.getElementById('total-users-count').innerText = data.length;
 
                 data.forEach((user, index) => {
-                    let regionDisp = user.assignedregion ? user.assignedregion.toUpperCase() : ((user.role === 'master' || user.role === 'super') ? 'ALL' : 'NONE');
-                    
-                    let roleBadgeClass = '';
                     let rName = user.role ? user.role.toUpperCase().trim() : '';
+                    let reg = user.assignedregion ? user.assignedregion.toUpperCase() : 'ALL';
+                    let area = user.assignedarea ? user.assignedarea.toUpperCase() : 'ALL';
+                    let regionDisp = (rName === 'MASTER' || rName === 'SUPER') ? 'ALL ACCESS' : `${reg} / ${area}`;
+                    let reportingDisp = user.reporting_to ? user.reporting_to.toUpperCase() : '-';
                     
-                    if (rName === 'SUPER') {
-                        roleBadgeClass = 'role-super';
-                    } else if (rName === 'MASTER') {
-                        roleBadgeClass = 'role-master';
-                    } else {
-                        roleBadgeClass = 'role-user';
-                    }
-                    
+                    let roleBadgeClass = rName === 'SUPER' ? 'role-super' : (rName === 'MASTER' ? 'role-master' : 'role-user');
                     let userStatus = user.status || 'ACTIVE';
                     let statusBadge = userStatus === 'ACTIVE' ? 'status-done' : 'status-pending';
                     
@@ -1374,19 +1453,18 @@ function resetHeaderArrows() {
                             <td style="text-align: center;">${index + 1}</td>
                             <td>${user.id}</td>
                             <td><span class="status-badge ${roleBadgeClass}">${rName}</span></td>
-                            <td>${regionDisp}</td>
+                            <td><span style="font-weight:bold; font-size: 11px; color: var(--text-muted);">${regionDisp}</span></td>
+                            <td style="color: var(--accent-gold); font-weight: bold;">${reportingDisp}</td>
                             <td><span class="status-badge ${statusBadge}">${userStatus}</span></td>
-                            <td>
+                            <td style="text-align: center; white-space: nowrap;">
+                                <button class="btn-update" style="margin-right: 5px;" onclick="openEditUserModal('${user.id}', '${user.role}', '${user.assignedregion}', '${user.assignedarea}', '${user.reporting_to}')">UPDATE</button>
                                 <button class="btn-update" style="color: ${toggleBtnColor}; border-color: ${toggleBtnColor}; margin-right: 5px;" onclick="toggleUserStatus('${user.id}', '${userStatus}')">${toggleBtnText}</button>
                                 <button class="btn-update" style="color: #ff3333; border-color: #ff3333;" onclick="deleteUser('${user.id}')">DELETE</button>
                             </td>
                         </tr>
                     `;
                 });
-                
-            } catch (err) {
-                console.error("Failed to fetch user list:", err);
-            }
+            } catch (err) { console.error("Failed to fetch user list:", err); }
         };
 
         window.toggleUserStatus = async function(userId, currentStatus) {
@@ -1427,6 +1505,115 @@ function resetHeaderArrows() {
                 showNotification("DELETE ERROR", error.message, true); 
             }
         };
+
+        window.addNewUser = async function() {
+            const id = document.getElementById('new-user-id').value.trim();
+            const pass = document.getElementById('new-user-pass').value.trim();
+            const role = document.getElementById('new-user-role').value;
+            const region = document.getElementById('new-user-region').value;
+            const area = document.getElementById('new-user-area').value;
+            const reportTo = document.getElementById('new-user-report').value;
+            
+            if(!id || !pass) { 
+                showNotification("ERROR", "Please fill in the User ID and Password fields.", true); 
+                return; 
+            }
+
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
+            
+            const { data: existingUser } = await supabase.from('users').select('id').eq('id', id).single();
+            
+            if (existingUser) { 
+                showNotification("ERROR", "User ID already exists in the system!", true); 
+            } else {
+                let finalReg = role === 'user' ? region : null;
+                let finalArea = role === 'user' ? area : null;
+                
+                const { error } = await supabase.from('users').insert([{ 
+                    id: id, 
+                    pass: pass, 
+                    role: role, 
+                    assignedregion: finalReg,
+                    assignedarea: finalArea,
+                    reporting_to: reportTo || null
+                }]);
+                
+                if(!error) {
+                    showNotification("REGISTRATION SUCCESSFUL", `New account <b>${id}</b> successfully created.`);
+                    document.getElementById('new-user-id').value = ''; 
+                    document.getElementById('new-user-pass').value = '';
+                    fetchAndRenderUsers(); 
+                } else { 
+                    showNotification("DATABASE ERROR", error.message, true); 
+                }
+            }
+        };
+
+        window.toggleFormRegionSelect = function(prefix) {
+            const role = document.getElementById(`${prefix}-user-role`).value;
+            const displayStyle = (role === 'master' || role === 'super') ? 'none' : 'block';
+            document.getElementById(`form-region-group-${prefix}`).style.display = displayStyle;
+            document.getElementById(`form-area-group-${prefix}`).style.display = displayStyle;
+        };
+
+        window.openEditUserModal = function(id, role, region, area, reportTo) {
+            document.getElementById('edit-user-title').innerText = id.toUpperCase();
+            document.getElementById('edit-user-id-hidden').value = id;
+            
+            document.getElementById('edit-user-role').value = role || 'user';
+            
+            document.getElementById('edit-user-region').value = (region && region !== 'null') ? region : 'ALL';
+            populateDynamicArea('edit');
+            setTimeout(() => { document.getElementById('edit-user-area').value = (area && area !== 'null') ? area : 'ALL'; }, 50);
+            
+            document.getElementById('edit-user-report').value = (reportTo && reportTo !== 'null') ? reportTo : '';
+            
+            toggleFormRegionSelect('edit');
+            document.getElementById('editUserModal').style.display = 'flex';
+        };
+
+        window.saveEditedUser = async function() {
+            const id = document.getElementById('edit-user-id-hidden').value;
+            const role = document.getElementById('edit-user-role').value;
+            const region = document.getElementById('edit-user-region').value;
+            const area = document.getElementById('edit-user-area').value;
+            const reportTo = document.getElementById('edit-user-report').value;
+
+            if (id === currentUser.username && role !== currentUser.role) {
+                let isConfirmed = await customConfirm("WARNING: You are changing your own role. This may restrict your current access. Proceed?");
+                if(!isConfirmed) return;
+            }
+
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
+
+            let finalReg = role === 'user' ? region : null;
+            let finalArea = role === 'user' ? area : null;
+
+            const { error } = await supabase.from('users').update({ 
+                role: role, 
+                assignedregion: finalReg,
+                assignedarea: finalArea,
+                reporting_to: reportTo || null
+            }).eq('id', id);
+
+            if (!error) {
+                showNotification("UPDATE SUCCESSFUL", `User <b>${id}</b> profile has been updated.`);
+                document.getElementById('editUserModal').style.display = 'none';
+                fetchAndRenderUsers();
+                
+                if (id === currentUser.username) {
+                    setTimeout(() => { handleLogout(); }, 2000);
+                }
+            } else {
+                showNotification("UPDATE ERROR", error.message, true);
+            }
+        };
+
+        // ==========================================
+        // FUNGSI-FUNGSI LAIN (REPORT, UPLOAD, DLL)
+        // ==========================================
 
         window.renderReportCenter = async function() {
             const tbody = document.getElementById('report-table-body');
@@ -1617,43 +1804,6 @@ function resetHeaderArrows() {
             } else {
                 showNotification("ERROR", error.message, true);
             }
-        };
-
-        window.addNewUser = async function() {
-            const id = document.getElementById('new-user-id').value.trim();
-            const pass = document.getElementById('new-user-pass').value.trim();
-            const role = document.getElementById('new-user-role').value;
-            const region = document.getElementById('new-user-region').value;
-            
-            if(!id || !pass) { 
-                showNotification("ERROR", "Please fill in the User ID and Password fields.", true); 
-                return; 
-            }
-
-            let isVerified = await verifyAdminPasscode();
-            if (!isVerified) return;
-            
-            const { data: existingUser } = await supabase.from('users').select('id').eq('id', id).single();
-            
-            if (existingUser) { 
-                showNotification("ERROR", "User ID already exists in the system!", true); 
-            } else {
-                const { error } = await supabase.from('users').insert([{ id: id, pass: pass, role: role, assignedregion: role === 'user' ? region : null }]);
-                
-                if(!error) {
-                    showNotification("REGISTRATION SUCCESSFUL", `New user account with ID <b>${id}</b> has been successfully registered into the database.`);
-                    document.getElementById('new-user-id').value = ''; 
-                    document.getElementById('new-user-pass').value = '';
-                    fetchAndRenderUsers(); 
-                } else { 
-                    showNotification("DATABASE ERROR", error.message, true); 
-                }
-            }
-        };
-
-        window.toggleFormRegionSelect = function() {
-            const role = document.getElementById('new-user-role').value;
-            document.getElementById('form-region-group').style.display = (role === 'master' || role === 'super') ? 'none' : 'block';
         };
 
         window.handleExcelFileSelect = function(e) {
@@ -1886,7 +2036,7 @@ function resetHeaderArrows() {
             } else {
                 findingsList.forEach((data) => {
 
-            let dateFormatted = 'N/A';
+                    let dateFormatted = 'N/A';
                     if (data.updated_at) {
                         dateFormatted = new Date(data.updated_at).toLocaleString('en-GB', {
                             day: '2-digit',
@@ -1997,15 +2147,15 @@ function resetHeaderArrows() {
             let acctLoc = accountInfo.loc || '';
             let acctRegion = accountInfo.region || '';
             
-let updatedDetailsObj = accountInfo.details || {};
+            let updatedDetailsObj = accountInfo.details || {};
             updatedDetailsObj.finding_status = selectedStatus; 
 
-let today = new Date();
-let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
+            let today = new Date();
+            let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
 
-updatedDetailsObj.last_remark_date = dateStr;
+            updatedDetailsObj.last_remark_date = dateStr;
 
-let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()})`;
+            let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()})`;
             
             try {
                 const { data: insertedData, error: insertError } = await supabase
