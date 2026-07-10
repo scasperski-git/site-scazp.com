@@ -2434,7 +2434,7 @@ const { data: findingsList } = await supabase.from('findings').select('*').eq('a
                     let currentTimestamp = new Date().toISOString();
                     let logs = batch.map(acc => ({
                         acct: acc,
-                        remark1: `CASE ASSIGNED TO PIC (${targetPic.toUpperCase()}) BY ADMIN`,
+                        remark1: `CASE ASSIGNED/TRANSFERRED TO PIC (${targetPic.toUpperCase()}) BY ADMIN`,
                         remark5: `[ASSIGNED] TRSF TO (${targetPic.toUpperCase()})`,
                         updated_by: currentUser.username,
                         updated_at: currentTimestamp // <-- [FIX]: Selesaikan punca N/A
