@@ -6,20 +6,16 @@
     <title>Findings Management System</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
-<style>
+    <style>
         :root {
-            --bg-color: #f0f4f8;      /* Biru ais cair (Frost Blue) */
-            --card-bg: #ffffff;       /* Putih bersih untuk kad/kotak */
-            --text-main: #102a43;     /* Biru pekat (navy) untuk teks utama */
-            --text-muted: #486581;    /* Biru pudar untuk teks sekunder */
-            
-            /* Warna ACCENT diubah ke Royal Sapphire (Biru Diraja) */
+            --bg-color: #f0f4f8;      
+            --card-bg: #ffffff;       
+            --text-main: #102a43;     
+            --text-muted: #486581;    
             --accent-gold: #2563eb;   
-            --border-color: #d9e2ec;  /* Border biru sangat cair */
-            
+            --border-color: #d9e2ec;  
             --success-green: #4caf50;
             --error-red: #e53935;
-            
             --status-call: #2196f3;
             --status-uct: #ff9800;
             --status-ptp: #9c27b0;
@@ -49,7 +45,7 @@
         .nav-btn.active { background-color: var(--accent-gold); color: #ffffff; border-color: var(--accent-gold); }
 
         .main-panel { display: block; }
-        #settings-panel { display: none; }
+        #settings-panel, #report-panel, #assignment-panel { display: none; }
 
         .action-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
         .filter-section { background-color: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); flex-grow: 1; }
@@ -72,11 +68,11 @@
         .kpi-card h3 { margin: 0 0 5px 0; font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
         .kpi-card p { margin: 0; font-size: 20px; font-weight: bold; color: var(--text-main); }
 
-        .table-container { background-color: var(--card-bg); border-radius: 8px 8px 0 0; border: 1px solid var(--border-color); overflow-x: auto; }
+        .table-container { background-color: var(--card-bg); border-radius: 8px 8px 0 0; border: 1px solid var(--border-color); overflow-x: auto; position: relative; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
         th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
         
-        th { background-color: #e8f0f8; color: var(--text-main); font-weight: 600; white-space: nowrap; user-select: none; }
+        th { background-color: #e8f0f8; color: var(--text-main); font-weight: 600; white-space: nowrap; user-select: none; position: relative; }
         th.sortable { cursor: pointer; transition: background 0.2s; }
         th.sortable:hover { background-color: #d9e2ec; color: var(--accent-gold); }
         
@@ -160,25 +156,23 @@
         }
         .btn-cancel:hover { background-color: #d9e2ec; color: var(--text-main); }
 
-/* --- STYLES FOR EXPANDABLE DATA & CONFIDENTIAL WATERMARK --- */
+        /* --- STYLES FOR EXPANDABLE DATA & CONFIDENTIAL WATERMARK --- */
         .expand-btn { background: #e8f0f8; color: var(--text-main); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-right: 5px; font-weight: 600; }
         .expand-btn:hover { background: var(--accent-gold); color: #ffffff; }
         
-        /* Gelapkan row dan tambah shadow dalam supaya nampak beza/terlekuk */
         .details-row { background-color: #d9e2ec; box-shadow: inset 0 3px 6px rgba(16,42,67,0.04); }
         .details-wrapper { padding: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; border-bottom: 2px solid var(--accent-gold); border-left: 4px solid var(--accent-gold); }
         
-.details-box { 
+        .details-box { 
             background-color: #ffffff !important; 
             padding: 10px; 
             border-radius: 6px; 
             border: 1px solid var(--border-color);
-            position: relative; /* Wajib ada untuk position watermark */
+            position: relative; 
             z-index: 1;
             overflow: hidden;
         }
 
-        /* WATERMARK DINAMIK ANTI-SCREENSHOT (FIXED FOR MOBILE & DESKTOP) */
         .details-box::before {
             content: attr(data-watermark);
             position: absolute;
@@ -189,28 +183,19 @@
             font-family: 'Segoe UI', sans-serif;
             font-size: 8px;
             font-weight: 900;
-            
-            /* [UPDATE]: Kita tukar warna text ke solid gray pudar */
             color: rgba(16, 42, 67, 0.09); 
-            
-            /* [FIX]: Sifat jaring melimpah yang takkan patah di skrin sempit */
             white-space: normal;
             word-break: break-all;
             line-height: 2.2;
             letter-spacing: 1px;
             padding: 10px;
             box-sizing: border-box;
-            
-            /* [FIX]: Tambah kesan condong tanpa merosakkan luas container */
             transform: rotate(-10deg) scale(1.2);
             transform-origin: center center;
-            
             pointer-events: none;
             z-index: 0;
         }
 
-        
-        /* Naikkan z-index content asal supaya duduk di atas watermark */
         .details-box h4, .details-box p {
             position: relative;
             z-index: 2;
@@ -223,6 +208,13 @@
         .mapping-container { max-height: 60vh; overflow-y: auto; padding-right: 10px; text-align: left; }
         .mapping-section { border: 1px solid var(--border-color); padding: 10px; margin-bottom: 15px; border-radius: 6px; background: #ffffff; }
         .mapping-section h3 { margin-top: 0; margin-bottom: 10px; font-size: 12px; color: var(--success-green); border-bottom: 1px solid var(--border-color); padding-bottom: 5px;}
+
+        /* --- COLUMN FILTER ICON & MENU --- */
+        .th-filter-btn { cursor: pointer; margin-left: 4px; font-size: 10px; color: var(--text-muted); padding: 2px; border-radius: 3px; }
+        .th-filter-btn:hover { background: #cbd5e1; color: var(--accent-gold); }
+        .filter-popup-menu { display: none; position: absolute; background: white; border: 1px solid var(--accent-gold); padding: 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; max-height: 200px; overflow-y: auto; min-width: 150px; }
+        .filter-popup-menu label { display: block; font-size: 11px; padding: 4px 0; cursor: pointer; color: var(--text-main); font-weight: normal; }
+        .filter-popup-menu input { margin-right: 6px; vertical-align: middle; }
 
         /* --- RESPONSIVE MOBILE VIEW MEDIA QUERY --- */
         @media (max-width: 768px) {
@@ -342,11 +334,13 @@
 
         <div class="nav-tabs" id="master-nav-tabs">
             <button class="nav-btn active" id="tab-dash" onclick="switchTab('dashboard')">Dashboard</button>
+            <button class="nav-btn" id="tab-assign" onclick="switchTab('assignment')">Task Assignment</button>
             <button class="nav-btn" id="tab-settings" onclick="switchTab('settings')">User Settings</button>
             <button class="nav-btn" id="tab-report" onclick="switchTab('report')" style="display: none;">MIS Remark</button>
         </div>
 
-<div id="dashboard-panel" class="main-panel">
+        <!-- PANEL 1: DASHBOARD -->
+        <div id="dashboard-panel" class="main-panel">
             
             <div class="filter-section" style="flex-grow: 2;">
                 <span class="filter-title">Advanced Search By:</span>
@@ -365,7 +359,9 @@
                         <button class="btn-cancel" onclick="clearSearch()" style="padding: 10px 15px;"> X </button>
                     </div>
                 </div>
-            </div> <div class="action-bar">
+            </div> 
+
+            <div class="action-bar" style="margin-top: 15px;">
                 <div class="filter-section">
                     <div id="region-filters-container">
                         <span class="filter-title">Select Region</span>
@@ -430,17 +426,80 @@
             </div>
         </div>
 
-        <div id="settings-panel" class="main-panel">
+        <!-- PANEL 2: TASK ASSIGNMENT CENTER -->
+        <div id="assignment-panel" class="main-panel">
+            <div class="settings-box" style="max-width: 100%; margin-bottom: 20px;">
+                <h2>Task Delegation Center (Pro Multi-Filter Suite)</h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; background: #e8f0f8; padding: 15px; border-radius: 6px;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="font-weight:bold;">1. Select Region</label>
+                        <select id="assign-filter-region" class="form-control" onchange="loadAssignmentAreas()"></select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="font-weight:bold;">2. Select Area</label>
+                        <select id="assign-filter-area" class="form-control" onchange="renderAssignmentTable()"></select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0; background: #ffffff; padding: 10px; border-radius: 4px; border: 1px solid var(--accent-gold);">
+                        <label style="color: var(--accent-gold); font-weight:bold;">🎯 Pipeline Execution Setup</label>
+                        
+                        <div style="margin: 5px 0; font-size:11px;">
+                            <label style="display:inline; margin-right:10px;"><input type="radio" name="assign-mode" value="MANUAL" checked onchange="toggleAssignModeUI()"> (A) Checkbox Manual</label>
+                            <label style="display:inline;"><input type="radio" name="assign-mode" value="AUTO" onchange="toggleAssignModeUI()"> (B) Auto-Divide</label>
+                        </div>
+
+                        <div style="display:flex; gap:5px; align-items: center;">
+                            <select id="assign-target-pic" class="form-control" style="padding:5px; font-size:12px; flex:1;"></select>
+                            <button class="btn-submit" onclick="executeBulkAssignment()" style="padding: 7px 15px; font-size:11px;">APPLY ROUTING</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-box" style="max-width: 100%;">
+                <h2>Matching Allocation Queue (<span id="assign-total-count" style="color: var(--accent-gold);">0</span> Records Screened)</h2>
+                <div class="table-container" style="overflow-y: visible;">
+                    <table>
+                        <thead>
+                            <tr style="background-color: #cbd5e1;">
+                                <th style="width: 40px; text-align: center;" id="th-assign-checkbox-header">
+                                    <input type="checkbox" id="assign-select-all" onclick="toggleSelectAllAssignment(this)">
+                                </th>
+                                <th>REGION <span class="th-filter-btn" onclick="toggleHeaderFilterPopup('region', event)">☩</span><div id="filter-pop-region" class="filter-popup-menu"></div></th>
+                                <th>AREA <span class="th-filter-btn" onclick="toggleHeaderFilterPopup('area', event)">☩</span><div id="filter-pop-area" class="filter-popup-menu"></div></th>
+                                <th>LOC <span class="th-filter-btn" onclick="toggleHeaderFilterPopup('loc', event)">☩</span><div id="filter-pop-loc" class="filter-popup-menu"></div></th>
+                                <th>ACCOUNT NO</th>
+                                <th>PACK <span class="th-filter-btn" onclick="toggleHeaderFilterPopup('pack', event)">☩</span><div id="filter-pop-pack" class="filter-popup-menu"></div></th>
+                                <th>DELQ <span class="th-filter-btn" onclick="toggleHeaderFilterPopup('delq', event)">☩</span><div id="filter-pop-delq" class="filter-popup-menu"></div></th>
+                                <th>OSB (RM)</th>
+                                <th>ASSIGN TO <span class="th-filter-btn" onclick="toggleHeaderFilterPopup('assign_to', event)">☩</span><div id="filter-pop-assign_to" class="filter-popup-menu"></div></th>
+                                <th>CURRENT ASSIGNED PIC</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assignment-table-body">
+                            <tr><td colspan="10" style="text-align:center; color: var(--text-muted);">Sila select Region & Area untuk memulakan tugasan agihan pukal.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 3: USER SETTINGS -->
+        <div id="settings-panel" class="main-panel" style="display: none;">
             <div class="settings-box" style="margin-bottom: 20px;">
-                <h2>Add New Portal User (Syncs to Cloud Ledger)</h2>
-                <div class="form-group">
-                    <label>User ID / Username</label>
-                    <input type="text" id="new-user-id" class="form-control" placeholder="e.g., pic_north">
+                <h2>Add New Portal User</h2>
+                
+                <div class="mapping-grid" style="grid-template-columns: 1fr 1fr; background: transparent; border: none; padding: 0; margin-bottom: 0;">
+                    <div class="form-group">
+                        <label>User ID / Username</label>
+                        <input type="text" id="new-user-id" class="form-control" placeholder="e.g., pic_north">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="new-user-pass" class="form-control" placeholder="••••••••">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="new-user-pass" class="form-control" placeholder="••••••••">
-                </div>
+
                 <div class="form-group">
                     <label>Access Privilege (Role)</label>
                     <select id="new-user-role" class="form-control" onchange="toggleFormRegionSelect()">
@@ -449,22 +508,30 @@
                         <option value="super">Super Admin (Master + Report Center)</option>
                     </select>
                 </div>
-                <div class="form-group" id="form-region-group">
-                    <label>Assign Region Scope</label>
-                    <select id="new-user-region" class="form-control">
-                        <option value="BC">BERJAYA CREDIT</option>
-                        <option value="NORTH">NORTH</option>
-                        <option value="NORTHWEST">NORTHWEST</option>
-                        <option value="NORTHEAST">NORTHEAST</option>
-                        <option value="SOUTH">SOUTH</option>
-                        <option value="CENTRAL">CENTRAL</option>
-                        <option value="MIDEAST">MIDEAST</option>
-                        <option value="SABAH">SABAH</option>
-                        <option value="SARAWAK">SARAWAK</option>
+                
+                <div class="form-group" id="form-reporting-group">
+                    <label>Reporting To (Admin/Manager)</label>
+                    <select id="new-user-reporting" class="form-control">
+                        <option value="">-- PILIH ADMIN --</option>
                     </select>
                 </div>
 
-                <button class="btn-submit" onclick="addNewUser()">Save User Configuration</button>
+                <div class="mapping-grid" id="form-region-group" style="display: none; grid-template-columns: 1fr 1fr; background: transparent; border: none; padding: 0;">
+                    <div class="form-group">
+                        <label>Assign Region</label>
+                        <select id="new-user-region" class="form-control" onchange="loadAreasForRegion()">
+                            <option value="ALL">ALL REGIONS</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Assign Area</label>
+                        <select id="new-user-area" class="form-control">
+                            <option value="ALL">ALL AREAS</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn-submit" onclick="addNewUser()" style="width: 100%; margin-top: 10px;">Save User Configuration</button>
             </div>
 
             <div class="settings-box" style="max-width: 100%;">
@@ -487,6 +554,7 @@
             </div>
         </div> 
         
+        <!-- PANEL 4: REPORT CENTER -->
         <div id="report-panel" class="main-panel" style="display: none;">
             <div class="settings-box" style="max-width: 100%;">
                 <h2>Daily Export Queue (Latest 30 Days)</h2>
@@ -512,6 +580,7 @@
         </div>
     </div> 
 
+    <!-- MODAL OVERLAYS -->
     <div class="modal-overlay" id="loadingModal">
         <div class="modal-content">
             <h2 style="color: var(--accent-gold); margin-top:0;">SYSTEM CHECK</h2>
@@ -599,6 +668,8 @@
                         <label>EP Balance</label><select id="map-bal" class="form-control mapping-select"></select>
                         <label>ODP Bal</label><select id="map-odp" class="form-control mapping-select"></select>
                         <label>ADCH Bal</label><select id="map-adch" class="form-control mapping-select"></select>
+                        <label style="color:var(--status-ptp)">PACK CD</label><select id="map-pack" class="form-control mapping-select"></select>
+                        <label style="color: var(--error-red); font-weight: bold;">Assign To (PIC ID)</label><select id="map-assign" class="form-control mapping-select"></select>
                     </div>
                 </div>
             </div>
@@ -650,6 +721,7 @@
 
             <div style="display: flex; gap: 10px;">
                 <button id="btnSaveFinding" class="btn-submit" style="flex: 2;" onclick="saveFinding()">COMMIT ENTRY</button>
+                <button id="btnAbortAccount" class="btn-submit" style="flex: 1; background-color: #ff9800; color: white; display: none;" onclick="abortAccount()">ABORT</button>
                 <button id="btnResetPending" class="btn-submit" style="flex: 1; background-color: var(--error-red); color: white; display: none;" onclick="resetAccountStatus()">RESET PENDING</button>
             </div>
         </div>
@@ -692,8 +764,8 @@
 
         const IS_MAINTENANCE = false; 
 
-        const supabaseUrl = 'https://awrarqugmkpahscpvewu.supabase.co';
-        const supabaseKey = 'sb_publishable_nN7JOvHOInSCZUAy6tTYgQ_xGzJD9N2';
+        const supabaseUrl = 'https://ageobrtzfpipaagtkoia.supabase.co';
+        const supabaseKey = 'sb_publishable_bhlBKnGCIyGHvyQ0rvAqzw_8fCU02j-';
         const supabase = createClient(supabaseUrl, supabaseKey);
 
         localforage.config({
@@ -716,6 +788,9 @@
 
         let currentSortColumn = null;
         let currentSortDirection = 'asc';
+
+        // --- EXCEL FIELD COLUMN FILTERS IN STORAGE ---
+        let activeHeaderFilters = { region: [], area: [], loc: [], pack: [], delq: [], assign_to: [] };
 
         async function checkLoginSession() {
             const currentYear = new Date().getFullYear();
@@ -859,14 +934,13 @@
             syncBtn.disabled = true;
             syncBtn.innerText = "SYNCING..."; 
             
-            const safeRegion = (currentUser.role === 'master' || currentUser.role === 'super') ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
-            const cacheKey = safeRegion ? `scazp_cache_${safeRegion}` : 'scazp_cache_all';
-            const timeKey = safeRegion ? `scazp_time_${safeRegion}` : 'scazp_time_all';
+            const cacheKey = `scazp_cache_${currentUser.username}`;
+            const timeKey = `scazp_time_${currentUser.username}`;
 
             await localforage.removeItem(cacheKey);
             localStorage.removeItem(timeKey);
 
-            await fetchFullDatabaseData(safeRegion);
+            await fetchFullDatabaseData(null);
             applyFilterAndRender();
             
             showNotification("SYNC SUCCESSFUL", "Data has been updated.");
@@ -878,8 +952,8 @@
         };
 
         async function fetchFullDatabaseData(region = null) {
-            const cacheKey = region ? `scazp_cache_${region}` : 'scazp_cache_all';
-            const timeKey = region ? `scazp_time_${region}` : 'scazp_time_all';
+            const cacheKey = `scazp_cache_${currentUser.username}`;
+            const timeKey = `scazp_time_${currentUser.username}`;
             
             const loadingModal = document.getElementById('loadingModal');
             const loadingText = document.getElementById('loadingText');
@@ -889,11 +963,9 @@
                 const { data: lastFinding } = await supabase.from('findings').select('updated_at').order('updated_at', { ascending: false }).limit(1);
                 const dbLastUpdate = lastFinding && lastFinding.length > 0 ? lastFinding[0].updated_at : 'NODATA';
                 const localLastUpdate = localStorage.getItem(timeKey);
-                
                 const cachedData = await localforage.getItem(cacheKey);
 
                 if (cachedData && localLastUpdate === dbLastUpdate) {
-                    console.log("Reading from IndexedDB storage...");
                     globalAccounts = cachedData;
                     filteredAccounts = [...globalAccounts];
                     rebuildRegionsMapFromData();
@@ -901,20 +973,23 @@
                     return; 
                 }
 
-                console.log("Fetching data sequentially from the cloud...");
                 loadingText.innerText = "Downloading records from the server (This may take a while)...";
-                
                 let allData = [];
                 let page = 0;
                 const pageSize = 1000;
                 
                 while(true) {
-                    let fetchQuery = supabase.from('accounts').select('acct, region, area, loc, type, delq, arrs_mth, osb, status, details');
-                    if (region) fetchQuery = fetchQuery.eq('region', region);
+                    let fetchQuery = supabase.from('accounts').select('acct, region, area, loc, type, delq, arrs_mth, osb, status, details, assigned_to, is_aborted');
+                    
+                    if (currentUser.role === 'user') {
+                        fetchQuery = fetchQuery.eq('assigned_to', currentUser.username).eq('is_aborted', false);
+                    } else {
+                        fetchQuery = fetchQuery.eq('is_aborted', false);
+                        if (region && region !== 'ALL') fetchQuery = fetchQuery.eq('region', region);
+                    }
                     
                     const { data, error } = await fetchQuery.range(page * pageSize, (page + 1) * pageSize - 1);
-                    
-                    if (error) { console.error("Error fetching data:", error); break; }
+                    if (error) break;
                     if (!data || data.length === 0) break;
                     
                     const mappedData = data.map(item => {
@@ -923,22 +998,17 @@
                     });
 
                     allData = allData.concat(mappedData);
-                    
                     if (data.length < pageSize) break; 
                     page++;
                 }
                 
                 globalAccounts = allData;
                 filteredAccounts = [...globalAccounts];
-                
                 await localforage.setItem(cacheKey, globalAccounts);
                 localStorage.setItem(timeKey, dbLastUpdate);
-                
                 rebuildRegionsMapFromData();
-            } catch (err) {
-                console.error("Sync error:", err);
-            }
-            
+                
+            } catch (err) { console.error("Sync error:", err); }
             loadingText.innerText = "Done.";
             loadingModal.style.display = 'none';
         }
@@ -968,6 +1038,8 @@
                 renderRegionSelectionUI(); 
                 applyFilterAndRender(); 
                 fetchAndRenderUsers();
+                loadSettingsDropdowns();
+                initAssignmentFilters(); 
                 
                 if(currentUser.role === 'super') renderReportCenter(); 
             } else {
@@ -1065,7 +1137,7 @@
         let activeSearchType = null;
         let activeSearchQuery = '';
 
-window.executeSearch = function() {
+        window.executeSearch = function() {
             activeSearchType = document.getElementById('search-type').value;
             activeSearchQuery = document.getElementById('search-query').value.trim().toUpperCase();
             
@@ -1156,7 +1228,7 @@ window.executeSearch = function() {
             document.getElementById('kpi-osb').innerText = 'RM ' + totalOsbValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
-window.sortTable = function(columnName) {
+        window.sortTable = function(columnName) {
             if (currentSortColumn === columnName) {
                 currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
             } else {
@@ -1195,7 +1267,7 @@ window.sortTable = function(columnName) {
             renderTablePage();
         };
 
-function resetHeaderArrows() {
+        function resetHeaderArrows() {
             const cols = ['region', 'area', 'loc', 'type', 'acct', 'delq', 'arrs_mth', 'osb', 'status', 'last_date'];
             cols.forEach(c => {
                 const el = document.getElementById(`th-${c}`);
@@ -1237,7 +1309,6 @@ function resetHeaderArrows() {
 
             pageData.forEach(row => {
                 let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
-                
                 let d = row.details || {};
 
                 tbody.innerHTML += `
@@ -1260,13 +1331,13 @@ function resetHeaderArrows() {
                 `;
 
                 let todayDate = new Date().toLocaleDateString('en-GB');
-                let wText = `INTERNAL DATA - ID: ${currentUser.username.toUpperCase()} - ${todayDate}      `.repeat(60);
+                let singleLine = `INTERNAL DATA - ID: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
+                let wText = `${singleLine.repeat(3)}\n`.repeat(25);
 
                 tbody.innerHTML += `
                     <tr id="details-${row.acct}" class="details-row" style="display: none;">
                         <td colspan="11" style="padding: 0;">
                             <div class="details-wrapper">
-                                
                                 <div style="display: flex; flex-direction: column; gap: 15px;">
                                     <div class="details-box" data-watermark="${wText}">
                                         <h4>HIRER INFO</h4>
@@ -1307,7 +1378,6 @@ function resetHeaderArrows() {
                                     <p><span class="lbl" style="width: 80px;">ODP BAL</span>: ${d.odp || '-'}</p>
                                     <p><span class="lbl" style="width: 80px;">ADCH BAL</span>: ${d.adch || '-'}</p>
                                 </div>
-
                             </div>
                         </td>
                     </tr>
@@ -1320,6 +1390,7 @@ function resetHeaderArrows() {
         }
 
         window.switchTab = function(target) {
+            if (target === 'assignment' && (currentUser.role !== 'master' && currentUser.role !== 'super')) target = 'dashboard';
             if (target === 'settings' && (currentUser.role !== 'master' && currentUser.role !== 'super')) target = 'dashboard';
             if (target === 'report' && currentUser.role !== 'super') target = 'dashboard';
 
@@ -1329,6 +1400,10 @@ function resetHeaderArrows() {
             if (target === 'dashboard') {
                 document.getElementById('dashboard-panel').style.display = 'block';
                 document.getElementById('tab-dash').classList.add('active');
+            } else if (target === 'assignment') {
+                document.getElementById('assignment-panel').style.display = 'block';
+                document.getElementById('tab-assign').classList.add('active');
+                renderAssignmentTable();
             } else if (target === 'settings') {
                 document.getElementById('settings-panel').style.display = 'block';
                 document.getElementById('tab-settings').classList.add('active');
@@ -1355,13 +1430,9 @@ function resetHeaderArrows() {
                     let roleBadgeClass = '';
                     let rName = user.role ? user.role.toUpperCase().trim() : '';
                     
-                    if (rName === 'SUPER') {
-                        roleBadgeClass = 'role-super';
-                    } else if (rName === 'MASTER') {
-                        roleBadgeClass = 'role-master';
-                    } else {
-                        roleBadgeClass = 'role-user';
-                    }
+                    if (rName === 'SUPER') { roleBadgeClass = 'role-super'; } 
+                    else if (rName === 'MASTER') { roleBadgeClass = 'role-master'; } 
+                    else { roleBadgeClass = 'role-user'; }
                     
                     let userStatus = user.status || 'ACTIVE';
                     let statusBadge = userStatus === 'ACTIVE' ? 'status-done' : 'status-pending';
@@ -1384,9 +1455,7 @@ function resetHeaderArrows() {
                     `;
                 });
                 
-            } catch (err) {
-                console.error("Failed to fetch user list:", err);
-            }
+            } catch (err) { console.error("Failed to fetch user list:", err); }
         };
 
         window.toggleUserStatus = async function(userId, currentStatus) {
@@ -1623,10 +1692,18 @@ function resetHeaderArrows() {
             const id = document.getElementById('new-user-id').value.trim();
             const pass = document.getElementById('new-user-pass').value.trim();
             const role = document.getElementById('new-user-role').value;
+            
             const region = document.getElementById('new-user-region').value;
+            const area = document.getElementById('new-user-area').value;
+            const reportingTo = document.getElementById('new-user-reporting').value; 
             
             if(!id || !pass) { 
                 showNotification("ERROR", "Please fill in the User ID and Password fields.", true); 
+                return; 
+            }
+
+            if (role === 'user' && !reportingTo) {
+                showNotification("ERROR", "Please select an Admin for this user to report to.", true); 
                 return; 
             }
 
@@ -1638,10 +1715,23 @@ function resetHeaderArrows() {
             if (existingUser) { 
                 showNotification("ERROR", "User ID already exists in the system!", true); 
             } else {
-                const { error } = await supabase.from('users').insert([{ id: id, pass: pass, role: role, assignedregion: role === 'user' ? region : null }]);
+                let assignedReg = null;
+                if (role === 'master' || role === 'super') {
+                    if (region === 'ALL') assignedReg = 'ALL';
+                    else assignedReg = area === 'ALL' ? region : `${region} (${area})`;
+                }
+
+                const { error } = await supabase.from('users').insert([{ 
+                    id: id, 
+                    pass: pass, 
+                    role: role, 
+                    assignedregion: assignedReg,
+                    reporting_to: role === 'user' ? reportingTo : null,
+                    status: 'ACTIVE'
+                }]);
                 
                 if(!error) {
-                    showNotification("REGISTRATION SUCCESSFUL", `New user account with ID <b>${id}</b> has been successfully registered into the database.`);
+                    showNotification("REGISTRATION SUCCESSFUL", `New user account with ID <b>${id}</b> has been successfully registered.`);
                     document.getElementById('new-user-id').value = ''; 
                     document.getElementById('new-user-pass').value = '';
                     fetchAndRenderUsers(); 
@@ -1653,7 +1743,16 @@ function resetHeaderArrows() {
 
         window.toggleFormRegionSelect = function() {
             const role = document.getElementById('new-user-role').value;
-            document.getElementById('form-region-group').style.display = (role === 'master' || role === 'super') ? 'none' : 'block';
+            const reportingGroup = document.getElementById('form-reporting-group');
+            const regionGroup = document.getElementById('form-region-group');
+
+            if (role === 'master' || role === 'super') {
+                reportingGroup.style.display = 'none';
+                regionGroup.style.display = 'grid'; 
+            } else {
+                reportingGroup.style.display = 'block'; 
+                regionGroup.style.display = 'none';
+            }
         };
 
         window.handleExcelFileSelect = function(e) {
@@ -1723,6 +1822,8 @@ function resetHeaderArrows() {
                             if(id === 'map-bal') preSelectOption(select, ['BALANCE']);
                             if(id === 'map-odp') preSelectOption(select, ['LATE_BAL']);
                             if(id === 'map-adch') preSelectOption(select, ['ADCH_BAL']);
+                            if(id === 'map-pack') preSelectOption(select, ['PACK_CD', 'pack_cd', 'PACK']);
+                            if(id === 'map-assign') preSelectOption(select, ['assign_to', 'ASSIGN_TO', 'PIC', 'pic', 'pic_id']);
                         });
                         
                         document.getElementById('readingExcelModal').style.display = 'none';
@@ -1800,6 +1901,7 @@ function resetHeaderArrows() {
                     bal: row[getVal('map-bal')] || '',
                     odp: row[getVal('map-odp')] || '',
                     adch: row[getVal('map-adch')] || '',
+                    pack_cd: row[getVal('map-pack')] || '',
                     finding_status: currentFindingStatus 
                 };
 
@@ -1813,7 +1915,9 @@ function resetHeaderArrows() {
                     arrs_mth: String(row[getVal('map-arrs')]).trim(), 
                     osb: parseFloat(String(row[getVal('map-osb')]).replace(/[^0-9.-]+/g,"")) || 0, 
                     status: currentStatus, 
-                    details: detailsJSON 
+                    details: detailsJSON,
+                    assigned_to: String(row[getVal('map-assign')] || '').toLowerCase().trim(),
+                    is_aborted: existingAcc ? existingAcc.is_aborted : false
                 });
             }
 
@@ -1844,8 +1948,8 @@ function resetHeaderArrows() {
                     document.getElementById('excel-file-input').value = ''; 
                     alert(`Successfully processed ${totalProcessed.toLocaleString()} accounts.`);
                     
-                    await localforage.removeItem('scazp_cache_all');
-                    localStorage.removeItem('scazp_time_all');
+                    await localforage.removeItem(`scazp_cache_${currentUser.username}`);
+                    localStorage.removeItem(`scazp_time_${currentUser.username}`);
                     
                     await fetchFullDatabaseData(null); 
                     resetStatusCardHighlight();
@@ -1868,6 +1972,7 @@ function resetHeaderArrows() {
             document.getElementById('updateModal').style.display = 'flex';
             
             document.getElementById('btnResetPending').style.display = (currentUser.role === 'master' || currentUser.role === 'super') ? 'block' : 'none';
+            document.getElementById('btnAbortAccount').style.display = (currentUser.role === 'master' || currentUser.role === 'super') ? 'block' : 'none';
 
             document.getElementById('finding-status-select').value = "";
 
@@ -1879,25 +1984,19 @@ function resetHeaderArrows() {
             const historyBox = document.querySelector('.history-box');
             historyBox.innerHTML = '<div style="text-align:center; padding:10px;">Loading history trail...</div>';
             
-            const { data: findingsList } = await supabase.from('findings').select('*').eq('acct', accNo).order('updated_at', { ascending: false });
+            const { data: findingsList } = await supabase.from('findings').select('*').eq('acct', accNo);
             historyBox.innerHTML = ''; 
             if(!findingsList || findingsList.length === 0) {
                 historyBox.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:10px;">No historical findings found.</div>';
             } else {
-                findingsList.forEach((data) => {
+                findingsList.sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
 
-            let dateFormatted = 'N/A';
-                    if (data.updated_at) {
-                        dateFormatted = new Date(data.updated_at).toLocaleString('en-GB', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit',
-                            hour12: true
-                        });
-                    }
+                findingsList.forEach((data) => {
+                    let rawDate = data.updated_at || data.created_at || new Date().toISOString();
+                    let dateFormatted = new Date(rawDate).toLocaleString('en-GB', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+                    });
                     
                     let statusBadgeHTML = '';
                     if (data.remark5 && data.remark5.startsWith('[')) {
@@ -1909,6 +2008,7 @@ function resetHeaderArrows() {
                         if (extractedStatus === 'PTP') badgeColor = 'var(--status-ptp)';
                         if (extractedStatus === 'PV') badgeColor = 'var(--status-pv)';
                         if (extractedStatus === 'PAID') badgeColor = 'var(--status-paid)';
+                        if (extractedStatus === 'ASSIGNED') badgeColor = '#334155';
 
                         statusBadgeHTML = ` | <span style="background-color: ${badgeColor}; color: white; padding: 1px 5px; border-radius: 3px; font-weight: 900; font-size: 9px; display: inline-block; vertical-align: middle;">${extractedStatus}</span>`;
                     }
@@ -1955,9 +2055,7 @@ function resetHeaderArrows() {
             currentElement.value = currentElement.value.toUpperCase();
             if (currentElement.value.length >= currentElement.maxLength && nextElementId) {
                 const nextEl = document.getElementById(nextElementId);
-                if (nextEl) {
-                    nextEl.focus(); 
-                }
+                if (nextEl) { nextEl.focus(); }
             }
         };
         
@@ -1997,15 +2095,19 @@ function resetHeaderArrows() {
             let acctLoc = accountInfo.loc || '';
             let acctRegion = accountInfo.region || '';
             
-let updatedDetailsObj = accountInfo.details || {};
+            let updatedDetailsObj = accountInfo.details || {};
             updatedDetailsObj.finding_status = selectedStatus; 
 
-let today = new Date();
-let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
+            let today = new Date();
+            let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
+            updatedDetailsObj.last_remark_date = dateStr;
 
-updatedDetailsObj.last_remark_date = dateStr;
+            let hh = String(today.getHours()).padStart(2, '0');
+            let mm = String(today.getMinutes()).padStart(2, '0');
+            let ss = String(today.getSeconds()).padStart(2, '0');
+            let timeStr = `${hh}:${mm}:${ss}`;
 
-let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()})`;
+            let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${dateStr} ${timeStr}`;
             
             try {
                 const { data: insertedData, error: insertError } = await supabase
@@ -2037,14 +2139,10 @@ let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCas
                         rowToUpdate.details = updatedDetailsObj;
                     }
                     
-                    const safeRegion = currentUser.role === 'master' || currentUser.role === 'super' ? 'all' : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
-                    const cacheKey = `scazp_cache_${safeRegion}`;
-                    const timeKey = `scazp_time_${safeRegion}`;
-                    
-                    await localforage.setItem(cacheKey, globalAccounts);
+                    await localforage.setItem(`scazp_cache_${currentUser.username}`, globalAccounts);
                     
                     if (insertedData && insertedData.length > 0) {
-                        localStorage.setItem(timeKey, insertedData[0].updated_at);
+                        localStorage.setItem(`scazp_time_${currentUser.username}`, insertedData[0].updated_at);
                     }
                     
                     showNotification("RECORD SAVED", `Action for account <b>${accNo}</b> successfully updated.`); 
@@ -2088,9 +2186,7 @@ let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCas
                     rowToUpdate.details = resetDetails;
                 }
 
-                const safeRegion = (currentUser.role === 'master' || currentUser.role === 'super') ? 'all' : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
-                const cacheKey = `scazp_cache_${safeRegion}`;
-                await localforage.setItem(cacheKey, globalAccounts);
+                await localforage.setItem(`scazp_cache_${currentUser.username}`, globalAccounts);
 
                 showNotification("RESET SUCCESSFUL", `Account <b>${accNo}</b> has been reverted to PENDING status and the log history has been cleared.`);
                 closeModal();
@@ -2101,10 +2197,41 @@ let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCas
                 console.error(err);
             }
         };
+
+        window.abortAccount = async function() {
+            let accNo = document.getElementById('modalAccNo').innerText;
+            let isConfirmed = await customConfirm(`WARNING:\nAre you sure you want to ABORT account ${accNo}? This will hide it from the user's view.`);
+            if(!isConfirmed) return;
+
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
+
+            try {
+                const { error: updError } = await supabase.from('accounts').update({ is_aborted: true }).eq('acct', accNo);
+                if (updError) throw updError;
+
+                let r5Auto = `[ABORTED] BY (${currentUser.username.toUpperCase()})`;
+                await supabase.from('findings').insert([{ acct: accNo, remark1: "Account Action Aborted.", remark5: r5Auto, updated_by: currentUser.username }]);
+
+                globalAccounts = globalAccounts.filter(a => a.acct !== accNo);
+                await localforage.setItem(`scazp_cache_${currentUser.username}`, globalAccounts);
+
+                showNotification("ABORT SUCCESSFUL", `Account <b>${accNo}</b> has been successfully aborted and removed from the active list.`);
+                closeModal();
+                applyFilterAndRender();
+
+            } catch (err) {
+                showNotification("CRITICAL SYSTEM ERROR", err.message, true);
+            }
+        };
         
         window.onclick = function(e) { 
             if(e.target == document.getElementById('updateModal')) closeModal(); 
             if(e.target == document.getElementById('mappingModal')) closeMappingModal();
+            // Tutup filter menu jika klik di luar
+            if (!e.target.classList.contains('th-filter-btn') && !e.target.closest('.filter-popup-menu')) {
+                document.querySelectorAll('.filter-popup-menu').forEach(m => m.style.display='none');
+            }
         }
 
         checkLoginSession();
@@ -2124,6 +2251,266 @@ let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCas
             }
         };
 
+        let refRegionsData = [];
+
+        window.loadSettingsDropdowns = async function() {
+            const { data: regData } = await supabase.from('ref_regions').select('*');
+            if (regData) {
+                refRegionsData = regData;
+                let uniqueRegions = [...new Set(regData.map(item => item.region_name))];
+                let regSelect = document.getElementById('new-user-region');
+                regSelect.innerHTML = '<option value="ALL">ALL REGIONS</option>';
+                uniqueRegions.forEach(r => {
+                    if(r) regSelect.innerHTML += `<option value="${r}">${r}</option>`;
+                });
+            }
+
+            const { data: adminData } = await supabase.from('users').select('id, role').eq('status', 'ACTIVE');
+            if (adminData) {
+                let repSelect = document.getElementById('new-user-reporting');
+                repSelect.innerHTML = '<option value="">-- PILIH ADMIN --</option>';
+                
+                let filteredAdmins = adminData.filter(a => {
+                    let r = String(a.role || '').toLowerCase();
+                    return r.includes('master') || r.includes('super');
+                });
+
+                filteredAdmins.forEach(a => {
+                    repSelect.innerHTML += `<option value="${a.id}">${a.id.toUpperCase()} (${a.role.toUpperCase()})</option>`;
+                });
+            }
+        };
+
+        window.loadAreasForRegion = function() {
+            let selectedReg = document.getElementById('new-user-region').value;
+            let areaSelect = document.getElementById('new-user-area');
+            areaSelect.innerHTML = '<option value="ALL">ALL AREAS</option>'; 
+            
+            if (selectedReg && selectedReg !== 'ALL') {
+                let filteredAreas = refRegionsData.filter(item => item.region_name === selectedReg);
+                let uniqueAreas = [...new Set(filteredAreas.map(item => item.area_name))];
+                uniqueAreas.forEach(a => {
+                    if(a) areaSelect.innerHTML += `<option value="${a}">${a}</option>`;
+                });
+            }
+        };
+
+        // =========================================================================
+        // 🚀 MODULE BARU: MANAGEMENT TASK ASSIGNMENT CENTER
+        // =========================================================================
+        async function initAssignmentFilters() {
+            let uniqueRegions = [...new Set(globalAccounts.map(a => a.region).filter(Boolean))];
+            let regSel = document.getElementById('assign-filter-region');
+            regSel.innerHTML = '<option value="">-- SELECT REGION --</option>';
+            uniqueRegions.forEach(r => regSel.innerHTML += `<option value="${r}">${r}</option>`);
+
+            document.getElementById('assign-filter-area').innerHTML = '<option value="">-- SELECT AREA --</option>';
+
+            try {
+                const { data: userList } = await supabase.from('users').select('id').eq('status', 'ACTIVE');
+                if (userList) {
+                    let picTarget = document.getElementById('assign-target-pic');
+                    picTarget.innerHTML = '<option value="">-- SELECT TARGET PIC --</option>';
+                    userList.forEach(u => {
+                        picTarget.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()}</option>`;
+                    });
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        window.loadAssignmentAreas = function() {
+            let reg = document.getElementById('assign-filter-region').value;
+            let areaSel = document.getElementById('assign-filter-area');
+            areaSel.innerHTML = '<option value="">-- SELECT AREA --</option>';
+            
+            if (reg) {
+                let uniqueAreas = [...new Set(globalAccounts.filter(a => a.region === reg).map(a => a.area).filter(Boolean))];
+                uniqueAreas.forEach(area => areaSel.innerHTML += `<option value="${area}">${area}</option>`);
+            }
+            renderAssignmentTable();
+        };
+
+        window.toggleAssignModeUI = function() {
+            let mode = document.querySelector('input[name="assign-mode"]:checked').value;
+            let checkHeader = document.getElementById('th-assign-checkbox-header');
+            if (mode === 'AUTO') {
+                checkHeader.style.opacity = '0.3';
+                document.querySelectorAll('.assign-row-checkbox').forEach(c => { c.checked = true; c.disabled = true; });
+            } else {
+                checkHeader.style.opacity = '1';
+                document.querySelectorAll('.assign-row-checkbox').forEach(c => { c.checked = false; c.disabled = false; });
+            }
+        };
+
+        window.toggleHeaderFilterPopup = function(columnKey, event) {
+            event.stopPropagation();
+            let menu = document.getElementById(`filter-pop-${columnKey}`);
+            if (menu.style.display === 'block') { menu.style.display = 'none'; return; }
+            
+            document.querySelectorAll('.filter-popup-menu').forEach(m => m.style.display = 'none');
+            menu.style.display = 'block';
+
+            let reg = document.getElementById('assign-filter-region').value;
+            let area = document.getElementById('assign-filter-area').value;
+            let pool = globalAccounts.filter(a => a.region === reg && a.area === area);
+
+            let uniqueValues = [...new Set(pool.map(a => {
+                if(columnKey === 'pack') return (a.details && a.details.pack_cd) || 'EMPTY';
+                return a[columnKey] || 'EMPTY';
+            }).filter(Boolean))];
+
+            menu.innerHTML = `<label><input type="checkbox" checked onclick="toggleAllSubFilters('${columnKey}', this)"> <b>Select All</b></label><hr style="border:none; border-top:1px solid #ddd; margin:4px 0;">`;
+            uniqueValues.forEach(val => {
+                let isChecked = !activeHeaderFilters[columnKey].includes(val);
+                menu.innerHTML += `<label><input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''} onchange="updateHeaderFilterState('${columnKey}', this)"> ${val}</label>`;
+            });
+        };
+
+        window.updateHeaderFilterState = function(columnKey, box) {
+            if (!box.checked) {
+                if(!activeHeaderFilters[columnKey].includes(box.value)) activeHeaderFilters[columnKey].push(box.value);
+            } else {
+                activeHeaderFilters[columnKey] = activeHeaderFilters[columnKey].filter(v => v !== box.value);
+            }
+            renderAssignmentTable();
+        };
+
+        window.toggleAllSubFilters = function(columnKey, masterBox) {
+            let parent = masterBox.closest('.filter-popup-menu');
+            parent.querySelectorAll('input[type="checkbox"]').forEach(b => {
+                if(b !== masterBox) { b.checked = masterBox.checked; updateHeaderFilterState(columnKey, b); }
+            });
+        };
+
+        window.renderAssignmentTable = function() {
+            let rSel = document.getElementById('assign-filter-region').value;
+            let aSel = document.getElementById('assign-filter-area').value;
+            const tbody = document.getElementById('assignment-table-body');
+            
+            document.getElementById('assign-select-all').checked = false;
+
+            if (!rSel || !aSel) {
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color: var(--text-muted);">Sila select Region & Area untuk memulakan tugasan agihan pukal.</td></tr>`;
+                document.getElementById('assign-total-count').innerText = "0";
+                return;
+            }
+
+            let pool = globalAccounts.filter(a => a.region === rSel && a.area === aSel);
+
+            Object.keys(activeHeaderFilters).forEach(key => {
+                let excludedValues = activeHeaderFilters[key];
+                if (excludedValues.length > 0) {
+                    pool = pool.filter(a => {
+                        let val = (key === 'pack') ? ((a.details && a.details.pack_cd) || 'EMPTY') : (a[key] || 'EMPTY');
+                        return !excludedValues.includes(String(val));
+                    });
+                }
+            });
+
+            tbody.innerHTML = '';
+            document.getElementById('assign-total-count').innerText = pool.length;
+
+            if (pool.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color: var(--error-red); font-weight:bold;">Tiada kes ditemui mengikut kriteria penapis ini.</td></tr>`;
+                return;
+            }
+
+            pool.forEach(row => {
+                let packCode = (row.details && row.details.pack_cd) || '-';
+                let picName = row.assigned_to ? `<b>${row.assigned_to.toUpperCase()}</b>` : `<span style="color:var(--error-red); font-weight:bold;">UNASSIGNED</span>`;
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="text-align:center;"><input type="checkbox" class="assign-row-checkbox" value="${row.acct}"></td>
+                        <td>${row.region}</td>
+                        <td>${row.area}</td>
+                        <td>${row.loc}</td>
+                        <td style="font-weight:bold; color:var(--accent-gold);">${row.acct}</td>
+                        <td>${packCode}</td>
+                        <td>${row.delq || '-'}</td>
+                        <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td>${row.assigned_to || 'EMPTY'}</td>
+                        <td>${picName}</td>
+                    </tr>
+                `;
+            });
+            toggleAssignModeUI();
+        };
+
+        window.toggleSelectAllAssignment = function(masterBox) {
+            let checkboxes = document.getElementsByClassName('assign-row-checkbox');
+            for (let box of checkboxes) {
+                if (!box.disabled) { box.checked = masterBox.checked; }
+            }
+        };
+
+        window.executeBulkAssignment = async function() {
+            let targetPic = document.getElementById('assign-target-pic').value;
+            let mode = document.querySelector('input[name="assign-mode"]:checked').value;
+            
+            let checkboxes = document.getElementsByClassName('assign-row-checkbox');
+            let selectedAccts = [];
+            for (let box of checkboxes) {
+                if (box.checked) selectedAccts.push(box.value);
+            }
+
+            if (selectedAccts.length === 0) {
+                alert("Sila TANDA (tick) sekurang-kurangnya satu nombor akaun pada jadual!");
+                return;
+            }
+            if (!targetPic) {
+                alert("Sila PILIH TARGET PIC ID baharu terlebih dahulu!");
+                return;
+            }
+
+            let confirmText = mode === 'MANUAL' 
+                ? `PENGESAHAN AGIHAN:\nAnda mahu memindahkan ${selectedAccts.length} akaun secara manual kepada PIC: ${targetPic.toUpperCase()}?`
+                : `PILIHAN (B) AUTO-DIVIDE:\nSistem akan membahagikan kesemua ${selectedAccts.length} tugasan ini kepada PIC: ${targetPic.toUpperCase()}. Teruskan?`;
+
+            let isConfirmed = await customConfirm(confirmText);
+            if (!isConfirmed) return;
+
+            document.getElementById('loadingText').innerText = `Mengagihkan ${selectedAccts.length} kes ke server cloud...`;
+            document.getElementById('loadingModal').style.display = 'flex';
+
+            try {
+                const CHUNK = 100;
+                for (let i = 0; i < selectedAccts.length; i += CHUNK) {
+                    let batch = selectedAccts.slice(i, i + CHUNK);
+                    
+                    const { error: updErr } = await supabase
+                        .from('accounts')
+                        .update({ assigned_to: targetPic })
+                        .in('acct', batch);
+
+                    if (updErr) throw updErr;
+
+                    let currentTimestamp = new Date().toISOString();
+                    let logs = batch.map(acc => ({
+                        acct: acc,
+                        remark1: `CASE ASSIGNED/TRANSFERRED TO PIC (${targetPic.toUpperCase()}) BY ADMIN`,
+                        remark5: `[ASSIGNED] TRSF TO (${targetPic.toUpperCase()})`,
+                        updated_by: currentUser.username,
+                        updated_at: currentTimestamp
+                    }));
+
+                    await supabase.from('findings').insert(logs);
+                }
+
+                await localforage.removeItem(`scazp_cache_${currentUser.username}`);
+                localStorage.removeItem(`scazp_time_${currentUser.username}`);
+
+                document.getElementById('loadingModal').style.display = 'none';
+                alert(`Agihan pukal berjaya! ${selectedAccts.length} kes kini di bawah seliaan ${targetPic.toUpperCase()}.`);
+                
+                await fetchFullDatabaseData(null);
+                renderAssignmentTable();
+                applyFilterAndRender();
+
+            } catch (err) {
+                document.getElementById('loadingModal').style.display = 'none';
+                showNotification("CRITICAL ASSIGN ERROR", err.message, true);
+            }
+        };
     </script>
 </body>
 </html>
