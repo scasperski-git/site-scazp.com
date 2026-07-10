@@ -6,7 +6,7 @@
     <title>Findings Management System</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
-    <style>
+<style>
         :root {
             --bg-color: #f0f4f8;      /* Biru ais cair (Frost Blue) */
             --card-bg: #ffffff;       /* Putih bersih untuk kad/kotak */
@@ -160,14 +160,15 @@
         }
         .btn-cancel:hover { background-color: #d9e2ec; color: var(--text-main); }
 
-        /* --- STYLES FOR EXPANDABLE DATA & CONFIDENTIAL WATERMARK --- */
+/* --- STYLES FOR EXPANDABLE DATA & CONFIDENTIAL WATERMARK --- */
         .expand-btn { background: #e8f0f8; color: var(--text-main); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-right: 5px; font-weight: 600; }
         .expand-btn:hover { background: var(--accent-gold); color: #ffffff; }
         
+        /* Gelapkan row dan tambah shadow dalam supaya nampak beza/terlekuk */
         .details-row { background-color: #d9e2ec; box-shadow: inset 0 3px 6px rgba(16,42,67,0.04); }
         .details-wrapper { padding: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; border-bottom: 2px solid var(--accent-gold); border-left: 4px solid var(--accent-gold); }
         
-        .details-box { 
+.details-box { 
             background-color: #ffffff !important; 
             padding: 10px; 
             border-radius: 6px; 
@@ -181,26 +182,35 @@
         .details-box::before {
             content: attr(data-watermark);
             position: absolute;
-            top: -20%;
-            left: -20%;
-            width: 160%;
-            height: 160%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             font-family: 'Segoe UI', sans-serif;
             font-size: 8px;
             font-weight: 900;
-            color: rgba(16, 42, 67, 0.09); /* Gelap sikit 9% opacity */
+            
+            /* [UPDATE]: Kita tukar warna text ke solid gray pudar */
+            color: rgba(16, 42, 67, 0.09); 
+            
+            /* [FIX]: Sifat jaring melimpah yang takkan patah di skrin sempit */
             white-space: normal;
             word-break: break-all;
             line-height: 2.2;
             letter-spacing: 1px;
             padding: 10px;
             box-sizing: border-box;
+            
+            /* [FIX]: Tambah kesan condong tanpa merosakkan luas container */
             transform: rotate(-10deg) scale(1.2);
             transform-origin: center center;
+            
             pointer-events: none;
             z-index: 0;
         }
+
         
+        /* Naikkan z-index content asal supaya duduk di atas watermark */
         .details-box h4, .details-box p {
             position: relative;
             z-index: 2;
@@ -298,7 +308,7 @@
             }
         }
 
-        /* --- STYLES UNTUK FAKE NEW PAGE (FULL SCREEN MODAL) --- */
+    /* --- STYLES UNTUK FAKE NEW PAGE (FULL SCREEN MODAL) --- */
         .full-page-modal {
             width: 100vw !important;
             height: 100vh !important;
@@ -354,6 +364,7 @@
                 gap: 15px;
             }
         }
+    
     </style>
 </head>
 <body>
@@ -393,24 +404,26 @@
             <button class="nav-btn" id="tab-report" onclick="switchTab('report')" style="display: none;">MIS Remark</button>
         </div>
 
-        <div id="dashboard-panel" class="main-panel">
+<div id="dashboard-panel" class="main-panel">
+            
             <div class="filter-section" style="flex-grow: 2;">
                 <span class="filter-title">Advanced Search By:</span>
+                
                 <div class="search-container">
                     <select id="search-type" class="form-control" style="width: 100%; max-width: 200px; border-color: var(--accent-gold);">
                         <option value="acct">Account No</option>
                         <option value="nric">NRIC (All Linked)</option>
                         <option value="plate">Plate No</option>
                     </select>
+                    
                     <input type="search" id="search-query" class="form-control" placeholder="Enter search..." style="flex: 1;" autocomplete="off" onkeypress="if(event.key==='Enter') executeSearch()">
+                    
                     <div style="display: flex; gap: 5px;">
                         <button class="btn-submit" onclick="executeSearch()" style="padding: 10px 15px;">SEARCH</button>
                         <button class="btn-cancel" onclick="clearSearch()" style="padding: 10px 15px;"> X </button>
                     </div>
                 </div>
-            </div>
-            
-            <div class="action-bar">
+            </div> <div class="action-bar">
                 <div class="filter-section">
                     <div id="region-filters-container">
                         <span class="filter-title">Select Region</span>
@@ -421,6 +434,7 @@
                         <div class="btn-group" id="area-buttons"></div>
                     </div>
                 </div>
+                
                 <div id="upload-action-container" style="display: none;">
                     <input type="file" id="excel-file-input" style="display: none;" accept=".xlsx, .xls, .csv" onchange="handleExcelFileSelect(event)">
                     <button class="btn-upload-trigger" onclick="document.getElementById('excel-file-input').click()">
@@ -507,6 +521,7 @@
                         <option value="SARAWAK">SARAWAK</option>
                     </select>
                 </div>
+
                 <button class="btn-submit" onclick="addNewUser()">Save User Configuration</button>
             </div>
 
@@ -645,11 +660,12 @@
                     </div>
                 </div>
             </div>
+
             <button class="btn-submit" style="width: 100%; background: #2e7d32; margin-top: 15px;" onclick="processExcelUpload()">CONFIRM & START UPLOAD</button>
         </div>
     </div>
     
-    <div class="modal-overlay" id="updateModal" style="align-items: flex-start; padding: 0;">
+<div class="modal-overlay" id="updateModal" style="align-items: flex-start; padding: 0;">
         <div class="modal-content full-page-modal">
             
             <div class="fp-header">
@@ -702,7 +718,7 @@
             
         </div>
     </div>
-
+    
     <div class="modal-overlay" id="progressModal">
         <div class="modal-content">
             <h2 style="margin-top: 0; font-size: 18px; color: var(--text-main);">DATA STREAMING PIPELINE</h2>
@@ -1113,7 +1129,7 @@
         let activeSearchType = null;
         let activeSearchQuery = '';
 
-        window.executeSearch = function() {
+window.executeSearch = function() {
             activeSearchType = document.getElementById('search-type').value;
             activeSearchQuery = document.getElementById('search-query').value.trim().toUpperCase();
             
@@ -1204,7 +1220,7 @@
             document.getElementById('kpi-osb').innerText = 'RM ' + totalOsbValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
-        window.sortTable = function(columnName) {
+window.sortTable = function(columnName) {
             if (currentSortColumn === columnName) {
                 currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
             } else {
@@ -1243,7 +1259,7 @@
             renderTablePage();
         };
 
-        function resetHeaderArrows() {
+function resetHeaderArrows() {
             const cols = ['region', 'area', 'loc', 'type', 'acct', 'delq', 'arrs_mth', 'osb', 'status', 'last_date'];
             cols.forEach(c => {
                 const el = document.getElementById(`th-${c}`);
@@ -1285,6 +1301,7 @@
 
             pageData.forEach(row => {
                 let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
+                
                 let d = row.details || {};
 
                 tbody.innerHTML += `
@@ -1307,13 +1324,13 @@
                 `;
 
                 let todayDate = new Date().toLocaleDateString('en-GB');
-                let singleLine = `INTERNAL DATA - PIC: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
-                let wText = `${singleLine.repeat(3)}\n`.repeat(25);
+                let wText = `INTERNAL DATA - ID: ${currentUser.username.toUpperCase()} - ${todayDate}      `.repeat(60);
 
                 tbody.innerHTML += `
                     <tr id="details-${row.acct}" class="details-row" style="display: none;">
                         <td colspan="11" style="padding: 0;">
                             <div class="details-wrapper">
+                                
                                 <div style="display: flex; flex-direction: column; gap: 15px;">
                                     <div class="details-box" data-watermark="${wText}">
                                         <h4>HIRER INFO</h4>
@@ -1354,6 +1371,7 @@
                                     <p><span class="lbl" style="width: 80px;">ODP BAL</span>: ${d.odp || '-'}</p>
                                     <p><span class="lbl" style="width: 80px;">ADCH BAL</span>: ${d.adch || '-'}</p>
                                 </div>
+
                             </div>
                         </td>
                     </tr>
@@ -1914,6 +1932,7 @@
             document.getElementById('updateModal').style.display = 'flex';
             
             document.getElementById('btnResetPending').style.display = (currentUser.role === 'master' || currentUser.role === 'super') ? 'block' : 'none';
+
             document.getElementById('finding-status-select').value = "";
 
             // --- JANA MAKLUMAT AKAUN & WATERMARK KE DALAM MODAL ---
@@ -1965,6 +1984,12 @@
                     <p><span class="lbl" style="width: 80px;">ADCH BAL</span>: ${d.adch || '-'}</p>
                 </div>
             `;
+            // --------------------------------------------------------
+
+            let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
+            if(accountInfo.finding_status) {
+                document.getElementById('finding-status-select').value = accountInfo.finding_status;
+            }
 
             const historyBox = document.querySelector('.history-box');
             historyBox.innerHTML = '<div style="text-align:center; padding:10px;">Loading history trail...</div>';
@@ -1975,7 +2000,8 @@
                 historyBox.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:10px;">No historical findings found.</div>';
             } else {
                 findingsList.forEach((data) => {
-                    let dateFormatted = 'N/A';
+
+            let dateFormatted = 'N/A';
                     if (data.updated_at) {
                         dateFormatted = new Date(data.updated_at).toLocaleString('en-GB', {
                             day: '2-digit',
@@ -1991,6 +2017,7 @@
                     let statusBadgeHTML = '';
                     if (data.remark5 && data.remark5.startsWith('[')) {
                         let extractedStatus = data.remark5.substring(1, data.remark5.indexOf(']'));
+                        
                         let badgeColor = 'var(--text-muted)';
                         if (extractedStatus === 'CALL') badgeColor = 'var(--status-call)';
                         if (extractedStatus === 'UCT') badgeColor = 'var(--status-uct)';
@@ -2028,56 +2055,54 @@
                         </div>`;
                 });
             }
-            setTimeout(() => document.getElementById('single-remark-box').focus(), 100);
+            setTimeout(() => document.getElementById('remark1').focus(), 100);
         };
         
-        window.updateTextareaInfo = function(el) {
-            if (el.value.length > 200) {
-                el.value = el.value.substring(0, 200);
+        window.handleEnter = function(e, nextElementId) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const nextEl = document.getElementById(nextElementId);
+                if (nextEl) nextEl.focus();
             }
-            document.getElementById('textarea-info').innerText = `Jumlah Karakter: ${el.value.length}/200`;
+        };
+
+        window.handleAutoJump = function(currentElement, nextElementId) {
+            currentElement.value = currentElement.value.toUpperCase();
+            if (currentElement.value.length >= currentElement.maxLength && nextElementId) {
+                const nextEl = document.getElementById(nextElementId);
+                if (nextEl) {
+                    nextEl.focus(); 
+                }
+            }
         };
         
         window.closeModal = function() { 
             document.getElementById('updateModal').style.display = 'none'; 
-            document.getElementById('single-remark-box').value = ''; 
+            document.getElementById('remark1').value = ''; 
+            document.getElementById('remark2').value = ''; 
+            document.getElementById('remark3').value = ''; 
+            document.getElementById('remark4').value = ''; 
             document.getElementById('finding-status-select').value = '';
-            document.getElementById('textarea-info').innerText = `Jumlah Karakter: 0/200`;
         };
 
         window.saveFinding = async function() {
             let selectedStatus = document.getElementById('finding-status-select').value;
+            let r1 = document.getElementById('remark1').value.trim();
+            let r2 = document.getElementById('remark2').value.trim();
+            let r3 = document.getElementById('remark3').value.trim();
+            let r4 = document.getElementById('remark4').value.trim();
             let accNo = document.getElementById('modalAccNo').innerText;
-            let fullStory = document.getElementById('single-remark-box').value.trim();
             
             if(!selectedStatus) {
-                alert("Sila PILIH ACTION STATUS sedia ada terlebih dahulu!");
+                alert("Please SELECT ACTION STATUS (CALL/UCT/PTP/PV/PAID) first!");
                 document.getElementById('finding-status-select').focus();
                 return;
             }
 
-            if(!fullStory) { 
-                alert("Sila isi nota pemeriksaan terlebih dahulu."); 
+            if(!r1 && !r2 && !r3 && !r4) { 
+                alert("Please enter at least one row of findings notes."); 
                 return; 
             }
-
-            // SMART SPLIT LOGIC: Potong karangan automatik ke r1-r4 (Max 50 Char per row)
-            let regex = /. {1,50}(?:\s|$)/g;
-            let chunks = [];
-            let match;
-            
-            if ((fullStory.match(regex) || []).join('').length < fullStory.length) {
-                chunks = fullStory.match(/.{1,50}/g) || [];
-            } else {
-                while ((match = regex.exec(fullStory)) !== null) {
-                    chunks.push(match[0].trim());
-                }
-            }
-
-            let r1 = (chunks[0] || '').toUpperCase();
-            let r2 = (chunks[1] || '').toUpperCase();
-            let r3 = (chunks[2] || '').toUpperCase();
-            let r4 = (chunks[3] || '').toUpperCase();
             
             const btn = document.getElementById('btnSaveFinding'); 
             btn.innerText = "SAVING...";
@@ -2087,14 +2112,15 @@
             let acctLoc = accountInfo.loc || '';
             let acctRegion = accountInfo.region || '';
             
-            let updatedDetailsObj = accountInfo.details || {};
+let updatedDetailsObj = accountInfo.details || {};
             updatedDetailsObj.finding_status = selectedStatus; 
 
-            let today = new Date();
-            let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
-            updatedDetailsObj.last_remark_date = dateStr;
-            
-            let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()})`;
+let today = new Date();
+let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
+
+updatedDetailsObj.last_remark_date = dateStr;
+
+let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()})`;
             
             try {
                 const { data: insertedData, error: insertError } = await supabase
@@ -2109,8 +2135,7 @@
                         type: acctType,
                         loc: acctLoc,
                         region: acctRegion,
-                        updated_by: currentUser.username,
-                        updated_at: new Date().toISOString()
+                        updated_by: currentUser.username 
                     }])
                     .select('updated_at');
 
@@ -2145,6 +2170,7 @@
                 }
             } catch (err) {
                 showNotification("CRITICAL SYSTEM ERROR", err.message, true);
+                console.error(err);
             } finally {
                 btn.innerText = "COMMIT ENTRY";
             }
@@ -2181,15 +2207,18 @@
                 const cacheKey = `scazp_cache_${safeRegion}`;
                 await localforage.setItem(cacheKey, globalAccounts);
 
-                showNotification("RESET SUCCESSFUL", `Account <b>${accNo}</b> has been reverted to PENDING status.`);
+                showNotification("RESET SUCCESSFUL", `Account <b>${accNo}</b> has been reverted to PENDING status and the log history has been cleared.`);
                 closeModal();
                 applyFilterAndRender();
+
             } catch (err) {
                 showNotification("CRITICAL SYSTEM ERROR", err.message, true);
+                console.error(err);
             }
         };
         
         window.onclick = function(e) { 
+            if(e.target == document.getElementById('updateModal')) closeModal(); 
             if(e.target == document.getElementById('mappingModal')) closeMappingModal();
         }
 
@@ -2209,6 +2238,7 @@
                 renderTablePage();
             }
         };
+
     </script>
 </body>
 </html>
