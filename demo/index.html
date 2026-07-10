@@ -458,7 +458,6 @@
                             <th class="sortable" onclick="sortTable('osb')" id="th-osb">OSB (RM) ⇅</th>
                             <th class="sortable" onclick="sortTable('status')" id="th-status">STATUS ⇅</th>
                             <th class="sortable" onclick="sortTable('last_date')" id="th-last_date" style="color: var(--accent-gold);">ATTEND DATE ⇅</th>
-                            <th>DETAIL & REMARK</th>
                         </tr>
                     </thead>
                     <tbody id="table-body"></tbody>
@@ -1283,7 +1282,7 @@
             const endIndex = startIndex + rowsPerPage;
             const pageData = filteredAccounts.slice(startIndex, endIndex);
 
-            pageData.forEach(row => {
+pageData.forEach(row => {
                 let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
                 let d = row.details || {};
 
@@ -1293,71 +1292,15 @@
                         <td>${row.area || '-'}</td>
                         <td>${row.loc || '-'}</td>
                         <td>${row.type || '-'}</td>
-                        <td style="font-weight: bold; color: var(--accent-gold);">${row.acct}</td>
+                        <td style="font-weight: 900; color: var(--accent-gold); cursor: pointer; text-decoration: underline;" onclick="openModal('${row.acct}')">${row.acct}</td>
                         <td>${row.delq || '-'}</td>
                         <td>${row.arrs_mth || '0'}</td>
                         <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td><span class="status-badge ${badgeClass}">${row.status === 'UPDATED' ? 'ATTENDED' : row.status}</span></td>
                         <td><span style="font-weight: 700; color: var(--text-muted); font-size: 11px;">${d.last_remark_date || '-'}</span></td>
-                        <td style="white-space: nowrap;">
-                            <button class="expand-btn" onclick="toggleExpand('${row.acct}')">▼ DETAILS</button>
-                            <button class="btn-update" onclick="openModal('${row.acct}')">REMARK</button>
-                        </td>
-                    </tr>
+                        </tr>
                 `;
-
-                let todayDate = new Date().toLocaleDateString('en-GB');
-                let singleLine = `INTERNAL DATA - PIC: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
-                let wText = `${singleLine.repeat(3)}\n`.repeat(25);
-
-                tbody.innerHTML += `
-                    <tr id="details-${row.acct}" class="details-row" style="display: none;">
-                        <td colspan="11" style="padding: 0;">
-                            <div class="details-wrapper">
-                                <div style="display: flex; flex-direction: column; gap: 15px;">
-                                    <div class="details-box" data-watermark="${wText}">
-                                        <h4>HIRER INFO</h4>
-                                        <p><span class="lbl">NAME</span>: ${d.h_name || '-'}</p>
-                                        <p><span class="lbl">NRIC</span>: ${d.h_nric || '-'}</p>
-                                        <p><span class="lbl">TEL</span>: ${d.h_tel || '-'}</p>
-                                        <p><span class="lbl">HOME ADD</span>: ${d.h_add1 || '-'} ${d.h_add2 || ''} ${d.h_add3 || ''}</p>
-                                        <br>
-                                        <p><span class="lbl">CO. NAME</span>: ${d.hc_name || '-'}</p>
-                                        <p><span class="lbl">CO. TEL</span>: ${d.hc_tel || '-'}</p>
-                                        <p><span class="lbl">CO. ADD</span>: ${d.hc_add1 || '-'} ${d.hc_add2 || ''}</p>
-                                    </div>
-                                    <div class="details-box" data-watermark="${wText}">
-                                        <h4>SPOUSE INFO</h4>
-                                        <p><span class="lbl">NAME</span>: ${d.s_name || '-'}</p>
-                                        <p><span class="lbl">NRIC</span>: ${d.s_nric || '-'}</p>
-                                        <p><span class="lbl">TEL</span>: ${d.s_tel || '-'}</p>
-                                    </div>
-                                </div>
-
-                                <div class="details-box" data-watermark="${wText}">
-                                    <h4>GUARANTOR INFO</h4>
-                                    <p><span class="lbl">NAME</span>: ${d.g_name || '-'}</p>
-                                    <p><span class="lbl">NRIC</span>: ${d.g_nric || '-'}</p>
-                                    <p><span class="lbl">TEL</span>: ${d.g_tel || '-'}</p>
-                                    <p><span class="lbl">GTOR ADD</span>: ${d.g_add1 || '-'} ${d.g_add2 || ''}</p>
-                                    <br>
-                                    <p><span class="lbl">CO. NAME</span>: ${d.gc_name || '-'}</p>
-                                    <p><span class="lbl">CO. TEL</span>: ${d.gc_tel || '-'}</p>
-                                    <p><span class="lbl">CO. ADD</span>: ${d.gc_add1 || '-'} ${d.gc_add2 || ''}</p>
-                                </div>
-
-                                <div class="details-box" data-watermark="${wText}">
-                                    <h4>ACCOUNT BALANCES</h4>
-                                    <p><span class="lbl" style="width: 80px;">PRODUCT</span>: ${d.prod || '-'}</p>
-                                    <p><span class="lbl" style="width: 80px;">PLATE NO</span>: ${d.plate || '-'}</p>
-                                    <p><span class="lbl" style="width: 80px;">BALANCE</span>: ${d.bal || '-'}</p>
-                                    <p><span class="lbl" style="width: 80px;">ODP BAL</span>: ${d.odp || '-'}</p>
-                                    <p><span class="lbl" style="width: 80px;">ADCH BAL</span>: ${d.adch || '-'}</p>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+                // KOD HIDDEN ROW (details-row) JUGA DIBUANG SEPENUHNYA DARI SINI
             });
 
             document.getElementById('page-info').innerText = `Page ${currentPage} of ${totalPages} (Total: ${filteredAccounts.length.toLocaleString()} Records)`;
@@ -2018,8 +1961,8 @@
                         histRemark = `<div style="font-size: 11px; margin-top: 5px; color: var(--text-main); font-weight: normal;">${data.remark || ''}</div>`;
                     }
 
-                    historyBox.innerHTML += `
-                        <div class="history-item" style="overflow: hidden; padding: 8px 0; border-bottom: 1px dashed var(--border-color);">
+historyBox.innerHTML += `
+                        <div class="history-item" style="overflow: hidden; padding: 10px; margin-bottom: 10px; background-color: #ffffff; border: 2px solid var(--text-main); border-radius: 6px; box-shadow: 2px 2px 0px rgba(16,42,67,0.1);">
                             <div class="history-meta" style="font-weight: bold; font-size: 10px; color: var(--text-muted);">
                                 UPDATE BY: ${data.updated_by ? data.updated_by.toUpperCase() : 'SYSTEM'} | ${dateFormatted}${statusBadgeHTML}
                                 ${deleteBtnHTML}
@@ -2031,13 +1974,15 @@
             setTimeout(() => document.getElementById('single-remark-box').focus(), 100);
         };
         
-        window.updateTextareaInfo = function(el) {
+window.updateTextareaInfo = function(el) {
+            // [UPDATE]: Auto tukar huruf besar (Caps Lock automatik)
+            el.value = el.value.toUpperCase(); 
+
             if (el.value.length > 200) {
                 el.value = el.value.substring(0, 200);
             }
             document.getElementById('textarea-info').innerText = `Jumlah Karakter: ${el.value.length}/200`;
         };
-        
         window.closeModal = function() { 
             document.getElementById('updateModal').style.display = 'none'; 
             document.getElementById('single-remark-box').value = ''; 
@@ -2131,15 +2076,19 @@
                     const cacheKey = `scazp_cache_${safeRegion}`;
                     const timeKey = `scazp_time_${safeRegion}`;
                     
-                    await localforage.setItem(cacheKey, globalAccounts);
+await localforage.setItem(cacheKey, globalAccounts);
                     
                     if (insertedData && insertedData.length > 0) {
                         localStorage.setItem(timeKey, insertedData[0].updated_at);
                     }
                     
                     showNotification("RECORD SAVED", `Action for account <b>${accNo}</b> successfully updated.`); 
-                    closeModal(); 
+                    
+                    // [UPDATE]: Jangan tutup modal. Refresh background table & panggil semula openModal untuk tunjuk rekod baharu!
+                    document.getElementById('single-remark-box').value = '';
+                    document.getElementById('textarea-info').innerText = `Jumlah Karakter: 0/200`;
                     applyFilterAndRender();
+                    openModal(accNo);
                 } else { 
                     showNotification("DATABASE ERROR", insertError.message, true); 
                 }
