@@ -2095,15 +2095,15 @@ let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCas
                         rowToUpdate.details = updatedDetailsObj;
                     }
                     
-                    const safeRegion = currentUser.role === 'master' || currentUser.role === 'super' ? 'all' : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
-                    const cacheKey = `scazp_cache_${safeRegion}`;
-                    const timeKey = `scazp_time_${safeRegion}`;
-                    
-                    await localforage.setItem(cacheKey, globalAccounts);
-                    
-                    if (insertedData && insertedData.length > 0) {
-                        localStorage.setItem(timeKey, insertedData[0].updated_at);
-                    }
+// [FIX BUG 1]: Simpan cache ikut username, bukan region lagi
+const cacheKey = `scazp_cache_${currentUser.username}`;
+const timeKey = `scazp_time_${currentUser.username}`;
+
+await localforage.setItem(cacheKey, globalAccounts);
+
+if (insertedData && insertedData.length > 0) {
+    localStorage.setItem(timeKey, insertedData[0].updated_at);
+}
                     
                     showNotification("RECORD SAVED", `Action for account <b>${accNo}</b> successfully updated.`); 
                     closeModal(); 
@@ -2146,9 +2146,9 @@ let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCas
                     rowToUpdate.details = resetDetails;
                 }
 
-                const safeRegion = (currentUser.role === 'master' || currentUser.role === 'super') ? 'all' : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
-                const cacheKey = `scazp_cache_${safeRegion}`;
-                await localforage.setItem(cacheKey, globalAccounts);
+// [FIX BUG 1]: Samakan cara simpan cache ikut username
+const cacheKey = `scazp_cache_${currentUser.username}`;
+await localforage.setItem(cacheKey, globalAccounts);
 
                 showNotification("RESET SUCCESSFUL", `Account <b>${accNo}</b> has been reverted to PENDING status and the log history has been cleared.`);
                 closeModal();
