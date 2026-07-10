@@ -1968,24 +1968,26 @@
             const historyBox = document.querySelector('.history-box');
             historyBox.innerHTML = '<div style="text-align:center; padding:10px;">Loading history trail...</div>';
             
-            const { data: findingsList } = await supabase.from('findings').select('*').eq('acct', accNo).order('updated_at', { ascending: false });
+const { data: findingsList } = await supabase.from('findings').select('*').eq('acct', accNo);
             historyBox.innerHTML = ''; 
             if(!findingsList || findingsList.length === 0) {
                 historyBox.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:10px;">No historical findings found.</div>';
             } else {
+                // [FIX]: Susun rekod paling latest di atas sekali berdasarkan masa (ISO atau String Date)
+                findingsList.sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
+
                 findingsList.forEach((data) => {
-                    let dateFormatted = 'N/A';
-                    if (data.updated_at) {
-                        dateFormatted = new Date(data.updated_at).toLocaleString('en-GB', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit',
-                            hour12: true
-                        });
-                    }
+                    // [FIX]: Gunakan fallback ke created_at atau tarikh manual jika updated_at belum sempat di-generate oleh server
+                    let rawDate = data.updated_at || data.created_at || new Date().toISOString();
+                    let dateFormatted = new Date(rawDate).toLocaleString('en-GB', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                    });
                     
                     let statusBadgeHTML = '';
                     if (data.remark5 && data.remark5.startsWith('[')) {
@@ -1997,6 +1999,7 @@
                         if (extractedStatus === 'PTP') badgeColor = 'var(--status-ptp)';
                         if (extractedStatus === 'PV') badgeColor = 'var(--status-pv)';
                         if (extractedStatus === 'PAID') badgeColor = 'var(--status-paid)';
+                        if (extractedStatus === 'ASSIGNED') badgeColor = '#334155'; // Warna gelap premium untuk tag assigned
 
                         statusBadgeHTML = ` | <span style="background-color: ${badgeColor}; color: white; padding: 1px 5px; border-radius: 3px; font-weight: 900; font-size: 9px; display: inline-block; vertical-align: middle;">${extractedStatus}</span>`;
                     }
@@ -2427,12 +2430,14 @@
 
                     if (updErr) throw updErr;
 
-                    // Log audit trail automatik bagi setiap row
+                // [FIX]: Suntik updated_at dengan tarikh waktu semasa (ISO String)
+                    let currentTimestamp = new Date().toISOString();
                     let logs = batch.map(acc => ({
                         acct: acc,
-                        remark1: `CASE ASSIGNED/TRANSFERRED TO PIC (${targetPic.toUpperCase()}) BY ADMIN`,
+                        remark1: `CASE ASSIGNED TO PIC (${targetPic.toUpperCase()}) BY ADMIN`,
                         remark5: `[ASSIGNED] TRSF TO (${targetPic.toUpperCase()})`,
-                        updated_by: currentUser.username
+                        updated_by: currentUser.username,
+                        updated_at: currentTimestamp // <-- [FIX]: Selesaikan punca N/A
                     }));
 
                     await supabase.from('findings').insert(logs);
