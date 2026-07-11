@@ -1437,14 +1437,17 @@ window.switchTab = function(target) {
         // [FASA 2]: PENGURUSAN USER BERSERTA PAGINATION & SEARCH
         // =========================================================
         
-        window.fetchAndRenderUsers = async function() {
+window.fetchAndRenderUsers = async function() {
             try {
                 // Tarik column report_to dari pangkalan data
-                const { data, error } = await supabase.from('users').select('id, role, assignedregion, status, report_to').order('id', { ascending: true });
+                const { 
+                    data, error } = await supabase.from('users').select('id, role, assignedregion, status, report_to').order('id', { ascending: true });
                 if (error) throw error;
-                
                 allSystemUsers = data;
                 filterUserList(); // Tapis dan paparkan
+                
+                // [FIX]: Otomatis isi ulang dropdown assignment setelah data user berhasil di-load
+                populateAssignSubordinates();
             } catch (err) {
                 console.error("Failed to fetch user list:", err);
             }
@@ -2435,19 +2438,36 @@ if (rawLocCd !== "") {
         let currentAssignPage = 1;
         const assignRowsPerPage = 20;
 
-        window.populateAssignSubordinates = function() {
+window.populateAssignSubordinates = function() {
             const dropdown = document.getElementById('assign-target-user');
+            if (!dropdown) return;
+            
             dropdown.innerHTML = '<option value="">-- PILIH STAF BAWAHAN --</option>';
             
+            // Proteksi jika data allSystemUsers belum selesai di-load dari server
+            if (!allSystemUsers || allSystemUsers.length === 0) return;
+            
             let subordinates = [];
+            let currentUserIdObj = currentUser.id || currentUser.username || "";
+            let currentUserIdClean = String(currentUserIdObj).trim().toLowerCase();
+
             if (currentUser.role === 'super') {
-                // Super Admin boleh nampak & assign kepada semua orang
-                subordinates = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.id !== currentUser.id);
+                // Super Admin dapat melihat & mendistribusikan ke semua orang
+                subordinates = allSystemUsers.filter(u => {
+                    let uStatus = String(u.status || '').toUpperCase().trim();
+                    let uId = String(u.id || '').toLowerCase().trim();
+                    return uStatus === 'ACTIVE' && uId !== currentUserIdClean;
+                });
             } else {
-                // Manager/Admin cuma nampak staf yang "Report To" mereka sahaja
-                subordinates = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.report_to === currentUser.id);
+                // Manager/Admin hanya melihat staf yang "Report To" langsung ke ID mereka
+                subordinates = allSystemUsers.filter(u => {
+                    let uStatus = String(u.status || '').toUpperCase().trim();
+                    let uReportTo = String(u.report_to || '').toLowerCase().trim();
+                    return uStatus === 'ACTIVE' && uReportTo === currentUserIdClean;
+                });
             }
 
+            // Masukkan data staf ke dalam opsi dropdown
             subordinates.forEach(u => {
                 dropdown.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
             });
