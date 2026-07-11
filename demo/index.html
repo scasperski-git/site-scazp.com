@@ -210,25 +210,34 @@
             box-shadow: 0 1px 2px rgba(229, 57, 53, 0.05);
         }
         
+/* --- BUTANG DELETE FINDING (DESKTOP & MOBILE) --- */
+        .btn-delete-finding {
+            float: right;
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: var(--error-red);
+            border-radius: 4px; 
+            cursor: pointer;
+            font-size: 9px; /* Saiz dikecilkan untuk desktop */
+            padding: 3px 6px; /* Padding dinipiskan */
+            font-weight: bold;
+            transition: all 0.2s ease;
+            margin-left: 10px;
+            display: inline-flex;
+            align-items: center;
+        }
+        
         .btn-delete-finding:hover {
             background-color: var(--error-red);
             border-color: var(--error-red);
             color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(229, 57, 53, 0.25);
-        }
-        
-        .btn-delete-finding:active {
-            transform: translateY(0);
-            box-shadow: none;
         }
 
         /* KHAS UNTUK SKRIN FON */
         @media (max-width: 768px) {
             .btn-delete-finding {
-                padding: 6px 12px; 
-                font-size: 11px;
-                border-radius: 4px;
+                padding: 4px 8px; /* Dikecilkan untuk mobile tapi tak terlalu halus */
+                font-size: 9px;
             }
         }
         
@@ -2172,7 +2181,7 @@ window.openModal = async function(accNo) {
                 btnNext.disabled = currentModalIndex === -1 || currentModalIndex >= filteredAccounts.length - 1;
             }
             
-            document.getElementById('btnResetPending').style.display = (currentUser.role === 'admin' || currentUser.role === 'manager' || currentUser.role === 'super') ? 'block' : 'none';
+            document.getElementById('btnResetPending').style.display = (currentUser.role === 'super') ? 'block' : 'none';
             document.getElementById('finding-status-select').value = "";
 
             let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
@@ -2254,8 +2263,8 @@ window.openModal = async function(accNo) {
                         statusBadgeHTML = ` | <span style="background-color: ${badgeColor}; color: white; padding: 1px 5px; border-radius: 3px; font-weight: 900; font-size: 9px; display: inline-block; vertical-align: middle;">${extractedStatus}</span>`;
                     }
 
-                    let deleteBtnHTML = '';
-                    if(currentUser.role === 'admin' || currentUser.role === 'manager' || currentUser.role === 'super') {
+                let deleteBtnHTML = '';
+                    if(currentUser.role === 'super') {
                         deleteBtnHTML = `<button class="btn-delete-finding" onclick="deleteSingleFinding('${data.id}', '${accNo}')">🗑️ DEL</button>`;
                     }
 
