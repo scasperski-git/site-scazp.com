@@ -1125,29 +1125,15 @@ async function fetchFullDatabaseData(region = null) {
                 
                 // Pastikan Dropdown Report_to diisi sedia
                 toggleFormRoleSelect();
-        } else {
+            } else {
                 // Untuk PIC USER biasa
                 document.getElementById('master-nav-tabs').style.display = 'none';
                 document.getElementById('upload-action-container').style.display = 'none';
-                
-                // Tunjukkan Region mereka (tetapi statik)
-                document.getElementById('region-filters-container').style.display = 'block';
-                document.getElementById('region-filters-container').innerHTML = `
-                    <span class="filter-title">My Assigned Region</span>
-                    <div class="btn-group"><button class="btn-filter active">${currentUser.assignedregion || 'NO REGION'}</button></div>
-                `;
-                
-                // Tunjukkan Area dan biarkan mereka pilih "ALL AREAS"
+                document.getElementById('region-filters-container').style.display = 'none';
                 document.getElementById('area-filters-container').style.display = 'block';
                 
                 currentRegion = currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null;
-                
-                // PANGGIL FUNGSI INI
                 renderAreaSelectionUI(currentRegion);
-                
-                // [FIX]: Pastikan currentArea adalah NULL (supaya ia menunjukkan "ALL AREAS" secara default)
-                currentArea = null; 
-                
                 applyFilterAndRender();
             }
 
@@ -1293,7 +1279,7 @@ filteredAccounts = scopedGeoData.filter(row => {
 
         window.applyAreaFilter = function(area, btnElement) {
             updateActiveFilterHighlight('area-buttons', btnElement);
-            currentArea = null;
+            currentArea = area;
             resetStatusCardHighlight();
             applyFilterAndRender();
         };
@@ -1309,22 +1295,18 @@ filteredAccounts = scopedGeoData.filter(row => {
         function renderAreaSelectionUI(region) {
             const areaContainer = document.getElementById('area-buttons');
             if (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') {
-                areaContainer.innerHTML = `<button class="btn-filter ${!currentArea ? 'active' : ''}" onclick="clearAreaSelection(this)">ALL AREAS</button>`;
-            } else { 
-            // [UBAH BAHAGIAN INI]: Dulu kita letak '', sekarang kita tambah butang ALL AREAS untuk user
-            areaContainer.innerHTML = `<button class="btn-filter active" onclick="clearAreaSelection(this)">ALL AREAS</button>`;
-            }
+                areaContainer.innerHTML = `<button class="btn-filter active" onclick="clearAreaSelection(this)">ALL AREAS IN ${region}</button>`;
+            } else { areaContainer.innerHTML = ''; }
             
             if(regionsMap[region] && regionsMap[region].length > 0) {
                 regionsMap[region].forEach((area, index) => {
-                    let activeStyle = (currentArea === area) ? 'active' : '';
+                    let activeStyle = ((currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin') && index === 0) ? 'active' : '';
                     areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
                 });
-                //if((currentUser.role !== 'master' && currentUser.role !== 'super') && !currentArea) {
-                    //const firstBtn = areaContainer.querySelector('.btn-filter');
-                    //if (firstBtn) applyAreaFilter(regionsMap[region][0], firstBtn); 
-                //console.log("Defaulting to ALL AREAS view");
-                //}
+                if((currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin') && !currentArea) { 
+                    const firstBtn = areaContainer.querySelector('.btn-filter');
+                    if (firstBtn) applyAreaFilter(regionsMap[region][0], firstBtn); 
+                }
             }
         }
 
