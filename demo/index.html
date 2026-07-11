@@ -1176,12 +1176,29 @@ async function fetchFullDatabaseData(region = null) {
             
             updateKPICards(scopedGeoData);
             
-            filteredAccounts = scopedGeoData.filter(row => {
+filteredAccounts = scopedGeoData.filter(row => {
                 return currentStatusFilter ? row.status === currentStatusFilter : true;
             });
             
-            currentSortColumn = null; 
-            resetHeaderArrows();
+            // [FIX]: Susunan lalai - yang paling latest di-attend akan duduk di atas sekali
+            currentSortColumn = 'last_date'; 
+            currentSortDirection = 'desc';
+
+            filteredAccounts.sort((a, b) => {
+                let dateA = (a.details && a.details.last_remark_date) ? a.details.last_remark_date.split('/').reverse().join('') : '';
+                let dateB = (b.details && b.details.last_remark_date) ? b.details.last_remark_date.split('/').reverse().join('') : '';
+                
+                let timeA = (a.details && a.details.timestamp) ? a.details.timestamp : 0;
+                let timeB = (b.details && b.details.timestamp) ? b.details.timestamp : 0;
+
+                // Jika tarikh sama (hari ini), susun ikut masa paling latest (timestamp)
+                if (dateA === dateB) return timeB - timeA;
+                
+                // Jika tarikh berbeza, susun ikut tarikh
+                return dateB.localeCompare(dateA);
+            });
+
+            updateHeaderArrows('last_date'); // Kemaskini ikon anak panah (▲/▼) di Header
 
             currentPage = 1;
             renderTablePage();
@@ -2375,6 +2392,7 @@ window.openModal = async function(accNo) {
             let today = new Date();
             let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
             updatedDetailsObj.last_remark_date = dateStr;
+            updatedDetailsObj.timestamp = today.getTime();
             
             let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()})`;
             
