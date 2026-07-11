@@ -127,18 +127,7 @@
 
         .details-wrapper { padding: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; border-bottom: 2px solid var(--accent-gold); border-left: 4px solid var(--accent-gold); }
         .details-box { background-color: #ffffff !important; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); position: relative; z-index: 1; overflow: hidden; }
-        .details-box h4 { margin: 0 0 10px 0; color: var(--accent-gold); font-size: 11px; border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; text-transform: uppercase; }
-        .details-box p { margin: 4px 0; font-size: 11px; color: var(--text-main); }
-        .details-box span.lbl { color: var(--text-muted); display: inline-block; width: 65px; font-weight: bold; }
-        
-        .mapping-container { max-height: 60vh; overflow-y: auto; padding-right: 10px; text-align: left; }
-        .mapping-section { border: 1px solid var(--border-color); padding: 10px; margin-bottom: 15px; border-radius: 6px; background: #ffffff; }
-        .mapping-section h3 { margin-top: 0; margin-bottom: 10px; font-size: 12px; color: var(--success-green); border-bottom: 1px solid var(--border-color); padding-bottom: 5px;}
-
-        @media (max-width: 768px) {
-            .details-wrapper { grid-template-columns: 1fr !important; gap: 12px; padding: 12px; }
-            .details-box { width: 100% !important; box-sizing: border-box; }
-            .details-box::before {
+        .details-box::before {
             content: attr(data-watermark);
             position: absolute;
             top: -20%;
@@ -165,6 +154,17 @@
             position: relative;
             z-index: 2;
         }
+        .details-box h4 { margin: 0 0 10px 0; color: var(--accent-gold); font-size: 11px; border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; text-transform: uppercase; }
+        .details-box p { margin: 4px 0; font-size: 11px; color: var(--text-main); }
+        .details-box span.lbl { color: var(--text-muted); display: inline-block; width: 65px; font-weight: bold; }
+        
+        .mapping-container { max-height: 60vh; overflow-y: auto; padding-right: 10px; text-align: left; }
+        .mapping-section { border: 1px solid var(--border-color); padding: 10px; margin-bottom: 15px; border-radius: 6px; background: #ffffff; }
+        .mapping-section h3 { margin-top: 0; margin-bottom: 10px; font-size: 12px; color: var(--success-green); border-bottom: 1px solid var(--border-color); padding-bottom: 5px;}
+
+        @media (max-width: 768px) {
+            .details-wrapper { grid-template-columns: 1fr !important; gap: 12px; padding: 12px; }
+            .details-box { width: 100% !important; box-sizing: border-box; }
             .kpi-container { grid-template-columns: repeat(4, 1fr); gap: 6px; }
             .kpi-card { padding: 10px 4px; }
             .kpi-card h3 { font-size: 8px; }
@@ -2141,7 +2141,7 @@ window.openModal = async function(accNo) {
 
             let d = accountInfo.details || {};
             let todayDate = new Date().toLocaleDateString('en-GB');
-            let singleLine = `INTERNAL DATA - PIC: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
+            let singleLine = `INTERNAL DATA - VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
             let wText = `${singleLine.repeat(3)}\n`.repeat(25);
 
             document.getElementById('modal-details-container').innerHTML = `
