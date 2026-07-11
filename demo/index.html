@@ -1306,24 +1306,18 @@ filteredAccounts = scopedGeoData.filter(row => {
             });
         }
 
-function renderAreaSelectionUI(region) {
+        function renderAreaSelectionUI(region) {
             const areaContainer = document.getElementById('area-buttons');
-            
-            // [FIX PENTING]: Pastikan butang "ALL AREAS" sentiasa wujud untuk semua orang
-            areaContainer.innerHTML = `<button class="btn-filter ${!currentArea ? 'active' : ''}" onclick="clearAreaSelection(this)">ALL AREAS</button>`;
-            
-            if(regionsMap[region] && regionsMap[region].length > 0) {
-                regionsMap[region].forEach((area) => {
-                    // Jika currentArea sama dengan area ini, tandakan sebagai active
-                    let activeStyle = (currentArea === area) ? 'active' : '';
-                    areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
-                });
+            if (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') {
+                areaContainer.innerHTML = `<button class="btn-filter ${!currentArea ? 'active' : ''}" onclick="clearAreaSelection(this)">ALL AREAS</button>`;
+            } else { 
+            // [UBAH BAHAGIAN INI]: Dulu kita letak '', sekarang kita tambah butang ALL AREAS untuk user
+            areaContainer.innerHTML = `<button class="btn-filter active" onclick="clearAreaSelection(this)">ALL AREAS</button>`;
             }
-        }
             
             if(regionsMap[region] && regionsMap[region].length > 0) {
                 regionsMap[region].forEach((area, index) => {
-                    let activeStyle = ((currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin') && index === 0) ? 'active' : '';
+                    let activeStyle = (currentArea === area) ? 'active' : '';
                     areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
                 });
                 //if((currentUser.role !== 'master' && currentUser.role !== 'super') && !currentArea) {
