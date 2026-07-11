@@ -1489,8 +1489,7 @@ window.renderUserTablePage = async function() { // Tambah async kat sini
             const reportGroup = document.getElementById('form-report-group');
             const reportSelect = document.getElementById('new-user-report-to');
             
-            // Tunjuk pilihan Region kalau peranan tu bukan Super
-            document.getElementById('form-region-group').style.display = (role === 'super') ? 'none' : 'block';
+            // (Baris rujukan ke form-region-group telah dibuang supaya tak crash)
             
             if (role === 'super') {
                 reportGroup.style.display = 'none';
@@ -1499,7 +1498,7 @@ window.renderUserTablePage = async function() { // Tambah async kat sini
                 reportGroup.style.display = 'block';
                 reportSelect.innerHTML = '<option value="">Loading Supervisor List...</option>';
                 
-                // [KEMAS KINI]: Logik Fleksibel - Boleh pilih mana-mana pangkat di atasnya
+                // Logik Fleksibel - Boleh pilih mana-mana pangkat di atasnya
                 let allowedRoles = role === 'user' ? ['admin', 'manager', 'super'] : 
                                    (role === 'admin' ? ['manager', 'super'] : ['super']);
                 
