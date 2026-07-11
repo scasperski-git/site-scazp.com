@@ -1013,7 +1013,74 @@ window.forceSyncData = async function() {
             }, 60000);
         };
 
-sync function fetchFullDatabaseData(
+async function fetchFullDatabaseData(region = null) {
+            const cacheKey = `scazp_cache_${currentUser.id}`;
+            const timeKey = `scazp_time_${currentUser.id}`;
+            
+            const loadingModal = document.getElementById('loadingModal');
+            const loadingText = document.getElementById('loadingText');
+            loadingModal.style.display = 'flex';
+            
+            try {
+                const { data: lastFinding } = await supabase.from('findings').select('updated_at').order('updated_at', { ascending: false }).limit(1);
+                const dbLastUpdate = lastFinding && lastFinding.length > 0 ? lastFinding[0].updated_at : 'NODATA';
+                const localLastUpdate = localStorage.getItem(timeKey);
+                const cachedData = await localforage.getItem(cacheKey);
+
+                if (cachedData && localLastUpdate === dbLastUpdate) {
+                    console.log("Reading from IndexedDB storage...");
+                    globalAccounts = cachedData;
+                    filteredAccounts = [...globalAccounts];
+                    rebuildRegionsMapFromData();
+                    loadingModal.style.display = 'none';
+                    return;
+                }
+
+                console.log("Fetching data sequentially from the cloud...");
+                loadingText.innerText = "Downloading records from the server (This may take a while)...";
+                
+                let allData = [];
+                let page = 0;
+                const pageSize = 1000;
+                
+                while(true) {
+                    let fetchQuery = supabase.from('accounts').select('acct, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id');
+                    
+                    if (currentUser.role === 'user') {
+                        let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
+                        fetchQuery = fetchQuery.eq('assignee_id', currentUserIdClean);
+                    } else {
+                        if (region) fetchQuery = fetchQuery.eq('region', region);
+                    }
+                    
+                    const { data, error } = await fetchQuery.range(page * pageSize, (page + 1) * pageSize - 1);
+                    if (error) { console.error("Error fetching data:", error); break; }
+                    if (!data || data.length === 0) break;
+                    
+                    const mappedData = data.map(item => {
+                        let f_status = (item.details && item.details.finding_status) ? item.details.finding_status : "";
+                        return { ...item, finding_status: f_status };
+                    });
+                    allData = allData.concat(mappedData);
+                    
+                    if (data.length < pageSize) break; 
+                    page++;
+                }
+                
+                globalAccounts = allData;
+                filteredAccounts = [...globalAccounts];
+                
+                await localforage.setItem(cacheKey, globalAccounts);
+                localStorage.setItem(timeKey, dbLastUpdate);
+                
+                rebuildRegionsMapFromData();
+            } catch (err) {
+                console.error("Sync error:", err);
+            }
+            
+            loadingText.innerText = "Done.";
+            loadingModal.style.display = 'none';
+        }
 
         function rebuildRegionsMapFromData() {
             regionsMap = {};
