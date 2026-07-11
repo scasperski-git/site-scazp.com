@@ -1461,12 +1461,13 @@ window.addNewUser = async function() {
                 showNotification("ERROR", "User ID already exists in the system!", true); 
             } else {
                 // [KEMAS KINI]: assignedregion automatik set jadi NULL (boleh set kat table nanti)
-                const { error } = await supabase.from('users').insert([{ 
+const { error } = await supabase.from('users').insert([{ 
                     id: id, 
                     pass: pass, 
                     role: role, 
-                    assignedregion: null,
-                    report_to: reportTo || null
+                    assignedregion: role === 'super' ? null : region,
+                    report_to: reportTo || null,
+                    status: 'ACTIVE' 
                 }]);
                 
                 if(!error) {
