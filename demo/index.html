@@ -25,11 +25,11 @@
             --status-paid: #4caf50;
         }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; }
 
         /* --- LOGIN STYLES --- */
         #login-section { display: none; justify-content: center; align-items: center; height: 90vh; }
-        .login-box { background-color: var(--card-bg); padding: 30px; border-radius: 8px; border: 1px solid var(--accent-gold); width: 100%; max-width: 350px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.1); text-align: center; box-sizing: border-box;}
+        .login-box { background-color: var(--card-bg); padding: 30px; border-radius: 8px; border: 1px solid var(--accent-gold); width: 100%; max-width: 350px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.1); text-align: center; }
         .login-box h2 { color: var(--accent-gold); margin-top: 0; font-size: 22px; }
         .login-input { width: 100%; box-sizing: border-box; background-color: #e8f0f8; border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 13px; }
         .login-input:focus { outline: none; border-color: var(--accent-gold); background-color: #ffffff; }
@@ -38,19 +38,19 @@
 
         /* --- DASHBOARD STYLES --- */
         #dashboard-section { display: none; }
-        .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
         .header h1 { margin: 0; font-size: 20px; color: var(--accent-gold); letter-spacing: 1px; }
         .btn-logout { background-color: transparent; color: var(--error-red); border: 1px solid var(--error-red); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
 
-        .nav-tabs { display: none; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .nav-btn { background-color: #e8f0f8; color: var(--text-muted); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; flex: 1; min-width: 120px; text-align: center;}
+        .nav-tabs { display: none; gap: 10px; margin-bottom: 20px; }
+        .nav-btn { background-color: #e8f0f8; color: var(--text-muted); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; }
         .nav-btn.active { background-color: var(--accent-gold); color: #ffffff; border-color: var(--accent-gold); }
 
         .main-panel { display: block; }
         #settings-panel { display: none; }
 
-        .action-bar { display: flex; justify-content: space-between; align-items: stretch; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
-        .filter-section { background-color: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); flex-grow: 1; min-width: 250px; box-sizing: border-box; }
+        .action-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+        .filter-section { background-color: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); flex-grow: 1; }
         .filter-title { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
         .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
         .btn-group:last-child { margin-bottom: 0; }
@@ -59,7 +59,7 @@
         .btn-filter.active { background-color: var(--accent-gold); color: #ffffff; border-color: var(--accent-gold); font-weight: bold; }
         #area-filters-container { display: none; padding-top: 10px; border-top: 1px dashed var(--border-color); }
 
-        .btn-upload-trigger { background-color: #2e7d32; color: white; border: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 5px; height: 100%; white-space: nowrap;}
+        .btn-upload-trigger { background-color: #2e7d32; color: white; border: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 5px; }
         .btn-upload-trigger:hover { background-color: #388e3c; }
 
         .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
@@ -70,8 +70,8 @@
         .kpi-card h3 { margin: 0 0 5px 0; font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
         .kpi-card p { margin: 0; font-size: 20px; font-weight: bold; color: var(--text-main); }
 
-        .table-container { background-color: var(--card-bg); border-radius: 8px 8px 0 0; border: 1px solid var(--border-color); overflow-x: auto; width: 100%; box-sizing: border-box;}
-        table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 800px; }
+        .table-container { background-color: var(--card-bg); border-radius: 8px 8px 0 0; border: 1px solid var(--border-color); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
         th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
         
         th { background-color: #e8f0f8; color: var(--text-main); font-weight: 600; white-space: nowrap; user-select: none; }
@@ -80,7 +80,7 @@
         
         tr:hover { background-color: #e2e8f0; }
         
-        .pagination-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background-color: #e8f0f8; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .pagination-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background-color: #e8f0f8; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; margin-bottom: 20px; }
         .pagination-controls button { background-color: #ffffff; color: var(--accent-gold); border: 1px solid var(--accent-gold); padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin: 0 5px; }
         .pagination-controls button:disabled { border-color: #cbd5e1; color: #cbd5e1; cursor: not-allowed; }
         .page-info { font-size: 12px; color: var(--text-muted); }
@@ -99,7 +99,7 @@
         .btn-update { background-color: transparent; color: var(--accent-gold); border: 1px solid var(--accent-gold); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
         .btn-update:hover { background-color: var(--accent-gold); color: #ffffff; }
 
-        .settings-box { background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; max-width: 500px; box-sizing: border-box; width: 100%;}
+        .settings-box { background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; max-width: 500px; }
         .settings-box h2 { color: var(--accent-gold); font-size: 16px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;}
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-size: 12px; color: var(--text-muted); }
@@ -107,8 +107,8 @@
         .form-control:focus { outline: none; border-color: var(--accent-gold) !important; background-color: #ffffff !important;}
         .btn-submit { background-color: var(--accent-gold); color: #ffffff; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; }
 
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(16, 42, 67, 0.75); z-index: 1000; justify-content: center; align-items: center; padding: 10px; box-sizing: border-box; }
-        .modal-content { background-color: var(--card-bg); border: 1px solid var(--accent-gold); border-radius: 8px; width: 100%; max-width: 500px; padding: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); position: relative; box-sizing: border-box; max-height: 90vh; overflow-y: auto;}
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(16, 42, 67, 0.75); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background-color: var(--card-bg); border: 1px solid var(--accent-gold); border-radius: 8px; width: 90%; max-width: 500px; padding: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); position: relative; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; }
         .modal-header h2 { margin: 0; font-size: 15px; color: var(--accent-gold); }
         .close-btn { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
@@ -173,10 +173,8 @@
             position: relative;
             z-index: 1;
             overflow: hidden;
-            box-sizing: border-box;
         }
 
-        /* WATERMARK KEKAL 100% SAMA */
         .details-box::before {
             content: attr(data-watermark);
             position: absolute;
@@ -213,6 +211,34 @@
         .mapping-section { border: 1px solid var(--border-color); padding: 10px; margin-bottom: 15px; border-radius: 6px; background: #ffffff; }
         .mapping-section h3 { margin-top: 0; margin-bottom: 10px; font-size: 12px; color: var(--success-green); border-bottom: 1px solid var(--border-color); padding-bottom: 5px;}
 
+        @media (max-width: 768px) {
+            .details-wrapper { 
+                grid-template-columns: 1fr !important; 
+                gap: 12px; 
+                padding: 12px;
+            }
+            .details-box {
+                width: 100% !important;
+                box-sizing: border-box;
+            }
+            
+            .kpi-container { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+            .kpi-card { padding: 10px 4px; }
+            .kpi-card h3 { font-size: 8px; }
+            .kpi-card p { font-size: 13px; }
+
+            table { font-size: 9px; }
+            th, td { padding: 8px 5px; white-space: nowrap; }
+            th { font-size: 9px; letter-spacing: 0.5px; }
+            
+            .status-badge { padding: 3px 6px; font-size: 8px; }
+            .btn-update { padding: 4px 6px; font-size: 9px; }
+            
+            .pagination-container { padding: 10px; flex-direction: column; gap: 10px; }
+            .page-info { font-size: 10px; }
+            .pagination-controls button { padding: 5px 10px; font-size: 10px; }
+        }
+
         #maintenance-bar {
             display: none; 
             background: linear-gradient(90deg, #b71c1c, #e57373);
@@ -240,12 +266,31 @@
             50% { opacity: 0; }
         }
 
-        .role-super { background-color: rgba(229, 57, 53, 0.15); color: var(--error-red); border: 1px solid rgba(229, 57, 53, 0.3); }
-        .role-manager { background-color: rgba(156, 39, 176, 0.15); color: var(--status-ptp); border: 1px solid rgba(156, 39, 176, 0.3); }
-        .role-admin { background-color: rgba(37, 99, 235, 0.15); color: var(--accent-gold); border: 1px solid rgba(37, 99, 235, 0.3); }
-        .role-user { background-color: rgba(33, 150, 243, 0.15); color: #1976d2; border: 1px solid rgba(33, 150, 243, 0.3); }
+        /* [UPDATE]: Role Styles Baharu Mengikut Hierarki */
+        .role-super { 
+            background-color: rgba(229, 57, 53, 0.15); 
+            color: var(--error-red); 
+            border: 1px solid rgba(229, 57, 53, 0.3); 
+        }
+        .role-manager { 
+            background-color: rgba(156, 39, 176, 0.15); 
+            color: var(--status-ptp); 
+            border: 1px solid rgba(156, 39, 176, 0.3); 
+        }
+        .role-admin { 
+            background-color: rgba(37, 99, 235, 0.15); 
+            color: var(--accent-gold); 
+            border: 1px solid rgba(37, 99, 235, 0.3); 
+        }
+        .role-user { 
+            background-color: rgba(33, 150, 243, 0.15); 
+            color: #1976d2; 
+            border: 1px solid rgba(33, 150, 243, 0.3); 
+        }
 
-        .search-container { display: flex; gap: 10px; align-items: center; width: 100%;}
+        .search-container { display: flex; gap: 10px; align-items: center; }
+
+        @media (max-width: 768px) { .search-container { flex-direction: column; } }
 
         .full-page-modal {
             width: 100vw !important;
@@ -271,14 +316,16 @@
             align-items: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             z-index: 10;
-            flex-wrap: wrap;
-            gap: 10px;
         }
         
         .fp-header h2 { margin: 0; font-size: 16px; color: var(--accent-gold); }
         .fp-btn-back { background: var(--accent-gold); color: white; border: none; padding: 6px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
         .fp-btn-back:hover { background: #1d4ed8; }
-        .fp-btn-back:disabled { background: #cbd5e1 !important; color: #94a3b8 !important; cursor: not-allowed !important; }
+        .fp-btn-back:disabled { 
+            background: #cbd5e1 !important; 
+            color: #94a3b8 !important; 
+            cursor: not-allowed !important; 
+        }
 
         .fp-body {
             flex: 1;
@@ -290,42 +337,10 @@
             align-items: start;
         }
         
-        .fp-panel { background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-sizing: border-box;}
+        .fp-panel { background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); }
 
-        /* MEDIA QUERIES YANG TELAH DIPERBAIKI UNTUK RESPONSIVE */
         @media (max-width: 768px) {
-            body { padding: 10px; }
-            
-            .header { flex-direction: column; align-items: flex-start; }
-            
-            .search-container { flex-direction: column; align-items: stretch; }
-            .search-container select, .search-container input { max-width: none !important; width: 100%; }
-            .search-container div { display: flex; width: 100%; justify-content: space-between; }
-            .search-container div button { flex: 1; }
-
-            .action-bar { flex-direction: column; align-items: stretch; }
-            
-            .kpi-container { grid-template-columns: repeat(4, 1fr); gap: 6px; }
-            .kpi-card { padding: 10px 4px; }
-            .kpi-card h3 { font-size: 8px; }
-            .kpi-card p { font-size: 13px; }
-
-            table { font-size: 9px; }
-            th, td { padding: 8px 5px; white-space: nowrap; }
-            th { font-size: 9px; letter-spacing: 0.5px; }
-            
-            .status-badge { padding: 3px 6px; font-size: 8px; }
-            .btn-update { padding: 4px 6px; font-size: 9px; }
-            
-            .pagination-container { padding: 10px; flex-direction: column; gap: 10px; justify-content: center; text-align: center; }
-            .page-info { font-size: 10px; }
-            .pagination-controls button { padding: 5px 10px; font-size: 10px; }
-
             .fp-body { grid-template-columns: 1fr; padding: 10px; gap: 15px; }
-            .details-wrapper { grid-template-columns: 1fr !important; gap: 12px; padding: 12px; }
-            .details-box { width: 100% !important; box-sizing: border-box; }
-            
-            .mapping-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -360,15 +375,17 @@
             </div>
         </div>
 
-        <div class="nav-tabs" id="master-nav-tabs">
+<div class="nav-tabs" id="master-nav-tabs">
             <button class="nav-btn active" id="tab-dash" onclick="switchTab('dashboard')">Dashboard</button>
+            
             <button class="nav-btn" id="tab-assign" onclick="switchTab('assign')">Assignment</button>
+            
             <button class="nav-btn" id="tab-settings" onclick="switchTab('settings')">User Settings</button>
             <button class="nav-btn" id="tab-report" onclick="switchTab('report')" style="display: none;">MIS Remark</button>
         </div>
 
         <div id="dashboard-panel" class="main-panel">
-            <div class="filter-section" style="flex-grow: 2; margin-bottom: 20px;">
+            <div class="filter-section" style="flex-grow: 2;">
                 <span class="filter-title">Advanced Search By:</span>
                 <div class="search-container">
                     <select id="search-type" class="form-control" style="width: 100%; max-width: 200px; border-color: var(--accent-gold);">
@@ -479,7 +496,7 @@
             </div>
 
             <div class="settings-box" style="max-width: 100%;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 15px;">
                     <h2 style="margin: 0; border: none; padding: 0;">System User List (<span id="total-users-count" style="color: var(--text-main);">0</span> Users)</h2>
                     <input type="text" id="search-user" class="form-control" placeholder="Search by User ID..." style="max-width: 250px; border-color: var(--accent-gold) !important;" oninput="filterUserList()">
                 </div>
@@ -531,69 +548,70 @@
         </div>
     </div> 
 
-    <div id="assign-panel" class="main-panel" style="display: none;">
-        <div class="action-bar" style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
-            <div style="flex: 1; min-width: 250px; margin-bottom: 10px;">
-                <span class="filter-title">1. Tapis Akaun Mengikut Status Agihan:</span>
-                <select id="assign-filter-status" class="form-control" style="max-width: 300px; font-weight: bold; border-color: var(--accent-gold);" onchange="renderAssignTable()">
-                    <option value="UNASSIGNED">🔴 UNASSIGNED (Belum Diagihkan)</option>
-                    <option value="ASSIGNED">🟢 ASSIGNED (Sudah Diagihkan)</option>
-                </select>
-            </div>
+<div id="assign-panel" class="main-panel" style="display: none;">
             
-            <div style="flex: 1; border-left: 2px dashed var(--border-color); padding-left: 15px; min-width: 250px;">
-                <span class="filter-title">2. Pilih Collector & Agihkan:</span>
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <select id="assign-target-user" class="form-control" style="flex: 1; min-width: 180px;">
-                        <option value="">-- PILIH STAF BAWAHAN --</option>
+            <div class="action-bar" style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+                <div style="flex: 1;">
+                    <span class="filter-title">1. Tapis Akaun Mengikut Status Agihan:</span>
+                    <select id="assign-filter-status" class="form-control" style="max-width: 300px; font-weight: bold; border-color: var(--accent-gold);" onchange="renderAssignTable()">
+                        <option value="UNASSIGNED">🔴 UNASSIGNED (Belum Diagihkan)</option>
+                        <option value="ASSIGNED">🟢 ASSIGNED (Sudah Diagihkan)</option>
                     </select>
-                    <button class="btn-submit" onclick="executeBatchAssignment()" style="background-color: #2e7d32;">✅ ASSIGN SELECTED</button>
+                </div>
+                
+                <div style="flex: 1; border-left: 2px dashed var(--border-color); padding-left: 15px;">
+                    <span class="filter-title">2. Pilih Collector & Agihkan:</span>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select id="assign-target-user" class="form-control" style="flex: 1;">
+                            <option value="">-- PILIH STAF BAWAHAN --</option>
+                        </select>
+                        <button class="btn-submit" onclick="executeBatchAssignment()" style="background-color: #2e7d32;">✅ ASSIGN SELECTED</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-box" style="max-width: 100%; margin-top: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h2 style="margin: 0; border: none; padding: 0;">Senarai Akaun (<span id="assign-total-count" style="color: var(--accent-gold);">0</span> Rekod)</h2>
+                    <div style="font-size: 11px; color: var(--text-muted);">
+                        *Hanya memaparkan rekod dalam kawasan (Region/Area) jagaan anda.
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 40px; text-align: center;">
+                                    <input type="checkbox" id="check-all-assign" onclick="toggleAllAssignCheckboxes(this)" style="cursor: pointer; transform: scale(1.2);">
+                                </th>
+                                <th>ACCT NO</th>
+                                <th>REGION</th>
+                                <th>AREA</th>
+                                <th>OSB (RM)</th>
+                                <th>STATUS</th>
+                                <th style="color: var(--accent-gold);">CURRENT ASSIGNEE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assign-table-body">
+                            <tr><td colspan="7" style="text-align:center;">Sila tunggu, sedang memuatkan data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination-container" style="margin-bottom: 0; border-radius: 0 0 8px 8px;">
+                    <div class="page-info" id="assign-page-info">Page 1 of 1</div>
+                    <div class="pagination-controls">
+                        <button id="btn-assign-prev" onclick="prevAssignPage()" disabled>◄ PREV</button>
+                        <button id="btn-assign-next" onclick="nextAssignPage()" disabled>NEXT ►</button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="settings-box" style="max-width: 100%; margin-top: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
-                <h2 style="margin: 0; border: none; padding: 0;">Senarai Akaun (<span id="assign-total-count" style="color: var(--accent-gold);">0</span> Rekod)</h2>
-                <div style="font-size: 11px; color: var(--text-muted);">
-                    *Hanya memaparkan rekod dalam kawasan (Region/Area) jagaan anda.
-                </div>
-            </div>
-            
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 40px; text-align: center;">
-                                <input type="checkbox" id="check-all-assign" onclick="toggleAllAssignCheckboxes(this)" style="cursor: pointer; transform: scale(1.2);">
-                            </th>
-                            <th>ACCT NO</th>
-                            <th>REGION</th>
-                            <th>AREA</th>
-                            <th>OSB (RM)</th>
-                            <th>STATUS</th>
-                            <th style="color: var(--accent-gold);">CURRENT ASSIGNEE</th>
-                        </tr>
-                    </thead>
-                    <tbody id="assign-table-body">
-                        <tr><td colspan="7" style="text-align:center;">Sila tunggu, sedang memuatkan data...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="pagination-container" style="margin-bottom: 0; border-radius: 0 0 8px 8px;">
-                <div class="page-info" id="assign-page-info">Page 1 of 1</div>
-                <div class="pagination-controls">
-                    <button id="btn-assign-prev" onclick="prevAssignPage()" disabled>◄ PREV</button>
-                    <button id="btn-assign-next" onclick="nextAssignPage()" disabled>NEXT ►</button>
-                </div>
-            </div>
+            <div style="text-align: center; padding: 25px 10px 15px 10px; margin-top: 30px; font-size: 11px; color: var(--text-muted); border-top: 1px dashed var(--border-color); letter-spacing: 0.5px;">
+            Copyright &copy; <span id="auto-year"></span> <span style="color: #2196f3; font-weight: bold;">System Findings v2.0</span>. All Rights Reserved.
         </div>
-    </div>
-
-    <div style="text-align: center; padding: 25px 10px 15px 10px; margin-top: 30px; font-size: 11px; color: var(--text-muted); border-top: 1px dashed var(--border-color); letter-spacing: 0.5px;">
-        Copyright &copy; <span id="auto-year"></span> <span style="color: #2196f3; font-weight: bold;">System Findings v2.0</span>. All Rights Reserved.
-    </div>
 
     <div class="modal-overlay" id="loadingModal">
         <div class="modal-content">
@@ -617,7 +635,7 @@
         </div>
     </div>
     
-    <div class="modal-overlay" id="mappingModal">
+<div class="modal-overlay" id="mappingModal">
         <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
                 <h2>Map Excel Columns to Database Fields</h2>
@@ -691,9 +709,9 @@
     
     <div class="modal-overlay" id="updateModal" style="align-items: flex-start; padding: 0;">
         <div class="modal-content full-page-modal">
-            <div class="fp-header">
+<div class="fp-header">
                 <h2>ACCT: <span id="modalAccNo"></span></h2>
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <div style="display: flex; gap: 10px; align-items: center;">
                     <button id="btn-modal-prev" class="fp-btn-back" style="background-color: #486581;" onclick="navigateModal('prev')">◄ PREV</button>
                     <button id="btn-modal-next" class="fp-btn-back" style="background-color: #486581;" onclick="navigateModal('next')">NEXT ►</button>
                     <button class="fp-btn-back" onclick="closeModal()">❮ KEMBALI</button>
@@ -707,9 +725,9 @@
                     <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px; font-weight: bold;">HISTORICAL AUDIT TRAIL:</label>
                     <div class="history-box" style="max-height: 250px; margin-bottom: 15px; background: #f8fafc;"></div>
                     
-                    <div class="form-group" style="margin-bottom: 15px; background: #e8f0f8; padding: 10px; border-radius: 6px; border: 1px dashed var(--accent-gold); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div class="form-group" style="margin-bottom: 15px; background: #e8f0f8; padding: 10px; border-radius: 6px; border: 1px dashed var(--accent-gold); display: flex; align-items: center; gap: 10px;">
                         <label style="color: var(--accent-gold); font-weight: bold; font-size: 12px; margin-bottom: 0;">ACTION STATUS:</label>
-                        <select id="finding-status-select" class="form-control" style="font-weight: bold; flex: 1; background-color: #ffffff !important; border-color: var(--accent-gold) !important; min-width: 150px;">
+                        <select id="finding-status-select" class="form-control" style="font-weight: bold; flex: 1; background-color: #ffffff !important; border-color: var(--accent-gold) !important;">
                             <option value="">-- SELECT STATUS --</option>
                             <option value="CALL" style="color: var(--status-call);">CALL (Phone Call)</option>
                             <option value="UCT" style="color: var(--status-uct);">UCT (Uncontactable)</option>
@@ -730,9 +748,9 @@
                                   oninput="updateTextareaInfo(this)"></textarea>
                     </div>
 
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button id="btnSaveFinding" class="btn-submit" style="flex: 2; padding: 12px; font-size: 14px; min-width: 150px;" onclick="saveFinding()">COMMIT ENTRY</button>
-                        <button id="btnResetPending" class="btn-submit" style="flex: 1; background-color: var(--error-red); color: white; display: none; padding: 12px; min-width: 100px;" onclick="resetAccountStatus()">RESET LOG</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="btnSaveFinding" class="btn-submit" style="flex: 2; padding: 12px; font-size: 14px;" onclick="saveFinding()">COMMIT ENTRY</button>
+                        <button id="btnResetPending" class="btn-submit" style="flex: 1; background-color: var(--error-red); color: white; display: none; padding: 12px;" onclick="resetAccountStatus()">RESET LOG</button>
                     </div>
                 </div>
             </div>
@@ -803,56 +821,64 @@
         let currentSortColumn = null;
         let currentSortDirection = 'asc';
 
+        // [NEW]: Variable Global untuk User Pagination
         let allSystemUsers = [];
         let filteredSystemUsers = [];
         let userCurrentPage = 1;
         const usersPerPage = 20;
 
-        async function checkLoginSession() {
-            const currentYear = new Date().getFullYear();
-            if(document.getElementById('auto-year')) document.getElementById('auto-year').innerText = currentYear;
-            if(document.getElementById('auto-year-login')) document.getElementById('auto-year-login').innerText = currentYear;
-            
-            const loginSection = document.getElementById('login-section');
-            const dashboardSection = document.getElementById('dashboard-section');
-            const storedSession = localStorage.getItem('scazp_user_session');
+async function checkLoginSession() {
+    const currentYear = new Date().getFullYear();
+    if(document.getElementById('auto-year')) document.getElementById('auto-year').innerText = currentYear;
+    if(document.getElementById('auto-year-login')) document.getElementById('auto-year-login').innerText = currentYear;
+    
+    const loginSection = document.getElementById('login-section');
+    const dashboardSection = document.getElementById('dashboard-section');
+    const storedSession = localStorage.getItem('scazp_user_session');
 
-            if (storedSession) {
-                let userTmp = JSON.parse(storedSession);
-                
-                const { data, error } = await supabase.from('users').select('status, role, assignedregion').eq('id', userTmp.id).single();
+    if (storedSession) {
+        let userTmp = JSON.parse(storedSession);
+        
+        // [FUNGSI KESELAMATAN]: Semak status terkini terus dari Database Supabase
+        // Ini akan "tendang" user kalau akaun dia dah kena INACTIVE atau DELETE
+        const { data, error } = await supabase.from('users').select('status, role, assignedregion').eq('id', userTmp.id).single();
 
-                if (error || !data || data.status === 'INACTIVE') {
-                    alert("Akaun anda telah dinyahaktifkan atau sesi tamat.");
-                    handleLogout(); 
-                    return;
-                }
-
-                currentUser = { ...userTmp, ...data };
-                
-                if (IS_MAINTENANCE && currentUser.role !== 'super') {
-                    document.getElementById('maintenance-bar').style.display = 'block';
-                    document.getElementById('maintenance-bar').innerHTML = `<span class="blink-dot"></span> SORRY, SYSTEM UNDER MAINTENANCE.`;
-                    loginSection.style.display = 'flex';
-                    dashboardSection.style.display = 'none';
-                    return;
-                }
-
-                dashboardSection.style.display = 'block';
-                loginSection.style.display = 'none';
-                document.getElementById('display-username').innerText = "Logged in as: " + currentUser.id.toUpperCase();
-                
-                const safeRegion = (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
-                
-                await fetchFullDatabaseData(safeRegion);
-                await fetchMasterLocations(); 
-                
-                initDashboardView();
-            } else {
-                loginSection.style.display = 'flex';
-                dashboardSection.style.display = 'none';
-            }
+        if (error || !data || data.status === 'INACTIVE') {
+            alert("Akaun anda telah dinyahaktifkan atau sesi tamat.");
+            handleLogout(); // Tendang balik ke login
+            return;
         }
+
+        // Update currentUser dengan data paling fresh dari DB
+        currentUser = { ...userTmp, ...data };
+        
+        // [LOGIK MAINTENANCE]
+        if (IS_MAINTENANCE && currentUser.role !== 'super') {
+            document.getElementById('maintenance-bar').style.display = 'block';
+            document.getElementById('maintenance-bar').innerHTML = `<span class="blink-dot"></span> SORRY, SYSTEM UNDER MAINTENANCE.`;
+            loginSection.style.display = 'flex';
+            dashboardSection.style.display = 'none';
+            return;
+        }
+
+        // [TUKAR PAPARAN]: Sembunyikan login, tunjuk dashboard
+        dashboardSection.style.display = 'block';
+        loginSection.style.display = 'none';
+        document.getElementById('display-username').innerText = "Logged in as: " + currentUser.id.toUpperCase();
+        
+        // Fetch data mengikut hierarki akses
+        const safeRegion = (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
+        
+        await fetchFullDatabaseData(safeRegion);
+        await fetchMasterLocations(); 
+        
+        initDashboardView();
+    } else {
+        // [TIADA SESSION]: Tunjuk login
+        loginSection.style.display = 'flex';
+        dashboardSection.style.display = 'none';
+    }
+}
 
         window.customConfirm = function(message) {
             return new Promise((resolve) => {
@@ -933,6 +959,7 @@
                         document.getElementById('maintenance-bar').style.display = 'none';
                     }
                     
+                    // [UPDATE]: Rombak akses login fetch.
                     const safeRegion = (data.role === 'super' || data.role === 'manager' || data.role === 'admin') ? null : (data.assignedregion ? data.assignedregion.toUpperCase().trim() : null);
                     await fetchFullDatabaseData(safeRegion);
                     
@@ -971,7 +998,7 @@
             document.getElementById('login-section').style.display = 'flex';
         };
 
-        window.forceSyncData = async function() {
+window.forceSyncData = async function() {
             if (!currentUser) return;
             const syncBtn = event.target;
             syncBtn.disabled = true;
@@ -980,6 +1007,7 @@
             const safeRegion = (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') ?
             null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
             
+            // [FIX]: Selaraskan pembersihan cache mengikut ID pengguna aktif
             const cacheKey = `scazp_cache_${currentUser.id}`;
             const timeKey = `scazp_time_${currentUser.id}`;
 
@@ -996,7 +1024,7 @@
             }, 60000);
         };
 
-        async function fetchFullDatabaseData(region = null) {
+async function fetchFullDatabaseData(region = null) {
             const cacheKey = `scazp_cache_${currentUser.id}`;
             const timeKey = `scazp_time_${currentUser.id}`;
             
@@ -1079,12 +1107,14 @@
         }
         
         function initDashboardView() {
+            // [UPDATE]: Rombak akses Menu & Filter untuk Role Baharu
             if (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') {
                 document.getElementById('master-nav-tabs').style.display = 'flex';
                 document.getElementById('upload-action-container').style.display = 'block';
                 document.getElementById('region-filters-container').style.display = 'block';
                 document.getElementById('area-filters-container').style.display = 'none';
                 
+                // Cuma Super yang boleh akses tab MIS Remark/Report Center
                 document.getElementById('tab-report').style.display = currentUser.role === 'super' ? 'block' : 'none';
 
                 renderRegionSelectionUI(); 
@@ -1093,8 +1123,10 @@
                 
                 if(currentUser.role === 'super') renderReportCenter(); 
                 
+                // Pastikan Dropdown Report_to diisi sedia
                 toggleFormRoleSelect();
-            } else {
+} else {
+                // Untuk PIC USER biasa
                 document.getElementById('master-nav-tabs').style.display = 'none';
                 document.getElementById('upload-action-container').style.display = 'none';
                 
@@ -1108,8 +1140,10 @@
                 
                 currentRegion = currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null;
                 
+                // [PENTING]: Set currentArea kepada null supaya "ALL AREAS" terpilih
                 currentArea = null; 
                 
+                // Panggil render supaya UI tahu "ALL AREAS" patut aktif
                 renderAreaSelectionUI(currentRegion);
                 
                 applyFilterAndRender();
@@ -1154,10 +1188,11 @@
             
             updateKPICards(scopedGeoData);
             
-            filteredAccounts = scopedGeoData.filter(row => {
+filteredAccounts = scopedGeoData.filter(row => {
                 return currentStatusFilter ? row.status === currentStatusFilter : true;
             });
             
+            // [FIX]: Susunan lalai - yang paling latest di-attend akan duduk di atas sekali
             currentSortColumn = 'last_date'; 
             currentSortDirection = 'desc';
 
@@ -1168,12 +1203,14 @@
                 let timeA = (a.details && a.details.timestamp) ? a.details.timestamp : 0;
                 let timeB = (b.details && b.details.timestamp) ? b.details.timestamp : 0;
 
+                // Jika tarikh sama (hari ini), susun ikut masa paling latest (timestamp)
                 if (dateA === dateB) return timeB - timeA;
                 
+                // Jika tarikh berbeza, susun ikut tarikh
                 return dateB.localeCompare(dateA);
             });
 
-            updateHeaderArrows('last_date'); 
+            updateHeaderArrows('last_date'); // Kemaskini ikon anak panah (▲/▼) di Header
 
             currentPage = 1;
             renderTablePage();
@@ -1267,14 +1304,16 @@
             });
         }
 
-        function renderAreaSelectionUI(region) {
+function renderAreaSelectionUI(region) {
             const areaContainer = document.getElementById('area-buttons');
             
+            // Tambah butang ALL AREAS. Ia aktif jika currentArea adalah null
             let activeAll = !currentArea ? 'active' : '';
             areaContainer.innerHTML = `<button class="btn-filter ${activeAll}" onclick="clearAreaSelection(this)">ALL AREAS</button>`;
             
             if(regionsMap[region] && regionsMap[region].length > 0) {
                 regionsMap[region].forEach((area) => {
+                    // Hanya aktif jika currentArea sama dengan area ini
                     let activeStyle = (currentArea === area) ? 'active' : '';
                     areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
                 });
@@ -1339,13 +1378,14 @@
             renderTablePage();
         };
 
-        function resetHeaderArrows() {
+function resetHeaderArrows() {
+            // [KEMASKINI]: Tambah 'assignee_id' ke dalam array ini
             const cols = ['region', 'area', 'loc', 'type', 'acct', 'delq', 'arrs_mth', 'osb', 'status', 'assignee_id', 'last_date'];
             cols.forEach(c => {
                 const el = document.getElementById(`th-${c}`);
                 if (el) {
                     if(c === 'last_date') el.innerHTML = "ATTEND DATE ⇅";
-                    else if(c === 'assignee_id') el.innerHTML = "ASSIGNED TO ⇅"; 
+                    else if(c === 'assignee_id') el.innerHTML = "ASSIGNED TO ⇅"; // [TAMBAH INI]
                     else el.innerHTML = `${el.innerText.split(' ')[0]} ⇅`;
                 }
             });
@@ -1357,7 +1397,7 @@
             if (el) {
                 let text = el.innerText.split(' ')[0];
                 if(activeCol === 'last_date') text = "ATTEND DATE";
-                else if(activeCol === 'assignee_id') text = "ASSIGNED TO"; 
+                else if(activeCol === 'assignee_id') text = "ASSIGNED TO"; // [TAMBAH INI]
                 
                 let arrow = currentSortDirection === 'asc' ? '▲' : '▼';
                 el.innerHTML = `<span style="color:var(--text-main);">${text} ${arrow}</span>`;
@@ -1367,7 +1407,7 @@
         function renderTablePage() {
             const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
             
-            if(filteredAccounts.length === 0) {
+if(filteredAccounts.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;">No records match the active criteria.</td></tr>`;
                 document.getElementById('page-info').innerText = `Page 0 of 0`;
                 document.getElementById('btn-prev').disabled = true; document.getElementById('btn-next').disabled = true;
@@ -1382,12 +1422,13 @@
             const endIndex = startIndex + rowsPerPage;
             const pageData = filteredAccounts.slice(startIndex, endIndex);
 
-            pageData.forEach(row => {
+ pageData.forEach(row => {
                 let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
                 let d = row.details || {};
                 
                 let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '-';
 
+                // [TAMBAH]: Logik paparan masa (Time) menggunakan nilai timestamp
                 let timeDisplay = '';
                 if (d.timestamp) {
                     let timeObj = new Date(d.timestamp);
@@ -1408,6 +1449,7 @@
                         <td><span class="status-badge ${badgeClass}">${row.status === 'UPDATED' ? 'ATTENDED' : row.status}</span></td>
                         <td style="font-weight: 600; color: var(--text-main);">${assigneeDisp}</td>
                         
+                        <!-- [KEMASKINI]: Tarikh & Masa disusun atas bawah -->
                         <td>
                             <span style="font-weight: 700; color: var(--text-muted); font-size: 11px;">${d.last_remark_date || '-'}</span>
                             ${timeDisplay}
@@ -1421,7 +1463,8 @@
             document.getElementById('btn-next').disabled = currentPage === totalPages;
         }
 
-        window.switchTab = function(target) {
+window.switchTab = function(target) {
+            // Kawalan akses: Hanya boss-boss boleh masuk tab settings & assign
             if (target === 'settings' && (currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin')) target = 'dashboard';
             if (target === 'assign' && (currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin')) target = 'dashboard';
             if (target === 'report' && currentUser.role !== 'super') target = 'dashboard';
@@ -1439,9 +1482,11 @@
                 document.getElementById('report-panel').style.display = 'block';
                 document.getElementById('tab-report').classList.add('active');
             } else if (target === 'assign') {
+                // [FASA 3]: Logik untuk buka panel Assignment
                 document.getElementById('assign-panel').style.display = 'block';
                 document.getElementById('tab-assign').classList.add('active');
                 
+                // Bila buka je tab ni, terus load senarai staf dan akaun
                 populateAssignSubordinates();
                 renderAssignTable();
             }
@@ -1449,13 +1494,20 @@
             localStorage.setItem('scazp_active_tab', target);
         };
 
-        window.fetchAndRenderUsers = async function() {
+        // =========================================================
+        // [FASA 2]: PENGURUSAN USER BERSERTA PAGINATION & SEARCH
+        // =========================================================
+        
+window.fetchAndRenderUsers = async function() {
             try {
-                const { data, error } = await supabase.from('users').select('id, role, assignedregion, status, report_to').order('id', { ascending: true });
+                // Tarik column report_to dari pangkalan data
+                const { 
+                    data, error } = await supabase.from('users').select('id, role, assignedregion, status, report_to').order('id', { ascending: true });
                 if (error) throw error;
                 allSystemUsers = data;
-                filterUserList(); 
+                filterUserList(); // Tapis dan paparkan
                 
+                // [FIX]: Otomatis isi ulang dropdown assignment setelah data user berhasil di-load
                 populateAssignSubordinates();
             } catch (err) {
                 console.error("Failed to fetch user list:", err);
@@ -1465,14 +1517,16 @@
         window.filterUserList = function() {
             let query = document.getElementById('search-user').value.toLowerCase().trim();
             filteredSystemUsers = allSystemUsers.filter(u => u.id.toLowerCase().includes(query));
-            userCurrentPage = 1; 
+            userCurrentPage = 1; // Reset ke mukasurat pertama bila buat carian
             renderUserTablePage();
         };
 
-        window.renderUserTablePage = async function() { 
+window.renderUserTablePage = async function() { // Tambah async kat sini
             const tbody = document.getElementById('users-table-body');
             tbody.innerHTML = '';
             
+            // [UPDATE]: Tarik senarai Region unik dari Supabase (atau memory kalau kau dah simpan)
+            // Kalau kau dah fetch masterLocations masa login, guna je memory tu!
             const uniqueRegions = [...new Set(masterLocations.map(m => m.region_name))].sort();
             
             let total = filteredSystemUsers.length;
@@ -1511,6 +1565,7 @@
                     });
                     let reportSelect = `<select id="edit-report-${user.id}" style="padding:4px; font-size:10px; border:1px solid var(--border-color); border-radius:3px; max-width:100px;">${reportToOptions}</select>`;
 
+                    // [UPDATE]: Dropdown Region yang dinamik
                     let regionOptions = `<option value="ALL" ${!user.assignedregion || user.assignedregion==='ALL'?'selected':''}>ALL REGIONS</option>`;
                     uniqueRegions.forEach(r => {
                         regionOptions += `<option value="${r}" ${user.assignedregion===r?'selected':''}>${r}</option>`;
@@ -1554,10 +1609,13 @@
             }
         };
 
+// Fungsi Pintar Cipta Rantaian Ketua (Supervisor Dropdown) - FLEKSIBEL
         window.toggleFormRoleSelect = async function() {
             const role = document.getElementById('new-user-role').value;
             const reportGroup = document.getElementById('form-report-group');
             const reportSelect = document.getElementById('new-user-report-to');
+            
+            // (Baris rujukan ke form-region-group telah dibuang supaya tak crash)
             
             if (role === 'super') {
                 reportGroup.style.display = 'none';
@@ -1566,10 +1624,12 @@
                 reportGroup.style.display = 'block';
                 reportSelect.innerHTML = '<option value="">Loading Supervisor List...</option>';
                 
+                // Logik Fleksibel - Boleh pilih mana-mana pangkat di atasnya
                 let allowedRoles = role === 'user' ? ['admin', 'manager', 'super'] : 
                                    (role === 'admin' ? ['manager', 'super'] : ['super']);
                 
                 try {
+                    // Cari semua user yang aktif dan berpangkat lebih tinggi
                     const { data, error } = await supabase.from('users').select('id, role').in('role', allowedRoles).eq('status', 'ACTIVE');
                     
                     reportSelect.innerHTML = '<option value="">-- TANGGUH DULU / TIADA SUPERVISOR --</option>';
@@ -1586,11 +1646,13 @@
             }
         };
 
-        window.addNewUser = async function() {
+window.addNewUser = async function() {
             const id = document.getElementById('new-user-id').value.trim();
             const pass = document.getElementById('new-user-pass').value.trim();
             const role = document.getElementById('new-user-role').value;
             const reportTo = document.getElementById('new-user-report-to').value; 
+            
+            // [FIX]: Buang rujukan ke 'new-user-region' yang dah dibuang dari HTML
             
             if(!id || !pass) { 
                 showNotification("ERROR", "Please fill in the User ID and Password fields.", true); 
@@ -1606,6 +1668,7 @@
             if (!isVerified) return;
             
             try {
+                // Check dulu kalau ID dah wujud
                 const { data: existingUser, error: checkError } = await supabase.from('users').select('id').eq('id', id).single();
                 
                 if (existingUser) { 
@@ -1613,17 +1676,18 @@
                     return;
                 }
 
+                // [FIX]: Tambah status 'ACTIVE' dan pastikan assignregion NULL masa create baru
                 const { error } = await supabase.from('users').insert([{ 
                     id: id, 
                     pass: pass, 
                     role: role, 
-                    assignedregion: null,
+                    assignedregion: null, // Default kosong masa create, edit nanti kat table
                     report_to: reportTo || null,
                     status: 'ACTIVE' 
                 }]);
                 
                 if(error) {
-                    console.error("Supabase Error Details:", error); 
+                    console.error("Supabase Error Details:", error); // [DEBUG]: Tengok error ni kat console (F12)
                     showNotification("DATABASE ERROR", error.message, true); 
                 } else {
                     showNotification("SUCCESS", `User account <b>${id}</b> has been registered.`);
@@ -1636,6 +1700,8 @@
                 showNotification("SYSTEM ERROR", "Check console for details.", true);
             }
         };
+
+        // =========================================================
 
         window.toggleUserStatus = async function(userId, currentStatus) {
             if (userId === currentUser.username) { 
@@ -1676,11 +1742,13 @@
             }
         };
 
+// [FUNGSI BAHARU]: Update Role/Report To/Region dari dalam Table
         window.updateUserInline = async function(userId) {
             let newRole = document.getElementById(`edit-role-${userId}`).value;
             let newReportTo = document.getElementById(`edit-report-${userId}`).value;
             let newRegion = document.getElementById(`edit-region-${userId}`).value;
 
+            // Bersihkan data
             if (newReportTo === "") newReportTo = null;
             if (newRegion === "ALL") newRegion = null;
 
@@ -1695,7 +1763,7 @@
 
             if (!error) { 
                 showNotification("UPDATE SUCCESS", `Konfigurasi untuk user <b>${userId.toUpperCase()}</b> telah berjaya dikemas kini.`);
-                fetchAndRenderUsers(); 
+                fetchAndRenderUsers(); // Refresh table
             } else { 
                 showNotification("UPDATE ERROR", error.message, true); 
             }
@@ -1893,6 +1961,7 @@
         };
 
         window.toggleFormRegionSelect = function() {
+            // Deprecated - Logik region select digantikan dengan toggleFormRoleSelect()
         };
 
         window.handleExcelFileSelect = function(e) {
@@ -2004,7 +2073,7 @@
                 return '';
             };
 
-            let bulkData = [];
+let bulkData = [];
             for (const row of parsedExcelRows) {
                 const rawAccountNo = String(row[getVal('map-acct')]).trim();
                 if (!rawAccountNo || rawAccountNo === "undefined") continue; 
@@ -2013,23 +2082,29 @@
                 let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; 
                 let currentFindingStatus = existingAcc ? existingAcc.finding_status : ''; 
                 
-                let keyLoc = getVal('map-loc');
-                let keyReg = getVal('map-region');
-                let keyArea = getVal('map-area');
+// [FIX]: Cara ambil nilai yang lebih selamat untuk elak 'undefined' text
+let keyLoc = getVal('map-loc');
+let keyReg = getVal('map-region');
+let keyArea = getVal('map-area');
 
-                let rawLocCd = (keyLoc && row[keyLoc]) ? String(row[keyLoc]).trim() : "";
-                let finalRegion = (keyReg && row[keyReg]) ? String(row[keyReg]).toUpperCase().trim() : "";
-                let finalArea = (keyArea && row[keyArea]) ? String(row[keyArea]).toUpperCase().trim() : "";
+let rawLocCd = (keyLoc && row[keyLoc]) ? String(row[keyLoc]).trim() : "";
+let finalRegion = (keyReg && row[keyReg]) ? String(row[keyReg]).toUpperCase().trim() : "";
+let finalArea = (keyArea && row[keyArea]) ? String(row[keyArea]).toUpperCase().trim() : "";
 
-                if (rawLocCd !== "") {
-                    let matchedLoc = masterLocations.find(loc => String(loc.loc_cd).trim().toUpperCase() === rawLocCd.toUpperCase());
-                    
-                    if (matchedLoc) {
-                        finalRegion = matchedLoc.region_name ? String(matchedLoc.region_name).toUpperCase().trim() : finalRegion;
-                        finalArea = matchedLoc.area_name ? String(matchedLoc.area_name).toUpperCase().trim() : finalArea;
-                    }
-                }
-                                
+// 🧠 LOGIK AUTO-MATCHING BERMULA DI SINI
+if (rawLocCd !== "") {
+    // Cari padanan loc_cd dalam memori masterLocations (Abaikan case sensitivity & ruang kosong)
+    let matchedLoc = masterLocations.find(loc => String(loc.loc_cd).trim().toUpperCase() === rawLocCd.toUpperCase());
+    
+    if (matchedLoc) {
+        // Jika jumpa, timpa (override) nilai Excel dengan data rasmi Supabase
+        // *PENTING: Pastikan nama column Supabase ini sama dengan apa yang ada di dalam table master_locations anda.
+        finalRegion = matchedLoc.region_name ? String(matchedLoc.region_name).toUpperCase().trim() : finalRegion;
+        finalArea = matchedLoc.area_name ? String(matchedLoc.area_name).toUpperCase().trim() : finalArea;
+    }
+}
+                
+                // Jika data Excel betul-betul 'undefined', tukar jadi string kosong supaya database tak pening
                 if (finalRegion === "UNDEFINED") finalRegion = "";
                 if (finalArea === "UNDEFINED") finalArea = "";
                 if (rawLocCd === "UNDEFINED") rawLocCd = "";
@@ -2070,8 +2145,8 @@
                 };
 
                 bulkData.push({
-                    region: finalRegion, 
-                    area: finalArea,     
+                    region: finalRegion, // Gunakan nilai yang telah di Auto-Match
+                    area: finalArea,     // Gunakan nilai yang telah di Auto-Match
                     loc: rawLocCd,
                     type: rawType, 
                     acct: rawAccountNo,
@@ -2129,10 +2204,11 @@
             }
         };
 
-        window.openModal = async function(accNo) {
+window.openModal = async function(accNo) {
             document.getElementById('modalAccNo').innerText = accNo;
             document.getElementById('updateModal').style.display = 'flex';
             
+            // [TAMBAH LOGIK INDEX UNTUK BUTTON NEXT/PREV]
             currentModalIndex = filteredAccounts.findIndex(a => a.acct === accNo);
             
             const btnPrev = document.getElementById('btn-modal-prev');
@@ -2267,10 +2343,12 @@
             if (newIndex !== currentModalIndex) {
                 let nextAcc = filteredAccounts[newIndex].acct;
                 
+                // Bersihkan ruangan input sebelum buka rekod baharu
                 document.getElementById('single-remark-box').value = ''; 
                 document.getElementById('finding-status-select').value = '';
                 document.getElementById('textarea-info').innerText = `Jumlah Karakter: 0/200`;
                 
+                // Buka rekod seterusnya
                 openModal(nextAcc);
             }
         };
@@ -2358,6 +2436,7 @@
                     }
                     
                     const safeRegion = currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin' ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
+                    // [FIX]: Simpan semula ke dalam cache spesifik pengguna setelah dikemas kini
                     const cacheKey = `scazp_cache_${currentUser.id}`;
                     const timeKey = `scazp_time_${currentUser.id}`;
                     
@@ -2404,6 +2483,7 @@
                 }
 
                 const safeRegion = (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
+// [FIX]: Selaraskan kemas kini cache lokal mengikut ID pengguna
                 const cacheKey = `scazp_cache_${currentUser.id}`;
                 await localforage.setItem(cacheKey, globalAccounts);
 
@@ -2434,6 +2514,7 @@
             }
         };
 
+        // [FUNGSI BAHARU] Tarik data lokasi dari Supabase
         window.fetchMasterLocations = async function() {
             try {
                 const { data, error } = await supabase.from('master_locations').select('*');
@@ -2446,16 +2527,21 @@
             }
         };
 
+        // =========================================================
+        // [FASA 3]: SISTEM ASSIGNMENT & COLLECTOR ROUTING
+        // =========================================================
+        
         let assignAccounts = [];
         let currentAssignPage = 1;
         const assignRowsPerPage = 20;
 
-        window.populateAssignSubordinates = function() {
+window.populateAssignSubordinates = function() {
             const dropdown = document.getElementById('assign-target-user');
             if (!dropdown) return;
             
             dropdown.innerHTML = '<option value="">-- PILIH STAF BAWAHAN --</option>';
             
+            // Proteksi jika data allSystemUsers belum selesai di-load dari server
             if (!allSystemUsers || allSystemUsers.length === 0) return;
             
             let subordinates = [];
@@ -2463,12 +2549,14 @@
             let currentUserIdClean = String(currentUserIdObj).trim().toLowerCase();
 
             if (currentUser.role === 'super') {
+                // Super Admin dapat melihat & mendistribusikan ke semua orang
                 subordinates = allSystemUsers.filter(u => {
                     let uStatus = String(u.status || '').toUpperCase().trim();
                     let uId = String(u.id || '').toLowerCase().trim();
                     return uStatus === 'ACTIVE' && uId !== currentUserIdClean;
                 });
             } else {
+                // Manager/Admin hanya melihat staf yang "Report To" langsung ke ID mereka
                 subordinates = allSystemUsers.filter(u => {
                     let uStatus = String(u.status || '').toUpperCase().trim();
                     let uReportTo = String(u.report_to || '').toLowerCase().trim();
@@ -2476,6 +2564,7 @@
                 });
             }
 
+            // Masukkan data staf ke dalam opsi dropdown
             subordinates.forEach(u => {
                 dropdown.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
             });
@@ -2485,6 +2574,7 @@
             const statusFilter = document.getElementById('assign-filter-status').value;
             const tbody = document.getElementById('assign-table-body');
             
+            // Tapis akaun berdasarkan status Assigned/Unassigned
             assignAccounts = globalAccounts.filter(row => {
                 let isUnassigned = !row.assignee_id || row.assignee_id === 'UNASSIGNED';
                 if (statusFilter === 'UNASSIGNED') return isUnassigned;
@@ -2528,7 +2618,7 @@
             document.getElementById('assign-page-info').innerText = `Page ${currentAssignPage} of ${totalPages}`;
             document.getElementById('btn-assign-prev').disabled = currentAssignPage === 1;
             document.getElementById('btn-assign-next').disabled = currentAssignPage === totalPages;
-            document.getElementById('check-all-assign').checked = false; 
+            document.getElementById('check-all-assign').checked = false; // Reset checkbox utama
         };
 
         window.nextAssignPage = function() {
@@ -2546,11 +2636,13 @@
             }
         };
 
+        // Fungsi pangkah semua kotak serentak
         window.toggleAllAssignCheckboxes = function(masterCheckbox) {
             let checkboxes = document.querySelectorAll('.chk-assign-row');
             checkboxes.forEach(chk => chk.checked = masterCheckbox.checked);
         };
 
+// Fungsi utama agihkan akaun ke pangkalan data
         window.executeBatchAssignment = async function() {
             const targetUser = document.getElementById('assign-target-user').value;
             if(!targetUser) {
@@ -2567,23 +2659,28 @@
             let isConfirmed = await customConfirm(`Anda pasti mahu mengagihkan ${checkboxes.length} akaun kepada staf ${targetUser.toUpperCase()}?`);
             if(!isConfirmed) return;
 
+            // Kumpul semua no akaun yang di-tick
             let selectedAccts = Array.from(checkboxes).map(chk => chk.value);
 
             document.getElementById('loadingText').innerText = "Mengagihkan akaun ke pelayan (server)...";
             document.getElementById('loadingModal').style.display = 'flex';
 
             try {
+                // [FIX 1]: Pastikan ID disimpan dalam huruf kecil (lowercase) untuk padan dengan tapisan server
                 let cleanTargetUser = targetUser.toLowerCase().trim();
                 
                 const { error } = await supabase.from('accounts').update({ assignee_id: cleanTargetUser }).in('acct', selectedAccts);
                 if(error) throw error;
 
+                // [FIX 2]: Hantar log 'SYSTEM' ke tabel findings. Ini WAJIB supaya cache timestamp pelayan berubah.
+                // Jika tidak, browser PIC User tidak akan tahu ada pertukaran data baharu!
                 await supabase.from('findings').insert([{
                     acct: 'SYSTEM',
                     remark: `BATCH ASSIGNMENT: ${selectedAccts.length} akaun kepada ${cleanTargetUser}`,
                     updated_by: currentUser.id
                 }]);
 
+                // Kemas kini memori tempatan
                 selectedAccts.forEach(acct => {
                     let accObj = globalAccounts.find(a => a.acct === acct);
                     if(accObj) accObj.assignee_id = cleanTargetUser;
@@ -2598,6 +2695,7 @@
                 document.getElementById('loadingModal').style.display = 'none';
             }
         };
+        
     </script>
 </body>
-</html>
+    </html>
