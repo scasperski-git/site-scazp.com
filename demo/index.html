@@ -1320,10 +1320,11 @@ filteredAccounts = scopedGeoData.filter(row => {
                     let activeStyle = ((currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin') && index === 0) ? 'active' : '';
                     areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
                 });
-                //if((currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin') && !currentArea) { 
+                if((currentUser.role !== 'master' && currentUser.role !== 'super') && !currentArea) {
                     //const firstBtn = areaContainer.querySelector('.btn-filter');
                     //if (firstBtn) applyAreaFilter(regionsMap[region][0], firstBtn); 
-                //}
+                console.log("Defaulting to ALL AREAS view");
+                }
             }
         }
 
