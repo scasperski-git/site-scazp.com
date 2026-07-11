@@ -1293,7 +1293,7 @@ filteredAccounts = scopedGeoData.filter(row => {
 
         window.applyAreaFilter = function(area, btnElement) {
             updateActiveFilterHighlight('area-buttons', btnElement);
-            currentArea = area;
+            currentArea = null;
             resetStatusCardHighlight();
             applyFilterAndRender();
         };
