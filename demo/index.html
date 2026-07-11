@@ -220,7 +220,6 @@
         }
         .btn-upload-trigger:hover { background-color: #15803d; }
 
-        /* KPI Container Responsive */
         .kpi-container { 
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
@@ -254,7 +253,6 @@
         .kpi-card h3 { margin: 0 0 8px 0; font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;}
         .kpi-card p { margin: 0; font-size: 24px; font-weight: 800; color: var(--text-main); }
 
-        /* Modernized Table Container */
         .table-container { 
             background-color: var(--card-bg); 
             border-radius: 8px; 
@@ -417,7 +415,6 @@
         #loadingModal .modal-content { text-align: center; padding: 40px; max-width: 360px;}
 
         .btn-delete-finding {
-            float: right;
             background-color: #fee2e2;
             border: 1px solid #fca5a5;
             color: var(--error-red);
@@ -486,7 +483,7 @@
         }
         
         .details-box h4, .details-box p { position: relative; z-index: 2; }
-        .details-box h4 { margin: 0 0 12px 0; color: var(--accent-gold); font-size: 13px; border-bottom: 1px dashed var(--border-color); padding-bottom: 6px; text-transform: uppercase; font-weight: 700; }
+        .details-box h4 { margin: 0 0 12px 0; color: var(--accent-gold); font-size: 13px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; text-transform: uppercase; font-weight: 700; }
         .details-box p { margin: 6px 0; font-size: 13px; color: var(--text-main); }
         .details-box span.lbl { color: var(--text-muted); display: inline-block; width: 85px; font-weight: 600; }
         
@@ -494,24 +491,16 @@
         .mapping-section { border: 1px solid var(--border-color); padding: 16px; margin-bottom: 16px; border-radius: 8px; background: #ffffff; }
         .mapping-section h3 { margin-top: 0; margin-bottom: 12px; font-size: 14px; color: var(--success-green); border-bottom: 1px solid var(--border-color); padding-bottom: 6px; font-weight: 700;}
 
-        /* --- RESPONSIVE MOBILE FIXES --- */
         @media (max-width: 768px) {
             body { padding: 12px; }
             .header h1 { font-size: 18px; }
-            
-            /* Carian Pintar Mobile */
             .search-container { flex-direction: column; width: 100%; gap: 8px; }
             #search-type { max-width: 100% !important; }
-            
-            /* KPI Kecil Bersih */
             .kpi-card { padding: 12px 8px; }
             .kpi-card h3 { font-size: 10px; margin-bottom: 4px; }
             .kpi-card p { font-size: 16px; }
-
-            /* Tulisan Kecil Untuk Skrin Padat */
             table { font-size: 11px; }
             th, td { padding: 10px 8px; }
-            
             .pagination-container { flex-direction: column; text-align: center; }
         }
 
@@ -544,7 +533,6 @@
 
         .search-container { display: flex; gap: 8px; align-items: center; width: 100%; }
 
-        /* Full Page Modal Redesign for UX */
         .full-page-modal {
             width: 100% !important;
             height: 100% !important;
@@ -853,10 +841,7 @@
         </div>
     </div>
 
-    <div style="text-align: center; padding: 24px 10px; margin-top: 40px; font-size: 12px; color: var(--text-muted); border-top: 1px dashed var(--border-color);">
-        Copyright &copy; <span id="auto-year"></span> <span style="color: var(--accent-gold); font-weight: bold;">System Findings v2.0</span>. All Rights Reserved.
-    </div>
-
+    <!-- MODALS PIPELINE -->
     <div class="modal-overlay" id="loadingModal">
         <div class="modal-content">
             <h2 style="color: var(--accent-gold); margin-top:0;">SYSTEM CHECK</h2>
@@ -1607,7 +1592,7 @@
                         <td style="font-weight: 900; color: var(--accent-gold); cursor: pointer; text-decoration: underline;" onclick="openModal('${row.acct}')">${row.acct}</td>
                         <td>${row.delq || '-'}</td>
                         <td>${row.arrs_mth || '0'}</td>
-                        <td>${=Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td><span class="status-badge ${badgeClass}">${row.status === 'UPDATED' ? 'ATTENDED' : row.status}</span></td>
                         <td style="font-weight: 600; color: var(--text-main);">${assigneeDisp}</td>
                         <td>
