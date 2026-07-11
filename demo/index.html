@@ -1311,9 +1311,13 @@
             renderUserTablePage();
         };
 
-window.renderUserTablePage = function() {
+window.renderUserTablePage = async function() { // Tambah async kat sini
             const tbody = document.getElementById('users-table-body');
             tbody.innerHTML = '';
+            
+            // [UPDATE]: Tarik senarai Region unik dari Supabase (atau memory kalau kau dah simpan)
+            // Kalau kau dah fetch masterLocations masa login, guna je memory tu!
+            const uniqueRegions = [...new Set(masterLocations.map(m => m.region_name))].sort();
             
             let total = filteredSystemUsers.length;
             document.getElementById('total-users-count').innerText = total;
@@ -1326,11 +1330,8 @@ window.renderUserTablePage = function() {
             let end = start + usersPerPage;
             let pageData = filteredSystemUsers.slice(start, end);
             
-            // Senarai Region Standard untuk dropdown (Boleh update kalau ada region baru)
-            const regionsList = ['BC', 'NORTH', 'NORTHWEST', 'NORTHEAST', 'SOUTH', 'CENTRAL', 'MIDEAST', 'SABAH', 'SARAWAK'];
-
             if(pageData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No users found matching the search criteria.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No users found.</td></tr>';
             } else {
                 pageData.forEach((user, index) => {
                     let rName = user.role ? user.role.toLowerCase().trim() : 'user';
@@ -1340,7 +1341,6 @@ window.renderUserTablePage = function() {
                     let toggleBtnText = userStatus === 'ACTIVE' ? 'DEACTIVATE' : 'ACTIVATE';
                     let toggleBtnColor = userStatus === 'ACTIVE' ? 'var(--error-red)' : 'var(--success-green)';
                     
-                    // 1. Dropdown ROLE
                     let roleSelect = `
                         <select id="edit-role-${user.id}" style="padding:4px; font-size:10px; font-weight:bold; border:1px solid var(--border-color); border-radius:3px;">
                             <option value="user" ${rName==='user'?'selected':''}>USER</option>
@@ -1349,21 +1349,19 @@ window.renderUserTablePage = function() {
                             <option value="super" ${rName==='super'?'selected':''}>SUPER</option>
                         </select>`;
 
-                    // 2. Dropdown REPORT TO (Senarai semua orang kecuali User biasa dan diri dia sendiri)
                     let reportToOptions = `<option value="">-- NONE --</option>`;
                     allSystemUsers.filter(u => u.role !== 'user' && u.id !== user.id).forEach(u => {
                         reportToOptions += `<option value="${u.id}" ${user.report_to===u.id?'selected':''}>${u.id.toUpperCase()}</option>`;
                     });
                     let reportSelect = `<select id="edit-report-${user.id}" style="padding:4px; font-size:10px; border:1px solid var(--border-color); border-radius:3px; max-width:100px;">${reportToOptions}</select>`;
 
-                    // 3. Dropdown REGION ACCESS
+                    // [UPDATE]: Dropdown Region yang dinamik
                     let regionOptions = `<option value="ALL" ${!user.assignedregion || user.assignedregion==='ALL'?'selected':''}>ALL REGIONS</option>`;
-                    regionsList.forEach(r => {
+                    uniqueRegions.forEach(r => {
                         regionOptions += `<option value="${r}" ${user.assignedregion===r?'selected':''}>${r}</option>`;
                     });
                     let regionSelect = `<select id="edit-region-${user.id}" style="padding:4px; font-size:10px; border:1px solid var(--border-color); border-radius:3px;">${regionOptions}</select>`;
                     
-                    // HTML untuk baris table
                     tbody.innerHTML += `
                         <tr>
                             <td style="text-align: center;">${start + index + 1}</td>
@@ -1381,11 +1379,11 @@ window.renderUserTablePage = function() {
                     `;
                 });
             }
-            
             document.getElementById('user-page-info').innerText = `Page ${userCurrentPage} of ${totalPages}`;
             document.getElementById('btn-user-prev').disabled = userCurrentPage === 1;
             document.getElementById('btn-user-next').disabled = userCurrentPage === totalPages;
         };
+        
         window.nextUserPage = function() {
             const totalPages = Math.ceil(filteredSystemUsers.length / usersPerPage);
             if (userCurrentPage < totalPages) {
