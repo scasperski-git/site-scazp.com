@@ -1125,22 +1125,30 @@ async function fetchFullDatabaseData(region = null) {
                 
                 // Pastikan Dropdown Report_to diisi sedia
                 toggleFormRoleSelect();
-} else {
+        } else {
                 // Untuk PIC USER biasa
                 document.getElementById('master-nav-tabs').style.display = 'none';
                 document.getElementById('upload-action-container').style.display = 'none';
                 
-                // [FIX]: Tunjukkan Region mereka (tetapi jangan bagi mereka tukar region lain)
+                // Tunjukkan Region mereka (tetapi statik)
                 document.getElementById('region-filters-container').style.display = 'block';
                 document.getElementById('region-filters-container').innerHTML = `
                     <span class="filter-title">My Assigned Region</span>
                     <div class="btn-group"><button class="btn-filter active">${currentUser.assignedregion || 'NO REGION'}</button></div>
                 `;
                 
+                // Tunjukkan Area dan biarkan mereka pilih "ALL AREAS"
                 document.getElementById('area-filters-container').style.display = 'block';
                 
                 currentRegion = currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null;
+                
+                // PANGGIL FUNGSI INI
                 renderAreaSelectionUI(currentRegion);
+                
+                // [FIX]: Pastikan currentArea adalah NULL (supaya ia menunjukkan "ALL AREAS" secara default)
+                currentArea = null; 
+                
+                applyFilterAndRender();
             }
 
             const lastActiveTab = localStorage.getItem('scazp_active_tab') || 'dashboard';
@@ -1312,10 +1320,10 @@ filteredAccounts = scopedGeoData.filter(row => {
                     let activeStyle = ((currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin') && index === 0) ? 'active' : '';
                     areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
                 });
-                if((currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin') && !currentArea) { 
-                    const firstBtn = areaContainer.querySelector('.btn-filter');
-                    if (firstBtn) applyAreaFilter(regionsMap[region][0], firstBtn); 
-                }
+                //if((currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin') && !currentArea) { 
+                    //const firstBtn = areaContainer.querySelector('.btn-filter');
+                    //if (firstBtn) applyAreaFilter(regionsMap[region][0], firstBtn); 
+                //}
             }
         }
 
