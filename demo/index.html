@@ -629,11 +629,73 @@
         </div>
     </div>
     
-    <div class="modal-overlay" id="mappingModal">
+<div class="modal-overlay" id="mappingModal">
         <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
                 <h2>Map Excel Columns to Database Fields</h2>
                 <button class="close-btn" onclick="closeMappingModal()">&times;</button>
+            </div>
+            
+            <div class="mapping-container">
+                <div class="mapping-section">
+                    <h3>1. MAIN ACCOUNT INFO</h3>
+                    <div class="mapping-grid">
+                        <label>REGION</label><select id="map-region" class="form-control mapping-select"></select>
+                        <label>AREA</label><select id="map-area" class="form-control mapping-select"></select>
+                        <label>LOC CODE</label><select id="map-loc" class="form-control mapping-select"></select>
+                        <label>TYPE</label><select id="map-type" class="form-control mapping-select"></select>
+                        <label>ACCOUNT NO</label><select id="map-acct" class="form-control mapping-select"></select>
+                        <label>DELQ</label><select id="map-delq" class="form-control mapping-select"></select>
+                        <label>ARRS MTH</label><select id="map-arrs" class="form-control mapping-select"></select>
+                        <label>OSB Balance</label><select id="map-osb" class="form-control mapping-select"></select>
+                    </div>
+                </div>
+
+                <div class="mapping-section">
+                    <h3>2. HIRER DETAILS</h3>
+                    <div class="mapping-grid">
+                        <label>Name</label><select id="map-h-name" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">New NRIC</label><select id="map-h-nric-new" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">Old NRIC</label><select id="map-h-nric-old" class="form-control mapping-select"></select>
+                        <label>Tel No</label><select id="map-h-tel" class="form-control mapping-select"></select>
+                        <label>Home Add 1</label><select id="map-h-add1" class="form-control mapping-select"></select>
+                        <label>Home Add 2</label><select id="map-h-add2" class="form-control mapping-select"></select>
+                        <label>Home Add 3</label><select id="map-h-add3" class="form-control mapping-select"></select>
+                        <label>Co. Name</label><select id="map-hc-name" class="form-control mapping-select"></select>
+                        <label>Co. Tel</label><select id="map-hc-tel" class="form-control mapping-select"></select>
+                        <label>Co. Add 1</label><select id="map-hc-add1" class="form-control mapping-select"></select>
+                        <label>Co. Add 2</label><select id="map-hc-add2" class="form-control mapping-select"></select>
+                    </div>
+                </div>
+
+                <div class="mapping-section">
+                    <h3>3. SPOUSE & GUARANTOR DETAILS</h3>
+                    <div class="mapping-grid">
+                        <label>Spouse Name</label><select id="map-s-name" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">Spouse New IC</label><select id="map-s-nric-new" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">Spouse Old IC</label><select id="map-s-nric-old" class="form-control mapping-select"></select>
+                        <label>Spouse Tel</label><select id="map-s-tel" class="form-control mapping-select"></select>
+                        <label>Gtor Name</label><select id="map-g-name" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">Gtor New IC</label><select id="map-g-nric-new" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">Gtor Old IC</label><select id="map-g-nric-old" class="form-control mapping-select"></select>
+                        <label>Gtor Tel</label><select id="map-g-tel" class="form-control mapping-select"></select>
+                        <label>Gtor Add 1</label><select id="map-g-add1" class="form-control mapping-select"></select>
+                        <label>Gtor Add 2</label><select id="map-g-add2" class="form-control mapping-select"></select>
+                        <label>Gtor Co. Name</label><select id="map-gc-name" class="form-control mapping-select"></select>
+                        <label>Gtor Co. Tel</label><select id="map-gc-tel" class="form-control mapping-select"></select>
+                    </div>
+                </div>
+
+                <div class="mapping-section">
+                    <h3>4. ACCOUNT INFO & BALANCES</h3>
+                    <div class="mapping-grid">
+                        <label>Product Desc</label><select id="map-prod" class="form-control mapping-select"></select>
+                        <label>Plate No</label><select id="map-plate" class="form-control mapping-select"></select>
+                        <label>EP Balance</label><select id="map-bal" class="form-control mapping-select"></select>
+                        <label>ODP Bal</label><select id="map-odp" class="form-control mapping-select"></select>
+                        <label>ADCH Bal</label><select id="map-adch" class="form-control mapping-select"></select>
+                    </div>
+                </div>
             </div>
             <button class="btn-submit" style="width: 100%; background: #2e7d32; margin-top: 15px;" onclick="processExcelUpload()">CONFIRM & START UPLOAD</button>
         </div>
