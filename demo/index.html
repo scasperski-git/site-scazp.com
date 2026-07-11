@@ -1936,7 +1936,14 @@ window.addNewUser = async function() {
             const progressText = document.getElementById('upload-progress-text');
             const progressSubtext = document.getElementById('upload-progress-subtext');
 
-            const getVal = (id) => document.getElementById(id).value;
+           const getVal = (id) => {
+                const el = document.getElementById(id);
+                if (!el) { 
+                    console.error("⛔ Ralat: Elemen HTML dengan ID '" + id + "' tidak dijumpai!"); 
+                    return ""; // Return kosong supaya sistem tak crash
+                }
+                return el.value;
+            };
             
             const formatIC = (newIcKey, oldIcKey, rowData) => {
                 let n = String(rowData[getVal(newIcKey)] || '').trim();
