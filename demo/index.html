@@ -1157,8 +1157,8 @@ async function fetchFullDatabaseData(region = null) {
 
                 let r = row.region ? row.region.toUpperCase().trim() : '';
                 let a = row.area ? row.area.toUpperCase().trim() : '';
-                let matchRegion = currentRegion ? r === currentRegion : true;
-                let matchArea = currentArea ? a === currentArea : true;
+                let matchRegion = (currentRegion && currentRegion !== 'ALL') ? r === currentRegion : true;
+                let matchArea = (currentArea && currentArea !== 'ALL') ? a === currentArea : true;
                 
                 return matchRegion && matchArea;
             });
@@ -2550,7 +2550,7 @@ window.populateAssignSubordinates = function() {
             checkboxes.forEach(chk => chk.checked = masterCheckbox.checked);
         };
 
-        // Fungsi utama agihkan akaun ke pangkalan data
+// Fungsi utama agihkan akaun ke pangkalan data
         window.executeBatchAssignment = async function() {
             const targetUser = document.getElementById('assign-target-user').value;
             if(!targetUser) {
@@ -2574,19 +2574,27 @@ window.populateAssignSubordinates = function() {
             document.getElementById('loadingModal').style.display = 'flex';
 
             try {
-                // Tembak perubahan ke Supabase sekaligus (Batch Update)
-                const { error } = await supabase.from('accounts').update({ assignee_id: targetUser }).in('acct', selectedAccts);
+                // [FIX 1]: Pastikan ID disimpan dalam huruf kecil (lowercase) untuk padan dengan tapisan server
+                let cleanTargetUser = targetUser.toLowerCase().trim();
+                
+                const { error } = await supabase.from('accounts').update({ assignee_id: cleanTargetUser }).in('acct', selectedAccts);
                 if(error) throw error;
 
-                // Kemas kini memori tempatan (supaya tak perlu buang masa sync semula)
+                // [FIX 2]: Hantar log 'SYSTEM' ke tabel findings. Ini WAJIB supaya cache timestamp pelayan berubah.
+                // Jika tidak, browser PIC User tidak akan tahu ada pertukaran data baharu!
+                await supabase.from('findings').insert([{
+                    acct: 'SYSTEM',
+                    remark: `BATCH ASSIGNMENT: ${selectedAccts.length} akaun kepada ${cleanTargetUser}`,
+                    updated_by: currentUser.id
+                }]);
+
+                // Kemas kini memori tempatan
                 selectedAccts.forEach(acct => {
                     let accObj = globalAccounts.find(a => a.acct === acct);
-                    if(accObj) accObj.assignee_id = targetUser;
+                    if(accObj) accObj.assignee_id = cleanTargetUser;
                 });
 
                 showNotification("SUCCESS", `${checkboxes.length} akaun telah berjaya diagihkan kepada ${targetUser.toUpperCase()}.`);
-                
-                // Segarkan semula jadual
                 renderAssignTable(); 
 
             } catch (err) {
