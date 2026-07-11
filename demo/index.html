@@ -1994,12 +1994,12 @@ window.addNewUser = async function() {
                             const id = select.id;
                             if(id === 'map-region') preSelectOption(select, ['region', 'REGION', 'Region']);
                             if(id === 'map-area') preSelectOption(select, ['area', 'AREA', 'Area']);
-                            if(id === 'map-loc') preSelectOption(select, ['loc', 'loc cd', 'LOC CD']);
+                            if(id === 'map-loc') preSelectOption(select, ['loc', 'loc_cd', 'LOC_CD']);
                             if(id === 'map-type') preSelectOption(select, ['type', 'TYPE', 'Type', 'ACCT_TYPE']);
                             if(id === 'map-acct') preSelectOption(select, ['acct', 'ACCT', 'account']);
-                            if(id === 'map-delq') preSelectOption(select, ['delq', 'DELQ', 'Delq']);
-                            if(id === 'map-arrs') preSelectOption(select, ['arrs', 'ARRS MTH', 'arrs mth']);
-                            if(id === 'map-osb') preSelectOption(select, ['osb', 'OSB', 'OSB OR FS AMT']);
+                            if(id === 'map-delq') preSelectOption(select, ['delq', 'V_DELQ', 'v_delq']);
+                            if(id === 'map-arrs') preSelectOption(select, ['arrs', 'ARRS_MTH', 'arrs_mth']);
+                            if(id === 'map-osb') preSelectOption(select, ['osb', 'OSB', 'FS_AMT_TO_COLLECT']);
                             
                             if(id === 'map-h-name') preSelectOption(select, ['HIRER_NAME']);
                             if(id === 'map-h-nric-new') preSelectOption(select, ['HIRER_NEW_IC_NO']);
