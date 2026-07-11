@@ -689,6 +689,7 @@
         let filteredAccounts = []; 
         let regionsMap = {}; 
         let parsedExcelRows = []; 
+        let masterLocations = [];
         
         let currentPage = 1;
         const rowsPerPage = 20;
@@ -738,6 +739,7 @@
                 // [UPDATE]: Rombak akses fetch ikut hierarki. Buat masa ni, selagi fungsi assign belum siap, kita beri akses kepada semua untuk Super, Manager, Admin.
                 const safeRegion = (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
                 await fetchFullDatabaseData(safeRegion);
+                await fetchMasterLocations();
                 
                 initDashboardView();
             }
@@ -1823,7 +1825,7 @@
                 return '';
             };
 
-            let bulkData = [];
+let bulkData = [];
             for (const row of parsedExcelRows) {
                 const rawAccountNo = String(row[getVal('map-acct')]).trim();
                 if (!rawAccountNo || rawAccountNo === "undefined") continue; 
@@ -1832,6 +1834,33 @@
                 let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; 
                 let currentFindingStatus = existingAcc ? existingAcc.finding_status : ''; 
                 
+                // Ambil nilai asal dari Excel (jika ada)
+                let rawLocCd = String(row[getVal('map-loc')]).trim();
+                let finalRegion = String(row[getVal('map-region')]).toUpperCase().trim();
+                let finalArea = String(row[getVal('map-area')]).toUpperCase().trim();
+
+                // 🧠 LOGIK AUTO-MATCHING BERMULA DI SINI
+                if (rawLocCd && rawLocCd !== "undefined") {
+                    // Cari padanan loc_cd dalam memori masterLocations
+                    let matchedLoc = masterLocations.find(loc => String(loc.loc_cd) === rawLocCd);
+                    if (matchedLoc) {
+                        // Jika jumpa, timpa (override) nilai kosong/salah dari Excel dengan data rasmi Supabase
+                        finalRegion = matchedLoc.region_name.toUpperCase();
+                        finalArea = matchedLoc.area_name.toUpperCase();
+                    }
+                }
+                
+                // Jika data Excel betul-betul 'undefined', tukar jadi string kosong supaya database tak pening
+                if (finalRegion === "UNDEFINED") finalRegion = "";
+                if (finalArea === "UNDEFINED") finalArea = "";
+                if (rawLocCd === "UNDEFINED") rawLocCd = "";
+                let rawType = String(row[getVal('map-type')]).trim();
+                if (rawType === "undefined") rawType = "";
+                let rawDelq = String(row[getVal('map-delq')]).trim();
+                if (rawDelq === "undefined") rawDelq = "";
+                let rawArrs = String(row[getVal('map-arrs')]).trim();
+                if (rawArrs === "undefined") rawArrs = "0";
+
                 let detailsJSON = {
                     h_name: row[getVal('map-h-name')] || '',
                     h_nric: formatIC('map-h-nric-new', 'map-h-nric-old', row),
@@ -1862,13 +1891,13 @@
                 };
 
                 bulkData.push({
-                    region: String(row[getVal('map-region')]).toUpperCase().trim(),
-                    area: String(row[getVal('map-area')]).toUpperCase().trim(),
-                    loc: String(row[getVal('map-loc')]).trim(),
-                    type: String(row[getVal('map-type')]).trim(), 
+                    region: finalRegion, // Gunakan nilai yang telah di Auto-Match
+                    area: finalArea,     // Gunakan nilai yang telah di Auto-Match
+                    loc: rawLocCd,
+                    type: rawType, 
                     acct: rawAccountNo,
-                    delq: String(row[getVal('map-delq')]).trim(), 
-                    arrs_mth: String(row[getVal('map-arrs')]).trim(), 
+                    delq: rawDelq, 
+                    arrs_mth: rawArrs, 
                     osb: parseFloat(String(row[getVal('map-osb')]).replace(/[^0-9.-]+/g,"")) || 0, 
                     status: currentStatus, 
                     details: detailsJSON 
@@ -2194,6 +2223,20 @@
                 renderTablePage();
             }
         };
+
+        // [FUNGSI BAHARU] Tarik data lokasi dari Supabase
+        window.fetchMasterLocations = async function() {
+            try {
+                const { data, error } = await supabase.from('master_locations').select('*');
+                if (data) {
+                    masterLocations = data;
+                    console.log("Auto-match memory loaded: ", masterLocations.length, "locations");
+                }
+            } catch (err) {
+                console.error("Gagal muat turun senarai lokasi:", err);
+            }
+        };
+        
     </script>
 </body>
 </html>
