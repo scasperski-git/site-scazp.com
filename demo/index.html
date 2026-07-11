@@ -1483,7 +1483,7 @@ window.renderUserTablePage = async function() { // Tambah async kat sini
             }
         };
 
-// Fungsi Pintar Cipta Rantaian Ketua (Supervisor Dropdown)
+// Fungsi Pintar Cipta Rantaian Ketua (Supervisor Dropdown) - FLEKSIBEL
         window.toggleFormRoleSelect = async function() {
             const role = document.getElementById('new-user-role').value;
             const reportGroup = document.getElementById('form-report-group');
@@ -1499,13 +1499,14 @@ window.renderUserTablePage = async function() { // Tambah async kat sini
                 reportGroup.style.display = 'block';
                 reportSelect.innerHTML = '<option value="">Loading Supervisor List...</option>';
                 
-                // Cipta logik ketua: User lapor ke Admin, Admin lapor ke Manager, Manager lapor ke Super
-                let targetRole = role === 'user' ? 'admin' : (role === 'admin' ? 'manager' : 'super');
+                // [KEMAS KINI]: Logik Fleksibel - Boleh pilih mana-mana pangkat di atasnya
+                let allowedRoles = role === 'user' ? ['admin', 'manager', 'super'] : 
+                                   (role === 'admin' ? ['manager', 'super'] : ['super']);
                 
                 try {
-                    const { data, error } = await supabase.from('users').select('id, role').eq('role', targetRole).eq('status', 'ACTIVE');
+                    // Cari semua user yang aktif dan berpangkat lebih tinggi
+                    const { data, error } = await supabase.from('users').select('id, role').in('role', allowedRoles).eq('status', 'ACTIVE');
                     
-                    // [KEMAS KINI]: Jadikan ia pilihan (Optional) yang jelas!
                     reportSelect.innerHTML = '<option value="">-- TANGGUH DULU / TIADA SUPERVISOR --</option>';
                     
                     if (data && data.length > 0) {
