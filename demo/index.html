@@ -2018,21 +2018,27 @@ let bulkData = [];
                 let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; 
                 let currentFindingStatus = existingAcc ? existingAcc.finding_status : ''; 
                 
-                // Ambil nilai asal dari Excel (jika ada)
-                let rawLocCd = String(row[getVal('map-loc')]).trim();
-                let finalRegion = String(row[getVal('map-region')]).toUpperCase().trim();
-                let finalArea = String(row[getVal('map-area')]).toUpperCase().trim();
+// [FIX]: Cara ambil nilai yang lebih selamat untuk elak 'undefined' text
+let keyLoc = getVal('map-loc');
+let keyReg = getVal('map-region');
+let keyArea = getVal('map-area');
 
-                // 🧠 LOGIK AUTO-MATCHING BERMULA DI SINI
-                if (rawLocCd && rawLocCd !== "undefined") {
-                    // Cari padanan loc_cd dalam memori masterLocations
-                    let matchedLoc = masterLocations.find(loc => String(loc.loc_cd) === rawLocCd);
-                    if (matchedLoc) {
-                        // Jika jumpa, timpa (override) nilai kosong/salah dari Excel dengan data rasmi Supabase
-                        finalRegion = matchedLoc.region_name.toUpperCase();
-                        finalArea = matchedLoc.area_name.toUpperCase();
-                    }
-                }
+let rawLocCd = (keyLoc && row[keyLoc]) ? String(row[keyLoc]).trim() : "";
+let finalRegion = (keyReg && row[keyReg]) ? String(row[keyReg]).toUpperCase().trim() : "";
+let finalArea = (keyArea && row[keyArea]) ? String(row[keyArea]).toUpperCase().trim() : "";
+
+// 🧠 LOGIK AUTO-MATCHING BERMULA DI SINI
+if (rawLocCd !== "") {
+    // Cari padanan loc_cd dalam memori masterLocations (Abaikan case sensitivity & ruang kosong)
+    let matchedLoc = masterLocations.find(loc => String(loc.loc_cd).trim().toUpperCase() === rawLocCd.toUpperCase());
+    
+    if (matchedLoc) {
+        // Jika jumpa, timpa (override) nilai Excel dengan data rasmi Supabase
+        // *PENTING: Pastikan nama column Supabase ini sama dengan apa yang ada di dalam table master_locations anda.
+        finalRegion = matchedLoc.region_name ? String(matchedLoc.region_name).toUpperCase().trim() : finalRegion;
+        finalArea = matchedLoc.area_name ? String(matchedLoc.area_name).toUpperCase().trim() : finalArea;
+    }
+}
                 
                 // Jika data Excel betul-betul 'undefined', tukar jadi string kosong supaya database tak pening
                 if (finalRegion === "UNDEFINED") finalRegion = "";
