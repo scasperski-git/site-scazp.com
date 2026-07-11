@@ -321,6 +321,11 @@
         .fp-header h2 { margin: 0; font-size: 16px; color: var(--accent-gold); }
         .fp-btn-back { background: var(--accent-gold); color: white; border: none; padding: 6px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
         .fp-btn-back:hover { background: #1d4ed8; }
+        .fp-btn-back:disabled { 
+            background: #cbd5e1 !important; 
+            color: #94a3b8 !important; 
+            cursor: not-allowed !important; 
+        }
 
         .fp-body {
             flex: 1;
@@ -704,9 +709,13 @@
     
     <div class="modal-overlay" id="updateModal" style="align-items: flex-start; padding: 0;">
         <div class="modal-content full-page-modal">
-            <div class="fp-header">
+<div class="fp-header">
                 <h2>ACCT: <span id="modalAccNo"></span></h2>
-                <button class="fp-btn-back" onclick="closeModal()">❮ KEMBALI</button>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button id="btn-modal-prev" class="fp-btn-back" style="background-color: #486581;" onclick="navigateModal('prev')">◄ PREV</button>
+                    <button id="btn-modal-next" class="fp-btn-back" style="background-color: #486581;" onclick="navigateModal('next')">NEXT ►</button>
+                    <button class="fp-btn-back" onclick="closeModal()">❮ KEMBALI</button>
+                </div>
             </div>
             <div class="fp-body">
                 <div class="fp-panel" style="background: transparent; border: none; padding: 0;">
@@ -804,6 +813,7 @@
         let regionsMap = {}; 
         let parsedExcelRows = []; 
         let masterLocations = [];
+        let currentModalIndex = -1;
         
         let currentPage = 1;
         const rowsPerPage = 20;
@@ -2158,9 +2168,19 @@ if (rawLocCd !== "") {
             }
         };
 
-        window.openModal = async function(accNo) {
+window.openModal = async function(accNo) {
             document.getElementById('modalAccNo').innerText = accNo;
             document.getElementById('updateModal').style.display = 'flex';
+            
+            // [TAMBAH LOGIK INDEX UNTUK BUTTON NEXT/PREV]
+            currentModalIndex = filteredAccounts.findIndex(a => a.acct === accNo);
+            
+            const btnPrev = document.getElementById('btn-modal-prev');
+            const btnNext = document.getElementById('btn-modal-next');
+            if (btnPrev && btnNext) {
+                btnPrev.disabled = currentModalIndex <= 0;
+                btnNext.disabled = currentModalIndex === -1 || currentModalIndex >= filteredAccounts.length - 1;
+            }
             
             document.getElementById('btnResetPending').style.display = (currentUser.role === 'admin' || currentUser.role === 'manager' || currentUser.role === 'super') ? 'block' : 'none';
             document.getElementById('finding-status-select').value = "";
@@ -2272,6 +2292,29 @@ if (rawLocCd !== "") {
                 });
             }
             setTimeout(() => document.getElementById('single-remark-box').focus(), 100);
+        };
+
+        window.navigateModal = function(direction) {
+            if (currentModalIndex === -1) return;
+            
+            let newIndex = currentModalIndex;
+            if (direction === 'prev' && currentModalIndex > 0) {
+                newIndex--;
+            } else if (direction === 'next' && currentModalIndex < filteredAccounts.length - 1) {
+                newIndex++;
+            }
+            
+            if (newIndex !== currentModalIndex) {
+                let nextAcc = filteredAccounts[newIndex].acct;
+                
+                // Bersihkan ruangan input sebelum buka rekod baharu
+                document.getElementById('single-remark-box').value = ''; 
+                document.getElementById('finding-status-select').value = '';
+                document.getElementById('textarea-info').innerText = `Jumlah Karakter: 0/200`;
+                
+                // Buka rekod seterusnya
+                openModal(nextAcc);
+            }
         };
         
         window.updateTextareaInfo = function(el) {
