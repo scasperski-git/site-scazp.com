@@ -2091,19 +2091,32 @@ let rawLocCd = (keyLoc && row[keyLoc]) ? String(row[keyLoc]).trim() : "";
 let finalRegion = (keyReg && row[keyReg]) ? String(row[keyReg]).toUpperCase().trim() : "";
 let finalArea = (keyArea && row[keyArea]) ? String(row[keyArea]).toUpperCase().trim() : "";
 
-// 🧠 LOGIK AUTO-MATCHING BERMULA DI SINI
-if (rawLocCd !== "") {
-    // Cari padanan loc_cd dalam memori masterLocations (Abaikan case sensitivity & ruang kosong)
-    let matchedLoc = masterLocations.find(loc => String(loc.loc_cd).trim().toUpperCase() === rawLocCd.toUpperCase());
-    
-    if (matchedLoc) {
-        // Jika jumpa, timpa (override) nilai Excel dengan data rasmi Supabase
-        // *PENTING: Pastikan nama column Supabase ini sama dengan apa yang ada di dalam table master_locations anda.
-        finalRegion = matchedLoc.region_name ? String(matchedLoc.region_name).toUpperCase().trim() : finalRegion;
-        finalArea = matchedLoc.area_name ? String(matchedLoc.area_name).toUpperCase().trim() : finalArea;
-    }
-}
-                
+// 🧠 LOGIK AUTO-MATCHING BERMULA DI SINI (VERSI IGNORE CASE)
+                if (rawLocCd !== "") {
+                    let cleanRawLoc = rawLocCd.replace(/^0+/, '').toUpperCase();
+
+                    let matchedLoc = masterLocations.find(loc => {
+                        // Kita cari nilai kolum tanpa peduli huruf besar/kecil
+                        let locKey = Object.keys(loc).find(k => k.toLowerCase() === 'loc_cd' || k.toLowerCase() === 'loc');
+                        let locValue = locKey ? loc[locKey] : '';
+                        let cleanMasterLoc = String(locValue).replace(/^0+/, '').trim().toUpperCase();
+                        return cleanMasterLoc === cleanRawLoc;
+                    });
+                    
+                    console.log(`Mencari Loc CD Excel: ${rawLocCd} (Clean: ${cleanRawLoc}) -> Jumpa?:`, matchedLoc ? "YA" : "TIDAK", matchedLoc);
+
+                    if (matchedLoc) {
+                        // Cari kolum region dan area tanpa peduli case sensitive
+                        let regKey = Object.keys(matchedLoc).find(k => k.toLowerCase() === 'region_name' || k.toLowerCase() === 'region');
+                        let areaKey = Object.keys(matchedLoc).find(k => k.toLowerCase() === 'area_name' || k.toLowerCase() === 'area');
+                        
+                        let dbRegion = regKey ? matchedLoc[regKey] : "";
+                        let dbArea = areaKey ? matchedLoc[areaKey] : "";
+                        
+                        finalRegion = dbRegion !== "" ? String(dbRegion).toUpperCase().trim() : finalRegion;
+                        finalArea = dbArea !== "" ? String(dbArea).toUpperCase().trim() : finalArea;
+                    }
+                }             
                 // Jika data Excel betul-betul 'undefined', tukar jadi string kosong supaya database tak pening
                 if (finalRegion === "UNDEFINED") finalRegion = "";
                 if (finalArea === "UNDEFINED") finalArea = "";
