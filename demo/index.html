@@ -1399,7 +1399,7 @@
             }
         };
 
-        // Fungsi Pintar Cipta Rantaian Ketua (Supervisor Dropdown)
+// Fungsi Pintar Cipta Rantaian Ketua (Supervisor Dropdown)
         window.toggleFormRoleSelect = async function() {
             const role = document.getElementById('new-user-role').value;
             const reportGroup = document.getElementById('form-report-group');
@@ -1421,16 +1421,17 @@
                 try {
                     const { data, error } = await supabase.from('users').select('id, role').eq('role', targetRole).eq('status', 'ACTIVE');
                     
-                    reportSelect.innerHTML = '<option value="">-- Select Assigned Supervisor --</option>';
+                    // [KEMAS KINI]: Jadikan ia pilihan (Optional) yang jelas!
+                    reportSelect.innerHTML = '<option value="">-- TANGGUH DULU / TIADA SUPERVISOR --</option>';
+                    
                     if (data && data.length > 0) {
                         data.forEach(u => {
                             reportSelect.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
                         });
-                    } else {
-                        reportSelect.innerHTML = `<option value="">-- No Active ${targetRole.toUpperCase()} Found --</option>`;
                     }
                 } catch(err) {
                     console.error("Gagal cari supervisor", err);
+                    reportSelect.innerHTML = '<option value="">-- TANGGUH DULU / TIADA SUPERVISOR --</option>';
                 }
             }
         };
@@ -1440,15 +1441,16 @@
             const pass = document.getElementById('new-user-pass').value.trim();
             const role = document.getElementById('new-user-role').value;
             const region = document.getElementById('new-user-region').value;
-            const reportTo = document.getElementById('new-user-report-to').value; // Ambil nilai supervisor
+            const reportTo = document.getElementById('new-user-report-to').value; 
             
             if(!id || !pass) { 
                 showNotification("ERROR", "Please fill in the User ID and Password fields.", true); 
                 return; 
             }
 
+            // [KEMAS KINI]: Mesej prompt yang lebih mesra kalau tak pilih bos
             if(role !== 'super' && !reportTo) {
-                let proceed = await customConfirm(`WARNING: You are creating an account without assigning a supervisor. Proceed?`);
+                let proceed = await customConfirm(`INFO:\nID ini dicipta TANPA sebarang Supervisor (Tangguh). Ia boleh di-update kemudian. Teruskan?`);
                 if(!proceed) return;
             }
 
