@@ -443,6 +443,7 @@
                             <th class="sortable" onclick="sortTable('arrs_mth')" id="th-arrs_mth">ARRS MTH ⇅</th>
                             <th class="sortable" onclick="sortTable('osb')" id="th-osb">OSB (RM) ⇅</th>
                             <th class="sortable" onclick="sortTable('status')" id="th-status">STATUS ⇅</th>
+                            <th class="sortable" onclick="sortTable('assignee_id')" id="th-assignee_id">ASSIGNED TO ⇅</th>
                             <th class="sortable" onclick="sortTable('last_date')" id="th-last_date" style="color: var(--accent-gold);">ATTEND DATE ⇅</th>
                         </tr>
                     </thead>
@@ -1340,12 +1341,14 @@ async function fetchFullDatabaseData(region = null) {
             renderTablePage();
         };
 
-        function resetHeaderArrows() {
-            const cols = ['region', 'area', 'loc', 'type', 'acct', 'delq', 'arrs_mth', 'osb', 'status', 'last_date'];
+function resetHeaderArrows() {
+            // [KEMASKINI]: Tambah 'assignee_id' ke dalam array ini
+            const cols = ['region', 'area', 'loc', 'type', 'acct', 'delq', 'arrs_mth', 'osb', 'status', 'assignee_id', 'last_date'];
             cols.forEach(c => {
                 const el = document.getElementById(`th-${c}`);
                 if (el) {
                     if(c === 'last_date') el.innerHTML = "ATTEND DATE ⇅";
+                    else if(c === 'assignee_id') el.innerHTML = "ASSIGNED TO ⇅"; // [TAMBAH INI]
                     else el.innerHTML = `${el.innerText.split(' ')[0]} ⇅`;
                 }
             });
@@ -1357,6 +1360,8 @@ async function fetchFullDatabaseData(region = null) {
             if (el) {
                 let text = el.innerText.split(' ')[0];
                 if(activeCol === 'last_date') text = "ATTEND DATE";
+                else if(activeCol === 'assignee_id') text = "ASSIGNED TO"; // [TAMBAH INI]
+                
                 let arrow = currentSortDirection === 'asc' ? '▲' : '▼';
                 el.innerHTML = `<span style="color:var(--text-main);">${text} ${arrow}</span>`;
             }
@@ -1365,8 +1370,8 @@ async function fetchFullDatabaseData(region = null) {
         function renderTablePage() {
             const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
             
-            if(filteredAccounts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No records match the active criteria.</td></tr>`;
+if(filteredAccounts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;">No records match the active criteria.</td></tr>`;
                 document.getElementById('page-info').innerText = `Page 0 of 0`;
                 document.getElementById('btn-prev').disabled = true; document.getElementById('btn-next').disabled = true;
                 return;
@@ -1383,6 +1388,9 @@ async function fetchFullDatabaseData(region = null) {
             pageData.forEach(row => {
                 let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
                 let d = row.details || {};
+                
+                // [TAMBAH]: Logik paparan Assigned To
+                let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '-';
 
                 tbody.innerHTML += `
                     <tr>
@@ -1395,6 +1403,10 @@ async function fetchFullDatabaseData(region = null) {
                         <td>${row.arrs_mth || '0'}</td>
                         <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td><span class="status-badge ${badgeClass}">${row.status === 'UPDATED' ? 'ATTENDED' : row.status}</span></td>
+                        
+                        <!-- [TAMBAH]: Data Assigned To dimasukkan di sini -->
+                        <td style="font-weight: 600; color: var(--text-main);">${assigneeDisp}</td>
+                        
                         <td><span style="font-weight: 700; color: var(--text-muted); font-size: 11px;">${d.last_remark_date || '-'}</span></td>
                     </tr>
                 `;
