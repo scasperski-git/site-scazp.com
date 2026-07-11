@@ -28,7 +28,7 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; }
 
         /* --- LOGIN STYLES --- */
-        #login-section { display: flex; justify-content: center; align-items: center; height: 90vh; }
+        #login-section { display: none; justify-content: center; align-items: center; height: 90vh; }
         .login-box { background-color: var(--card-bg); padding: 30px; border-radius: 8px; border: 1px solid var(--accent-gold); width: 100%; max-width: 350px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.1); text-align: center; }
         .login-box h2 { color: var(--accent-gold); margin-top: 0; font-size: 22px; }
         .login-input { width: 100%; box-sizing: border-box; background-color: #e8f0f8; border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 13px; }
@@ -691,47 +691,57 @@
         const usersPerPage = 20;
 
 async function checkLoginSession() {
-            const currentYear = new Date().getFullYear();
-            if(document.getElementById('auto-year')) document.getElementById('auto-year').innerText = currentYear;
-            if(document.getElementById('auto-year-login')) document.getElementById('auto-year-login').innerText = currentYear;
-            
-            const storedSession = localStorage.getItem('scazp_user_session');
-            if (storedSession) {
-                let userTmp = JSON.parse(storedSession);
-                
-                // [FIX]: Semak status terkini terus dari Database Supabase
-                const { data, error } = await supabase.from('users').select('status, role').eq('id', userTmp.id).single();
+    const currentYear = new Date().getFullYear();
+    if(document.getElementById('auto-year')) document.getElementById('auto-year').innerText = currentYear;
+    if(document.getElementById('auto-year-login')) document.getElementById('auto-year-login').innerText = currentYear;
+    
+    const loginSection = document.getElementById('login-section');
+    const dashboardSection = document.getElementById('dashboard-section');
+    const storedSession = localStorage.getItem('scazp_user_session');
 
-                if (error || !data || data.status === 'INACTIVE') {
-                    // [TENDANG KELUAR]: Kalau status INACTIVE atau user dah kena delete
-                    alert("Sesi anda telah tamat atau akaun telah dinyahaktifkan.");
-                    handleLogout();
-                    return;
-                }
+    if (storedSession) {
+        let userTmp = JSON.parse(storedSession);
+        
+        // [FUNGSI KESELAMATAN]: Semak status terkini terus dari Database Supabase
+        // Ini akan "tendang" user kalau akaun dia dah kena INACTIVE atau DELETE
+        const { data, error } = await supabase.from('users').select('status, role, assignedregion').eq('id', userTmp.id).single();
 
-                currentUser = userTmp;
-                
-                // [LOGIK MAINTENANCE]: Kekalkan macam asal
-                if (IS_MAINTENANCE && currentUser.role !== 'super') {
-                    document.getElementById('maintenance-bar').style.display = 'block';
-                    document.getElementById('maintenance-bar').innerHTML = `<span class="blink-dot"></span> SORRY ${currentUser.username.toUpperCase()}, THE SYSTEM IS UNDER MAINTENANCE.`;
-                    document.getElementById('login-section').style.display = 'flex';
-                    document.getElementById('dashboard-section').style.display = 'none';
-                    return;
-                }
-
-                document.getElementById('login-section').style.display = 'none';
-                document.getElementById('dashboard-section').style.display = 'block';
-                document.getElementById('display-username').innerText = "Logged in as: " + currentUser.username.toUpperCase();
-                
-                // Fetch data ikut akses masing-masing
-                const safeRegion = (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
-                await fetchFullDatabaseData(safeRegion);
-                await fetchMasterLocations(); 
-                
-                initDashboardView();
-            }
+        if (error || !data || data.status === 'INACTIVE') {
+            alert("Akaun anda telah dinyahaktifkan atau sesi tamat.");
+            handleLogout(); // Tendang balik ke login
+            return;
         }
+
+        // Update currentUser dengan data paling fresh dari DB
+        currentUser = { ...userTmp, ...data };
+        
+        // [LOGIK MAINTENANCE]
+        if (IS_MAINTENANCE && currentUser.role !== 'super') {
+            document.getElementById('maintenance-bar').style.display = 'block';
+            document.getElementById('maintenance-bar').innerHTML = `<span class="blink-dot"></span> SORRY, SYSTEM UNDER MAINTENANCE.`;
+            loginSection.style.display = 'flex';
+            dashboardSection.style.display = 'none';
+            return;
+        }
+
+        // [TUKAR PAPARAN]: Sembunyikan login, tunjuk dashboard
+        dashboardSection.style.display = 'block';
+        loginSection.style.display = 'none';
+        document.getElementById('display-username').innerText = "Logged in as: " + currentUser.id.toUpperCase();
+        
+        // Fetch data mengikut hierarki akses
+        const safeRegion = (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
+        
+        await fetchFullDatabaseData(safeRegion);
+        await fetchMasterLocations(); 
+        
+        initDashboardView();
+    } else {
+        // [TIADA SESSION]: Tunjuk login
+        loginSection.style.display = 'flex';
+        dashboardSection.style.display = 'none';
+    }
+}
 
         window.customConfirm = function(message) {
             return new Promise((resolve) => {
