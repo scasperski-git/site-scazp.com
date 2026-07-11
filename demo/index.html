@@ -1412,12 +1412,19 @@ if(filteredAccounts.length === 0) {
             const endIndex = startIndex + rowsPerPage;
             const pageData = filteredAccounts.slice(startIndex, endIndex);
 
-            pageData.forEach(row => {
+ pageData.forEach(row => {
                 let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
                 let d = row.details || {};
                 
-                // [TAMBAH]: Logik paparan Assigned To
                 let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '-';
+
+                // [TAMBAH]: Logik paparan masa (Time) menggunakan nilai timestamp
+                let timeDisplay = '';
+                if (d.timestamp) {
+                    let timeObj = new Date(d.timestamp);
+                    let formattedTime = timeObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+                    timeDisplay = `<br><span style="font-size: 9px; color: #94a3b8; font-weight: normal;">${formattedTime}</span>`;
+                }
 
                 tbody.innerHTML += `
                     <tr>
@@ -1430,11 +1437,13 @@ if(filteredAccounts.length === 0) {
                         <td>${row.arrs_mth || '0'}</td>
                         <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td><span class="status-badge ${badgeClass}">${row.status === 'UPDATED' ? 'ATTENDED' : row.status}</span></td>
-                        
-                        <!-- [TAMBAH]: Data Assigned To dimasukkan di sini -->
                         <td style="font-weight: 600; color: var(--text-main);">${assigneeDisp}</td>
                         
-                        <td><span style="font-weight: 700; color: var(--text-muted); font-size: 11px;">${d.last_remark_date || '-'}</span></td>
+                        <!-- [KEMASKINI]: Tarikh & Masa disusun atas bawah -->
+                        <td>
+                            <span style="font-weight: 700; color: var(--text-muted); font-size: 11px;">${d.last_remark_date || '-'}</span>
+                            ${timeDisplay}
+                        </td>
                     </tr>
                 `;
             });
