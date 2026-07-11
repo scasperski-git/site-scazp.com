@@ -8,14 +8,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
     <style>
         :root {
-            --bg-color: #f0f4f8;      /* Biru ais cair (Frost Blue) */
-            --card-bg: #ffffff;       /* Putih bersih untuk kad/kotak */
-            --text-main: #102a43;     /* Biru pekat (navy) untuk teks utama */
-            --text-muted: #486581;    /* Biru pudar untuk teks sekunder */
-            
-            /* Warna ACCENT diubah ke Royal Sapphire (Biru Diraja) */
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --text-main: #102a43;
+            --text-muted: #486581;
             --accent-gold: #2563eb;   
-            --border-color: #d9e2ec;  /* Border biru sangat cair */
+            --border-color: #d9e2ec;
             
             --success-green: #4caf50;
             --error-red: #e53935;
@@ -131,15 +129,15 @@
         
         #loadingModal .modal-content { text-align: center; padding: 40px; border: 1px solid var(--accent-gold); max-width: 350px;}
 
-.btn-delete-finding {
+        .btn-delete-finding {
             float: right;
             background-color: rgba(229, 57, 53, 0.1);
             border: 1px solid var(--error-red);
             color: var(--error-red);
-            border-radius: 3px; /* Kurangkan lengkung sikit */
+            border-radius: 3px; 
             cursor: pointer;
-            font-size: 8px; /* [UPDATE]: Font dikecilkan ke 8px */
-            padding: 2px 5px; /* [UPDATE]: Ruang dalam butang dinipiskan */
+            font-size: 8px; 
+            padding: 2px 5px; 
             font-weight: bold;
             transition: all 0.2s;
             margin-left: 5px;
@@ -161,7 +159,6 @@
         }
         .btn-cancel:hover { background-color: #d9e2ec; color: var(--text-main); }
 
-        /* --- STYLES FOR EXPANDABLE DATA & CONFIDENTIAL WATERMARK --- */
         .expand-btn { background: #e8f0f8; color: var(--text-main); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-right: 5px; font-weight: 600; }
         .expand-btn:hover { background: var(--accent-gold); color: #ffffff; }
         
@@ -173,12 +170,11 @@
             padding: 10px; 
             border-radius: 6px; 
             border: 1px solid var(--border-color);
-            position: relative; /* Wajib ada untuk position watermark */
+            position: relative;
             z-index: 1;
             overflow: hidden;
         }
 
-        /* WATERMARK DINAMIK ANTI-SCREENSHOT (FIXED FOR MOBILE & DESKTOP) */
         .details-box::before {
             content: attr(data-watermark);
             position: absolute;
@@ -189,7 +185,7 @@
             font-family: 'Segoe UI', sans-serif;
             font-size: 8px;
             font-weight: 900;
-            color: rgba(16, 42, 67, 0.09); /* Gelap sikit 9% opacity */
+            color: rgba(16, 42, 67, 0.09); 
             white-space: normal;
             word-break: break-all;
             line-height: 2.2;
@@ -215,7 +211,6 @@
         .mapping-section { border: 1px solid var(--border-color); padding: 10px; margin-bottom: 15px; border-radius: 6px; background: #ffffff; }
         .mapping-section h3 { margin-top: 0; margin-bottom: 10px; font-size: 12px; color: var(--success-green); border-bottom: 1px solid var(--border-color); padding-bottom: 5px;}
 
-        /* --- RESPONSIVE MOBILE VIEW MEDIA QUERY --- */
         @media (max-width: 768px) {
             .details-wrapper { 
                 grid-template-columns: 1fr !important; 
@@ -271,12 +266,18 @@
             50% { opacity: 0; }
         }
 
+        /* [UPDATE]: Role Styles Baharu Mengikut Hierarki */
         .role-super { 
             background-color: rgba(229, 57, 53, 0.15); 
             color: var(--error-red); 
             border: 1px solid rgba(229, 57, 53, 0.3); 
         }
-        .role-master { 
+        .role-manager { 
+            background-color: rgba(156, 39, 176, 0.15); 
+            color: var(--status-ptp); 
+            border: 1px solid rgba(156, 39, 176, 0.3); 
+        }
+        .role-admin { 
             background-color: rgba(37, 99, 235, 0.15); 
             color: var(--accent-gold); 
             border: 1px solid rgba(37, 99, 235, 0.3); 
@@ -287,19 +288,10 @@
             border: 1px solid rgba(33, 150, 243, 0.3); 
         }
 
-        .search-container {
-            display: flex; 
-            gap: 10px; 
-            align-items: center;
-        }
+        .search-container { display: flex; gap: 10px; align-items: center; }
 
-        @media (max-width: 768px) {
-            .search-container {
-                flex-direction: column;
-            }
-        }
+        @media (max-width: 768px) { .search-container { flex-direction: column; } }
 
-        /* --- STYLES UNTUK FAKE NEW PAGE (FULL SCREEN MODAL) --- */
         .full-page-modal {
             width: 100vw !important;
             height: 100vh !important;
@@ -335,25 +327,15 @@
             overflow-y: auto;
             padding: 20px;
             display: grid;
-            grid-template-columns: 1fr 1fr; /* Desktop: 2 Kolum */
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
             align-items: start;
         }
         
-        .fp-panel { 
-            background: var(--card-bg); 
-            padding: 15px; 
-            border-radius: 8px; 
-            border: 1px solid var(--border-color); 
-        }
+        .fp-panel { background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); }
 
-        /* Responsive Mobile: Susun Atas & Bawah */
         @media (max-width: 768px) {
-            .fp-body { 
-                grid-template-columns: 1fr; 
-                padding: 10px;
-                gap: 15px;
-            }
+            .fp-body { grid-template-columns: 1fr; padding: 10px; gap: 15px; }
         }
     </style>
 </head>
@@ -487,10 +469,17 @@
                 </div>
                 <div class="form-group">
                     <label>Access Privilege (Role)</label>
-                    <select id="new-user-role" class="form-control" onchange="toggleFormRegionSelect()">
-                        <option value="user">PIC User (Restricted Access)</option>
-                        <option value="master">Master Admin (Full Access)</option>
-                        <option value="super">Super Admin (Master + Report Center)</option>
+                    <select id="new-user-role" class="form-control" onchange="toggleFormRoleSelect()">
+                        <option value="user">PIC User (Field Staff / Collector)</option>
+                        <option value="admin">Admin (Branch / Area Head)</option>
+                        <option value="manager">Manager (Regional Head)</option>
+                        <option value="super">Super Admin (Mastermind)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="form-report-group" style="display: block;">
+                    <label>Report To (Assign Supervisor)</label>
+                    <select id="new-user-report-to" class="form-control">
+                        <option value="">-- No Supervisor Required --</option>
                     </select>
                 </div>
                 <div class="form-group" id="form-region-group">
@@ -511,7 +500,11 @@
             </div>
 
             <div class="settings-box" style="max-width: 100%;">
-                <h2>System User List (<span id="total-users-count" style="color: var(--text-main);">0</span> Users)</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 15px;">
+                    <h2 style="margin: 0; border: none; padding: 0;">System User List (<span id="total-users-count" style="color: var(--text-main);">0</span> Users)</h2>
+                    <input type="text" id="search-user" class="form-control" placeholder="Search by User ID..." style="max-width: 250px; border-color: var(--accent-gold) !important;" oninput="filterUserList()">
+                </div>
+
                 <div class="table-container">
                     <table>
                         <thead>
@@ -519,13 +512,21 @@
                                 <th style="width: 50px; text-align: center;">NO</th>
                                 <th>USER ID</th>
                                 <th>ROLE</th>
-                                <th>REGION ACCESS</th>
+                                <th>REPORT TO</th> <th>REGION ACCESS</th>
                                 <th>STATUS</th> 
                                 <th>ACTION</th> 
                             </tr>
                         </thead>
                         <tbody id="users-table-body"></tbody>
                     </table>
+                </div>
+
+                <div class="pagination-container" style="margin-bottom: 0; border-radius: 0 0 8px 8px;">
+                    <div class="page-info" id="user-page-info">Page 1 of 1</div>
+                    <div class="pagination-controls">
+                        <button id="btn-user-prev" onclick="prevUserPage()" disabled>◄ PREV</button>
+                        <button id="btn-user-next" onclick="nextUserPage()" disabled>NEXT ►</button>
+                    </div>
                 </div>
             </div>
         </div> 
@@ -583,89 +584,21 @@
                 <h2>Map Excel Columns to Database Fields</h2>
                 <button class="close-btn" onclick="closeMappingModal()">&times;</button>
             </div>
-            
-            <div class="mapping-container">
-                <div class="mapping-section">
-                    <h3>1. MAIN ACCOUNT INFO</h3>
-                    <div class="mapping-grid">
-                        <label>REGION</label><select id="map-region" class="form-control mapping-select"></select>
-                        <label>AREA</label><select id="map-area" class="form-control mapping-select"></select>
-                        <label>LOC CODE</label><select id="map-loc" class="form-control mapping-select"></select>
-                        <label>TYPE</label><select id="map-type" class="form-control mapping-select"></select>
-                        <label>ACCOUNT NO</label><select id="map-acct" class="form-control mapping-select"></select>
-                        <label>DELQ</label><select id="map-delq" class="form-control mapping-select"></select>
-                        <label>ARRS MTH</label><select id="map-arrs" class="form-control mapping-select"></select>
-                        <label>OSB Balance</label><select id="map-osb" class="form-control mapping-select"></select>
-                    </div>
-                </div>
-
-                <div class="mapping-section">
-                    <h3>2. HIRER DETAILS</h3>
-                    <div class="mapping-grid">
-                        <label>Name</label><select id="map-h-name" class="form-control mapping-select"></select>
-                        <label style="color: var(--accent-gold);">New NRIC</label><select id="map-h-nric-new" class="form-control mapping-select"></select>
-                        <label style="color: var(--accent-gold);">Old NRIC</label><select id="map-h-nric-old" class="form-control mapping-select"></select>
-                        <label>Tel No</label><select id="map-h-tel" class="form-control mapping-select"></select>
-                        <label>Home Add 1</label><select id="map-h-add1" class="form-control mapping-select"></select>
-                        <label>Home Add 2</label><select id="map-h-add2" class="form-control mapping-select"></select>
-                        <label>Home Add 3</label><select id="map-h-add3" class="form-control mapping-select"></select>
-                        <label>Co. Name</label><select id="map-hc-name" class="form-control mapping-select"></select>
-                        <label>Co. Tel</label><select id="map-hc-tel" class="form-control mapping-select"></select>
-                        <label>Co. Add 1</label><select id="map-hc-add1" class="form-control mapping-select"></select>
-                        <label>Co. Add 2</label><select id="map-hc-add2" class="form-control mapping-select"></select>
-                    </div>
-                </div>
-
-                <div class="mapping-section">
-                    <h3>3. SPOUSE & GUARANTOR DETAILS</h3>
-                    <div class="mapping-grid">
-                        <label>Spouse Name</label><select id="map-s-name" class="form-control mapping-select"></select>
-                        <label style="color: var(--accent-gold);">Spouse New IC</label><select id="map-s-nric-new" class="form-control mapping-select"></select>
-                        <label style="color: var(--accent-gold);">Spouse Old IC</label><select id="map-s-nric-old" class="form-control mapping-select"></select>
-                        <label>Spouse Tel</label><select id="map-s-tel" class="form-control mapping-select"></select>
-                        <label>Gtor Name</label><select id="map-g-name" class="form-control mapping-select"></select>
-                        <label style="color: var(--accent-gold);">Gtor New IC</label><select id="map-g-nric-new" class="form-control mapping-select"></select>
-                        <label style="color: var(--accent-gold);">Gtor Old IC</label><select id="map-g-nric-old" class="form-control mapping-select"></select>
-                        <label>Gtor Tel</label><select id="map-g-tel" class="form-control mapping-select"></select>
-                        <label>Gtor Add 1</label><select id="map-g-add1" class="form-control mapping-select"></select>
-                        <label>Gtor Add 2</label><select id="map-g-add2" class="form-control mapping-select"></select>
-                        <label>Gtor Co. Name</label><select id="map-gc-name" class="form-control mapping-select"></select>
-                        <label>Gtor Co. Tel</label><select id="map-gc-tel" class="form-control mapping-select"></select>
-                    </div>
-                </div>
-
-                <div class="mapping-section">
-                    <h3>4. ACCOUNT INFO & BALANCES</h3>
-                    <div class="mapping-grid">
-                        <label>Product Desc</label><select id="map-prod" class="form-control mapping-select"></select>
-                        <label>Plate No</label><select id="map-plate" class="form-control mapping-select"></select>
-                        <label>EP Balance</label><select id="map-bal" class="form-control mapping-select"></select>
-                        <label>ODP Bal</label><select id="map-odp" class="form-control mapping-select"></select>
-                        <label>ADCH Bal</label><select id="map-adch" class="form-control mapping-select"></select>
-                    </div>
-                </div>
-            </div>
             <button class="btn-submit" style="width: 100%; background: #2e7d32; margin-top: 15px;" onclick="processExcelUpload()">CONFIRM & START UPLOAD</button>
         </div>
     </div>
     
     <div class="modal-overlay" id="updateModal" style="align-items: flex-start; padding: 0;">
         <div class="modal-content full-page-modal">
-            
             <div class="fp-header">
                 <h2>ACCT: <span id="modalAccNo"></span></h2>
                 <button class="fp-btn-back" onclick="closeModal()">❮ KEMBALI</button>
             </div>
-            
             <div class="fp-body">
-                
                 <div class="fp-panel" style="background: transparent; border: none; padding: 0;">
-                    <div id="modal-details-container" style="display: flex; flex-direction: column; gap: 15px;">
-                        </div>
+                    <div id="modal-details-container" style="display: flex; flex-direction: column; gap: 15px;"></div>
                 </div>
-
                 <div class="fp-panel" style="position: sticky; top: 0;">
-                    
                     <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px; font-weight: bold;">HISTORICAL AUDIT TRAIL:</label>
                     <div class="history-box" style="max-height: 250px; margin-bottom: 15px; background: #f8fafc;"></div>
                     
@@ -696,10 +629,8 @@
                         <button id="btnSaveFinding" class="btn-submit" style="flex: 2; padding: 12px; font-size: 14px;" onclick="saveFinding()">COMMIT ENTRY</button>
                         <button id="btnResetPending" class="btn-submit" style="flex: 1; background-color: var(--error-red); color: white; display: none; padding: 12px;" onclick="resetAccountStatus()">RESET LOG</button>
                     </div>
-                    
                 </div>
             </div>
-            
         </div>
     </div>
 
@@ -765,10 +696,17 @@
         let currentSortColumn = null;
         let currentSortDirection = 'asc';
 
+        // [NEW]: Variable Global untuk User Pagination
+        let allSystemUsers = [];
+        let filteredSystemUsers = [];
+        let userCurrentPage = 1;
+        const usersPerPage = 20;
+
         async function checkLoginSession() {
             const currentYear = new Date().getFullYear();
             if(document.getElementById('auto-year')) document.getElementById('auto-year').innerText = currentYear;
             if(document.getElementById('auto-year-login')) document.getElementById('auto-year-login').innerText = currentYear;
+            
             const storedSession = localStorage.getItem('scazp_user_session');
             if (storedSession) {
                 currentUser = JSON.parse(storedSession);
@@ -797,7 +735,10 @@
                 document.getElementById('dashboard-section').style.display = 'block';
                 document.getElementById('display-username').innerText = "Logged in as: " + currentUser.username.toUpperCase();
                 
-                await fetchFullDatabaseData(null);
+                // [UPDATE]: Rombak akses fetch ikut hierarki. Buat masa ni, selagi fungsi assign belum siap, kita beri akses kepada semua untuk Super, Manager, Admin.
+                const safeRegion = (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
+                await fetchFullDatabaseData(safeRegion);
+                
                 initDashboardView();
             }
         }
@@ -881,7 +822,10 @@
                         document.getElementById('maintenance-bar').style.display = 'none';
                     }
                     
-                    await fetchFullDatabaseData(null);
+                    // [UPDATE]: Rombak akses login fetch.
+                    const safeRegion = (data.role === 'super' || data.role === 'manager' || data.role === 'admin') ? null : (data.assignedregion ? data.assignedregion.toUpperCase().trim() : null);
+                    await fetchFullDatabaseData(safeRegion);
+                    
                     initDashboardView();
                 } else {
                     document.getElementById('login-error').style.display = 'block';
@@ -890,12 +834,29 @@
             btn.innerText = "SIGN IN";
         };
 
-        window.handleLogout = function() {
-            currentUser = null; globalAccounts = []; filteredAccounts = []; regionsMap = {};
+        window.handleLogout = async function() {
+            currentUser = null; 
+            globalAccounts = []; 
+            filteredAccounts = []; 
+            regionsMap = {};
+            currentRegion = null; 
+            currentArea = null;
+            currentStatusFilter = null;
+            activeSearchType = null;
+            activeSearchQuery = '';
+
             localStorage.removeItem('scazp_user_session');
             localStorage.removeItem('scazp_active_tab'); 
             
-            document.getElementById('username').value = ''; document.getElementById('password').value = '';
+            try {
+                await localforage.clear();
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('scazp_time_')) localStorage.removeItem(key);
+                });
+            } catch (e) { console.error("Cache clear error:", e); }
+            
+            document.getElementById('username').value = ''; 
+            document.getElementById('password').value = '';
             document.getElementById('dashboard-section').style.display = 'none';
             document.getElementById('login-section').style.display = 'flex';
         };
@@ -907,7 +868,8 @@
             syncBtn.disabled = true;
             syncBtn.innerText = "SYNCING..."; 
             
-            const safeRegion = (currentUser.role === 'master' || currentUser.role === 'super') ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
+            // [UPDATE]: Sync access
+            const safeRegion = (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null);
             const cacheKey = safeRegion ? `scazp_cache_${safeRegion}` : 'scazp_cache_all';
             const timeKey = safeRegion ? `scazp_time_${safeRegion}` : 'scazp_time_all';
 
@@ -1005,12 +967,14 @@
         }
         
         function initDashboardView() {
-            if (currentUser.role === 'master' || currentUser.role === 'super') {
+            // [UPDATE]: Rombak akses Menu & Filter untuk Role Baharu
+            if (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') {
                 document.getElementById('master-nav-tabs').style.display = 'flex';
                 document.getElementById('upload-action-container').style.display = 'block';
                 document.getElementById('region-filters-container').style.display = 'block';
                 document.getElementById('area-filters-container').style.display = 'none';
                 
+                // Cuma Super yang boleh akses tab MIS Remark/Report Center
                 document.getElementById('tab-report').style.display = currentUser.role === 'super' ? 'block' : 'none';
 
                 renderRegionSelectionUI(); 
@@ -1018,7 +982,11 @@
                 fetchAndRenderUsers();
                 
                 if(currentUser.role === 'super') renderReportCenter(); 
+                
+                // Pastikan Dropdown Report_to diisi sedia
+                toggleFormRoleSelect();
             } else {
+                // Untuk PIC USER biasa
                 document.getElementById('master-nav-tabs').style.display = 'none';
                 document.getElementById('upload-action-container').style.display = 'none';
                 document.getElementById('region-filters-container').style.display = 'none';
@@ -1169,16 +1137,16 @@
 
         function renderAreaSelectionUI(region) {
             const areaContainer = document.getElementById('area-buttons');
-            if (currentUser.role === 'master' || currentUser.role === 'super') {
+            if (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') {
                 areaContainer.innerHTML = `<button class="btn-filter active" onclick="clearAreaSelection(this)">ALL AREAS IN ${region}</button>`;
             } else { areaContainer.innerHTML = ''; }
             
             if(regionsMap[region] && regionsMap[region].length > 0) {
                 regionsMap[region].forEach((area, index) => {
-                    let activeStyle = ((currentUser.role !== 'master' && currentUser.role !== 'super') && index === 0) ? 'active' : '';
+                    let activeStyle = ((currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin') && index === 0) ? 'active' : '';
                     areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
                 });
-                if((currentUser.role !== 'master' && currentUser.role !== 'super') && !currentArea) { 
+                if((currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin') && !currentArea) { 
                     const firstBtn = areaContainer.querySelector('.btn-filter');
                     if (firstBtn) applyAreaFilter(regionsMap[region][0], firstBtn); 
                 }
@@ -1269,7 +1237,7 @@
             const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
             
             if(filteredAccounts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;">No records match the active criteria.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No records match the active criteria.</td></tr>`;
                 document.getElementById('page-info').innerText = `Page 0 of 0`;
                 document.getElementById('btn-prev').disabled = true; document.getElementById('btn-next').disabled = true;
                 return;
@@ -1283,7 +1251,7 @@
             const endIndex = startIndex + rowsPerPage;
             const pageData = filteredAccounts.slice(startIndex, endIndex);
 
-pageData.forEach(row => {
+            pageData.forEach(row => {
                 let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
                 let d = row.details || {};
 
@@ -1299,9 +1267,8 @@ pageData.forEach(row => {
                         <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td><span class="status-badge ${badgeClass}">${row.status === 'UPDATED' ? 'ATTENDED' : row.status}</span></td>
                         <td><span style="font-weight: 700; color: var(--text-muted); font-size: 11px;">${d.last_remark_date || '-'}</span></td>
-                        </tr>
+                    </tr>
                 `;
-                // KOD HIDDEN ROW (details-row) JUGA DIBUANG SEPENUHNYA DARI SINI
             });
 
             document.getElementById('page-info').innerText = `Page ${currentPage} of ${totalPages} (Total: ${filteredAccounts.length.toLocaleString()} Records)`;
@@ -1310,7 +1277,8 @@ pageData.forEach(row => {
         }
 
         window.switchTab = function(target) {
-            if (target === 'settings' && (currentUser.role !== 'master' && currentUser.role !== 'super')) target = 'dashboard';
+            // [UPDATE]: Kawalan akses tab untuk role baharu
+            if (target === 'settings' && (currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin')) target = 'dashboard';
             if (target === 'report' && currentUser.role !== 'super') target = 'dashboard';
 
             document.querySelectorAll('.main-panel').forEach(p => p.style.display = 'none');
@@ -1330,28 +1298,58 @@ pageData.forEach(row => {
             localStorage.setItem('scazp_active_tab', target);
         };
 
+        // =========================================================
+        // [FASA 2]: PENGURUSAN USER BERSERTA PAGINATION & SEARCH
+        // =========================================================
+        
         window.fetchAndRenderUsers = async function() {
             try {
-                const { data, error } = await supabase.from('users').select('id, role, assignedregion, status').order('id', { ascending: true });
+                // Tarik column report_to dari pangkalan data
+                const { data, error } = await supabase.from('users').select('id, role, assignedregion, status, report_to').order('id', { ascending: true });
                 if (error) throw error;
                 
-                const tbody = document.getElementById('users-table-body');
-                tbody.innerHTML = '';
-                document.getElementById('total-users-count').innerText = data.length;
+                allSystemUsers = data;
+                filterUserList(); // Tapis dan paparkan
+            } catch (err) {
+                console.error("Failed to fetch user list:", err);
+            }
+        };
 
-                data.forEach((user, index) => {
-                    let regionDisp = user.assignedregion ? user.assignedregion.toUpperCase() : ((user.role === 'master' || user.role === 'super') ? 'ALL' : 'NONE');
+        window.filterUserList = function() {
+            let query = document.getElementById('search-user').value.toLowerCase().trim();
+            filteredSystemUsers = allSystemUsers.filter(u => u.id.toLowerCase().includes(query));
+            userCurrentPage = 1; // Reset ke mukasurat pertama bila buat carian
+            renderUserTablePage();
+        };
+
+        window.renderUserTablePage = function() {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+            
+            let total = filteredSystemUsers.length;
+            document.getElementById('total-users-count').innerText = total;
+            
+            let totalPages = Math.ceil(total / usersPerPage) || 1;
+            if(userCurrentPage > totalPages) userCurrentPage = totalPages;
+            if(userCurrentPage < 1) userCurrentPage = 1;
+            
+            let start = (userCurrentPage - 1) * usersPerPage;
+            let end = start + usersPerPage;
+            let pageData = filteredSystemUsers.slice(start, end);
+            
+            if(pageData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No users found matching the search criteria.</td></tr>';
+            } else {
+                pageData.forEach((user, index) => {
+                    let regionDisp = user.assignedregion ? user.assignedregion.toUpperCase() : ((user.role === 'admin' || user.role === 'manager' || user.role === 'super') ? 'ALL' : 'NONE');
                     
                     let roleBadgeClass = '';
                     let rName = user.role ? user.role.toUpperCase().trim() : '';
                     
-                    if (rName === 'SUPER') {
-                        roleBadgeClass = 'role-super';
-                    } else if (rName === 'MASTER') {
-                        roleBadgeClass = 'role-master';
-                    } else {
-                        roleBadgeClass = 'role-user';
-                    }
+                    if (rName === 'SUPER') { roleBadgeClass = 'role-super'; } 
+                    else if (rName === 'MANAGER') { roleBadgeClass = 'role-manager'; } 
+                    else if (rName === 'ADMIN') { roleBadgeClass = 'role-admin'; } 
+                    else { roleBadgeClass = 'role-user'; }
                     
                     let userStatus = user.status || 'ACTIVE';
                     let statusBadge = userStatus === 'ACTIVE' ? 'status-done' : 'status-pending';
@@ -1359,11 +1357,15 @@ pageData.forEach(row => {
                     let toggleBtnText = userStatus === 'ACTIVE' ? 'DEACTIVATE' : 'ACTIVATE';
                     let toggleBtnColor = userStatus === 'ACTIVE' ? 'var(--error-red)' : 'var(--success-green)';
                     
+                    // Lapor Kepada (Report To)
+                    let reportDisp = user.report_to ? `<span style="font-weight:bold; color:var(--accent-gold);">${user.report_to.toUpperCase()}</span>` : '-';
+                    
                     tbody.innerHTML += `
                         <tr>
-                            <td style="text-align: center;">${index + 1}</td>
+                            <td style="text-align: center;">${start + index + 1}</td>
                             <td>${user.id}</td>
                             <td><span class="status-badge ${roleBadgeClass}">${rName}</span></td>
+                            <td>${reportDisp}</td>
                             <td>${regionDisp}</td>
                             <td><span class="status-badge ${statusBadge}">${userStatus}</span></td>
                             <td>
@@ -1373,11 +1375,110 @@ pageData.forEach(row => {
                         </tr>
                     `;
                 });
-                
-            } catch (err) {
-                console.error("Failed to fetch user list:", err);
+            }
+            
+            document.getElementById('user-page-info').innerText = `Page ${userCurrentPage} of ${totalPages}`;
+            document.getElementById('btn-user-prev').disabled = userCurrentPage === 1;
+            document.getElementById('btn-user-next').disabled = userCurrentPage === totalPages;
+        };
+
+        window.nextUserPage = function() {
+            const totalPages = Math.ceil(filteredSystemUsers.length / usersPerPage);
+            if (userCurrentPage < totalPages) {
+                userCurrentPage++;
+                renderUserTablePage();
             }
         };
+
+        window.prevUserPage = function() {
+            if (userCurrentPage > 1) {
+                userCurrentPage--;
+                renderUserTablePage();
+            }
+        };
+
+        // Fungsi Pintar Cipta Rantaian Ketua (Supervisor Dropdown)
+        window.toggleFormRoleSelect = async function() {
+            const role = document.getElementById('new-user-role').value;
+            const reportGroup = document.getElementById('form-report-group');
+            const reportSelect = document.getElementById('new-user-report-to');
+            
+            // Tunjuk pilihan Region kalau peranan tu bukan Super
+            document.getElementById('form-region-group').style.display = (role === 'super') ? 'none' : 'block';
+            
+            if (role === 'super') {
+                reportGroup.style.display = 'none';
+                reportSelect.innerHTML = '<option value="">-- N/A --</option>';
+            } else {
+                reportGroup.style.display = 'block';
+                reportSelect.innerHTML = '<option value="">Loading Supervisor List...</option>';
+                
+                // Cipta logik ketua: User lapor ke Admin, Admin lapor ke Manager, Manager lapor ke Super
+                let targetRole = role === 'user' ? 'admin' : (role === 'admin' ? 'manager' : 'super');
+                
+                try {
+                    const { data, error } = await supabase.from('users').select('id, role').eq('role', targetRole).eq('status', 'ACTIVE');
+                    
+                    reportSelect.innerHTML = '<option value="">-- Select Assigned Supervisor --</option>';
+                    if (data && data.length > 0) {
+                        data.forEach(u => {
+                            reportSelect.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
+                        });
+                    } else {
+                        reportSelect.innerHTML = `<option value="">-- No Active ${targetRole.toUpperCase()} Found --</option>`;
+                    }
+                } catch(err) {
+                    console.error("Gagal cari supervisor", err);
+                }
+            }
+        };
+
+        window.addNewUser = async function() {
+            const id = document.getElementById('new-user-id').value.trim();
+            const pass = document.getElementById('new-user-pass').value.trim();
+            const role = document.getElementById('new-user-role').value;
+            const region = document.getElementById('new-user-region').value;
+            const reportTo = document.getElementById('new-user-report-to').value; // Ambil nilai supervisor
+            
+            if(!id || !pass) { 
+                showNotification("ERROR", "Please fill in the User ID and Password fields.", true); 
+                return; 
+            }
+
+            if(role !== 'super' && !reportTo) {
+                let proceed = await customConfirm(`WARNING: You are creating an account without assigning a supervisor. Proceed?`);
+                if(!proceed) return;
+            }
+
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
+            
+            const { data: existingUser } = await supabase.from('users').select('id').eq('id', id).single();
+            
+            if (existingUser) { 
+                showNotification("ERROR", "User ID already exists in the system!", true); 
+            } else {
+                // Masukkan report_to sekali masa INSERT
+                const { error } = await supabase.from('users').insert([{ 
+                    id: id, 
+                    pass: pass, 
+                    role: role, 
+                    assignedregion: role === 'super' ? null : region,
+                    report_to: reportTo || null
+                }]);
+                
+                if(!error) {
+                    showNotification("REGISTRATION SUCCESSFUL", `New user account with ID <b>${id}</b> has been successfully registered into the database.`);
+                    document.getElementById('new-user-id').value = ''; 
+                    document.getElementById('new-user-pass').value = '';
+                    fetchAndRenderUsers(); 
+                } else { 
+                    showNotification("DATABASE ERROR", error.message, true); 
+                }
+            }
+        };
+
+        // =========================================================
 
         window.toggleUserStatus = async function(userId, currentStatus) {
             if (userId === currentUser.username) { 
@@ -1609,41 +1710,8 @@ pageData.forEach(row => {
             }
         };
 
-        window.addNewUser = async function() {
-            const id = document.getElementById('new-user-id').value.trim();
-            const pass = document.getElementById('new-user-pass').value.trim();
-            const role = document.getElementById('new-user-role').value;
-            const region = document.getElementById('new-user-region').value;
-            
-            if(!id || !pass) { 
-                showNotification("ERROR", "Please fill in the User ID and Password fields.", true); 
-                return; 
-            }
-
-            let isVerified = await verifyAdminPasscode();
-            if (!isVerified) return;
-            
-            const { data: existingUser } = await supabase.from('users').select('id').eq('id', id).single();
-            
-            if (existingUser) { 
-                showNotification("ERROR", "User ID already exists in the system!", true); 
-            } else {
-                const { error } = await supabase.from('users').insert([{ id: id, pass: pass, role: role, assignedregion: role === 'user' ? region : null }]);
-                
-                if(!error) {
-                    showNotification("REGISTRATION SUCCESSFUL", `New user account with ID <b>${id}</b> has been successfully registered into the database.`);
-                    document.getElementById('new-user-id').value = ''; 
-                    document.getElementById('new-user-pass').value = '';
-                    fetchAndRenderUsers(); 
-                } else { 
-                    showNotification("DATABASE ERROR", error.message, true); 
-                }
-            }
-        };
-
         window.toggleFormRegionSelect = function() {
-            const role = document.getElementById('new-user-role').value;
-            document.getElementById('form-region-group').style.display = (role === 'master' || role === 'super') ? 'none' : 'block';
+            // Deprecated - Logik region select digantikan dengan toggleFormRoleSelect()
         };
 
         window.handleExcelFileSelect = function(e) {
@@ -1857,10 +1925,9 @@ pageData.forEach(row => {
             document.getElementById('modalAccNo').innerText = accNo;
             document.getElementById('updateModal').style.display = 'flex';
             
-            document.getElementById('btnResetPending').style.display = (currentUser.role === 'master' || currentUser.role === 'super') ? 'block' : 'none';
+            document.getElementById('btnResetPending').style.display = (currentUser.role === 'admin' || currentUser.role === 'manager' || currentUser.role === 'super') ? 'block' : 'none';
             document.getElementById('finding-status-select').value = "";
 
-            // --- JANA MAKLUMAT AKAUN & WATERMARK KE DALAM MODAL ---
             let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
             if(accountInfo.finding_status) {
                 document.getElementById('finding-status-select').value = accountInfo.finding_status;
@@ -1922,13 +1989,8 @@ pageData.forEach(row => {
                     let dateFormatted = 'N/A';
                     if (data.updated_at) {
                         dateFormatted = new Date(data.updated_at).toLocaleString('en-GB', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit',
-                            hour12: true
+                            day: '2-digit', month: '2-digit', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
                         });
                     }
                     
@@ -1946,7 +2008,7 @@ pageData.forEach(row => {
                     }
 
                     let deleteBtnHTML = '';
-                    if(currentUser.role === 'master' || currentUser.role === 'super') {
+                    if(currentUser.role === 'admin' || currentUser.role === 'manager' || currentUser.role === 'super') {
                         deleteBtnHTML = `<button class="btn-delete-finding" onclick="deleteSingleFinding('${data.id}', '${accNo}')">🗑️ DEL</button>`;
                     }
 
@@ -1962,7 +2024,7 @@ pageData.forEach(row => {
                         histRemark = `<div style="font-size: 11px; margin-top: 5px; color: var(--text-main); font-weight: normal;">${data.remark || ''}</div>`;
                     }
 
-historyBox.innerHTML += `
+                    historyBox.innerHTML += `
                         <div class="history-item" style="overflow: hidden; padding: 10px; margin-bottom: 10px; background-color: #ffffff; border: 2px solid var(--text-main); border-radius: 6px; box-shadow: 2px 2px 0px rgba(16,42,67,0.1);">
                             <div class="history-meta" style="font-weight: bold; font-size: 10px; color: var(--text-muted);">
                                 UPDATE BY: ${data.updated_by ? data.updated_by.toUpperCase() : 'SYSTEM'} | ${dateFormatted}${statusBadgeHTML}
@@ -1975,15 +2037,12 @@ historyBox.innerHTML += `
             setTimeout(() => document.getElementById('single-remark-box').focus(), 100);
         };
         
-window.updateTextareaInfo = function(el) {
-            // [UPDATE]: Auto tukar huruf besar (Caps Lock automatik)
+        window.updateTextareaInfo = function(el) {
             el.value = el.value.toUpperCase(); 
-
-            if (el.value.length > 200) {
-                el.value = el.value.substring(0, 200);
-            }
+            if (el.value.length > 200) { el.value = el.value.substring(0, 200); }
             document.getElementById('textarea-info').innerText = `Jumlah Karakter: ${el.value.length}/200`;
         };
+        
         window.closeModal = function() { 
             document.getElementById('updateModal').style.display = 'none'; 
             document.getElementById('single-remark-box').value = ''; 
@@ -2007,7 +2066,6 @@ window.updateTextareaInfo = function(el) {
                 return; 
             }
 
-            // SMART SPLIT LOGIC: Potong karangan automatik ke r1-r4 (Max 50 Char per row)
             let regex = /. {1,50}(?:\s|$)/g;
             let chunks = [];
             let match;
@@ -2015,9 +2073,7 @@ window.updateTextareaInfo = function(el) {
             if ((fullStory.match(regex) || []).join('').length < fullStory.length) {
                 chunks = fullStory.match(/.{1,50}/g) || [];
             } else {
-                while ((match = regex.exec(fullStory)) !== null) {
-                    chunks.push(match[0].trim());
-                }
+                while ((match = regex.exec(fullStory)) !== null) { chunks.push(match[0].trim()); }
             }
 
             let r1 = (chunks[0] || '').toUpperCase();
@@ -2046,25 +2102,14 @@ window.updateTextareaInfo = function(el) {
                 const { data: insertedData, error: insertError } = await supabase
                     .from('findings')
                     .insert([{ 
-                        acct: accNo, 
-                        remark1: r1,
-                        remark2: r2,
-                        remark3: r3,
-                        remark4: r4,
-                        remark5: r5Auto,
-                        type: acctType,
-                        loc: acctLoc,
-                        region: acctRegion,
-                        updated_by: currentUser.username,
+                        acct: accNo, remark1: r1, remark2: r2, remark3: r3, remark4: r4, remark5: r5Auto,
+                        type: acctType, loc: acctLoc, region: acctRegion, updated_by: currentUser.username,
                         updated_at: new Date().toISOString()
                     }])
                     .select('updated_at');
 
                 if(!insertError) {
-                    await supabase.from('accounts').update({ 
-                        status: 'UPDATED', 
-                        details: updatedDetailsObj 
-                    }).eq('acct', accNo);
+                    await supabase.from('accounts').update({ status: 'UPDATED', details: updatedDetailsObj }).eq('acct', accNo);
                     
                     let rowToUpdate = globalAccounts.find(a => a.acct === accNo);
                     if(rowToUpdate) {
@@ -2073,31 +2118,23 @@ window.updateTextareaInfo = function(el) {
                         rowToUpdate.details = updatedDetailsObj;
                     }
                     
-                    const safeRegion = currentUser.role === 'master' || currentUser.role === 'super' ? 'all' : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
+                    const safeRegion = currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin' ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
                     const cacheKey = `scazp_cache_${safeRegion}`;
                     const timeKey = `scazp_time_${safeRegion}`;
                     
-await localforage.setItem(cacheKey, globalAccounts);
+                    await localforage.setItem(cacheKey, globalAccounts);
                     
-                    if (insertedData && insertedData.length > 0) {
-                        localStorage.setItem(timeKey, insertedData[0].updated_at);
-                    }
+                    if (insertedData && insertedData.length > 0) { localStorage.setItem(timeKey, insertedData[0].updated_at); }
                     
                     showNotification("RECORD SAVED", `Action for account <b>${accNo}</b> successfully updated.`); 
                     
-                    // [UPDATE]: Jangan tutup modal. Refresh background table & panggil semula openModal untuk tunjuk rekod baharu!
                     document.getElementById('single-remark-box').value = '';
                     document.getElementById('textarea-info').innerText = `Jumlah Karakter: 0/200`;
                     applyFilterAndRender();
                     openModal(accNo);
-                } else { 
-                    showNotification("DATABASE ERROR", insertError.message, true); 
-                }
-            } catch (err) {
-                showNotification("CRITICAL SYSTEM ERROR", err.message, true);
-            } finally {
-                btn.innerText = "COMMIT ENTRY";
-            }
+                } else { showNotification("DATABASE ERROR", insertError.message, true); }
+            } catch (err) { showNotification("CRITICAL SYSTEM ERROR", err.message, true);
+            } finally { btn.innerText = "COMMIT ENTRY"; }
         };
 
         window.resetAccountStatus = async function() {
@@ -2127,16 +2164,14 @@ await localforage.setItem(cacheKey, globalAccounts);
                     rowToUpdate.details = resetDetails;
                 }
 
-                const safeRegion = (currentUser.role === 'master' || currentUser.role === 'super') ? 'all' : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
+                const safeRegion = (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') ? null : (currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : 'null');
                 const cacheKey = `scazp_cache_${safeRegion}`;
                 await localforage.setItem(cacheKey, globalAccounts);
 
                 showNotification("RESET SUCCESSFUL", `Account <b>${accNo}</b> has been reverted to PENDING status.`);
                 closeModal();
                 applyFilterAndRender();
-            } catch (err) {
-                showNotification("CRITICAL SYSTEM ERROR", err.message, true);
-            }
+            } catch (err) { showNotification("CRITICAL SYSTEM ERROR", err.message, true); }
         };
         
         window.onclick = function(e) { 
