@@ -1141,7 +1141,6 @@ async function fetchFullDatabaseData(region = null) {
                 
                 currentRegion = currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null;
                 renderAreaSelectionUI(currentRegion);
-                applyFilterAndRender();
             }
 
             const lastActiveTab = localStorage.getItem('scazp_active_tab') || 'dashboard';
@@ -1303,7 +1302,10 @@ filteredAccounts = scopedGeoData.filter(row => {
             const areaContainer = document.getElementById('area-buttons');
             if (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') {
                 areaContainer.innerHTML = `<button class="btn-filter active" onclick="clearAreaSelection(this)">ALL AREAS IN ${region}</button>`;
-            } else { areaContainer.innerHTML = ''; }
+            } else { 
+            // [UBAH BAHAGIAN INI]: Dulu kita letak '', sekarang kita tambah butang ALL AREAS untuk user
+            areaContainer.innerHTML = `<button class="btn-filter active" onclick="clearAreaSelection(this)">ALL AREAS</button>`;
+            }
             
             if(regionsMap[region] && regionsMap[region].length > 0) {
                 regionsMap[region].forEach((area, index) => {
