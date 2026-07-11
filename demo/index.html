@@ -2189,7 +2189,7 @@ let finalArea = (keyArea && row[keyArea]) ? String(row[keyArea]).toUpperCase().t
                 
                 await supabase.from('findings').insert([{
                     acct: 'SYSTEM',
-                    remark: 'BULK EXCEL LEDGER UPLOADED/REFRESHED By Master',
+                    remark1: `BULK DATA UPLOADED BY ${currentUser.id.toUpperCase()}`,
                     updated_by: currentUser.username
                 }]);
 
@@ -2687,9 +2687,9 @@ window.populateAssignSubordinates = function() {
 
                 // [FIX 2]: Hantar log 'SYSTEM' ke tabel findings. Ini WAJIB supaya cache timestamp pelayan berubah.
                 // Jika tidak, browser PIC User tidak akan tahu ada pertukaran data baharu!
-                await supabase.from('findings').insert([{
+            await supabase.from('findings').insert([{
                     acct: 'SYSTEM',
-                    remark: `BATCH ASSIGNMENT: ${selectedAccts.length} akaun kepada ${cleanTargetUser}`,
+                    remark1: `BATCH ASSIGNMENT: ${selectedAccts.length} akaun kepada ${cleanTargetUser} BY ${currentUser.id.toUpperCase()}`,
                     updated_by: currentUser.id
                 }]);
 
