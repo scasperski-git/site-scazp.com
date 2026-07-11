@@ -1125,11 +1125,18 @@ async function fetchFullDatabaseData(region = null) {
                 
                 // Pastikan Dropdown Report_to diisi sedia
                 toggleFormRoleSelect();
-            } else {
+} else {
                 // Untuk PIC USER biasa
                 document.getElementById('master-nav-tabs').style.display = 'none';
                 document.getElementById('upload-action-container').style.display = 'none';
-                document.getElementById('region-filters-container').style.display = 'none';
+                
+                // [FIX]: Tunjukkan Region mereka (tetapi jangan bagi mereka tukar region lain)
+                document.getElementById('region-filters-container').style.display = 'block';
+                document.getElementById('region-filters-container').innerHTML = `
+                    <span class="filter-title">My Assigned Region</span>
+                    <div class="btn-group"><button class="btn-filter active">${currentUser.assignedregion || 'NO REGION'}</button></div>
+                `;
+                
                 document.getElementById('area-filters-container').style.display = 'block';
                 
                 currentRegion = currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null;
