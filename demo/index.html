@@ -1340,9 +1340,10 @@ async function checkLoginSession() {
             document.getElementById('btn-next').disabled = currentPage === totalPages;
         }
 
-        window.switchTab = function(target) {
-            // [UPDATE]: Kawalan akses tab untuk role baharu
+window.switchTab = function(target) {
+            // Kawalan akses: Hanya boss-boss boleh masuk tab settings & assign
             if (target === 'settings' && (currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin')) target = 'dashboard';
+            if (target === 'assign' && (currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin')) target = 'dashboard';
             if (target === 'report' && currentUser.role !== 'super') target = 'dashboard';
 
             document.querySelectorAll('.main-panel').forEach(p => p.style.display = 'none');
@@ -1357,6 +1358,14 @@ async function checkLoginSession() {
             } else if (target === 'report') {
                 document.getElementById('report-panel').style.display = 'block';
                 document.getElementById('tab-report').classList.add('active');
+            } else if (target === 'assign') {
+                // [FASA 3]: Logik untuk buka panel Assignment
+                document.getElementById('assign-panel').style.display = 'block';
+                document.getElementById('tab-assign').classList.add('active');
+                
+                // Bila buka je tab ni, terus load senarai staf dan akaun
+                populateAssignSubordinates();
+                renderAssignTable();
             }
             
             localStorage.setItem('scazp_active_tab', target);
@@ -2347,6 +2356,150 @@ let bulkData = [];
                 }
             } catch (err) {
                 console.error("Gagal muat turun senarai lokasi:", err);
+            }
+        };
+
+        // =========================================================
+        // [FASA 3]: SISTEM ASSIGNMENT & COLLECTOR ROUTING
+        // =========================================================
+        
+        let assignAccounts = [];
+        let currentAssignPage = 1;
+        const assignRowsPerPage = 20;
+
+        window.populateAssignSubordinates = function() {
+            const dropdown = document.getElementById('assign-target-user');
+            dropdown.innerHTML = '<option value="">-- PILIH STAF BAWAHAN --</option>';
+            
+            let subordinates = [];
+            if (currentUser.role === 'super') {
+                // Super Admin boleh nampak & assign kepada semua orang
+                subordinates = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.id !== currentUser.id);
+            } else {
+                // Manager/Admin cuma nampak staf yang "Report To" mereka sahaja
+                subordinates = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.report_to === currentUser.id);
+            }
+
+            subordinates.forEach(u => {
+                dropdown.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
+            });
+        };
+
+        window.renderAssignTable = function() {
+            const statusFilter = document.getElementById('assign-filter-status').value;
+            const tbody = document.getElementById('assign-table-body');
+            
+            // Tapis akaun berdasarkan status Assigned/Unassigned
+            assignAccounts = globalAccounts.filter(row => {
+                let isUnassigned = !row.assignee_id || row.assignee_id === 'UNASSIGNED';
+                if (statusFilter === 'UNASSIGNED') return isUnassigned;
+                if (statusFilter === 'ASSIGNED') return !isUnassigned;
+                return true;
+            });
+
+            let total = assignAccounts.length;
+            document.getElementById('assign-total-count').innerText = total.toLocaleString();
+
+            let totalPages = Math.ceil(total / assignRowsPerPage) || 1;
+            if(currentAssignPage > totalPages) currentAssignPage = totalPages;
+            if(currentAssignPage < 1) currentAssignPage = 1;
+
+            let start = (currentAssignPage - 1) * assignRowsPerPage;
+            let end = start + assignRowsPerPage;
+            let pageData = assignAccounts.slice(start, end);
+
+            tbody.innerHTML = '';
+            if(pageData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Tiada akaun dijumpai untuk kategori ini.</td></tr>';
+            } else {
+                pageData.forEach(row => {
+                    let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '🔴 UNASSIGNED';
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="text-align: center;">
+                                <input type="checkbox" class="chk-assign-row" value="${row.acct}" style="cursor:pointer; transform: scale(1.2);">
+                            </td>
+                            <td style="font-weight: bold; color: var(--text-main);">${row.acct}</td>
+                            <td>${row.region || '-'}</td>
+                            <td>${row.area || '-'}</td>
+                            <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td><span class="status-badge status-pending">${row.status}</span></td>
+                            <td style="font-weight:bold; color:var(--accent-gold);">${assigneeDisp}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            document.getElementById('assign-page-info').innerText = `Page ${currentAssignPage} of ${totalPages}`;
+            document.getElementById('btn-assign-prev').disabled = currentAssignPage === 1;
+            document.getElementById('btn-assign-next').disabled = currentAssignPage === totalPages;
+            document.getElementById('check-all-assign').checked = false; // Reset checkbox utama
+        };
+
+        window.nextAssignPage = function() {
+            const totalPages = Math.ceil(assignAccounts.length / assignRowsPerPage);
+            if (currentAssignPage < totalPages) {
+                currentAssignPage++;
+                renderAssignTable();
+            }
+        };
+
+        window.prevAssignPage = function() {
+            if (currentAssignPage > 1) {
+                currentAssignPage--;
+                renderAssignTable();
+            }
+        };
+
+        // Fungsi pangkah semua kotak serentak
+        window.toggleAllAssignCheckboxes = function(masterCheckbox) {
+            let checkboxes = document.querySelectorAll('.chk-assign-row');
+            checkboxes.forEach(chk => chk.checked = masterCheckbox.checked);
+        };
+
+        // Fungsi utama agihkan akaun ke pangkalan data
+        window.executeBatchAssignment = async function() {
+            const targetUser = document.getElementById('assign-target-user').value;
+            if(!targetUser) {
+                alert("Sila pilih Staf/Collector terlebih dahulu!");
+                return;
+            }
+
+            let checkboxes = document.querySelectorAll('.chk-assign-row:checked');
+            if(checkboxes.length === 0) {
+                alert("Sila tick (✔️) sekurang-kurangnya satu akaun untuk diagihkan!");
+                return;
+            }
+
+            let isConfirmed = await customConfirm(`Anda pasti mahu mengagihkan ${checkboxes.length} akaun kepada staf ${targetUser.toUpperCase()}?`);
+            if(!isConfirmed) return;
+
+            // Kumpul semua no akaun yang di-tick
+            let selectedAccts = Array.from(checkboxes).map(chk => chk.value);
+
+            document.getElementById('loadingText').innerText = "Mengagihkan akaun ke pelayan (server)...";
+            document.getElementById('loadingModal').style.display = 'flex';
+
+            try {
+                // Tembak perubahan ke Supabase sekaligus (Batch Update)
+                const { error } = await supabase.from('accounts').update({ assignee_id: targetUser }).in('acct', selectedAccts);
+                if(error) throw error;
+
+                // Kemas kini memori tempatan (supaya tak perlu buang masa sync semula)
+                selectedAccts.forEach(acct => {
+                    let accObj = globalAccounts.find(a => a.acct === acct);
+                    if(accObj) accObj.assignee_id = targetUser;
+                });
+
+                showNotification("SUCCESS", `${checkboxes.length} akaun telah berjaya diagihkan kepada ${targetUser.toUpperCase()}.`);
+                
+                // Segarkan semula jadual
+                renderAssignTable(); 
+
+            } catch (err) {
+                showNotification("ERROR", err.message, true);
+            } finally {
+                document.getElementById('loadingModal').style.display = 'none';
             }
         };
         
