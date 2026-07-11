@@ -1125,15 +1125,27 @@ async function fetchFullDatabaseData(region = null) {
                 
                 // Pastikan Dropdown Report_to diisi sedia
                 toggleFormRoleSelect();
-            } else {
+} else {
                 // Untuk PIC USER biasa
                 document.getElementById('master-nav-tabs').style.display = 'none';
                 document.getElementById('upload-action-container').style.display = 'none';
-                document.getElementById('region-filters-container').style.display = 'none';
+                
+                document.getElementById('region-filters-container').style.display = 'block';
+                document.getElementById('region-filters-container').innerHTML = `
+                    <span class="filter-title">My Assigned Region</span>
+                    <div class="btn-group"><button class="btn-filter active">${currentUser.assignedregion || 'NO REGION'}</button></div>
+                `;
+                
                 document.getElementById('area-filters-container').style.display = 'block';
                 
                 currentRegion = currentUser.assignedregion ? currentUser.assignedregion.toUpperCase().trim() : null;
+                
+                // [PENTING]: Set currentArea kepada null supaya "ALL AREAS" terpilih
+                currentArea = null; 
+                
+                // Panggil render supaya UI tahu "ALL AREAS" patut aktif
                 renderAreaSelectionUI(currentRegion);
+                
                 applyFilterAndRender();
             }
 
@@ -1292,21 +1304,19 @@ filteredAccounts = scopedGeoData.filter(row => {
             });
         }
 
-        function renderAreaSelectionUI(region) {
+function renderAreaSelectionUI(region) {
             const areaContainer = document.getElementById('area-buttons');
-            if (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') {
-                areaContainer.innerHTML = `<button class="btn-filter active" onclick="clearAreaSelection(this)">ALL AREAS IN ${region}</button>`;
-            } else { areaContainer.innerHTML = ''; }
+            
+            // Tambah butang ALL AREAS. Ia aktif jika currentArea adalah null
+            let activeAll = !currentArea ? 'active' : '';
+            areaContainer.innerHTML = `<button class="btn-filter ${activeAll}" onclick="clearAreaSelection(this)">ALL AREAS</button>`;
             
             if(regionsMap[region] && regionsMap[region].length > 0) {
-                regionsMap[region].forEach((area, index) => {
-                    let activeStyle = ((currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin') && index === 0) ? 'active' : '';
+                regionsMap[region].forEach((area) => {
+                    // Hanya aktif jika currentArea sama dengan area ini
+                    let activeStyle = (currentArea === area) ? 'active' : '';
                     areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
                 });
-                if((currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin') && !currentArea) { 
-                    const firstBtn = areaContainer.querySelector('.btn-filter');
-                    if (firstBtn) applyAreaFilter(regionsMap[region][0], firstBtn); 
-                }
             }
         }
 
