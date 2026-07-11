@@ -1011,6 +1011,7 @@ async function fetchFullDatabaseData() {
                 document.getElementById('master-nav-tabs').style.display = 'flex';
                 document.getElementById('upload-action-container').style.display = 'block';
                 document.getElementById('tab-report').style.display = currentUser.role === 'super' ? 'block' : 'none';
+                document.getElementById('tab-settings').style.display = currentUser.role === 'super' ? 'inline-block' : 'none';
                 
                 // FILTER HIERARCHY LOGIC
                 if(currentUser.role === 'super') {
@@ -1395,7 +1396,7 @@ function resetHeaderArrows() {
         }
 
         window.switchTab = function(target) {
-            if (target === 'settings' && (currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin')) target = 'dashboard';
+            if (target === 'settings' && currentUser.role !== 'super') target = 'dashboard';
             if (target === 'assign' && (currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin')) target = 'dashboard';
             if (target === 'report' && currentUser.role !== 'super') target = 'dashboard';
 
