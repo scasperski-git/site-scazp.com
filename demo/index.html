@@ -482,20 +482,7 @@
                         <option value="">-- No Supervisor Required --</option>
                     </select>
                 </div>
-                <div class="form-group" id="form-region-group">
-                    <label>Assign Region Scope</label>
-                    <select id="new-user-region" class="form-control">
-                        <option value="BC">BERJAYA CREDIT</option>
-                        <option value="NORTH">NORTH</option>
-                        <option value="NORTHWEST">NORTHWEST</option>
-                        <option value="NORTHEAST">NORTHEAST</option>
-                        <option value="SOUTH">SOUTH</option>
-                        <option value="CENTRAL">CENTRAL</option>
-                        <option value="MIDEAST">MIDEAST</option>
-                        <option value="SABAH">SABAH</option>
-                        <option value="SARAWAK">SARAWAK</option>
-                    </select>
-                </div>
+
                 <button class="btn-submit" onclick="addNewUser()">Save User Configuration</button>
             </div>
 
@@ -1324,7 +1311,7 @@
             renderUserTablePage();
         };
 
-        window.renderUserTablePage = function() {
+window.renderUserTablePage = function() {
             const tbody = document.getElementById('users-table-body');
             tbody.innerHTML = '';
             
@@ -1339,40 +1326,56 @@
             let end = start + usersPerPage;
             let pageData = filteredSystemUsers.slice(start, end);
             
+            // Senarai Region Standard untuk dropdown (Boleh update kalau ada region baru)
+            const regionsList = ['BC', 'NORTH', 'NORTHWEST', 'NORTHEAST', 'SOUTH', 'CENTRAL', 'MIDEAST', 'SABAH', 'SARAWAK'];
+
             if(pageData.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No users found matching the search criteria.</td></tr>';
             } else {
                 pageData.forEach((user, index) => {
-                    let regionDisp = user.assignedregion ? user.assignedregion.toUpperCase() : ((user.role === 'admin' || user.role === 'manager' || user.role === 'super') ? 'ALL' : 'NONE');
-                    
-                    let roleBadgeClass = '';
-                    let rName = user.role ? user.role.toUpperCase().trim() : '';
-                    
-                    if (rName === 'SUPER') { roleBadgeClass = 'role-super'; } 
-                    else if (rName === 'MANAGER') { roleBadgeClass = 'role-manager'; } 
-                    else if (rName === 'ADMIN') { roleBadgeClass = 'role-admin'; } 
-                    else { roleBadgeClass = 'role-user'; }
-                    
+                    let rName = user.role ? user.role.toLowerCase().trim() : 'user';
                     let userStatus = user.status || 'ACTIVE';
                     let statusBadge = userStatus === 'ACTIVE' ? 'status-done' : 'status-pending';
                     
                     let toggleBtnText = userStatus === 'ACTIVE' ? 'DEACTIVATE' : 'ACTIVATE';
                     let toggleBtnColor = userStatus === 'ACTIVE' ? 'var(--error-red)' : 'var(--success-green)';
                     
-                    // Lapor Kepada (Report To)
-                    let reportDisp = user.report_to ? `<span style="font-weight:bold; color:var(--accent-gold);">${user.report_to.toUpperCase()}</span>` : '-';
+                    // 1. Dropdown ROLE
+                    let roleSelect = `
+                        <select id="edit-role-${user.id}" style="padding:4px; font-size:10px; font-weight:bold; border:1px solid var(--border-color); border-radius:3px;">
+                            <option value="user" ${rName==='user'?'selected':''}>USER</option>
+                            <option value="admin" ${rName==='admin'?'selected':''}>ADMIN</option>
+                            <option value="manager" ${rName==='manager'?'selected':''}>MANAGER</option>
+                            <option value="super" ${rName==='super'?'selected':''}>SUPER</option>
+                        </select>`;
+
+                    // 2. Dropdown REPORT TO (Senarai semua orang kecuali User biasa dan diri dia sendiri)
+                    let reportToOptions = `<option value="">-- NONE --</option>`;
+                    allSystemUsers.filter(u => u.role !== 'user' && u.id !== user.id).forEach(u => {
+                        reportToOptions += `<option value="${u.id}" ${user.report_to===u.id?'selected':''}>${u.id.toUpperCase()}</option>`;
+                    });
+                    let reportSelect = `<select id="edit-report-${user.id}" style="padding:4px; font-size:10px; border:1px solid var(--border-color); border-radius:3px; max-width:100px;">${reportToOptions}</select>`;
+
+                    // 3. Dropdown REGION ACCESS
+                    let regionOptions = `<option value="ALL" ${!user.assignedregion || user.assignedregion==='ALL'?'selected':''}>ALL REGIONS</option>`;
+                    regionsList.forEach(r => {
+                        regionOptions += `<option value="${r}" ${user.assignedregion===r?'selected':''}>${r}</option>`;
+                    });
+                    let regionSelect = `<select id="edit-region-${user.id}" style="padding:4px; font-size:10px; border:1px solid var(--border-color); border-radius:3px;">${regionOptions}</select>`;
                     
+                    // HTML untuk baris table
                     tbody.innerHTML += `
                         <tr>
                             <td style="text-align: center;">${start + index + 1}</td>
-                            <td>${user.id}</td>
-                            <td><span class="status-badge ${roleBadgeClass}">${rName}</span></td>
-                            <td>${reportDisp}</td>
-                            <td>${regionDisp}</td>
+                            <td style="font-weight:bold; color:var(--text-main);">${user.id.toUpperCase()}</td>
+                            <td>${roleSelect}</td>
+                            <td>${reportSelect}</td>
+                            <td>${regionSelect}</td>
                             <td><span class="status-badge ${statusBadge}">${userStatus}</span></td>
-                            <td>
+                            <td style="white-space: nowrap;">
+                                <button class="btn-update" style="color: var(--accent-gold); border-color: var(--accent-gold); margin-right: 5px; font-weight:bold;" onclick="updateUserInline('${user.id}')">💾 SAVE</button>
                                 <button class="btn-update" style="color: ${toggleBtnColor}; border-color: ${toggleBtnColor}; margin-right: 5px;" onclick="toggleUserStatus('${user.id}', '${userStatus}')">${toggleBtnText}</button>
-                                <button class="btn-update" style="color: #ff3333; border-color: #ff3333;" onclick="deleteUser('${user.id}')">DELETE</button>
+                                <button class="btn-update" style="color: #ff3333; border-color: #ff3333;" onclick="deleteUser('${user.id}')">DEL</button>
                             </td>
                         </tr>
                     `;
@@ -1383,7 +1386,6 @@
             document.getElementById('btn-user-prev').disabled = userCurrentPage === 1;
             document.getElementById('btn-user-next').disabled = userCurrentPage === totalPages;
         };
-
         window.nextUserPage = function() {
             const totalPages = Math.ceil(filteredSystemUsers.length / usersPerPage);
             if (userCurrentPage < totalPages) {
@@ -1436,11 +1438,10 @@
             }
         };
 
-        window.addNewUser = async function() {
+window.addNewUser = async function() {
             const id = document.getElementById('new-user-id').value.trim();
             const pass = document.getElementById('new-user-pass').value.trim();
             const role = document.getElementById('new-user-role').value;
-            const region = document.getElementById('new-user-region').value;
             const reportTo = document.getElementById('new-user-report-to').value; 
             
             if(!id || !pass) { 
@@ -1448,7 +1449,6 @@
                 return; 
             }
 
-            // [KEMAS KINI]: Mesej prompt yang lebih mesra kalau tak pilih bos
             if(role !== 'super' && !reportTo) {
                 let proceed = await customConfirm(`INFO:\nID ini dicipta TANPA sebarang Supervisor (Tangguh). Ia boleh di-update kemudian. Teruskan?`);
                 if(!proceed) return;
@@ -1462,12 +1462,12 @@
             if (existingUser) { 
                 showNotification("ERROR", "User ID already exists in the system!", true); 
             } else {
-                // Masukkan report_to sekali masa INSERT
+                // [KEMAS KINI]: assignedregion automatik set jadi NULL (boleh set kat table nanti)
                 const { error } = await supabase.from('users').insert([{ 
                     id: id, 
                     pass: pass, 
                     role: role, 
-                    assignedregion: role === 'super' ? null : region,
+                    assignedregion: null,
                     report_to: reportTo || null
                 }]);
                 
@@ -1520,6 +1520,33 @@
                 showNotification("SUCCESSFULLY DELETED", `User account <b>${userId.toUpperCase()}</b> has been completely deleted.`);
             } else { 
                 showNotification("DELETE ERROR", error.message, true); 
+            }
+        };
+
+// [FUNGSI BAHARU]: Update Role/Report To/Region dari dalam Table
+        window.updateUserInline = async function(userId) {
+            let newRole = document.getElementById(`edit-role-${userId}`).value;
+            let newReportTo = document.getElementById(`edit-report-${userId}`).value;
+            let newRegion = document.getElementById(`edit-region-${userId}`).value;
+
+            // Bersihkan data
+            if (newReportTo === "") newReportTo = null;
+            if (newRegion === "ALL") newRegion = null;
+
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
+
+            const { error } = await supabase.from('users').update({ 
+                role: newRole, 
+                report_to: newReportTo,
+                assignedregion: newRegion
+            }).eq('id', userId);
+
+            if (!error) { 
+                showNotification("UPDATE SUCCESS", `Konfigurasi untuk user <b>${userId.toUpperCase()}</b> telah berjaya dikemas kini.`);
+                fetchAndRenderUsers(); // Refresh table
+            } else { 
+                showNotification("UPDATE ERROR", error.message, true); 
             }
         };
 
