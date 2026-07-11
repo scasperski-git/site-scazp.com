@@ -1442,6 +1442,8 @@ window.addNewUser = async function() {
             const role = document.getElementById('new-user-role').value;
             const reportTo = document.getElementById('new-user-report-to').value; 
             
+            // [FIX]: Buang rujukan ke 'new-user-region' yang dah dibuang dari HTML
+            
             if(!id || !pass) { 
                 showNotification("ERROR", "Please fill in the User ID and Password fields.", true); 
                 return; 
@@ -1455,29 +1457,37 @@ window.addNewUser = async function() {
             let isVerified = await verifyAdminPasscode();
             if (!isVerified) return;
             
-            const { data: existingUser } = await supabase.from('users').select('id').eq('id', id).single();
-            
-            if (existingUser) { 
-                showNotification("ERROR", "User ID already exists in the system!", true); 
-            } else {
-                // [KEMAS KINI]: assignedregion automatik set jadi NULL (boleh set kat table nanti)
-const { error } = await supabase.from('users').insert([{ 
+            try {
+                // Check dulu kalau ID dah wujud
+                const { data: existingUser, error: checkError } = await supabase.from('users').select('id').eq('id', id).single();
+                
+                if (existingUser) { 
+                    showNotification("ERROR", "User ID already exists!", true); 
+                    return;
+                }
+
+                // [FIX]: Tambah status 'ACTIVE' dan pastikan assignregion NULL masa create baru
+                const { error } = await supabase.from('users').insert([{ 
                     id: id, 
                     pass: pass, 
                     role: role, 
-                    assignedregion: role === 'super' ? null : region,
+                    assignedregion: null, // Default kosong masa create, edit nanti kat table
                     report_to: reportTo || null,
                     status: 'ACTIVE' 
                 }]);
                 
-                if(!error) {
-                    showNotification("REGISTRATION SUCCESSFUL", `New user account with ID <b>${id}</b> has been successfully registered into the database.`);
+                if(error) {
+                    console.error("Supabase Error Details:", error); // [DEBUG]: Tengok error ni kat console (F12)
+                    showNotification("DATABASE ERROR", error.message, true); 
+                } else {
+                    showNotification("SUCCESS", `User account <b>${id}</b> has been registered.`);
                     document.getElementById('new-user-id').value = ''; 
                     document.getElementById('new-user-pass').value = '';
                     fetchAndRenderUsers(); 
-                } else { 
-                    showNotification("DATABASE ERROR", error.message, true); 
                 }
+            } catch (err) {
+                console.error(err);
+                showNotification("SYSTEM ERROR", "Check console for details.", true);
             }
         };
 
