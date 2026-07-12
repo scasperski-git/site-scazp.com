@@ -1179,6 +1179,11 @@ tr:hover {
             
             <!-- TOOLBOX AGIHAN DI SEBELAH KANAN HEADER SENARAI -->
 <div class="agih-container">
+    <span style="font-size: 11px; font-weight: bold; color: var(--text-main);">FILTER COLLECTOR:</span>
+    <select id="filter-collector-dropdown" class="form-control" style="padding: 8px 10px; font-size: 12px; margin-right: 15px; border-color: var(--accent-gold);" onchange="renderAssignTable()">
+        <option value="ALL">SEMUA COLLECTOR</option>
+    </select>
+    
     <span style="font-size: 11px; font-weight: bold; color: var(--text-main);">AGIH KEPADA:</span>
     <select id="assign-target-user" class="form-control" style="padding: 8px 10px; font-size: 12px;">
         <option value="">-- PILIH STAF BAWAHAN --</option>
@@ -1189,20 +1194,21 @@ tr:hover {
         
         <div class="table-container">
             <table>
-                <thead>
-                    <tr>
-                        <th style="width: 40px; text-align: center;">
-                            <input type="checkbox" id="check-all-assign" onclick="toggleAllAssignCheckboxes(this)" style="cursor: pointer; transform: scale(1.2);">
-                        </th>
-                        <th>ACCT NO</th>
-                        <th>ZONE</th>
-                        <th>REGION</th>
-                        <th>AREA</th>
-                        <th>OSB (RM)</th>
-                        <th>STATUS</th>
-                        <th style="color: var(--accent-gold);">CURRENT ASSIGNEE</th>
-                    </tr>
-                </thead>
+<thead>
+    <tr>
+        <th style="width: 40px; text-align: center;">
+            <input type="checkbox" id="check-all-assign" onclick="toggleAllAssignCheckboxes(this)" style="cursor: pointer; transform: scale(1.2);">
+        </th>
+        <th class="sortable" onclick="sortTable('acct')" id="th-acct">ACCT NO ⇅</th>
+        <th class="sortable" onclick="sortTable('zone')" id="th-zone">ZONE ⇅</th>
+        <th class="sortable" onclick="sortTable('region')" id="th-region">REGION ⇅</th>
+        <th class="sortable" onclick="sortTable('area')" id="th-area">AREA ⇅</th>
+        <th class="sortable" onclick="sortTable('osb')" id="th-osb">OSB (RM) ⇅</th>
+        <th class="sortable" onclick="sortTable('status')" id="th-status">STATUS ⇅</th>
+        <th class="sortable" onclick="sortTable('collector')" id="th-collector">COLLECTOR ⇅</th>
+        <th class="sortable" onclick="sortTable('assignee_id')" id="th-assignee_id">CURRENT ASSIGNEE ⇅</th>
+        <th class="sortable" onclick="sortTable('assignee_id')" id="th-assignee_id">CURRENT ASSIGNEE ⇅</th> </tr>
+</thead>
                 <tbody id="assign-table-body">
                     <tr><td colspan="8" style="text-align:center;">Sila tunggu, sedang memuatkan data...</td></tr>
                 </tbody>
@@ -1257,6 +1263,7 @@ tr:hover {
                 <div class="mapping-section">
                     <h3>1. MAIN ACCOUNT INFO</h3>
                     <div class="mapping-grid">
+                        <label>COLLECTOR (CALLER)</label><select id="map-collector" class="form-control mapping-select"></select>
                         <label>ZONE</label><select id="map-zone" class="form-control mapping-select"></select>
                         <label>REGION</label><select id="map-region" class="form-control mapping-select"></select>
                         <label>AREA</label><select id="map-area" class="form-control mapping-select"></select>
@@ -2123,6 +2130,7 @@ function resetHeaderArrows() {
                 document.getElementById('tab-assign').classList.add('active');
                 
                 populateAssignSubordinates();
+                populateCollectorFilters();
                 renderAssignTable();
             }
             
@@ -2667,6 +2675,7 @@ window.exportDataByDate = async function(dateStr) {
                             headers.forEach(h => { select.appendChild(new Option(h, h)); });
                             
                             const id = select.id;
+                            if(id === 'map-collector') preSelectOption(select, ['collector', 'COLLECTOR', 'caller', 'CALLER']);
                             if(id === 'map-zone') preSelectOption(select, ['zone', 'ZONE', 'Zone']);
                             if(id === 'map-region') preSelectOption(select, ['region', 'REGION', 'Region']);
                             if(id === 'map-area') preSelectOption(select, ['area', 'AREA', 'Area']);
@@ -2804,6 +2813,9 @@ window.exportDataByDate = async function(dateStr) {
                 if (rawDelq === "undefined") rawDelq = "";
                 let rawArrs = String(row[getVal('map-arrs')]).trim();
                 if (rawArrs === "undefined") rawArrs = "0";
+                let keyColl = getVal('map-collector');
+                let rawColl = (keyColl && row[keyColl]) ? String(row[keyColl]).toUpperCase().trim() : "";
+                if (rawColl === "UNDEFINED") rawColl = "";
 
                 let detailsJSON = {
                     h_name: row[getVal('map-h-name')] || '',
@@ -2845,6 +2857,7 @@ window.exportDataByDate = async function(dateStr) {
                     arrs_mth: rawArrs, 
                     osb: parseFloat(String(row[getVal('map-osb')]).replace(/[^0-9.-]+/g,"")) || 0, 
                     status: currentStatus, 
+                    collector: rawColl,
                     details: detailsJSON 
                 });
             }
@@ -3263,16 +3276,38 @@ if(!fullStory) {
             });
         };
 
-        window.renderAssignTable = function() {
-            const statusFilter = document.getElementById('assign-filter-status').value;
-            const tbody = document.getElementById('assign-table-body');
-            
-            assignAccounts = globalAccounts.filter(row => {
-                let isUnassigned = !row.assignee_id || row.assignee_id === 'UNASSIGNED';
-                if (statusFilter === 'UNASSIGNED') return isUnassigned;
-                if (statusFilter === 'ASSIGNED') return !isUnassigned;
-                return true;
-            });
+        window.populateCollectorFilters = function() {
+    const dropdown = document.getElementById('filter-collector-dropdown');
+    if (!dropdown) return;
+    
+    // Ambil senarai unik collector, buang yang kosong, susun A-Z
+    let collectors = [...new Set(globalAccounts.map(a => a.collector).filter(Boolean))].sort();
+    
+    dropdown.innerHTML = '<option value="ALL">SEMUA COLLECTOR</option>';
+    collectors.forEach(c => {
+        dropdown.innerHTML += `<option value="${c}">${c.toUpperCase()}</option>`;
+    });
+};
+
+window.renderAssignTable = function() {
+    const statusFilter = document.getElementById('assign-filter-status').value;
+    const collectorFilter = document.getElementById('filter-collector-dropdown').value; // [UPDATE]
+
+    const tbody = document.getElementById('assign-table-body');
+    
+    assignAccounts = globalAccounts.filter(row => {
+        let isUnassigned = !row.assignee_id || row.assignee_id === 'UNASSIGNED';
+        
+        let matchStatus = false;
+        if (statusFilter === 'UNASSIGNED') matchStatus = isUnassigned;
+        else if (statusFilter === 'ASSIGNED') matchStatus = !isUnassigned;
+        else matchStatus = true;
+
+        // [UPDATE: Filter Collector]
+        let matchCollector = (collectorFilter === 'ALL' || !collectorFilter) ? true : (row.collector === collectorFilter);
+        
+        return matchStatus && matchCollector;
+    });
 
             let total = assignAccounts.length;
             document.getElementById('assign-total-count').innerText = total.toLocaleString();
@@ -3290,22 +3325,24 @@ if(!fullStory) {
                 tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Tiada akaun dijumpai untuk kategori ini.</td></tr>';
             } else {
                 pageData.forEach(row => {
-                    let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '🔴 UNASSIGNED';
-                    tbody.innerHTML += `
-                        <tr>
-                            <td style="text-align: center;">
-                                <input type="checkbox" class="chk-assign-row" value="${row.acct}" style="cursor:pointer; transform: scale(1.2);">
-                            </td>
-                            <td style="font-weight: bold; color: var(--text-main);">${row.acct}</td>
-                            <td>${row.zone || '-'}</td>
-                            <td>${row.region || '-'}</td>
-                            <td>${row.area || '-'}</td>
-                            <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                            <td><span class="status-badge status-pending">${row.status}</span></td>
-                            <td style="font-weight:bold; color:var(--accent-gold);">${assigneeDisp}</td>
-                        </tr>
-                    `;
-                });
+                let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '🔴 UNASSIGNED';
+                let colDisp = row.collector ? row.collector.toUpperCase() : '-'; // [UPDATE]
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="text-align: center;">
+                            <input type="checkbox" class="chk-assign-row" value="${row.acct}" style="cursor:pointer; transform: scale(1.2);">
+                        </td>
+                        <td style="font-weight: bold; color: var(--text-main);">${row.acct}</td>
+                        <td>${row.zone || '-'}</td>
+                        <td>${row.region || '-'}</td>
+                        <td>${row.area || '-'}</td>
+                        <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td><span class="status-badge status-pending">${row.status}</span></td>
+                        <td style="font-weight:bold; color:var(--success-green);">${colDisp}</td>
+                        <td style="font-weight:bold; color:var(--accent-gold);">${assigneeDisp}</td> </tr>
+                `;
+            });
             }
 
             document.getElementById('assign-page-info').innerText = `Page ${currentAssignPage} of ${totalPages}`;
