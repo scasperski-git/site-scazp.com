@@ -2212,22 +2212,22 @@ window.renderUserTablePage = async function() {
 
                     let fullNameDisp = user.name ? user.name.toUpperCase() : '<span style="color:#cbd5e1;">TIADA DATA</span>'; // <-- SETTING NAMA
                     
-                    tbody.innerHTML += `
-                        <tr>
-                            <td style="text-align: center;">${start + index + 1}</td>
-                            <td style="font-weight:bold; color:var(--text-main);">${user.id.toUpperCase()}</td>
-                            <td>${roleSelect}</td>
-                            <td>${reportSelect}</td>
-                            <td>${zoneSelect}${areaSelect}${noneText}</td>
-                            <td><span class="status-badge ${statusBadge}">${userStatus}</span></td>
-                            <td style="white-space: nowrap;">
-                                <button class="btn-update" style="color: var(--accent-gold); border-color: var(--accent-gold); margin-right: 5px; font-weight:bold;" onclick="updateUserInline('${user.id}')">💾 SAVE</button>
-                                <button class="btn-update" style="color: ${toggleBtnColor}; border-color: ${toggleBtnColor}; margin-right: 5px;" onclick="toggleUserStatus('${user.id}', '${userStatus}')">${toggleBtnText}</button>
-                                <button class="btn-update" style="color: #ff3333; border-color: #ff3333;" onclick="deleteUser('${user.id}')">DEL</button>
-                            </td>
-                        </tr>
-                    `;
-                });
+tbody.innerHTML += `
+        <tr>
+            <td style="text-align: center;">${start + index + 1}</td>
+            <td style="font-weight:bold; color:var(--text-main);">${user.id.toUpperCase()}</td>
+            <td style="font-size:11px;">${fullNameDisp}</td> <td>${roleSelect}</td>
+            <td>${reportSelect}</td>
+            <td>${zoneSelect}${areaSelect}${noneText}</td>
+            <td><span class="status-badge ${statusBadge}">${userStatus}</span></td>
+            <td style="white-space: nowrap;">
+                <button class="btn-update" style="color: var(--accent-gold); border-color: var(--accent-gold); margin-right: 5px; font-weight:bold;" onclick="updateUserInline('${user.id}')">💾 SAVE</button>
+                <button class="btn-update" style="color: ${toggleBtnColor}; border-color: ${toggleBtnColor}; margin-right: 5px;" onclick="toggleUserStatus('${user.id}', '${userStatus}')">${toggleBtnText}</button>
+                <button class="btn-update" style="color: #ff3333; border-color: #ff3333;" onclick="deleteUser('${user.id}')">DEL</button>
+            </td>
+        </tr>
+    `;
+});
             }
             document.getElementById('user-page-info').innerText = `Page ${userCurrentPage} of ${totalPages}`;
             document.getElementById('btn-user-prev').disabled = userCurrentPage === 1;
