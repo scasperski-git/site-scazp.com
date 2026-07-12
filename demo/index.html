@@ -6,188 +6,6 @@
     <title>Findings Management System</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
-    <style>
-        :root {
-            --bg-color: #f0f4f8;
-            --card-bg: #ffffff;
-            --text-main: #102a43;
-            --text-muted: #486581;
-            --accent-gold: #2563eb;   
-            --border-color: #d9e2ec;
-            
-            --success-green: #4caf50;
-            --error-red: #e53935;
-            
-            --status-call: #2196f3;
-            --status-uct: #ff9800;
-            --status-ptp: #9c27b0;
-            --status-pv: #00bcd4;
-            --status-paid: #4caf50;
-        }
-
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; }
-
-        /* --- LOGIN STYLES --- */
-        #login-section { display: none; justify-content: center; align-items: center; height: 90vh; }
-        .login-box { background-color: var(--card-bg); padding: 30px; border-radius: 8px; border: 1px solid var(--accent-gold); width: 100%; max-width: 350px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.1); text-align: center; }
-        .login-box h2 { color: var(--accent-gold); margin-top: 0; font-size: 22px; }
-        .login-input { width: 100%; box-sizing: border-box; background-color: #e8f0f8; border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 13px; }
-        .login-input:focus { outline: none; border-color: var(--accent-gold); background-color: #ffffff; }
-        .btn-login { width: 100%; background-color: var(--accent-gold); color: #ffffff; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .btn-login:hover { background-color: #1d4ed8; }
-
-        /* --- DASHBOARD STYLES --- */
-        #dashboard-section { display: none; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-        .header h1 { margin: 0; font-size: 20px; color: var(--accent-gold); letter-spacing: 1px; }
-        .btn-logout { background-color: transparent; color: var(--error-red); border: 1px solid var(--error-red); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-
-        .nav-tabs { display: none; gap: 10px; margin-bottom: 20px; }
-        .nav-btn { background-color: #e8f0f8; color: var(--text-muted); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; }
-        .nav-btn.active { background-color: var(--accent-gold); color: #ffffff; border-color: var(--accent-gold); }
-
-        .main-panel { display: block; }
-        #settings-panel { display: none; }
-
-        .action-bar { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
-        .filter-section { background-color: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
-        .filter-title { font-size: 11px; color: var(--text-muted); margin-bottom: 5px; display: block; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;}
-        .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
-        .btn-filter { background-color: #ffffff; color: var(--text-main); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; transition: all 0.2s; }
-        .btn-filter:hover { border-color: var(--accent-gold); background-color: #e8f0f8; }
-        .btn-filter.active { background-color: var(--accent-gold); color: #ffffff; border-color: var(--accent-gold); font-weight: bold; }
-        
-        #zone-filters-container, #region-filters-container, #area-filters-container { display: none; padding-top: 5px; }
-
-        .btn-upload-trigger { background-color: #2e7d32; color: white; border: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 5px; height: fit-content;}
-        .btn-upload-trigger:hover { background-color: #388e3c; }
-
-        .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
-        .kpi-card { background-color: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center; transition: all 0.25s ease; }
-        .kpi-clickable { cursor: pointer; }
-        .kpi-clickable:hover { border-color: var(--accent-gold); background-color: #e8f0f8; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
-        .kpi-card.active { border-color: var(--accent-gold); background-color: #d9e2ec; box-shadow: 0 0 15px rgba(37, 99, 235, 0.2); }
-        .kpi-card h3 { margin: 0 0 5px 0; font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
-        .kpi-card p { margin: 0; font-size: 20px; font-weight: bold; color: var(--text-main); }
-
-        .table-container { background-color: var(--card-bg); border-radius: 8px 8px 0 0; border: 1px solid var(--border-color); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        th, td { padding: 10px 10px; text-align: left; border-bottom: 1px solid var(--border-color); }
-        
-        th { background-color: #e8f0f8; color: var(--text-main); font-weight: 600; white-space: nowrap; user-select: none; font-size: 10px;}
-        th.sortable { cursor: pointer; transition: background 0.2s; }
-        th.sortable:hover { background-color: #d9e2ec; color: var(--accent-gold); }
-        
-        tr:hover { background-color: #e2e8f0; }
-        
-        .pagination-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background-color: #e8f0f8; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; margin-bottom: 20px; }
-        .pagination-controls button { background-color: #ffffff; color: var(--accent-gold); border: 1px solid var(--accent-gold); padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin: 0 5px; }
-        .pagination-controls button:disabled { border-color: #cbd5e1; color: #cbd5e1; cursor: not-allowed; }
-        .page-info { font-size: 12px; color: var(--text-muted); }
-        
-        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; display: inline-block; text-align: center; }
-        .status-done { background-color: rgba(76, 175, 80, 0.15); color: var(--success-green); border: 1px solid rgba(76, 175, 80, 0.3); }
-        .status-pending { background-color: rgba(229, 57, 53, 0.15); color: var(--error-red); border: 1px solid rgba(229, 57, 53, 0.3); }
-        
-        .btn-update { background-color: transparent; color: var(--accent-gold); border: 1px solid var(--accent-gold); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; }
-        .btn-update:hover { background-color: var(--accent-gold); color: #ffffff; }
-
-        .settings-box { background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; max-width: 500px; }
-        .settings-box h2 { color: var(--accent-gold); font-size: 16px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;}
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 12px; color: var(--text-muted); }
-        .form-control { width: 100%; box-sizing: border-box; background-color: #e8f0f8 !important; border: 1px solid var(--border-color) !important; color: var(--text-main) !important; padding: 10px; border-radius: 4px; font-size: 12px; }
-        .form-control:focus { outline: none; border-color: var(--accent-gold) !important; background-color: #ffffff !important;}
-        .btn-submit { background-color: var(--accent-gold); color: #ffffff; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; }
-
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(16, 42, 67, 0.75); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background-color: var(--card-bg); border: 1px solid var(--accent-gold); border-radius: 8px; width: 90%; max-width: 500px; padding: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); position: relative; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; }
-        .modal-header h2 { margin: 0; font-size: 15px; color: var(--accent-gold); }
-        .close-btn { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
-        .close-btn:hover { color: var(--error-red); }
-        
-        .history-box { background-color: #e8f0f8; padding: 10px; border-radius: 4px; margin-bottom: 15px; max-height: 120px; overflow-y: auto; font-size: 11px; border: 1px solid var(--border-color); }
-        .history-item { border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; margin-bottom: 5px; }
-        .history-item:last-child { border-bottom: none; margin-bottom: 0; }
-        .history-meta { color: var(--accent-gold); font-size: 10px; margin-bottom: 3px; }
-
-        .mapping-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; background: #e8f0f8; padding: 10px; border-radius: 6px;}
-        .mapping-grid label { font-size: 12px; align-self: center; color: var(--text-main); font-weight: 500;}
-
-        #progressModal .modal-content { max-width: 400px; text-align: center; padding: 35px 25px; border-color: var(--border-color); }
-        .progress-wrapper { background-color: #d9e2ec; border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; margin: 20px 0 10px 0; height: 16px; width: 100%; }
-        .progress-bar-fill { background: linear-gradient(90deg, var(--accent-gold), #60a5fa); height: 100%; width: 0%; transition: width 0.3s ease-out; }
-        .progress-text { font-size: 16px; font-weight: bold; color: var(--accent-gold); margin-bottom: 5px; }
-        
-        #loadingModal .modal-content { text-align: center; padding: 40px; border: 1px solid var(--accent-gold); max-width: 350px;}
-
-        .btn-cancel { background-color: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border-color); padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; }
-        .btn-cancel:hover { background-color: #d9e2ec; color: var(--text-main); }
-
-        .details-wrapper { padding: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; border-bottom: 2px solid var(--accent-gold); border-left: 4px solid var(--accent-gold); }
-        .details-box { background-color: #ffffff !important; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); position: relative; z-index: 1; overflow: hidden; }
-        .details-box::before {
-            content: attr(data-watermark);
-            position: absolute;
-            top: -20%;
-            left: -20%;
-            width: 160%;
-            height: 160%;
-            font-family: 'Segoe UI', sans-serif;
-            font-size: 8px;
-            font-weight: 900;
-            color: rgba(16, 42, 67, 0.09); 
-            white-space: normal;
-            word-break: break-all;
-            line-height: 2.2;
-            letter-spacing: 1px;
-            padding: 10px;
-            box-sizing: border-box;
-            transform: rotate(-10deg) scale(1.2);
-            transform-origin: center center;
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        .details-box h4, .details-box p {
-            position: relative;
-            z-index: 2;
-        }
-        .details-box h4 { margin: 0 0 10px 0; color: var(--accent-gold); font-size: 11px; border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; text-transform: uppercase; }
-        .details-box p { margin: 4px 0; font-size: 11px; color: var(--text-main); }
-        .details-box span.lbl { color: var(--text-muted); display: inline-block; width: 65px; font-weight: bold; }
-        
-        .mapping-container { max-height: 60vh; overflow-y: auto; padding-right: 10px; text-align: left; }
-        .mapping-section { border: 1px solid var(--border-color); padding: 10px; margin-bottom: 15px; border-radius: 6px; background: #ffffff; }
-        .mapping-section h3 { margin-top: 0; margin-bottom: 10px; font-size: 12px; color: var(--success-green); border-bottom: 1px solid var(--border-color); padding-bottom: 5px;}
-
-        @media (max-width: 768px) {
-            .details-wrapper { grid-template-columns: 1fr !important; gap: 12px; padding: 12px; }
-            .details-box { width: 100% !important; box-sizing: border-box; }
-            .kpi-container { grid-template-columns: repeat(4, 1fr); gap: 6px; }
-            .kpi-card { padding: 10px 4px; }
-            .kpi-card h3 { font-size: 8px; }
-            .kpi-card p { font-size: 13px; }
-            table { font-size: 9px; }
-            th, td { padding: 8px 5px; white-space: nowrap; }
-            th { font-size: 9px; letter-spacing: 0.5px; }
-            .pagination-container { padding: 10px; flex-direction: column; gap: 10px; }
-        }
-
-        #maintenance-bar { display: none; background: linear-gradient(90deg, #b71c1c, #e57373); color: white; text-align: center; padding: 10px; font-size: 13px; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 9999; }
-        .blink-dot { height: 8px; width: 8px; background-color: white; border-radius: 50%; display: inline-block; margin-right: 8px; animation: blinker 1.5s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0; } }
-
-        .search-container { display: flex; gap: 10px; align-items: center; }
-        @media (max-width: 768px) { .search-container { flex-direction: column; } }
-
-        .full-page-modal { width: 100vw !important; height: 100vh !important; max-width: 100% !important; max-height: 100% !important; border-radius: 0 !important; border: none !important; background-color: var(--bg-color) !important; display: flex; flex-direction: column; padding: 0 !important; margin: 0; box-sizing: border-box; }
-        .fp-header { background-color: var(--card-bg); padding: 15px 20px; border-bottom: 2px solid var(--accent-gold); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); z-index: 10; }
-        .fp-header h2 { margin: 0; font-size: 16px; color: var(--accent-gold); }
-        .fp-btn-back { background: var(--accent-gold); color: white; border: none; padding: 6px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
-        .fp-btn-back:hover { background: #1d4ed8; }
-        .fp-btn-back:disabled { background: #cbd5e1 !important; color: #94a3b8 !important; cursor: not-allowed !important; }
 <style>
         :root {
             /* Warna Latar & Teks Premium */
@@ -196,7 +14,7 @@
             --text-main: #0f172a;
             --text-muted: #64748b;
             
-            /* Warna Tema Korporat (Ganti nama asal supaya tak rosak HTML) */
+            /* Warna Tema Korporat */
             --accent-gold: #1d4ed8;   /* Corporate Ocean Blue */
             --accent-hover: #1e3a8a;  /* Darker Blue untuk Hover */
             --border-color: #e2e8f0;
@@ -219,8 +37,8 @@
         .login-box h2 { color: var(--accent-gold); margin-top: 0; font-size: 22px; font-weight: 800;}
         .login-input { width: 100%; box-sizing: border-box; background-color: #f8fafc; border: 1px solid var(--border-color); color: var(--text-main); padding: 12px 15px; margin-bottom: 15px; border-radius: 6px; font-size: 13px; transition: all 0.3s ease; }
         .login-input:focus { outline: none; border-color: var(--accent-gold); background-color: #ffffff; box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15); }
-        .btn-login { width: 100%; background-color: var(--accent-gold); color: #ffffff; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(29, 78, 216, 0.2); }
-        .btn-login:hover { background-color: var(--accent-hover); transform: translateY(-1px); }
+        .btn-login { width: 100%; background-color: var(--accent-gold); color: #ffffff !important; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(29, 78, 216, 0.2); }
+        .btn-login:hover { background-color: var(--accent-hover) !important; color: #ffffff !important; transform: translateY(-1px); }
 
         /* --- DASHBOARD STYLES --- */
         #dashboard-section { display: none; max-width: 1600px; margin: 0 auto; }
@@ -234,7 +52,7 @@
         .nav-btn:hover { color: var(--accent-gold); border-color: var(--accent-gold); }
         .nav-btn.active { background-color: var(--accent-gold); color: #ffffff; border-color: var(--accent-gold); box-shadow: 0 4px 10px rgba(29, 78, 216, 0.2); }
 
-        .main-panel { display: block; animation: fadeIn 0.4s ease; }
+        .main-panel { display: block; min-height: 80vh; animation: fadeIn 0.4s ease; }
         #settings-panel { display: none; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -248,8 +66,8 @@
         
         #zone-filters-container, #region-filters-container, #area-filters-container { display: none; padding-top: 5px; }
 
-        .btn-upload-trigger { background-color: #0f172a; color: white; border: none; padding: 12px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 6px; height: fit-content; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.15); }
-        .btn-upload-trigger:hover { background-color: #1e293b; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(15, 23, 42, 0.25); }
+        .btn-upload-trigger { background-color: #059669; color: white; border: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 5px; height: fit-content; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2); }
+        .btn-upload-trigger:hover { background-color: #047857; transform: translateY(-1px); box-shadow: 0 4px 6px rgba(5, 150, 105, 0.3); }
 
         .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
         .kpi-card { background-color: var(--card-bg); padding: 18px 15px; border-radius: 10px; border: 1px solid var(--border-color); text-align: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 4px rgba(15, 23, 42, 0.02); }
@@ -261,8 +79,8 @@
 
         /* --- JADUAL ANTI-PECAH (FLUID RESPONSIVE) --- */
         .table-container { background-color: var(--card-bg); border-radius: 10px 10px 0 0; border: 1px solid var(--border-color); overflow-x: auto; -webkit-overflow-scrolling: touch; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.02); }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 800px; } /* Min-width halang kolum penyek di fon */
-        th, td { padding: 12px 12px; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap; } /* No wrap text */
+        table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 800px; }
+        th, td { padding: 12px 12px; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
         
         th { background-color: #f8fafc; color: var(--text-main); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 5;}
         th.sortable { cursor: pointer; transition: background 0.2s; }
@@ -290,8 +108,10 @@
         .form-group label { display: block; margin-bottom: 8px; font-size: 12px; color: var(--text-main); font-weight: 600; }
         .form-control { width: 100%; box-sizing: border-box; background-color: #f8fafc !important; border: 1px solid var(--border-color) !important; color: var(--text-main) !important; padding: 12px; border-radius: 6px; font-size: 13px; transition: all 0.3s; }
         .form-control:focus { outline: none; border-color: var(--accent-gold) !important; background-color: #ffffff !important; box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);}
-        .btn-submit { background-color: var(--accent-gold); color: #ffffff; border: none; padding: 12px 24px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 13px; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(29, 78, 216, 0.2); }
-        .btn-submit:hover { background-color: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(29, 78, 216, 0.3); }
+        
+        /* --- UTK BUTANG SEARCH & SAVE USER CONFIGURATION --- */
+        .btn-submit { background-color: var(--accent-gold); color: #ffffff !important; border: none; padding: 12px 24px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 13px; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(29, 78, 216, 0.2); }
+        .btn-submit:hover { background-color: var(--accent-hover) !important; color: #ffffff !important; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(29, 78, 216, 0.3); }
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background-color: var(--card-bg); border: none; border-radius: 12px; width: 90%; max-width: 550px; padding: 25px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); position: relative; animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -361,6 +181,14 @@
         }
         .btn-delete-finding:hover { background-color: var(--error-red); border-color: var(--error-red); color: white; }
 
+        /* --- UTK BUTANG COMMIT ENTRY (KHAS) --- */
+        #btnSaveFinding { background-color: var(--accent-gold) !important; color: #ffffff !important; }
+        #btnSaveFinding:hover { background-color: var(--accent-hover) !important; color: #ffffff !important; }
+
+        /* --- UTK BUTANG CLOSE MODAL NOTIFIKASI EXPORT --- */
+        #notificationModal .btn-submit { background-color: var(--accent-gold) !important; color: #ffffff !important; }
+        #notificationModal .btn-submit:hover { background-color: var(--accent-hover) !important; color: #ffffff !important; }
+
         /* --- KAWALAN SKRIN KECIL (MOBILE/TABLET) --- */
         @media (max-width: 768px) {
             .details-wrapper { grid-template-columns: 1fr !important; gap: 12px; padding: 12px; }
@@ -370,7 +198,7 @@
             .kpi-container { grid-template-columns: repeat(4, 1fr); gap: 6px; }
             .kpi-card { padding: 12px 4px; border-radius: 8px;}
             .kpi-card h3 { font-size: 8px; letter-spacing: -0.5px; }
-            .kpi-card p { font-size: 15px; } /* Saiz nombor diturunkan supaya muat */
+            .kpi-card p { font-size: 15px; }
             
             table { font-size: 10px; }
             th, td { padding: 10px 8px; white-space: nowrap; }
@@ -399,8 +227,7 @@
         .fp-body { flex: 1; overflow-y: auto; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
         .fp-panel { background: var(--card-bg); padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(15, 23, 42, 0.02);}
         @media (max-width: 768px) { .fp-body { grid-template-columns: 1fr; padding: 12px; gap: 15px; } }
-
-</style>
+    </style>
 
 </head>
 <body>
@@ -419,7 +246,7 @@
             <button class="btn-login" onclick="handleLogin()">SIGN IN</button>
             <p id="login-error" style="color: var(--error-red); font-size: 12px; display: none; margin-top: 10px;">Invalid User ID or Password!</p>
             <div style="margin-top: 25px; padding-top: 15px; font-size: 10px; color: var(--text-muted); border-top: 1px dashed var(--border-color); letter-spacing: 0.5px; text-align: center;">
-                Copyright &copy; <span id="auto-year-login"></span> <span style="color: #2196f3; font-weight: bold;">System Findings v2.0</span>
+                Copyright &copy; <span id="auto-year"></span> <span style="color: #486581; font-weight: bold;">System Findings v2.0</span>. All Rights Reserved.
             </div>
         </div>
     </div>
@@ -472,12 +299,6 @@
                         <span class="filter-title">Select Area</span>
                         <div class="btn-group" id="area-buttons"></div>
                     </div>
-                </div>
-                <div id="upload-action-container" style="display: none;">
-                    <input type="file" id="excel-file-input" style="display: none;" accept=".xlsx, .xls, .csv" onchange="handleExcelFileSelect(event)">
-                    <button class="btn-upload-trigger" onclick="document.getElementById('excel-file-input').click()">
-                        <span>▲</span> Upload Excel Data
-                    </button>
                 </div>
             </div>
 
@@ -619,64 +440,87 @@
         </div>
     </div> 
 
-    <div id="assign-panel" class="main-panel" style="display: none;">
-            <div class="action-bar" style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
-                <div style="flex: 1;">
-                    <span class="filter-title">1. Tapis Akaun Mengikut Status Agihan:</span>
-                    <select id="assign-filter-status" class="form-control" style="max-width: 300px; font-weight: bold; border-color: var(--accent-gold);" onchange="renderAssignTable()">
-                        <option value="UNASSIGNED">🔴 UNASSIGNED (Belum Diagihkan)</option>
-                        <option value="ASSIGNED">🟢 ASSIGNED (Sudah Diagihkan)</option>
-                    </select>
-                </div>
-                
-                <div style="flex: 1; border-left: 2px dashed var(--border-color); padding-left: 15px;">
-                    <span class="filter-title">2. Pilih Collector & Agihkan:</span>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <select id="assign-target-user" class="form-control" style="flex: 1;">
-                            <option value="">-- PILIH STAF BAWAHAN --</option>
-                        </select>
-                        <button class="btn-submit" onclick="executeBatchAssignment()" style="background-color: #2e7d32;">✅ ASSIGN SELECTED</button>
-                    </div>
+<div id="assign-panel" class="main-panel" style="display: none;">
+    
+    <!-- BARIS UTAMA: NO 1 & NO 2 SIDE-BY-SIDE -->
+    <div class="action-bar" style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; gap: 20px; flex-wrap: wrap;">
+        
+        <!-- NO 1: MUAT NAIK DATA EXCEL -->
+        <div id="upload-action-container" style="flex: 1; min-width: 280px; display: none;">
+            <span class="filter-title">1. Muat Naik Data Excel:</span>
+            <input type="file" id="excel-file-input" style="display: none;" accept=".xlsx, .xls, .csv" onchange="handleExcelFileSelect(event)">
+<button class="btn-upload-trigger" onclick="document.getElementById('excel-file-input').click()" style="background-color: #059669 !important; color: #ffffff !important; width: 100%; justify-content: center; padding: 11px; margin-top: 5px; border: none; box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);">
+    ▲ Upload Excel Data
+</button>
+        </div>
+        
+        <!-- NO 2: TAPIS AKAUN MENGIKUT STATUS -->
+        <div style="flex: 1; min-width: 280px; border-left: 2px dashed var(--border-color); padding-left: 20px;">
+            <span class="filter-title">2. Tapis Akaun Mengikut Status Agihan:</span>
+            <select id="assign-filter-status" class="form-control" style="width: 100%; font-weight: bold; border-color: var(--accent-gold); margin-top: 5px;" onchange="renderAssignTable()">
+                <option value="UNASSIGNED">🔴 UNASSIGNED (Belum Diagihkan)</option>
+                <option value="ASSIGNED">🟢 ASSIGNED (Sudah Diagihkan)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- NO 3: SENARAI AKAUN & PILIH COLLECTOR -->
+    <div class="settings-box" style="max-width: 100%; margin-top: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+            <div>
+                <h2 style="margin: 0; border: none; padding: 0;">3. Senarai Akaun (<span id="assign-total-count" style="color: var(--accent-gold);">0</span> Rekod)</h2>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                    *Hanya memaparkan rekod dalam tapisan kawalan (Zone/Region/Area) jagaan anda.
                 </div>
             </div>
-
-            <div class="settings-box" style="max-width: 100%; margin-top: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h2 style="margin: 0; border: none; padding: 0;">Senarai Akaun (<span id="assign-total-count" style="color: var(--accent-gold);">0</span> Rekod)</h2>
-                    <div style="font-size: 11px; color: var(--text-muted);">*Hanya memaparkan rekod dalam tapisan kawalan (Zone/Region/Area) jagaan anda.</div>
-                </div>
-                
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 40px; text-align: center;">
-                                    <input type="checkbox" id="check-all-assign" onclick="toggleAllAssignCheckboxes(this)" style="cursor: pointer; transform: scale(1.2);">
-                                </th>
-                                <th>ACCT NO</th>
-                                <th>ZONE</th>
-                                <th>REGION</th>
-                                <th>AREA</th>
-                                <th>OSB (RM)</th>
-                                <th>STATUS</th>
-                                <th style="color: var(--accent-gold);">CURRENT ASSIGNEE</th>
-                            </tr>
-                        </thead>
-                        <tbody id="assign-table-body">
-                            <tr><td colspan="8" style="text-align:center;">Sila tunggu, sedang memuatkan data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="pagination-container" style="margin-bottom: 0; border-radius: 0 0 8px 8px;">
-                    <div class="page-info" id="assign-page-info">Page 1 of 1</div>
-                    <div class="pagination-controls">
-                        <button id="btn-assign-prev" onclick="prevAssignPage()" disabled>◄ PREV</button>
-                        <button id="btn-assign-next" onclick="nextAssignPage()" disabled>NEXT ►</button>
-                    </div>
-                </div>
+            
+            <!-- TOOLBOX AGIHAN DI SEBELAH KANAN HEADER SENARAI -->
+            <div style="display: flex; gap: 10px; align-items: center; background: #e8f0f8; padding: 8px 12px; border-radius: 6px; border: 1px dashed var(--accent-gold);">
+                <span style="font-size: 11px; font-weight: bold; color: var(--text-main); white-space: nowrap;">AGIH KEPADA:</span>
+                <select id="assign-target-user" class="form-control" style="min-width: 180px; padding: 6px 10px; font-size: 11px;">
+                    <option value="">-- PILIH STAF BAWAHAN --</option>
+                </select>
+                <button class="btn-submit" onclick="executeBatchAssignment()" style="background-color: #2e7d32; padding: 8px 14px; font-size: 11px; white-space: nowrap;">✅ ASSIGN SELECTED</button>
             </div>
         </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;">
+                            <input type="checkbox" id="check-all-assign" onclick="toggleAllAssignCheckboxes(this)" style="cursor: pointer; transform: scale(1.2);">
+                        </th>
+                        <th>ACCT NO</th>
+                        <th>ZONE</th>
+                        <th>REGION</th>
+                        <th>AREA</th>
+                        <th>OSB (RM)</th>
+                        <th>STATUS</th>
+                        <th style="color: var(--accent-gold);">CURRENT ASSIGNEE</th>
+                    </tr>
+                </thead>
+                <tbody id="assign-table-body">
+                    <tr><td colspan="8" style="text-align:center;">Sila tunggu, sedang memuatkan data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination-container" style="margin-bottom: 0; border-radius: 0 0 8px 8px;">
+            <div class="page-info" id="assign-page-info">Page 1 of 1</div>
+            <div class="pagination-controls">
+                <button id="btn-assign-prev" onclick="prevAssignPage()" disabled>◄ PREV</button>
+                <button id="btn-assign-next" onclick="nextAssignPage()" disabled>NEXT ►</button>
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- PASTE FOOTER KAT SINI -->
+    <div style="text-align: center; padding: 25px 10px 15px 10px; margin-top: 30px; font-size: 9px; color: var(--text-muted); border-top: 1px dashed var(--border-color); letter-spacing: 0.5px;">
+            Copyright &copy; <span id="auto-year"></span> <span style="color: #486581; font-weight: bold;">System Findings v2.0</span>. All Rights Reserved.
+        </div>
+
+    </div> <!-- Ini penutup <div id="dashboard-section"> -->
         
     <div class="modal-overlay" id="loadingModal">
         <div class="modal-content">
@@ -785,7 +629,7 @@
                     <div id="modal-details-container" style="display: flex; flex-direction: column; gap: 15px;"></div>
                 </div>
                 <div class="fp-panel" style="position: sticky; top: 0;">
-                    <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px; font-weight: bold;">HISTORICAL AUDIT TRAIL:</label>
+                    <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px; font-weight: bold;">HISTORICAL TRAIL:</label>
                     <div class="history-box" style="max-height: 250px; margin-bottom: 15px; background: #f8fafc;"></div>
                     
                     <div class="form-group" style="margin-bottom: 15px; background: #e8f0f8; padding: 10px; border-radius: 6px; border: 1px dashed var(--accent-gold); display: flex; align-items: center; gap: 10px;">
@@ -851,7 +695,6 @@
             </div>
         </div>
     </div>
-
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
@@ -1253,21 +1096,24 @@ async function fetchFullDatabaseData() {
                 return matchZone && matchRegion && matchArea;
             });
             
-updateKPICards(scopedGeoData);
+            updateKPICards(scopedGeoData);
             
             filteredAccounts = scopedGeoData.filter(row => {
                 return currentStatusFilter ? row.status === currentStatusFilter : true;
             });
-
+            
             currentSortColumn = 'last_date'; 
             currentSortDirection = 'desc';
 
-            // [FIX 1: SUSUNAN KELAS KAKAP] - Yang ada masa/Attended akan automatik tolak ke atas!
             filteredAccounts.sort((a, b) => {
-                let timeA = (a.details && a.details.timestamp) ? Number(a.details.timestamp) : 0;
-                let timeB = (b.details && b.details.timestamp) ? Number(b.details.timestamp) : 0;
+                let dateA = (a.details && a.details.last_remark_date) ? a.details.last_remark_date.split('/').reverse().join('') : '';
+                let dateB = (b.details && b.details.last_remark_date) ? b.details.last_remark_date.split('/').reverse().join('') : '';
                 
-                return timeB - timeA; // Susun nombor paling besar (terkini) di atas
+                let timeA = (a.details && a.details.timestamp) ? a.details.timestamp : 0;
+                let timeB = (b.details && b.details.timestamp) ? b.details.timestamp : 0;
+
+                if (dateA === dateB) return timeB - timeA;
+                return dateB.localeCompare(dateA);
             });
 
             updateHeaderArrows('last_date');
@@ -2200,13 +2046,9 @@ window.exportDataByDate = async function(dateStr) {
                 const rawAccountNo = String(row[getVal('map-acct')]).trim();
                 if (!rawAccountNo || rawAccountNo === "undefined") continue; 
                 
-let existingAcc = globalAccounts.find(a => a.acct === rawAccountNo);
+                let existingAcc = globalAccounts.find(a => a.acct === rawAccountNo);
                 let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; 
-                let currentFindingStatus = existingAcc && existingAcc.details ? existingAcc.details.finding_status : ''; 
-                
-                // [FIX 2: SELAMATKAN MEMORI MASA] - Kunci tarikh & masa lama supaya tak hilang
-                let currentLastDate = existingAcc && existingAcc.details ? existingAcc.details.last_remark_date : '';
-                let currentTimestamp = existingAcc && existingAcc.details ? existingAcc.details.timestamp : null;
+                let currentFindingStatus = existingAcc ? existingAcc.finding_status : ''; 
                 
                 let keyLoc = getVal('map-loc');
                 let keyZone = getVal('map-zone');
@@ -2281,9 +2123,7 @@ let existingAcc = globalAccounts.find(a => a.acct === rawAccountNo);
                     bal: row[getVal('map-bal')] || '',
                     odp: row[getVal('map-odp')] || '',
                     adch: row[getVal('map-adch')] || '',
-                    finding_status: currentFindingStatus,
-                    last_remark_date: currentLastDate, // Masukkan balik ke DB
-                    timestamp: currentTimestamp        // Masukkan balik ke DB
+                    finding_status: currentFindingStatus 
                 };
 
                 bulkData.push({
