@@ -3098,6 +3098,7 @@ if(!fullStory) {
                 let resetDetails = accountInfo.details || {};
                 resetDetails.finding_status = ""; 
                 resetDetails.last_remark_date = "";
+                resetDetails.timestamp = "";
 
                 const { error: updError = null } = await supabase.from('accounts').update({ status: 'PENDING', details: resetDetails }).eq('acct', accNo);
                 if (updError) throw updError;
