@@ -2541,14 +2541,21 @@ window.openModal = async function(accNo) {
                 return; 
             }
 
-            let regex = /.{1,50}(?:\s|$)/g;
+// [FASA 5 PINTAR]: Pecah cerita panjang kepada chunk 50 karakter tanpa putuskan perkataan
+            let words = fullStory.split(' ');
             let chunks = [];
-            let match;
-            
-            if ((fullStory.match(regex) || []).join('').length < fullStory.length) {
-                chunks = fullStory.match(/.{1,50}/g) || [];
-            } else {
-                while ((match = regex.exec(fullStory)) !== null) { chunks.push(match[0].trim()); }
+            let currentChunk = "";
+
+            words.forEach(word => {
+                if ((currentChunk + word).length > 50) {
+                    chunks.push(currentChunk.trim());
+                    currentChunk = word + " ";
+                } else {
+                    currentChunk += word + " ";
+                }
+            });
+            if (currentChunk.trim() !== "") {
+                chunks.push(currentChunk.trim());
             }
 
             let r1 = (chunks[0] || '').toUpperCase();
