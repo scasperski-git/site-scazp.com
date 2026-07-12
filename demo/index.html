@@ -1206,7 +1206,6 @@ tr:hover {
         <th class="sortable" onclick="sortTable('osb')" id="th-osb">OSB (RM) ⇅</th>
         <th class="sortable" onclick="sortTable('status')" id="th-status">STATUS ⇅</th>
         <th class="sortable" onclick="sortTable('collector')" id="th-collector">COLLECTOR ⇅</th>
-        <th class="sortable" onclick="sortTable('assignee_id')" id="th-assignee_id">CURRENT ASSIGNEE ⇅</th>
         <th class="sortable" onclick="sortTable('assignee_id')" id="th-assignee_id">CURRENT ASSIGNEE ⇅</th> </tr>
 </thead>
                 <tbody id="assign-table-body">
@@ -1660,7 +1659,7 @@ async function fetchFullDatabaseData() {
                 
                 while(true) {
                     // [ADD ZONE COLUMN TO FETCH]
-                    let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, collector, assignee_id');
+                    let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id, collector');
                     
                     // [FIX HIERARCHY ACCESS]
                     if (currentUser.role === 'user') {
