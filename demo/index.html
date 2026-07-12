@@ -2588,12 +2588,19 @@ window.openModal = async function(accNo) {
             let updatedDetailsObj = accountInfo.details || {};
             updatedDetailsObj.finding_status = selectedStatus; 
 
-            let today = new Date();
-            let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
-            updatedDetailsObj.last_remark_date = dateStr;
-            updatedDetailsObj.timestamp = today.getTime();
-            
-            let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()})`;
+// Ambil waktu sekarang untuk tarikh dan masa tanpa saat (Format: DD/MM/YYYY HH:MM AM/PM)
+            let currentDateTime = new Date();
+            let formattedDate = String(currentDateTime.getDate()).padStart(2, '0') + '/' + 
+                                String(currentDateTime.getMonth() + 1).padStart(2, '0') + '/' + 
+                                currentDateTime.getFullYear();
+            let formattedTime = currentDateTime.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: true 
+            });
+
+            // [FASA 5 PINTAR]: Remark 5 lengkap dengan tarikh & masa tanpa saat mengikut standard MIS SINGER
+            let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${formattedDate} ${formattedTime}`;
             
             try {
                 const { data: insertedData, error: insertError } = await supabase
