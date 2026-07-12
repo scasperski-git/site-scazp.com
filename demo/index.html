@@ -1253,24 +1253,21 @@ async function fetchFullDatabaseData() {
                 return matchZone && matchRegion && matchArea;
             });
             
-            updateKPICards(scopedGeoData);
+updateKPICards(scopedGeoData);
             
             filteredAccounts = scopedGeoData.filter(row => {
                 return currentStatusFilter ? row.status === currentStatusFilter : true;
             });
-            
+
             currentSortColumn = 'last_date'; 
             currentSortDirection = 'desc';
 
+            // [FIX 1: SUSUNAN KELAS KAKAP] - Yang ada masa/Attended akan automatik tolak ke atas!
             filteredAccounts.sort((a, b) => {
-                let dateA = (a.details && a.details.last_remark_date) ? a.details.last_remark_date.split('/').reverse().join('') : '';
-                let dateB = (b.details && b.details.last_remark_date) ? b.details.last_remark_date.split('/').reverse().join('') : '';
+                let timeA = (a.details && a.details.timestamp) ? Number(a.details.timestamp) : 0;
+                let timeB = (b.details && b.details.timestamp) ? Number(b.details.timestamp) : 0;
                 
-                let timeA = (a.details && a.details.timestamp) ? a.details.timestamp : 0;
-                let timeB = (b.details && b.details.timestamp) ? b.details.timestamp : 0;
-
-                if (dateA === dateB) return timeB - timeA;
-                return dateB.localeCompare(dateA);
+                return timeB - timeA; // Susun nombor paling besar (terkini) di atas
             });
 
             updateHeaderArrows('last_date');
@@ -2203,9 +2200,13 @@ window.exportDataByDate = async function(dateStr) {
                 const rawAccountNo = String(row[getVal('map-acct')]).trim();
                 if (!rawAccountNo || rawAccountNo === "undefined") continue; 
                 
-                let existingAcc = globalAccounts.find(a => a.acct === rawAccountNo);
+let existingAcc = globalAccounts.find(a => a.acct === rawAccountNo);
                 let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; 
-                let currentFindingStatus = existingAcc ? existingAcc.finding_status : ''; 
+                let currentFindingStatus = existingAcc && existingAcc.details ? existingAcc.details.finding_status : ''; 
+                
+                // [FIX 2: SELAMATKAN MEMORI MASA] - Kunci tarikh & masa lama supaya tak hilang
+                let currentLastDate = existingAcc && existingAcc.details ? existingAcc.details.last_remark_date : '';
+                let currentTimestamp = existingAcc && existingAcc.details ? existingAcc.details.timestamp : null;
                 
                 let keyLoc = getVal('map-loc');
                 let keyZone = getVal('map-zone');
@@ -2280,7 +2281,9 @@ window.exportDataByDate = async function(dateStr) {
                     bal: row[getVal('map-bal')] || '',
                     odp: row[getVal('map-odp')] || '',
                     adch: row[getVal('map-adch')] || '',
-                    finding_status: currentFindingStatus 
+                    finding_status: currentFindingStatus,
+                    last_remark_date: currentLastDate, // Masukkan balik ke DB
+                    timestamp: currentTimestamp        // Masukkan balik ke DB
                 };
 
                 bulkData.push({
