@@ -1773,7 +1773,7 @@ window.addNewUser = async function() {
             }
         };
 
-        window.exportDataByDate = async function(dateStr) {
+window.exportDataByDate = async function(dateStr) {
             let isConfirmed = await customConfirm(`Are you sure you want to export findings data for the date ${dateStr}?`);
             if (!isConfirmed) return;
 
@@ -1781,21 +1781,32 @@ window.addNewUser = async function() {
             document.getElementById('loadingModal').style.display = 'flex';
 
             try {
-                let startOfDay = `${dateStr}T00:00:00+08:00`;
-                let endOfDay = `${dateStr}T23:59:59+08:00`;
+                // [FIX TIMEZONE]: Tukar tarikh input kepada julat permulaan dan penghujung ISO UTC yang tepat
+                let startOfDay = new Date(`${dateStr}T00:00:00`).toISOString();
+                let endOfDay = new Date(`${dateStr}T23:59:59.999`).toISOString();
 
+                // Tarik data findings dari Supabase
                 const { data, error } = await supabase
                     .from('findings')
-                    .select('id, acct, remark1, remark2, remark3, remark4, remark5, region')
+                    .select('id, acct, remark1, remark2, remark3, remark4, remark5, region, is_exported')
                     .gte('updated_at', startOfDay)
                     .lte('updated_at', endOfDay)
-                    .eq('is_exported', false)
                     .neq('acct', 'SYSTEM');
 
                 if (error) throw error;
                 
+                // Semak jika tiada langsung rekod untuk tarikh tersebut
                 if (!data || data.length === 0) {
-                    showNotification("NO DATA", "Logic error: No pending records found.", true);
+                    showNotification("NO RECORDS", `Tiada sebarang log penemuan (findings) ditemui pada tarikh ${dateStr}.`, true);
+                    document.getElementById('loadingModal').style.display = 'none';
+                    return;
+                }
+
+                // Tapis hanya rekod yang belum dieksport sahaja
+                let pendingRows = data.filter(row => row.is_exported === false || row.is_exported === null);
+
+                if (pendingRows.length === 0) {
+                    showNotification("ALREADY EXPORTED", `Semua rekod pada tarikh ${dateStr} telah pun selamat dieksport sebelum ini (Status Locked).`, true);
                     document.getElementById('loadingModal').style.display = 'none';
                     return;
                 }
@@ -1803,10 +1814,11 @@ window.addNewUser = async function() {
                 let groupedData = {};
                 let idsToUpdate = [];
 
-                data.forEach(row => {
-                    let reg = row.region ? row.region.toUpperCase() : 'UNKNOWN';
+                pendingRows.forEach(row => {
+                    let reg = row.region ? row.region.toUpperCase().trim() : 'UNKNOWN';
                     if (!groupedData[reg]) groupedData[reg] = [];
                     
+                    // Mengekalkan susunan asal kau: REMARK5 di kedudukan atas sekali sebelum REMARK1
                     groupedData[reg].push({
                         "ACCT": row.acct,
                         "REMARK1": row.remark5 || '',
@@ -1821,6 +1833,7 @@ window.addNewUser = async function() {
 
                 let formattedDate = dateStr.replace(/-/g, ''); 
                 
+                // Jana fail Excel mengikut Wilayah (Region)
                 Object.keys(groupedData).forEach(reg => {
                     const ws = XLSX.utils.json_to_sheet(groupedData[reg]);
                     const wb = XLSX.utils.book_new();
@@ -1830,6 +1843,7 @@ window.addNewUser = async function() {
                     XLSX.writeFile(wb, fileName);
                 });
 
+                // Kunci status log di database supaya tidak dieksport bertindih
                 const { error: updateError } = await supabase
                     .from('findings')
                     .update({ is_exported: true })
@@ -1838,7 +1852,7 @@ window.addNewUser = async function() {
                 if (updateError) throw updateError;
 
                 document.getElementById('loadingModal').style.display = 'none';
-                showNotification("EXPORT SUCCESSFUL", "All Excel files have been downloaded and status is locked.");
+                showNotification("EXPORT SUCCESSFUL", `${idsToUpdate.length} akaun berjaya diproses. Fail Excel telah dimuat turun mengikut wilayah.`);
                 
                 renderReportCenter(); 
 
@@ -2320,25 +2334,34 @@ window.openModal = async function(accNo) {
                 return;
             }
 
-            if(!fullStory) { 
+if(!fullStory) { 
                 alert("Sila isi nota pemeriksaan terlebih dahulu."); 
                 return; 
             }
 
-            let regex = /.{1,50}(?:\s|$)/g;
+            // [FASA 5 PINTAR]: Pecah cerita panjang kepada chunk 50 karakter tanpa putuskan perkataan
+            let words = fullStory.split(' ');
             let chunks = [];
-            let match;
-            
-            if ((fullStory.match(regex) || []).join('').length < fullStory.length) {
-                chunks = fullStory.match(/.{1,50}/g) || [];
-            } else {
-                while ((match = regex.exec(fullStory)) !== null) { chunks.push(match[0].trim()); }
+            let currentChunk = "";
+
+            words.forEach(word => {
+                if ((currentChunk + word).length > 50) {
+                    chunks.push(currentChunk.trim());
+                    currentChunk = word + " ";
+                } else {
+                    currentChunk += word + " ";
+                }
+            });
+            if (currentChunk.trim() !== "") {
+                chunks.push(currentChunk.trim());
             }
 
             let r1 = (chunks[0] || '').toUpperCase();
             let r2 = (chunks[1] || '').toUpperCase();
             let r3 = (chunks[2] || '').toUpperCase();
             let r4 = (chunks[3] || '').toUpperCase();
+            
+            // 🛑 KOD LAMA REGEX & IF-STATEMENT SEBELUM NI DAH DIBUANG TERUS DI SINI!
             
             const btn = document.getElementById('btnSaveFinding'); 
             btn.innerText = "SAVING...";
@@ -2356,7 +2379,19 @@ window.openModal = async function(accNo) {
             updatedDetailsObj.last_remark_date = dateStr;
             updatedDetailsObj.timestamp = today.getTime();
             
-            let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()})`;
+            // Ambil waktu sekarang untuk tarikh dan masa tanpa saat (Format: DD/MM/YYYY HH:MM AM/PM)
+            let currentDateTime = new Date();
+            let formattedDate = String(currentDateTime.getDate()).padStart(2, '0') + '/' + 
+                                String(currentDateTime.getMonth() + 1).padStart(2, '0') + '/' + 
+                                currentDateTime.getFullYear();
+            let formattedTime = currentDateTime.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: true 
+            });
+
+            // [FASA 5 PINTAR]: Remark 5 lengkap dengan tarikh & masa tanpa saat mengikut standard MIS SINGER
+            let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${formattedDate} ${formattedTime}`;
             
             try {
                 const { data: insertedData, error: insertError } = await supabase
