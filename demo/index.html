@@ -192,7 +192,7 @@
         #notificationModal .btn-submit { background-color: var(--accent-gold) !important; color: #ffffff !important; }
         #notificationModal .btn-submit:hover { background-color: var(--accent-hover) !important; color: #ffffff !important; }
 
-        /* --- KAWALAN SKRIN KECIL (MOBILE/TABLET) --- */
+/* --- KAWALAN SKRIN KECIL (MOBILE/TABLET) --- */
         @media (max-width: 768px) {
             body { padding: 10px; }
             .header { flex-direction: column; align-items: flex-start; gap: 12px; }
@@ -201,7 +201,7 @@
             .details-wrapper { grid-template-columns: 1fr !important; gap: 12px; padding: 12px; }
             .details-box { width: 100% !important; box-sizing: border-box; }
             
-            /* Susunan 4 Kotak Dikekalkan Sempurna */
+            /* Susunan 4 Kotak KPI Dikekalkan Sempurna */
             .kpi-container { grid-template-columns: repeat(4, 1fr); gap: 6px; }
             .kpi-card { padding: 12px 4px; border-radius: 8px;}
             .kpi-card h3 { font-size: 8px; letter-spacing: -0.5px; }
@@ -215,7 +215,7 @@
             .pagination-controls button { flex: 1; text-align: center; }
             
             .search-container { flex-direction: column; width: 100%; }
-            .search-container select, .search-container input { width: 100%; font-size: 14px; /* Halang auto-zoom iOS */ }
+            .search-container select, .search-container input { width: 100%; font-size: 14px; }
             .search-container div { width: 100%; display: flex; justify-content: space-between;}
             .search-container div button { flex: 1; }
             
@@ -224,7 +224,19 @@
             .btn-group { gap: 6px; }
             .btn-filter { font-size: 10px; padding: 8px 10px; }
             
-            .fp-body { grid-template-columns: 1fr; padding: 12px; gap: 15px; }
+            /* FIX 1: Paksa Modal Turun ke Bawah (1 Kolum) */
+            .fp-body { grid-template-columns: 1fr !important; padding: 12px; gap: 15px; }
+            
+            /* FIX 2: Susun Semula Butang Header Modal (PREV/NEXT/KEMBALI) */
+            .fp-header { flex-direction: column; align-items: flex-start !important; gap: 12px; }
+            .fp-header > div { width: 100%; justify-content: space-between; gap: 5px; }
+            .fp-header > div button { flex: 1; padding: 8px 4px; font-size: 10px; text-align: center; }
+            
+            /* FIX 3: Kotak "AGIH KEPADA" Turun Ke Bawah Sempurna */
+            .assign-toolbox { flex-direction: column !important; align-items: stretch !important; gap: 8px !important; }
+            .assign-toolbox select, .assign-toolbox button { width: 100% !important; margin: 0 !important; }
+            .assign-toolbox span { text-align: center; display: block; margin-bottom: 2px; }
+            
             .modal-content { padding: 20px 15px; }
         }
 
@@ -486,12 +498,13 @@
                 </div>
             </div>
             
-            <div style="display: flex; gap: 10px; align-items: center; background: #e8f0f8; padding: 8px 12px; border-radius: 6px; border: 1px dashed var(--accent-gold);">
-                <span style="font-size: 11px; font-weight: bold; color: var(--text-main); white-space: nowrap;">AGIH KEPADA:</span>
-                <select id="assign-target-user" class="form-control" style="min-width: 180px; padding: 6px 10px; font-size: 11px;">
+<!-- TOOLBOX AGIHAN DI SEBELAH KANAN HEADER SENARAI -->
+            <div class="assign-toolbox" style="display: flex; gap: 10px; align-items: center; background: #e8f0f8; padding: 8px 12px; border-radius: 6px; border: 1px dashed var(--accent-gold);">
+                <span style="font-size: 11px; font-weight: bold; color: var(--text-main);">AGIH KEPADA:</span>
+                <select id="assign-target-user" class="form-control" style="padding: 6px 10px; font-size: 11px;">
                     <option value="">-- PILIH STAF BAWAHAN --</option>
                 </select>
-                <button class="btn-submit" onclick="executeBatchAssignment()" style="background-color: #2e7d32; padding: 8px 14px; font-size: 11px; white-space: nowrap;">✅ ASSIGN SELECTED</button>
+                <button class="btn-submit" onclick="executeBatchAssignment()" style="background-color: #2e7d32; padding: 8px 14px; font-size: 11px;">✅ ASSIGN SELECTED</button>
             </div>
         </div>
         
