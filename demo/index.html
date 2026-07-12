@@ -868,65 +868,59 @@ tr:hover {
         padding: 10px 8px; 
     }
 
-    .header {
+.header {
         display: flex !important;
-        flex-direction: row; /* Bahagi kiri dan kanan */
-        justify-content: space-between;
-        align-items: flex-start; /* Mula dari atas */
-        padding: 15px 12px;
+        flex-direction: column;
+        align-items: stretch; /* Biar semua elemen penuhkan lebar skrin */
+        padding: 16px;
         background-color: var(--card-bg);
         border: 1px solid var(--border-color);
         border-radius: 8px;
         margin-bottom: 20px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        gap: 15px; /* Jarak ruang nafas yang seragam */
     }
 
     .header h1 {
-        color: var(--accent-gold) !important; /* Kekalkan warna biru desktop */
-        font-size: 16px;
+        color: var(--accent-gold) !important;
+        font-size: 18px; 
         font-weight: 800;
         line-height: 1.3;
         margin: 0;
-        max-width: 55%; /* Paksa tajuk patah jadi 2 baris */
+        text-align: center; /* Tajuk duduk tengah nampak lebih stabil */
     }
 
     .header > div {
         display: flex !important;
-        flex-direction: column; /* Susun atas ke bawah */
-        align-items: flex-end; /* Rapat ke kanan skrin */
-        gap: 6px; /* Jarak antara butang */
-        width: 45%;
-        border-top: none; 
-        padding-top: 0;
-    }
-
-    /* Trik ubah susunan visual tanpa ubah susunan HTML asal */
-    #display-username {
-        order: 3; /* Letak info nama paling bawah */
-        font-size: 10px !important;
-        color: var(--text-muted) !important;
-        margin-top: 2px;
-        background: transparent;
-        border: none;
-        padding: 0;
-        text-align: right;
-    }
-
-    .header .btn-logout:nth-of-type(1) { 
-        order: 1; /* Butang SYNC no 1 (atas) */
-    } 
-    
-    .header .btn-logout:nth-of-type(2) { 
-        order: 2; /* Butang Sign Out no 2 (tengah) */
+        flex-wrap: wrap; /* Benarkan elemen turun ke bawah dengan kemas */
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        gap: 10px;
     }
 
     .btn-logout {
-        width: 85px; /* Seragamkan lebar kedua-dua butang */
-        padding: 6px 0 !important;
-        font-size: 11px !important;
-        text-align: center;
-        justify-content: center;
+        flex: 1; /* SYNC dan Sign Out dibahagi dua sama rata kiri & kanan */
+        padding: 10px 0 !important;
+        font-size: 12px !important;
+        margin: 0;
     }
+
+    #display-username {
+        width: 100%; /* Ambil 1 baris penuh kat bawah butang */
+        text-align: center;
+        font-size: 11px !important;
+        color: var(--text-muted) !important;
+        background: #f8fafc;
+        padding: 8px 0;
+        border-radius: 4px;
+        border: 1px dashed var(--border-color); /* Nampak macam label/badge rasmi */
+        order: 3; /* Paksa duduk baris bawah sekali */
+    }
+
+    /* Susunan untuk pastikan butang duk atas dari username */
+    .header .btn-logout:nth-of-type(1) { order: 1; } /* Butang SYNC */
+    .header .btn-logout:nth-of-type(2) { order: 2; } /* Butang Sign Out */
+
 }
     
     </style>
