@@ -1200,6 +1200,7 @@ tr:hover {
                         <th>AREA</th>
                         <th>OSB (RM)</th>
                         <th>STATUS</th>
+                        <th>COLLECTOR</th> </tr>
                         <th style="color: var(--accent-gold);">CURRENT ASSIGNEE</th>
                     </tr>
                 </thead>
@@ -1257,6 +1258,7 @@ tr:hover {
                 <div class="mapping-section">
                     <h3>1. MAIN ACCOUNT INFO</h3>
                     <div class="mapping-grid">
+                        <label>COLLECTOR</label><select id="map-collector" class="form-control mapping-select"></select>
                         <label>ZONE</label><select id="map-zone" class="form-control mapping-select"></select>
                         <label>REGION</label><select id="map-region" class="form-control mapping-select"></select>
                         <label>AREA</label><select id="map-area" class="form-control mapping-select"></select>
@@ -2087,6 +2089,7 @@ function resetHeaderArrows() {
                         <td>${row.arrs_mth || '0'}</td>
                         <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td><span class="status-badge ${badgeClass}">${row.status === 'UPDATED' ? 'ATTENDED' : row.status}</span></td>
+                        <td style="font-weight:bold; color:var(--accent-gold);">${row.collector || '-'}</td>
                         <td style="font-weight: 600; color: var(--text-main);">${assigneeDisp}</td>
                         <td>
                             <span style="font-weight: 700; color: var(--text-muted); font-size: 11px;">${d.last_remark_date || '-'}</span>
@@ -2845,6 +2848,7 @@ window.exportDataByDate = async function(dateStr) {
                     arrs_mth: rawArrs, 
                     osb: parseFloat(String(row[getVal('map-osb')]).replace(/[^0-9.-]+/g,"")) || 0, 
                     status: currentStatus, 
+                    collector: finalColl,
                     details: detailsJSON 
                 });
             }
