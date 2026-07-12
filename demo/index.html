@@ -1051,6 +1051,10 @@ tr:hover {
             <div class="settings-box" style="margin-bottom: 20px;">
                 <h2>Add New Portal User (Syncs to Cloud Ledger)</h2>
                 <div class="form-group">
+    <label>Nama Penuh / Nama Panggilan</label>
+    <input type="text" id="new-user-name" class="form-control" placeholder="Cth: Ali Bin Abu">
+</div>
+                <div class="form-group">
                     <label>User ID / Username</label>
                     <input type="text" id="new-user-id" class="form-control" placeholder="e.g., pic_north">
                 </div>
@@ -1095,14 +1099,14 @@ tr:hover {
                     <table>
                         <thead>
                             <tr>
-                                <th style="width: 50px; text-align: center;">NO</th>
-                                <th>USER ID</th>
-                                <th>ROLE</th>
-                                <th>REPORT TO</th> 
-                                <th>DATA ACCESS ASSIGNED</th>
-                                <th>STATUS</th> 
-                                <th>ACTION</th> 
-                            </tr>
+<th style="width: 50px; text-align: center;">NO</th>
+        <th>USER ID</th>
+        <th>NAMA</th> <th>ROLE</th>
+        <th>REPORT TO</th> 
+        <th>DATA ACCESS ASSIGNED</th>
+        <th>STATUS</th> 
+        <th>ACTION</th> 
+    </tr>
                         </thead>
                         <tbody id="users-table-body"></tbody>
                     </table>
@@ -2126,17 +2130,18 @@ function resetHeaderArrows() {
         };
 
 window.fetchAndRenderUsers = async function() {
-            try {
-                // Tarik column baharu (assignedzone, assignedarea) dari pangkalan data
-                const { data, error } = await supabase.from('users').select('id, role, assignedzone, assignedregion, assignedarea, status, report_to').order('id', { ascending: true });
-                if (error) throw error;
-                allSystemUsers = data;
-                filterUserList();
-                populateAssignSubordinates();
-            } catch (err) {
-                console.error("Failed to fetch user list:", err);
-            }
-        };
+    try {
+        // TAMBAHKAN 'name' DALAM SELECT QUERY DI BAWAH
+        const { data, error } = await supabase.from('users').select('id, name, role, assignedzone, assignedregion, assignedarea, status, report_to').order('id', { ascending: true });
+        
+        if (error) throw error;
+        allSystemUsers = data;
+        filterUserList();
+        populateAssignSubordinates();
+    } catch (err) {
+        console.error("Failed to fetch user list:", err);
+    }
+};
 
         window.filterUserList = function() {
             let query = document.getElementById('search-user').value.toLowerCase().trim();
@@ -2204,6 +2209,8 @@ window.renderUserTablePage = async function() {
                     
                     // Kapsul fallback jika User/Super
                     let noneText = `<span id="edit-none-${user.id}" style="font-size: 10px; color: var(--text-muted); display: ${(rName === 'user' || rName === 'super') ? 'inline-block' : 'none'};">N/A (Global/PIC)</span>`;
+
+                    let fullNameDisp = user.name ? user.name.toUpperCase() : '<span style="color:#cbd5e1;">TIADA DATA</span>'; // <-- SETTING NAMA
                     
                     tbody.innerHTML += `
                         <tr>
@@ -2303,6 +2310,7 @@ window.renderUserTablePage = async function() {
 
 window.addNewUser = async function() {
             const id = document.getElementById('new-user-id').value.trim();
+            const name = document.getElementById('new-user-name').value.trim();
             const pass = document.getElementById('new-user-pass').value.trim();
             const role = document.getElementById('new-user-role').value;
             const reportTo = document.getElementById('new-user-report-to').value; 
@@ -2310,10 +2318,10 @@ window.addNewUser = async function() {
             const zone = document.getElementById('new-user-zone') ? document.getElementById('new-user-zone').value : null;
             const area = document.getElementById('new-user-area') ? document.getElementById('new-user-area').value : null;
             
-            if(!id || !pass) { 
-                showNotification("ERROR", "Please fill in the User ID and Password fields.", true); 
-                return; 
-            }
+        if(!id || !pass || !name) { // Wajibkan isi nama
+            showNotification("ERROR", "Sila lengkapkan ruangan Nama, User ID dan Password.", true);
+            return; 
+    }
 
             if(role !== 'super' && !reportTo) {
                 let proceed = await customConfirm(`INFO:\nID ini dicipta TANPA sebarang Supervisor (Tangguh). Ia boleh di-update kemudian. Teruskan?`);
@@ -2335,6 +2343,7 @@ window.addNewUser = async function() {
 
                 const { error } = await supabase.from('users').insert([{ 
                     id: id, 
+                    name: name,
                     pass: pass, 
                     role: role, 
                     assignedzone: finalZone,
@@ -2344,14 +2353,15 @@ window.addNewUser = async function() {
                     status: 'ACTIVE' 
                 }]);
                 
-                if(error) {
-                    showNotification("DATABASE ERROR", error.message, true); 
-                } else {
-                    showNotification("SUCCESS", `User account <b>${id}</b> has been registered.`);
-                    document.getElementById('new-user-id').value = ''; 
-                    document.getElementById('new-user-pass').value = '';
-                    fetchAndRenderUsers(); 
-                }
+if(error) {
+            showNotification("DATABASE ERROR", error.message, true);
+        } else {
+            showNotification("SUCCESS", `Akaun pengguna <b>${id}</b> telah didaftarkan.`);
+            document.getElementById('new-user-id').value = ''; 
+            document.getElementById('new-user-name').value = ''; // Kosongkan lepas save
+            document.getElementById('new-user-pass').value = '';
+            fetchAndRenderUsers(); 
+        }
             } catch (err) {
                 showNotification("SYSTEM ERROR", "Check console for details.", true);
             }
