@@ -2757,7 +2757,7 @@ window.exportDataByDate = async function(dateStr) {
                 return '';
             };
 
-            let bulkData = [];
+let bulkData = [];
             for (const row of parsedExcelRows) {
                 const rawAccountNo = String(row[getVal('map-acct')]).trim();
                 if (!rawAccountNo || rawAccountNo === "undefined") continue; 
@@ -2765,6 +2765,25 @@ window.exportDataByDate = async function(dateStr) {
                 let existingAcc = globalAccounts.find(a => a.acct === rawAccountNo);
                 let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; 
                 let currentFindingStatus = existingAcc ? existingAcc.finding_status : ''; 
+                
+                // --- 1. AMBIL VALUE DARI EXCEL ---
+                let bal = parseFloat(String(row[getVal('map-bal')]).replace(/[^0-9.-]+/g,"")) || 0;
+                let odp = parseFloat(String(row[getVal('map-odp')]).replace(/[^0-9.-]+/g,"")) || 0;
+                let adch = parseFloat(String(row[getVal('map-adch')]).replace(/[^0-9.-]+/g,"")) || 0;
+                let arrAmt = parseFloat(String(row[getVal('map-arrs')]).replace(/[^0-9.-]+/g,"")) || 0;
+                let type = String(row[getVal('map-type')]).trim().toUpperCase();
+
+                // --- 2. LOGIK PENGIRAAN PINTAR ---
+                let finalArrAmt = arrAmt * -1; // Tukar positif/negatif
+                
+                let finalOsb = 0;
+                if (type === 'EP') {
+                    finalOsb = bal + adch;
+                } else if (type === 'HP') {
+                    finalOsb = (bal + odp) + adch;
+                } else {
+                    finalOsb = bal + odp + adch;
+                }
                 
                 let keyLoc = getVal('map-loc');
                 let keyZone = getVal('map-zone');
@@ -2845,18 +2864,18 @@ window.exportDataByDate = async function(dateStr) {
                     finding_status: currentFindingStatus 
                 };
 
-                bulkData.push({
+bulkData.push({
                     zone: finalZone,
                     region: finalRegion, 
                     area: finalArea,     
                     loc: rawLocCd,
-                    type: rawType, 
+                    type: type, 
                     acct: rawAccountNo,
-                    delq: rawDelq, 
-                    arrs_mth: rawArrs, 
-                    osb: parseFloat(String(row[getVal('map-osb')]).replace(/[^0-9.-]+/g,"")) || 0, 
+                    delq: String(row[getVal('map-delq')]).trim(), 
+                    arrs_mth: finalArrAmt, // Hasil kiraan
+                    osb: finalOsb,         // Hasil kiraan
                     status: currentStatus, 
-                    collector: rawColl,
+                    collector: String(row[getVal('map-collector')]).toUpperCase().trim(),
                     details: detailsJSON 
                 });
             }
