@@ -1660,7 +1660,7 @@ async function fetchFullDatabaseData() {
                 
                 while(true) {
                     // [ADD ZONE COLUMN TO FETCH]
-                    let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id');
+                    let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, collector, assignee_id');
                     
                     // [FIX HIERARCHY ACCESS]
                     if (currentUser.role === 'user') {
