@@ -2908,7 +2908,7 @@ window.openModal = async function(accNo) {
 
             let d = accountInfo.details || {};
             let todayDate = new Date().toLocaleDateString('en-GB');
-            let singleLine = `INTERNAL DATA - PIC: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
+            let singleLine = `INTERNAL DATA-VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
             let wText = `${singleLine.repeat(3)}\n`.repeat(25);
 
             document.getElementById('modal-details-container').innerHTML = `
