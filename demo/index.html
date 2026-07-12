@@ -1018,22 +1018,21 @@ tr:hover {
 
             <div class="table-container">
                 <table>
-                    <thead>
-                        <tr>
-                            <th class="sortable" onclick="sortTable('zone')" id="th-zone">ZONE ⇅</th>
-                            <th class="sortable" onclick="sortTable('region')" id="th-region">REGION ⇅</th>
-                            <th class="sortable" onclick="sortTable('area')" id="th-area">AREA ⇅</th>
-                            <th class="sortable" onclick="sortTable('loc')" id="th-loc">LOC CD ⇅</th>
-                            <th class="sortable" onclick="sortTable('type')" id="th-type">TYPE ⇅</th>
-                            <th class="sortable" onclick="sortTable('acct')" id="th-acct">ACCT NO ⇅</th>
-                            <th class="sortable" onclick="sortTable('delq')" id="th-delq">DELQ ⇅</th>
-                            <th class="sortable" onclick="sortTable('arrs_mth')" id="th-arrs_mth">ARRS MTH ⇅</th>
-                            <th class="sortable" onclick="sortTable('osb')" id="th-osb">OSB (RM) ⇅</th>
-                            <th class="sortable" onclick="sortTable('status')" id="th-status">STATUS ⇅</th>
-                            <th class="sortable" onclick="sortTable('assignee_id')" id="th-assignee_id">ASSIGNED TO ⇅</th>
-                            <th class="sortable" onclick="sortTable('last_date')" id="th-last_date" style="color: var(--accent-gold);">ATTEND DATE ⇅</th>
-                        </tr>
-                    </thead>
+<thead>
+            <tr>
+                <th style="width: 40px; text-align: center;">
+                    <input type="checkbox" id="check-all-assign" onclick="toggleAllAssignCheckboxes(this)" style="cursor: pointer; transform: scale(1.2);">
+                </th>
+                <th class="sortable" onclick="sortAssignTable('acct')" id="tha-acct">ACCT NO ⇅</th>
+                <th class="sortable" onclick="sortAssignTable('zone')" id="tha-zone">ZONE ⇅</th>
+                <th class="sortable" onclick="sortAssignTable('region')" id="tha-region">REGION ⇅</th>
+                <th class="sortable" onclick="sortAssignTable('area')" id="tha-area">AREA ⇅</th>
+                <th class="sortable" onclick="sortAssignTable('osb')" id="tha-osb">OSB (RM) ⇅</th>
+                <th class="sortable" onclick="sortAssignTable('status')" id="tha-status">STATUS ⇅</th>
+                <th class="sortable" onclick="sortAssignTable('collector')" id="tha-collector">COLLECTOR ⇅</th>
+                <th class="sortable" onclick="sortAssignTable('assignee_id')" id="tha-assignee_id">CURRENT ASSIGNEE ⇅</th> 
+            </tr>
+        </thead>
                     <tbody id="table-body"></tbody>
                 </table>
             </div>
