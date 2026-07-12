@@ -119,34 +119,45 @@ body {
     font-size: 12px;
 }
 
-/* --- ENHANCED NAVIGATION BAR --- */
+/* --- ENHANCED NAVIGATION BAR (SCROLLABLE) --- */
 .nav-tabs { 
-    display: none; /* Changed to flex in JS when active */
-    flex-wrap: wrap; 
+    display: none; /* Ditukar kepada flex melalui JS */
+    flex-wrap: nowrap; /* Paksa kekal 1 baris */
+    overflow-x: auto; /* Benarkan scroll kiri/kanan */
+    -webkit-overflow-scrolling: touch; /* Smooth scroll untuk iOS */
     gap: 8px; 
     margin-bottom: 25px;
     background-color: var(--card-bg);
     padding: 8px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(16, 42, 67, 0.05);
+    scrollbar-width: none; /* Sembunyikan scrollbar (Firefox) */
 }
+
+/* Sembunyikan scrollbar untuk Chrome, Safari & Edge supaya nampak clean */
+.nav-tabs::-webkit-scrollbar {
+    display: none;
+}
+
 .nav-btn { 
-    flex: 1;
-    min-width: 120px;
+    flex: 0 0 auto; /* Elak butang mengecil atau memanjang secara automatik */
+    white-space: nowrap; /* Halang teks butang turun ke baris kedua */
     background-color: transparent; 
     color: var(--text-muted); 
     border: none;
-    padding: 10px 16px; 
+    padding: 10px 18px; /* Ruang bernafas kiri kanan teks */
     border-radius: 6px; 
     cursor: pointer; 
     font-size: 13px; 
     font-weight: 600;
     transition: all 0.25s ease;
 }
+
 .nav-btn:hover {
     background-color: #e8f0f8;
     color: var(--accent-gold);
 }
+
 .nav-btn.active { 
     background-color: var(--accent-gold); 
     color: #ffffff; 
