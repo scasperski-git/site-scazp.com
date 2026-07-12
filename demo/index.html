@@ -2651,10 +2651,15 @@ window.openModal = async function(accNo) {
                 const { error: delError } = await supabase.from('findings').delete().eq('acct', accNo);
                 if (delError) throw delError;
 
-                let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
+let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
                 let resetDetails = accountInfo.details || {};
                 resetDetails.finding_status = ""; 
                 resetDetails.last_remark_date = "";
+                
+                // [FIX RESET LOG]: Buang terus timestamp lama supaya masa tak tertinggal kat jadual!
+                if (resetDetails.timestamp) {
+                    delete resetDetails.timestamp;
+                }
 
                 const { error: updError = null } = await supabase.from('accounts').update({ status: 'PENDING', details: resetDetails }).eq('acct', accNo);
                 if (updError) throw updError;
