@@ -868,6 +868,29 @@ tr:hover {
         padding: 10px 8px; 
     }
 }
+    .header {
+        flex-direction: column; /* Susun tajuk dan butang atas bawah */
+        align-items: flex-start; /* Rapatkan semua ke kiri */
+        gap: 12px; /* Jarak sikit antara tajuk dan butang */
+        padding-bottom: 15px;
+    }
+    
+    .header h1 {
+        font-size: 15px; /* Kecilkan sikit tajuk */
+        line-height: 1.3;
+    }
+    
+    .header > div {
+        width: 100%; /* Penuhkan ruang kiri ke kanan */
+        justify-content: space-between; /* Tolak butang ke hujung kanan, nama kiri */
+        flex-wrap: wrap; /* Kalau skrin terlalu sempit, dia wrap elok-elok */
+    }
+    
+    .btn-logout {
+        padding: 5px 8px; /* Nipiskan sikit butang */
+        font-size: 11px;
+    }
+}
     
     </style>
 </head>
