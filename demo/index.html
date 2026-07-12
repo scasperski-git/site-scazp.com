@@ -1989,7 +1989,7 @@ window.addNewUser = async function() {
             }
         };
 
-        window.exportDataByDate = async function(dateStr) {
+window.exportDataByDate = async function(dateStr) {
             let isConfirmed = await customConfirm(`Are you sure you want to export findings data for the date ${dateStr}?`);
             if (!isConfirmed) return;
 
@@ -1997,21 +1997,32 @@ window.addNewUser = async function() {
             document.getElementById('loadingModal').style.display = 'flex';
 
             try {
-                let startOfDay = `${dateStr}T00:00:00+08:00`;
-                let endOfDay = `${dateStr}T23:59:59+08:00`;
+                // [FIX TIMEZONE]: Tukar tarikh input kepada julat permulaan dan penghujung ISO UTC yang tepat
+                let startOfDay = new Date(`${dateStr}T00:00:00`).toISOString();
+                let endOfDay = new Date(`${dateStr}T23:59:59.999`).toISOString();
 
+                // Tarik data findings dari Supabase
                 const { data, error } = await supabase
                     .from('findings')
-                    .select('id, acct, remark1, remark2, remark3, remark4, remark5, region')
+                    .select('id, acct, remark1, remark2, remark3, remark4, remark5, region, is_exported')
                     .gte('updated_at', startOfDay)
                     .lte('updated_at', endOfDay)
-                    .eq('is_exported', false)
                     .neq('acct', 'SYSTEM');
 
                 if (error) throw error;
                 
+                // Semak jika tiada langsung rekod untuk tarikh tersebut
                 if (!data || data.length === 0) {
-                    showNotification("NO DATA", "Logic error: No pending records found.", true);
+                    showNotification("NO RECORDS", `Tiada sebarang log penemuan (findings) ditemui pada tarikh ${dateStr}.`, true);
+                    document.getElementById('loadingModal').style.display = 'none';
+                    return;
+                }
+
+                // Tapis hanya rekod yang belum dieksport sahaja
+                let pendingRows = data.filter(row => row.is_exported === false || row.is_exported === null);
+
+                if (pendingRows.length === 0) {
+                    showNotification("ALREADY EXPORTED", `Semua rekod pada tarikh ${dateStr} telah pun selamat dieksport sebelum ini (Status Locked).`, true);
                     document.getElementById('loadingModal').style.display = 'none';
                     return;
                 }
@@ -2019,10 +2030,11 @@ window.addNewUser = async function() {
                 let groupedData = {};
                 let idsToUpdate = [];
 
-                data.forEach(row => {
-                    let reg = row.region ? row.region.toUpperCase() : 'UNKNOWN';
+                pendingRows.forEach(row => {
+                    let reg = row.region ? row.region.toUpperCase().trim() : 'UNKNOWN';
                     if (!groupedData[reg]) groupedData[reg] = [];
                     
+                    // Mengekalkan susunan asal kau: REMARK5 di kedudukan atas sekali sebelum REMARK1
                     groupedData[reg].push({
                         "ACCT": row.acct,
                         "REMARK1": row.remark5 || '',
@@ -2037,6 +2049,7 @@ window.addNewUser = async function() {
 
                 let formattedDate = dateStr.replace(/-/g, ''); 
                 
+                // Jana fail Excel mengikut Wilayah (Region)
                 Object.keys(groupedData).forEach(reg => {
                     const ws = XLSX.utils.json_to_sheet(groupedData[reg]);
                     const wb = XLSX.utils.book_new();
@@ -2046,6 +2059,7 @@ window.addNewUser = async function() {
                     XLSX.writeFile(wb, fileName);
                 });
 
+                // Kunci status log di database supaya tidak dieksport bertindih
                 const { error: updateError } = await supabase
                     .from('findings')
                     .update({ is_exported: true })
@@ -2054,7 +2068,7 @@ window.addNewUser = async function() {
                 if (updateError) throw updateError;
 
                 document.getElementById('loadingModal').style.display = 'none';
-                showNotification("EXPORT SUCCESSFUL", "All Excel files have been downloaded and status is locked.");
+                showNotification("EXPORT SUCCESSFUL", `${idsToUpdate.length} akaun berjaya diproses. Fail Excel telah dimuat turun mengikut wilayah.`);
                 
                 renderReportCenter(); 
 
