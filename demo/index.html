@@ -252,7 +252,7 @@
         .blink-dot { height: 8px; width: 8px; background-color: white; border-radius: 50%; display: inline-block; margin-right: 8px; animation: blinker 1.5s linear infinite; }
 
         /* =========================================
-           11. MOBILE RESPONSIVENESS (100% KUKUH)
+           11. MOBILE RESPONSIVENESS (FIX KUKUH)
            ========================================= */
         @media (max-width: 768px) {
             body { padding: 10px; }
@@ -278,7 +278,7 @@
             .kpi-card h3 { font-size: 8px; letter-spacing: -0.5px; margin-bottom: 4px; }
             .kpi-card p { font-size: 13px; } 
             
-            /* -- Fix Table & Navigasi (Senang skrol pakai jari) -- */
+            /* -- Fix Table Akaun Utama (Senang skrol pakai jari) -- */
             table { font-size: 10px; }
             th, td { padding: 10px 8px; white-space: nowrap; }
             th { font-size: 9px; letter-spacing: 0.5px; }
@@ -286,9 +286,20 @@
             .pagination-controls { display: flex; width: 100%; justify-content: space-between; }
             .pagination-controls button { flex: 1; text-align: center; }
             
+            /* -- FIX: MIS REMARK TABLE DI MOBILE -- */
+            #report-panel table { min-width: 100% !important; } /* Halang jadual memanjang 850px! */
+            #report-panel th, #report-panel td { 
+                padding: 8px 4px !important; 
+                white-space: normal !important; /* Paksa teks membalut ke bawah */
+                word-wrap: break-word; 
+                font-size: 10px;
+            }
+            #report-panel th:first-child, #report-panel td:first-child { width: 75px !important; }
+            #report-panel th:last-child, #report-panel td:last-child { width: 85px !important; }
+
             /* -- Fix Ruangan Filter & Search -- */
             .search-container { flex-direction: column; width: 100%; }
-            .search-container select, .search-container input { width: 100%; font-size: 16px !important; /* Halang auto-zoom di iOS */ }
+            .search-container select, .search-container input { width: 100%; font-size: 14px !important; /* Elak zoom sikit */ }
             .search-container div { width: 100%; display: flex; justify-content: space-between; gap: 6px;}
             .search-container div button { flex: 1; padding: 12px 10px !important;}
             
@@ -303,7 +314,7 @@
                 flex-direction: column !important; align-items: stretch !important; 
                 width: 100% !important; gap: 8px !important;
             }
-            #assign-target-user { width: 100% !important; margin: 0 !important; font-size: 14px !important;}
+            #assign-target-user { width: 100% !important; margin: 0 !important; font-size: 13px !important;}
             #assign-panel .settings-box > div:first-child > div:last-child > span { text-align: center; display: block; margin-bottom: 2px; }
             
             /* -- FIX: Modal Data Tak Berhimpit -- */
@@ -316,10 +327,11 @@
             
             .modal-content { padding: 20px 15px; }
             
-            /* Form dalam user settings elak iOS zoom */
-            .form-control { font-size: 16px !important; }
+            /* -- FIX: Saiz Font Borang Dalam Update Modal -- */
+            .form-control { font-size: 13px !important; padding: 10px !important; }
+            #single-remark-box { font-size: 12px !important; padding: 8px !important; }
+            #finding-status-select { font-size: 12px !important; padding: 8px !important; height: auto !important; }
         }
-        
     </style>
 </head>
 <body>
