@@ -1199,14 +1199,14 @@ tr:hover {
         <th style="width: 40px; text-align: center;">
             <input type="checkbox" id="check-all-assign" onclick="toggleAllAssignCheckboxes(this)" style="cursor: pointer; transform: scale(1.2);">
         </th>
-        <th class="sortable" onclick="sortTable('acct')" id="th-acct">ACCT NO ⇅</th>
-        <th class="sortable" onclick="sortTable('zone')" id="th-zone">ZONE ⇅</th>
-        <th class="sortable" onclick="sortTable('region')" id="th-region">REGION ⇅</th>
-        <th class="sortable" onclick="sortTable('area')" id="th-area">AREA ⇅</th>
-        <th class="sortable" onclick="sortTable('osb')" id="th-osb">OSB (RM) ⇅</th>
-        <th class="sortable" onclick="sortTable('status')" id="th-status">STATUS ⇅</th>
-        <th class="sortable" onclick="sortTable('collector')" id="th-collector">COLLECTOR ⇅</th>
-        <th class="sortable" onclick="sortTable('assignee_id')" id="th-assignee_id">CURRENT ASSIGNEE ⇅</th> </tr>
+        <th class="sortable" onclick="sortTable('acct')" id="tha-acct">ACCT NO ⇅</th>
+        <th class="sortable" onclick="sortTable('zone')" id="tha-zone">ZONE ⇅</th>
+        <th class="sortable" onclick="sortTable('region')" id="tha-region">REGION ⇅</th>
+        <th class="sortable" onclick="sortTable('area')" id="tha-area">AREA ⇅</th>
+        <th class="sortable" onclick="sortTable('osb')" id="tha-osb">OSB (RM) ⇅</th>
+        <th class="sortable" onclick="sortTable('status')" id="tha-status">STATUS ⇅</th>
+        <th class="sortable" onclick="sortTable('collector')" id="tha-collector">COLLECTOR ⇅</th>
+        <th class="sortable" onclick="sortTable('assignee_id')" id="tha-assignee_id">CURRENT ASSIGNEE ⇅</th> </tr>
 </thead>
                 <tbody id="assign-table-body">
                     <tr><td colspan="8" style="text-align:center;">Sila tunggu, sedang memuatkan data...</td></tr>
@@ -3246,6 +3246,40 @@ if(!fullStory) {
         let currentAssignPage = 1;
         const assignRowsPerPage = 20;
 
+        let currentAssignSortColumn = null;
+        let currentAssignSortDirection = 'asc';
+
+        window.sortAssignTable = function(columnName) {
+            if (currentAssignSortColumn === columnName) {
+                currentAssignSortDirection = currentAssignSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentAssignSortColumn = columnName;
+                currentAssignSortDirection = 'asc';
+            }
+            currentAssignPage = 1;
+            renderAssignTable(); // Panggil semula table untuk filter & susun
+        };
+
+        function updateAssignHeaderArrows(activeCol) {
+            const cols = ['acct', 'zone', 'region', 'area', 'osb', 'status', 'assignee_id', 'collector'];
+            cols.forEach(c => {
+                const el = document.getElementById(`tha-${c}`);
+                if (el) {
+                    let baseText = el.innerText.split(' ')[0];
+                    if(c === 'acct') baseText = "ACCT NO";
+                    else if(c === 'assignee_id') baseText = "CURRENT ASSIGNEE";
+                    else if(c === 'osb') baseText = "OSB (RM)";
+                    
+                    if (c === activeCol) {
+                        let arrow = currentAssignSortDirection === 'asc' ? '▲' : '▼';
+                        el.innerHTML = `<span style="color:var(--text-main);">${baseText} ${arrow}</span>`;
+                    } else {
+                        el.innerHTML = `${baseText} ⇅`;
+                    }
+                }
+            });
+        }
+
         window.populateAssignSubordinates = function() {
             const dropdown = document.getElementById('assign-target-user');
             if (!dropdown) return;
@@ -3307,6 +3341,29 @@ window.renderAssignTable = function() {
         
         return matchStatus && matchCollector;
     });
+
+    if (currentAssignSortColumn) {
+                assignAccounts.sort((a, b) => {
+                    let valueA = a[currentAssignSortColumn];
+                    let valueB = b[currentAssignSortColumn];
+
+                    if (currentAssignSortColumn === 'osb') {
+                        let numA = parseFloat(valueA) || 0;
+                        let numB = parseFloat(valueB) || 0;
+                        return currentAssignSortDirection === 'asc' ? numA - numB : numB - numA;
+                    } 
+                    
+                    let strA = valueA ? String(valueA).toUpperCase().trim() : '';
+                    let strB = valueB ? String(valueB).toUpperCase().trim() : '';
+                    
+                    if (strA < strB) return currentAssignSortDirection === 'asc' ? -1 : 1;
+                    if (strA > strB) return currentAssignSortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+                updateAssignHeaderArrows(currentAssignSortColumn);
+            }
+
+            let total = assignAccounts.length;
 
             let total = assignAccounts.length;
             document.getElementById('assign-total-count').innerText = total.toLocaleString();
