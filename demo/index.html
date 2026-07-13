@@ -866,7 +866,7 @@
             min-width: 160px;
         }
 
-        /* --- MOBILE RESPONSIVENESS (Diperbaiki & Diperkemaskan) --- */
+/* --- MOBILE RESPONSIVENESS (Diperbaiki & Diperkemaskan) --- */
         @media (max-width: 768px) {
             body { padding: 15px; }
             .details-wrapper { 
@@ -941,6 +941,23 @@
             }
             .header .btn-logout:nth-of-type(1) { order: 1; } 
             .header .btn-logout:nth-of-type(2) { order: 2; } 
+
+            /* --- KOD BARU: OPTIMASI AUDIT TRAIL UNTUK MOBILE --- */
+            .history-box {
+                padding: 8px 4px !important; 
+            }
+            .history-item {
+                padding: 8px 6px !important; 
+                margin-bottom: 8px !important;
+            }
+            .history-meta {
+                font-size: 9px !important; 
+                letter-spacing: -0.3px;
+            }
+            .history-item div[style*="font-size: 12px"] {
+                font-size: 11px !important; 
+                line-height: 1.4 !important; 
+            }
         }
     </style>
 </head>
