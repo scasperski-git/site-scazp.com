@@ -561,18 +561,20 @@
         }
 
         /* --- FIXED HISTORY BOX --- */
-        .history-box { 
+.history-box { 
             background-color: #f8fafc;
             padding: 15px; 
             border-radius: var(--radius-md); 
             margin-bottom: 15px; 
-            max-height: 250px; 
+            min-height: 380px; /* Paksa kotak jadi tinggi sikit kat desktop */
+            max-height: 500px !important; /* Override setting asal 250px */
             overflow-y: auto; 
             font-size: 12px; 
             border: 1px solid var(--border-color);
             box-sizing: border-box;
             width: 100%;
         }
+    
         .history-item { 
             border-bottom: 1px dashed var(--border-color); 
             padding-bottom: 8px; 
