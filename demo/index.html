@@ -866,9 +866,18 @@
             min-width: 160px;
         }
 
-/* --- MOBILE RESPONSIVENESS (Diperbaiki & Diperkemaskan) --- */
+        /* --- MOBILE RESPONSIVENESS (Diperbaiki & Diperkemaskan) --- */
         @media (max-width: 768px) {
             body { padding: 15px; }
+            .details-wrapper { 
+                grid-template-columns: 1fr !important;
+                gap: 15px; 
+                padding: 0 10px !important; 
+            }
+            .details-box { 
+                width: 100% !important;
+                box-sizing: border-box; 
+            }
             .kpi-container { 
                 grid-template-columns: repeat(2, 1fr); 
                 gap: 12px; 
@@ -883,6 +892,24 @@
             .search-container { flex-direction: column; }
             .search-container select, .search-container input, .search-container div { width: 100%; max-width: 100% !important; }
             
+            .fp-body { 
+                grid-template-columns: 1fr;
+                padding: 10px 0 !important; 
+                gap: 15px !important; 
+            }
+            .fp-panel {
+                border-radius: 0 !important; 
+                border-left: none !important; 
+                border-right: none !important; 
+                padding: 15px 12px !important; 
+            }
+            .fp-header { padding: 15px; flex-direction: column; gap: 15px; align-items: flex-start; }
+            .fp-header > div { width: 100%; justify-content: space-between; }
+            
+            .btn-delete-finding {
+                padding: 3px 6px !important; 
+                font-size: 9px !important; 
+            }
             table { font-size: 12px; }
             th, td { padding: 12px 10px; }
 
@@ -921,43 +948,9 @@
             .header .btn-logout:nth-of-type(1) { order: 1; } 
             .header .btn-logout:nth-of-type(2) { order: 2; } 
 
-            /* --- OPTIMASI FAKE PAGE (LEKAT KE TEPI DINDING) --- */
-            .fp-header { 
-                padding: 15px 10px !important; /* Rapatkan header atas */
-                flex-direction: column; 
-                gap: 12px; 
-                align-items: flex-start; 
-            }
-            .fp-header > div { width: 100%; justify-content: space-between; }
-
-            .fp-body { 
-                grid-template-columns: 1fr;
-                padding: 10px 0 !important; /* Buang padding utama body */
-                gap: 10px !important; 
-            }
-            .fp-panel {
-                border-radius: 0 !important; 
-                border-left: none !important; 
-                border-right: none !important; 
-                padding: 15px 10px !important; /* Kurangkan gap kiri kanan panel */
-            }
-            .details-wrapper { 
-                grid-template-columns: 1fr !important;
-                gap: 10px !important; 
-                padding: 0 !important; /* Buang border pemisah kotak */
-            }
-            .details-box { 
-                width: 100% !important;
-                box-sizing: border-box; 
-                border-radius: 0 !important; /* Jadikan kotak bersegi */
-                border-left: none !important; /* Hilangkan garisan kiri */
-                border-right: none !important; /* Hilangkan garisan kanan */
-                padding: 12px 10px !important;
-            }
-
             /* --- OPTIMASI AUDIT TRAIL UNTUK MOBILE --- */
             .history-box {
-                padding: 8px 2px !important; 
+                padding: 8px 4px !important; 
             }
             .history-item {
                 padding: 8px 6px !important; 
@@ -970,12 +963,6 @@
             .history-item div[style*="font-size: 12px"] {
                 font-size: 11px !important; 
                 line-height: 1.4 !important; 
-            }
-            .btn-delete-finding {
-                padding: 2px 6px !important; 
-                font-size: 8px !important; 
-                height: 18px; /* Rendahkan butang DEL */
-                line-height: 1.2;
             }
         }
     </style>
