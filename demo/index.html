@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
-    <style>
+<style>
         :root {
             /* Palet warna baharu yang lebih clean & premium */
             --bg-color: #f4f7f9;
@@ -872,7 +872,7 @@
             .details-wrapper { 
                 grid-template-columns: 1fr !important;
                 gap: 15px; 
-                padding: 10px 0; 
+                padding: 0 10px !important; 
             }
             .details-box { 
                 width: 100% !important;
@@ -894,8 +894,14 @@
             
             .fp-body { 
                 grid-template-columns: 1fr;
-                padding: 15px; 
-                gap: 20px; 
+                padding: 10px 0 !important; 
+                gap: 15px !important; 
+            }
+            .fp-panel {
+                border-radius: 0 !important; 
+                border-left: none !important; 
+                border-right: none !important; 
+                padding: 15px 12px !important; 
             }
             .fp-header { padding: 15px; flex-direction: column; gap: 15px; align-items: flex-start; }
             .fp-header > div { width: 100%; justify-content: space-between; }
@@ -941,6 +947,23 @@
             }
             .header .btn-logout:nth-of-type(1) { order: 1; } 
             .header .btn-logout:nth-of-type(2) { order: 2; } 
+
+            /* --- OPTIMASI AUDIT TRAIL UNTUK MOBILE --- */
+            .history-box {
+                padding: 8px 4px !important; 
+            }
+            .history-item {
+                padding: 8px 6px !important; 
+                margin-bottom: 8px !important;
+            }
+            .history-meta {
+                font-size: 9px !important; 
+                letter-spacing: -0.3px;
+            }
+            .history-item div[style*="font-size: 12px"] {
+                font-size: 11px !important; 
+                line-height: 1.4 !important; 
+            }
         }
     </style>
 </head>
