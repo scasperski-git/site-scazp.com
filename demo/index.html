@@ -2748,7 +2748,7 @@ window.exportDataByDate = async function(dateStr) {
             document.getElementById('excel-file-input').value = ''; 
         };
 
-        window.processExcelUpload = async function() {
+window.processExcelUpload = async function() {
             document.getElementById('mappingModal').style.display = 'none';
             document.getElementById('progressModal').style.display = 'flex';
             
@@ -2775,6 +2775,27 @@ window.exportDataByDate = async function(dateStr) {
                 let existingAcc = globalAccounts.find(a => a.acct === rawAccountNo);
                 let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; 
                 let currentFindingStatus = existingAcc ? existingAcc.finding_status : ''; 
+                
+                // --- 1. AMBIL & BERSIHKAN DATA MENTAH DARI EXCEL ---
+                let bal = parseFloat(String(row[getVal('map-bal') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+                let odp = parseFloat(String(row[getVal('map-odp') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+                let adch = parseFloat(String(row[getVal('map-adch') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+                let arrAmt = parseFloat(String(row[getVal('map-arrs') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+                let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
+
+                // --- 2. LOGIK PENGIRAAN PINTAR DARI USER ---
+                // Formula 1 & 2: Positifkan nilai ARR_AMT (Contoh: -100 jadi 100, -4 jadi 4)
+                let finalArrAmt = arrAmt * -1; 
+                
+                // Formula 3: Kira FS_AMT_TO_COLLECT (OSB) mengikut jenis akaun
+                let finalOsb = 0;
+                if (type === 'EP') {
+                    finalOsb = bal + adch;
+                } else if (type === 'HP') {
+                    finalOsb = (bal + odp) + adch;
+                } else {
+                    finalOsb = bal + odp + adch; // Fallback jika ada ACCT_TYPE lain
+                }
                 
                 let keyLoc = getVal('map-loc');
                 let keyZone = getVal('map-zone');
@@ -2820,8 +2841,7 @@ window.exportDataByDate = async function(dateStr) {
                 if (rawType === "undefined") rawType = "";
                 let rawDelq = String(row[getVal('map-delq')]).trim();
                 if (rawDelq === "undefined") rawDelq = "";
-                let rawArrs = String(row[getVal('map-arrs')]).trim();
-                if (rawArrs === "undefined") rawArrs = "0";
+                
                 let keyColl = getVal('map-collector');
                 let rawColl = (keyColl && row[keyColl]) ? String(row[keyColl]).toUpperCase().trim() : "";
                 if (rawColl === "UNDEFINED") rawColl = "";
@@ -2860,11 +2880,11 @@ window.exportDataByDate = async function(dateStr) {
                     region: finalRegion, 
                     area: finalArea,     
                     loc: rawLocCd,
-                    type: rawType, 
+                    type: type, // Guna string bersih yang dah upper-case
                     acct: rawAccountNo,
                     delq: rawDelq, 
-                    arrs_mth: rawArrs, 
-                    osb: parseFloat(String(row[getVal('map-osb')]).replace(/[^0-9.-]+/g,"")) || 0, 
+                    arrs_mth: finalArrAmt, // [FIXED]: Memasukkan hasil darab -1
+                    osb: finalOsb,         // [FIXED]: Memasukkan hasil formula EP/HP
                     status: currentStatus, 
                     collector: rawColl,
                     details: detailsJSON 
