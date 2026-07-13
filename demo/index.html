@@ -897,10 +897,25 @@
             
             .nav-tabs { padding: 10px; margin-bottom: 15px; }
 
-            /* KPI Cards - biar ada ruang tepi sikit supaya tak nampak sesak */
-            .kpi-container { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 15px; }
-            .kpi-card { padding: 15px 10px; }
-            .kpi-card p { font-size: 20px; }
+/* --- KPI CARDS MOBILE (COMPACT & KEMAS) --- */
+            .kpi-container { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 8px; /* Kurangkan jarak antara kotak */
+                padding: 0 10px; 
+            }
+            .kpi-card { 
+                padding: 10px 8px; /* Kurangkan ruang kosong dalam kotak */
+                border-radius: 10px; /* Bucu tak terlalu bulat untuk kotak kecil */
+            }
+            .kpi-card h3 { 
+                font-size: 9px; /* Tajuk lebih halus */
+                margin-bottom: 4px; 
+                letter-spacing: 0.2px;
+            }
+            .kpi-card p { 
+                font-size: 16px; /* Saiz nombor dikecilkan dari 20px ke 16px */
+                font-weight: 800; /* Ditebalkan sikit supaya tetap menonjol */
+            }
 
             /* General Layout */
             .action-bar { padding: 15px; }
