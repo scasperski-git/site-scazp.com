@@ -11,7 +11,3536 @@
     /* =========================================================
        1. GLOBAL & DESKTOP STYLES (ASAL - Jangan usik)
        ========================================================= */
-    :root {
+    :root {<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Findings Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+    <style>
+        :root {
+            /* Palet warna baharu yang lebih clean & premium */
+            --bg-color: #f4f7f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --accent-gold: #3b82f6; /* Modern Blue */
+            --accent-hover: #2563eb;
+            --border-color: #e2e8f0;
+            
+            --success-green: #10b981;
+            --error-red: #ef4444;
+            
+            --status-call: #3b82f6;
+            --status-uct: #f59e0b;
+            --status-ptp: #8b5cf6;
+            --status-pv: #06b6d4;
+            --status-paid: #10b981;
+
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        body { 
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 20px; 
+            line-height: 1.5;
+        }
+
+        /* --- CUSTOM SCROLLBAR --- */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* --- ANIMATIONS --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- LOGIN STYLES --- */
+        #login-section { 
+            display: none;
+            justify-content: center; 
+            align-items: center; 
+            height: 90vh; 
+        }
+        .login-box { 
+            background-color: var(--card-bg); 
+            padding: 40px 30px;
+            border-radius: var(--radius-lg); 
+            border: 1px solid rgba(255,255,255,0.5); 
+            width: 100%; 
+            max-width: 360px; 
+            box-shadow: var(--shadow-lg); 
+            text-align: center;
+        }
+        .login-box h2 { 
+            color: var(--accent-gold); 
+            margin-top: 0; 
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .login-input { 
+            width: 100%; 
+            box-sizing: border-box; 
+            background-color: #f8fafc; 
+            border: 1px solid var(--border-color);
+            color: var(--text-main); 
+            padding: 12px 15px; 
+            margin-bottom: 15px; 
+            border-radius: var(--radius-md); 
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        .login-input:focus { 
+            outline: none; 
+            border-color: var(--accent-gold); 
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .btn-login { 
+            width: 100%; 
+            background-color: var(--accent-gold); 
+            color: #ffffff; 
+            border: none; 
+            padding: 12px;
+            border-radius: var(--radius-md); 
+            font-weight: 600; 
+            font-size: 14px;
+            cursor: pointer; 
+            transition: all 0.2s ease;
+        }
+        .btn-login:hover { 
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* --- DASHBOARD STYLES --- */
+        #dashboard-section { display: none; }
+        
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 25px;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color); 
+        }
+        .header h1 { 
+            margin: 0;
+            font-size: 20px; 
+            font-weight: 700;
+            color: var(--accent-gold); 
+            letter-spacing: -0.5px; 
+        }
+        .btn-logout { 
+            background-color: transparent; 
+            color: var(--error-red);
+            border: 1px solid var(--error-red); 
+            padding: 6px 12px; 
+            border-radius: var(--radius-md); 
+            cursor: pointer; 
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .btn-logout:hover {
+            background-color: var(--error-red);
+            color: #ffffff;
+        }
+
+        /* --- ENHANCED NAVIGATION BAR --- */
+        .nav-tabs { 
+            display: none; 
+            flex-wrap: nowrap; 
+            overflow-x: auto; 
+            -webkit-overflow-scrolling: touch; 
+            gap: 8px; 
+            margin-bottom: 25px;
+            background-color: var(--card-bg);
+            padding: 8px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            scrollbar-width: none; 
+            border: 1px solid var(--border-color);
+        }
+        .nav-tabs::-webkit-scrollbar { display: none; }
+        .nav-btn { 
+            flex: 0 0 auto; 
+            white-space: nowrap; 
+            background-color: transparent; 
+            color: var(--text-muted); 
+            border: none;
+            padding: 10px 20px; 
+            border-radius: var(--radius-md); 
+            cursor: pointer; 
+            font-size: 13px; 
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .nav-btn:hover {
+            background-color: #f1f5f9;
+            color: var(--text-main);
+        }
+        .nav-btn.active { 
+            background-color: var(--accent-gold); 
+            color: #ffffff; 
+            box-shadow: var(--shadow-md);
+        }
+
+        .main-panel { 
+            display: block;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        #settings-panel { display: none; }
+
+        .action-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            flex-wrap: wrap; 
+            gap: 15px;
+            margin-bottom: 20px; 
+        }
+        .filter-section { 
+            background-color: var(--card-bg); 
+            padding: 18px; 
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color); 
+            box-shadow: var(--shadow-sm);
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px;
+        }
+        .filter-title { 
+            font-size: 11px; 
+            color: var(--text-muted); 
+            margin-bottom: 2px; 
+            display: block; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px; 
+            font-weight: 700;
+        }
+        .btn-group { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px;
+        }
+        .btn-filter { 
+            background-color: #f8fafc; 
+            color: var(--text-muted); 
+            border: 1px solid var(--border-color);
+            padding: 8px 14px; 
+            border-radius: var(--radius-md); 
+            cursor: pointer; 
+            font-size: 12px; 
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-filter:hover { 
+            border-color: var(--accent-gold); 
+            color: var(--accent-gold);
+            background-color: #eff6ff;
+        }
+        .btn-filter.active { 
+            background-color: var(--accent-gold); 
+            color: #ffffff; 
+            border-color: var(--accent-gold); 
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+        }
+
+        #zone-filters-container, #region-filters-container, #area-filters-container { 
+            display: none;
+            padding-top: 5px; 
+        }
+
+        .btn-upload-trigger { 
+            background-color: var(--success-green);
+            color: white;
+            border: none; 
+            padding: 10px 18px; 
+            border-radius: var(--radius-md); 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-size: 13px; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+        }
+        .btn-upload-trigger:hover { 
+            background-color: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px -1px rgba(16, 185, 129, 0.3);
+        }
+
+        .kpi-container { 
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 15px; 
+            margin-bottom: 25px; 
+        }
+        .kpi-card { 
+            background-color: var(--card-bg);
+            padding: 20px 15px; 
+            border-radius: var(--radius-lg); 
+            border: 1px solid var(--border-color); 
+            text-align: center; 
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+        }
+        .kpi-clickable { cursor: pointer; }
+        .kpi-clickable:hover { 
+            border-color: var(--accent-gold); 
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md); 
+        }
+        .kpi-card.active { 
+            border-color: var(--accent-gold);
+            background-color: #eff6ff; 
+            box-shadow: 0 0 0 1px var(--accent-gold);
+        }
+        .kpi-card h3 { 
+            margin: 0 0 8px 0; 
+            font-size: 11px; 
+            color: var(--text-muted);
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        .kpi-card p { 
+            margin: 0; 
+            font-size: 24px; 
+            font-weight: 700;
+            color: var(--text-main); 
+            letter-spacing: -0.5px;
+        }
+
+        /* --- ENHANCED TABLES --- */
+        .table-container { 
+            background-color: var(--card-bg); 
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            border: 1px solid var(--border-color); 
+            box-shadow: var(--shadow-sm);
+            overflow-x: auto; 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse;
+            font-size: 13px; 
+            min-width: 800px;
+        }
+        th, td { 
+            padding: 14px 16px; 
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9; 
+        }
+        th { 
+            background-color: #f8fafc;
+            color: var(--text-muted); 
+            font-weight: 600; 
+            white-space: nowrap; 
+            user-select: none; 
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        th.sortable { 
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s; 
+        }
+        th.sortable:hover { 
+            background-color: #e2e8f0; 
+            color: var(--text-main);
+        }
+        tr:nth-child(even) { background-color: #fafbfc; }
+        tr:hover { 
+            background-color: #f1f5f9;
+            transition: background-color 0.15s ease;
+        }
+
+        .pagination-container { 
+            display: flex;
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 15px 20px; 
+            background-color: #f8fafc; 
+            border: 1px solid var(--border-color); 
+            border-top: none; 
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+            margin-bottom: 20px; 
+        }
+        .pagination-controls button { 
+            background-color: #ffffff; 
+            color: var(--text-main);
+            border: 1px solid var(--border-color); 
+            padding: 6px 14px; 
+            border-radius: var(--radius-md); 
+            cursor: pointer; 
+            font-size: 12px; 
+            font-weight: 600; 
+            margin: 0 5px;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        .pagination-controls button:hover:not(:disabled) {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+        .pagination-controls button:disabled { 
+            background-color: #f1f5f9;
+            border-color: #e2e8f0; 
+            color: #94a3b8; 
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .page-info { 
+            font-size: 13px; 
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .status-badge { 
+            padding: 4px 10px;
+            border-radius: 20px; 
+            font-size: 11px; 
+            font-weight: 600; 
+            display: inline-block; 
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+        .status-done { 
+            background-color: #dcfce7; 
+            color: #166534;
+            border: 1px solid #bbf7d0; 
+        }
+        .status-pending { 
+            background-color: #fee2e2;
+            color: #991b1b; 
+            border: 1px solid #fecaca; 
+        }
+
+        .btn-update { 
+            background-color: #ffffff;
+            color: var(--text-main); 
+            border: 1px solid var(--border-color); 
+            padding: 5px 10px; 
+            border-radius: var(--radius-md); 
+            cursor: pointer; 
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .btn-update:hover { 
+            border-color: var(--accent-gold); 
+            color: var(--accent-gold);
+            background-color: #eff6ff;
+        }
+
+        .settings-box { 
+            background-color: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            padding: 25px; 
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            max-width: 500px; 
+        }
+        .settings-box h2 { 
+            color: var(--text-main); 
+            font-size: 16px; 
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 20px; 
+            border-bottom: 1px solid var(--border-color); 
+            padding-bottom: 10px;
+        }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { 
+            display: block; 
+            margin-bottom: 6px; 
+            font-size: 13px; 
+            font-weight: 500;
+            color: var(--text-main);
+        }
+        .form-control { 
+            width: 100%; 
+            box-sizing: border-box; 
+            background-color: #f8fafc !important;
+            border: 1px solid var(--border-color) !important; 
+            color: var(--text-main) !important; 
+            padding: 12px; 
+            border-radius: var(--radius-md); 
+            font-size: 13px;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .form-control:focus { 
+            outline: none; 
+            border-color: var(--accent-gold) !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .btn-submit { 
+            background-color: var(--accent-gold); 
+            color: #ffffff; 
+            border: none;
+            padding: 12px 20px; 
+            border-radius: var(--radius-md); 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-size: 13px;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        .btn-submit:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .modal-overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(15, 23, 42, 0.6); /* Lebih dark & clean overlay */
+            backdrop-filter: blur(4px); /* Efek blur iOS */
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 1000; 
+            justify-content: center; 
+            align-items: center;
+        }
+        .modal-content { 
+            background-color: var(--card-bg); 
+            border: none; 
+            border-radius: var(--radius-lg); 
+            width: 90%;
+            max-width: 500px; 
+            padding: 25px; 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); 
+            position: relative;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        .modal-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px; 
+            margin-bottom: 20px; 
+        }
+        .modal-header h2 { 
+            margin: 0; 
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-main); 
+        }
+        .close-btn { 
+            background: #f1f5f9; 
+            border: none; 
+            color: var(--text-muted); 
+            font-size: 18px;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            cursor: pointer; 
+            display: flex; justify-content: center; align-items: center;
+            transition: all 0.2s ease;
+        }
+        .close-btn:hover { 
+            background: #fee2e2;
+            color: var(--error-red);
+        }
+
+        /* --- FIXED HISTORY BOX --- */
+        .history-box { 
+            background-color: #f8fafc;
+            padding: 15px; 
+            border-radius: var(--radius-md); 
+            margin-bottom: 15px; 
+            max-height: 250px; 
+            overflow-y: auto; 
+            font-size: 12px; 
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .history-item { 
+            border-bottom: 1px dashed var(--border-color); 
+            padding-bottom: 8px; 
+            margin-bottom: 8px;
+        }
+        .history-item:last-child { 
+            border-bottom: none; 
+            margin-bottom: 0;
+        }
+        .history-meta { 
+            color: var(--text-muted); 
+            font-size: 10px; 
+            margin-bottom: 4px;
+        }
+
+        .mapping-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            margin-bottom: 20px;
+            background: #f8fafc; 
+            padding: 15px; 
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+        .mapping-grid label { 
+            font-size: 12px; 
+            align-self: center;
+            color: var(--text-main); 
+            font-weight: 600;
+        }
+
+        #progressModal .modal-content { 
+            max-width: 400px; 
+            text-align: center;
+            padding: 35px 25px; 
+        }
+        .progress-wrapper { 
+            background-color: #e2e8f0;
+            border-radius: 20px; 
+            overflow: hidden; 
+            margin: 20px 0 15px 0; 
+            height: 12px; 
+            width: 100%;
+        }
+        .progress-bar-fill { 
+            background: linear-gradient(90deg, var(--accent-gold), #60a5fa); 
+            height: 100%; 
+            width: 0%;
+            transition: width 0.3s ease-out; 
+            border-radius: 20px;
+        }
+        .progress-text { 
+            font-size: 18px; 
+            font-weight: 700; 
+            color: var(--text-main);
+            margin-bottom: 5px; 
+        }
+
+        #loadingModal .modal-content { 
+            text-align: center;
+            padding: 40px; 
+            max-width: 350px;
+        }
+
+        .btn-cancel { 
+            background-color: #ffffff;
+            color: var(--text-main); 
+            border: 1px solid var(--border-color); 
+            padding: 12px 20px; 
+            border-radius: var(--radius-md); 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-size: 13px;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        .btn-cancel:hover { 
+            background-color: #f1f5f9; 
+        }
+
+        .details-wrapper { 
+            padding: 15px; 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 15px;
+        }
+        .details-box { 
+            background-color: #ffffff !important;
+            padding: 15px; 
+            border-radius: var(--radius-lg); 
+            border: 1px solid var(--border-color); 
+            position: relative; 
+            z-index: 1; 
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        .details-box::before {
+            content: attr(data-watermark);
+            position: absolute;
+            top: -20%; left: -20%;
+            width: 160%; height: 160%;
+            font-family: inherit;
+            font-size: 8px; font-weight: 900;
+            color: rgba(30, 41, 59, 0.06); 
+            white-space: normal; word-break: break-all;
+            line-height: 2.2; letter-spacing: 1px;
+            padding: 10px; box-sizing: border-box;
+            transform: rotate(-10deg) scale(1.2);
+            pointer-events: none; z-index: 0;
+        }
+        .details-box h4, .details-box p { position: relative; z-index: 2; }
+        .details-box h4 { 
+            margin: 0 0 12px 0; 
+            color: var(--text-main);
+            font-size: 12px; 
+            border-bottom: 1px solid var(--border-color); 
+            padding-bottom: 8px; 
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .details-box p { 
+            margin: 6px 0; 
+            font-size: 12px; 
+            color: var(--text-main);
+        }
+        .details-box span.lbl { 
+            color: var(--text-muted); 
+            display: inline-block; 
+            width: 70px; 
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        .mapping-container { 
+            max-height: 60vh;
+            overflow-y: auto; 
+            padding-right: 15px; 
+            text-align: left; 
+        }
+        .mapping-section { 
+            border: 1px solid var(--border-color);
+            padding: 15px; 
+            margin-bottom: 15px; 
+            border-radius: var(--radius-lg); 
+            background: #ffffff; 
+            box-shadow: var(--shadow-sm);
+        }
+        .mapping-section h3 { 
+            margin-top: 0; margin-bottom: 12px; 
+            font-size: 13px; 
+            color: var(--text-main); 
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        #maintenance-bar { 
+            display: none;
+            background: linear-gradient(90deg, #dc2626, #f87171); 
+            color: white; 
+            text-align: center; 
+            padding: 12px; 
+            font-size: 13px; 
+            font-weight: 600; 
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.3); 
+            position: sticky; 
+            top: 0; 
+            z-index: 9999;
+        }
+        .blink-dot { 
+            height: 8px; width: 8px; 
+            background-color: white; 
+            border-radius: 50%; 
+            display: inline-block;
+            margin-right: 8px; 
+            animation: blinker 1.5s linear infinite; 
+        }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        .search-container { 
+            display: flex; 
+            gap: 10px; 
+            align-items: center;
+        }
+
+        .full-page-modal { 
+            width: 100vw !important; 
+            height: 100vh !important; 
+            max-width: 100% !important;
+            max-height: 100% !important; 
+            border-radius: 0 !important; 
+            border: none !important; 
+            background-color: var(--bg-color) !important; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 0 !important;
+            margin: 0; 
+            box-sizing: border-box; 
+        }
+        .fp-header { 
+            background-color: var(--card-bg); 
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--border-color); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: var(--shadow-sm); 
+            z-index: 10;
+        }
+        .fp-header h2 { 
+            margin: 0; 
+            font-size: 18px; 
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .fp-btn-back { 
+            background: #ffffff; 
+            color: var(--text-main); 
+            border: 1px solid var(--border-color); 
+            padding: 8px 16px;
+            border-radius: var(--radius-md); 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 12px; 
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        .fp-btn-back:hover { 
+            background: #f8fafc;
+        }
+        .fp-btn-back:disabled { 
+            background: #f1f5f9 !important; 
+            color: #94a3b8 !important; 
+            border-color: #e2e8f0 !important;
+            cursor: not-allowed !important;
+            box-shadow: none;
+        }
+        .fp-body { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 25px; 
+            display: grid;
+            grid-template-columns: 1fr 1fr; 
+            gap: 25px; 
+            align-items: start; 
+        }
+        .fp-panel { 
+            background: var(--card-bg);
+            padding: 20px; 
+            border-radius: var(--radius-lg); 
+            border: 1px solid var(--border-color); 
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-delete-finding {
+            float: right;
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: var(--error-red);
+            border-radius: var(--radius-md); 
+            cursor: pointer;
+            font-size: 10px;
+            padding: 4px 8px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            margin-left: 10px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn-delete-finding:hover {
+            background-color: var(--error-red);
+            color: white;
+        }
+
+        .agih-container {
+            display: flex; 
+            gap: 12px; 
+            align-items: center; 
+            background: #f8fafc; 
+            padding: 12px 15px; 
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            flex-wrap: wrap; 
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .agih-container > select, 
+        .agih-container > button {
+            flex: 1 1 auto;
+            min-width: 160px;
+        }
+
+        /* --- MOBILE RESPONSIVENESS (Diperbaiki & Diperkemaskan) --- */
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .details-wrapper { 
+                grid-template-columns: 1fr !important;
+                gap: 15px; 
+                padding: 10px 0; 
+            }
+            .details-box { 
+                width: 100% !important;
+                box-sizing: border-box; 
+            }
+            .kpi-container { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 12px; 
+            }
+            .kpi-card { padding: 15px 10px; }
+            .kpi-card p { font-size: 20px; }
+            .pagination-container { 
+                padding: 15px; 
+                flex-direction: column; 
+                gap: 12px;
+            }
+            .search-container { flex-direction: column; }
+            .search-container select, .search-container input, .search-container div { width: 100%; max-width: 100% !important; }
+            
+            .fp-body { 
+                grid-template-columns: 1fr;
+                padding: 15px; 
+                gap: 20px; 
+            }
+            .fp-header { padding: 15px; flex-direction: column; gap: 15px; align-items: flex-start; }
+            .fp-header > div { width: 100%; justify-content: space-between; }
+            
+            .btn-delete-finding {
+                padding: 3px 6px !important; 
+                font-size: 9px !important; 
+            }
+            table { font-size: 12px; }
+            th, td { padding: 12px 10px; }
+
+            .header {
+                flex-direction: column;
+                align-items: stretch; 
+                padding: 20px;
+                gap: 15px; 
+            }
+            .header h1 {
+                font-size: 18px; 
+                text-align: center; 
+            }
+            .header > div {
+                flex-wrap: wrap; 
+                justify-content: space-between;
+                width: 100%;
+                gap: 10px;
+            }
+            .btn-logout {
+                flex: 1; 
+                padding: 10px 0 !important;
+                margin: 0;
+                text-align: center;
+            }
+            #display-username {
+                width: 100%; 
+                text-align: center;
+                background: #f8fafc;
+                padding: 10px 0;
+                border-radius: var(--radius-md);
+                border: 1px solid var(--border-color); 
+                order: 3; 
+                font-weight: 500;
+            }
+            .header .btn-logout:nth-of-type(1) { order: 1; } 
+            .header .btn-logout:nth-of-type(2) { order: 2; } 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="maintenance-bar">
+        <span class="blink-dot"></span> 
+        SYSTEM UNDER MAINTENANCE: ALL USERS TEMPORARILY BLOCKED.
+    </div>
+
+    <div id="login-section">
+        <div class="login-box">
+            <h2>SINGER FINDINGS PORTAL</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 25px;">Findings Tracking System</p>
+            <input type="text" id="username" class="login-input" placeholder="User ID">
+            <input type="password" id="password" class="login-input" placeholder="Password">
+            <button class="btn-login" onclick="handleLogin()">SIGN IN</button>
+            <p id="login-error" style="color: var(--error-red); font-size: 13px; display: none; margin-top: 15px; font-weight: 500;">Invalid User ID or Password!</p>
+            <div style="margin-top: 30px; padding-top: 20px; font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--border-color); letter-spacing: 0.5px; text-align: center;">
+                Copyright &copy; <span id="auto-year"></span> <span style="color: var(--text-main); font-weight: 600;">System Findings v2.0</span>. All Rights Reserved.
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard-section">
+        <div class="header">
+            <h1>FINDINGS MONITORING SYSTEM</h1>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span id="display-username" style="font-size: 12px; color: var(--text-muted);"></span>
+                <button class="btn-logout" style="color: var(--text-main); border-color: var(--border-color);" onclick="forceSyncData()">⟳ SYNC</button>
+                <button class="btn-logout" onclick="handleLogout()">Sign Out</button>
+            </div>
+        </div>
+
+        <div class="nav-tabs" id="master-nav-tabs">
+            <button class="nav-btn active" id="tab-dash" onclick="switchTab('dashboard')">Dashboard</button>
+            <button class="nav-btn" id="tab-assign" onclick="switchTab('assign')">Assignment</button>
+            <button class="nav-btn" id="tab-settings" onclick="switchTab('settings')">User Settings</button>
+            <button class="nav-btn" id="tab-report" onclick="switchTab('report')" style="display: none;">MIS Remark</button>
+        </div>
+
+        <div id="dashboard-panel" class="main-panel">
+            <div class="filter-section" style="margin-bottom: 20px;">
+                <span class="filter-title">Advanced Search By:</span>
+                <div class="search-container">
+                    <select id="search-type" class="form-control" style="width: 100%; max-width: 200px;">
+                        <option value="acct">Account No</option>
+                        <option value="nric">NRIC (All Linked)</option>
+                        <option value="plate">Plate No</option>
+                    </select>
+                    <input type="search" id="search-query" class="form-control" placeholder="Enter search..." style="flex: 1;" autocomplete="off" onkeypress="if(event.key==='Enter') executeSearch()">
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-submit" onclick="executeSearch()">SEARCH</button>
+                        <button class="btn-cancel" onclick="clearSearch()">CLEAR</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-bar">
+                <div class="filter-section">
+                    <div id="zone-filters-container">
+                        <span class="filter-title">Select Zone</span>
+                        <div class="btn-group" id="zone-buttons"></div>
+                    </div>
+                    <div id="region-filters-container">
+                        <span class="filter-title">Select Region</span>
+                        <div class="btn-group" id="region-buttons"></div>
+                    </div>
+                    <div id="area-filters-container">
+                        <span class="filter-title">Select Area</span>
+                        <div class="btn-group" id="area-buttons"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-container">
+                <div class="kpi-card kpi-clickable active" id="card-total" onclick="applyStatusFilter(null, this)">
+                    <h3>Total Accounts</h3><p id="kpi-total">0</p>
+                </div>
+                <div class="kpi-card kpi-clickable" id="card-done" onclick="applyStatusFilter('UPDATED', this)">
+                    <h3>ATTENDED</h3><p id="kpi-done" style="color: var(--success-green);">0</p>
+                </div>
+                <div class="kpi-card kpi-clickable" id="card-pending" onclick="applyStatusFilter('PENDING', this)">
+                    <h3>Pending</h3><p id="kpi-pending" style="color: var(--error-red);">0</p>
+                </div>
+                <div class="kpi-card" style="cursor: default;">
+                    <h3>Total OSB</h3><p id="kpi-osb">RM 0.00</p>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="sortable" onclick="sortTable('zone')" id="th-zone">ZONE ⇅</th>
+                            <th class="sortable" onclick="sortTable('region')" id="th-region">REGION ⇅</th>
+                            <th class="sortable" onclick="sortTable('area')" id="th-area">AREA ⇅</th>
+                            <th class="sortable" onclick="sortTable('loc')" id="th-loc">LOC CD ⇅</th>
+                            <th class="sortable" onclick="sortTable('type')" id="th-type">TYPE ⇅</th>
+                            <th class="sortable" onclick="sortTable('acct')" id="th-acct">ACCT NO ⇅</th>
+                            <th class="sortable" onclick="sortTable('delq')" id="th-delq">DELQ ⇅</th>
+                            <th class="sortable" onclick="sortTable('arrs_mth')" id="th-arrs_mth">ARRS MTH ⇅</th>
+                            <th class="sortable" onclick="sortTable('osb')" id="th-osb">OSB (RM) ⇅</th>
+                            <th class="sortable" onclick="sortTable('status')" id="th-status">STATUS ⇅</th>
+                            <th class="sortable" onclick="sortTable('assignee_id')" id="th-assignee_id">ASSIGNED TO ⇅</th>
+                            <th class="sortable" onclick="sortTable('last_date')" id="th-last_date" style="color: var(--accent-gold);">ATTEND DATE ⇅</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+            
+            <div class="pagination-container">
+                <div class="page-info" id="page-info">Page 0 of 0</div>
+                <div class="pagination-controls">
+                    <button id="btn-prev" onclick="prevPage()" disabled>◄ PREV</button>
+                    <button id="btn-next" onclick="nextPage()" disabled>NEXT ►</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="settings-panel" class="main-panel">
+            <div class="settings-box" style="margin-bottom: 20px;">
+                <h2>Add New Portal User (Syncs to Cloud Ledger)</h2>
+                <div class="form-group">
+                    <label>Nama Penuh / Nama Panggilan</label>
+                    <input type="text" id="new-user-name" class="form-control" placeholder="Cth: Ali Bin Abu">
+                </div>
+                <div class="form-group">
+                    <label>User ID / Username</label>
+                    <input type="text" id="new-user-id" class="form-control" placeholder="e.g., pic_north">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="new-user-pass" class="form-control" placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                    <label>Access Privilege (Role)</label>
+                    <select id="new-user-role" class="form-control" onchange="toggleFormRoleSelect()">
+                        <option value="user">PIC User (Field Staff / Collector)</option>
+                        <option value="admin">Admin (Branch / Area Head)</option>
+                        <option value="manager">Manager (Regional/Zone Head)</option>
+                        <option value="super">Super Admin (Mastermind)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="form-report-group" style="display: block;">
+                    <label>Report To (Assign Supervisor)</label>
+                    <select id="new-user-report-to" class="form-control">
+                        <option value="">-- No Supervisor Required --</option>
+                    </select>
+                </div>
+                <div class="form-group" id="form-zone-group" style="display: none;">
+                    <label style="color: var(--accent-gold); font-weight: bold;">Assign to ZONE (For Manager)</label>
+                    <select id="new-user-zone" class="form-control"></select>
+                </div>
+                <div class="form-group" id="form-area-group" style="display: none;">
+                    <label style="color: var(--status-ptp); font-weight: bold;">Assign to AREA (For Admin)</label>
+                    <select id="new-user-area" class="form-control"></select>
+                </div>
+
+                <button class="btn-submit" onclick="addNewUser()">Save User Configuration</button>
+            </div>
+
+            <div class="settings-box" style="max-width: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                    <h2 style="margin: 0; border: none; padding: 0;">System User List (<span id="total-users-count" style="color: var(--text-main);">0</span> Users)</h2>
+                    <input type="text" id="search-user" class="form-control" placeholder="Search by User ID..." style="max-width: 250px;" oninput="filterUserList()">
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 50px; text-align: center;">NO</th>
+                                <th>USER ID</th>
+                                <th>NAMA</th> 
+                                <th>ROLE</th>
+                                <th>REPORT TO</th> 
+                                <th>DATA ACCESS ASSIGNED</th>
+                                <th>STATUS</th> 
+                                <th>ACTION</th> 
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body"></tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-container" style="margin-bottom: 0; border-radius: 0 0 var(--radius-lg) var(--radius-lg);">
+                    <div class="page-info" id="user-page-info">Page 1 of 1</div>
+                    <div class="pagination-controls">
+                        <button id="btn-user-prev" onclick="prevUserPage()" disabled>◄ PREV</button>
+                        <button id="btn-user-next" onclick="nextUserPage()" disabled>NEXT ►</button>
+                    </div>
+                </div>
+            </div>
+        </div> 
+        
+        <div id="report-panel" class="main-panel" style="display: none;">
+            <div class="settings-box" style="max-width: 100%;">
+                <h2>Daily Export Queue (Latest 30 Days)</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="text-align: center; width: 120px;">DATE</th>
+                                <th style="text-align: center;">EXPORT REMARK</th>
+                                <th style="text-align: center; width: 150px;">ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-table-body">
+                            <tr><td colspan="3" style="text-align:center;">Loading database...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div> 
+
+    <div id="assign-panel" class="main-panel" style="display: none;">
+        <div class="action-bar" style="background: var(--card-bg); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); display: flex; gap: 25px; flex-wrap: wrap; box-shadow: var(--shadow-sm);">
+            
+            <div id="upload-action-container" style="flex: 1; min-width: 280px; display: none;">
+                <span class="filter-title">1. Muat Naik Data Excel:</span>
+                <input type="file" id="excel-file-input" style="display: none;" accept=".xlsx, .xls, .csv" onchange="handleExcelFileSelect(event)">
+                <button class="btn-upload-trigger" onclick="document.getElementById('excel-file-input').click()" style="width: 100%; justify-content: center; padding: 12px; margin-top: 8px;">
+                    ▲ Upload Excel Data
+                </button>
+            </div>
+            
+            <div style="flex: 1; min-width: 280px; border-left: 2px dashed var(--border-color); padding-left: 25px;">
+                <span class="filter-title">2. Tapis Akaun Mengikut Status Agihan:</span>
+                <select id="assign-filter-status" class="form-control" style="width: 100%; font-weight: 600; margin-top: 8px;" onchange="renderAssignTable()">
+                    <option value="UNASSIGNED">🔴 UNASSIGNED (Belum Diagihkan)</option>
+                    <option value="ASSIGNED">🟢 ASSIGNED (Sudah Diagihkan)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="settings-box" style="max-width: 100%; margin-top: 25px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                <div>
+                    <h2 style="margin: 0; border: none; padding: 0;">3. Senarai Akaun (<span id="assign-total-count" style="color: var(--accent-gold);">0</span> Rekod)</h2>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">
+                        *Hanya memaparkan rekod dalam tapisan kawalan (Zone/Region/Area) jagaan anda.
+                    </div>
+                </div>
+                
+                <div class="agih-container">
+                    <span style="font-size: 11px; font-weight: 700; color: var(--text-main);">FILTER COLLECTOR:</span>
+                    <select id="filter-collector-dropdown" class="form-control" style="padding: 8px 12px; font-size: 13px; margin-right: 15px;" onchange="renderAssignTable()">
+                        <option value="ALL">SEMUA COLLECTOR</option>
+                    </select>
+                    
+                    <span style="font-size: 11px; font-weight: 700; color: var(--text-main);">AGIH KEPADA:</span>
+                    <select id="assign-target-user" class="form-control" style="padding: 8px 12px; font-size: 13px;">
+                        <option value="">-- PILIH STAF BAWAHAN --</option>
+                    </select>
+                    <button class="btn-submit" onclick="executeBatchAssignment()" style="background-color: var(--success-green); padding: 10px 16px; font-size: 12px;">✅ ASSIGN SELECTED</button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 40px; text-align: center;">
+                                <input type="checkbox" id="check-all-assign" onclick="toggleAllAssignCheckboxes(this)" style="cursor: pointer; transform: scale(1.2);">
+                            </th>
+                            <th class="sortable" onclick="sortAssignTable('acct')" id="tha-acct">ACCT NO ⇅</th>
+                            <th class="sortable" onclick="sortAssignTable('zone')" id="tha-zone">ZONE ⇅</th>
+                            <th class="sortable" onclick="sortAssignTable('region')" id="tha-region">REGION ⇅</th>
+                            <th class="sortable" onclick="sortAssignTable('area')" id="tha-area">AREA ⇅</th>
+                            <th class="sortable" onclick="sortAssignTable('osb')" id="tha-osb">OSB (RM) ⇅</th>
+                            <th class="sortable" onclick="sortAssignTable('status')" id="tha-status">STATUS ⇅</th>
+                            <th class="sortable" onclick="sortAssignTable('collector')" id="tha-collector">COLLECTOR ⇅</th>
+                            <th class="sortable" onclick="sortAssignTable('assignee_id')" id="tha-assignee_id">CURRENT ASSIGNEE ⇅</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assign-table-body">
+                        <tr><td colspan="9" style="text-align:center;">Sila tunggu, sedang memuatkan data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination-container" style="margin-bottom: 0; border-radius: 0 0 var(--radius-lg) var(--radius-lg);">
+                <div class="page-info" id="assign-page-info">Page 1 of 1</div>
+                <div class="pagination-controls">
+                    <button id="btn-assign-prev" onclick="prevAssignPage()" disabled>◄ PREV</button>
+                    <button id="btn-assign-next" onclick="nextAssignPage()" disabled>NEXT ►</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div style="text-align: center; padding: 25px 10px 15px 10px; margin-top: 30px; font-size: 11px; color: var(--text-muted); border-top: 1px dashed var(--border-color); letter-spacing: 0.5px;">
+        Copyright &copy; <span id="auto-year"></span> <span style="color: var(--text-main); font-weight: 600;">System Findings v2.0</span>. All Rights Reserved.
+    </div>
+
+    <div class="modal-overlay" id="loadingModal">
+        <div class="modal-content">
+            <h2 style="color: var(--text-main); margin-top:0;">SYSTEM CHECK</h2>
+            <p style="color: var(--text-muted); font-size: 14px;" id="loadingText">Checking latest data version. Please wait...</p>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="readingExcelModal">
+        <div class="modal-content" style="text-align: center; padding: 40px; max-width: 350px;">
+            <h2 style="color: var(--success-green); margin-top:0;">READING EXCEL FILE</h2>
+            <p style="color: var(--text-muted); font-size: 14px;">Please wait, the system is processing data rows...</p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="notificationModal" style="z-index: 1200;">
+        <div class="modal-content" style="text-align: center; max-width: 350px;">
+            <h2 id="notif-title" style="margin-top: 0; font-size: 20px;">NOTIFICATION TITLE</h2>
+            <p id="notif-message" style="color: var(--text-main); font-size: 14px; margin: 15px 0 25px 0; line-height: 1.6;"></p>
+            <button class="btn-submit" style="width: 100%;" onclick="document.getElementById('notificationModal').style.display='none'">CLOSE</button>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="mappingModal">
+        <div class="modal-content" style="max-width: 750px; width: 95%;">
+            <div class="modal-header">
+                <h2>Map Excel Columns to Database Fields</h2>
+                <button class="close-btn" onclick="closeMappingModal()">&times;</button>
+            </div>
+            
+            <div class="mapping-container">
+                <div class="mapping-section">
+                    <h3>1. MAIN ACCOUNT INFO</h3>
+                    <div class="mapping-grid">
+                        <label>COLLECTOR (CALLER)</label><select id="map-collector" class="form-control mapping-select"></select>
+                        <label>ZONE</label><select id="map-zone" class="form-control mapping-select"></select>
+                        <label>REGION</label><select id="map-region" class="form-control mapping-select"></select>
+                        <label>AREA</label><select id="map-area" class="form-control mapping-select"></select>
+                        <label>LOC CODE</label><select id="map-loc" class="form-control mapping-select"></select>
+                        <label>TYPE</label><select id="map-type" class="form-control mapping-select"></select>
+                        <label>ACCOUNT NO</label><select id="map-acct" class="form-control mapping-select"></select>
+                        <label>DELQ</label><select id="map-delq" class="form-control mapping-select"></select>
+                        <label>ARRS MTH</label><select id="map-arrs" class="form-control mapping-select"></select>
+                        <label>OSB Balance</label><select id="map-osb" class="form-control mapping-select"></select>
+                    </div>
+                </div>
+                <div class="mapping-section">
+                    <h3>2. HIRER DETAILS</h3>
+                    <div class="mapping-grid">
+                        <label>Name</label><select id="map-h-name" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">New NRIC</label><select id="map-h-nric-new" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">Old NRIC</label><select id="map-h-nric-old" class="form-control mapping-select"></select>
+                        <label>Tel No</label><select id="map-h-tel" class="form-control mapping-select"></select>
+                        <label>Home Add 1</label><select id="map-h-add1" class="form-control mapping-select"></select>
+                        <label>Home Add 2</label><select id="map-h-add2" class="form-control mapping-select"></select>
+                        <label>Home Add 3</label><select id="map-h-add3" class="form-control mapping-select"></select>
+                        <label>Co. Name</label><select id="map-hc-name" class="form-control mapping-select"></select>
+                        <label>Co. Tel</label><select id="map-hc-tel" class="form-control mapping-select"></select>
+                        <label>Co. Add 1</label><select id="map-hc-add1" class="form-control mapping-select"></select>
+                        <label>Co. Add 2</label><select id="map-hc-add2" class="form-control mapping-select"></select>
+                    </div>
+                </div>
+                <div class="mapping-section">
+                    <h3>3. SPOUSE & GUARANTOR DETAILS</h3>
+                    <div class="mapping-grid">
+                        <label>Spouse Name</label><select id="map-s-name" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">Spouse New IC</label><select id="map-s-nric-new" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">Spouse Old IC</label><select id="map-s-nric-old" class="form-control mapping-select"></select>
+                        <label>Spouse Tel</label><select id="map-s-tel" class="form-control mapping-select"></select>
+                        <label>Gtor Name</label><select id="map-g-name" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">Gtor New IC</label><select id="map-g-nric-new" class="form-control mapping-select"></select>
+                        <label style="color: var(--accent-gold);">Gtor Old IC</label><select id="map-g-nric-old" class="form-control mapping-select"></select>
+                        <label>Gtor Tel</label><select id="map-g-tel" class="form-control mapping-select"></select>
+                        <label>Gtor Add 1</label><select id="map-g-add1" class="form-control mapping-select"></select>
+                        <label>Gtor Add 2</label><select id="map-g-add2" class="form-control mapping-select"></select>
+                        <label>Gtor Co. Name</label><select id="map-gc-name" class="form-control mapping-select"></select>
+                        <label>Gtor Co. Tel</label><select id="map-gc-tel" class="form-control mapping-select"></select>
+                    </div>
+                </div>
+                <div class="mapping-section">
+                    <h3>4. ACCOUNT INFO & BALANCES</h3>
+                    <div class="mapping-grid">
+                        <label>Product Desc</label><select id="map-prod" class="form-control mapping-select"></select>
+                        <label>Plate No</label><select id="map-plate" class="form-control mapping-select"></select>
+                        <label>EP Balance</label><select id="map-bal" class="form-control mapping-select"></select>
+                        <label>ODP Bal</label><select id="map-odp" class="form-control mapping-select"></select>
+                        <label>ADCH Bal</label><select id="map-adch" class="form-control mapping-select"></select>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-submit" style="width: 100%; background: var(--success-green); margin-top: 20px; font-size: 14px;" onclick="processExcelUpload()">CONFIRM & START UPLOAD</button>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="updateModal" style="align-items: flex-start; padding: 0;">
+        <div class="modal-content full-page-modal">
+            <div class="fp-header">
+                <h2>ACCT: <span id="modalAccNo"></span></h2>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button id="btn-modal-prev" class="fp-btn-back" onclick="navigateModal('prev')">◄ PREV</button>
+                    <button id="btn-modal-next" class="fp-btn-back" onclick="navigateModal('next')">NEXT ►</button>
+                    <button class="btn-submit" onclick="closeModal()">❮ KEMBALI</button>
+                </div>
+            </div>
+            <div class="fp-body">
+                <div class="fp-panel" style="background: transparent; border: none; padding: 0; box-shadow: none;">
+                    <div id="modal-details-container" style="display: flex; flex-direction: column; gap: 20px;"></div>
+                </div>
+                <div class="fp-panel" style="position: sticky; top: 25px;">
+                    <label style="font-size: 12px; color: var(--text-main); display: block; margin-bottom: 8px; font-weight: 700;">HISTORICAL AUDIT TRAIL:</label>
+                    <div class="history-box" style="max-height: 250px; margin-bottom: 20px;"></div>
+                    
+                    <div class="form-group" style="margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px;">
+                        <label style="color: var(--text-main); font-weight: 700; font-size: 13px; margin-bottom: 0;">ACTION STATUS:</label>
+                        <select id="finding-status-select" class="form-control" style="font-weight: 600; flex: 1;">
+                            <option value="">-- SELECT STATUS --</option>
+                            <option value="CALL" style="color: var(--status-call);">CALL (Phone Call)</option>
+                            <option value="UCT" style="color: var(--status-uct);">UCT (Uncontactable)</option>
+                            <option value="PTP" style="color: var(--status-ptp);">PTP (Promise To Pay)</option>
+                            <option value="PV" style="color: var(--status-pv);">PV (Physical Visit)</option>
+                            <option value="PAID" style="color: var(--status-paid);">PAID (Payment Settled)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 25px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <label style="color: var(--text-main); font-size: 13px; font-weight: 700;">VERIFICATION FINDING LOG:</label>
+                            <span id="textarea-info" style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Jumlah Karakter: 0/200</span>
+                        </div>
+                        <textarea id="single-remark-box" class="form-control" rows="5" 
+                                  placeholder="Taip satu cerita panjang di sini... Sistem akan automatik susun dan potong kepada maksimum 4 baris × 50 karakter dengan kemas semasa disimpan."
+                                  style="font-size: 13px; resize: none; line-height: 1.6;"
+                                  oninput="updateTextareaInfo(this)"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 12px;">
+                        <button id="btnSaveFinding" class="btn-submit" style="flex: 2; padding: 14px; font-size: 14px;" onclick="saveFinding()">COMMIT ENTRY</button>
+                        <button id="btnResetPending" class="btn-cancel" style="flex: 1; color: var(--error-red); border-color: #fecaca; display: none; padding: 14px;" onclick="resetAccountStatus()">RESET LOG</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="progressModal">
+        <div class="modal-content">
+            <h2 style="margin-top: 0; font-size: 20px; color: var(--text-main);">DATA STREAMING PIPELINE</h2>
+            <div class="progress-wrapper"><div class="progress-bar-fill" id="upload-progress-bar"></div></div>
+            <div class="progress-text" id="upload-progress-text">0%</div>
+            <div class="progress-subtext" id="upload-progress-subtext" style="color: var(--text-muted); font-size: 13px;">Preparing data profile...</div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="customConfirmModal" style="z-index: 1100;">
+        <div class="modal-content" style="text-align: center; max-width: 360px;">
+            <h2 style="color: var(--text-main); margin-top: 0; font-size: 20px;">ACTION CONFIRMATION</h2>
+            <p id="confirmMessage" style="color: var(--text-muted); font-size: 14px; margin: 15px 0 25px 0; line-height: 1.6; white-space: pre-wrap;"></p>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn-cancel" style="flex: 1;" id="btnConfirmCancel">CANCEL</button>
+                <button class="btn-submit" style="flex: 1; background-color: var(--error-red);" id="btnConfirmOk">CONTINUE</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="customPromptModal" style="z-index: 1100;">
+        <div class="modal-content" style="text-align: center; max-width: 360px;">
+            <h2 style="color: var(--text-main); margin-top: 0; font-size: 20px;">SECURITY PASSCODE</h2>
+            <p id="promptMessage" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;"></p>
+            <input type="password" id="promptInput" class="form-control" placeholder="••••••••" style="text-align: center; margin-bottom: 25px; font-size: 20px; letter-spacing: 4px;">
+            <div style="display: flex; gap: 12px;">
+                <button class="btn-cancel" style="flex: 1;" id="btnPromptCancel">CANCEL</button>
+                <button class="btn-submit" style="flex: 1;" id="btnPromptOk">VERIFY</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const IS_MAINTENANCE = false; 
+
+        const supabaseUrl = 'https://ageobrtzfpipaagtkoia.supabase.co';
+        const supabaseKey = 'sb_publishable_bhlBKnGCIyGHvyQ0rvAqzw_8fCU02j-';
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        localforage.config({
+            name: 'SCAZP_Portal',
+            storeName: 'account_data'
+        });
+
+        let currentUser = null; 
+        // [ZONE HIERARCHY]
+        let currentZone = null;
+        let currentRegion = null; 
+        let currentArea = null;
+        let currentStatusFilter = null; 
+        
+        let globalAccounts = []; 
+        let filteredAccounts = []; 
+        let geoMap = {}; // Menggantikan regionsMap -> Menyimpan Zone -> Region -> Area
+        let parsedExcelRows = []; 
+        let masterLocations = [];
+        let currentModalIndex = -1;
+        
+        let currentPage = 1;
+        const rowsPerPage = 20;
+
+        let currentSortColumn = null;
+        let currentSortDirection = 'asc';
+
+        let allSystemUsers = [];
+        let filteredSystemUsers = [];
+        let userCurrentPage = 1;
+        const usersPerPage = 20;
+
+async function checkLoginSession() {
+    const currentYear = new Date().getFullYear();
+    if(document.getElementById('auto-year')) document.getElementById('auto-year').innerText = currentYear;
+    if(document.getElementById('auto-year-login')) document.getElementById('auto-year-login').innerText = currentYear;
+    
+    const loginSection = document.getElementById('login-section');
+    const dashboardSection = document.getElementById('dashboard-section');
+    const storedSession = localStorage.getItem('scazp_user_session');
+
+    if (storedSession) {
+        let userTmp = JSON.parse(storedSession);
+        
+        // [FIX DB SELECT] Tarik zone dan area sekali
+        const { data, error } = await supabase.from('users').select('status, role, assignedzone, assignedregion, assignedarea, report_to').eq('id', userTmp.id).single();
+
+        if (error || !data || data.status === 'INACTIVE') {
+            alert("Akaun anda telah dinyahaktifkan atau sesi tamat.");
+            handleLogout(); 
+            return;
+        }
+
+        currentUser = { ...userTmp, ...data };
+        
+        if (IS_MAINTENANCE && currentUser.role !== 'super') {
+            document.getElementById('maintenance-bar').style.display = 'block';
+            document.getElementById('maintenance-bar').innerHTML = `<span class="blink-dot"></span> SORRY, SYSTEM UNDER MAINTENANCE.`;
+            loginSection.style.display = 'flex';
+            dashboardSection.style.display = 'none';
+            return;
+        }
+
+        dashboardSection.style.display = 'block';
+        loginSection.style.display = 'none';
+        document.getElementById('display-username').innerText = "Logged in as: " + currentUser.id.toUpperCase();
+        
+        await fetchFullDatabaseData();
+        await fetchMasterLocations(); 
+        
+        initDashboardView();
+    } else {
+        loginSection.style.display = 'flex';
+        dashboardSection.style.display = 'none';
+    }
+}
+
+        window.customConfirm = function(message) {
+            return new Promise((resolve) => {
+                document.getElementById('confirmMessage').innerText = message;
+                document.getElementById('customConfirmModal').style.display = 'flex';
+                
+                document.getElementById('btnConfirmOk').onclick = function() {
+                    document.getElementById('customConfirmModal').style.display = 'none';
+                    resolve(true);
+                };
+                document.getElementById('btnConfirmCancel').onclick = function() {
+                    document.getElementById('customConfirmModal').style.display = 'none';
+                    resolve(false);
+                };
+            });
+        };
+
+        window.customPrompt = function(message) {
+            return new Promise((resolve) => {
+                document.getElementById('promptMessage').innerText = message;
+                document.getElementById('promptInput').value = '';
+                document.getElementById('customPromptModal').style.display = 'flex';
+                setTimeout(() => document.getElementById('promptInput').focus(), 100);
+                
+                document.getElementById('btnPromptOk').onclick = function() {
+                    let val = document.getElementById('promptInput').value.trim();
+                    document.getElementById('customPromptModal').style.display = 'none';
+                    resolve(val);
+                };
+                document.getElementById('btnPromptCancel').onclick = function() {
+                    document.getElementById('customPromptModal').style.display = 'none';
+                    resolve(null);
+                };
+                
+                document.getElementById('promptInput').onkeypress = function(e) {
+                    if (e.key === 'Enter') document.getElementById('btnPromptOk').click();
+                };
+            });
+        };
+
+        window.handleLogin = async function() {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            const btn = document.querySelector('.btn-login');
+            btn.innerText = "CHECKING DATABASE..."; 
+            
+            try {
+                const { data, error } = await supabase.from('users').select('*').eq('id', user).single();
+                if (data && data.pass === pass) {
+                    if (data.status === 'INACTIVE') {
+                        document.getElementById('login-error').innerText = "Your account has been deactivated. Please contact the Admin.";
+                        document.getElementById('login-error').style.display = 'block';
+                        btn.innerText = "SIGN IN";
+                        return; 
+                    }
+
+                    if (IS_MAINTENANCE && data.role !== 'super') {
+                        document.getElementById('maintenance-bar').style.display = 'block';
+                        document.getElementById('maintenance-bar').innerHTML = `<span class="blink-dot"></span> SORRY, THE SYSTEM IS UNDER MAINTENANCE. ACCESS TEMPORARILY BLOCKED.`;
+                        document.getElementById('login-error').innerText = "Access denied! System is in maintenance mode.";
+                        document.getElementById('login-error').style.display = 'block';
+                        btn.innerText = "SIGN IN";
+                        return;
+                    }
+
+                    currentUser = data;
+                    currentUser.username = user;
+                    localStorage.setItem('scazp_user_session', JSON.stringify(currentUser));
+                    document.getElementById('login-error').style.display = 'none';
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('dashboard-section').style.display = 'block';
+                    document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
+                    
+                    if (IS_MAINTENANCE && data.role === 'super') {
+                        document.getElementById('maintenance-bar').style.display = 'block';
+                        document.getElementById('maintenance-bar').innerHTML = `<span class="blink-dot"></span> MAINTENANCE MODE ACTIVE (Super Admin Access Only)`;
+                    } else {
+                        document.getElementById('maintenance-bar').style.display = 'none';
+                    }
+                    
+                    await fetchFullDatabaseData();
+                    await fetchMasterLocations();
+                    initDashboardView();
+                } else {
+                    document.getElementById('login-error').style.display = 'block';
+                }
+            } catch (error) { alert("Connection error!"); }
+            btn.innerText = "SIGN IN";
+        };
+
+        window.handleLogout = async function() {
+            currentUser = null; 
+            globalAccounts = []; 
+            filteredAccounts = []; 
+            geoMap = {};
+            currentZone = null;
+            currentRegion = null; 
+            currentArea = null;
+            currentStatusFilter = null;
+            activeSearchType = null;
+            activeSearchQuery = '';
+
+            localStorage.removeItem('scazp_user_session');
+            localStorage.removeItem('scazp_active_tab'); 
+            
+            try {
+                await localforage.clear();
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('scazp_time_')) localStorage.removeItem(key);
+                });
+            } catch (e) { console.error("Cache clear error:", e); }
+            
+            document.getElementById('username').value = ''; 
+            document.getElementById('password').value = '';
+            document.getElementById('dashboard-section').style.display = 'none';
+            document.getElementById('login-section').style.display = 'flex';
+        };
+
+window.forceSyncData = async function() {
+            if (!currentUser) return;
+            const syncBtn = event.target;
+            syncBtn.disabled = true;
+            syncBtn.innerText = "SYNCING...";
+
+            const cacheKey = `scazp_cache_${currentUser.id}`;
+            const timeKey = `scazp_time_${currentUser.id}`;
+
+            await localforage.removeItem(cacheKey);
+            localStorage.removeItem(timeKey);
+
+            await fetchFullDatabaseData();
+            applyFilterAndRender();
+            
+            showNotification("SYNC SUCCESSFUL", "Data has been updated.");
+            setTimeout(() => {
+                syncBtn.disabled = false;
+                syncBtn.innerText = "⟳ SYNC";
+            }, 60000);
+        };
+
+async function fetchFullDatabaseData() {
+            const cacheKey = `scazp_cache_${currentUser.id}`;
+            const timeKey = `scazp_time_${currentUser.id}`;
+            
+            const loadingModal = document.getElementById('loadingModal');
+            const loadingText = document.getElementById('loadingText');
+            loadingModal.style.display = 'flex';
+            
+            try {
+                const { data: lastFinding } = await supabase.from('findings').select('updated_at').order('updated_at', { ascending: false }).limit(1);
+                const dbLastUpdate = lastFinding && lastFinding.length > 0 ? lastFinding[0].updated_at : 'NODATA';
+                const localLastUpdate = localStorage.getItem(timeKey);
+                const cachedData = await localforage.getItem(cacheKey);
+
+                if (cachedData && localLastUpdate === dbLastUpdate) {
+                    console.log("Reading from IndexedDB storage...");
+                    globalAccounts = cachedData;
+                    filteredAccounts = [...globalAccounts];
+                    rebuildGeoMapFromData();
+                    loadingModal.style.display = 'none';
+                    return;
+                }
+
+                console.log("Fetching data sequentially from the cloud...");
+                loadingText.innerText = "Downloading records from the server (This may take a while)...";
+                
+                let allData = [];
+                let page = 0;
+                const pageSize = 1000;
+                
+                while(true) {
+                    // [ADD ZONE COLUMN TO FETCH]
+                    let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id, collector');
+                    
+                    // [FIX HIERARCHY ACCESS]
+                    if (currentUser.role === 'user') {
+                        let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
+                        fetchQuery = fetchQuery.eq('assignee_id', currentUserIdClean);
+                    } else if (currentUser.role === 'admin') {
+                        let safeArea = currentUser.assignedarea ? currentUser.assignedarea.toUpperCase().trim() : 'NONE';
+                        fetchQuery = fetchQuery.eq('area', safeArea);
+                    } else if (currentUser.role === 'manager') {
+                        let safeZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : 'NONE';
+                        fetchQuery = fetchQuery.eq('zone', safeZone);
+                    }
+                    // 'super' fetches everything.
+                    
+                    const { data, error } = await fetchQuery.range(page * pageSize, (page + 1) * pageSize - 1);
+                    if (error) { console.error("Error fetching data:", error); break; }
+                    if (!data || data.length === 0) break;
+                    
+                    const mappedData = data.map(item => {
+                        let f_status = (item.details && item.details.finding_status) ? item.details.finding_status : "";
+                        return { ...item, finding_status: f_status };
+                    });
+                    allData = allData.concat(mappedData);
+                    
+                    if (data.length < pageSize) break; 
+                    page++;
+                }
+                
+                globalAccounts = allData;
+                filteredAccounts = [...globalAccounts];
+                
+                await localforage.setItem(cacheKey, globalAccounts);
+                localStorage.setItem(timeKey, dbLastUpdate);
+                
+                rebuildGeoMapFromData();
+            } catch (err) {
+                console.error("Sync error:", err);
+            }
+            
+            loadingText.innerText = "Done.";
+            loadingModal.style.display = 'none';
+        }
+
+        function rebuildGeoMapFromData() {
+            geoMap = {};
+            globalAccounts.forEach(row => {
+                let z = row.zone ? row.zone.toUpperCase().trim() : '';
+                let r = row.region ? row.region.toUpperCase().trim() : '';
+                let a = row.area ? row.area.toUpperCase().trim() : '';
+                
+                if (z && r && a) {
+                    if (!geoMap[z]) geoMap[z] = {};
+                    if (!geoMap[z][r]) geoMap[z][r] = [];
+                    if (!geoMap[z][r].includes(a)) geoMap[z][r].push(a);
+                }
+            });
+        }
+        
+        function initDashboardView() {
+            if (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') {
+                document.getElementById('master-nav-tabs').style.display = 'flex';
+                document.getElementById('upload-action-container').style.display = 'block';
+                document.getElementById('tab-report').style.display = currentUser.role === 'super' ? 'block' : 'none';
+                document.getElementById('tab-settings').style.display = currentUser.role === 'super' ? 'inline-block' : 'none';
+                
+                // FILTER HIERARCHY LOGIC
+                if(currentUser.role === 'super') {
+                    document.getElementById('zone-filters-container').style.display = 'block';
+                    renderZoneSelectionUI();
+                } else if(currentUser.role === 'manager') {
+                    document.getElementById('zone-filters-container').style.display = 'block';
+                    document.getElementById('zone-filters-container').innerHTML = `
+                        <span class="filter-title">My Assigned Zone</span>
+                        <div class="btn-group"><button class="btn-filter active">${currentUser.assignedzone || 'NO ZONE'}</button></div>
+                    `;
+                    currentZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : null;
+                    document.getElementById('region-filters-container').style.display = 'block';
+                    renderRegionSelectionUI(currentZone);
+                } else if(currentUser.role === 'admin') {
+                    // [BUG FIX]: Admin cannot select region/zone. Stick strictly to their assigned area.
+                    document.getElementById('area-filters-container').style.display = 'block';
+                    document.getElementById('area-filters-container').innerHTML = `
+                        <span class="filter-title">My Assigned Area</span>
+                        <div class="btn-group"><button class="btn-filter active">${currentUser.assignedarea || 'NO AREA'}</button></div>
+                    `;
+                    currentArea = currentUser.assignedarea ? currentUser.assignedarea.toUpperCase().trim() : null;
+                }
+
+                applyFilterAndRender(); 
+                fetchAndRenderUsers();
+                if(currentUser.role === 'super') renderReportCenter(); 
+                toggleFormRoleSelect();
+            } else {
+                // Untuk PIC USER biasa
+                document.getElementById('master-nav-tabs').style.display = 'none';
+                document.getElementById('upload-action-container').style.display = 'none';
+                
+                document.getElementById('area-filters-container').style.display = 'block';
+                document.getElementById('area-filters-container').innerHTML = `
+                    <span class="filter-title">My Assigned Accounts</span>
+                    <div class="btn-group"><button class="btn-filter active">Showing My Accounts Only</button></div>
+                `;
+                applyFilterAndRender();
+            }
+
+            const lastActiveTab = localStorage.getItem('scazp_active_tab') || 'dashboard';
+            switchTab(lastActiveTab);
+        }
+
+        function applyFilterAndRender() {
+            let scopedGeoData = globalAccounts.filter(row => {
+                if (activeSearchQuery) {
+                    let d = row.details || {};
+                    let q = activeSearchQuery.replace(/[\s-]/g, ''); 
+                    
+                    if (activeSearchType === 'acct') {
+                        let a = row.acct ? String(row.acct).toUpperCase().replace(/[\s-]/g, '') : '';
+                        if (!a.includes(q)) return false;
+                    } 
+                    else if (activeSearchType === 'plate') {
+                        let p = d.plate ? String(d.plate).toUpperCase().replace(/[\s-]/g, '') : '';
+                        if (!p.includes(q)) return false;
+                    }
+                    else if (activeSearchType === 'nric') {
+                        let h_ic = d.h_nric ? String(d.h_nric).toUpperCase().replace(/[\s-/]/g, '') : '';
+                        let s_ic = d.s_nric ? String(d.s_nric).toUpperCase().replace(/[\s-/]/g, '') : '';
+                        let g_ic = d.g_nric ? String(d.g_nric).toUpperCase().replace(/[\s-/]/g, '') : '';
+                        if (!h_ic.includes(q) && !s_ic.includes(q) && !g_ic.includes(q)) {
+                            return false; 
+                        }
+                    }
+                }
+
+                let z = row.zone ? row.zone.toUpperCase().trim() : '';
+                let r = row.region ? row.region.toUpperCase().trim() : '';
+                let a = row.area ? row.area.toUpperCase().trim() : '';
+                
+                let matchZone = (currentZone && currentZone !== 'ALL') ? z === currentZone : true;
+                let matchRegion = (currentRegion && currentRegion !== 'ALL') ? r === currentRegion : true;
+                let matchArea = (currentArea && currentArea !== 'ALL') ? a === currentArea : true;
+                
+                return matchZone && matchRegion && matchArea;
+            });
+            
+            updateKPICards(scopedGeoData);
+            
+            filteredAccounts = scopedGeoData.filter(row => {
+                return currentStatusFilter ? row.status === currentStatusFilter : true;
+            });
+            
+            currentSortColumn = 'last_date'; 
+            currentSortDirection = 'desc';
+
+            filteredAccounts.sort((a, b) => {
+                let dateA = (a.details && a.details.last_remark_date) ? a.details.last_remark_date.split('/').reverse().join('') : '';
+                let dateB = (b.details && b.details.last_remark_date) ? b.details.last_remark_date.split('/').reverse().join('') : '';
+                
+                let timeA = (a.details && a.details.timestamp) ? a.details.timestamp : 0;
+                let timeB = (b.details && b.details.timestamp) ? b.details.timestamp : 0;
+
+                if (dateA === dateB) return timeB - timeA;
+                return dateB.localeCompare(dateA);
+            });
+
+            updateHeaderArrows('last_date');
+
+            currentPage = 1;
+            renderTablePage();
+        }
+        
+        window.applyStatusFilter = function(status, element) {
+            currentStatusFilter = status;
+            document.querySelectorAll('.kpi-clickable').forEach(card => card.classList.remove('active'));
+            if (element) element.classList.add('active');
+            applyFilterAndRender();
+        };
+
+        function resetStatusCardHighlight() {
+            currentStatusFilter = null;
+            document.querySelectorAll('.kpi-clickable').forEach(card => card.classList.remove('active'));
+            const totalCard = document.getElementById('card-total');
+            if (totalCard) totalCard.classList.add('active');
+        }
+
+        // ZONE FILTERS
+        window.clearZoneSelection = function(btnElement) {
+            updateActiveFilterHighlight('zone-buttons', btnElement);
+            document.getElementById('region-filters-container').style.display = 'none';
+            document.getElementById('area-filters-container').style.display = 'none';
+            currentZone = null; currentRegion = null; currentArea = null;
+            resetStatusCardHighlight();
+            applyFilterAndRender();
+        };
+
+        window.applyZoneFilter = function(zone, btnElement) {
+            updateActiveFilterHighlight('zone-buttons', btnElement);
+            currentZone = zone; currentRegion = null; currentArea = null;
+            document.getElementById('region-filters-container').style.display = 'block';
+            document.getElementById('area-filters-container').style.display = 'none';
+            renderRegionSelectionUI(zone);
+            resetStatusCardHighlight();
+            applyFilterAndRender();
+        };
+
+        // REGION FILTERS
+        window.clearRegionSelection = function(btnElement) {
+            updateActiveFilterHighlight('region-buttons', btnElement);
+            document.getElementById('area-filters-container').style.display = 'none';
+            currentRegion = null; currentArea = null;
+            resetStatusCardHighlight();
+            applyFilterAndRender();
+        };
+
+        window.applyRegionFilter = function(region, btnElement) {
+            updateActiveFilterHighlight('region-buttons', btnElement);
+            currentRegion = region; currentArea = null;
+            document.getElementById('area-filters-container').style.display = 'block';
+            renderAreaSelectionUI(currentZone, region);
+            resetStatusCardHighlight();
+            applyFilterAndRender();
+        };
+
+        // AREA FILTERS
+        window.clearAreaSelection = function(btnElement) {
+            updateActiveFilterHighlight('area-buttons', btnElement);
+            currentArea = null;
+            resetStatusCardHighlight();
+            applyFilterAndRender();
+        };
+
+        window.applyAreaFilter = function(area, btnElement) {
+            updateActiveFilterHighlight('area-buttons', btnElement);
+            currentArea = area;
+            resetStatusCardHighlight();
+            applyFilterAndRender();
+        };
+
+        function renderZoneSelectionUI() {
+            const container = document.getElementById('zone-buttons');
+            container.innerHTML = '<button class="btn-filter active" onclick="clearZoneSelection(this)">ALL ZONES</button>';
+            Object.keys(geoMap).forEach(zone => {
+                container.innerHTML += `<button class="btn-filter" onclick="applyZoneFilter('${zone}', this)">${zone}</button>`;
+            });
+        }
+
+        function renderRegionSelectionUI(zone) {
+            const container = document.getElementById('region-buttons');
+            let activeAll = !currentRegion ? 'active' : '';
+            container.innerHTML = `<button class="btn-filter ${activeAll}" onclick="clearRegionSelection(this)">ALL REGIONS</button>`;
+            
+            if(geoMap[zone]) {
+                Object.keys(geoMap[zone]).forEach(reg => {
+                    let activeStyle = (currentRegion === reg) ? 'active' : '';
+                    container.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyRegionFilter('${reg}', this)">${reg}</button>`;
+                });
+            }
+        }
+
+        function renderAreaSelectionUI(zone, region) {
+            const areaContainer = document.getElementById('area-buttons');
+            let activeAll = !currentArea ? 'active' : '';
+            areaContainer.innerHTML = `<button class="btn-filter ${activeAll}" onclick="clearAreaSelection(this)">ALL AREAS</button>`;
+            
+            if(geoMap[zone] && geoMap[zone][region] && geoMap[zone][region].length > 0) {
+                geoMap[zone][region].forEach((area) => {
+                    let activeStyle = (currentArea === area) ? 'active' : '';
+                    areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
+                });
+            }
+        }
+
+        function updateActiveFilterHighlight(containerId, activeBtn) {
+            if(!activeBtn) return;
+            let btns = document.getElementById(containerId).getElementsByClassName('btn-filter');
+            for(let btn of btns) { btn.classList.remove('active'); }
+            activeBtn.classList.add('active');
+        }
+
+        let activeSearchType = null;
+        let activeSearchQuery = '';
+
+        window.executeSearch = function() {
+            activeSearchType = document.getElementById('search-type').value;
+            activeSearchQuery = document.getElementById('search-query').value.trim().toUpperCase();
+            
+            if(!activeSearchQuery) {
+                showNotification("EMPTY FIELD", "Please enter text to search.", true);
+                return;
+            }
+
+            if(currentUser.role === 'super') {
+                currentZone = null; currentRegion = null; currentArea = null;
+                const regContainer = document.getElementById('region-filters-container');
+                const areaContainer = document.getElementById('area-filters-container');
+                if(regContainer) regContainer.style.display = 'none';
+                if(areaContainer) areaContainer.style.display = 'none';
+                
+                let zoneBtns = document.getElementById('zone-buttons');
+                if (zoneBtns) {
+                    let btns = zoneBtns.getElementsByClassName('btn-filter');
+                    for(let btn of btns) btn.classList.remove('active');
+                    if(btns.length > 0) btns[0].classList.add('active');
+                }
+            }
+
+            resetStatusCardHighlight();
+            applyFilterAndRender();
+        };
+
+        window.clearSearch = function() {
+            document.getElementById('search-query').value = '';
+            activeSearchType = null;
+            activeSearchQuery = '';
+            applyFilterAndRender();
+        };
+
+        function updateKPICards(dataArray) {
+            let countDone = 0; let totalOsbValue = 0;
+            dataArray.forEach(row => {
+                if(row.status === 'UPDATED') countDone++;
+                totalOsbValue += parseFloat(row.osb) || 0;
+            });
+            document.getElementById('kpi-total').innerText = dataArray.length.toLocaleString();
+            document.getElementById('kpi-done').innerText = countDone.toLocaleString();
+            document.getElementById('kpi-pending').innerText = (dataArray.length - countDone).toLocaleString();
+            document.getElementById('kpi-osb').innerText = 'RM ' + totalOsbValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        window.sortTable = function(columnName) {
+            if (currentSortColumn === columnName) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = columnName;
+                currentSortDirection = 'asc';
+            }
+
+            filteredAccounts.sort((a, b) => {
+                let valueA = a[columnName];
+                let valueB = b[columnName];
+
+                if (columnName === 'last_date') {
+                    let dateA = (a.details && a.details.last_remark_date) ? a.details.last_remark_date : '';
+                    let dateB = (b.details && b.details.last_remark_date) ? b.details.last_remark_date : '';
+                    valueA = dateA ? dateA.split('/').reverse().join('') : '';
+                    valueB = dateB ? dateB.split('/').reverse().join('') : '';
+                }
+
+                if (columnName === 'osb' || columnName === 'arrs_mth' || columnName === 'delq') {
+                    let numA = parseFloat(valueA) || 0;
+                    let numB = parseFloat(valueB) || 0;
+                    return currentSortDirection === 'asc' ? numA - numB : numB - numA;
+                } 
+                
+                let strA = valueA ? String(valueA).toUpperCase().trim() : '';
+                let strB = valueB ? String(valueB).toUpperCase().trim() : '';
+                
+                if (strA < strB) return currentSortDirection === 'asc' ? -1 : 1;
+                if (strA > strB) return currentSortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            updateHeaderArrows(columnName);
+            currentPage = 1;
+            renderTablePage();
+        };
+
+function resetHeaderArrows() {
+            const cols = ['zone', 'region', 'area', 'loc', 'type', 'acct', 'delq', 'arrs_mth', 'osb', 'status', 'assignee_id', 'last_date'];
+            cols.forEach(c => {
+                const el = document.getElementById(`th-${c}`);
+                if (el) {
+                    if(c === 'last_date') el.innerHTML = "ATTEND DATE ⇅";
+                    else if(c === 'assignee_id') el.innerHTML = "ASSIGNED TO ⇅";
+                    else el.innerHTML = `${el.innerText.split(' ')[0]} ⇅`;
+                }
+            });
+        }
+
+        function updateHeaderArrows(activeCol) {
+            resetHeaderArrows();
+            const el = document.getElementById(`th-${activeCol}`);
+            if (el) {
+                let text = el.innerText.split(' ')[0];
+                if(activeCol === 'last_date') text = "ATTEND DATE";
+                else if(activeCol === 'assignee_id') text = "ASSIGNED TO";
+                
+                let arrow = currentSortDirection === 'asc' ? '▲' : '▼';
+                el.innerHTML = `<span style="color:var(--text-main);">${text} ${arrow}</span>`;
+            }
+        }
+        
+        function renderTablePage() {
+            const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
+            
+            if(filteredAccounts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;">No records match the active criteria.</td></tr>`;
+                document.getElementById('page-info').innerText = `Page 0 of 0`;
+                document.getElementById('btn-prev').disabled = true; document.getElementById('btn-next').disabled = true;
+                return;
+            }
+
+            const totalPages = Math.ceil(filteredAccounts.length / rowsPerPage);
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const pageData = filteredAccounts.slice(startIndex, endIndex);
+
+            pageData.forEach(row => {
+                let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
+                let d = row.details || {};
+                let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '-';
+
+                let timeDisplay = '';
+                if (d.timestamp) {
+                    let timeObj = new Date(d.timestamp);
+                    let formattedTime = timeObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+                    timeDisplay = `<br><span style="font-size: 10px; color: #94a3b8; font-weight: normal;">${formattedTime}</span>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${row.zone || '-'}</td>
+                        <td>${row.region || '-'}</td>
+                        <td>${row.area || '-'}</td>
+                        <td>${row.loc || '-'}</td>
+                        <td>${row.type || '-'}</td>
+                        <td style="font-weight: 700; white-space: nowrap;">
+    <span style="color: var(--accent-gold); cursor: pointer; text-decoration: underline;" onclick="openModal('${row.acct}')">${row.acct}</span>
+    <button onclick="event.stopPropagation(); copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0; display: inline-block;" title="Copy Account No">📋</button>
+</td>
+                        <td>${row.delq || '-'}</td>
+                        <td>${row.arrs_mth || '0'}</td>
+                        <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td><span class="status-badge ${badgeClass}">${row.status === 'UPDATED' ? 'ATTENDED' : row.status}</span></td>
+                        <td style="font-weight: 600; color: var(--text-main);">${assigneeDisp}</td>
+                        <td>
+                            <span style="font-weight: 600; color: var(--text-muted); font-size: 12px;">${d.last_remark_date || '-'}</span>
+                            ${timeDisplay}
+                        </td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('page-info').innerText = `Page ${currentPage} of ${totalPages} (Total: ${filteredAccounts.length.toLocaleString()} Records)`;
+            document.getElementById('btn-prev').disabled = currentPage === 1;
+            document.getElementById('btn-next').disabled = currentPage === totalPages;
+        }
+
+        window.switchTab = function(target) {
+            if (target === 'settings' && currentUser.role !== 'super') target = 'dashboard';
+            if (target === 'assign' && (currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin')) target = 'dashboard';
+            if (target === 'report' && currentUser.role !== 'super') target = 'dashboard';
+
+            document.querySelectorAll('.main-panel').forEach(p => p.style.display = 'none');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            if (target === 'dashboard') {
+                document.getElementById('dashboard-panel').style.display = 'block';
+                document.getElementById('tab-dash').classList.add('active');
+            } else if (target === 'settings') {
+                document.getElementById('settings-panel').style.display = 'block';
+                document.getElementById('tab-settings').classList.add('active');
+            } else if (target === 'report') {
+                document.getElementById('report-panel').style.display = 'block';
+                document.getElementById('tab-report').classList.add('active');
+            } else if (target === 'assign') {
+                document.getElementById('assign-panel').style.display = 'block';
+                document.getElementById('tab-assign').classList.add('active');
+                
+                populateAssignSubordinates();
+                populateCollectorFilters();
+                renderAssignTable();
+            }
+            
+            localStorage.setItem('scazp_active_tab', target);
+        };
+
+window.fetchAndRenderUsers = async function() {
+    try {
+        // TAMBAHKAN 'name' DALAM SELECT QUERY DI BAWAH
+        const { data, error } = await supabase.from('users').select('id, name, role, assignedzone, assignedregion, assignedarea, status, report_to').order('id', { ascending: true });
+        
+        if (error) throw error;
+        allSystemUsers = data;
+        filterUserList();
+        populateAssignSubordinates();
+    } catch (err) {
+        console.error("Failed to fetch user list:", err);
+    }
+};
+
+        window.filterUserList = function() {
+            let query = document.getElementById('search-user').value.toLowerCase().trim();
+            filteredSystemUsers = allSystemUsers.filter(u => u.id.toLowerCase().includes(query));
+            userCurrentPage = 1; 
+            renderUserTablePage();
+        };
+
+window.renderUserTablePage = async function() {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+            
+            const uniqueZones = [...new Set(masterLocations.map(m => m.zone_name))].filter(Boolean).sort();
+            const uniqueAreas = [...new Set(masterLocations.map(m => m.area_name))].filter(Boolean).sort();
+            
+            let total = filteredSystemUsers.length;
+            document.getElementById('total-users-count').innerText = total;
+            
+            let totalPages = Math.ceil(total / usersPerPage) || 1;
+            if(userCurrentPage > totalPages) userCurrentPage = totalPages;
+            if(userCurrentPage < 1) userCurrentPage = 1;
+            
+            let start = (userCurrentPage - 1) * usersPerPage;
+            let end = start + usersPerPage;
+            let pageData = filteredSystemUsers.slice(start, end);
+            
+            if(pageData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No users found.</td></tr>';
+            } else {
+                pageData.forEach((user, index) => {
+                    let rName = user.role ? user.role.toLowerCase().trim() : 'user';
+                    let userStatus = user.status || 'ACTIVE';
+                    let statusBadge = userStatus === 'ACTIVE' ? 'status-done' : 'status-pending';
+                    
+                    let toggleBtnText = userStatus === 'ACTIVE' ? 'DEACTIVATE' : 'ACTIVATE';
+                    let toggleBtnColor = userStatus === 'ACTIVE' ? 'var(--error-red)' : 'var(--success-green)';
+                    
+                    let roleSelect = `
+                        <select id="edit-role-${user.id}" onchange="toggleInlineAccessSelect('${user.id}')" style="padding:4px; font-size:11px; font-weight:600; border:1px solid var(--border-color); border-radius:4px;">
+                            <option value="user" ${rName==='user'?'selected':''}>USER</option>
+                            <option value="admin" ${rName==='admin'?'selected':''}>ADMIN</option>
+                            <option value="manager" ${rName==='manager'?'selected':''}>MANAGER</option>
+                            <option value="super" ${rName==='super'?'selected':''}>SUPER</option>
+                        </select>`;
+
+                    let reportToOptions = `<option value="">-- NONE --</option>`;
+                    allSystemUsers.filter(u => u.role !== 'user' && u.id !== user.id).forEach(u => {
+                        reportToOptions += `<option value="${u.id}" ${user.report_to===u.id?'selected':''}>${u.id.toUpperCase()}</option>`;
+                    });
+                    let reportSelect = `<select id="edit-report-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; max-width:110px;">${reportToOptions}</select>`;
+
+                    // Dropdown ZONE dinamik (Untuk Manager)
+                    let zoneOptions = `<option value="ALL" ${!user.assignedzone || user.assignedzone==='ALL'?'selected':''}>ALL ZONES</option>`;
+                    uniqueZones.forEach(z => {
+                        zoneOptions += `<option value="${z}" ${user.assignedzone===z?'selected':''}>${z}</option>`;
+                    });
+                    let zoneSelect = `<select id="edit-zone-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; display: ${rName === 'manager' ? 'inline-block' : 'none'};">${zoneOptions}</select>`;
+                    
+                    // Dropdown AREA dinamik (Untuk Admin)
+                    let areaOptions = `<option value="ALL" ${!user.assignedarea || user.assignedarea==='ALL'?'selected':''}>ALL AREAS</option>`;
+                    uniqueAreas.forEach(a => {
+                        areaOptions += `<option value="${a}" ${user.assignedarea===a?'selected':''}>${a}</option>`;
+                    });
+                    let areaSelect = `<select id="edit-area-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; display: ${rName === 'admin' ? 'inline-block' : 'none'};">${areaOptions}</select>`;
+                    
+                    // Kapsul fallback jika User/Super
+                    let noneText = `<span id="edit-none-${user.id}" style="font-size: 11px; color: var(--text-muted); display: ${(rName === 'user' || rName === 'super') ? 'inline-block' : 'none'};">N/A (Global/PIC)</span>`;
+
+                    let fullNameDisp = user.name ? user.name.toUpperCase() : '<span style="color:#cbd5e1;">TIADA DATA</span>'; // <-- SETTING NAMA
+                    
+tbody.innerHTML += `
+        <tr>
+            <td style="text-align: center;">${start + index + 1}</td>
+            <td style="font-weight:700; color:var(--text-main);">${user.id.toUpperCase()}</td>
+            <td style="font-size:12px;">${fullNameDisp}</td> <td>${roleSelect}</td>
+            <td>${reportSelect}</td>
+            <td>${zoneSelect}${areaSelect}${noneText}</td>
+            <td><span class="status-badge ${statusBadge}">${userStatus}</span></td>
+            <td style="white-space: nowrap;">
+                <button class="btn-update" style="color: var(--accent-gold); border-color: var(--accent-gold); margin-right: 5px; font-weight:600;" onclick="updateUserInline('${user.id}')">💾 SAVE</button>
+                <button class="btn-update" style="color: ${toggleBtnColor}; border-color: ${toggleBtnColor}; margin-right: 5px;" onclick="toggleUserStatus('${user.id}', '${userStatus}')">${toggleBtnText}</button>
+                <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteUser('${user.id}')">DEL</button>
+            </td>
+        </tr>
+    `;
+});
+            }
+            document.getElementById('user-page-info').innerText = `Page ${userCurrentPage} of ${totalPages}`;
+            document.getElementById('btn-user-prev').disabled = userCurrentPage === 1;
+            document.getElementById('btn-user-next').disabled = userCurrentPage === totalPages;
+        };
+
+        window.toggleInlineAccessSelect = function(userId) {
+            let role = document.getElementById(`edit-role-${userId}`).value;
+            document.getElementById(`edit-zone-${userId}`).style.display = role === 'manager' ? 'inline-block' : 'none';
+            document.getElementById(`edit-area-${userId}`).style.display = role === 'admin' ? 'inline-block' : 'none';
+            document.getElementById(`edit-none-${userId}`).style.display = (role === 'user' || role === 'super') ? 'inline-block' : 'none';
+        }
+        
+        window.nextUserPage = function() {
+            const totalPages = Math.ceil(filteredSystemUsers.length / usersPerPage);
+            if (userCurrentPage < totalPages) {
+                userCurrentPage++;
+                renderUserTablePage();
+            }
+        };
+
+        window.prevUserPage = function() {
+            if (userCurrentPage > 1) {
+                userCurrentPage--;
+                renderUserTablePage();
+            }
+        };
+
+        window.toggleFormRoleSelect = async function() {
+            const role = document.getElementById('new-user-role').value;
+            const reportGroup = document.getElementById('form-report-group');
+            const reportSelect = document.getElementById('new-user-report-to');
+            const zoneGroup = document.getElementById('form-zone-group');
+            const areaGroup = document.getElementById('form-area-group');
+            
+            // Toggle paparan Zone / Area
+            if (role === 'manager') {
+                zoneGroup.style.display = 'block'; areaGroup.style.display = 'none';
+                populateFilterDropdown('new-user-zone', 'zone_name');
+            } else if (role === 'admin') {
+                zoneGroup.style.display = 'none'; areaGroup.style.display = 'block';
+                populateFilterDropdown('new-user-area', 'area_name');
+            } else {
+                zoneGroup.style.display = 'none'; areaGroup.style.display = 'none';
+            }
+            
+            if (role === 'super') {
+                reportGroup.style.display = 'none';
+                reportSelect.innerHTML = '<option value="">-- N/A --</option>';
+            } else {
+                reportGroup.style.display = 'block';
+                reportSelect.innerHTML = '<option value="">Loading Supervisor List...</option>';
+                
+                let allowedRoles = role === 'user' ? ['admin', 'manager', 'super'] : 
+                                   (role === 'admin' ? ['manager', 'super'] : ['super']);
+                
+                try {
+                    const { data, error } = await supabase.from('users').select('id, role').in('role', allowedRoles).eq('status', 'ACTIVE');
+                    reportSelect.innerHTML = '<option value="">-- TANGGUH DULU / TIADA SUPERVISOR --</option>';
+                    if (data && data.length > 0) {
+                        data.forEach(u => {
+                            reportSelect.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
+                        });
+                    }
+                } catch(err) {
+                    reportSelect.innerHTML = '<option value="">-- TANGGUH DULU / TIADA SUPERVISOR --</option>';
+                }
+            }
+        };
+
+        function populateFilterDropdown(dropdownId, keyName) {
+            const dropdown = document.getElementById(dropdownId);
+            if (!dropdown) return;
+            const uniqueList = [...new Set(masterLocations.map(m => m[keyName]))].filter(Boolean).sort();
+            dropdown.innerHTML = '<option value="ALL">ALL (KESELURUHAN)</option>';
+            uniqueList.forEach(item => {
+                dropdown.innerHTML += `<option value="${item}">${item}</option>`;
+            });
+        }
+
+window.addNewUser = async function() {
+            const id = document.getElementById('new-user-id').value.trim();
+            const name = document.getElementById('new-user-name').value.trim();
+            const pass = document.getElementById('new-user-pass').value.trim();
+            const role = document.getElementById('new-user-role').value;
+            const reportTo = document.getElementById('new-user-report-to').value; 
+            
+            const zone = document.getElementById('new-user-zone') ? document.getElementById('new-user-zone').value : null;
+            const area = document.getElementById('new-user-area') ? document.getElementById('new-user-area').value : null;
+            
+        if(!id || !pass || !name) { // Wajibkan isi nama
+            showNotification("ERROR", "Sila lengkapkan ruangan Nama, User ID dan Password.", true);
+            return; 
+    }
+
+            if(role !== 'super' && !reportTo) {
+                let proceed = await customConfirm(`INFO:\nID ini dicipta TANPA sebarang Supervisor (Tangguh). Ia boleh di-update kemudian. Teruskan?`);
+                if(!proceed) return;
+            }
+
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
+            
+            try {
+                const { data: existingUser, error: checkError } = await supabase.from('users').select('id').eq('id', id).single();
+                if (existingUser) { 
+                    showNotification("ERROR", "User ID already exists!", true); 
+                    return;
+                }
+
+                let finalZone = (role === 'manager' && zone !== 'ALL') ? zone : null;
+                let finalArea = (role === 'admin' && area !== 'ALL') ? area : null;
+
+                const { error } = await supabase.from('users').insert([{ 
+                    id: id, 
+                    name: name,
+                    pass: pass, 
+                    role: role, 
+                    assignedzone: finalZone,
+                    assignedarea: finalArea,
+                    assignedregion: null, // Boleh dibiarkan null
+                    report_to: reportTo || null,
+                    status: 'ACTIVE' 
+                }]);
+                
+if(error) {
+            showNotification("DATABASE ERROR", error.message, true);
+        } else {
+            showNotification("SUCCESS", `Akaun pengguna <b>${id}</b> telah didaftarkan.`);
+            document.getElementById('new-user-id').value = ''; 
+            document.getElementById('new-user-name').value = ''; // Kosongkan lepas save
+            document.getElementById('new-user-pass').value = '';
+            fetchAndRenderUsers(); 
+        }
+            } catch (err) {
+                showNotification("SYSTEM ERROR", "Check console for details.", true);
+            }
+        };
+
+        window.toggleUserStatus = async function(userId, currentStatus) {
+            if (userId === currentUser.username) { 
+                showNotification("ACTION ERROR", "You cannot change your own account status!", true); 
+                return; 
+            }
+            
+            const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+            let isConfirmed = await customConfirm(`CONFIRMATION:\nChange account status for ${userId.toUpperCase()} to ${newStatus}?`);
+            if (!isConfirmed) return;
+
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
+
+            const { error } = await supabase.from('users').update({ status: newStatus }).eq('id', userId);
+            if (!error) { fetchAndRenderUsers(); } 
+            else { showNotification("UPDATE ERROR", error.message, true); }
+        };
+
+        window.deleteUser = async function(userId) {
+            if (userId === currentUser.username) { 
+                showNotification("ACTION ERROR", "You cannot completely delete your own account!", true); 
+                return; 
+            }
+            
+            let isConfirmed = await customConfirm(`STRICT WARNING:\nAre you sure you want to completely delete the account ${userId.toUpperCase()} from the database?`);
+            if (!isConfirmed) return;
+            
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
+
+            const { error } = await supabase.from('users').delete().eq('id', userId);
+            if (!error) { 
+                fetchAndRenderUsers(); 
+                showNotification("SUCCESSFULLY DELETED", `User account <b>${userId.toUpperCase()}</b> has been completely deleted.`);
+            } else { 
+                showNotification("DELETE ERROR", error.message, true); 
+            }
+        };
+
+        window.updateUserInline = async function(userId) {
+            let newRole = document.getElementById(`edit-role-${userId}`).value;
+            let newReportTo = document.getElementById(`edit-report-${userId}`).value;
+            let newZone = document.getElementById(`edit-zone-${userId}`).value;
+            let newArea = document.getElementById(`edit-area-${userId}`).value;
+
+            if (newReportTo === "") newReportTo = null;
+            if (newZone === "ALL") newZone = null;
+            if (newArea === "ALL") newArea = null;
+
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
+
+            const { error } = await supabase.from('users').update({ 
+                role: newRole, 
+                report_to: newReportTo,
+                assignedzone: newRole === 'manager' ? newZone : null,
+                assignedarea: newRole === 'admin' ? newArea : null
+            }).eq('id', userId);
+
+            if (!error) { 
+                showNotification("UPDATE SUCCESS", `Konfigurasi untuk user <b>${userId.toUpperCase()}</b> telah berjaya dikemas kini.`);
+                fetchAndRenderUsers();
+            } else { 
+                showNotification("UPDATE ERROR", error.message, true); 
+            }
+        };
+
+        window.renderReportCenter = async function() {
+            const tbody = document.getElementById('report-table-body');
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Checking database traffic logs...</td></tr>';
+            
+            let thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            let startDateStr = thirtyDaysAgo.toISOString().split('T')[0] + 'T00:00:00+08:00';
+
+            try {
+                const { data, error } = await supabase
+                    .from('findings')
+                    .select('updated_at, is_exported')
+                    .gte('updated_at', startDateStr)
+                    .neq('acct', 'SYSTEM'); 
+                
+                if (error) throw error;
+
+                let dateMap = {};
+                if (data) {
+                    data.forEach(item => {
+                        if (!item.updated_at) return;
+                        let d = new Date(item.updated_at);
+                        let year = d.getFullYear();
+                        let month = String(d.getMonth() + 1).padStart(2, '0');
+                        let day = String(d.getDate()).padStart(2, '0');
+                        let dateKey = `${year}-${month}-${day}`;
+                        
+                        if (!dateMap[dateKey]) { dateMap[dateKey] = { total: 0, pending: 0 }; }
+                        dateMap[dateKey].total++;
+                        if (!item.is_exported) dateMap[dateKey].pending++;
+                    });
+                }
+
+                tbody.innerHTML = '';
+                
+                for (let i = 0; i < 30; i++) {
+                    let loopDate = new Date();
+                    loopDate.setDate(loopDate.getDate() - i);
+                    
+                    let yyyy = loopDate.getFullYear();
+                    let mm = String(loopDate.getMonth() + 1).padStart(2, '0');
+                    let dd = String(loopDate.getDate()).padStart(2, '0');
+                    let dateKey = `${yyyy}-${mm}-${dd}`;
+                    let displayDate = `${dd}/${mm}/${yyyy}`;
+
+                    let statusObj = dateMap[dateKey];
+                    let statusHtml = ''; let actionHtml = '-';
+
+                    if (!statusObj || statusObj.total === 0) {
+                        statusHtml = '<span style="color: var(--text-muted);">⚪ NO RECORDS</span>';
+                    } else if (statusObj.pending > 0) {
+                        statusHtml = `<span style="color: var(--accent-gold); font-weight: bold;">🟡 PENDING (${statusObj.pending} Accounts)</span>`;
+                        actionHtml = `<button class="btn-update" style="color: var(--bg-color); background-color: var(--accent-gold); border-color: var(--accent-gold);" onclick="exportDataByDate('${dateKey}')">EXPORT</button>`;
+                    } else {
+                        statusHtml = `<span style="color: var(--success-green); font-weight: bold;">✅ DONE (Exported)</span>`;
+                    }
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="text-align: center; font-weight: 600;">${displayDate}</td>
+                            <td style="text-align: center;">${statusHtml}</td>
+                            <td style="text-align: center;">${actionHtml}</td>
+                        </tr>
+                    `;
+                }
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: var(--error-red);">System Error: ${err.message}</td></tr>`;
+            }
+        };
+
+window.exportDataByDate = async function(dateStr) {
+            let isConfirmed = await customConfirm(`Are you sure you want to export findings data for the date ${dateStr}?`);
+            if (!isConfirmed) return;
+
+            document.getElementById('loadingText').innerText = "Generating Excel file and sorting data by region...";
+            document.getElementById('loadingModal').style.display = 'flex';
+
+            try {
+                // [FIX TIMEZONE]: Tukar tarikh input kepada julat permulaan dan penghujung ISO UTC yang tepat
+                let startOfDay = new Date(`${dateStr}T00:00:00`).toISOString();
+                let endOfDay = new Date(`${dateStr}T23:59:59.999`).toISOString();
+
+                // Tarik data findings dari Supabase
+                const { data, error } = await supabase
+                    .from('findings')
+                    .select('id, acct, remark1, remark2, remark3, remark4, remark5, region, is_exported')
+                    .gte('updated_at', startOfDay)
+                    .lte('updated_at', endOfDay)
+                    .neq('acct', 'SYSTEM');
+
+                if (error) throw error;
+                
+                // Semak jika tiada langsung rekod untuk tarikh tersebut
+                if (!data || data.length === 0) {
+                    showNotification("NO RECORDS", `Tiada sebarang log penemuan (findings) ditemui pada tarikh ${dateStr}.`, true);
+                    document.getElementById('loadingModal').style.display = 'none';
+                    return;
+                }
+
+                // Tapis hanya rekod yang belum dieksport sahaja
+                let pendingRows = data.filter(row => row.is_exported === false || row.is_exported === null);
+
+                if (pendingRows.length === 0) {
+                    showNotification("ALREADY EXPORTED", `Semua rekod pada tarikh ${dateStr} telah pun selamat dieksport sebelum ini (Status Locked).`, true);
+                    document.getElementById('loadingModal').style.display = 'none';
+                    return;
+                }
+
+                let groupedData = {};
+                let idsToUpdate = [];
+
+                pendingRows.forEach(row => {
+                    let reg = row.region ? row.region.toUpperCase().trim() : 'UNKNOWN';
+                    if (!groupedData[reg]) groupedData[reg] = [];
+                    
+                    // Mengekalkan susunan asal kau: REMARK5 di kedudukan atas sekali sebelum REMARK1
+                    groupedData[reg].push({
+                        "ACCT": row.acct,
+                        "REMARK1": row.remark5 || '',
+                        "REMARK2": row.remark1 || '',
+                        "REMARK3": row.remark2 || '',
+                        "REMARK4": row.remark3 || '',
+                        "REMARK5": row.remark4 || ''
+                    });
+                    
+                    idsToUpdate.push(row.id); 
+                }); 
+
+                let formattedDate = dateStr.replace(/-/g, ''); 
+                
+                // Jana fail Excel mengikut Wilayah (Region)
+                Object.keys(groupedData).forEach(reg => {
+                    const ws = XLSX.utils.json_to_sheet(groupedData[reg]);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "Findings");
+                    
+                    const fileName = `${reg}_FINDINGS_${formattedDate}.xlsx`;
+                    XLSX.writeFile(wb, fileName);
+                });
+
+                // Kunci status log di database supaya tidak dieksport bertindih
+                const { error: updateError } = await supabase
+                    .from('findings')
+                    .update({ is_exported: true })
+                    .in('id', idsToUpdate);
+                
+                if (updateError) throw updateError;
+
+                document.getElementById('loadingModal').style.display = 'none';
+                showNotification("EXPORT SUCCESSFUL", `${idsToUpdate.length} akaun berjaya diproses. Fail Excel telah dimuat turun mengikut wilayah.`);
+                
+                renderReportCenter(); 
+
+            } catch (err) {
+                document.getElementById('loadingModal').style.display = 'none';
+                showNotification("EXPORT ERROR", err.message, true);
+            }
+        };
+        
+        window.showNotification = function(title, message, isError = false) {
+            document.getElementById('notif-title').innerText = title;
+            document.getElementById('notif-message').innerHTML = message;
+            document.getElementById('notif-title').style.color = isError ? 'var(--error-red)' : 'var(--success-green)';
+            document.getElementById('notificationModal').style.display = 'flex';
+        };
+
+        window.verifyAdminPasscode = async function() {
+            let pwd = await customPrompt("This action is sensitive. Please enter the Master Admin Passcode for verification:");
+            if (!pwd) return false; 
+
+            try {
+                const { data, error } = await supabase.from('settings').select('val').eq('id', 'admin_pass').single();
+                if (error || !data) {
+                    showNotification("SYSTEM ERROR", "Passcode settings not found in Supabase.", true);
+                    return false;
+                }
+                
+                if (pwd === data.val) {
+                    return true; 
+                } else {
+                    showNotification("ACCESS DENIED", "The passcode entered is INCORRECT.", true);
+                    return false; 
+                }
+            } catch (err) {
+                console.error(err);
+                return false;
+            }
+        };
+
+        window.deleteSingleFinding = async function(findingId, accNo) {
+            let isConfirmed = await customConfirm("Are you sure you want to delete this findings note row?");
+            if(!isConfirmed) return;
+            
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
+
+            const { error } = await supabase.from('findings').delete().eq('id', findingId);
+            if(!error) {
+                showNotification("SUCCESSFULLY DELETED", "The findings row has been removed from the database.");
+                openModal(accNo); 
+            } else {
+                showNotification("ERROR", error.message, true);
+            }
+        };
+
+        window.handleExcelFileSelect = function(e) {
+            const file = e.target.files[0]; 
+            if (!file) return;
+            
+            document.getElementById('readingExcelModal').style.display = 'flex';
+            
+            setTimeout(() => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const data = new Uint8Array(event.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        parsedExcelRows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
+                        
+                        if(parsedExcelRows.length === 0) {
+                            alert("Excel file is empty or contains no data!");
+                            document.getElementById('readingExcelModal').style.display = 'none';
+                            return;
+                        }
+                        
+                        const headers = Object.keys(parsedExcelRows[0]);
+                        const dropdowns = document.querySelectorAll('.mapping-select');
+                        
+                        dropdowns.forEach(select => {
+                            select.innerHTML = '<option value="">-- EMPTY (Leave as is) --</option>'; 
+                            headers.forEach(h => { select.appendChild(new Option(h, h)); });
+                            
+                            const id = select.id;
+                            if(id === 'map-collector') preSelectOption(select, ['collector', 'COLLECTOR', 'caller', 'CALLER']);
+                            if(id === 'map-zone') preSelectOption(select, ['zone', 'ZONE', 'Zone']);
+                            if(id === 'map-region') preSelectOption(select, ['region', 'REGION', 'Region']);
+                            if(id === 'map-area') preSelectOption(select, ['area', 'AREA', 'Area']);
+                            if(id === 'map-loc') preSelectOption(select, ['loc', 'loc_cd', 'LOC_CD']);
+                            if(id === 'map-type') preSelectOption(select, ['type', 'TYPE', 'Type', 'ACCT_TYPE']);
+                            if(id === 'map-acct') preSelectOption(select, ['acct', 'ACCT', 'account']);
+                            if(id === 'map-delq') preSelectOption(select, ['delq', 'V_DELQ', 'v_delq']);
+                            if(id === 'map-arrs') preSelectOption(select, ['arrs', 'ARR_MTH', 'arr_mth']);
+                            if(id === 'map-osb') preSelectOption(select, ['osb', 'OSB', 'FS_AMT_TO_COLLECT']);
+                            
+                            if(id === 'map-h-name') preSelectOption(select, ['HIRER_NAME']);
+                            if(id === 'map-h-nric-new') preSelectOption(select, ['HIRER_NEW_IC_NO']);
+                            if(id === 'map-h-nric-old') preSelectOption(select, ['HIRER_OLD_IC_NO']);
+                            if(id === 'map-h-tel') preSelectOption(select, ['HIRER_TEL_NO']);
+                            if(id === 'map-h-add1') preSelectOption(select, ['HIRER_ADDR1']);
+                            if(id === 'map-h-add2') preSelectOption(select, ['HIRER_ADDR2']);
+                            if(id === 'map-h-add3') preSelectOption(select, ['HIRER_ADDR3']);
+                            if(id === 'map-hc-name') preSelectOption(select, ['HIRER_CO_NAME']);
+                            if(id === 'map-hc-tel') preSelectOption(select, ['HIRER_CO_TEL']);
+                            if(id === 'map-hc-add1') preSelectOption(select, ['HIRER_CO_ADDR1']);
+                            if(id === 'map-hc-add2') preSelectOption(select, ['HIRER_CO_ADDR21', 'HIRER_CO_ADDR2']); 
+                            
+                            if(id === 'map-s-name') preSelectOption(select, ['SPOUSE_NAME']);
+                            if(id === 'map-s-nric-new') preSelectOption(select, ['SPOUSE_NEW_IC_NO']);
+                            if(id === 'map-s-nric-old') preSelectOption(select, ['SPOUSE_OLD_IC_NO']);
+                            if(id === 'map-s-tel') preSelectOption(select, ['SPOUSE_TEL_NO']);
+                            if(id === 'map-g-name') preSelectOption(select, ['GUAR_NAME']);
+                            if(id === 'map-g-nric-new') preSelectOption(select, ['GUAR_NEW_IC_NO']);
+                            if(id === 'map-g-nric-old') preSelectOption(select, ['GUAR_OLD_IC_NO']);
+                            if(id === 'map-g-tel') preSelectOption(select, ['GUAR_TEL_NO']);
+                            if(id === 'map-g-add1') preSelectOption(select, ['GUAR_ADDR1']);
+                            if(id === 'map-g-add2') preSelectOption(select, ['GUAR_ADDR2']);
+                            if(id === 'map-gc-name') preSelectOption(select, ['GUAR_CO_NAME']);
+                            if(id === 'map-gc-tel') preSelectOption(select, ['GUAR_CO_TEL']);
+                            
+                            if(id === 'map-prod') preSelectOption(select, ['EP_SALES_DESC']);
+                            if(id === 'map-plate') preSelectOption(select, ['PLATE_NO', 'PLATE NO']);
+                            if(id === 'map-bal') preSelectOption(select, ['BALANCE']);
+                            if(id === 'map-odp') preSelectOption(select, ['LATE_BAL']);
+                            if(id === 'map-adch') preSelectOption(select, ['ADCH_BAL']);
+                        });
+                        
+                        document.getElementById('readingExcelModal').style.display = 'none';
+                        document.getElementById('mappingModal').style.display = 'flex';
+                        
+                    } catch (err) {
+                        alert("Error processing Excel: " + err.message);
+                        document.getElementById('readingExcelModal').style.display = 'none';
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }, 50); 
+        };
+        
+        function preSelectOption(select, guesses) {
+            for(let option of select.options) { if(guesses.includes(option.value)) { select.value = option.value; break; } }
+        }
+        
+        window.closeMappingModal = function() {
+            document.getElementById('mappingModal').style.display = 'none';
+            document.getElementById('excel-file-input').value = ''; 
+        };
+
+window.processExcelUpload = async function() {
+            document.getElementById('mappingModal').style.display = 'none';
+            document.getElementById('progressModal').style.display = 'flex';
+            
+            const progressBar = document.getElementById('upload-progress-bar');
+            const progressText = document.getElementById('upload-progress-text');
+            const progressSubtext = document.getElementById('upload-progress-subtext');
+
+            const getVal = (id) => document.getElementById(id).value;
+            
+            const formatIC = (newIcKey, oldIcKey, rowData) => {
+                let n = String(rowData[getVal(newIcKey)] || '').trim();
+                let o = String(rowData[getVal(oldIcKey)] || '').trim();
+                if(n && n !== 'undefined' && o && o !== 'undefined') return `${n} / ${o}`;
+                if(n && n !== 'undefined') return n;
+                if(o && o !== 'undefined') return o;
+                return '';
+            };
+
+            let bulkData = [];
+            for (const row of parsedExcelRows) {
+                const rawAccountNo = String(row[getVal('map-acct')]).trim();
+                if (!rawAccountNo || rawAccountNo === "undefined") continue; 
+                
+                let existingAcc = globalAccounts.find(a => a.acct === rawAccountNo);
+                let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; 
+                let currentFindingStatus = existingAcc ? existingAcc.finding_status : ''; 
+                
+                // --- 1. AMBIL & BERSIHKAN DATA MENTAH DARI EXCEL ---
+                let bal = parseFloat(String(row[getVal('map-bal') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+                let odp = parseFloat(String(row[getVal('map-odp') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+                let adch = parseFloat(String(row[getVal('map-adch') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+                let arrAmt = parseFloat(String(row[getVal('map-arrs') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+                let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
+
+                // --- 2. LOGIK PENGIRAAN PINTAR DARI USER ---
+                // Formula 1 & 2: Positifkan nilai ARR_AMT (Contoh: -100 jadi 100, -4 jadi 4)
+                let finalArrAmt = arrAmt * -1; 
+                
+                // Formula 3: Kira FS_AMT_TO_COLLECT (OSB) mengikut jenis akaun
+                let finalOsb = 0;
+                if (type === 'EP') {
+                    finalOsb = bal + adch;
+                } else if (type === 'HP') {
+                    finalOsb = (bal + odp) + adch;
+                } else {
+                    finalOsb = bal + odp + adch; // Fallback jika ada ACCT_TYPE lain
+                }
+                
+                let keyLoc = getVal('map-loc');
+                let keyZone = getVal('map-zone');
+                let keyReg = getVal('map-region');
+                let keyArea = getVal('map-area');
+
+                let rawLocCd = (keyLoc && row[keyLoc]) ? String(row[keyLoc]).trim() : "";
+                let finalZone = (keyZone && row[keyZone]) ? String(row[keyZone]).toUpperCase().trim() : "";
+                let finalRegion = (keyReg && row[keyReg]) ? String(row[keyReg]).toUpperCase().trim() : "";
+                let finalArea = (keyArea && row[keyArea]) ? String(row[keyArea]).toUpperCase().trim() : "";
+
+                // AUTO MATCH ZONE/REGION/AREA DARI LOC_CD
+                if (rawLocCd !== "") {
+                    let cleanRawLoc = rawLocCd.replace(/^0+/, '').toUpperCase();
+                    let matchedLoc = masterLocations.find(loc => {
+                        let locKey = Object.keys(loc).find(k => k.toLowerCase() === 'loc_cd' || k.toLowerCase() === 'loc');
+                        let locValue = locKey ? loc[locKey] : '';
+                        let cleanMasterLoc = String(locValue).replace(/^0+/, '').trim().toUpperCase();
+                        return cleanMasterLoc === cleanRawLoc;
+                    });
+                    
+                    if (matchedLoc) {
+                        let zKey = Object.keys(matchedLoc).find(k => k.toLowerCase() === 'zone_name' || k.toLowerCase() === 'zone');
+                        let regKey = Object.keys(matchedLoc).find(k => k.toLowerCase() === 'region_name' || k.toLowerCase() === 'region');
+                        let areaKey = Object.keys(matchedLoc).find(k => k.toLowerCase() === 'area_name' || k.toLowerCase() === 'area');
+                        
+                        let dbZone = zKey ? matchedLoc[zKey] : "";
+                        let dbRegion = regKey ? matchedLoc[regKey] : "";
+                        let dbArea = areaKey ? matchedLoc[areaKey] : "";
+                        
+                        finalZone = dbZone !== "" ? String(dbZone).toUpperCase().trim() : finalZone;
+                        finalRegion = dbRegion !== "" ? String(dbRegion).toUpperCase().trim() : finalRegion;
+                        finalArea = dbArea !== "" ? String(dbArea).toUpperCase().trim() : finalArea;
+                    }
+                }             
+                
+                if (finalZone === "UNDEFINED") finalZone = "";
+                if (finalRegion === "UNDEFINED") finalRegion = "";
+                if (finalArea === "UNDEFINED") finalArea = "";
+                if (rawLocCd === "UNDEFINED") rawLocCd = "";
+                
+                let rawType = String(row[getVal('map-type')]).trim();
+                if (rawType === "undefined") rawType = "";
+                let rawDelq = String(row[getVal('map-delq')]).trim();
+                if (rawDelq === "undefined") rawDelq = "";
+                
+                let keyColl = getVal('map-collector');
+                let rawColl = (keyColl && row[keyColl]) ? String(row[keyColl]).toUpperCase().trim() : "";
+                if (rawColl === "UNDEFINED") rawColl = "";
+
+                let detailsJSON = {
+                    h_name: row[getVal('map-h-name')] || '',
+                    h_nric: formatIC('map-h-nric-new', 'map-h-nric-old', row),
+                    h_tel: row[getVal('map-h-tel')] || '',
+                    h_add1: row[getVal('map-h-add1')] || '',
+                    h_add2: row[getVal('map-h-add2')] || '',
+                    h_add3: row[getVal('map-h-add3')] || '',
+                    hc_name: row[getVal('map-hc-name')] || '',
+                    hc_tel: row[getVal('map-hc-tel')] || '',
+                    hc_add1: row[getVal('map-hc-add1')] || '',
+                    hc_add2: row[getVal('map-hc-add2')] || '',
+                    s_name: row[getVal('map-s-name')] || '',
+                    s_nric: formatIC('map-s-nric-new', 'map-s-nric-old', row),
+                    s_tel: row[getVal('map-s-tel')] || '',
+                    g_name: row[getVal('map-g-name')] || '',
+                    g_nric: formatIC('map-g-nric-new', 'map-g-nric-old', row),
+                    g_tel: row[getVal('map-g-tel')] || '',
+                    g_add1: row[getVal('map-g-add1')] || '',
+                    g_add2: row[getVal('map-g-add2')] || '',
+                    gc_name: row[getVal('map-gc-name')] || '',
+                    gc_tel: row[getVal('map-gc-tel')] || '',
+                    prod: row[getVal('map-prod')] || '',
+                    plate: row[getVal('map-plate')] || '',
+                    bal: row[getVal('map-bal')] || '',
+                    odp: row[getVal('map-odp')] || '',
+                    adch: row[getVal('map-adch')] || '',
+                    finding_status: currentFindingStatus 
+                };
+
+                bulkData.push({
+                    zone: finalZone,
+                    region: finalRegion, 
+                    area: finalArea,     
+                    loc: rawLocCd,
+                    type: type, // Guna string bersih yang dah upper-case
+                    acct: rawAccountNo,
+                    delq: rawDelq, 
+                    arrs_mth: finalArrAmt, // [FIXED]: Memasukkan hasil darab -1
+                    osb: finalOsb,         // [FIXED]: Memasukkan hasil formula EP/HP
+                    status: currentStatus, 
+                    collector: rawColl,
+                    details: detailsJSON 
+                });
+            }
+
+            const CHUNK_SIZE = 1000; let totalProcessed = 0; let hasError = false;
+            for (let i = 0; i < bulkData.length; i += CHUNK_SIZE) {
+                const chunk = bulkData.slice(i, i + CHUNK_SIZE);
+                const currentProgress = Math.round((i / bulkData.length) * 100);
+                progressBar.style.width = `${currentProgress}%`; progressText.innerText = `${currentProgress}%`;
+                progressSubtext.innerText = `Submitting data: ${i.toLocaleString()} of ${bulkData.length.toLocaleString()} records...`;
+                
+                const { error } = await supabase.from('accounts').upsert(chunk, { onConflict: 'acct' });
+                if (error) { alert("Error: " + error.message); hasError = true; break; }
+                totalProcessed += chunk.length;
+            }
+
+            if (!hasError) {
+                progressBar.style.width = '100%'; progressText.innerText = '100%';
+                progressSubtext.innerText = `Completely done! Reloading ledger structure...`;
+                
+                await supabase.from('findings').insert([{
+                    acct: 'SYSTEM',
+                    remark1: `BULK DATA UPLOADED BY ${currentUser.id.toUpperCase()}`,
+                    updated_by: currentUser.username
+                }]);
+
+                setTimeout(async () => {
+                    document.getElementById('progressModal').style.display = 'none';
+                    document.getElementById('excel-file-input').value = ''; 
+                    alert(`Successfully processed ${totalProcessed.toLocaleString()} accounts.`);
+                    
+                    await localforage.removeItem('scazp_cache_all');
+                    localStorage.removeItem('scazp_time_all');
+                    
+                    await fetchFullDatabaseData(); 
+                    resetStatusCardHighlight();
+                    initDashboardView();
+                }, 800);
+            } else { document.getElementById('progressModal').style.display = 'none'; }
+        };
+
+        window.toggleExpand = function(acct) {
+            const row = document.getElementById('details-' + acct);
+            if (row.style.display === 'none') {
+                row.style.display = 'table-row';
+            } else {
+                row.style.display = 'none';
+            }
+        };
+
+window.openModal = async function(accNo) {
+            document.getElementById('modalAccNo').innerText = accNo;
+            document.getElementById('updateModal').style.display = 'flex';
+            
+            currentModalIndex = filteredAccounts.findIndex(a => a.acct === accNo);
+            
+            const btnPrev = document.getElementById('btn-modal-prev');
+            const btnNext = document.getElementById('btn-modal-next');
+            if (btnPrev && btnNext) {
+                btnPrev.disabled = currentModalIndex <= 0;
+                btnNext.disabled = currentModalIndex === -1 || currentModalIndex >= filteredAccounts.length - 1;
+            }
+            
+            document.getElementById('btnResetPending').style.display = (currentUser.role === 'super') ? 'block' : 'none';
+            document.getElementById('finding-status-select').value = "";
+
+            let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
+            if(accountInfo.finding_status) {
+                document.getElementById('finding-status-select').value = accountInfo.finding_status;
+            }
+
+            let d = accountInfo.details || {};
+            let todayDate = new Date().toLocaleDateString('en-GB');
+            let singleLine = `INTERNAL DATA-VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
+            let wText = `${singleLine.repeat(3)}\n`.repeat(25);
+
+            document.getElementById('modal-details-container').innerHTML = `
+                <div class="details-box" data-watermark="${wText}">
+                    <h4>HIRER INFO</h4>
+                    <p><span class="lbl">NAME</span>: ${d.h_name || '-'}</p>
+                    <p><span class="lbl">NRIC</span>: ${d.h_nric || '-'}</p>
+                    <p><span class="lbl">TEL</span>: ${d.h_tel || '-'}</p>
+                    <p><span class="lbl">HOME ADD</span>: ${d.h_add1 || '-'} ${d.h_add2 || ''} ${d.h_add3 || ''}</p>
+                    <br>
+                    <p><span class="lbl">CO. NAME</span>: ${d.hc_name || '-'}</p>
+                    <p><span class="lbl">CO. TEL</span>: ${d.hc_tel || '-'}</p>
+                    <p><span class="lbl">CO. ADD</span>: ${d.hc_add1 || '-'} ${d.hc_add2 || ''}</p>
+                </div>
+                <div class="details-box" data-watermark="${wText}">
+                    <h4>SPOUSE INFO</h4>
+                    <p><span class="lbl">NAME</span>: ${d.s_name || '-'}</p>
+                    <p><span class="lbl">NRIC</span>: ${d.s_nric || '-'}</p>
+                    <p><span class="lbl">TEL</span>: ${d.s_tel || '-'}</p>
+                </div>
+                <div class="details-box" data-watermark="${wText}">
+                    <h4>GUARANTOR INFO</h4>
+                    <p><span class="lbl">NAME</span>: ${d.g_name || '-'}</p>
+                    <p><span class="lbl">NRIC</span>: ${d.g_nric || '-'}</p>
+                    <p><span class="lbl">TEL</span>: ${d.g_tel || '-'}</p>
+                    <p><span class="lbl">GTOR ADD</span>: ${d.g_add1 || '-'} ${d.g_add2 || ''}</p>
+                    <br>
+                    <p><span class="lbl">CO. NAME</span>: ${d.gc_name || '-'}</p>
+                    <p><span class="lbl">CO. TEL</span>: ${d.gc_tel || '-'}</p>
+                    <p><span class="lbl">CO. ADD</span>: ${d.gc_add1 || '-'} ${d.gc_add2 || ''}</p>
+                </div>
+                <div class="details-box" data-watermark="${wText}">
+                    <h4>ACCOUNT BALANCES</h4>
+                    <p><span class="lbl" style="width: 80px;">PRODUCT</span>: ${d.prod || '-'}</p>
+                    <p><span class="lbl" style="width: 80px;">PLATE NO</span>: ${d.plate || '-'}</p>
+                    <p><span class="lbl" style="width: 80px;">BALANCE</span>: ${d.bal || '-'}</p>
+                    <p><span class="lbl" style="width: 80px;">ODP BAL</span>: ${d.odp || '-'}</p>
+                    <p><span class="lbl" style="width: 80px;">ADCH BAL</span>: ${d.adch || '-'}</p>
+                </div>
+            `;
+
+            const historyBox = document.querySelector('.history-box');
+            historyBox.innerHTML = '<div style="text-align:center; padding:10px;">Loading history trail...</div>';
+            
+            const { data: findingsList } = await supabase.from('findings').select('*').eq('acct', accNo).order('updated_at', { ascending: false });
+            historyBox.innerHTML = ''; 
+            if(!findingsList || findingsList.length === 0) {
+                historyBox.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:10px;">No historical findings found.</div>';
+            } else {
+                findingsList.forEach((data) => {
+                    let dateFormatted = 'N/A';
+                    if (data.updated_at) {
+                        dateFormatted = new Date(data.updated_at).toLocaleString('en-GB', {
+                            day: '2-digit', month: '2-digit', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+                        });
+                    }
+                    
+                    let statusBadgeHTML = '';
+                    if (data.remark5 && data.remark5.startsWith('[')) {
+                        let extractedStatus = data.remark5.substring(1, data.remark5.indexOf(']'));
+                        let badgeColor = 'var(--text-muted)';
+                        if (extractedStatus === 'CALL') badgeColor = 'var(--status-call)';
+                        if (extractedStatus === 'UCT') badgeColor = 'var(--status-uct)';
+                        if (extractedStatus === 'PTP') badgeColor = 'var(--status-ptp)';
+                        if (extractedStatus === 'PV') badgeColor = 'var(--status-pv)';
+                        if (extractedStatus === 'PAID') badgeColor = 'var(--status-paid)';
+
+                        statusBadgeHTML = ` | <span style="background-color: ${badgeColor}; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px; display: inline-block; vertical-align: middle;">${extractedStatus}</span>`;
+                    }
+
+                let deleteBtnHTML = '';
+                    if(currentUser.role === 'super') {
+                        deleteBtnHTML = `<button class="btn-delete-finding" onclick="deleteSingleFinding('${data.id}', '${accNo}')">🗑️ DEL</button>`;
+                    }
+
+                    let histRemark = '';
+                    if(data.remark1 || data.remark2 || data.remark3 || data.remark4) {
+                        histRemark += `<div style="font-size: 12px; line-height: 1.5; margin-top: 8px; color: var(--text-main); font-weight: normal;">`;
+                        if(data.remark1) histRemark += `<div>${data.remark1}</div>`;
+                        if(data.remark2) histRemark += `<div>${data.remark2}</div>`;
+                        if(data.remark3) histRemark += `<div>${data.remark3}</div>`;
+                        if(data.remark4) histRemark += `<div>${data.remark4}</div>`;
+                        histRemark += `</div>`;
+                    } else {
+                        histRemark = `<div style="font-size: 12px; margin-top: 8px; color: var(--text-main); font-weight: normal;">${data.remark || ''}</div>`;
+                    }
+
+                    historyBox.innerHTML += `
+                        <div class="history-item" style="overflow: hidden; padding: 12px; margin-bottom: 12px; background-color: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+                            <div class="history-meta" style="font-weight: 600; font-size: 11px; color: var(--text-muted);">
+                                UPDATE BY: ${data.updated_by ? data.updated_by.toUpperCase() : 'SYSTEM'} | ${dateFormatted}${statusBadgeHTML}
+                                ${deleteBtnHTML}
+                            </div>
+                            ${histRemark}
+                        </div>`;
+                });
+            }
+            setTimeout(() => document.getElementById('single-remark-box').focus(), 100);
+        };
+
+        window.navigateModal = function(direction) {
+            if (currentModalIndex === -1) return;
+            
+            let newIndex = currentModalIndex;
+            if (direction === 'prev' && currentModalIndex > 0) {
+                newIndex--;
+            } else if (direction === 'next' && currentModalIndex < filteredAccounts.length - 1) {
+                newIndex++;
+            }
+            
+            if (newIndex !== currentModalIndex) {
+                let nextAcc = filteredAccounts[newIndex].acct;
+                
+                document.getElementById('single-remark-box').value = ''; 
+                document.getElementById('finding-status-select').value = '';
+                document.getElementById('textarea-info').innerText = `Jumlah Karakter: 0/200`;
+                
+                openModal(nextAcc);
+            }
+        };
+        
+        window.updateTextareaInfo = function(el) {
+            el.value = el.value.toUpperCase(); 
+            if (el.value.length > 200) { el.value = el.value.substring(0, 200); }
+            document.getElementById('textarea-info').innerText = `Jumlah Karakter: ${el.value.length}/200`;
+        };
+        
+        window.closeModal = function() { 
+            document.getElementById('updateModal').style.display = 'none'; 
+            document.getElementById('single-remark-box').value = ''; 
+            document.getElementById('finding-status-select').value = '';
+            document.getElementById('textarea-info').innerText = `Jumlah Karakter: 0/200`;
+        };
+
+        window.saveFinding = async function() {
+            let selectedStatus = document.getElementById('finding-status-select').value;
+            let accNo = document.getElementById('modalAccNo').innerText;
+            let fullStory = document.getElementById('single-remark-box').value.trim();
+            
+            if(!selectedStatus) {
+                alert("Sila PILIH ACTION STATUS sedia ada terlebih dahulu!");
+                document.getElementById('finding-status-select').focus();
+                return;
+            }
+
+if(!fullStory) { 
+                alert("Sila isi nota pemeriksaan terlebih dahulu."); 
+                return; 
+            }
+
+            // [FASA 5 PINTAR]: Pecah cerita panjang kepada chunk 50 karakter tanpa putuskan perkataan
+            let words = fullStory.split(' ');
+            let chunks = [];
+            let currentChunk = "";
+
+            words.forEach(word => {
+                if ((currentChunk + word).length > 50) {
+                    chunks.push(currentChunk.trim());
+                    currentChunk = word + " ";
+                } else {
+                    currentChunk += word + " ";
+                }
+            });
+            if (currentChunk.trim() !== "") {
+                chunks.push(currentChunk.trim());
+            }
+
+            let r1 = (chunks[0] || '').toUpperCase();
+            let r2 = (chunks[1] || '').toUpperCase();
+            let r3 = (chunks[2] || '').toUpperCase();
+            let r4 = (chunks[3] || '').toUpperCase();
+            
+            // 🛑 KOD LAMA REGEX & IF-STATEMENT SEBELUM NI DAH DIBUANG TERUS DI SINI!
+            
+            const btn = document.getElementById('btnSaveFinding'); 
+            btn.innerText = "SAVING...";
+            
+            let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
+            let acctType = accountInfo.type || '';
+            let acctLoc = accountInfo.loc || '';
+            let acctRegion = accountInfo.region || '';
+            
+            let updatedDetailsObj = accountInfo.details || {};
+            updatedDetailsObj.finding_status = selectedStatus; 
+
+            let today = new Date();
+            let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
+            updatedDetailsObj.last_remark_date = dateStr;
+            updatedDetailsObj.timestamp = today.getTime();
+            
+            // Ambil waktu sekarang untuk tarikh dan masa tanpa saat (Format: DD/MM/YYYY HH:MM AM/PM)
+            let currentDateTime = new Date();
+            let formattedDate = String(currentDateTime.getDate()).padStart(2, '0') + '/' + 
+                                String(currentDateTime.getMonth() + 1).padStart(2, '0') + '/' + 
+                                currentDateTime.getFullYear();
+            let formattedTime = currentDateTime.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: true 
+            });
+
+            // [FASA 5 PINTAR]: Remark 5 lengkap dengan tarikh & masa tanpa saat mengikut standard MIS SINGER
+            let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${formattedDate} ${formattedTime}`;
+            
+            try {
+                const { data: insertedData, error: insertError } = await supabase
+                    .from('findings')
+                    .insert([{ 
+                        acct: accNo, remark1: r1, remark2: r2, remark3: r3, remark4: r4, remark5: r5Auto,
+                        type: acctType, loc: acctLoc, region: acctRegion, updated_by: currentUser.username,
+                        updated_at: new Date().toISOString()
+                    }])
+                    .select('updated_at');
+
+                if(!insertError) {
+                    await supabase.from('accounts').update({ status: 'UPDATED', details: updatedDetailsObj }).eq('acct', accNo);
+                    
+                    let rowToUpdate = globalAccounts.find(a => a.acct === accNo);
+                    if(rowToUpdate) {
+                        rowToUpdate.status = 'UPDATED';
+                        rowToUpdate.finding_status = selectedStatus; 
+                        rowToUpdate.details = updatedDetailsObj;
+                    }
+                    
+                    const cacheKey = `scazp_cache_${currentUser.id}`;
+                    const timeKey = `scazp_time_${currentUser.id}`;
+                    
+                    await localforage.setItem(cacheKey, globalAccounts);
+                    if (insertedData && insertedData.length > 0) { localStorage.setItem(timeKey, insertedData[0].updated_at); }
+                    
+                    showNotification("RECORD SAVED", `Action for account <b>${accNo}</b> successfully updated.`); 
+                    
+                    document.getElementById('single-remark-box').value = '';
+                    document.getElementById('textarea-info').innerText = `Jumlah Karakter: 0/200`;
+                    applyFilterAndRender();
+                    openModal(accNo);
+                } else { showNotification("DATABASE ERROR", insertError.message, true); }
+            } catch (err) { showNotification("CRITICAL SYSTEM ERROR", err.message, true);
+            } finally { btn.innerText = "COMMIT ENTRY"; }
+        };
+
+        window.resetAccountStatus = async function() {
+            let accNo = document.getElementById('modalAccNo').innerText;
+            let isConfirmed = await customConfirm(`WARNING:\nAre you sure you want to delete ALL findings history for account ${accNo} and revert its status to PENDING?`);
+            if(!isConfirmed) return;
+
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
+
+            try {
+                const { error: delError } = await supabase.from('findings').delete().eq('acct', accNo);
+                if (delError) throw delError;
+
+                let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
+                let resetDetails = accountInfo.details || {};
+                resetDetails.finding_status = ""; 
+                resetDetails.last_remark_date = "";
+                resetDetails.timestamp = "";
+
+                const { error: updError = null } = await supabase.from('accounts').update({ status: 'PENDING', details: resetDetails }).eq('acct', accNo);
+                if (updError) throw updError;
+
+                let rowToUpdate = globalAccounts.find(a => a.acct === accNo);
+                if(rowToUpdate) {
+                    rowToUpdate.status = 'PENDING';
+                    rowToUpdate.finding_status = '';
+                    rowToUpdate.details = resetDetails;
+                }
+
+                const cacheKey = `scazp_cache_${currentUser.id}`;
+                await localforage.setItem(cacheKey, globalAccounts);
+
+                showNotification("RESET SUCCESSFUL", `Account <b>${accNo}</b> has been reverted to PENDING status.`);
+                closeModal();
+                applyFilterAndRender();
+            } catch (err) { showNotification("CRITICAL SYSTEM ERROR", err.message, true); }
+        };
+        
+        window.onclick = function(e) { 
+            if(e.target == document.getElementById('mappingModal')) closeMappingModal();
+        }
+
+        checkLoginSession();
+
+        window.nextPage = function() {
+            const totalPages = Math.ceil(filteredAccounts.length / rowsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTablePage();
+            }
+        };
+
+        window.prevPage = function() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTablePage();
+            }
+        };
+
+        window.fetchMasterLocations = async function() {
+            try {
+                const { data, error } = await supabase.from('master_locations').select('*');
+                if (data) {
+                    masterLocations = data;
+                }
+            } catch (err) {
+                console.error("Gagal muat turun senarai lokasi:", err);
+            }
+        };
+
+        let assignAccounts = [];
+        let currentAssignPage = 1;
+        const assignRowsPerPage = 20;
+
+        let currentAssignSortColumn = null;
+        let currentAssignSortDirection = 'asc';
+
+        window.sortAssignTable = function(columnName) {
+            if (currentAssignSortColumn === columnName) {
+                currentAssignSortDirection = currentAssignSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentAssignSortColumn = columnName;
+                currentAssignSortDirection = 'asc';
+            }
+            currentAssignPage = 1;
+            renderAssignTable(); // Panggil semula table untuk filter & susun
+        };
+
+        function updateAssignHeaderArrows(activeCol) {
+            const cols = ['acct', 'zone', 'region', 'area', 'osb', 'status', 'assignee_id', 'collector'];
+            cols.forEach(c => {
+                const el = document.getElementById(`tha-${c}`);
+                if (el) {
+                    let baseText = el.innerText.split(' ')[0];
+                    if(c === 'acct') baseText = "ACCT NO";
+                    else if(c === 'assignee_id') baseText = "CURRENT ASSIGNEE";
+                    else if(c === 'osb') baseText = "OSB (RM)";
+                    
+                    if (c === activeCol) {
+                        let arrow = currentAssignSortDirection === 'asc' ? '▲' : '▼';
+                        el.innerHTML = `<span style="color:var(--text-main);">${baseText} ${arrow}</span>`;
+                    } else {
+                        el.innerHTML = `${baseText} ⇅`;
+                    }
+                }
+            });
+        }
+
+        window.populateAssignSubordinates = function() {
+            const dropdown = document.getElementById('assign-target-user');
+            if (!dropdown) return;
+            
+            dropdown.innerHTML = '<option value="">-- PILIH STAF BAWAHAN --</option>';
+            if (!allSystemUsers || allSystemUsers.length === 0) return;
+            
+            let subordinates = [];
+            let currentUserIdClean = String(currentUser.id || currentUser.username || "").trim().toLowerCase();
+
+            if (currentUser.role === 'super') {
+                subordinates = allSystemUsers.filter(u => {
+                    let uStatus = String(u.status || '').toUpperCase().trim();
+                    let uId = String(u.id || '').toLowerCase().trim();
+                    return uStatus === 'ACTIVE' && uId !== currentUserIdClean;
+                });
+            } else {
+                subordinates = allSystemUsers.filter(u => {
+                    let uStatus = String(u.status || '').toUpperCase().trim();
+                    let uReportTo = String(u.report_to || '').toLowerCase().trim();
+                    return uStatus === 'ACTIVE' && uReportTo === currentUserIdClean;
+                });
+            }
+
+            subordinates.forEach(u => {
+                dropdown.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
+            });
+        };
+
+        window.populateCollectorFilters = function() {
+    const dropdown = document.getElementById('filter-collector-dropdown');
+    if (!dropdown) return;
+    
+    // Ambil senarai unik collector, buang yang kosong, susun A-Z
+    let collectors = [...new Set(globalAccounts.map(a => a.collector).filter(Boolean))].sort();
+    
+    dropdown.innerHTML = '<option value="ALL">SEMUA COLLECTOR</option>';
+    collectors.forEach(c => {
+        dropdown.innerHTML += `<option value="${c}">${c.toUpperCase()}</option>`;
+    });
+};
+
+window.renderAssignTable = function() {
+    const statusFilter = document.getElementById('assign-filter-status').value;
+    const collectorFilter = document.getElementById('filter-collector-dropdown').value; // [UPDATE]
+
+    const tbody = document.getElementById('assign-table-body');
+    
+    assignAccounts = globalAccounts.filter(row => {
+        let isUnassigned = !row.assignee_id || row.assignee_id === 'UNASSIGNED';
+        
+        let matchStatus = false;
+        if (statusFilter === 'UNASSIGNED') matchStatus = isUnassigned;
+        else if (statusFilter === 'ASSIGNED') matchStatus = !isUnassigned;
+        else matchStatus = true;
+
+        // [UPDATE: Filter Collector]
+        let matchCollector = (collectorFilter === 'ALL' || !collectorFilter) ? true : (row.collector === collectorFilter);
+        
+        return matchStatus && matchCollector;
+    });
+
+    if (currentAssignSortColumn) {
+                assignAccounts.sort((a, b) => {
+                    let valueA = a[currentAssignSortColumn];
+                    let valueB = b[currentAssignSortColumn];
+
+                    if (currentAssignSortColumn === 'osb') {
+                        let numA = parseFloat(valueA) || 0;
+                        let numB = parseFloat(valueB) || 0;
+                        return currentAssignSortDirection === 'asc' ? numA - numB : numB - numA;
+                    } 
+                    
+                    let strA = valueA ? String(valueA).toUpperCase().trim() : '';
+                    let strB = valueB ? String(valueB).toUpperCase().trim() : '';
+                    
+                    if (strA < strB) return currentAssignSortDirection === 'asc' ? -1 : 1;
+                    if (strA > strB) return currentAssignSortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+                updateAssignHeaderArrows(currentAssignSortColumn);
+            }
+
+            let total = assignAccounts.length;
+            document.getElementById('assign-total-count').innerText = total.toLocaleString();
+
+            let totalPages = Math.ceil(total / assignRowsPerPage) || 1;
+            if(currentAssignPage > totalPages) currentAssignPage = totalPages;
+            if(currentAssignPage < 1) currentAssignPage = 1;
+
+            let start = (currentAssignPage - 1) * assignRowsPerPage;
+            let end = start + assignRowsPerPage;
+            let pageData = assignAccounts.slice(start, end);
+
+            tbody.innerHTML = '';
+            if(pageData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Tiada akaun dijumpai untuk kategori ini.</td></tr>';
+            } else {
+                pageData.forEach(row => {
+                let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '🔴 UNASSIGNED';
+                let colDisp = row.collector ? row.collector.toUpperCase() : '-'; // [UPDATE]
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="text-align: center;">
+                            <input type="checkbox" class="chk-assign-row" value="${row.acct}" style="cursor:pointer; transform: scale(1.2);">
+                        </td>
+                        <td style="font-weight: bold; color: var(--text-main); white-space: nowrap;">
+    ${row.acct}
+    <button onclick="copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0; display: inline-block;" title="Copy Account No">📋</button>
+</td>
+                        <td>${row.zone || '-'}</td>
+                        <td>${row.region || '-'}</td>
+                        <td>${row.area || '-'}</td>
+                        <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td><span class="status-badge status-pending">${row.status}</span></td>
+                        <td style="font-weight:bold; color:var(--success-green);">${colDisp}</td>
+                        <td style="font-weight:bold; color:var(--accent-gold);">${assigneeDisp}</td> </tr>
+                `;
+            });
+            }
+
+            document.getElementById('assign-page-info').innerText = `Page ${currentAssignPage} of ${totalPages}`;
+            document.getElementById('btn-assign-prev').disabled = currentAssignPage === 1;
+            document.getElementById('btn-assign-next').disabled = currentAssignPage === totalPages;
+            document.getElementById('check-all-assign').checked = false; 
+        };
+
+        window.nextAssignPage = function() {
+            const totalPages = Math.ceil(assignAccounts.length / assignRowsPerPage);
+            if (currentAssignPage < totalPages) {
+                currentAssignPage++;
+                renderAssignTable();
+            }
+        };
+
+        window.prevAssignPage = function() {
+            if (currentAssignPage > 1) {
+                currentAssignPage--;
+                renderAssignTable();
+            }
+        };
+
+        window.toggleAllAssignCheckboxes = function(masterCheckbox) {
+            let checkboxes = document.querySelectorAll('.chk-assign-row');
+            checkboxes.forEach(chk => chk.checked = masterCheckbox.checked);
+        };
+
+        window.executeBatchAssignment = async function() {
+            const targetUser = document.getElementById('assign-target-user').value;
+            if(!targetUser) {
+                alert("Sila pilih Staf/Collector terlebih dahulu!");
+                return;
+            }
+
+            let checkboxes = document.querySelectorAll('.chk-assign-row:checked');
+            if(checkboxes.length === 0) {
+                alert("Sila tick (✔️) sekurang-kurangnya satu akaun untuk diagihkan!");
+                return;
+            }
+
+            let isConfirmed = await customConfirm(`Anda pasti mahu mengagihkan ${checkboxes.length} akaun kepada staf ${targetUser.toUpperCase()}?`);
+            if(!isConfirmed) return;
+
+            let selectedAccts = Array.from(checkboxes).map(chk => chk.value);
+
+            document.getElementById('loadingText').innerText = "Mengagihkan akaun ke pelayan (server)...";
+            document.getElementById('loadingModal').style.display = 'flex';
+
+            try {
+                let cleanTargetUser = targetUser.toLowerCase().trim();
+                
+                const { error } = await supabase.from('accounts').update({ assignee_id: cleanTargetUser }).in('acct', selectedAccts);
+                if(error) throw error;
+
+            await supabase.from('findings').insert([{
+                    acct: 'SYSTEM',
+                    remark1: `BATCH ASSIGNMENT: ${selectedAccts.length} akaun kepada ${cleanTargetUser} BY ${currentUser.id.toUpperCase()}`,
+                    updated_by: currentUser.id
+                }]);
+
+                selectedAccts.forEach(acct => {
+                    let accObj = globalAccounts.find(a => a.acct === acct);
+                    if(accObj) accObj.assignee_id = cleanTargetUser;
+                });
+
+                showNotification("SUCCESS", `${checkboxes.length} akaun telah berjaya diagihkan kepada ${targetUser.toUpperCase()}.`);
+                renderAssignTable(); 
+
+            } catch (err) {
+                showNotification("ERROR", err.message, true);
+            } finally {
+                document.getElementById('loadingModal').style.display = 'none';
+            }
+        };
+
+        // --- KOD BARU: FUNGSI UTK COPY ACCT NO ---
+window.copyToClipboard = function(text, btnElement) {
+    navigator.clipboard.writeText(text).then(() => {
+        const originalHTML = btnElement.innerHTML;
+        btnElement.innerHTML = '✅';
+        btnElement.style.color = 'var(--success-green)';
+        
+        setTimeout(() => {
+            btnElement.innerHTML = '📋';
+            btnElement.style.color = 'var(--accent-gold)';
+        }, 1000);
+    }).catch(err => {
+        console.error('Gagal menyalin text: ', err);
+    });
+};
+        
+    </script>
+</body>
+</html>
         --bg-color: #f4f7f9;
         --card-bg: #ffffff;
         --text-main: #1e293b;
@@ -2154,7 +5683,7 @@ window.openModal = async function(accNo) {
                         if (extractedStatus === 'PV') badgeColor = 'var(--status-pv)';
                         if (extractedStatus === 'PAID') badgeColor = 'var(--status-paid)';
 
-                        statusBadgeHTML = ` | <span style="background-color: ${badgeColor}; color: white; padding: 2px 5px; border-radius: 3px; font-weight: 700; font-size: 8px; display: inline-block; vertical-align: middle; line-height: 1.2;">${extractedStatus}</span>`;
+                        statusBadgeHTML = ` | <span style="background-color: ${badgeColor}; color: white; padding: 2px 5px; border-radius: 3px; font-weight: 700; font-size: 7px; display: inline-block; vertical-align: middle; line-height: 1.2;">${extractedStatus}</span>`;
                     }
 
                 let deleteBtnHTML = '';
