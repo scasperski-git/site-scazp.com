@@ -866,112 +866,62 @@
             min-width: 160px;
         }
 
-        /* --- MOBILE RESPONSIVENESS (Diperbaiki & Diperkemaskan) --- */
+/* --- MOBILE RESPONSIVENESS (Diperbaiki & Rapat Ke Tepi) --- */
         @media (max-width: 768px) {
-            body { padding: 15px; }
-            .details-wrapper { 
-                grid-template-columns: 1fr !important;
-                gap: 15px; 
-                padding: 10px 0; 
-            }
-            .details-box { 
-                width: 100% !important;
-                box-sizing: border-box; 
-            }
-            .kpi-container { 
-                grid-template-columns: repeat(2, 1fr); 
-                gap: 12px; 
-            }
-            .kpi-card { padding: 15px 10px; }
-            .kpi-card p { font-size: 20px; }
-            .pagination-container { 
-                padding: 15px; 
-                flex-direction: column; 
-                gap: 12px;
-            }
-            .search-container { flex-direction: column; }
-            .search-container select, .search-container input, .search-container div { width: 100%; max-width: 100% !important; }
+            body { padding: 0; background-color: var(--bg-color); }
             
-            .fp-body { 
-                grid-template-columns: 1fr;
-                padding: 10px 0 !important; 
-                gap: 15px !important; 
-            }
-            .fp-panel {
-                border-radius: 0 !important; 
-                border-left: none !important; 
-                border-right: none !important; 
-                padding: 15px 10px !important; 
-            }
-            .details-wrapper {
-                padding: 0 10px !important;
-            }
-            .details-box {
+            /* RAPATKAN SEMUA KOTAK UTAMA KE TEPI SKRIN */
+            .header, .nav-tabs, .filter-section, .settings-box, .table-container, .pagination-container, .action-bar {
                 border-radius: 0 !important;
                 border-left: none !important;
                 border-right: none !important;
+                border-top: none !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
             }
-            .fp-header { padding: 15px; flex-direction: column; gap: 15px; align-items: flex-start; }
-            .fp-header > div { width: 100%; justify-content: space-between; }
             
-            .btn-delete-finding {
-                padding: 3px 6px !important; 
-                font-size: 9px !important; 
-            }
+            /* Letak padding pada panel supaya ada ruang nafas kat bawah */
+            #dashboard-panel, #assign-panel, #settings-panel, #report-panel { padding-bottom: 20px; }
+
+            /* Header Settings */
+            .header { padding: 15px; flex-direction: column; align-items: stretch; gap: 15px; margin-bottom: 10px; }
+            .header h1 { font-size: 18px; text-align: center; }
+            .header > div { flex-wrap: wrap; justify-content: space-between; width: 100%; gap: 10px; }
+            .btn-logout { flex: 1; padding: 10px 0 !important; margin: 0; text-align: center; }
+            #display-username { width: 100%; text-align: center; background: #f8fafc; padding: 10px 0; border-radius: var(--radius-md); border: 1px solid var(--border-color); order: 3; font-weight: 500; }
+            .header .btn-logout:nth-of-type(1) { order: 1; } 
+            .header .btn-logout:nth-of-type(2) { order: 2; } 
+            
+            .nav-tabs { padding: 10px; margin-bottom: 15px; }
+
+            /* KPI Cards - biar ada ruang tepi sikit supaya tak nampak sesak */
+            .kpi-container { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 15px; }
+            .kpi-card { padding: 15px 10px; }
+            .kpi-card p { font-size: 20px; }
+
+            /* General Layout */
+            .action-bar { padding: 15px; }
+            .pagination-container { padding: 15px; flex-direction: column; gap: 12px; }
+            .search-container { flex-direction: column; }
+            .search-container select, .search-container input, .search-container div { width: 100%; max-width: 100% !important; }
             table { font-size: 12px; }
             th, td { padding: 12px 10px; }
 
-            .header {
-                flex-direction: column;
-                align-items: stretch; 
-                padding: 20px;
-                gap: 15px; 
-            }
-            .header h1 {
-                font-size: 18px; 
-                text-align: center; 
-            }
-            .header > div {
-                flex-wrap: wrap; 
-                justify-content: space-between;
-                width: 100%;
-                gap: 10px;
-            }
-            .btn-logout {
-                flex: 1; 
-                padding: 10px 0 !important;
-                margin: 0;
-                text-align: center;
-            }
-            #display-username {
-                width: 100%; 
-                text-align: center;
-                background: #f8fafc;
-                padding: 10px 0;
-                border-radius: var(--radius-md);
-                border: 1px solid var(--border-color); 
-                order: 3; 
-                font-weight: 500;
-            }
-            .header .btn-logout:nth-of-type(1) { order: 1; } 
-            .header .btn-logout:nth-of-type(2) { order: 2; } 
+            /* --- FAKE PAGE & AUDIT TRAIL --- */
+            .fp-header { padding: 15px 10px !important; flex-direction: column; gap: 12px; align-items: flex-start; border-radius: 0 !important; }
+            .fp-header > div { width: 100%; justify-content: space-between; }
+            
+            .fp-body { grid-template-columns: 1fr; padding: 10px 0 !important; gap: 10px !important; }
+            .fp-panel { border-radius: 0 !important; border-left: none !important; border-right: none !important; padding: 15px 10px !important; }
+            
+            .details-wrapper { grid-template-columns: 1fr !important; gap: 10px !important; padding: 0 !important; }
+            .details-box { width: 100% !important; box-sizing: border-box; border-radius: 0 !important; border-left: none !important; border-right: none !important; padding: 12px 10px !important; }
 
-            /* --- OPTIMASI AUDIT TRAIL UNTUK MOBILE --- */
-            .history-box {
-                padding: 8px 4px !important; 
-            }
-            .history-item {
-                padding: 8px 6px !important; 
-                margin-bottom: 8px !important;
-            }
-            .history-meta {
-                font-size: 9px !important; 
-                letter-spacing: -0.3px;
-            }
-            .history-item div[style*="font-size: 12px"] {
-                font-size: 11px !important; 
-                line-height: 1.4 !important; 
-            }
+            .history-box { padding: 8px 4px !important; border-radius: 0 !important; border-left: none !important; border-right: none !important; }
+            .history-item { padding: 10px 8px !important; margin-bottom: 10px !important; }
+            .history-meta { font-size: 9px !important; letter-spacing: -0.3px; }
+            
+            .btn-delete-finding { padding: 2px 6px !important; font-size: 8px !important; height: 18px; line-height: 1.2; }
         }
     </style>
 </head>
@@ -3071,16 +3021,16 @@ window.openModal = async function(accNo) {
                         deleteBtnHTML = `<button class="btn-delete-finding" onclick="deleteSingleFinding('${data.id}', '${accNo}')">🗑️ DEL</button>`;
                     }
 
+// --- GABUNGKAN SEMULA AYAT SUPAYA TAK NAMPAK TERKERAT ---
                     let histRemark = '';
                     if(data.remark1 || data.remark2 || data.remark3 || data.remark4) {
-                        histRemark += `<div style="font-size: 12px; line-height: 1.5; margin-top: 8px; color: var(--text-main); font-weight: normal;">`;
-                        if(data.remark1) histRemark += `<div>${data.remark1}</div>`;
-                        if(data.remark2) histRemark += `<div>${data.remark2}</div>`;
-                        if(data.remark3) histRemark += `<div>${data.remark3}</div>`;
-                        if(data.remark4) histRemark += `<div>${data.remark4}</div>`;
-                        histRemark += `</div>`;
+                        // Gabung remark1, 2, 3, 4 dengan jarak ruang (space)
+                        let combinedStr = [data.remark1, data.remark2, data.remark3, data.remark4].filter(Boolean).join(' ');
+                        
+                        // Letak text-align: justify supaya kiri kanan sama rata cantik
+                        histRemark = `<div style="font-size: 11px; line-height: 1.5; margin-top: 8px; color: var(--text-main); font-weight: normal; text-align: justify;">${combinedStr}</div>`;
                     } else {
-                        histRemark = `<div style="font-size: 12px; margin-top: 8px; color: var(--text-main); font-weight: normal;">${data.remark || ''}</div>`;
+                        histRemark = `<div style="font-size: 11px; line-height: 1.5; margin-top: 8px; color: var(--text-main); font-weight: normal; text-align: justify;">${data.remark || ''}</div>`;
                     }
 
                     historyBox.innerHTML += `
