@@ -4,18 +4,201 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Findings Management System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
     <style>
         :root {
-            /* Palet warna baharu yang lebih clean & premium */
-            --bg-color: #f4f7f9;
+            --bg-color: #f0f4f8;
             --card-bg: #ffffff;
-            --text-main: #1e293b;
+            --text-main: #102a43;
+            --text-muted: #486581;
+            --accent-gold: #2563eb;   
+            --border-color: #d9e2ec;
+            
+            --success-green: #4caf50;
+            --error-red: #e53935;
+            
+            --status-call: #2196f3;
+            --status-uct: #ff9800;
+            --status-ptp: #9c27b0;
+            --status-pv: #00bcd4;
+            --status-paid: #4caf50;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; }
+
+        /* --- LOGIN STYLES --- */
+        #login-section { display: none; justify-content: center; align-items: center; height: 90vh; }
+        .login-box { background-color: var(--card-bg); padding: 30px; border-radius: 8px; border: 1px solid var(--accent-gold); width: 100%; max-width: 350px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.1); text-align: center; }
+        .login-box h2 { color: var(--accent-gold); margin-top: 0; font-size: 22px; }
+        .login-input { width: 100%; box-sizing: border-box; background-color: #e8f0f8; border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 13px; }
+        .login-input:focus { outline: none; border-color: var(--accent-gold); background-color: #ffffff; }
+        .btn-login { width: 100%; background-color: var(--accent-gold); color: #ffffff; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .btn-login:hover { background-color: #1d4ed8; }
+
+        /* --- DASHBOARD STYLES --- */
+        #dashboard-section { display: none; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        .header h1 { margin: 0; font-size: 20px; color: var(--accent-gold); letter-spacing: 1px; }
+        .btn-logout { background-color: transparent; color: var(--error-red); border: 1px solid var(--error-red); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+
+        .nav-tabs { display: none; gap: 10px; margin-bottom: 20px; }
+        .nav-btn { background-color: #e8f0f8; color: var(--text-muted); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .nav-btn.active { background-color: var(--accent-gold); color: #ffffff; border-color: var(--accent-gold); }
+
+        .main-panel { display: block; }
+        #settings-panel { display: none; }
+
+        .action-bar { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+        .filter-section { background-color: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
+        .filter-title { font-size: 11px; color: var(--text-muted); margin-bottom: 5px; display: block; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;}
+        .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .btn-filter { background-color: #ffffff; color: var(--text-main); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; transition: all 0.2s; }
+        .btn-filter:hover { border-color: var(--accent-gold); background-color: #e8f0f8; }
+        .btn-filter.active { background-color: var(--accent-gold); color: #ffffff; border-color: var(--accent-gold); font-weight: bold; }
+        
+        #zone-filters-container, #region-filters-container, #area-filters-container { display: none; padding-top: 5px; }
+
+        .btn-upload-trigger { background-color: #2e7d32; color: white; border: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 5px; height: fit-content;}
+        .btn-upload-trigger:hover { background-color: #388e3c; }
+
+        .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .kpi-card { background-color: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center; transition: all 0.25s ease; }
+        .kpi-clickable { cursor: pointer; }
+        .kpi-clickable:hover { border-color: var(--accent-gold); background-color: #e8f0f8; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
+        .kpi-card.active { border-color: var(--accent-gold); background-color: #d9e2ec; box-shadow: 0 0 15px rgba(37, 99, 235, 0.2); }
+        .kpi-card h3 { margin: 0 0 5px 0; font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+        .kpi-card p { margin: 0; font-size: 20px; font-weight: bold; color: var(--text-main); }
+
+        .table-container { background-color: var(--card-bg); border-radius: 8px 8px 0 0; border: 1px solid var(--border-color); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th, td { padding: 10px 10px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        
+        th { background-color: #e8f0f8; color: var(--text-main); font-weight: 600; white-space: nowrap; user-select: none; font-size: 10px;}
+        th.sortable { cursor: pointer; transition: background 0.2s; }
+        th.sortable:hover { background-color: #d9e2ec; color: var(--accent-gold); }
+        
+        tr:hover { background-color: #e2e8f0; }
+        
+        .pagination-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background-color: #e8f0f8; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; margin-bottom: 20px; }
+        .pagination-controls button { background-color: #ffffff; color: var(--accent-gold); border: 1px solid var(--accent-gold); padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin: 0 5px; }
+        .pagination-controls button:disabled { border-color: #cbd5e1; color: #cbd5e1; cursor: not-allowed; }
+        .page-info { font-size: 12px; color: var(--text-muted); }
+        
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; display: inline-block; text-align: center; }
+        .status-done { background-color: rgba(76, 175, 80, 0.15); color: var(--success-green); border: 1px solid rgba(76, 175, 80, 0.3); }
+        .status-pending { background-color: rgba(229, 57, 53, 0.15); color: var(--error-red); border: 1px solid rgba(229, 57, 53, 0.3); }
+        
+        .btn-update { background-color: transparent; color: var(--accent-gold); border: 1px solid var(--accent-gold); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; }
+        .btn-update:hover { background-color: var(--accent-gold); color: #ffffff; }
+
+        .settings-box { background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; max-width: 500px; }
+        .settings-box h2 { color: var(--accent-gold); font-size: 16px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;}
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 12px; color: var(--text-muted); }
+        .form-control { width: 100%; box-sizing: border-box; background-color: #e8f0f8 !important; border: 1px solid var(--border-color) !important; color: var(--text-main) !important; padding: 10px; border-radius: 4px; font-size: 12px; }
+        .form-control:focus { outline: none; border-color: var(--accent-gold) !important; background-color: #ffffff !important;}
+        .btn-submit { background-color: var(--accent-gold); color: #ffffff; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(16, 42, 67, 0.75); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background-color: var(--card-bg); border: 1px solid var(--accent-gold); border-radius: 8px; width: 90%; max-width: 500px; padding: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); position: relative; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; }
+        .modal-header h2 { margin: 0; font-size: 15px; color: var(--accent-gold); }
+        .close-btn { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
+        .close-btn:hover { color: var(--error-red); }
+        
+        .history-box { background-color: #e8f0f8; padding: 10px; border-radius: 4px; margin-bottom: 15px; max-height: 120px; overflow-y: auto; font-size: 11px; border: 1px solid var(--border-color); }
+        .history-item { border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; margin-bottom: 5px; }
+        .history-item:last-child { border-bottom: none; margin-bottom: 0; }
+        .history-meta { color: var(--accent-gold); font-size: 10px; margin-bottom: 3px; }
+
+        .mapping-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; background: #e8f0f8; padding: 10px; border-radius: 6px;}
+        .mapping-grid label { font-size: 12px; align-self: center; color: var(--text-main); font-weight: 500;}
+
+        #progressModal .modal-content { max-width: 400px; text-align: center; padding: 35px 25px; border-color: var(--border-color); }
+        .progress-wrapper { background-color: #d9e2ec; border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; margin: 20px 0 10px 0; height: 16px; width: 100%; }
+        .progress-bar-fill { background: linear-gradient(90deg, var(--accent-gold), #60a5fa); height: 100%; width: 0%; transition: width 0.3s ease-out; }
+        .progress-text { font-size: 16px; font-weight: bold; color: var(--accent-gold); margin-bottom: 5px; }
+        
+        #loadingModal .modal-content { text-align: center; padding: 40px; border: 1px solid var(--accent-gold); max-width: 350px;}
+
+        .btn-cancel { background-color: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border-color); padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .btn-cancel:hover { background-color: #d9e2ec; color: var(--text-main); }
+
+        .details-wrapper { padding: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; border-bottom: 2px solid var(--accent-gold); border-left: 4px solid var(--accent-gold); }
+        .details-box { background-color: #ffffff !important; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); position: relative; z-index: 1; overflow: hidden; }
+        .details-box::before {
+            content: attr(data-watermark);
+            position: absolute;
+            top: -20%;
+            left: -20%;
+            width: 160%;
+            height: 160%;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 8px;
+            font-weight: 900;
+            color: rgba(16, 42, 67, 0.09); 
+            white-space: normal;
+            word-break: break-all;
+            line-height: 2.2;
+            letter-spacing: 1px;
+            padding: 10px;
+            box-sizing: border-box;
+            transform: rotate(-10deg) scale(1.2);
+            transform-origin: center center;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .details-box h4, .details-box p {
+            position: relative;
+            z-index: 2;
+        }
+        .details-box h4 { margin: 0 0 10px 0; color: var(--accent-gold); font-size: 11px; border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; text-transform: uppercase; }
+        .details-box p { margin: 4px 0; font-size: 11px; color: var(--text-main); }
+        .details-box span.lbl { color: var(--text-muted); display: inline-block; width: 65px; font-weight: bold; }
+        
+        .mapping-container { max-height: 60vh; overflow-y: auto; padding-right: 10px; text-align: left; }
+        .mapping-section { border: 1px solid var(--border-color); padding: 10px; margin-bottom: 15px; border-radius: 6px; background: #ffffff; }
+        .mapping-section h3 { margin-top: 0; margin-bottom: 10px; font-size: 12px; color: var(--success-green); border-bottom: 1px solid var(--border-color); padding-bottom: 5px;}
+
+        @media (max-width: 768px) {
+            .details-wrapper { grid-template-columns: 1fr !important; gap: 12px; padding: 12px; }
+            .details-box { width: 100% !important; box-sizing: border-box; }
+            .kpi-container { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+            .kpi-card { padding: 10px 4px; }
+            .kpi-card h3 { font-size: 8px; }
+            .kpi-card p { font-size: 13px; }
+            table { font-size: 9px; }
+            th, td { padding: 8px 5px; white-space: nowrap; }
+            th { font-size: 9px; letter-spacing: 0.5px; }
+            .pagination-container { padding: 10px; flex-direction: column; gap: 10px; }
+        }
+
+        #maintenance-bar { display: none; background: linear-gradient(90deg, #b71c1c, #e57373); color: white; text-align: center; padding: 10px; font-size: 13px; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 9999; }
+        .blink-dot { height: 8px; width: 8px; background-color: white; border-radius: 50%; display: inline-block; margin-right: 8px; animation: blinker 1.5s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        .search-container { display: flex; gap: 10px; align-items: center; }
+        @media (max-width: 768px) { .search-container { flex-direction: column; } }
+
+        .full-page-modal { width: 100vw !important; height: 100vh !important; max-width: 100% !important; max-height: 100% !important; border-radius: 0 !important; border: none !important; background-color: var(--bg-color) !important; display: flex; flex-direction: column; padding: 0 !important; margin: 0; box-sizing: border-box; }
+        .fp-header { background-color: var(--card-bg); padding: 15px 20px; border-bottom: 2px solid var(--accent-gold); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); z-index: 10; }
+        .fp-header h2 { margin: 0; font-size: 16px; color: var(--accent-gold); }
+        .fp-btn-back { background: var(--accent-gold); color: white; border: none; padding: 6px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .fp-btn-back:hover { background: #1d4ed8; }
+        .fp-btn-back:disabled { background: #cbd5e1 !important; color: #94a3b8 !important; cursor: not-allowed !important; }
+<style>
+        :root {
+            /* Warna Latar & Teks Premium */
+            --bg-color: #f4f7fa;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
             --text-muted: #64748b;
-            --accent-gold: #3b82f6; /* Modern Blue */
-            --accent-hover: #2563eb;
+            
+            /* Warna Tema Korporat (Ganti nama asal supaya tak rosak HTML) */
+            --accent-gold: #1d4ed8;   /* Corporate Ocean Blue */
+            --accent-hover: #1e3a8a;  /* Darker Blue untuk Hover */
             --border-color: #e2e8f0;
             
             --success-green: #10b981;
@@ -26,940 +209,199 @@
             --status-ptp: #8b5cf6;
             --status-pv: #06b6d4;
             --status-paid: #10b981;
-
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
-            --radius-md: 8px;
-            --radius-lg: 12px;
         }
 
-        body { 
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color); 
-            color: var(--text-main); 
-            margin: 0; 
-            padding: 20px; 
-            line-height: 1.5;
-        }
-
-        /* --- CUSTOM SCROLLBAR --- */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-color); }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        /* --- ANIMATIONS --- */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        body { font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
 
         /* --- LOGIN STYLES --- */
-        #login-section { 
-            display: none;
-            justify-content: center; 
-            align-items: center; 
-            height: 90vh; 
-        }
-        .login-box { 
-            background-color: var(--card-bg); 
-            padding: 40px 30px;
-            border-radius: var(--radius-lg); 
-            border: 1px solid rgba(255,255,255,0.5); 
-            width: 100%; 
-            max-width: 360px; 
-            box-shadow: var(--shadow-lg); 
-            text-align: center;
-        }
-        .login-box h2 { 
-            color: var(--accent-gold); 
-            margin-top: 0; 
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-        .login-input { 
-            width: 100%; 
-            box-sizing: border-box; 
-            background-color: #f8fafc; 
-            border: 1px solid var(--border-color);
-            color: var(--text-main); 
-            padding: 12px 15px; 
-            margin-bottom: 15px; 
-            border-radius: var(--radius-md); 
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-        .login-input:focus { 
-            outline: none; 
-            border-color: var(--accent-gold); 
-            background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        .btn-login { 
-            width: 100%; 
-            background-color: var(--accent-gold); 
-            color: #ffffff; 
-            border: none; 
-            padding: 12px;
-            border-radius: var(--radius-md); 
-            font-weight: 600; 
-            font-size: 14px;
-            cursor: pointer; 
-            transition: all 0.2s ease;
-        }
-        .btn-login:hover { 
-            background-color: var(--accent-hover);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
+        #login-section { display: none; justify-content: center; align-items: center; height: 90vh; }
+        .login-box { background-color: var(--card-bg); padding: 40px 30px; border-radius: 12px; border-top: 4px solid var(--accent-gold); width: 100%; max-width: 380px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05); text-align: center; }
+        .login-box h2 { color: var(--accent-gold); margin-top: 0; font-size: 22px; font-weight: 800;}
+        .login-input { width: 100%; box-sizing: border-box; background-color: #f8fafc; border: 1px solid var(--border-color); color: var(--text-main); padding: 12px 15px; margin-bottom: 15px; border-radius: 6px; font-size: 13px; transition: all 0.3s ease; }
+        .login-input:focus { outline: none; border-color: var(--accent-gold); background-color: #ffffff; box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15); }
+        .btn-login { width: 100%; background-color: var(--accent-gold); color: #ffffff; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(29, 78, 216, 0.2); }
+        .btn-login:hover { background-color: var(--accent-hover); transform: translateY(-1px); }
 
         /* --- DASHBOARD STYLES --- */
-        #dashboard-section { display: none; }
-        
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 25px;
-            background: var(--card-bg);
-            padding: 15px 20px;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-color); 
-        }
-        .header h1 { 
-            margin: 0;
-            font-size: 20px; 
-            font-weight: 700;
-            color: var(--accent-gold); 
-            letter-spacing: -0.5px; 
-        }
-        .btn-logout { 
-            background-color: transparent; 
-            color: var(--error-red);
-            border: 1px solid var(--error-red); 
-            padding: 6px 12px; 
-            border-radius: var(--radius-md); 
-            cursor: pointer; 
-            font-size: 12px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-        .btn-logout:hover {
-            background-color: var(--error-red);
-            color: #ffffff;
-        }
+        #dashboard-section { display: none; max-width: 1600px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
+        .header h1 { margin: 0; font-size: 20px; color: var(--accent-gold); letter-spacing: 0.5px; font-weight: 800; }
+        .btn-logout { background-color: transparent; color: var(--error-red); border: 1px solid var(--error-red); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; }
+        .btn-logout:hover { background-color: #fef2f2; }
 
-        /* --- ENHANCED NAVIGATION BAR --- */
-        .nav-tabs { 
-            display: none; 
-            flex-wrap: nowrap; 
-            overflow-x: auto; 
-            -webkit-overflow-scrolling: touch; 
-            gap: 8px; 
-            margin-bottom: 25px;
-            background-color: var(--card-bg);
-            padding: 8px;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            scrollbar-width: none; 
-            border: 1px solid var(--border-color);
-        }
-        .nav-tabs::-webkit-scrollbar { display: none; }
-        .nav-btn { 
-            flex: 0 0 auto; 
-            white-space: nowrap; 
-            background-color: transparent; 
-            color: var(--text-muted); 
-            border: none;
-            padding: 10px 20px; 
-            border-radius: var(--radius-md); 
-            cursor: pointer; 
-            font-size: 13px; 
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-        .nav-btn:hover {
-            background-color: #f1f5f9;
-            color: var(--text-main);
-        }
-        .nav-btn.active { 
-            background-color: var(--accent-gold); 
-            color: #ffffff; 
-            box-shadow: var(--shadow-md);
-        }
+        .nav-tabs { display: none; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;}
+        .nav-btn { background-color: #f8fafc; color: var(--text-muted); border: 1px solid var(--border-color); padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s ease; white-space: nowrap; }
+        .nav-btn:hover { color: var(--accent-gold); border-color: var(--accent-gold); }
+        .nav-btn.active { background-color: var(--accent-gold); color: #ffffff; border-color: var(--accent-gold); box-shadow: 0 4px 10px rgba(29, 78, 216, 0.2); }
 
-        .main-panel { 
-            display: block;
-            animation: fadeIn 0.4s ease-out forwards;
-        }
+        .main-panel { display: block; animation: fadeIn 0.4s ease; }
         #settings-panel { display: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .action-bar { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: flex-start; 
-            flex-wrap: wrap; 
-            gap: 15px;
-            margin-bottom: 20px; 
-        }
-        .filter-section { 
-            background-color: var(--card-bg); 
-            padding: 18px; 
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-color); 
-            box-shadow: var(--shadow-sm);
-            flex-grow: 1; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px;
-        }
-        .filter-title { 
-            font-size: 11px; 
-            color: var(--text-muted); 
-            margin-bottom: 2px; 
-            display: block; 
-            text-transform: uppercase;
-            letter-spacing: 0.5px; 
-            font-weight: 700;
-        }
-        .btn-group { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 8px;
-        }
-        .btn-filter { 
-            background-color: #f8fafc; 
-            color: var(--text-muted); 
-            border: 1px solid var(--border-color);
-            padding: 8px 14px; 
-            border-radius: var(--radius-md); 
-            cursor: pointer; 
-            font-size: 12px; 
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .btn-filter:hover { 
-            border-color: var(--accent-gold); 
-            color: var(--accent-gold);
-            background-color: #eff6ff;
-        }
-        .btn-filter.active { 
-            background-color: var(--accent-gold); 
-            color: #ffffff; 
-            border-color: var(--accent-gold); 
-            font-weight: 600;
-            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
-        }
+        .action-bar { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+        .filter-section { background-color: var(--card-bg); padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); flex-grow: 1; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 2px 4px rgba(15, 23, 42, 0.02); }
+        .filter-title { font-size: 11px; color: var(--text-muted); margin-bottom: 5px; display: block; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;}
+        .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .btn-filter { background-color: #f8fafc; color: var(--text-main); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-filter:hover { border-color: var(--accent-gold); background-color: #eff6ff; color: var(--accent-gold); }
+        .btn-filter.active { background-color: var(--accent-gold); color: #ffffff; border-color: var(--accent-gold); box-shadow: 0 2px 6px rgba(29, 78, 216, 0.25); }
+        
+        #zone-filters-container, #region-filters-container, #area-filters-container { display: none; padding-top: 5px; }
 
-        #zone-filters-container, #region-filters-container, #area-filters-container { 
-            display: none;
-            padding-top: 5px; 
-        }
+        .btn-upload-trigger { background-color: #0f172a; color: white; border: none; padding: 12px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 6px; height: fit-content; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.15); }
+        .btn-upload-trigger:hover { background-color: #1e293b; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(15, 23, 42, 0.25); }
 
-        .btn-upload-trigger { 
-            background-color: var(--success-green);
-            color: white;
-            border: none; 
-            padding: 10px 18px; 
-            border-radius: var(--radius-md); 
-            font-weight: 600; 
-            cursor: pointer; 
-            font-size: 13px; 
-            display: flex; 
-            align-items: center; 
-            gap: 6px;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
-        }
-        .btn-upload-trigger:hover { 
-            background-color: #059669;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px -1px rgba(16, 185, 129, 0.3);
-        }
-
-        .kpi-container { 
-            display: grid;
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 15px; 
-            margin-bottom: 25px; 
-        }
-        .kpi-card { 
-            background-color: var(--card-bg);
-            padding: 20px 15px; 
-            border-radius: var(--radius-lg); 
-            border: 1px solid var(--border-color); 
-            text-align: center; 
-            box-shadow: var(--shadow-sm);
-            transition: all 0.2s ease;
-        }
+        .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .kpi-card { background-color: var(--card-bg); padding: 18px 15px; border-radius: 10px; border: 1px solid var(--border-color); text-align: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 4px rgba(15, 23, 42, 0.02); }
         .kpi-clickable { cursor: pointer; }
-        .kpi-clickable:hover { 
-            border-color: var(--accent-gold); 
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md); 
-        }
-        .kpi-card.active { 
-            border-color: var(--accent-gold);
-            background-color: #eff6ff; 
-            box-shadow: 0 0 0 1px var(--accent-gold);
-        }
-        .kpi-card h3 { 
-            margin: 0 0 8px 0; 
-            font-size: 11px; 
-            color: var(--text-muted);
-            text-transform: uppercase; 
-            letter-spacing: 0.5px;
-            font-weight: 600;
-        }
-        .kpi-card p { 
-            margin: 0; 
-            font-size: 24px; 
-            font-weight: 700;
-            color: var(--text-main); 
-            letter-spacing: -0.5px;
-        }
+        .kpi-clickable:hover { border-color: var(--accent-gold); transform: translateY(-4px); box-shadow: 0 10px 20px rgba(29, 78, 216, 0.1); }
+        .kpi-card.active { border-color: var(--accent-gold); background-color: #eff6ff; box-shadow: 0 0 0 1px var(--accent-gold); }
+        .kpi-card h3 { margin: 0 0 8px 0; font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;}
+        .kpi-card p { margin: 0; font-size: 22px; font-weight: 800; color: var(--text-main); }
 
-        /* --- ENHANCED TABLES --- */
-        .table-container { 
-            background-color: var(--card-bg); 
-            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-            border: 1px solid var(--border-color); 
-            box-shadow: var(--shadow-sm);
-            overflow-x: auto; 
-        }
-        table { 
-            width: 100%; 
-            border-collapse: collapse;
-            font-size: 13px; 
-            min-width: 800px;
-        }
-        th, td { 
-            padding: 14px 16px; 
-            text-align: left;
-            border-bottom: 1px solid #f1f5f9; 
-        }
-        th { 
-            background-color: #f8fafc;
-            color: var(--text-muted); 
-            font-weight: 600; 
-            white-space: nowrap; 
-            user-select: none; 
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        th.sortable { 
-            cursor: pointer;
-            transition: background 0.2s, color 0.2s; 
-        }
-        th.sortable:hover { 
-            background-color: #e2e8f0; 
-            color: var(--text-main);
-        }
-        tr:nth-child(even) { background-color: #fafbfc; }
-        tr:hover { 
-            background-color: #f1f5f9;
-            transition: background-color 0.15s ease;
-        }
+        /* --- JADUAL ANTI-PECAH (FLUID RESPONSIVE) --- */
+        .table-container { background-color: var(--card-bg); border-radius: 10px 10px 0 0; border: 1px solid var(--border-color); overflow-x: auto; -webkit-overflow-scrolling: touch; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.02); }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 800px; } /* Min-width halang kolum penyek di fon */
+        th, td { padding: 12px 12px; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap; } /* No wrap text */
+        
+        th { background-color: #f8fafc; color: var(--text-main); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 5;}
+        th.sortable { cursor: pointer; transition: background 0.2s; }
+        th.sortable:hover { background-color: #f1f5f9; color: var(--accent-gold); }
+        
+        tr { transition: background-color 0.2s ease; }
+        tr:hover { background-color: #f8fafc; }
+        
+        .pagination-container { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #f8fafc; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 10px 10px; margin-bottom: 25px; }
+        .pagination-controls button { background-color: #ffffff; color: var(--accent-gold); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 700; margin: 0 5px; transition: all 0.2s; }
+        .pagination-controls button:hover:not(:disabled) { border-color: var(--accent-gold); background-color: #eff6ff; }
+        .pagination-controls button:disabled { border-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; opacity: 0.7; }
+        .page-info { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+        
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; display: inline-block; text-align: center; letter-spacing: 0.5px; }
+        .status-done { background-color: #d1fae5; color: #059669; }
+        .status-pending { background-color: #fee2e2; color: #dc2626; }
+        
+        .btn-update { background-color: transparent; color: var(--accent-gold); border: 1px solid var(--accent-gold); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 600; transition: all 0.2s; }
+        .btn-update:hover { background-color: var(--accent-gold); color: #ffffff; box-shadow: 0 2px 4px rgba(29, 78, 216, 0.2); }
 
-        .pagination-container { 
-            display: flex;
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 15px 20px; 
-            background-color: #f8fafc; 
-            border: 1px solid var(--border-color); 
-            border-top: none; 
-            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-            margin-bottom: 20px; 
-        }
-        .pagination-controls button { 
-            background-color: #ffffff; 
-            color: var(--text-main);
-            border: 1px solid var(--border-color); 
-            padding: 6px 14px; 
-            border-radius: var(--radius-md); 
-            cursor: pointer; 
-            font-size: 12px; 
-            font-weight: 600; 
-            margin: 0 5px;
-            transition: all 0.2s ease;
-            box-shadow: var(--shadow-sm);
-        }
-        .pagination-controls button:hover:not(:disabled) {
-            border-color: var(--accent-gold);
-            color: var(--accent-gold);
-        }
-        .pagination-controls button:disabled { 
-            background-color: #f1f5f9;
-            border-color: #e2e8f0; 
-            color: #94a3b8; 
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-        .page-info { 
-            font-size: 13px; 
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .status-badge { 
-            padding: 4px 10px;
-            border-radius: 20px; 
-            font-size: 11px; 
-            font-weight: 600; 
-            display: inline-block; 
-            text-align: center;
-            letter-spacing: 0.3px;
-        }
-        .status-done { 
-            background-color: #dcfce7; 
-            color: #166534;
-            border: 1px solid #bbf7d0; 
-        }
-        .status-pending { 
-            background-color: #fee2e2;
-            color: #991b1b; 
-            border: 1px solid #fecaca; 
-        }
-
-        .btn-update { 
-            background-color: #ffffff;
-            color: var(--text-main); 
-            border: 1px solid var(--border-color); 
-            padding: 5px 10px; 
-            border-radius: var(--radius-md); 
-            cursor: pointer; 
-            font-size: 11px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-        .btn-update:hover { 
-            border-color: var(--accent-gold); 
-            color: var(--accent-gold);
-            background-color: #eff6ff;
-        }
-
-        .settings-box { 
-            background-color: var(--card-bg); 
-            border: 1px solid var(--border-color); 
-            padding: 25px; 
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            max-width: 500px; 
-        }
-        .settings-box h2 { 
-            color: var(--text-main); 
-            font-size: 16px; 
-            font-weight: 600;
-            margin-top: 0;
-            margin-bottom: 20px; 
-            border-bottom: 1px solid var(--border-color); 
-            padding-bottom: 10px;
-        }
+        .settings-box { background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 25px; border-radius: 12px; max-width: 500px; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.02); }
+        .settings-box h2 { color: var(--text-main); font-size: 16px; font-weight: 800; margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;}
         .form-group { margin-bottom: 18px; }
-        .form-group label { 
-            display: block; 
-            margin-bottom: 6px; 
-            font-size: 13px; 
-            font-weight: 500;
-            color: var(--text-main);
-        }
-        .form-control { 
-            width: 100%; 
-            box-sizing: border-box; 
-            background-color: #f8fafc !important;
-            border: 1px solid var(--border-color) !important; 
-            color: var(--text-main) !important; 
-            padding: 12px; 
-            border-radius: var(--radius-md); 
-            font-size: 13px;
-            transition: all 0.2s ease;
-            font-family: inherit;
-        }
-        .form-control:focus { 
-            outline: none; 
-            border-color: var(--accent-gold) !important;
-            background-color: #ffffff !important;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        .btn-submit { 
-            background-color: var(--accent-gold); 
-            color: #ffffff; 
-            border: none;
-            padding: 12px 20px; 
-            border-radius: var(--radius-md); 
-            font-weight: 600; 
-            cursor: pointer; 
-            font-size: 13px;
-            transition: all 0.2s ease;
-            box-shadow: var(--shadow-sm);
-        }
-        .btn-submit:hover {
-            background-color: var(--accent-hover);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 12px; color: var(--text-main); font-weight: 600; }
+        .form-control { width: 100%; box-sizing: border-box; background-color: #f8fafc !important; border: 1px solid var(--border-color) !important; color: var(--text-main) !important; padding: 12px; border-radius: 6px; font-size: 13px; transition: all 0.3s; }
+        .form-control:focus { outline: none; border-color: var(--accent-gold) !important; background-color: #ffffff !important; box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);}
+        .btn-submit { background-color: var(--accent-gold); color: #ffffff; border: none; padding: 12px 24px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 13px; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(29, 78, 216, 0.2); }
+        .btn-submit:hover { background-color: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(29, 78, 216, 0.3); }
 
-        .modal-overlay { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: rgba(15, 23, 42, 0.6); /* Lebih dark & clean overlay */
-            backdrop-filter: blur(4px); /* Efek blur iOS */
-            -webkit-backdrop-filter: blur(4px);
-            z-index: 1000; 
-            justify-content: center; 
-            align-items: center;
-        }
-        .modal-content { 
-            background-color: var(--card-bg); 
-            border: none; 
-            border-radius: var(--radius-lg); 
-            width: 90%;
-            max-width: 500px; 
-            padding: 25px; 
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); 
-            position: relative;
-            animation: fadeIn 0.3s ease-out forwards;
-        }
-        .modal-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px; 
-            margin-bottom: 20px; 
-        }
-        .modal-header h2 { 
-            margin: 0; 
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text-main); 
-        }
-        .close-btn { 
-            background: #f1f5f9; 
-            border: none; 
-            color: var(--text-muted); 
-            font-size: 18px;
-            width: 32px; height: 32px;
-            border-radius: 50%;
-            cursor: pointer; 
-            display: flex; justify-content: center; align-items: center;
-            transition: all 0.2s ease;
-        }
-        .close-btn:hover { 
-            background: #fee2e2;
-            color: var(--error-red);
-        }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background-color: var(--card-bg); border: none; border-radius: 12px; width: 90%; max-width: 550px; padding: 25px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); position: relative; animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; }
+        .modal-header h2 { margin: 0; font-size: 16px; color: var(--text-main); font-weight: 800;}
+        .close-btn { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; transition: color 0.2s; line-height: 1; }
+        .close-btn:hover { color: var(--error-red); }
+        
+        .history-box { background-color: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px; max-height: 150px; overflow-y: auto; font-size: 11px; border: 1px solid var(--border-color); }
+        .history-item { border-bottom: 1px dashed var(--border-color); padding-bottom: 8px; margin-bottom: 8px; }
+        .history-item:last-child { border-bottom: none; margin-bottom: 0; }
+        .history-meta { color: var(--accent-gold); font-size: 10px; margin-bottom: 4px; font-weight: 600; }
 
-        /* --- FIXED HISTORY BOX --- */
-        .history-box { 
-            background-color: #f8fafc;
-            padding: 15px; 
-            border-radius: var(--radius-md); 
-            margin-bottom: 15px; 
-            max-height: 250px; 
-            overflow-y: auto; 
-            font-size: 12px; 
-            border: 1px solid var(--border-color);
-            box-sizing: border-box;
-            width: 100%;
-        }
-        .history-item { 
-            border-bottom: 1px dashed var(--border-color); 
-            padding-bottom: 8px; 
-            margin-bottom: 8px;
-        }
-        .history-item:last-child { 
-            border-bottom: none; 
-            margin-bottom: 0;
-        }
-        .history-meta { 
-            color: var(--text-muted); 
-            font-size: 10px; 
-            margin-bottom: 4px;
-        }
+        .mapping-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 12px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; align-items: center;}
+        .mapping-grid label { font-size: 12px; color: var(--text-main); font-weight: 600;}
 
-        .mapping-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 12px; 
-            margin-bottom: 20px;
-            background: #f8fafc; 
-            padding: 15px; 
-            border-radius: var(--radius-md);
-            border: 1px solid var(--border-color);
-        }
-        .mapping-grid label { 
-            font-size: 12px; 
-            align-self: center;
-            color: var(--text-main); 
-            font-weight: 600;
-        }
+        #progressModal .modal-content { max-width: 400px; text-align: center; padding: 35px 25px; border-color: var(--border-color); }
+        .progress-wrapper { background-color: #e2e8f0; border: none; border-radius: 20px; overflow: hidden; margin: 20px 0 10px 0; height: 16px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+        .progress-bar-fill { background: linear-gradient(90deg, var(--accent-gold), #60a5fa); height: 100%; width: 0%; transition: width 0.3s ease-out; }
+        .progress-text { font-size: 18px; font-weight: 800; color: var(--accent-gold); margin-bottom: 5px; }
+        
+        #loadingModal .modal-content { text-align: center; padding: 40px; border: none; max-width: 350px;}
 
-        #progressModal .modal-content { 
-            max-width: 400px; 
-            text-align: center;
-            padding: 35px 25px; 
-        }
-        .progress-wrapper { 
-            background-color: #e2e8f0;
-            border-radius: 20px; 
-            overflow: hidden; 
-            margin: 20px 0 15px 0; 
-            height: 12px; 
-            width: 100%;
-        }
-        .progress-bar-fill { 
-            background: linear-gradient(90deg, var(--accent-gold), #60a5fa); 
-            height: 100%; 
-            width: 0%;
-            transition: width 0.3s ease-out; 
-            border-radius: 20px;
-        }
-        .progress-text { 
-            font-size: 18px; 
-            font-weight: 700; 
-            color: var(--text-main);
-            margin-bottom: 5px; 
-        }
+        .btn-cancel { background-color: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border-color); padding: 12px 24px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+        .btn-cancel:hover { background-color: #e2e8f0; color: var(--text-main); }
 
-        #loadingModal .modal-content { 
-            text-align: center;
-            padding: 40px; 
-            max-width: 350px;
-        }
-
-        .btn-cancel { 
-            background-color: #ffffff;
-            color: var(--text-main); 
-            border: 1px solid var(--border-color); 
-            padding: 12px 20px; 
-            border-radius: var(--radius-md); 
-            font-weight: 600; 
-            cursor: pointer; 
-            font-size: 13px;
-            transition: all 0.2s ease;
-            box-shadow: var(--shadow-sm);
-        }
-        .btn-cancel:hover { 
-            background-color: #f1f5f9; 
-        }
-
-        .details-wrapper { 
-            padding: 15px; 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 15px;
-        }
-        .details-box { 
-            background-color: #ffffff !important;
-            padding: 15px; 
-            border-radius: var(--radius-lg); 
-            border: 1px solid var(--border-color); 
-            position: relative; 
-            z-index: 1; 
-            overflow: hidden;
-            box-shadow: var(--shadow-sm);
-        }
+        .details-wrapper { padding: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; border-bottom: 2px solid var(--border-color); border-left: 4px solid var(--accent-gold); }
+        .details-box { background-color: #ffffff !important; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); position: relative; z-index: 1; overflow: hidden; box-shadow: 0 2px 4px rgba(15, 23, 42, 0.02);}
         .details-box::before {
             content: attr(data-watermark);
             position: absolute;
-            top: -20%; left: -20%;
-            width: 160%; height: 160%;
-            font-family: inherit;
-            font-size: 8px; font-weight: 900;
-            color: rgba(30, 41, 59, 0.06); 
-            white-space: normal; word-break: break-all;
-            line-height: 2.2; letter-spacing: 1px;
+            top: -20%; left: -20%; width: 160%; height: 160%;
+            font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 900;
+            color: rgba(15, 23, 42, 0.05); 
+            white-space: normal; word-break: break-all; line-height: 2.2; letter-spacing: 1px;
             padding: 10px; box-sizing: border-box;
-            transform: rotate(-10deg) scale(1.2);
+            transform: rotate(-10deg) scale(1.2); transform-origin: center center;
             pointer-events: none; z-index: 0;
         }
+        
         .details-box h4, .details-box p { position: relative; z-index: 2; }
-        .details-box h4 { 
-            margin: 0 0 12px 0; 
-            color: var(--text-main);
-            font-size: 12px; 
-            border-bottom: 1px solid var(--border-color); 
-            padding-bottom: 8px; 
-            text-transform: uppercase;
-            font-weight: 700;
-        }
-        .details-box p { 
-            margin: 6px 0; 
-            font-size: 12px; 
-            color: var(--text-main);
-        }
-        .details-box span.lbl { 
-            color: var(--text-muted); 
-            display: inline-block; 
-            width: 70px; 
-            font-weight: 600;
-            font-size: 11px;
-        }
+        .details-box h4 { margin: 0 0 10px 0; color: var(--accent-gold); font-size: 11px; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px; text-transform: uppercase; font-weight: 800;}
+        .details-box p { margin: 6px 0; font-size: 11px; color: var(--text-main); font-weight: 500;}
+        .details-box span.lbl { color: var(--text-muted); display: inline-block; width: 75px; font-weight: 700; }
+        
+        .mapping-container { max-height: 60vh; overflow-y: auto; padding-right: 15px; text-align: left; }
+        .mapping-section { border: 1px solid var(--border-color); padding: 15px; margin-bottom: 15px; border-radius: 8px; background: #ffffff; box-shadow: 0 2px 4px rgba(15, 23, 42, 0.02); }
+        .mapping-section h3 { margin-top: 0; margin-bottom: 12px; font-size: 12px; color: var(--success-green); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; font-weight: 800;}
 
-        .mapping-container { 
-            max-height: 60vh;
-            overflow-y: auto; 
-            padding-right: 15px; 
-            text-align: left; 
-        }
-        .mapping-section { 
-            border: 1px solid var(--border-color);
-            padding: 15px; 
-            margin-bottom: 15px; 
-            border-radius: var(--radius-lg); 
-            background: #ffffff; 
-            box-shadow: var(--shadow-sm);
-        }
-        .mapping-section h3 { 
-            margin-top: 0; margin-bottom: 12px; 
-            font-size: 13px; 
-            color: var(--text-main); 
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
-        }
-
-        #maintenance-bar { 
-            display: none;
-            background: linear-gradient(90deg, #dc2626, #f87171); 
-            color: white; 
-            text-align: center; 
-            padding: 12px; 
-            font-size: 13px; 
-            font-weight: 600; 
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.3); 
-            position: sticky; 
-            top: 0; 
-            z-index: 9999;
-        }
-        .blink-dot { 
-            height: 8px; width: 8px; 
-            background-color: white; 
-            border-radius: 50%; 
-            display: inline-block;
-            margin-right: 8px; 
-            animation: blinker 1.5s linear infinite; 
-        }
-        @keyframes blinker { 50% { opacity: 0; } }
-
-        .search-container { 
-            display: flex; 
-            gap: 10px; 
-            align-items: center;
-        }
-
-        .full-page-modal { 
-            width: 100vw !important; 
-            height: 100vh !important; 
-            max-width: 100% !important;
-            max-height: 100% !important; 
-            border-radius: 0 !important; 
-            border: none !important; 
-            background-color: var(--bg-color) !important; 
-            display: flex; 
-            flex-direction: column; 
-            padding: 0 !important;
-            margin: 0; 
-            box-sizing: border-box; 
-        }
-        .fp-header { 
-            background-color: var(--card-bg); 
-            padding: 15px 25px;
-            border-bottom: 1px solid var(--border-color); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            box-shadow: var(--shadow-sm); 
-            z-index: 10;
-        }
-        .fp-header h2 { 
-            margin: 0; 
-            font-size: 18px; 
-            font-weight: 700;
-            color: var(--text-main);
-        }
-        .fp-btn-back { 
-            background: #ffffff; 
-            color: var(--text-main); 
-            border: 1px solid var(--border-color); 
-            padding: 8px 16px;
-            border-radius: var(--radius-md); 
-            cursor: pointer; 
-            font-weight: 600; 
-            font-size: 12px; 
-            transition: all 0.2s ease;
-            box-shadow: var(--shadow-sm);
-        }
-        .fp-btn-back:hover { 
-            background: #f8fafc;
-        }
-        .fp-btn-back:disabled { 
-            background: #f1f5f9 !important; 
-            color: #94a3b8 !important; 
-            border-color: #e2e8f0 !important;
-            cursor: not-allowed !important;
-            box-shadow: none;
-        }
-        .fp-body { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 25px; 
-            display: grid;
-            grid-template-columns: 1fr 1fr; 
-            gap: 25px; 
-            align-items: start; 
-        }
-        .fp-panel { 
-            background: var(--card-bg);
-            padding: 20px; 
-            border-radius: var(--radius-lg); 
-            border: 1px solid var(--border-color); 
-            box-shadow: var(--shadow-sm);
-        }
-
+        /* --- BUTANG DELETE FINDING --- */
         .btn-delete-finding {
             float: right;
             background-color: #fef2f2;
             border: 1px solid #fecaca;
             color: var(--error-red);
-            border-radius: var(--radius-md); 
+            border-radius: 4px; 
             cursor: pointer;
-            font-size: 10px;
-            padding: 4px 8px;
-            font-weight: 600;
+            font-size: 9px; 
+            padding: 4px 8px; 
+            font-weight: 700;
             transition: all 0.2s ease;
             margin-left: 10px;
             display: inline-flex;
             align-items: center;
         }
-        .btn-delete-finding:hover {
-            background-color: var(--error-red);
-            color: white;
-        }
+        .btn-delete-finding:hover { background-color: var(--error-red); border-color: var(--error-red); color: white; }
 
-        .agih-container {
-            display: flex; 
-            gap: 12px; 
-            align-items: center; 
-            background: #f8fafc; 
-            padding: 12px 15px; 
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-color);
-            flex-wrap: wrap; 
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .agih-container > select, 
-        .agih-container > button {
-            flex: 1 1 auto;
-            min-width: 160px;
-        }
-
-/* --- MOBILE RESPONSIVENESS (Diperbaiki & Diperkemaskan) --- */
+        /* --- KAWALAN SKRIN KECIL (MOBILE/TABLET) --- */
         @media (max-width: 768px) {
-            body { padding: 15px; }
-            .details-wrapper { 
-                grid-template-columns: 1fr !important;
-                gap: 15px; 
-                padding: 10px 0; 
-            }
-            .details-box { 
-                width: 100% !important;
-                box-sizing: border-box; 
-            }
-            .kpi-container { 
-                grid-template-columns: repeat(2, 1fr); 
-                gap: 12px; 
-            }
-            .kpi-card { padding: 15px 10px; }
-            .kpi-card p { font-size: 20px; }
-            .pagination-container { 
-                padding: 15px; 
-                flex-direction: column; 
-                gap: 12px;
-            }
-            .search-container { flex-direction: column; }
-            .search-container select, .search-container input, .search-container div { width: 100%; max-width: 100% !important; }
+            .details-wrapper { grid-template-columns: 1fr !important; gap: 12px; padding: 12px; }
+            .details-box { width: 100% !important; box-sizing: border-box; }
             
-            .fp-body { 
-                grid-template-columns: 1fr;
-                padding: 15px; 
-                gap: 20px; 
-            }
-            .fp-header { padding: 15px; flex-direction: column; gap: 15px; align-items: flex-start; }
-            .fp-header > div { width: 100%; justify-content: space-between; }
+            /* Susunan 4 Kotak Dikekalkan Sempurna */
+            .kpi-container { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+            .kpi-card { padding: 12px 4px; border-radius: 8px;}
+            .kpi-card h3 { font-size: 8px; letter-spacing: -0.5px; }
+            .kpi-card p { font-size: 15px; } /* Saiz nombor diturunkan supaya muat */
             
-            .btn-delete-finding {
-                padding: 3px 6px !important; 
-                font-size: 9px !important; 
-            }
-            table { font-size: 12px; }
-            th, td { padding: 12px 10px; }
-
-            .header {
-                flex-direction: column;
-                align-items: stretch; 
-                padding: 20px;
-                gap: 15px; 
-            }
-            .header h1 {
-                font-size: 18px; 
-                text-align: center; 
-            }
-            .header > div {
-                flex-wrap: wrap; 
-                justify-content: space-between;
-                width: 100%;
-                gap: 10px;
-            }
-            .btn-logout {
-                flex: 1; 
-                padding: 10px 0 !important;
-                margin: 0;
-                text-align: center;
-            }
-            #display-username {
-                width: 100%; 
-                text-align: center;
-                background: #f8fafc;
-                padding: 10px 0;
-                border-radius: var(--radius-md);
-                border: 1px solid var(--border-color); 
-                order: 3; 
-                font-weight: 500;
-            }
-            .header .btn-logout:nth-of-type(1) { order: 1; } 
-            .header .btn-logout:nth-of-type(2) { order: 2; } 
-
-            /* --- KOD BARU: OPTIMASI AUDIT TRAIL UNTUK MOBILE --- */
-            .history-box {
-                padding: 8px 4px !important; 
-            }
-            .history-item {
-                padding: 8px 6px !important; 
-                margin-bottom: 8px !important;
-            }
-            .history-meta {
-                font-size: 9px !important; 
-                letter-spacing: -0.3px;
-            }
-            .history-item div[style*="font-size: 12px"] {
-                font-size: 11px !important; 
-                line-height: 1.4 !important; 
-            }
+            table { font-size: 10px; }
+            th, td { padding: 10px 8px; white-space: nowrap; }
+            th { font-size: 9px; letter-spacing: 0.5px; }
+            .pagination-container { padding: 12px; flex-direction: column; gap: 12px; }
+            
+            .search-container { flex-direction: column; width: 100%; }
+            .search-container select, .search-container input { width: 100%; }
+            .search-container div { width: 100%; display: flex; justify-content: space-between;}
+            .search-container div button { flex: 1; }
         }
-    </style>
+
+        #maintenance-bar { display: none; background: linear-gradient(90deg, #b91c1c, #ef4444); color: white; text-align: center; padding: 10px; font-size: 13px; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 9999; }
+        .blink-dot { height: 8px; width: 8px; background-color: white; border-radius: 50%; display: inline-block; margin-right: 8px; animation: blinker 1.5s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        .search-container { display: flex; gap: 10px; align-items: center; }
+
+        .full-page-modal { width: 100vw !important; height: 100vh !important; max-width: 100% !important; max-height: 100% !important; border-radius: 0 !important; border: none !important; background-color: var(--bg-color) !important; display: flex; flex-direction: column; padding: 0 !important; margin: 0; box-sizing: border-box; }
+        .fp-header { background-color: var(--card-bg); padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.03); z-index: 10; }
+        .fp-header h2 { margin: 0; font-size: 16px; color: var(--text-main); font-weight: 800;}
+        .fp-btn-back { background: #0f172a; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 11px; transition: all 0.2s;}
+        .fp-btn-back:hover { background: #1e293b; }
+        .fp-btn-back:disabled { background: #cbd5e1 !important; color: #94a3b8 !important; cursor: not-allowed !important; }
+        
+        .fp-body { flex: 1; overflow-y: auto; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+        .fp-panel { background: var(--card-bg); padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(15, 23, 42, 0.02);}
+        @media (max-width: 768px) { .fp-body { grid-template-columns: 1fr; padding: 12px; gap: 15px; } }
+
+</style>
+
 </head>
 <body>
 
@@ -971,13 +413,13 @@
     <div id="login-section">
         <div class="login-box">
             <h2>SINGER FINDINGS PORTAL</h2>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 25px;">Findings Tracking System</p>
+            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 20px;">Findings Tracking System</p>
             <input type="text" id="username" class="login-input" placeholder="User ID">
             <input type="password" id="password" class="login-input" placeholder="Password">
             <button class="btn-login" onclick="handleLogin()">SIGN IN</button>
-            <p id="login-error" style="color: var(--error-red); font-size: 13px; display: none; margin-top: 15px; font-weight: 500;">Invalid User ID or Password!</p>
-            <div style="margin-top: 30px; padding-top: 20px; font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--border-color); letter-spacing: 0.5px; text-align: center;">
-                Copyright &copy; <span id="auto-year"></span> <span style="color: var(--text-main); font-weight: 600;">System Findings v2.0</span>. All Rights Reserved.
+            <p id="login-error" style="color: var(--error-red); font-size: 12px; display: none; margin-top: 10px;">Invalid User ID or Password!</p>
+            <div style="margin-top: 25px; padding-top: 15px; font-size: 10px; color: var(--text-muted); border-top: 1px dashed var(--border-color); letter-spacing: 0.5px; text-align: center;">
+                Copyright &copy; <span id="auto-year-login"></span> <span style="color: #2196f3; font-weight: bold;">System Findings v2.0</span>
             </div>
         </div>
     </div>
@@ -986,8 +428,8 @@
         <div class="header">
             <h1>FINDINGS MONITORING SYSTEM</h1>
             <div style="display: flex; align-items: center; gap: 15px;">
-                <span id="display-username" style="font-size: 12px; color: var(--text-muted);"></span>
-                <button class="btn-logout" style="color: var(--text-main); border-color: var(--border-color);" onclick="forceSyncData()">⟳ SYNC</button>
+                <span id="display-username" style="font-size: 11px; color: var(--text-muted);"></span>
+                <button class="btn-logout" style="color: var(--accent-gold); border-color: var(--accent-gold);" onclick="forceSyncData()">⟳ SYNC</button>
                 <button class="btn-logout" onclick="handleLogout()">Sign Out</button>
             </div>
         </div>
@@ -1003,15 +445,15 @@
             <div class="filter-section" style="margin-bottom: 20px;">
                 <span class="filter-title">Advanced Search By:</span>
                 <div class="search-container">
-                    <select id="search-type" class="form-control" style="width: 100%; max-width: 200px;">
+                    <select id="search-type" class="form-control" style="width: 100%; max-width: 200px; border-color: var(--accent-gold);">
                         <option value="acct">Account No</option>
                         <option value="nric">NRIC (All Linked)</option>
                         <option value="plate">Plate No</option>
                     </select>
                     <input type="search" id="search-query" class="form-control" placeholder="Enter search..." style="flex: 1;" autocomplete="off" onkeypress="if(event.key==='Enter') executeSearch()">
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn-submit" onclick="executeSearch()">SEARCH</button>
-                        <button class="btn-cancel" onclick="clearSearch()">CLEAR</button>
+                    <div style="display: flex; gap: 5px;">
+                        <button class="btn-submit" onclick="executeSearch()" style="padding: 10px 15px;">SEARCH</button>
+                        <button class="btn-cancel" onclick="clearSearch()" style="padding: 10px 15px;"> X </button>
                     </div>
                 </div>
             </div>
@@ -1030,6 +472,12 @@
                         <span class="filter-title">Select Area</span>
                         <div class="btn-group" id="area-buttons"></div>
                     </div>
+                </div>
+                <div id="upload-action-container" style="display: none;">
+                    <input type="file" id="excel-file-input" style="display: none;" accept=".xlsx, .xls, .csv" onchange="handleExcelFileSelect(event)">
+                    <button class="btn-upload-trigger" onclick="document.getElementById('excel-file-input').click()">
+                        <span>▲</span> Upload Excel Data
+                    </button>
                 </div>
             </div>
 
@@ -1083,10 +531,6 @@
             <div class="settings-box" style="margin-bottom: 20px;">
                 <h2>Add New Portal User (Syncs to Cloud Ledger)</h2>
                 <div class="form-group">
-                    <label>Nama Penuh / Nama Panggilan</label>
-                    <input type="text" id="new-user-name" class="form-control" placeholder="Cth: Ali Bin Abu">
-                </div>
-                <div class="form-group">
                     <label>User ID / Username</label>
                     <input type="text" id="new-user-id" class="form-control" placeholder="e.g., pic_north">
                 </div>
@@ -1122,9 +566,9 @@
             </div>
 
             <div class="settings-box" style="max-width: 100%;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 15px;">
                     <h2 style="margin: 0; border: none; padding: 0;">System User List (<span id="total-users-count" style="color: var(--text-main);">0</span> Users)</h2>
-                    <input type="text" id="search-user" class="form-control" placeholder="Search by User ID..." style="max-width: 250px;" oninput="filterUserList()">
+                    <input type="text" id="search-user" class="form-control" placeholder="Search by User ID..." style="max-width: 250px; border-color: var(--accent-gold) !important;" oninput="filterUserList()">
                 </div>
 
                 <div class="table-container">
@@ -1133,7 +577,6 @@
                             <tr>
                                 <th style="width: 50px; text-align: center;">NO</th>
                                 <th>USER ID</th>
-                                <th>NAMA</th> 
                                 <th>ROLE</th>
                                 <th>REPORT TO</th> 
                                 <th>DATA ACCESS ASSIGNED</th>
@@ -1145,7 +588,7 @@
                     </table>
                 </div>
 
-                <div class="pagination-container" style="margin-bottom: 0; border-radius: 0 0 var(--radius-lg) var(--radius-lg);">
+                <div class="pagination-container" style="margin-bottom: 0; border-radius: 0 0 8px 8px;">
                     <div class="page-info" id="user-page-info">Page 1 of 1</div>
                     <div class="pagination-controls">
                         <button id="btn-user-prev" onclick="prevUserPage()" disabled>◄ PREV</button>
@@ -1177,109 +620,88 @@
     </div> 
 
     <div id="assign-panel" class="main-panel" style="display: none;">
-        <div class="action-bar" style="background: var(--card-bg); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); display: flex; gap: 25px; flex-wrap: wrap; box-shadow: var(--shadow-sm);">
-            
-            <div id="upload-action-container" style="flex: 1; min-width: 280px; display: none;">
-                <span class="filter-title">1. Muat Naik Data Excel:</span>
-                <input type="file" id="excel-file-input" style="display: none;" accept=".xlsx, .xls, .csv" onchange="handleExcelFileSelect(event)">
-                <button class="btn-upload-trigger" onclick="document.getElementById('excel-file-input').click()" style="width: 100%; justify-content: center; padding: 12px; margin-top: 8px;">
-                    ▲ Upload Excel Data
-                </button>
-            </div>
-            
-            <div style="flex: 1; min-width: 280px; border-left: 2px dashed var(--border-color); padding-left: 25px;">
-                <span class="filter-title">2. Tapis Akaun Mengikut Status Agihan:</span>
-                <select id="assign-filter-status" class="form-control" style="width: 100%; font-weight: 600; margin-top: 8px;" onchange="renderAssignTable()">
-                    <option value="UNASSIGNED">🔴 UNASSIGNED (Belum Diagihkan)</option>
-                    <option value="ASSIGNED">🟢 ASSIGNED (Sudah Diagihkan)</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="settings-box" style="max-width: 100%; margin-top: 25px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
-                <div>
-                    <h2 style="margin: 0; border: none; padding: 0;">3. Senarai Akaun (<span id="assign-total-count" style="color: var(--accent-gold);">0</span> Rekod)</h2>
-                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">
-                        *Hanya memaparkan rekod dalam tapisan kawalan (Zone/Region/Area) jagaan anda.
-                    </div>
+            <div class="action-bar" style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+                <div style="flex: 1;">
+                    <span class="filter-title">1. Tapis Akaun Mengikut Status Agihan:</span>
+                    <select id="assign-filter-status" class="form-control" style="max-width: 300px; font-weight: bold; border-color: var(--accent-gold);" onchange="renderAssignTable()">
+                        <option value="UNASSIGNED">🔴 UNASSIGNED (Belum Diagihkan)</option>
+                        <option value="ASSIGNED">🟢 ASSIGNED (Sudah Diagihkan)</option>
+                    </select>
                 </div>
                 
-                <div class="agih-container">
-                    <span style="font-size: 11px; font-weight: 700; color: var(--text-main);">FILTER COLLECTOR:</span>
-                    <select id="filter-collector-dropdown" class="form-control" style="padding: 8px 12px; font-size: 13px; margin-right: 15px;" onchange="renderAssignTable()">
-                        <option value="ALL">SEMUA COLLECTOR</option>
-                    </select>
-                    
-                    <span style="font-size: 11px; font-weight: 700; color: var(--text-main);">AGIH KEPADA:</span>
-                    <select id="assign-target-user" class="form-control" style="padding: 8px 12px; font-size: 13px;">
-                        <option value="">-- PILIH STAF BAWAHAN --</option>
-                    </select>
-                    <button class="btn-submit" onclick="executeBatchAssignment()" style="background-color: var(--success-green); padding: 10px 16px; font-size: 12px;">✅ ASSIGN SELECTED</button>
+                <div style="flex: 1; border-left: 2px dashed var(--border-color); padding-left: 15px;">
+                    <span class="filter-title">2. Pilih Collector & Agihkan:</span>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select id="assign-target-user" class="form-control" style="flex: 1;">
+                            <option value="">-- PILIH STAF BAWAHAN --</option>
+                        </select>
+                        <button class="btn-submit" onclick="executeBatchAssignment()" style="background-color: #2e7d32;">✅ ASSIGN SELECTED</button>
+                    </div>
                 </div>
             </div>
-            
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 40px; text-align: center;">
-                                <input type="checkbox" id="check-all-assign" onclick="toggleAllAssignCheckboxes(this)" style="cursor: pointer; transform: scale(1.2);">
-                            </th>
-                            <th class="sortable" onclick="sortAssignTable('acct')" id="tha-acct">ACCT NO ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('zone')" id="tha-zone">ZONE ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('region')" id="tha-region">REGION ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('area')" id="tha-area">AREA ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('osb')" id="tha-osb">OSB (RM) ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('status')" id="tha-status">STATUS ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('collector')" id="tha-collector">COLLECTOR ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('assignee_id')" id="tha-assignee_id">CURRENT ASSIGNEE ⇅</th>
-                        </tr>
-                    </thead>
-                    <tbody id="assign-table-body">
-                        <tr><td colspan="9" style="text-align:center;">Sila tunggu, sedang memuatkan data...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="pagination-container" style="margin-bottom: 0; border-radius: 0 0 var(--radius-lg) var(--radius-lg);">
-                <div class="page-info" id="assign-page-info">Page 1 of 1</div>
-                <div class="pagination-controls">
-                    <button id="btn-assign-prev" onclick="prevAssignPage()" disabled>◄ PREV</button>
-                    <button id="btn-assign-next" onclick="nextAssignPage()" disabled>NEXT ►</button>
+
+            <div class="settings-box" style="max-width: 100%; margin-top: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h2 style="margin: 0; border: none; padding: 0;">Senarai Akaun (<span id="assign-total-count" style="color: var(--accent-gold);">0</span> Rekod)</h2>
+                    <div style="font-size: 11px; color: var(--text-muted);">*Hanya memaparkan rekod dalam tapisan kawalan (Zone/Region/Area) jagaan anda.</div>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 40px; text-align: center;">
+                                    <input type="checkbox" id="check-all-assign" onclick="toggleAllAssignCheckboxes(this)" style="cursor: pointer; transform: scale(1.2);">
+                                </th>
+                                <th>ACCT NO</th>
+                                <th>ZONE</th>
+                                <th>REGION</th>
+                                <th>AREA</th>
+                                <th>OSB (RM)</th>
+                                <th>STATUS</th>
+                                <th style="color: var(--accent-gold);">CURRENT ASSIGNEE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assign-table-body">
+                            <tr><td colspan="8" style="text-align:center;">Sila tunggu, sedang memuatkan data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination-container" style="margin-bottom: 0; border-radius: 0 0 8px 8px;">
+                    <div class="page-info" id="assign-page-info">Page 1 of 1</div>
+                    <div class="pagination-controls">
+                        <button id="btn-assign-prev" onclick="prevAssignPage()" disabled>◄ PREV</button>
+                        <button id="btn-assign-next" onclick="nextAssignPage()" disabled>NEXT ►</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <div style="text-align: center; padding: 25px 10px 15px 10px; margin-top: 30px; font-size: 11px; color: var(--text-muted); border-top: 1px dashed var(--border-color); letter-spacing: 0.5px;">
-        Copyright &copy; <span id="auto-year"></span> <span style="color: var(--text-main); font-weight: 600;">System Findings v2.0</span>. All Rights Reserved.
-    </div>
-
+        
     <div class="modal-overlay" id="loadingModal">
         <div class="modal-content">
-            <h2 style="color: var(--text-main); margin-top:0;">SYSTEM CHECK</h2>
-            <p style="color: var(--text-muted); font-size: 14px;" id="loadingText">Checking latest data version. Please wait...</p>
+            <h2 style="color: var(--accent-gold); margin-top:0;">SYSTEM CHECK</h2>
+            <p style="color: var(--text-muted); font-size: 13px;" id="loadingText">Checking latest data version. Please wait...</p>
         </div>
     </div>
     
     <div class="modal-overlay" id="readingExcelModal">
-        <div class="modal-content" style="text-align: center; padding: 40px; max-width: 350px;">
+        <div class="modal-content" style="text-align: center; padding: 40px; border: 1px solid var(--success-green); max-width: 350px;">
             <h2 style="color: var(--success-green); margin-top:0;">READING EXCEL FILE</h2>
-            <p style="color: var(--text-muted); font-size: 14px;">Please wait, the system is processing data rows...</p>
+            <p style="color: var(--text-muted); font-size: 13px;">Please wait, the system is processing data rows...</p>
         </div>
     </div>
 
     <div class="modal-overlay" id="notificationModal" style="z-index: 1200;">
-        <div class="modal-content" style="text-align: center; max-width: 350px;">
-            <h2 id="notif-title" style="margin-top: 0; font-size: 20px;">NOTIFICATION TITLE</h2>
-            <p id="notif-message" style="color: var(--text-main); font-size: 14px; margin: 15px 0 25px 0; line-height: 1.6;"></p>
+        <div class="modal-content" style="text-align: center; max-width: 350px; border: 1px solid var(--accent-gold);">
+            <h2 id="notif-title" style="margin-top: 0; font-size: 18px;">NOTIFICATION TITLE</h2>
+            <p id="notif-message" style="color: var(--text-main); font-size: 13px; margin: 15px 0 20px 0; line-height: 1.5;"></p>
             <button class="btn-submit" style="width: 100%;" onclick="document.getElementById('notificationModal').style.display='none'">CLOSE</button>
         </div>
     </div>
     
     <div class="modal-overlay" id="mappingModal">
-        <div class="modal-content" style="max-width: 750px; width: 95%;">
+        <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
                 <h2>Map Excel Columns to Database Fields</h2>
                 <button class="close-btn" onclick="closeMappingModal()">&times;</button>
@@ -1289,7 +711,6 @@
                 <div class="mapping-section">
                     <h3>1. MAIN ACCOUNT INFO</h3>
                     <div class="mapping-grid">
-                        <label>COLLECTOR (CALLER)</label><select id="map-collector" class="form-control mapping-select"></select>
                         <label>ZONE</label><select id="map-zone" class="form-control mapping-select"></select>
                         <label>REGION</label><select id="map-region" class="form-control mapping-select"></select>
                         <label>AREA</label><select id="map-area" class="form-control mapping-select"></select>
@@ -1345,7 +766,7 @@
                     </div>
                 </div>
             </div>
-            <button class="btn-submit" style="width: 100%; background: var(--success-green); margin-top: 20px; font-size: 14px;" onclick="processExcelUpload()">CONFIRM & START UPLOAD</button>
+            <button class="btn-submit" style="width: 100%; background: #2e7d32; margin-top: 15px;" onclick="processExcelUpload()">CONFIRM & START UPLOAD</button>
         </div>
     </div>
     
@@ -1354,22 +775,22 @@
             <div class="fp-header">
                 <h2>ACCT: <span id="modalAccNo"></span></h2>
                 <div style="display: flex; gap: 10px; align-items: center;">
-                    <button id="btn-modal-prev" class="fp-btn-back" onclick="navigateModal('prev')">◄ PREV</button>
-                    <button id="btn-modal-next" class="fp-btn-back" onclick="navigateModal('next')">NEXT ►</button>
-                    <button class="btn-submit" onclick="closeModal()">❮ KEMBALI</button>
+                    <button id="btn-modal-prev" class="fp-btn-back" style="background-color: #486581;" onclick="navigateModal('prev')">◄ PREV</button>
+                    <button id="btn-modal-next" class="fp-btn-back" style="background-color: #486581;" onclick="navigateModal('next')">NEXT ►</button>
+                    <button class="fp-btn-back" onclick="closeModal()">❮ KEMBALI</button>
                 </div>
             </div>
             <div class="fp-body">
-                <div class="fp-panel" style="background: transparent; border: none; padding: 0; box-shadow: none;">
-                    <div id="modal-details-container" style="display: flex; flex-direction: column; gap: 20px;"></div>
+                <div class="fp-panel" style="background: transparent; border: none; padding: 0;">
+                    <div id="modal-details-container" style="display: flex; flex-direction: column; gap: 15px;"></div>
                 </div>
-                <div class="fp-panel" style="position: sticky; top: 25px;">
-                    <label style="font-size: 12px; color: var(--text-main); display: block; margin-bottom: 8px; font-weight: 700;">HISTORICAL AUDIT TRAIL:</label>
-                    <div class="history-box" style="max-height: 250px; margin-bottom: 20px;"></div>
+                <div class="fp-panel" style="position: sticky; top: 0;">
+                    <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px; font-weight: bold;">HISTORICAL AUDIT TRAIL:</label>
+                    <div class="history-box" style="max-height: 250px; margin-bottom: 15px; background: #f8fafc;"></div>
                     
-                    <div class="form-group" style="margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px;">
-                        <label style="color: var(--text-main); font-weight: 700; font-size: 13px; margin-bottom: 0;">ACTION STATUS:</label>
-                        <select id="finding-status-select" class="form-control" style="font-weight: 600; flex: 1;">
+                    <div class="form-group" style="margin-bottom: 15px; background: #e8f0f8; padding: 10px; border-radius: 6px; border: 1px dashed var(--accent-gold); display: flex; align-items: center; gap: 10px;">
+                        <label style="color: var(--accent-gold); font-weight: bold; font-size: 12px; margin-bottom: 0;">ACTION STATUS:</label>
+                        <select id="finding-status-select" class="form-control" style="font-weight: bold; flex: 1; background-color: #ffffff !important; border-color: var(--accent-gold) !important;">
                             <option value="">-- SELECT STATUS --</option>
                             <option value="CALL" style="color: var(--status-call);">CALL (Phone Call)</option>
                             <option value="UCT" style="color: var(--status-uct);">UCT (Uncontactable)</option>
@@ -1379,20 +800,20 @@
                         </select>
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 25px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <label style="color: var(--text-main); font-size: 13px; font-weight: 700;">VERIFICATION FINDING LOG:</label>
-                            <span id="textarea-info" style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Jumlah Karakter: 0/200</span>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <label style="color: var(--text-main); font-size: 12px; font-weight: bold;">VERIFICATION FINDING LOG:</label>
+                            <span id="textarea-info" style="font-size: 11px; color: var(--text-muted); font-weight: bold;">Jumlah Karakter: 0/200</span>
                         </div>
-                        <textarea id="single-remark-box" class="form-control" rows="5" 
+                        <textarea id="single-remark-box" class="form-control" rows="4" 
                                   placeholder="Taip satu cerita panjang di sini... Sistem akan automatik susun dan potong kepada maksimum 4 baris × 50 karakter dengan kemas semasa disimpan."
-                                  style="font-size: 13px; resize: none; line-height: 1.6;"
+                                  style="font-size: 12px; resize: none; line-height: 1.5; padding: 10px; background-color: #ffffff !important;"
                                   oninput="updateTextareaInfo(this)"></textarea>
                     </div>
 
-                    <div style="display: flex; gap: 12px;">
-                        <button id="btnSaveFinding" class="btn-submit" style="flex: 2; padding: 14px; font-size: 14px;" onclick="saveFinding()">COMMIT ENTRY</button>
-                        <button id="btnResetPending" class="btn-cancel" style="flex: 1; color: var(--error-red); border-color: #fecaca; display: none; padding: 14px;" onclick="resetAccountStatus()">RESET LOG</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="btnSaveFinding" class="btn-submit" style="flex: 2; padding: 12px; font-size: 14px;" onclick="saveFinding()">COMMIT ENTRY</button>
+                        <button id="btnResetPending" class="btn-submit" style="flex: 1; background-color: var(--error-red); color: white; display: none; padding: 12px;" onclick="resetAccountStatus()">RESET LOG</button>
                     </div>
                 </div>
             </div>
@@ -1401,18 +822,18 @@
 
     <div class="modal-overlay" id="progressModal">
         <div class="modal-content">
-            <h2 style="margin-top: 0; font-size: 20px; color: var(--text-main);">DATA STREAMING PIPELINE</h2>
+            <h2 style="margin-top: 0; font-size: 18px; color: var(--text-main);">DATA STREAMING PIPELINE</h2>
             <div class="progress-wrapper"><div class="progress-bar-fill" id="upload-progress-bar"></div></div>
             <div class="progress-text" id="upload-progress-text">0%</div>
-            <div class="progress-subtext" id="upload-progress-subtext" style="color: var(--text-muted); font-size: 13px;">Preparing data profile...</div>
+            <div class="progress-subtext" id="upload-progress-subtext">Preparing data profile...</div>
         </div>
     </div>
 
     <div class="modal-overlay" id="customConfirmModal" style="z-index: 1100;">
-        <div class="modal-content" style="text-align: center; max-width: 360px;">
-            <h2 style="color: var(--text-main); margin-top: 0; font-size: 20px;">ACTION CONFIRMATION</h2>
-            <p id="confirmMessage" style="color: var(--text-muted); font-size: 14px; margin: 15px 0 25px 0; line-height: 1.6; white-space: pre-wrap;"></p>
-            <div style="display: flex; gap: 12px;">
+        <div class="modal-content" style="text-align: center; max-width: 350px; border: 1px solid var(--error-red);">
+            <h2 style="color: var(--error-red); margin-top: 0; font-size: 18px;">ACTION CONFIRMATION</h2>
+            <p id="confirmMessage" style="color: var(--text-main); font-size: 13px; margin: 15px 0 20px 0; line-height: 1.5; white-space: pre-wrap;"></p>
+            <div style="display: flex; gap: 10px;">
                 <button class="btn-cancel" style="flex: 1;" id="btnConfirmCancel">CANCEL</button>
                 <button class="btn-submit" style="flex: 1; background-color: var(--error-red);" id="btnConfirmOk">CONTINUE</button>
             </div>
@@ -1420,11 +841,11 @@
     </div>
 
     <div class="modal-overlay" id="customPromptModal" style="z-index: 1100;">
-        <div class="modal-content" style="text-align: center; max-width: 360px;">
-            <h2 style="color: var(--text-main); margin-top: 0; font-size: 20px;">SECURITY PASSCODE</h2>
-            <p id="promptMessage" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;"></p>
-            <input type="password" id="promptInput" class="form-control" placeholder="••••••••" style="text-align: center; margin-bottom: 25px; font-size: 20px; letter-spacing: 4px;">
-            <div style="display: flex; gap: 12px;">
+        <div class="modal-content" style="text-align: center; max-width: 350px; border: 1px solid var(--accent-gold);">
+            <h2 style="color: var(--accent-gold); margin-top: 0; font-size: 18px;">SECURITY PASSCODE</h2>
+            <p id="promptMessage" style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;"></p>
+            <input type="password" id="promptInput" class="form-control" placeholder="••••••••" style="text-align: center; margin-bottom: 20px; font-size: 18px; letter-spacing: 3px;">
+            <div style="display: flex; gap: 10px;">
                 <button class="btn-cancel" style="flex: 1;" id="btnPromptCancel">CANCEL</button>
                 <button class="btn-submit" style="flex: 1;" id="btnPromptOk">VERIFY</button>
             </div>
@@ -1686,7 +1107,7 @@ async function fetchFullDatabaseData() {
                 
                 while(true) {
                     // [ADD ZONE COLUMN TO FETCH]
-                    let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id, collector');
+                    let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id');
                     
                     // [FIX HIERARCHY ACCESS]
                     if (currentUser.role === 'user') {
@@ -2105,7 +1526,7 @@ function resetHeaderArrows() {
                 if (d.timestamp) {
                     let timeObj = new Date(d.timestamp);
                     let formattedTime = timeObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-                    timeDisplay = `<br><span style="font-size: 10px; color: #94a3b8; font-weight: normal;">${formattedTime}</span>`;
+                    timeDisplay = `<br><span style="font-size: 9px; color: #94a3b8; font-weight: normal;">${formattedTime}</span>`;
                 }
 
                 tbody.innerHTML += `
@@ -2115,17 +1536,14 @@ function resetHeaderArrows() {
                         <td>${row.area || '-'}</td>
                         <td>${row.loc || '-'}</td>
                         <td>${row.type || '-'}</td>
-                        <td style="font-weight: 700; white-space: nowrap;">
-    <span style="color: var(--accent-gold); cursor: pointer; text-decoration: underline;" onclick="openModal('${row.acct}')">${row.acct}</span>
-    <button onclick="event.stopPropagation(); copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0; display: inline-block;" title="Copy Account No">📋</button>
-</td>
+                        <td style="font-weight: 900; color: var(--accent-gold); cursor: pointer; text-decoration: underline;" onclick="openModal('${row.acct}')">${row.acct}</td>
                         <td>${row.delq || '-'}</td>
                         <td>${row.arrs_mth || '0'}</td>
                         <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td><span class="status-badge ${badgeClass}">${row.status === 'UPDATED' ? 'ATTENDED' : row.status}</span></td>
                         <td style="font-weight: 600; color: var(--text-main);">${assigneeDisp}</td>
                         <td>
-                            <span style="font-weight: 600; color: var(--text-muted); font-size: 12px;">${d.last_remark_date || '-'}</span>
+                            <span style="font-weight: 700; color: var(--text-muted); font-size: 11px;">${d.last_remark_date || '-'}</span>
                             ${timeDisplay}
                         </td>
                     </tr>
@@ -2159,7 +1577,6 @@ function resetHeaderArrows() {
                 document.getElementById('tab-assign').classList.add('active');
                 
                 populateAssignSubordinates();
-                populateCollectorFilters();
                 renderAssignTable();
             }
             
@@ -2167,18 +1584,17 @@ function resetHeaderArrows() {
         };
 
 window.fetchAndRenderUsers = async function() {
-    try {
-        // TAMBAHKAN 'name' DALAM SELECT QUERY DI BAWAH
-        const { data, error } = await supabase.from('users').select('id, name, role, assignedzone, assignedregion, assignedarea, status, report_to').order('id', { ascending: true });
-        
-        if (error) throw error;
-        allSystemUsers = data;
-        filterUserList();
-        populateAssignSubordinates();
-    } catch (err) {
-        console.error("Failed to fetch user list:", err);
-    }
-};
+            try {
+                // Tarik column baharu (assignedzone, assignedarea) dari pangkalan data
+                const { data, error } = await supabase.from('users').select('id, role, assignedzone, assignedregion, assignedarea, status, report_to').order('id', { ascending: true });
+                if (error) throw error;
+                allSystemUsers = data;
+                filterUserList();
+                populateAssignSubordinates();
+            } catch (err) {
+                console.error("Failed to fetch user list:", err);
+            }
+        };
 
         window.filterUserList = function() {
             let query = document.getElementById('search-user').value.toLowerCase().trim();
@@ -2217,7 +1633,7 @@ window.renderUserTablePage = async function() {
                     let toggleBtnColor = userStatus === 'ACTIVE' ? 'var(--error-red)' : 'var(--success-green)';
                     
                     let roleSelect = `
-                        <select id="edit-role-${user.id}" onchange="toggleInlineAccessSelect('${user.id}')" style="padding:4px; font-size:11px; font-weight:600; border:1px solid var(--border-color); border-radius:4px;">
+                        <select id="edit-role-${user.id}" onchange="toggleInlineAccessSelect('${user.id}')" style="padding:4px; font-size:10px; font-weight:bold; border:1px solid var(--border-color); border-radius:3px;">
                             <option value="user" ${rName==='user'?'selected':''}>USER</option>
                             <option value="admin" ${rName==='admin'?'selected':''}>ADMIN</option>
                             <option value="manager" ${rName==='manager'?'selected':''}>MANAGER</option>
@@ -2228,43 +1644,41 @@ window.renderUserTablePage = async function() {
                     allSystemUsers.filter(u => u.role !== 'user' && u.id !== user.id).forEach(u => {
                         reportToOptions += `<option value="${u.id}" ${user.report_to===u.id?'selected':''}>${u.id.toUpperCase()}</option>`;
                     });
-                    let reportSelect = `<select id="edit-report-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; max-width:110px;">${reportToOptions}</select>`;
+                    let reportSelect = `<select id="edit-report-${user.id}" style="padding:4px; font-size:10px; border:1px solid var(--border-color); border-radius:3px; max-width:100px;">${reportToOptions}</select>`;
 
                     // Dropdown ZONE dinamik (Untuk Manager)
                     let zoneOptions = `<option value="ALL" ${!user.assignedzone || user.assignedzone==='ALL'?'selected':''}>ALL ZONES</option>`;
                     uniqueZones.forEach(z => {
                         zoneOptions += `<option value="${z}" ${user.assignedzone===z?'selected':''}>${z}</option>`;
                     });
-                    let zoneSelect = `<select id="edit-zone-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; display: ${rName === 'manager' ? 'inline-block' : 'none'};">${zoneOptions}</select>`;
+                    let zoneSelect = `<select id="edit-zone-${user.id}" style="padding:4px; font-size:10px; border:1px solid var(--border-color); border-radius:3px; display: ${rName === 'manager' ? 'inline-block' : 'none'};">${zoneOptions}</select>`;
                     
                     // Dropdown AREA dinamik (Untuk Admin)
                     let areaOptions = `<option value="ALL" ${!user.assignedarea || user.assignedarea==='ALL'?'selected':''}>ALL AREAS</option>`;
                     uniqueAreas.forEach(a => {
                         areaOptions += `<option value="${a}" ${user.assignedarea===a?'selected':''}>${a}</option>`;
                     });
-                    let areaSelect = `<select id="edit-area-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; display: ${rName === 'admin' ? 'inline-block' : 'none'};">${areaOptions}</select>`;
+                    let areaSelect = `<select id="edit-area-${user.id}" style="padding:4px; font-size:10px; border:1px solid var(--border-color); border-radius:3px; display: ${rName === 'admin' ? 'inline-block' : 'none'};">${areaOptions}</select>`;
                     
                     // Kapsul fallback jika User/Super
-                    let noneText = `<span id="edit-none-${user.id}" style="font-size: 11px; color: var(--text-muted); display: ${(rName === 'user' || rName === 'super') ? 'inline-block' : 'none'};">N/A (Global/PIC)</span>`;
-
-                    let fullNameDisp = user.name ? user.name.toUpperCase() : '<span style="color:#cbd5e1;">TIADA DATA</span>'; // <-- SETTING NAMA
+                    let noneText = `<span id="edit-none-${user.id}" style="font-size: 10px; color: var(--text-muted); display: ${(rName === 'user' || rName === 'super') ? 'inline-block' : 'none'};">N/A (Global/PIC)</span>`;
                     
-tbody.innerHTML += `
-        <tr>
-            <td style="text-align: center;">${start + index + 1}</td>
-            <td style="font-weight:700; color:var(--text-main);">${user.id.toUpperCase()}</td>
-            <td style="font-size:12px;">${fullNameDisp}</td> <td>${roleSelect}</td>
-            <td>${reportSelect}</td>
-            <td>${zoneSelect}${areaSelect}${noneText}</td>
-            <td><span class="status-badge ${statusBadge}">${userStatus}</span></td>
-            <td style="white-space: nowrap;">
-                <button class="btn-update" style="color: var(--accent-gold); border-color: var(--accent-gold); margin-right: 5px; font-weight:600;" onclick="updateUserInline('${user.id}')">💾 SAVE</button>
-                <button class="btn-update" style="color: ${toggleBtnColor}; border-color: ${toggleBtnColor}; margin-right: 5px;" onclick="toggleUserStatus('${user.id}', '${userStatus}')">${toggleBtnText}</button>
-                <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteUser('${user.id}')">DEL</button>
-            </td>
-        </tr>
-    `;
-});
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="text-align: center;">${start + index + 1}</td>
+                            <td style="font-weight:bold; color:var(--text-main);">${user.id.toUpperCase()}</td>
+                            <td>${roleSelect}</td>
+                            <td>${reportSelect}</td>
+                            <td>${zoneSelect}${areaSelect}${noneText}</td>
+                            <td><span class="status-badge ${statusBadge}">${userStatus}</span></td>
+                            <td style="white-space: nowrap;">
+                                <button class="btn-update" style="color: var(--accent-gold); border-color: var(--accent-gold); margin-right: 5px; font-weight:bold;" onclick="updateUserInline('${user.id}')">💾 SAVE</button>
+                                <button class="btn-update" style="color: ${toggleBtnColor}; border-color: ${toggleBtnColor}; margin-right: 5px;" onclick="toggleUserStatus('${user.id}', '${userStatus}')">${toggleBtnText}</button>
+                                <button class="btn-update" style="color: #ff3333; border-color: #ff3333;" onclick="deleteUser('${user.id}')">DEL</button>
+                            </td>
+                        </tr>
+                    `;
+                });
             }
             document.getElementById('user-page-info').innerText = `Page ${userCurrentPage} of ${totalPages}`;
             document.getElementById('btn-user-prev').disabled = userCurrentPage === 1;
@@ -2347,7 +1761,6 @@ tbody.innerHTML += `
 
 window.addNewUser = async function() {
             const id = document.getElementById('new-user-id').value.trim();
-            const name = document.getElementById('new-user-name').value.trim();
             const pass = document.getElementById('new-user-pass').value.trim();
             const role = document.getElementById('new-user-role').value;
             const reportTo = document.getElementById('new-user-report-to').value; 
@@ -2355,10 +1768,10 @@ window.addNewUser = async function() {
             const zone = document.getElementById('new-user-zone') ? document.getElementById('new-user-zone').value : null;
             const area = document.getElementById('new-user-area') ? document.getElementById('new-user-area').value : null;
             
-        if(!id || !pass || !name) { // Wajibkan isi nama
-            showNotification("ERROR", "Sila lengkapkan ruangan Nama, User ID dan Password.", true);
-            return; 
-    }
+            if(!id || !pass) { 
+                showNotification("ERROR", "Please fill in the User ID and Password fields.", true); 
+                return; 
+            }
 
             if(role !== 'super' && !reportTo) {
                 let proceed = await customConfirm(`INFO:\nID ini dicipta TANPA sebarang Supervisor (Tangguh). Ia boleh di-update kemudian. Teruskan?`);
@@ -2380,7 +1793,6 @@ window.addNewUser = async function() {
 
                 const { error } = await supabase.from('users').insert([{ 
                     id: id, 
-                    name: name,
                     pass: pass, 
                     role: role, 
                     assignedzone: finalZone,
@@ -2390,15 +1802,14 @@ window.addNewUser = async function() {
                     status: 'ACTIVE' 
                 }]);
                 
-if(error) {
-            showNotification("DATABASE ERROR", error.message, true);
-        } else {
-            showNotification("SUCCESS", `Akaun pengguna <b>${id}</b> telah didaftarkan.`);
-            document.getElementById('new-user-id').value = ''; 
-            document.getElementById('new-user-name').value = ''; // Kosongkan lepas save
-            document.getElementById('new-user-pass').value = '';
-            fetchAndRenderUsers(); 
-        }
+                if(error) {
+                    showNotification("DATABASE ERROR", error.message, true); 
+                } else {
+                    showNotification("SUCCESS", `User account <b>${id}</b> has been registered.`);
+                    document.getElementById('new-user-id').value = ''; 
+                    document.getElementById('new-user-pass').value = '';
+                    fetchAndRenderUsers(); 
+                }
             } catch (err) {
                 showNotification("SYSTEM ERROR", "Check console for details.", true);
             }
@@ -2520,7 +1931,7 @@ if(error) {
                     let statusHtml = ''; let actionHtml = '-';
 
                     if (!statusObj || statusObj.total === 0) {
-                        statusHtml = '<span style="color: var(--text-muted);">⚪ NO RECORDS</span>';
+                        statusHtml = '<span style="color: #777;">⚪ NO RECORDS</span>';
                     } else if (statusObj.pending > 0) {
                         statusHtml = `<span style="color: var(--accent-gold); font-weight: bold;">🟡 PENDING (${statusObj.pending} Accounts)</span>`;
                         actionHtml = `<button class="btn-update" style="color: var(--bg-color); background-color: var(--accent-gold); border-color: var(--accent-gold);" onclick="exportDataByDate('${dateKey}')">EXPORT</button>`;
@@ -2530,7 +1941,7 @@ if(error) {
 
                     tbody.innerHTML += `
                         <tr>
-                            <td style="text-align: center; font-weight: 600;">${displayDate}</td>
+                            <td style="text-align: center; font-weight: bold;">${displayDate}</td>
                             <td style="text-align: center;">${statusHtml}</td>
                             <td style="text-align: center;">${actionHtml}</td>
                         </tr>
@@ -2541,7 +1952,7 @@ if(error) {
             }
         };
 
-window.exportDataByDate = async function(dateStr) {
+        window.exportDataByDate = async function(dateStr) {
             let isConfirmed = await customConfirm(`Are you sure you want to export findings data for the date ${dateStr}?`);
             if (!isConfirmed) return;
 
@@ -2549,32 +1960,21 @@ window.exportDataByDate = async function(dateStr) {
             document.getElementById('loadingModal').style.display = 'flex';
 
             try {
-                // [FIX TIMEZONE]: Tukar tarikh input kepada julat permulaan dan penghujung ISO UTC yang tepat
-                let startOfDay = new Date(`${dateStr}T00:00:00`).toISOString();
-                let endOfDay = new Date(`${dateStr}T23:59:59.999`).toISOString();
+                let startOfDay = `${dateStr}T00:00:00+08:00`;
+                let endOfDay = `${dateStr}T23:59:59+08:00`;
 
-                // Tarik data findings dari Supabase
                 const { data, error } = await supabase
                     .from('findings')
-                    .select('id, acct, remark1, remark2, remark3, remark4, remark5, region, is_exported')
+                    .select('id, acct, remark1, remark2, remark3, remark4, remark5, region')
                     .gte('updated_at', startOfDay)
                     .lte('updated_at', endOfDay)
+                    .eq('is_exported', false)
                     .neq('acct', 'SYSTEM');
 
                 if (error) throw error;
                 
-                // Semak jika tiada langsung rekod untuk tarikh tersebut
                 if (!data || data.length === 0) {
-                    showNotification("NO RECORDS", `Tiada sebarang log penemuan (findings) ditemui pada tarikh ${dateStr}.`, true);
-                    document.getElementById('loadingModal').style.display = 'none';
-                    return;
-                }
-
-                // Tapis hanya rekod yang belum dieksport sahaja
-                let pendingRows = data.filter(row => row.is_exported === false || row.is_exported === null);
-
-                if (pendingRows.length === 0) {
-                    showNotification("ALREADY EXPORTED", `Semua rekod pada tarikh ${dateStr} telah pun selamat dieksport sebelum ini (Status Locked).`, true);
+                    showNotification("NO DATA", "Logic error: No pending records found.", true);
                     document.getElementById('loadingModal').style.display = 'none';
                     return;
                 }
@@ -2582,11 +1982,10 @@ window.exportDataByDate = async function(dateStr) {
                 let groupedData = {};
                 let idsToUpdate = [];
 
-                pendingRows.forEach(row => {
-                    let reg = row.region ? row.region.toUpperCase().trim() : 'UNKNOWN';
+                data.forEach(row => {
+                    let reg = row.region ? row.region.toUpperCase() : 'UNKNOWN';
                     if (!groupedData[reg]) groupedData[reg] = [];
                     
-                    // Mengekalkan susunan asal kau: REMARK5 di kedudukan atas sekali sebelum REMARK1
                     groupedData[reg].push({
                         "ACCT": row.acct,
                         "REMARK1": row.remark5 || '',
@@ -2601,7 +2000,6 @@ window.exportDataByDate = async function(dateStr) {
 
                 let formattedDate = dateStr.replace(/-/g, ''); 
                 
-                // Jana fail Excel mengikut Wilayah (Region)
                 Object.keys(groupedData).forEach(reg => {
                     const ws = XLSX.utils.json_to_sheet(groupedData[reg]);
                     const wb = XLSX.utils.book_new();
@@ -2611,7 +2009,6 @@ window.exportDataByDate = async function(dateStr) {
                     XLSX.writeFile(wb, fileName);
                 });
 
-                // Kunci status log di database supaya tidak dieksport bertindih
                 const { error: updateError } = await supabase
                     .from('findings')
                     .update({ is_exported: true })
@@ -2620,7 +2017,7 @@ window.exportDataByDate = async function(dateStr) {
                 if (updateError) throw updateError;
 
                 document.getElementById('loadingModal').style.display = 'none';
-                showNotification("EXPORT SUCCESSFUL", `${idsToUpdate.length} akaun berjaya diproses. Fail Excel telah dimuat turun mengikut wilayah.`);
+                showNotification("EXPORT SUCCESSFUL", "All Excel files have been downloaded and status is locked.");
                 
                 renderReportCenter(); 
 
@@ -2704,7 +2101,6 @@ window.exportDataByDate = async function(dateStr) {
                             headers.forEach(h => { select.appendChild(new Option(h, h)); });
                             
                             const id = select.id;
-                            if(id === 'map-collector') preSelectOption(select, ['collector', 'COLLECTOR', 'caller', 'CALLER']);
                             if(id === 'map-zone') preSelectOption(select, ['zone', 'ZONE', 'Zone']);
                             if(id === 'map-region') preSelectOption(select, ['region', 'REGION', 'Region']);
                             if(id === 'map-area') preSelectOption(select, ['area', 'AREA', 'Area']);
@@ -2768,7 +2164,7 @@ window.exportDataByDate = async function(dateStr) {
             document.getElementById('excel-file-input').value = ''; 
         };
 
-window.processExcelUpload = async function() {
+        window.processExcelUpload = async function() {
             document.getElementById('mappingModal').style.display = 'none';
             document.getElementById('progressModal').style.display = 'flex';
             
@@ -2795,27 +2191,6 @@ window.processExcelUpload = async function() {
                 let existingAcc = globalAccounts.find(a => a.acct === rawAccountNo);
                 let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; 
                 let currentFindingStatus = existingAcc ? existingAcc.finding_status : ''; 
-                
-                // --- 1. AMBIL & BERSIHKAN DATA MENTAH DARI EXCEL ---
-                let bal = parseFloat(String(row[getVal('map-bal') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
-                let odp = parseFloat(String(row[getVal('map-odp') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
-                let adch = parseFloat(String(row[getVal('map-adch') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
-                let arrAmt = parseFloat(String(row[getVal('map-arrs') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
-                let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
-
-                // --- 2. LOGIK PENGIRAAN PINTAR DARI USER ---
-                // Formula 1 & 2: Positifkan nilai ARR_AMT (Contoh: -100 jadi 100, -4 jadi 4)
-                let finalArrAmt = arrAmt * -1; 
-                
-                // Formula 3: Kira FS_AMT_TO_COLLECT (OSB) mengikut jenis akaun
-                let finalOsb = 0;
-                if (type === 'EP') {
-                    finalOsb = bal + adch;
-                } else if (type === 'HP') {
-                    finalOsb = (bal + odp) + adch;
-                } else {
-                    finalOsb = bal + odp + adch; // Fallback jika ada ACCT_TYPE lain
-                }
                 
                 let keyLoc = getVal('map-loc');
                 let keyZone = getVal('map-zone');
@@ -2861,10 +2236,8 @@ window.processExcelUpload = async function() {
                 if (rawType === "undefined") rawType = "";
                 let rawDelq = String(row[getVal('map-delq')]).trim();
                 if (rawDelq === "undefined") rawDelq = "";
-                
-                let keyColl = getVal('map-collector');
-                let rawColl = (keyColl && row[keyColl]) ? String(row[keyColl]).toUpperCase().trim() : "";
-                if (rawColl === "UNDEFINED") rawColl = "";
+                let rawArrs = String(row[getVal('map-arrs')]).trim();
+                if (rawArrs === "undefined") rawArrs = "0";
 
                 let detailsJSON = {
                     h_name: row[getVal('map-h-name')] || '',
@@ -2900,13 +2273,12 @@ window.processExcelUpload = async function() {
                     region: finalRegion, 
                     area: finalArea,     
                     loc: rawLocCd,
-                    type: type, // Guna string bersih yang dah upper-case
+                    type: rawType, 
                     acct: rawAccountNo,
                     delq: rawDelq, 
-                    arrs_mth: finalArrAmt, // [FIXED]: Memasukkan hasil darab -1
-                    osb: finalOsb,         // [FIXED]: Memasukkan hasil formula EP/HP
+                    arrs_mth: rawArrs, 
+                    osb: parseFloat(String(row[getVal('map-osb')]).replace(/[^0-9.-]+/g,"")) || 0, 
                     status: currentStatus, 
-                    collector: rawColl,
                     details: detailsJSON 
                 });
             }
@@ -2980,7 +2352,7 @@ window.openModal = async function(accNo) {
 
             let d = accountInfo.details || {};
             let todayDate = new Date().toLocaleDateString('en-GB');
-            let singleLine = `INTERNAL DATA-VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
+            let singleLine = `INTERNAL DATA - VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
             let wText = `${singleLine.repeat(3)}\n`.repeat(25);
 
             document.getElementById('modal-details-container').innerHTML = `
@@ -3049,7 +2421,7 @@ window.openModal = async function(accNo) {
                         if (extractedStatus === 'PV') badgeColor = 'var(--status-pv)';
                         if (extractedStatus === 'PAID') badgeColor = 'var(--status-paid)';
 
-                        statusBadgeHTML = ` | <span style="background-color: ${badgeColor}; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px; display: inline-block; vertical-align: middle;">${extractedStatus}</span>`;
+                        statusBadgeHTML = ` | <span style="background-color: ${badgeColor}; color: white; padding: 1px 5px; border-radius: 3px; font-weight: 900; font-size: 9px; display: inline-block; vertical-align: middle;">${extractedStatus}</span>`;
                     }
 
                 let deleteBtnHTML = '';
@@ -3059,19 +2431,19 @@ window.openModal = async function(accNo) {
 
                     let histRemark = '';
                     if(data.remark1 || data.remark2 || data.remark3 || data.remark4) {
-                        histRemark += `<div style="font-size: 12px; line-height: 1.5; margin-top: 8px; color: var(--text-main); font-weight: normal;">`;
+                        histRemark += `<div style="font-size: 11px; line-height: 1.4; margin-top: 5px; color: var(--text-main); font-weight: normal;">`;
                         if(data.remark1) histRemark += `<div>${data.remark1}</div>`;
                         if(data.remark2) histRemark += `<div>${data.remark2}</div>`;
                         if(data.remark3) histRemark += `<div>${data.remark3}</div>`;
                         if(data.remark4) histRemark += `<div>${data.remark4}</div>`;
                         histRemark += `</div>`;
                     } else {
-                        histRemark = `<div style="font-size: 12px; margin-top: 8px; color: var(--text-main); font-weight: normal;">${data.remark || ''}</div>`;
+                        histRemark = `<div style="font-size: 11px; margin-top: 5px; color: var(--text-main); font-weight: normal;">${data.remark || ''}</div>`;
                     }
 
                     historyBox.innerHTML += `
-                        <div class="history-item" style="overflow: hidden; padding: 12px; margin-bottom: 12px; background-color: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
-                            <div class="history-meta" style="font-weight: 600; font-size: 11px; color: var(--text-muted);">
+                        <div class="history-item" style="overflow: hidden; padding: 10px; margin-bottom: 10px; background-color: #ffffff; border: 2px solid var(--text-main); border-radius: 6px; box-shadow: 2px 2px 0px rgba(16,42,67,0.1);">
+                            <div class="history-meta" style="font-weight: bold; font-size: 10px; color: var(--text-muted);">
                                 UPDATE BY: ${data.updated_by ? data.updated_by.toUpperCase() : 'SYSTEM'} | ${dateFormatted}${statusBadgeHTML}
                                 ${deleteBtnHTML}
                             </div>
@@ -3127,34 +2499,25 @@ window.openModal = async function(accNo) {
                 return;
             }
 
-if(!fullStory) { 
+            if(!fullStory) { 
                 alert("Sila isi nota pemeriksaan terlebih dahulu."); 
                 return; 
             }
 
-            // [FASA 5 PINTAR]: Pecah cerita panjang kepada chunk 50 karakter tanpa putuskan perkataan
-            let words = fullStory.split(' ');
+            let regex = /.{1,50}(?:\s|$)/g;
             let chunks = [];
-            let currentChunk = "";
-
-            words.forEach(word => {
-                if ((currentChunk + word).length > 50) {
-                    chunks.push(currentChunk.trim());
-                    currentChunk = word + " ";
-                } else {
-                    currentChunk += word + " ";
-                }
-            });
-            if (currentChunk.trim() !== "") {
-                chunks.push(currentChunk.trim());
+            let match;
+            
+            if ((fullStory.match(regex) || []).join('').length < fullStory.length) {
+                chunks = fullStory.match(/.{1,50}/g) || [];
+            } else {
+                while ((match = regex.exec(fullStory)) !== null) { chunks.push(match[0].trim()); }
             }
 
             let r1 = (chunks[0] || '').toUpperCase();
             let r2 = (chunks[1] || '').toUpperCase();
             let r3 = (chunks[2] || '').toUpperCase();
             let r4 = (chunks[3] || '').toUpperCase();
-            
-            // 🛑 KOD LAMA REGEX & IF-STATEMENT SEBELUM NI DAH DIBUANG TERUS DI SINI!
             
             const btn = document.getElementById('btnSaveFinding'); 
             btn.innerText = "SAVING...";
@@ -3172,19 +2535,7 @@ if(!fullStory) {
             updatedDetailsObj.last_remark_date = dateStr;
             updatedDetailsObj.timestamp = today.getTime();
             
-            // Ambil waktu sekarang untuk tarikh dan masa tanpa saat (Format: DD/MM/YYYY HH:MM AM/PM)
-            let currentDateTime = new Date();
-            let formattedDate = String(currentDateTime.getDate()).padStart(2, '0') + '/' + 
-                                String(currentDateTime.getMonth() + 1).padStart(2, '0') + '/' + 
-                                currentDateTime.getFullYear();
-            let formattedTime = currentDateTime.toLocaleTimeString('en-US', { 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                hour12: true 
-            });
-
-            // [FASA 5 PINTAR]: Remark 5 lengkap dengan tarikh & masa tanpa saat mengikut standard MIS SINGER
-            let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${formattedDate} ${formattedTime}`;
+            let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()})`;
             
             try {
                 const { data: insertedData, error: insertError } = await supabase
@@ -3239,7 +2590,6 @@ if(!fullStory) {
                 let resetDetails = accountInfo.details || {};
                 resetDetails.finding_status = ""; 
                 resetDetails.last_remark_date = "";
-                resetDetails.timestamp = "";
 
                 const { error: updError = null } = await supabase.from('accounts').update({ status: 'PENDING', details: resetDetails }).eq('acct', accNo);
                 if (updError) throw updError;
@@ -3296,40 +2646,6 @@ if(!fullStory) {
         let currentAssignPage = 1;
         const assignRowsPerPage = 20;
 
-        let currentAssignSortColumn = null;
-        let currentAssignSortDirection = 'asc';
-
-        window.sortAssignTable = function(columnName) {
-            if (currentAssignSortColumn === columnName) {
-                currentAssignSortDirection = currentAssignSortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                currentAssignSortColumn = columnName;
-                currentAssignSortDirection = 'asc';
-            }
-            currentAssignPage = 1;
-            renderAssignTable(); // Panggil semula table untuk filter & susun
-        };
-
-        function updateAssignHeaderArrows(activeCol) {
-            const cols = ['acct', 'zone', 'region', 'area', 'osb', 'status', 'assignee_id', 'collector'];
-            cols.forEach(c => {
-                const el = document.getElementById(`tha-${c}`);
-                if (el) {
-                    let baseText = el.innerText.split(' ')[0];
-                    if(c === 'acct') baseText = "ACCT NO";
-                    else if(c === 'assignee_id') baseText = "CURRENT ASSIGNEE";
-                    else if(c === 'osb') baseText = "OSB (RM)";
-                    
-                    if (c === activeCol) {
-                        let arrow = currentAssignSortDirection === 'asc' ? '▲' : '▼';
-                        el.innerHTML = `<span style="color:var(--text-main);">${baseText} ${arrow}</span>`;
-                    } else {
-                        el.innerHTML = `${baseText} ⇅`;
-                    }
-                }
-            });
-        }
-
         window.populateAssignSubordinates = function() {
             const dropdown = document.getElementById('assign-target-user');
             if (!dropdown) return;
@@ -3359,59 +2675,16 @@ if(!fullStory) {
             });
         };
 
-        window.populateCollectorFilters = function() {
-    const dropdown = document.getElementById('filter-collector-dropdown');
-    if (!dropdown) return;
-    
-    // Ambil senarai unik collector, buang yang kosong, susun A-Z
-    let collectors = [...new Set(globalAccounts.map(a => a.collector).filter(Boolean))].sort();
-    
-    dropdown.innerHTML = '<option value="ALL">SEMUA COLLECTOR</option>';
-    collectors.forEach(c => {
-        dropdown.innerHTML += `<option value="${c}">${c.toUpperCase()}</option>`;
-    });
-};
-
-window.renderAssignTable = function() {
-    const statusFilter = document.getElementById('assign-filter-status').value;
-    const collectorFilter = document.getElementById('filter-collector-dropdown').value; // [UPDATE]
-
-    const tbody = document.getElementById('assign-table-body');
-    
-    assignAccounts = globalAccounts.filter(row => {
-        let isUnassigned = !row.assignee_id || row.assignee_id === 'UNASSIGNED';
-        
-        let matchStatus = false;
-        if (statusFilter === 'UNASSIGNED') matchStatus = isUnassigned;
-        else if (statusFilter === 'ASSIGNED') matchStatus = !isUnassigned;
-        else matchStatus = true;
-
-        // [UPDATE: Filter Collector]
-        let matchCollector = (collectorFilter === 'ALL' || !collectorFilter) ? true : (row.collector === collectorFilter);
-        
-        return matchStatus && matchCollector;
-    });
-
-    if (currentAssignSortColumn) {
-                assignAccounts.sort((a, b) => {
-                    let valueA = a[currentAssignSortColumn];
-                    let valueB = b[currentAssignSortColumn];
-
-                    if (currentAssignSortColumn === 'osb') {
-                        let numA = parseFloat(valueA) || 0;
-                        let numB = parseFloat(valueB) || 0;
-                        return currentAssignSortDirection === 'asc' ? numA - numB : numB - numA;
-                    } 
-                    
-                    let strA = valueA ? String(valueA).toUpperCase().trim() : '';
-                    let strB = valueB ? String(valueB).toUpperCase().trim() : '';
-                    
-                    if (strA < strB) return currentAssignSortDirection === 'asc' ? -1 : 1;
-                    if (strA > strB) return currentAssignSortDirection === 'asc' ? 1 : -1;
-                    return 0;
-                });
-                updateAssignHeaderArrows(currentAssignSortColumn);
-            }
+        window.renderAssignTable = function() {
+            const statusFilter = document.getElementById('assign-filter-status').value;
+            const tbody = document.getElementById('assign-table-body');
+            
+            assignAccounts = globalAccounts.filter(row => {
+                let isUnassigned = !row.assignee_id || row.assignee_id === 'UNASSIGNED';
+                if (statusFilter === 'UNASSIGNED') return isUnassigned;
+                if (statusFilter === 'ASSIGNED') return !isUnassigned;
+                return true;
+            });
 
             let total = assignAccounts.length;
             document.getElementById('assign-total-count').innerText = total.toLocaleString();
@@ -3429,27 +2702,22 @@ window.renderAssignTable = function() {
                 tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Tiada akaun dijumpai untuk kategori ini.</td></tr>';
             } else {
                 pageData.forEach(row => {
-                let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '🔴 UNASSIGNED';
-                let colDisp = row.collector ? row.collector.toUpperCase() : '-'; // [UPDATE]
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="text-align: center;">
-                            <input type="checkbox" class="chk-assign-row" value="${row.acct}" style="cursor:pointer; transform: scale(1.2);">
-                        </td>
-                        <td style="font-weight: bold; color: var(--text-main); white-space: nowrap;">
-    ${row.acct}
-    <button onclick="copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0; display: inline-block;" title="Copy Account No">📋</button>
-</td>
-                        <td>${row.zone || '-'}</td>
-                        <td>${row.region || '-'}</td>
-                        <td>${row.area || '-'}</td>
-                        <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td><span class="status-badge status-pending">${row.status}</span></td>
-                        <td style="font-weight:bold; color:var(--success-green);">${colDisp}</td>
-                        <td style="font-weight:bold; color:var(--accent-gold);">${assigneeDisp}</td> </tr>
-                `;
-            });
+                    let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '🔴 UNASSIGNED';
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="text-align: center;">
+                                <input type="checkbox" class="chk-assign-row" value="${row.acct}" style="cursor:pointer; transform: scale(1.2);">
+                            </td>
+                            <td style="font-weight: bold; color: var(--text-main);">${row.acct}</td>
+                            <td>${row.zone || '-'}</td>
+                            <td>${row.region || '-'}</td>
+                            <td>${row.area || '-'}</td>
+                            <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td><span class="status-badge status-pending">${row.status}</span></td>
+                            <td style="font-weight:bold; color:var(--accent-gold);">${assigneeDisp}</td>
+                        </tr>
+                    `;
+                });
             }
 
             document.getElementById('assign-page-info').innerText = `Page ${currentAssignPage} of ${totalPages}`;
@@ -3525,23 +2793,7 @@ window.renderAssignTable = function() {
                 document.getElementById('loadingModal').style.display = 'none';
             }
         };
-
-        // --- KOD BARU: FUNGSI UTK COPY ACCT NO ---
-window.copyToClipboard = function(text, btnElement) {
-    navigator.clipboard.writeText(text).then(() => {
-        const originalHTML = btnElement.innerHTML;
-        btnElement.innerHTML = '✅';
-        btnElement.style.color = 'var(--success-green)';
-        
-        setTimeout(() => {
-            btnElement.innerHTML = '📋';
-            btnElement.style.color = 'var(--accent-gold)';
-        }, 1000);
-    }).catch(err => {
-        console.error('Gagal menyalin text: ', err);
-    });
-};
         
     </script>
 </body>
-</html>
+    </html>
