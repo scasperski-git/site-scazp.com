@@ -887,15 +887,56 @@ th {
             /* Letak padding pada panel supaya ada ruang nafas kat bawah */
             #dashboard-panel, #assign-panel, #settings-panel, #report-panel { padding-bottom: 20px; }
 
-            /* Header Settings */
-            .header { padding: 15px; flex-direction: column; align-items: stretch; gap: 15px; margin-bottom: 10px; }
-            .header h1 { font-size: 18px; text-align: center; }
-            .header > div { flex-wrap: wrap; justify-content: space-between; width: 100%; gap: 10px; }
-            .btn-logout { flex: 1; padding: 10px 0 !important; margin: 0; text-align: center; }
-            #display-username { width: 100%; text-align: center; background: #f8fafc; padding: 10px 0; border-radius: var(--radius-md); border: 1px solid var(--border-color); order: 3; font-weight: 500; }
-            .header .btn-logout:nth-of-type(1) { order: 1; } 
-            .header .btn-logout:nth-of-type(2) { order: 2; } 
-            
+                        /* --- HEADER MOBILE REDESIGN (CLEAN & COMPACT) --- */
+            .header {
+                flex-direction: column;
+                align-items: center; 
+                padding: 15px;
+                gap: 12px; 
+            }
+            .header h1 {
+                font-size: 16px; 
+                text-align: center; 
+            }
+            .header > div {
+                flex-direction: row !important; /* Paksa duduk sebaris */
+                flex-wrap: nowrap !important; /* Elak elemen jatuh ke bawah */
+                align-items: center;
+                width: 100%;
+                background: #f8fafc; /* Buat satu bar kelabu lembut */
+                padding: 8px 12px;
+                border-radius: var(--radius-md);
+                border: 1px solid var(--border-color); 
+                gap: 8px;
+                box-sizing: border-box;
+            }
+            #display-username {
+                width: auto !important; 
+                text-align: left !important;
+                background: transparent !important;
+                padding: 0 !important;
+                border: none !important; 
+                order: 1 !important; 
+                font-weight: 700 !important;
+                font-size: 11px !important;
+                color: var(--accent-gold) !important;
+                margin-right: auto; /* Tolak nama ke kiri sepenuhnya */
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis; /* Kalau nama panjang sangat, dia jadi titik-titik */
+            }
+            .header .btn-logout {
+                flex: 0 0 auto !important; /* Kunci saiz butang supaya tak jadi gedabak */
+                padding: 6px 12px !important;
+                font-size: 10px !important;
+                font-weight: 700 !important;
+                border-radius: 6px !important;
+                white-space: nowrap;
+                margin: 0 !important;
+            }
+            .header .btn-logout:nth-of-type(1) { order: 2 !important; } 
+            .header .btn-logout:nth-of-type(2) { order: 3 !important; } 
+
             .nav-tabs { padding: 10px; margin-bottom: 15px; }
 
 /* --- KPI CARDS MOBILE (COMPACT & KEMAS) --- */
