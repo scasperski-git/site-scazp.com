@@ -2948,15 +2948,14 @@ let adch = parseFloat(String(row[getVal('map-adch') || '']).replace(/,/g, '').re
 
 // [DIBETULKAN]: Asingkan deklarasi untuk arrMth dan arrAmt.
 let arrMth = parseFloat(String(row[getVal('map-arrs') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
-let arrAmt = 0; // Anda boleh letak nilai statik 0 jika tiada dropdown map-arr-amt, atau tambah getVal('map-arr-amt') jika perlu.
-
+// [DIBETULKAN]: Tarik terus dari column 'ARR_AMT' dalam Excel jika dropdown tak wujud
+let rawArrAmtKey = getVal('map-arr-amt') || 'ARR_AMT';
+let arrAmt = parseFloat(String(row[rawArrAmtKey] || '0').replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
 let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
 
 // --- 2. LOGIK PENGIRAAN PINTAR (TUKAR TANDA +/-) ---
 
 // ARR_AMT: + jadi -, - jadi +
-// Kalau dia positif (bayar lebih/advance), jadikan negatif.
-// Kalau negatif (tunggakan), jadi positif.
 let finalArrAmt = arrAmt * -1;
 
 // ARR_MTH: + jadi -, - jadi +
