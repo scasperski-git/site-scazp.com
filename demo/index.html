@@ -2941,25 +2941,40 @@ window.processExcelUpload = async function() {
                 let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; 
                 let currentFindingStatus = existingAcc ? existingAcc.finding_status : '';
 
+// --- 0. FUNGSI KHAS UNTUK BACA DAN TERBALIKKAN NOMBOR (+/-) ---
+const parseAndFlip = (val) => {
+    if (!val || val === "undefined") return 0;
+    let str = String(val).trim();
+    
+    // Kenal pasti kalau asalnya negatif (ada '-' di depan/belakang atau guna kurungan)
+    let isNegative = str.startsWith('-') || str.endsWith('-') || (str.startsWith('(') && str.endsWith(')'));
+    
+    // Ekstrak nombor sahaja (buang koma, kurungan, atau huruf)
+    let num = parseFloat(str.replace(/[^0-9.]/g, '')) || 0;
+    
+    // LOGIK FLIP: 
+    // Kalau asal negatif -> jadi positif (pulangkan num)
+    // Kalau asal positif -> jadi negatif (pulangkan -num)
+    return isNegative ? num : -num;
+};
+
 // --- 1. AMBIL & BERSIHKAN DATA MENTAH DARI EXCEL ---
 let bal = parseFloat(String(row[getVal('map-bal') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
 let odp = parseFloat(String(row[getVal('map-odp') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
 let adch = parseFloat(String(row[getVal('map-adch') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
 
-// [DIBETULKAN]: Asingkan deklarasi untuk arrMth dan arrAmt.
-let arrMth = parseFloat(String(row[getVal('map-arrs') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
-// [DIBETULKAN]: Tarik terus dari column 'ARR_AMT' dalam Excel jika dropdown tak wujud
+// --- 2. LOGIK PENGIRAAN PINTAR (TUKAR TANDA +/- UNTUK ARR_MTH & ARR_AMT) ---
+
+// Guna fungsi parseAndFlip untuk ARR_MTH
+let rawArrMth = row[getVal('map-arrs')];
+let finalArrMth = parseAndFlip(rawArrMth);
+
+// Guna fungsi parseAndFlip untuk ARR_AMT
 let rawArrAmtKey = getVal('map-arr-amt') || 'ARR_AMT';
-let arrAmt = parseFloat(String(row[rawArrAmtKey] || '0').replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+let rawArrAmt = row[rawArrAmtKey];
+let finalArrAmt = parseAndFlip(rawArrAmt);
+
 let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
-
-// --- 2. LOGIK PENGIRAAN PINTAR (TUKAR TANDA +/-) ---
-
-// ARR_AMT: + jadi -, - jadi +
-let finalArrAmt = arrAmt * -1;
-
-// ARR_MTH: + jadi -, - jadi +
-let finalArrMth = arrMth * -1;
                 
                 // Formula 3: Kira FS_AMT_TO_COLLECT (OSB) mengikut jenis akaun
                 let finalOsb = 0;
