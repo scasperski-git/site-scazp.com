@@ -3140,7 +3140,11 @@ document.getElementById('modal-details-container').innerHTML = `
                         <p><span class="lbl">PLATE NO:</span> <span class="val">${d.PLATE_NO || d.plate || '-'}</span></p>
                         
                         <p><span class="lbl">BALANCE:</span> <span class="val">RM ${d.BALANCE || d.bal || '0.00'}</span></p>
-                        <p><span class="lbl">ARR AMT:</span> <span class="val" style="color: var(--error-red);">RM ${d.arr_amt ? Math.abs(parseFloat(d.arr_amt)).toFixed(2) : (accountInfo.arrs_amt ? Math.abs(parseFloat(accountInfo.arrs_amt)).toFixed(2) : '0.00')}</span></p>
+                        <p><span class="lbl">ARR AMT:</span> <span class="val" style="color: var(--error-red);">RM ${
+                            (d.arr_amt || accountInfo.arrs_amt) 
+    ? Math.abs(parseFloat(d.arr_amt || accountInfo.arrs_amt)).toFixed(2) 
+    : '0.00'
+}</span></p>
                         
                         <p><span class="lbl">MTH INST:</span> <span class="val">RM ${d.MTH_INST_AMT || '0.00'}</span></p>
                         <p><span class="lbl">ARR MTH:</span> <span class="val" style="color: var(--error-red);">${accountInfo.arrs_mth || '-'}</span></p>
