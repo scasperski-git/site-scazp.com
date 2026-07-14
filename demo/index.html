@@ -2948,10 +2948,14 @@ window.processExcelUpload = async function() {
                 let arrAmt = parseFloat(String(row[getVal('map-arrs') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
                 let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
 
-// --- 2. LOGIK PENGIRAAN PINTAR (FIX POSITIF) ---
-                // Tukar ARR_AMT dan ARR_MTH kepada positif jika dia negatif
-                let finalArrAmt = Math.abs(arrAmt);
-                let finalArrMth = Math.abs(arrMth);
+// --- 2. LOGIK PENGIRAAN PINTAR (TUKAR TANDA +/-) ---
+                
+                // ARR_AMT: + jadi -, - jadi +
+                // Kalau dia positif (bayar lebih/advance), jadikan negatif. Kalau negatif (tunggakan), jadi positif.
+                let finalArrAmt = arrAmt * -1; 
+                
+                // ARR_MTH: + jadi -, - jadi +
+                let finalArrMth = arrMth * -1;
                 
                 // Formula 3: Kira FS_AMT_TO_COLLECT (OSB) mengikut jenis akaun
                 let finalOsb = 0;
