@@ -3129,6 +3129,7 @@ window.openModal = async function(accNo) {
             let d = accountInfo.details || {};
             let todayDate = new Date().toLocaleDateString('en-GB');
             let displayArrMth = accountInfo.arrs_mth ? Math.abs(parseFloat(accountInfo.arrs_mth)) : '-';
+            let displayArrAmt = accountInfo.arrs_amt ? Math.abs(parseFloat(accountInfo.arrs_amt)) : '-';
             let singleLine = `INTERNAL DATA-VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
             let wText = `${singleLine.repeat(3)}\n`.repeat(25);
 
@@ -3140,11 +3141,7 @@ document.getElementById('modal-details-container').innerHTML = `
                         <p><span class="lbl">PLATE NO:</span> <span class="val">${d.PLATE_NO || d.plate || '-'}</span></p>
                         
                         <p><span class="lbl">BALANCE:</span> <span class="val">RM ${d.BALANCE || d.bal || '0.00'}</span></p>
-                        <p><span class="lbl">ARR AMT:</span> <span class="val" style="color: var(--error-red);">RM ${
-                            (d.arr_amt || accountInfo.arrs_amt) 
-    ? Math.abs(parseFloat(d.arr_amt || accountInfo.arrs_amt)).toFixed(2) 
-    : '-'
-}</span></p>
+                        <p><span class="lbl">ARR AMT:</span> <span class="val" style="color: var(--error-red);">RM ${d.ARR_AMT || '0.00'}</span></p>
                         
                         <p><span class="lbl">MTH INST:</span> <span class="val">RM ${d.MTH_INST_AMT || '0.00'}</span></p>
                         <p><span class="lbl">ARR MTH:</span> <span class="val" style="color: var(--error-red);">${accountInfo.arrs_mth || '-'}</span></p>
