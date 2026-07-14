@@ -3048,6 +3048,7 @@ let finalArrMth = arrMth * -1;
                     bal: row[getVal('map-bal')] || '',
                     odp: row[getVal('map-odp')] || '',
                     adch: row[getVal('map-adch')] || '',
+                    ARR_AMT: finalArrAmt,
                     finding_status: currentFindingStatus 
                 };
 
@@ -3060,7 +3061,6 @@ let finalArrMth = arrMth * -1;
                     acct: rawAccountNo,
                     delq: rawDelq, 
                     arrs_mth: finalArrMth, 
-                    arrs_amt: finalArrAmt,
                     osb: finalOsb,         
                     status: currentStatus, 
                     collector: rawColl,
