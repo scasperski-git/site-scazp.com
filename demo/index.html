@@ -2206,7 +2206,7 @@ function resetHeaderArrows() {
     <button onclick="event.stopPropagation(); copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0; display: inline-block;" title="Copy Account No">📋</button>
 </td>
                         <td>${row.delq || '-'}</td>
-                        <td>${row.arrs_mth || '0'}</td>
+                        <td style="color: ${parseFloat(row.arrs_mth) > 0 ? 'var(--error-red)' : 'inherit'}; font-weight: ${parseFloat(row.arrs_mth) > 0 ? '700' : 'normal'};">${row.arrs_mth || '0'}</td>
                         <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td><span class="status-badge ${badgeClass}">${row.status === 'UPDATED' ? 'ATTENDED' : row.status}</span></td>
                         <td style="font-weight: 600; color: var(--text-main);">${assigneeDisp}</td>
@@ -3166,10 +3166,10 @@ document.getElementById('modal-details-container').innerHTML = `
                         <p><span class="lbl">PLATE NO:</span> <span class="val">${d.PLATE_NO || d.plate || '-'}</span></p>
                         
                         <p><span class="lbl">BALANCE:</span> <span class="val">RM ${d.BALANCE || d.bal || '0.00'}</span></p>
-                        <p><span class="lbl">ARR AMT:</span> <span class="val" style="color: var(--error-red);">RM ${d.ARR_AMT ? parseFloat(d.ARR_AMT).toFixed(2) : '0.00'}</span></p>
+                        <p><span class="lbl">ARR AMT:</span> <span class="val" style="color: ${parseFloat(d.ARR_AMT) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700;">RM ${d.ARR_AMT ? parseFloat(d.ARR_AMT).toFixed(2) : '0.00'}</span></p>
                         
                         <p><span class="lbl">MTH INST:</span> <span class="val">RM ${d.MTH_INST_AMT || '0.00'}</span></p>
-                        <p><span class="lbl">ARR MTH:</span> <span class="val" style="color: var(--error-red);">${accountInfo.arrs_mth || '-'}</span></p>
+                        <p><span class="lbl">ARR MTH:</span> <span class="val" style="color: ${parseFloat(accountInfo.arrs_mth) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700;">${accountInfo.arrs_mth || '-'}</span></p>
 
                         <p><span class="lbl">LATE BAL:</span> <span class="val" style="color: var(--error-red);">RM ${d.LATE_BAL || d.odp || '0.00'}</span></p>
                         <p><span class="lbl">ADCH BAL:</span> <span class="val" style="color: var(--error-red);">RM ${d.ADCH_BAL || d.adch || '0.00'}</span></p>
