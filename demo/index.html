@@ -3128,6 +3128,7 @@ window.openModal = async function(accNo) {
 
             let d = accountInfo.details || {};
             let todayDate = new Date().toLocaleDateString('en-GB');
+            let displayArrMth = accountInfo.arrs_mth ? Math.abs(parseFloat(accountInfo.arrs_mth)) : '-';
             let singleLine = `INTERNAL DATA-VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
             let wText = `${singleLine.repeat(3)}\n`.repeat(25);
 
