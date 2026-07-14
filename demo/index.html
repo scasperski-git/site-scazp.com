@@ -2941,21 +2941,26 @@ window.processExcelUpload = async function() {
                 let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; 
                 let currentFindingStatus = existingAcc ? existingAcc.finding_status : '';
 
-                // --- 1. AMBIL & BERSIHKAN DATA MENTAH DARI EXCEL ---
-                let bal = parseFloat(String(row[getVal('map-bal') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
-                let odp = parseFloat(String(row[getVal('map-odp') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
-                let adch = parseFloat(String(row[getVal('map-adch') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
-                let arrAmt = parseFloat(String(row[getVal('map-arrs') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
-                let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
+// --- 1. AMBIL & BERSIHKAN DATA MENTAH DARI EXCEL ---
+let bal = parseFloat(String(row[getVal('map-bal') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+let odp = parseFloat(String(row[getVal('map-odp') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+let adch = parseFloat(String(row[getVal('map-adch') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+
+// [DIBETULKAN]: Asingkan deklarasi untuk arrMth dan arrAmt.
+let arrMth = parseFloat(String(row[getVal('map-arrs') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+let arrAmt = 0; // Anda boleh letak nilai statik 0 jika tiada dropdown map-arr-amt, atau tambah getVal('map-arr-amt') jika perlu.
+
+let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
 
 // --- 2. LOGIK PENGIRAAN PINTAR (TUKAR TANDA +/-) ---
-                
-                // ARR_AMT: + jadi -, - jadi +
-                // Kalau dia positif (bayar lebih/advance), jadikan negatif. Kalau negatif (tunggakan), jadi positif.
-                let finalArrAmt = arrAmt * -1; 
-                
-                // ARR_MTH: + jadi -, - jadi +
-                let finalArrMth = arrMth * -1;
+
+// ARR_AMT: + jadi -, - jadi +
+// Kalau dia positif (bayar lebih/advance), jadikan negatif.
+// Kalau negatif (tunggakan), jadi positif.
+let finalArrAmt = arrAmt * -1;
+
+// ARR_MTH: + jadi -, - jadi +
+let finalArrMth = arrMth * -1;
                 
                 // Formula 3: Kira FS_AMT_TO_COLLECT (OSB) mengikut jenis akaun
                 let finalOsb = 0;
@@ -3054,7 +3059,7 @@ window.processExcelUpload = async function() {
                     type: type, 
                     acct: rawAccountNo,
                     delq: rawDelq, 
-                    arrs_mth: finalArrAmt, 
+                    arrs_mth: finalArrMth, 
                     arrs_amt: finalArrAmt,
                     osb: finalOsb,         
                     status: currentStatus, 
