@@ -3143,7 +3143,7 @@ document.getElementById('modal-details-container').innerHTML = `
                         <p><span class="lbl">ARR AMT:</span> <span class="val" style="color: var(--error-red);">RM ${
                             (d.arr_amt || accountInfo.arrs_amt) 
     ? Math.abs(parseFloat(d.arr_amt || accountInfo.arrs_amt)).toFixed(2) 
-    : '0.00'
+    : '-'
 }</span></p>
                         
                         <p><span class="lbl">MTH INST:</span> <span class="val">RM ${d.MTH_INST_AMT || '0.00'}</span></p>
