@@ -2761,7 +2761,7 @@ window.exportDataByDate = async function(dateStr) {
             }
         };
 
-        window.handleExcelFileSelect = function(e) {
+window.handleExcelFileSelect = function(e) {
             const file = e.target.files[0]; 
             if (!file) return;
             
@@ -2789,47 +2789,104 @@ window.exportDataByDate = async function(dateStr) {
                             headers.forEach(h => { select.appendChild(new Option(h, h)); });
                             
                             const id = select.id;
+
+                            // --- COLLECTOR & ASSIGNMENT INFO (KEKAL) ---
                             if(id === 'map-collector') preSelectOption(select, ['collector', 'COLLECTOR', 'caller', 'CALLER']);
                             if(id === 'map-zone') preSelectOption(select, ['zone', 'ZONE', 'Zone']);
-                            if(id === 'map-region') preSelectOption(select, ['region', 'REGION', 'Region']);
                             if(id === 'map-area') preSelectOption(select, ['area', 'AREA', 'Area']);
-                            if(id === 'map-loc') preSelectOption(select, ['loc', 'loc_cd', 'LOC_CD']);
-                            if(id === 'map-type') preSelectOption(select, ['type', 'TYPE', 'Type', 'ACCT_TYPE']);
-                            if(id === 'map-acct') preSelectOption(select, ['acct', 'ACCT', 'account']);
-                            if(id === 'map-delq') preSelectOption(select, ['delq', 'V_DELQ', 'v_delq']);
-                            if(id === 'map-arrs') preSelectOption(select, ['arrs', 'ARR_MTH', 'arr_mth']);
                             if(id === 'map-osb') preSelectOption(select, ['osb', 'OSB', 'FS_AMT_TO_COLLECT']);
                             
-                            if(id === 'map-h-name') preSelectOption(select, ['HIRER_NAME']);
-                            if(id === 'map-h-nric-new') preSelectOption(select, ['HIRER_NEW_IC_NO']);
-                            if(id === 'map-h-nric-old') preSelectOption(select, ['HIRER_OLD_IC_NO']);
-                            if(id === 'map-h-tel') preSelectOption(select, ['HIRER_TEL_NO']);
-                            if(id === 'map-h-add1') preSelectOption(select, ['HIRER_ADDR1']);
-                            if(id === 'map-h-add2') preSelectOption(select, ['HIRER_ADDR2']);
-                            if(id === 'map-h-add3') preSelectOption(select, ['HIRER_ADDR3']);
-                            if(id === 'map-hc-name') preSelectOption(select, ['HIRER_CO_NAME']);
-                            if(id === 'map-hc-tel') preSelectOption(select, ['HIRER_CO_TEL']);
-                            if(id === 'map-hc-add1') preSelectOption(select, ['HIRER_CO_ADDR1']);
-                            if(id === 'map-hc-add2') preSelectOption(select, ['HIRER_CO_ADDR21', 'HIRER_CO_ADDR2']); 
-                            
-                            if(id === 'map-s-name') preSelectOption(select, ['SPOUSE_NAME']);
-                            if(id === 'map-s-nric-new') preSelectOption(select, ['SPOUSE_NEW_IC_NO']);
-                            if(id === 'map-s-nric-old') preSelectOption(select, ['SPOUSE_OLD_IC_NO']);
-                            if(id === 'map-s-tel') preSelectOption(select, ['SPOUSE_TEL_NO']);
-                            if(id === 'map-g-name') preSelectOption(select, ['GUAR_NAME']);
-                            if(id === 'map-g-nric-new') preSelectOption(select, ['GUAR_NEW_IC_NO']);
-                            if(id === 'map-g-nric-old') preSelectOption(select, ['GUAR_OLD_IC_NO']);
-                            if(id === 'map-g-tel') preSelectOption(select, ['GUAR_TEL_NO']);
-                            if(id === 'map-g-add1') preSelectOption(select, ['GUAR_ADDR1']);
-                            if(id === 'map-g-add2') preSelectOption(select, ['GUAR_ADDR2']);
+                            // --- ACCOUNT BALANCE INFO ---
+                            if(id === 'map-acct') preSelectOption(select, ['ACCT', 'acct', 'account']);
+                            if(id === 'map-type' || id === 'map-acct-type') preSelectOption(select, ['ACCT_TYPE', 'type', 'TYPE']);
+                            if(id === 'map-region' || id === 'map-region-cd') preSelectOption(select, ['REGION_CD', 'region', 'REGION']);
+                            if(id === 'map-loc' || id === 'map-loc-cd') preSelectOption(select, ['LOC_CD', 'loc', 'loc_cd']);
+                            if(id === 'map-sa-cd') preSelectOption(select, ['SA_CD']);
+                            if(id === 'map-pack-cd') preSelectOption(select, ['PACK_CD']);
+                            if(id === 'map-freeze-stat') preSelectOption(select, ['FREEZE_STAT']);
+                            if(id === 'map-sales-rep-dt') preSelectOption(select, ['SALES_REP_DT']);
+                            if(id === 'map-hp-mature-dt') preSelectOption(select, ['HP_MATURE_DT']);
+                            if(id === 'map-prod' || id === 'map-prod-sales-cd') preSelectOption(select, ['PROD_SALES_CD', 'EP_SALES_DESC']);
+                            if(id === 'map-prod-sales-desc') preSelectOption(select, ['PROD_SALES_DESC']);
+                            if(id === 'map-cash-price') preSelectOption(select, ['CASH_PRICE']);
+                            if(id === 'map-ep-price') preSelectOption(select, ['EP_PRICE']);
+                            if(id === 'map-contract-len') preSelectOption(select, ['CONTRACT_LEN']);
+                            if(id === 'map-mth-inst-amt') preSelectOption(select, ['MTH_INST_AMT']);
+                            if(id === 'map-delq' || id === 'map-v-delq') preSelectOption(select, ['V_DELQ', 'delq', 'v_delq']);
+                            if(id === 'map-arr-amt') preSelectOption(select, ['ARR_AMT']);
+                            if(id === 'map-arrs' || id === 'map-arr-mth') preSelectOption(select, ['ARR_MTH', 'arrs', 'arr_mth']);
+                            if(id === 'map-bal' || id === 'map-balance') preSelectOption(select, ['BALANCE', 'bal']);
+                            if(id === 'map-odp' || id === 'map-late-bal') preSelectOption(select, ['LATE_BAL', 'odp']);
+                            if(id === 'map-adch' || id === 'map-adch-bal') preSelectOption(select, ['ADCH_BAL', 'adch']);
+                            if(id === 'map-plate' || id === 'map-plate-no') preSelectOption(select, ['PLATE_NO', 'PLATE NO', 'plate']);
+                            if(id === 'map-coll-comm-cat') preSelectOption(select, ['COLL_COMM_CAT']);
+                            if(id === 'map-co-ind') preSelectOption(select, ['CO_IND']);
+
+                            // --- HIRER INFO ---
+                            if(id === 'map-h-name' || id === 'map-hirer-name') preSelectOption(select, ['HIRER_NAME', 'h_name']);
+                            if(id === 'map-h-nric-old' || id === 'map-hirer-old-ic') preSelectOption(select, ['HIRER_OLD_IC_NO', 'h_nric_old']);
+                            if(id === 'map-h-nric-new' || id === 'map-hirer-new-ic') preSelectOption(select, ['HIRER_NEW_IC_NO', 'h_nric_new']);
+                            if(id === 'map-h-add1' || id === 'map-hirer-addr1') preSelectOption(select, ['HIRER_ADDR1', 'h_add1']);
+                            if(id === 'map-h-add2' || id === 'map-hirer-addr2') preSelectOption(select, ['HIRER_ADDR2', 'h_add2']);
+                            if(id === 'map-h-add3' || id === 'map-hirer-addr3') preSelectOption(select, ['HIRER_ADDR3', 'h_add3']);
+                            if(id === 'map-hirer-post-cd') preSelectOption(select, ['HIRER_POST_CD']);
+                            if(id === 'map-h-tel' || id === 'map-hirer-tel') preSelectOption(select, ['HIRER_TEL_NO', 'h_tel']);
+                            if(id === 'map-hirer-email') preSelectOption(select, ['HIRER_EMAIL']);
+
+                            // --- HIRER CO INFO ---
+                            if(id === 'map-hirer-occ-cd') preSelectOption(select, ['HIRER_OCC_CD']);
+                            if(id === 'map-hc-name' || id === 'map-hirer-co-name') preSelectOption(select, ['HIRER_CO_NAME', 'hc_name']);
+                            if(id === 'map-hc-add1' || id === 'map-hirer-co-addr1') preSelectOption(select, ['HIRER_CO_ADDR1', 'hc_add1']);
+                            if(id === 'map-hc-add2' || id === 'map-hirer-co-addr2') preSelectOption(select, ['HIRER_CO_ADDR2', 'hc_add2', 'HIRER_CO_ADDR21']); 
+                            if(id === 'map-hirer-co-addr3') preSelectOption(select, ['HIRER_CO_ADDR3']);
+                            if(id === 'map-hirer-co-post-cd') preSelectOption(select, ['HIRER_CO_POST_CD']);
+                            if(id === 'map-hc-tel' || id === 'map-hirer-co-tel') preSelectOption(select, ['HIRER_CO_TEL', 'hc_tel']);
+
+                            // --- SPOUSE INFO ---
+                            if(id === 'map-s-name' || id === 'map-spouse-name') preSelectOption(select, ['SPOUSE_NAME', 's_name']);
+                            if(id === 'map-s-nric-old' || id === 'map-spouse-old-ic') preSelectOption(select, ['SPOUSE_OLD_IC_NO', 's_nric_old']);
+                            if(id === 'map-s-nric-new' || id === 'map-spouse-new-ic') preSelectOption(select, ['SPOUSE_NEW_IC_NO', 's_nric_new']);
+                            if(id === 'map-spouse-addr1') preSelectOption(select, ['SPOUSE_ADDR1']);
+                            if(id === 'map-spouse-addr2') preSelectOption(select, ['SPOUSE_ADDR2']);
+                            if(id === 'map-spouse-addr3') preSelectOption(select, ['SPOUSE_ADDR3']);
+                            if(id === 'map-spouse-post-cd') preSelectOption(select, ['SPOUSE_POST_CD']);
+                            if(id === 'map-s-tel' || id === 'map-spouse-tel') preSelectOption(select, ['SPOUSE_TEL_NO', 's_tel']);
+                            if(id === 'map-spouse-occ-cd') preSelectOption(select, ['SPOUSE_OCC_CD']);
+
+                            // --- GTOR INFO ---
+                            if(id === 'map-g-name' || id === 'map-gtor-name') preSelectOption(select, ['GUAR_NAME', 'g_name']);
+                            if(id === 'map-g-nric-old' || id === 'map-gtor-old-ic') preSelectOption(select, ['GUAR_OLD_IC_NO', 'g_nric_old']);
+                            if(id === 'map-g-nric-new' || id === 'map-gtor-new-ic') preSelectOption(select, ['GUAR_NEW_IC_NO', 'g_nric_new']);
+                            if(id === 'map-g-add1' || id === 'map-gtor-addr1') preSelectOption(select, ['GUAR_ADDR1', 'g_add1']);
+                            if(id === 'map-g-add2' || id === 'map-gtor-addr2') preSelectOption(select, ['GUAR_ADDR2', 'g_add2']);
+                            if(id === 'map-gtor-addr3') preSelectOption(select, ['GUAR_ADDR3']);
+                            if(id === 'map-gtor-post-cd') preSelectOption(select, ['GUAR_POST_CD']);
+                            if(id === 'map-g-tel' || id === 'map-gtor-tel') preSelectOption(select, ['GUAR_TEL_NO', 'g_tel']);
+                            if(id === 'map-gtor-occ-cd') preSelectOption(select, ['GUAR_OCC_CD']);
                             if(id === 'map-gc-name') preSelectOption(select, ['GUAR_CO_NAME']);
                             if(id === 'map-gc-tel') preSelectOption(select, ['GUAR_CO_TEL']);
-                            
-                            if(id === 'map-prod') preSelectOption(select, ['EP_SALES_DESC']);
-                            if(id === 'map-plate') preSelectOption(select, ['PLATE_NO', 'PLATE NO']);
-                            if(id === 'map-bal') preSelectOption(select, ['BALANCE']);
-                            if(id === 'map-odp') preSelectOption(select, ['LATE_BAL']);
-                            if(id === 'map-adch') preSelectOption(select, ['ADCH_BAL']);
+
+                            // --- REF 1 INFO ---
+                            if(id === 'map-ref1-name') preSelectOption(select, ['REFEREE1_NAME']);
+                            if(id === 'map-ref1-tel') preSelectOption(select, ['REFEREE1_TEL']);
+                            if(id === 'map-ref1-addr1') preSelectOption(select, ['REF_ADDRESS1_1']);
+                            if(id === 'map-ref1-addr2') preSelectOption(select, ['REF_ADDRESS2_1']);
+                            if(id === 'map-ref1-addr3') preSelectOption(select, ['REF_ADDRESS3_1']);
+                            if(id === 'map-ref1-post-cd') preSelectOption(select, ['REF_POST_CD_1']);
+                            if(id === 'map-ref1-hse-no') preSelectOption(select, ['REF_HSE_PHONE_NO_1']);
+                            if(id === 'map-ref1-off-no') preSelectOption(select, ['REF_OFF_PHONE_NO_1']);
+                            if(id === 'map-ref1-relation') preSelectOption(select, ['RELATIONSHIP_WITH_HIRER_1']);
+
+                            // --- REF 2 INFO ---
+                            if(id === 'map-ref2-name') preSelectOption(select, ['REFEREE2_NAME']);
+                            if(id === 'map-ref2-tel') preSelectOption(select, ['REFEREE2_TEL']);
+                            if(id === 'map-ref2-addr1') preSelectOption(select, ['REF_ADDRESS1_2']);
+                            if(id === 'map-ref2-addr2') preSelectOption(select, ['REF_ADDRESS2_2']);
+                            if(id === 'map-ref2-addr3') preSelectOption(select, ['REF_ADDRESS3_2']);
+                            if(id === 'map-ref2-post-cd') preSelectOption(select, ['REF_POST_CD_2']);
+                            if(id === 'map-ref2-hse-no') preSelectOption(select, ['REF_HSE_PHONE_NO_2']);
+                            if(id === 'map-ref2-off-no') preSelectOption(select, ['REF_OFF_PHONE_NO_2']);
+                            if(id === 'map-ref2-relation') preSelectOption(select, ['RELATIONSHIP_WITH_HIRER_2']);
                         });
                         
                         document.getElementById('readingExcelModal').style.display = 'none';
@@ -2841,7 +2898,7 @@ window.exportDataByDate = async function(dateStr) {
                     }
                 };
                 reader.readAsArrayBuffer(file);
-            }, 50); 
+            }, 300);
         };
         
         function preSelectOption(select, guesses) {
