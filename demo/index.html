@@ -2917,12 +2917,15 @@ window.processExcelUpload = async function() {
             const progressBar = document.getElementById('upload-progress-bar');
             const progressText = document.getElementById('upload-progress-text');
             const progressSubtext = document.getElementById('upload-progress-subtext');
-
-            const getVal = (id) => document.getElementById(id).value;
+            
+            // Tambah sikit safety supaya kalau ID tak wujud, sistem tak error
+            const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : '';
             
             const formatIC = (newIcKey, oldIcKey, rowData) => {
-                let n = String(rowData[getVal(newIcKey)] || '').trim();
-                let o = String(rowData[getVal(oldIcKey)] || '').trim();
+                let nKey = getVal(newIcKey);
+                let oKey = getVal(oldIcKey);
+                let n = nKey ? String(rowData[nKey] || '').trim() : '';
+                let o = oKey ? String(rowData[oKey] || '').trim() : '';
                 if(n && n !== 'undefined' && o && o !== 'undefined') return `${n} / ${o}`;
                 if(n && n !== 'undefined') return n;
                 if(o && o !== 'undefined') return o;
@@ -2936,8 +2939,8 @@ window.processExcelUpload = async function() {
                 
                 let existingAcc = globalAccounts.find(a => a.acct === rawAccountNo);
                 let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; 
-                let currentFindingStatus = existingAcc ? existingAcc.finding_status : ''; 
-                
+                let currentFindingStatus = existingAcc ? existingAcc.finding_status : '';
+
                 // --- 1. AMBIL & BERSIHKAN DATA MENTAH DARI EXCEL ---
                 let bal = parseFloat(String(row[getVal('map-bal') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
                 let odp = parseFloat(String(row[getVal('map-odp') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
@@ -2946,8 +2949,8 @@ window.processExcelUpload = async function() {
                 let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
 
                 // --- 2. LOGIK PENGIRAAN PINTAR DARI USER ---
-                // Formula 1 & 2: Positifkan nilai ARR_AMT (Contoh: -100 jadi 100, -4 jadi 4)
-                let finalArrAmt = arrAmt * -1; 
+                // Formula 1 & 2: Positifkan nilai ARR_AMT
+                let finalArrAmt = arrAmt * -1;
                 
                 // Formula 3: Kira FS_AMT_TO_COLLECT (OSB) mengikut jenis akaun
                 let finalOsb = 0;
@@ -2956,7 +2959,7 @@ window.processExcelUpload = async function() {
                 } else if (type === 'HP') {
                     finalOsb = (bal + odp) + adch;
                 } else {
-                    finalOsb = bal + odp + adch; // Fallback jika ada ACCT_TYPE lain
+                    finalOsb = bal + odp + adch;
                 }
                 
                 let keyLoc = getVal('map-loc');
@@ -2978,7 +2981,7 @@ window.processExcelUpload = async function() {
                         let cleanMasterLoc = String(locValue).replace(/^0+/, '').trim().toUpperCase();
                         return cleanMasterLoc === cleanRawLoc;
                     });
-                    
+
                     if (matchedLoc) {
                         let zKey = Object.keys(matchedLoc).find(k => k.toLowerCase() === 'zone_name' || k.toLowerCase() === 'zone');
                         let regKey = Object.keys(matchedLoc).find(k => k.toLowerCase() === 'region_name' || k.toLowerCase() === 'region');
@@ -2987,7 +2990,7 @@ window.processExcelUpload = async function() {
                         let dbZone = zKey ? matchedLoc[zKey] : "";
                         let dbRegion = regKey ? matchedLoc[regKey] : "";
                         let dbArea = areaKey ? matchedLoc[areaKey] : "";
-                        
+
                         finalZone = dbZone !== "" ? String(dbZone).toUpperCase().trim() : finalZone;
                         finalRegion = dbRegion !== "" ? String(dbRegion).toUpperCase().trim() : finalRegion;
                         finalArea = dbArea !== "" ? String(dbArea).toUpperCase().trim() : finalArea;
@@ -3009,6 +3012,7 @@ window.processExcelUpload = async function() {
                 if (rawColl === "UNDEFINED") rawColl = "";
 
                 let detailsJSON = {
+                    ...row, // 🌟 INI MAGIC TRICK NYA! Auto-sedut semua header Excel kau (CASH_PRICE, REFEREE1_NAME dll) bulat-bulat
                     h_name: row[getVal('map-h-name')] || '',
                     h_nric: formatIC('map-h-nric-new', 'map-h-nric-old', row),
                     h_tel: row[getVal('map-h-tel')] || '',
@@ -3042,18 +3046,19 @@ window.processExcelUpload = async function() {
                     region: finalRegion, 
                     area: finalArea,     
                     loc: rawLocCd,
-                    type: type, // Guna string bersih yang dah upper-case
+                    type: type, 
                     acct: rawAccountNo,
                     delq: rawDelq, 
-                    arrs_mth: finalArrAmt, // [FIXED]: Memasukkan hasil darab -1
-                    osb: finalOsb,         // [FIXED]: Memasukkan hasil formula EP/HP
+                    arrs_mth: finalArrAmt, 
+                    osb: finalOsb,         
                     status: currentStatus, 
                     collector: rawColl,
                     details: detailsJSON 
                 });
             }
 
-            const CHUNK_SIZE = 1000; let totalProcessed = 0; let hasError = false;
+            const CHUNK_SIZE = 1000;
+            let totalProcessed = 0; let hasError = false;
             for (let i = 0; i < bulkData.length; i += CHUNK_SIZE) {
                 const chunk = bulkData.slice(i, i + CHUNK_SIZE);
                 const currentProgress = Math.round((i / bulkData.length) * 100);
@@ -3066,7 +3071,8 @@ window.processExcelUpload = async function() {
             }
 
             if (!hasError) {
-                progressBar.style.width = '100%'; progressText.innerText = '100%';
+                progressBar.style.width = '100%';
+                progressText.innerText = '100%';
                 progressSubtext.innerText = `Completely done! Reloading ledger structure...`;
                 
                 await supabase.from('findings').insert([{
