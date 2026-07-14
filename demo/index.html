@@ -2959,6 +2959,24 @@ const parseAndFlip = (val) => {
     return isNegative ? num : -num;
 };
 
+// --- 0.1 FUNGSI KHAS UNTUK CONVERT EXCEL DATE KE DD/MM/YYYY ---
+const formatExcelDate = (val) => {
+    if (!val || String(val).trim() === "") return "";
+    
+    // Kalau data dah sedia ada bentuk tarikh "11/07/2021" (bukan nombor), biarkan sahaja
+    if (isNaN(val) || String(val).includes('/') || String(val).includes('-')) return String(val).trim(); 
+    
+    let serial = parseFloat(val);
+    // Formula kalis Timezone untuk tukar Serial Excel ke Tarikh JS
+    let date_info = new Date(Math.round((serial - 25569) * 86400 * 1000));
+    
+    let day = String(date_info.getUTCDate()).padStart(2, '0');
+    let month = String(date_info.getUTCMonth() + 1).padStart(2, '0');
+    let year = date_info.getUTCFullYear();
+    
+    return `${day}/${month}/${year}`;
+};
+
 // --- 1. AMBIL & BERSIHKAN DATA MENTAH DARI EXCEL ---
 let bal = parseFloat(String(row[getVal('map-bal') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
 let odp = parseFloat(String(row[getVal('map-odp') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
@@ -3036,8 +3054,13 @@ let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
                 let rawColl = (keyColl && row[keyColl]) ? String(row[keyColl]).toUpperCase().trim() : "";
                 if (rawColl === "UNDEFINED") rawColl = "";
 
+                let salesKey = getVal('map-sales-rep-dt') || 'SALES_REP_DT';
+                let matureKey = getVal('map-hp-mature-dt') || 'HP_MATURE_DT';
+
                 let detailsJSON = {
                     ...row, // 🌟 INI MAGIC TRICK NYA! Auto-sedut semua header Excel kau (CASH_PRICE, REFEREE1_NAME dll) bulat-bulat
+                    SALES_REP_DT: formatExcelDate(row[salesKey]),
+                    HP_MATURE_DT: formatExcelDate(row[matureKey]),
                     h_name: row[getVal('map-h-name')] || '',
                     h_nric: formatIC('map-h-nric-new', 'map-h-nric-old', row),
                     h_tel: row[getVal('map-h-tel')] || '',
