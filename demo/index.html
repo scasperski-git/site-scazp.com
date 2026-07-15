@@ -722,7 +722,7 @@ th {
     font-family: inherit;
     font-size: 8px; font-weight: 900;
     color: rgba(30, 41, 59, 0.06); 
-    white-space: normal; word-break: break-all;
+    white-space: pre-wrap; word-break: break-all; /* <-- Tukar normal jadi pre-wrap di sini */
     line-height: 2.2; letter-spacing: 1px;
     padding: 10px; box-sizing: border-box;
     transform: rotate(-10deg) scale(1.2);
@@ -3158,137 +3158,138 @@ let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
         };
 
 window.openModal = async function(accNo) {
-    document.getElementById('modalAccNo').innerText = accNo;
-    document.getElementById('updateModal').style.display = 'flex';
-    
-    currentModalIndex = filteredAccounts.findIndex(a => a.acct === accNo);
-    
-    const btnPrev = document.getElementById('btn-modal-prev');
-    const btnNext = document.getElementById('btn-modal-next');
-    if (btnPrev && btnNext) {
-        btnPrev.disabled = currentModalIndex <= 0;
-        btnNext.disabled = currentModalIndex === -1 || currentModalIndex >= filteredAccounts.length - 1;
-    }
-    
-    document.getElementById('btnResetPending').style.display = (currentUser.role === 'super') ? 'block' : 'none';
-    document.getElementById('finding-status-select').value = "";
-
-    let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
-    if(accountInfo.finding_status) {
-        document.getElementById('finding-status-select').value = accountInfo.finding_status;
-    }
-
-    let d = accountInfo.details || {};
-    let todayDate = new Date().toLocaleDateString('en-GB');
-    
-    // 1. TEKS WATERMARK
-    let wmText = `INTERNAL DATA-VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}`;
-
-    // 2. JANA SVG WATERMARK (Teknik Zig-Zag)
-    // Kita buat dua baris yang berselang seli (Offset 100px)
-    let svgData = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="300">
-        <text x="0" y="50" font-family="Arial" font-size="14" fill="rgba(30, 41, 59, 0.05)" transform="rotate(-15)">${wmText}</text>
-        <text x="300" y="150" font-family="Arial" font-size="14" fill="rgba(30, 41, 59, 0.05)" transform="rotate(-15)">${wmText}</text>
-        <text x="0" y="250" font-family="Arial" font-size="14" fill="rgba(30, 41, 59, 0.05)" transform="rotate(-15)">${wmText}</text>
-    </svg>`;
-    
-    let bgUrl = `url("data:image/svg+xml,${encodeURIComponent(svgData)}")`;
-
-    document.getElementById('modal-details-container').innerHTML = `
-        <style>
-            .details-box { 
-                background-image: ${bgUrl}; 
-                background-repeat: repeat; 
-                background-position: center; 
+            document.getElementById('modalAccNo').innerText = accNo;
+            document.getElementById('updateModal').style.display = 'flex';
+            
+            currentModalIndex = filteredAccounts.findIndex(a => a.acct === accNo);
+            
+            const btnPrev = document.getElementById('btn-modal-prev');
+            const btnNext = document.getElementById('btn-modal-next');
+            if (btnPrev && btnNext) {
+                btnPrev.disabled = currentModalIndex <= 0;
+                btnNext.disabled = currentModalIndex === -1 || currentModalIndex >= filteredAccounts.length - 1;
             }
-        </style>
+            
+            document.getElementById('btnResetPending').style.display = (currentUser.role === 'super') ? 'block' : 'none';
+            document.getElementById('finding-status-select').value = "";
 
-        <div class="details-box" style="grid-column: 1 / -1;">
-            <h4>ACCOUNT BALANCE INFO</h4>
-            <div class="info-grid-2col">
-                <p><span class="lbl">ACCT NO:</span> <span class="val">${accountInfo.acct || '-'}</span></p>
-                <p><span class="lbl">PLATE NO:</span> <span class="val">${d.PLATE_NO || d.plate || '-'}</span></p>
-                <p><span class="lbl">BALANCE:</span> <span class="val">RM ${d.BALANCE || d.bal || '0.00'}</span></p>
-                <p><span class="lbl">ARR AMT:</span> <span class="val" style="color: ${parseFloat(d.ARR_AMT) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700;">RM ${d.ARR_AMT ? parseFloat(d.ARR_AMT).toFixed(2) : '0.00'}</span></p>
-                <p><span class="lbl">MTH INST:</span> <span class="val">RM ${d.MTH_INST_AMT || '0.00'}</span></p>
-                <p><span class="lbl">ARR MTH:</span> <span class="val" style="color: ${parseFloat(accountInfo.arrs_mth) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700;">${accountInfo.arrs_mth || '-'}</span></p>
-                <p><span class="lbl">LATE BAL:</span> <span class="val" style="color: var(--error-red);">RM ${d.LATE_BAL || d.odp || '0.00'}</span></p>
-                <p><span class="lbl">ADCH BAL:</span> <span class="val" style="color: var(--error-red);">RM ${d.ADCH_BAL || d.adch || '0.00'}</span></p>
-                <p><span class="lbl">CASH PRICE:</span> <span class="val">RM ${d.CASH_PRICE || '0.00'}</span></p>
-                <p><span class="lbl">EP PRICE:</span> <span class="val">RM ${d.EP_PRICE || '0.00'}</span></p>
-                <p><span class="lbl">V DELQ:</span> <span class="val">${accountInfo.delq || '-'}</span></p>
-                <p><span class="lbl">CONT. LEN:</span> <span class="val">${d.CONTRACT_LEN || '-'}</span></p>
-                <p><span class="lbl">REGION:</span> <span class="val">${accountInfo.region || '-'}</span></p>
-                <p><span class="lbl">LOC CD:</span> <span class="val">${accountInfo.loc || '-'}</span></p>
-                <p><span class="lbl">ACCT TYPE:</span> <span class="val">${accountInfo.type || '-'}</span></p>
-                <p><span class="lbl">SA CD:</span> <span class="val">${d.SA_CD || '-'}</span></p>
-                <p><span class="lbl">PACK CD:</span> <span class="val">${d.PACK_CD || '-'}</span></p>
-                <p><span class="lbl">FREEZE STAT:</span> <span class="val">${d.FREEZE_STAT || '-'}</span></p>
-                <p><span class="lbl">SALES DT:</span> <span class="val">${d.SALES_REP_DT || '-'}</span></p>
-                <p><span class="lbl">MATURE DT:</span> <span class="val">${d.HP_MATURE_DT || '-'}</span></p>
-                <p><span class="lbl">COMM CAT:</span> <span class="val">${d.COLL_COMM_CAT || '-'}</span></p>
-                <p><span class="lbl">CO IND:</span> <span class="val">${d.CO_IND || '-'}</span></p>
-            </div>
-            <div style="margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
-                <p><span class="lbl">PRODUCT:</span> <span class="val" style="color: var(--accent-gold);">${d.PROD_SALES_CD || ''} ${d.PROD_SALES_DESC || d.prod || '-'}</span></p>
-            </div>
-        </div>
-        
-        <div class="details-box">
-            <h4>HIRER INFO</h4>
-            <p><span class="lbl">NAME:</span> <span class="val">${d.HIRER_NAME || d.h_name || '-'}</span></p>
-            <p><span class="lbl">NRIC:</span> <span class="val">${d.HIRER_NEW_IC_NO || d.h_nric || '-'} / ${d.HIRER_OLD_IC_NO || '-'}</span></p>
-            <p><span class="lbl">TEL:</span> <span class="val">${d.HIRER_TEL_NO || d.h_tel || '-'}</span></p>
-            <p><span class="lbl">EMAIL:</span> <span class="val">${d.HIRER_EMAIL || '-'}</span></p>
-            <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.HIRER_ADDR1 || d.h_add1, d.HIRER_ADDR2 || d.h_add2, d.HIRER_ADDR3 || d.h_add3, d.HIRER_POST_CD].filter(Boolean).join(', ')}</span></p>
-        </div>
+            let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
+            if(accountInfo.finding_status) {
+                document.getElementById('finding-status-select').value = accountInfo.finding_status;
+            }
 
-        <div class="details-box">
-            <h4>HIRER COMPANY</h4>
-            <p><span class="lbl">COMPANY:</span> <span class="val">${d.HIRER_CO_NAME || d.hc_name || '-'}</span></p>
-            <p><span class="lbl">OCCUPATION:</span> <span class="val">${d.HIRER_OCC_CD || '-'}</span></p>
-            <p><span class="lbl">TEL (OFF):</span> <span class="val">${d.HIRER_CO_TEL || d.hc_tel || '-'}</span></p>
-            <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.HIRER_CO_ADDR1 || d.hc_add1, d.HIRER_CO_ADDR2 || d.hc_add2, d.HIRER_CO_ADDR3, d.HIRER_CO_POST_CD].filter(Boolean).join(', ')}</span></p>
-        </div>
+            let d = accountInfo.details || {};
+            let todayDate = new Date().toLocaleDateString('en-GB');
+            let displayArrMth = accountInfo.arrs_mth ? Math.abs(parseFloat(accountInfo.arrs_mth)) : '-';
 
-        <div class="details-box">
-            <h4>SPOUSE INFO</h4>
-            <p><span class="lbl">NAME:</span> <span class="val">${d.SPOUSE_NAME || d.s_name || '-'}</span></p>
-            <p><span class="lbl">NRIC:</span> <span class="val">${d.SPOUSE_NEW_IC_NO || d.s_nric || '-'} / ${d.SPOUSE_OLD_IC_NO || '-'}</span></p>
-            <p><span class="lbl">TEL:</span> <span class="val">${d.SPOUSE_TEL_NO || d.s_tel || '-'}</span></p>
-            <p><span class="lbl">OCCUPATION:</span> <span class="val">${d.SPOUSE_OCC_CD || '-'}</span></p>
-            <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.SPOUSE_ADDR1, d.SPOUSE_ADDR2, d.SPOUSE_ADDR3, d.SPOUSE_POST_CD].filter(Boolean).join(', ')}</span></p>
-        </div>
+let baseText = `INTERNAL DATA-VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
 
-        <div class="details-box">
-            <h4>GUARANTOR INFO</h4>
-            <p><span class="lbl">NAME:</span> <span class="val">${d.GUAR_NAME || d.g_name || '-'}</span></p>
-            <p><span class="lbl">NRIC:</span> <span class="val">${d.GUAR_NEW_IC_NO || d.g_nric || '-'} / ${d.GUAR_OLD_IC_NO || '-'}</span></p>
-            <p><span class="lbl">TEL:</span> <span class="val">${d.GUAR_TEL_NO || d.g_tel || '-'}</span></p>
-            <p><span class="lbl">OCCUPATION:</span> <span class="val">${d.GUAR_OCC_CD || '-'}</span></p>
-            <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.GUAR_ADDR1 || d.g_add1, d.GUAR_ADDR2 || d.g_add2, d.GUAR_ADDR3, d.GUAR_POST_CD].filter(Boolean).join(', ')}</span></p>
-        </div>
+// Baris 1: Biasa
+let line1 = baseText.repeat(8) + "\n";
+// Baris 2: Ditambah jarak kosong (offset) di hadapan untuk efek tertolak (zig-zag)
+let line2 = "                  " + baseText.repeat(8) + "\n"; 
 
-        <div class="details-box">
-            <h4>REFEREE 1 INFO</h4>
-            <p><span class="lbl">NAME:</span> <span class="val">${d.REFEREE1_NAME || '-'}</span></p>
-            <p><span class="lbl">RELATION:</span> <span class="val">${d.RELATIONSHIP_WITH_HIRER_1 || '-'}</span></p>
-            <p><span class="lbl">H/P NO:</span> <span class="val">${d.REFEREE1_TEL || '-'}</span></p>
-            <p><span class="lbl">HSE NO:</span> <span class="val">${d.REF_HSE_PHONE_NO_1 || '-'}</span></p>
-            <p><span class="lbl">OFF NO:</span> <span class="val">${d.REF_OFF_PHONE_NO_1 || '-'}</span></p>
-            <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.REF_ADDRESS1_1, d.REF_ADDRESS2_1, d.REF_ADDRESS3_1, d.REF_POST_CD_1].filter(Boolean).join(', ')}</span></p>
-        </div>
+// Ulang gandingan Baris 1 & Baris 2 sebanyak 50 kali (menjadi 100 baris keseluruhan)
+let wText = (line1 + line2).repeat(50);
 
-        <div class="details-box">
-            <h4>REFEREE 2 INFO</h4>
-            <p><span class="lbl">NAME:</span> <span class="val">${d.REFEREE2_NAME || '-'}</span></p>
-            <p><span class="lbl">RELATION:</span> <span class="val">${d.RELATIONSHIP_WITH_HIRER_2 || '-'}</span></p>
-            <p><span class="lbl">H/P NO:</span> <span class="val">${d.REFEREE2_TEL || '-'}</span></p>
-            <p><span class="lbl">HSE NO:</span> <span class="val">${d.REF_HSE_PHONE_NO_2 || '-'}</span></p>
-            <p><span class="lbl">OFF NO:</span> <span class="val">${d.REF_OFF_PHONE_NO_2 || '-'}</span></p>
-            <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.REF_ADDRESS1_2, d.REF_ADDRESS2_2, d.REF_ADDRESS3_2, d.REF_POST_CD_2].filter(Boolean).join(', ')}</span></p>
-        </div>
-    `;
+            document.getElementById('modal-details-container').innerHTML = `
+                <div class="details-box" style="grid-column: 1 / -1;" data-watermark="${wText}">
+                    <h4>ACCOUNT BALANCE INFO</h4>
+                    <div class="info-grid-2col">
+                        <p><span class="lbl">ACCT NO:</span> <span class="val">${accountInfo.acct || '-'}</span></p>
+                        <p><span class="lbl">PLATE NO:</span> <span class="val">${d.PLATE_NO || d.plate || '-'}</span></p>
+                        
+                        <p><span class="lbl">BALANCE:</span> <span class="val">RM ${d.BALANCE || d.bal || '0.00'}</span></p>
+                        <p><span class="lbl">ARR AMT:</span> <span class="val" style="color: ${parseFloat(d.ARR_AMT) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700;">RM ${d.ARR_AMT ? parseFloat(d.ARR_AMT).toFixed(2) : '0.00'}</span></p>
+                        
+                        <p><span class="lbl">MTH INST:</span> <span class="val">RM ${d.MTH_INST_AMT || '0.00'}</span></p>
+                        <p><span class="lbl">ARR MTH:</span> <span class="val" style="color: ${parseFloat(accountInfo.arrs_mth) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700;">${accountInfo.arrs_mth || '-'}</span></p>
+
+                        <p><span class="lbl">LATE BAL:</span> <span class="val" style="color: var(--error-red);">RM ${d.LATE_BAL || d.odp || '0.00'}</span></p>
+                        <p><span class="lbl">ADCH BAL:</span> <span class="val" style="color: var(--error-red);">RM ${d.ADCH_BAL || d.adch || '0.00'}</span></p>
+
+                        <p><span class="lbl">CASH PRICE:</span> <span class="val">RM ${d.CASH_PRICE || '0.00'}</span></p>
+                        <p><span class="lbl">EP PRICE:</span> <span class="val">RM ${d.EP_PRICE || '0.00'}</span></p>
+
+                        <p><span class="lbl">V DELQ:</span> <span class="val">${accountInfo.delq || '-'}</span></p>
+                        <p><span class="lbl">CONT. LEN:</span> <span class="val">${d.CONTRACT_LEN || '-'}</span></p>
+                        
+                        <p><span class="lbl">REGION:</span> <span class="val">${accountInfo.region || '-'}</span></p>
+                        <p><span class="lbl">LOC CD:</span> <span class="val">${accountInfo.loc || '-'}</span></p>
+
+                        <p><span class="lbl">ACCT TYPE:</span> <span class="val">${accountInfo.type || '-'}</span></p>
+                        <p><span class="lbl">SA CD:</span> <span class="val">${d.SA_CD || '-'}</span></p>
+
+                        <p><span class="lbl">PACK CD:</span> <span class="val">${d.PACK_CD || '-'}</span></p>
+                        <p><span class="lbl">FREEZE STAT:</span> <span class="val">${d.FREEZE_STAT || '-'}</span></p>
+
+                        <p><span class="lbl">SALES DT:</span> <span class="val">${d.SALES_REP_DT || '-'}</span></p>
+                        <p><span class="lbl">MATURE DT:</span> <span class="val">${d.HP_MATURE_DT || '-'}</span></p>
+
+                        <p><span class="lbl">COMM CAT:</span> <span class="val">${d.COLL_COMM_CAT || '-'}</span></p>
+                        <p><span class="lbl">CO IND:</span> <span class="val">${d.CO_IND || '-'}</span></p>
+                    </div>
+                    
+                    <div style="margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
+                        <p><span class="lbl">PRODUCT:</span> <span class="val" style="color: var(--accent-gold);">${d.PROD_SALES_CD || ''} ${d.PROD_SALES_DESC || d.prod || '-'}</span></p>
+                    </div>
+                </div>
+
+                <div class="details-box" data-watermark="${wText}">
+                    <h4>HIRER INFO</h4>
+                    <p><span class="lbl">NAME:</span> <span class="val">${d.HIRER_NAME || d.h_name || '-'}</span></p>
+                    <p><span class="lbl">NRIC:</span> <span class="val">${d.HIRER_NEW_IC_NO || d.h_nric || '-'} / ${d.HIRER_OLD_IC_NO || '-'}</span></p>
+                    <p><span class="lbl">TEL:</span> <span class="val">${d.HIRER_TEL_NO || d.h_tel || '-'}</span></p>
+                    <p><span class="lbl">EMAIL:</span> <span class="val">${d.HIRER_EMAIL || '-'}</span></p>
+                    <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.HIRER_ADDR1 || d.h_add1, d.HIRER_ADDR2 || d.h_add2, d.HIRER_ADDR3 || d.h_add3, d.HIRER_POST_CD].filter(Boolean).join(', ')}</span></p>
+                </div>
+
+                <div class="details-box" data-watermark="${wText}">
+                    <h4>HIRER COMPANY</h4>
+                    <p><span class="lbl">COMPANY:</span> <span class="val">${d.HIRER_CO_NAME || d.hc_name || '-'}</span></p>
+                    <p><span class="lbl">OCCUPATION:</span> <span class="val">${d.HIRER_OCC_CD || '-'}</span></p>
+                    <p><span class="lbl">TEL (OFF):</span> <span class="val">${d.HIRER_CO_TEL || d.hc_tel || '-'}</span></p>
+                    <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.HIRER_CO_ADDR1 || d.hc_add1, d.HIRER_CO_ADDR2 || d.hc_add2, d.HIRER_CO_ADDR3, d.HIRER_CO_POST_CD].filter(Boolean).join(', ')}</span></p>
+                </div>
+
+                <div class="details-box" data-watermark="${wText}">
+                    <h4>SPOUSE INFO</h4>
+                    <p><span class="lbl">NAME:</span> <span class="val">${d.SPOUSE_NAME || d.s_name || '-'}</span></p>
+                    <p><span class="lbl">NRIC:</span> <span class="val">${d.SPOUSE_NEW_IC_NO || d.s_nric || '-'} / ${d.SPOUSE_OLD_IC_NO || '-'}</span></p>
+                    <p><span class="lbl">TEL:</span> <span class="val">${d.SPOUSE_TEL_NO || d.s_tel || '-'}</span></p>
+                    <p><span class="lbl">OCCUPATION:</span> <span class="val">${d.SPOUSE_OCC_CD || '-'}</span></p>
+                    <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.SPOUSE_ADDR1, d.SPOUSE_ADDR2, d.SPOUSE_ADDR3, d.SPOUSE_POST_CD].filter(Boolean).join(', ')}</span></p>
+                </div>
+
+                <div class="details-box" data-watermark="${wText}">
+                    <h4>GUARANTOR INFO</h4>
+                    <p><span class="lbl">NAME:</span> <span class="val">${d.GUAR_NAME || d.g_name || '-'}</span></p>
+                    <p><span class="lbl">NRIC:</span> <span class="val">${d.GUAR_NEW_IC_NO || d.g_nric || '-'} / ${d.GUAR_OLD_IC_NO || '-'}</span></p>
+                    <p><span class="lbl">TEL:</span> <span class="val">${d.GUAR_TEL_NO || d.g_tel || '-'}</span></p>
+                    <p><span class="lbl">OCCUPATION:</span> <span class="val">${d.GUAR_OCC_CD || '-'}</span></p>
+                    <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.GUAR_ADDR1 || d.g_add1, d.GUAR_ADDR2 || d.g_add2, d.GUAR_ADDR3, d.GUAR_POST_CD].filter(Boolean).join(', ')}</span></p>
+                </div>
+
+                <div class="details-box" data-watermark="${wText}">
+                    <h4>REFEREE 1 INFO</h4>
+                    <p><span class="lbl">NAME:</span> <span class="val">${d.REFEREE1_NAME || '-'}</span></p>
+                    <p><span class="lbl">RELATION:</span> <span class="val">${d.RELATIONSHIP_WITH_HIRER_1 || '-'}</span></p>
+                    <p><span class="lbl">H/P NO:</span> <span class="val">${d.REFEREE1_TEL || '-'}</span></p>
+                    <p><span class="lbl">HSE NO:</span> <span class="val">${d.REF_HSE_PHONE_NO_1 || '-'}</span></p>
+                    <p><span class="lbl">OFF NO:</span> <span class="val">${d.REF_OFF_PHONE_NO_1 || '-'}</span></p>
+                    <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.REF_ADDRESS1_1, d.REF_ADDRESS2_1, d.REF_ADDRESS3_1, d.REF_POST_CD_1].filter(Boolean).join(', ')}</span></p>
+                </div>
+
+                <div class="details-box" data-watermark="${wText}">
+                    <h4>REFEREE 2 INFO</h4>
+                    <p><span class="lbl">NAME:</span> <span class="val">${d.REFEREE2_NAME || '-'}</span></p>
+                    <p><span class="lbl">RELATION:</span> <span class="val">${d.RELATIONSHIP_WITH_HIRER_2 || '-'}</span></p>
+                    <p><span class="lbl">H/P NO:</span> <span class="val">${d.REFEREE2_TEL || '-'}</span></p>
+                    <p><span class="lbl">HSE NO:</span> <span class="val">${d.REF_HSE_PHONE_NO_2 || '-'}</span></p>
+                    <p><span class="lbl">OFF NO:</span> <span class="val">${d.REF_OFF_PHONE_NO_2 || '-'}</span></p>
+                    <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.REF_ADDRESS1_2, d.REF_ADDRESS2_2, d.REF_ADDRESS3_2, d.REF_POST_CD_2].filter(Boolean).join(', ')}</span></p>
+                </div>
+            `;
     
             const historyBox = document.querySelector('.history-box');
             historyBox.innerHTML = '<div style="text-align:center; padding:10px;">Loading history trail...</div>';
