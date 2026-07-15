@@ -3195,53 +3195,66 @@ let wText = (line1 + line2).repeat(50);
             document.getElementById('modal-details-container').innerHTML = `
                 <div class="details-box" style="grid-column: 1 / -1;" data-watermark="${wText}">
                     <h4>ACCOUNT BALANCE INFO</h4>
+                    
+                    <!-- KUMPULAN 1: INFO AKAUN -->
                     <div class="info-grid-2col">
                         <p><span class="lbl">ACCT NO:</span> <span class="val">${accountInfo.acct || '-'}</span></p>
-                        <p><span class="lbl">PLATE NO:</span> <span class="val">${d.PLATE_NO || d.plate || '-'}</span></p>
-                        
-                        <p><span class="lbl">BALANCE:</span> <span class="val">RM ${d.BALANCE || d.bal || '0.00'}</span></p>
-                        
-                        <p><span class="lbl">ARR AMT:</span> <span class="val" style="color: ${parseFloat(d.ARR_AMT) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700; position: relative; display: inline-block;">RM ${d.ARR_AMT ? parseFloat(d.ARR_AMT).toFixed(2) : '0.00'}
-                            <span style="position: absolute; left: 0; bottom: -6px; font-size: 5px; color: rgba(30, 41, 59, 0.02); font-weight: 900; white-space: nowrap; pointer-events: none; user-select: none;">
-                                ${currentUser.username.toUpperCase()}-${todayDate}-${accountInfo.acct}
-                            </span>
-                        </span></p>
-                        
+                        <p><span class="lbl">ACCT TYPE:</span> <span class="val">${accountInfo.type || '-'}</span></p>
+
+                        <p><span class="lbl">LOC CD:</span> <span class="val">${accountInfo.loc || '-'}</span></p>
+                        <p><span class="lbl">PACK CD:</span> <span class="val">${d.PACK_CD || '-'}</span></p>
+
+                        <p><span class="lbl">SA CD:</span> <span class="val">${d.SA_CD || '-'}</span></p>
+                        <p></p>
+
+                        <p><span class="lbl">SALES DT:</span> <span class="val">${d.SALES_REP_DT || '-'}</span></p>
+                        <p><span class="lbl">MATURE DT:</span> <span class="val">${d.HP_MATURE_DT || '-'}</span></p>
+
+                        <p><span class="lbl">CO IND:</span> <span class="val">${d.CO_IND || '-'}</span></p>
+                        <p><span class="lbl">CONT. LEN:</span> <span class="val">${d.CONTRACT_LEN || '-'}</span></p>
+                    </div>
+                    
+                    <div style="height: 18px;"></div> <!-- Ruang Pemisah -->
+
+                    <!-- KUMPULAN 2: INFO KEWANGAN -->
+                    <div class="info-grid-2col">
+                        <p><span class="lbl">CASH PRICE:</span> <span class="val">RM ${d.CASH_PRICE || '0.00'}</span></p>
+                        <p><span class="lbl">EP PRICE:</span> <span class="val">RM ${d.EP_PRICE || '0.00'}</span></p>
+
                         <p><span class="lbl">MTH INST:</span> <span class="val">RM ${d.MTH_INST_AMT || '0.00'}</span></p>
-                        
+                        <p><span class="lbl">BALANCE:</span> <span class="val">RM ${d.BALANCE || d.bal || '0.00'}</span></p>
+
+                        <p><span class="lbl">V DELQ:</span> <span class="val">${accountInfo.delq || '-'}</span></p>
+                        <p><span class="lbl">LATE BAL:</span> <span class="val" style="color: var(--error-red);">RM ${d.LATE_BAL || d.odp || '0.00'}</span></p>
+
                         <p><span class="lbl">ARR MTH:</span> <span class="val" style="color: ${parseFloat(accountInfo.arrs_mth) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700; position: relative; display: inline-block;">${accountInfo.arrs_mth || '-'}
                             <span style="position: absolute; left: 0; bottom: -6px; font-size: 5px; color: rgba(30, 41, 59, 0.02); font-weight: 900; white-space: nowrap; pointer-events: none; user-select: none;">
                                 ${currentUser.username.toUpperCase()}-${todayDate}-${accountInfo.acct}
                             </span>
                         </span></p>
-
-                        <p><span class="lbl">LATE BAL:</span> <span class="val" style="color: var(--error-red);">RM ${d.LATE_BAL || d.odp || '0.00'}</span></p>
                         <p><span class="lbl">ADCH BAL:</span> <span class="val" style="color: var(--error-red);">RM ${d.ADCH_BAL || d.adch || '0.00'}</span></p>
 
-                        <p><span class="lbl">CASH PRICE:</span> <span class="val">RM ${d.CASH_PRICE || '0.00'}</span></p>
-                        <p><span class="lbl">EP PRICE:</span> <span class="val">RM ${d.EP_PRICE || '0.00'}</span></p>
+                        <p><span class="lbl">ARR AMT:</span> <span class="val" style="color: ${parseFloat(d.ARR_AMT) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700; position: relative; display: inline-block;">RM ${d.ARR_AMT ? parseFloat(d.ARR_AMT).toFixed(2) : '0.00'}
+                            <span style="position: absolute; left: 0; bottom: -6px; font-size: 5px; color: rgba(30, 41, 59, 0.02); font-weight: 900; white-space: nowrap; pointer-events: none; user-select: none;">
+                                ${currentUser.username.toUpperCase()}-${todayDate}-${accountInfo.acct}
+                            </span>
+                        </span></p>
+                        <p><span class="lbl">OSB:</span> <span class="val">RM ${Number(accountInfo.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></p>
+                    </div>
 
-                        <p><span class="lbl">V DELQ:</span> <span class="val">${accountInfo.delq || '-'}</span></p>
-                        <p><span class="lbl">CONT. LEN:</span> <span class="val">${d.CONTRACT_LEN || '-'}</span></p>
-                        
-                        <p><span class="lbl">REGION:</span> <span class="val">${accountInfo.region || '-'}</span></p>
-                        <p><span class="lbl">LOC CD:</span> <span class="val">${accountInfo.loc || '-'}</span></p>
+                    <div style="height: 18px;"></div> <!-- Ruang Pemisah -->
 
-                        <p><span class="lbl">ACCT TYPE:</span> <span class="val">${accountInfo.type || '-'}</span></p>
-                        <p><span class="lbl">SA CD:</span> <span class="val">${d.SA_CD || '-'}</span></p>
-
-                        <p><span class="lbl">PACK CD:</span> <span class="val">${d.PACK_CD || '-'}</span></p>
-                        <p><span class="lbl">FREEZE STAT:</span> <span class="val">${d.FREEZE_STAT || '-'}</span></p>
-
-                        <p><span class="lbl">SALES DT:</span> <span class="val">${d.SALES_REP_DT || '-'}</span></p>
-                        <p><span class="lbl">MATURE DT:</span> <span class="val">${d.HP_MATURE_DT || '-'}</span></p>
-
-                        <p><span class="lbl">COMM CAT:</span> <span class="val">${d.COLL_COMM_CAT || '-'}</span></p>
-                        <p><span class="lbl">CO IND:</span> <span class="val">${d.CO_IND || '-'}</span></p>
+                    <!-- KUMPULAN 3: INFO KENDERAAN & LAIN-LAIN -->
+                    <div class="info-grid-2col">
+                        <p style="grid-column: 1 / -1;"><span class="lbl">PRODUCT:</span> <span class="val" style="color: var(--accent-gold);">${d.PROD_SALES_CD || ''} ${d.PROD_SALES_DESC || d.prod || '-'}</span></p>
+                        <p style="grid-column: 1 / -1;"><span class="lbl">PLATE NO:</span> <span class="val">${d.PLATE_NO || d.plate || '-'}</span></p>
                     </div>
                     
-                    <div style="margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
-                        <p><span class="lbl">PRODUCT:</span> <span class="val" style="color: var(--accent-gold);">${d.PROD_SALES_CD || ''} ${d.PROD_SALES_DESC || d.prod || '-'}</span></p>
+                    <div style="margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 8px;" class="info-grid-2col">
+                        <p><span class="lbl">REGION:</span> <span class="val">${accountInfo.region || '-'}</span></p>
+                        <p><span class="lbl">FREEZE STAT:</span> <span class="val">${d.FREEZE_STAT || '-'}</span></p>
+                        <p><span class="lbl">COMM CAT:</span> <span class="val">${d.COLL_COMM_CAT || '-'}</span></p>
+                        <p></p>
                     </div>
                 </div>
 
