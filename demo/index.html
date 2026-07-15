@@ -719,7 +719,7 @@ th {
             width: 160%; height: 160%;
             font-family: inherit;
             font-size: 8px; font-weight: 900;
-            color: rgba(30, 41, 59, 0.06); 
+            color: rgba(30, 41, 59, 0.07); 
             white-space: normal; word-break: break-all;
             line-height: 2.2; letter-spacing: 1px;
             padding: 10px; box-sizing: border-box;
@@ -3179,7 +3179,7 @@ window.openModal = async function(accNo) {
             let todayDate = new Date().toLocaleDateString('en-GB');
             let displayArrMth = accountInfo.arrs_mth ? Math.abs(parseFloat(accountInfo.arrs_mth)) : '-';
             let singleLine = `INTERNAL DATA-VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
-            let wText = `${singleLine.repeat(3)}\n`.repeat(25);
+            let wText = `${singleLine.repeat(8)}\n`.repeat(100);
 
 document.getElementById('modal-details-container').innerHTML = `
                 <div class="details-box" style="grid-column: 1 / -1;" data-watermark="${wText}">
