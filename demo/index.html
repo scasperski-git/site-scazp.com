@@ -712,7 +712,6 @@ th {
             overflow: hidden;
             box-shadow: var(--shadow-sm);
         }
-/* GANTIKAN KOD LAMA DENGAN INI */
 .watermark-bg {
     position: absolute;
     top: -50%; left: -20%;  /* Dilebarkan ke -50% supaya tak lompong bila senget */
@@ -3178,14 +3177,29 @@ window.openModal = async function(accNo) {
             let d = accountInfo.details || {};
             let todayDate = new Date().toLocaleDateString('en-GB');
             let displayArrMth = accountInfo.arrs_mth ? Math.abs(parseFloat(accountInfo.arrs_mth)) : '-';
-let baseText = `INTERNAL DATA-VIEWED BY:${currentUser.username.toUpperCase()} - ${todayDate}    `;
-let line1 = baseText.repeat(8) + "\n";
-let line2 = "                  " + baseText.repeat(8) + "\n"; 
-let wText = (line1 + line2).repeat(100);
 
-document.getElementById('modal-details-container').innerHTML = `
+            // 1. Bina teks watermark
+            let wmText = `INTERNAL DATA-VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}`;
+
+            // 2. Lukis SVG dengan susunan zig-zag (senget -15 darjah)
+            let svgWatermark = `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="150">
+                <text x="20" y="60" font-family="Arial, sans-serif" font-size="12" font-weight="900" fill="rgba(30, 41, 59, 0.06)" transform="rotate(-15 20 60)">${wmText}</text>
+                <text x="220" y="130" font-family="Arial, sans-serif" font-size="12" font-weight="900" fill="rgba(30, 41, 59, 0.06)" transform="rotate(-15 220 130)">${wmText}</text>
+            </svg>`;
+
+            // 3. Tukar SVG kepada format gambar URL
+            let bgUrl = `data:image/svg+xml,${encodeURIComponent(svgWatermark)}`;
+
+            document.getElementById('modal-details-container').innerHTML = `
+                <style>
+                    .details-box {
+                        background-image: url('${bgUrl}');
+                        background-repeat: repeat;
+                        background-position: top left;
+                    }
+                </style>
+
                 <div class="details-box" style="grid-column: 1 / -1;">
-    <div class="watermark-bg">${wText}</div>
                     <h4>ACCOUNT BALANCE INFO</h4>
                     <div class="info-grid-2col">
                         <p><span class="lbl">ACCT NO:</span> <span class="val">${accountInfo.acct || '-'}</span></p>
@@ -3228,7 +3242,6 @@ document.getElementById('modal-details-container').innerHTML = `
                 </div>
 
                 <div class="details-box">
-    <div class="watermark-bg">${wText}</div>
                     <h4>HIRER INFO</h4>
                     <p><span class="lbl">NAME:</span> <span class="val">${d.HIRER_NAME || d.h_name || '-'}</span></p>
                     <p><span class="lbl">NRIC:</span> <span class="val">${d.HIRER_NEW_IC_NO || d.h_nric || '-'} / ${d.HIRER_OLD_IC_NO || '-'}</span></p>
@@ -3238,7 +3251,6 @@ document.getElementById('modal-details-container').innerHTML = `
                 </div>
 
                 <div class="details-box">
-    <div class="watermark-bg">${wText}</div>
                     <h4>HIRER COMPANY</h4>
                     <p><span class="lbl">COMPANY:</span> <span class="val">${d.HIRER_CO_NAME || d.hc_name || '-'}</span></p>
                     <p><span class="lbl">OCCUPATION:</span> <span class="val">${d.HIRER_OCC_CD || '-'}</span></p>
@@ -3247,7 +3259,6 @@ document.getElementById('modal-details-container').innerHTML = `
                 </div>
 
                 <div class="details-box">
-    <div class="watermark-bg">${wText}</div>
                     <h4>SPOUSE INFO</h4>
                     <p><span class="lbl">NAME:</span> <span class="val">${d.SPOUSE_NAME || d.s_name || '-'}</span></p>
                     <p><span class="lbl">NRIC:</span> <span class="val">${d.SPOUSE_NEW_IC_NO || d.s_nric || '-'} / ${d.SPOUSE_OLD_IC_NO || '-'}</span></p>
@@ -3257,7 +3268,6 @@ document.getElementById('modal-details-container').innerHTML = `
                 </div>
 
                 <div class="details-box">
-    <div class="watermark-bg">${wText}</div>
                     <h4>GUARANTOR INFO</h4>
                     <p><span class="lbl">NAME:</span> <span class="val">${d.GUAR_NAME || d.g_name || '-'}</span></p>
                     <p><span class="lbl">NRIC:</span> <span class="val">${d.GUAR_NEW_IC_NO || d.g_nric || '-'} / ${d.GUAR_OLD_IC_NO || '-'}</span></p>
@@ -3267,7 +3277,6 @@ document.getElementById('modal-details-container').innerHTML = `
                 </div>
 
                 <div class="details-box">
-    <div class="watermark-bg">${wText}</div>
                     <h4>REFEREE 1 INFO</h4>
                     <p><span class="lbl">NAME:</span> <span class="val">${d.REFEREE1_NAME || '-'}</span></p>
                     <p><span class="lbl">RELATION:</span> <span class="val">${d.RELATIONSHIP_WITH_HIRER_1 || '-'}</span></p>
@@ -3278,7 +3287,6 @@ document.getElementById('modal-details-container').innerHTML = `
                 </div>
 
                 <div class="details-box">
-    <div class="watermark-bg">${wText}</div>
                     <h4>REFEREE 2 INFO</h4>
                     <p><span class="lbl">NAME:</span> <span class="val">${d.REFEREE2_NAME || '-'}</span></p>
                     <p><span class="lbl">RELATION:</span> <span class="val">${d.RELATIONSHIP_WITH_HIRER_2 || '-'}</span></p>
@@ -3288,7 +3296,7 @@ document.getElementById('modal-details-container').innerHTML = `
                     <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.REF_ADDRESS1_2, d.REF_ADDRESS2_2, d.REF_ADDRESS3_2, d.REF_POST_CD_2].filter(Boolean).join(', ')}</span></p>
                 </div>
             `;
-
+    
             const historyBox = document.querySelector('.history-box');
             historyBox.innerHTML = '<div style="text-align:center; padding:10px;">Loading history trail...</div>';
             
