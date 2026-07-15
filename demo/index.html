@@ -702,16 +702,18 @@ th {
             grid-template-columns: repeat(3, 1fr); 
             gap: 15px;
         }
-        .details-box { 
-            background-color: #ffffff !important;
-            padding: 15px; 
-            border-radius: var(--radius-lg); 
-            border: 1px solid var(--border-color); 
-            position: relative; 
-            z-index: 1; 
-            overflow: hidden;
-            box-shadow: var(--shadow-sm);
-        }
+    
+.details-box { 
+    background-color: #ffffff !important;
+    padding: 15px; 
+    border-radius: var(--radius-lg); 
+    border: 1px solid var(--border-color); 
+    position: relative; 
+    z-index: 1; 
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+    
 .watermark-bg {
     position: absolute;
     top: -50%; left: -20%;  /* Dilebarkan ke -50% supaya tak lompong bila senget */
@@ -3178,28 +3180,12 @@ window.openModal = async function(accNo) {
             let todayDate = new Date().toLocaleDateString('en-GB');
             let displayArrMth = accountInfo.arrs_mth ? Math.abs(parseFloat(accountInfo.arrs_mth)) : '-';
 
-            // 1. Bina teks watermark
-            let wmText = `INTERNAL DATA-VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}`;
-
-            // 2. Lukis SVG dengan susunan zig-zag (senget -15 darjah)
-            let svgWatermark = `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="150">
-                <text x="20" y="60" font-family="Arial, sans-serif" font-size="12" font-weight="900" fill="rgba(30, 41, 59, 0.06)" transform="rotate(-15 20 60)">${wmText}</text>
-                <text x="220" y="130" font-family="Arial, sans-serif" font-size="12" font-weight="900" fill="rgba(30, 41, 59, 0.06)" transform="rotate(-15 220 130)">${wmText}</text>
-            </svg>`;
-
-            // 3. Tukar SVG kepada format gambar URL
-            let bgUrl = `data:image/svg+xml,${encodeURIComponent(svgWatermark)}`;
+            // --- KEMBALI KEPADA KOD ASAL SEPENUHNYA ---
+            let singleLine = `INTERNAL DATA-VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
+            let wText = `${singleLine.repeat(5)}\n`.repeat(40); // Saya lebihkan sikit repeat ke 40 supaya cover kotak bawah
 
             document.getElementById('modal-details-container').innerHTML = `
-                <style>
-                    .details-box {
-                        background-image: url('${bgUrl}');
-                        background-repeat: repeat;
-                        background-position: top left;
-                    }
-                </style>
-
-                <div class="details-box" style="grid-column: 1 / -1;">
+                <div class="details-box" style="grid-column: 1 / -1;" data-watermark="${wText}">
                     <h4>ACCOUNT BALANCE INFO</h4>
                     <div class="info-grid-2col">
                         <p><span class="lbl">ACCT NO:</span> <span class="val">${accountInfo.acct || '-'}</span></p>
@@ -3241,7 +3227,7 @@ window.openModal = async function(accNo) {
                     </div>
                 </div>
 
-                <div class="details-box">
+                <div class="details-box" data-watermark="${wText}">
                     <h4>HIRER INFO</h4>
                     <p><span class="lbl">NAME:</span> <span class="val">${d.HIRER_NAME || d.h_name || '-'}</span></p>
                     <p><span class="lbl">NRIC:</span> <span class="val">${d.HIRER_NEW_IC_NO || d.h_nric || '-'} / ${d.HIRER_OLD_IC_NO || '-'}</span></p>
@@ -3250,7 +3236,7 @@ window.openModal = async function(accNo) {
                     <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.HIRER_ADDR1 || d.h_add1, d.HIRER_ADDR2 || d.h_add2, d.HIRER_ADDR3 || d.h_add3, d.HIRER_POST_CD].filter(Boolean).join(', ')}</span></p>
                 </div>
 
-                <div class="details-box">
+                <div class="details-box" data-watermark="${wText}">
                     <h4>HIRER COMPANY</h4>
                     <p><span class="lbl">COMPANY:</span> <span class="val">${d.HIRER_CO_NAME || d.hc_name || '-'}</span></p>
                     <p><span class="lbl">OCCUPATION:</span> <span class="val">${d.HIRER_OCC_CD || '-'}</span></p>
@@ -3258,7 +3244,7 @@ window.openModal = async function(accNo) {
                     <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.HIRER_CO_ADDR1 || d.hc_add1, d.HIRER_CO_ADDR2 || d.hc_add2, d.HIRER_CO_ADDR3, d.HIRER_CO_POST_CD].filter(Boolean).join(', ')}</span></p>
                 </div>
 
-                <div class="details-box">
+                <div class="details-box" data-watermark="${wText}">
                     <h4>SPOUSE INFO</h4>
                     <p><span class="lbl">NAME:</span> <span class="val">${d.SPOUSE_NAME || d.s_name || '-'}</span></p>
                     <p><span class="lbl">NRIC:</span> <span class="val">${d.SPOUSE_NEW_IC_NO || d.s_nric || '-'} / ${d.SPOUSE_OLD_IC_NO || '-'}</span></p>
@@ -3267,7 +3253,7 @@ window.openModal = async function(accNo) {
                     <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.SPOUSE_ADDR1, d.SPOUSE_ADDR2, d.SPOUSE_ADDR3, d.SPOUSE_POST_CD].filter(Boolean).join(', ')}</span></p>
                 </div>
 
-                <div class="details-box">
+                <div class="details-box" data-watermark="${wText}">
                     <h4>GUARANTOR INFO</h4>
                     <p><span class="lbl">NAME:</span> <span class="val">${d.GUAR_NAME || d.g_name || '-'}</span></p>
                     <p><span class="lbl">NRIC:</span> <span class="val">${d.GUAR_NEW_IC_NO || d.g_nric || '-'} / ${d.GUAR_OLD_IC_NO || '-'}</span></p>
@@ -3276,7 +3262,7 @@ window.openModal = async function(accNo) {
                     <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.GUAR_ADDR1 || d.g_add1, d.GUAR_ADDR2 || d.g_add2, d.GUAR_ADDR3, d.GUAR_POST_CD].filter(Boolean).join(', ')}</span></p>
                 </div>
 
-                <div class="details-box">
+                <div class="details-box" data-watermark="${wText}">
                     <h4>REFEREE 1 INFO</h4>
                     <p><span class="lbl">NAME:</span> <span class="val">${d.REFEREE1_NAME || '-'}</span></p>
                     <p><span class="lbl">RELATION:</span> <span class="val">${d.RELATIONSHIP_WITH_HIRER_1 || '-'}</span></p>
@@ -3286,7 +3272,7 @@ window.openModal = async function(accNo) {
                     <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.REF_ADDRESS1_1, d.REF_ADDRESS2_1, d.REF_ADDRESS3_1, d.REF_POST_CD_1].filter(Boolean).join(', ')}</span></p>
                 </div>
 
-                <div class="details-box">
+                <div class="details-box" data-watermark="${wText}">
                     <h4>REFEREE 2 INFO</h4>
                     <p><span class="lbl">NAME:</span> <span class="val">${d.REFEREE2_NAME || '-'}</span></p>
                     <p><span class="lbl">RELATION:</span> <span class="val">${d.RELATIONSHIP_WITH_HIRER_2 || '-'}</span></p>
