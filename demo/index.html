@@ -1473,9 +1473,9 @@ th {
                             </div>
                         </div>
                         
-<textarea id="single-remark-box" class="form-control" rows="4" 
-          placeholder="Taip nota pemerhatian di sini... (Maksimum 200 huruf)"
-          style="font-size: 12px; resize: none; line-height: 1.6;"></textarea>
+                        <textarea id="single-remark-box" class="form-control" rows="4" 
+                                  placeholder="Taip nota pemerhatian di sini... (Maksimum 200 huruf)"
+                                  style="font-size: 12px; resize: none; line-height: 1.6;"></textarea>
                     </div>
 
                     <div style="display: flex; gap: 12px;">
@@ -3398,22 +3398,23 @@ let wText = (line1 + line2).repeat(50);
             document.getElementById('textarea-info').innerText = `Jumlah Karakter: 0/200`;
         };
 
-        window.saveFinding = async function() {
-            let selectedStatus = document.getElementById('finding-status-select').value;
-            let accNo = document.getElementById('modalAccNo').innerText;
-            let fullStory = document.getElementById('single-remark-box').value.trim();
-            let fullStory = document.getElementById('single-remark-box').value.trim().toUpperCase();
-            
-            if(!selectedStatus) {
-                alert("Sila PILIH ACTION STATUS sedia ada terlebih dahulu!");
-                document.getElementById('finding-status-select').focus();
-                return;
-            }
+window.saveFinding = async function() {
+    let selectedStatus = document.getElementById('finding-status-select').value;
+    let accNo = document.getElementById('modalAccNo').innerText;
+    
+    // TUKAR DI SINI: Tukar kepada huruf besar SELEPAS user tekan COMMIT ENTRY
+    let fullStory = document.getElementById('single-remark-box').value.trim().toUpperCase();
+    
+    if(!selectedStatus) {
+        alert("Sila PILIH ACTION STATUS sedia ada terlebih dahulu!");
+        document.getElementById('finding-status-select').focus();
+        return;
+    }
 
-if(!fullStory) { 
-                alert("Sila isi nota pemeriksaan terlebih dahulu."); 
-                return; 
-            }
+    if(!fullStory) { 
+        alert("Sila isi nota pemeriksaan terlebih dahulu."); 
+        return; 
+    }
 
             // [FASA 5 PINTAR]: Pecah cerita panjang kepada chunk 50 karakter tanpa putuskan perkataan
             let words = fullStory.split(' ');
