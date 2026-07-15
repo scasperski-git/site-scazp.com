@@ -3200,10 +3200,29 @@ let wText = (line1 + line2).repeat(50);
                         <p><span class="lbl">PLATE NO:</span> <span class="val">${d.PLATE_NO || d.plate || '-'}</span></p>
                         
                         <p><span class="lbl">BALANCE:</span> <span class="val">RM ${d.BALANCE || d.bal || '0.00'}</span></p>
-                        <p><span class="lbl">ARR AMT:</span> <span class="val" style="color: ${parseFloat(d.ARR_AMT) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700;">RM ${d.ARR_AMT ? parseFloat(d.ARR_AMT).toFixed(2) : '0.00'}</span></p>
-                        
-                        <p><span class="lbl">MTH INST:</span> <span class="val">RM ${d.MTH_INST_AMT || '0.00'}</span></p>
-                        <p><span class="lbl">ARR MTH:</span> <span class="val" style="color: ${parseFloat(accountInfo.arrs_mth) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700;">${accountInfo.arrs_mth || '-'}</span></p>
+                        // 1. GANTIKAN BARIS PAPARAN ARR AMT DENGAN INI:
+<p>
+    <span class="lbl">ARR AMT:</span> 
+    <span class="val" style="color: ${parseFloat(d.ARR_AMT) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700; position: relative; display: inline-block;">
+        RM ${d.ARR_AMT ? parseFloat(d.ARR_AMT).toFixed(2) : '0.00'}
+        <span style="position: absolute; left: 0; bottom: -6px; font-size: 5px; color: rgba(30, 41, 59, 0.02); font-weight: 900; white-space: nowrap; pointer-events: none; user-select: none;">
+            ${currentUser.username.toUpperCase()}-${todayDate}-${accountInfo.acct}
+        </span>
+    </span>
+</p>
+
+<p><span class="lbl">MTH INST:</span> <span class="val">RM ${d.MTH_INST_AMT || '0.00'}</span></p>
+
+// 2. GANTIKAN BARIS PAPARAN ARR MTH DENGAN INI:
+<p>
+    <span class="lbl">ARR MTH:</span> 
+    <span class="val" style="color: ${parseFloat(accountInfo.arrs_mth) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700; position: relative; display: inline-block;">
+        ${accountInfo.arrs_mth || '-'}
+        <span style="position: absolute; left: 0; bottom: -6px; font-size: 5px; color: rgba(30, 41, 59, 0.02); font-weight: 900; white-space: nowrap; pointer-events: none; user-select: none;">
+            ${currentUser.username.toUpperCase()}-${todayDate}-${accountInfo.acct}
+        </span>
+    </span>
+</p>
 
                         <p><span class="lbl">LATE BAL:</span> <span class="val" style="color: var(--error-red);">RM ${d.LATE_BAL || d.odp || '0.00'}</span></p>
                         <p><span class="lbl">ADCH BAL:</span> <span class="val" style="color: var(--error-red);">RM ${d.ADCH_BAL || d.adch || '0.00'}</span></p>
