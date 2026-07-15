@@ -3194,7 +3194,7 @@ let wText = (line1 + line2).repeat(50);
 
             document.getElementById('modal-details-container').innerHTML = `
                 <div class="details-box" style="grid-column: 1 / -1;" data-watermark="${wText}">
-                    <h4>ACCOUNT BALANCE INFO</h4>
+                    <h4>ACCOUNT INFO & BALANCE</h4>
                     
                     <!-- KUMPULAN 1: INFO AKAUN -->
                     <div class="info-grid-2col">
@@ -3242,22 +3242,13 @@ let wText = (line1 + line2).repeat(50);
                         <p><span class="lbl">OSB:</span> <span class="val">RM ${Number(accountInfo.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></p>
                     </div>
 
-                    <div style="height: 18px;"></div> <!-- Ruang Pemisah -->
-
-                    <!-- KUMPULAN 3: INFO KENDERAAN & LAIN-LAIN -->
-                    <div class="info-grid-2col">
-                        <p style="grid-column: 1 / -1;"><span class="lbl">PRODUCT:</span> <span class="val" style="color: var(--accent-gold);">${d.PROD_SALES_CD || ''} ${d.PROD_SALES_DESC || d.prod || '-'}</span></p>
-                        <p style="grid-column: 1 / -1;"><span class="lbl">PLATE NO:</span> <span class="val">${d.PLATE_NO || d.plate || '-'}</span></p>
-                    </div>
-                    
-                    <div style="margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 8px;" class="info-grid-2col">
-                        <p><span class="lbl">REGION:</span> <span class="val">${accountInfo.region || '-'}</span></p>
-                        <p><span class="lbl">FREEZE STAT:</span> <span class="val">${d.FREEZE_STAT || '-'}</span></p>
-                        <p><span class="lbl">COMM CAT:</span> <span class="val">${d.COLL_COMM_CAT || '-'}</span></p>
-                        <p></p>
+                    <!-- KUMPULAN 3: PRODUK DI BAWAH GARISAN -->
+                    <div style="margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
+                        <p style="margin-bottom: 6px;"><span class="lbl">PRODUCT:</span> <span class="val" style="color: var(--accent-gold);">${d.PROD_SALES_CD || ''} ${d.PROD_SALES_DESC || d.prod || '-'}</span></p>
+                        <p><span class="lbl">PLATE NO:</span> <span class="val">${d.PLATE_NO || d.plate || '-'}</span></p>
                     </div>
                 </div>
-
+                
                 <div class="details-box" data-watermark="${wText}">
                     <h4>HIRER INFO</h4>
                     <p><span class="lbl">NAME:</span> <span class="val">${d.HIRER_NAME || d.h_name || '-'}</span></p>
