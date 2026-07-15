@@ -3200,29 +3200,31 @@ let wText = (line1 + line2).repeat(50);
                         <p><span class="lbl">PLATE NO:</span> <span class="val">${d.PLATE_NO || d.plate || '-'}</span></p>
                         
                         <p><span class="lbl">BALANCE:</span> <span class="val">RM ${d.BALANCE || d.bal || '0.00'}</span></p>
-                        // 1. GANTIKAN BARIS PAPARAN ARR AMT DENGAN INI:
-<p>
-    <span class="lbl">ARR AMT:</span> 
-    <span class="val" style="color: ${parseFloat(d.ARR_AMT) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700; position: relative; display: inline-block;">
-        RM ${d.ARR_AMT ? parseFloat(d.ARR_AMT).toFixed(2) : '0.00'}
-        <span style="position: absolute; left: 0; bottom: -6px; font-size: 5px; color: rgba(30, 41, 59, 0.02); font-weight: 900; white-space: nowrap; pointer-events: none; user-select: none;">
-            ${currentUser.username.toUpperCase()}-${todayDate}-${accountInfo.acct}
-        </span>
-    </span>
-</p>
+                        
+                        <!-- Paparan ARR AMT dengan suntikan Micro-Watermark Halus -->
+                        <p>
+                            <span class="lbl">ARR AMT:</span> 
+                            <span class="val" style="color: ${parseFloat(d.ARR_AMT) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700; position: relative; display: inline-block;">
+                                RM ${d.ARR_AMT ? parseFloat(d.ARR_AMT).toFixed(2) : '0.00'}
+                                <span style="position: absolute; left: 0; bottom: -6px; font-size: 5px; color: rgba(30, 41, 59, 0.02); font-weight: 900; white-space: nowrap; pointer-events: none; user-select: none;">
+                                    ${currentUser.username.toUpperCase()}-${todayDate}-${accountInfo.acct}
+                                </span>
+                            </span>
+                        </p>
+                        
+                        <p><span class="lbl">MTH INST:</span> <span class="val">RM ${d.MTH_INST_AMT || '0.00'}</span></p>
+                        
+                        <!-- Paparan ARR MTH dengan suntikan Micro-Watermark Halus -->
+                        <p>
+                            <span class="lbl">ARR MTH:</span> 
+                            <span class="val" style="color: ${parseFloat(accountInfo.arrs_mth) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700; position: relative; display: inline-block;">
+                                ${accountInfo.arrs_mth || '-'}
+                                <span style="position: absolute; left: 0; bottom: -6px; font-size: 5px; color: rgba(30, 41, 59, 0.02); font-weight: 900; white-space: nowrap; pointer-events: none; user-select: none;">
+                                    ${currentUser.username.toUpperCase()}-${todayDate}-${accountInfo.acct}
+                                </span>
+                            </span>
+                        </p>
 
-<p><span class="lbl">MTH INST:</span> <span class="val">RM ${d.MTH_INST_AMT || '0.00'}</span></p>
-
-// 2. GANTIKAN BARIS PAPARAN ARR MTH DENGAN INI:
-<p>
-    <span class="lbl">ARR MTH:</span> 
-    <span class="val" style="color: ${parseFloat(accountInfo.arrs_mth) > 0 ? 'var(--error-red)' : 'var(--text-main)'}; font-weight: 700; position: relative; display: inline-block;">
-        ${accountInfo.arrs_mth || '-'}
-        <span style="position: absolute; left: 0; bottom: -6px; font-size: 5px; color: rgba(30, 41, 59, 0.02); font-weight: 900; white-space: nowrap; pointer-events: none; user-select: none;">
-            ${currentUser.username.toUpperCase()}-${todayDate}-${accountInfo.acct}
-        </span>
-    </span>
-</p>
                         <p><span class="lbl">LATE BAL:</span> <span class="val" style="color: var(--error-red);">RM ${d.LATE_BAL || d.odp || '0.00'}</span></p>
                         <p><span class="lbl">ADCH BAL:</span> <span class="val" style="color: var(--error-red);">RM ${d.ADCH_BAL || d.adch || '0.00'}</span></p>
 
@@ -3308,6 +3310,62 @@ let wText = (line1 + line2).repeat(50);
                     <p><span class="lbl">ADDRESS:</span> <span class="val">${[d.REF_ADDRESS1_2, d.REF_ADDRESS2_2, d.REF_ADDRESS3_2, d.REF_POST_CD_2].filter(Boolean).join(', ')}</span></p>
                 </div>
             `;
+
+            const historyBox = document.querySelector('.history-box');
+            historyBox.innerHTML = '<div style="text-align:center; padding:10px;">Loading history trail...</div>';
+            
+            const { data: findingsList } = await supabase.from('findings').select('*').eq('acct', accNo).order('updated_at', { ascending: false });
+            historyBox.innerHTML = ''; 
+            if(!findingsList || findingsList.length === 0) {
+                historyBox.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:10px;">No historical findings found.</div>';
+            } else {
+                findingsList.forEach((data) => {
+                    let dateFormatted = 'N/A';
+                    if (data.updated_at) {
+                        dateFormatted = new Date(data.updated_at).toLocaleString('en-GB', {
+                            day: '2-digit', month: '2-digit', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+                        });
+                    }
+                    
+                    let statusBadgeHTML = '';
+                    if (data.remark5 && data.remark5.startsWith('[')) {
+                        let extractedStatus = data.remark5.substring(1, data.remark5.indexOf(']'));
+                        let badgeColor = 'var(--text-muted)';
+                        if (extractedStatus === 'CALL') badgeColor = 'var(--status-call)';
+                        if (extractedStatus === 'UCT') badgeColor = 'var(--status-uct)';
+                        if (extractedStatus === 'PTP') badgeColor = 'var(--status-ptp)';
+                        if (extractedStatus === 'PV') badgeColor = 'var(--status-pv)';
+                        if (extractedStatus === 'PAID') badgeColor = 'var(--status-paid)';
+
+                        statusBadgeHTML = ` | <span style="background-color: ${badgeColor}; color: white; padding: 2px 5px; border-radius: 3px; font-weight: 700; font-size: 8px; display: inline-block; vertical-align: middle; line-height: 1.2;">${extractedStatus}</span>`;
+                    }
+
+                let deleteBtnHTML = '';
+                    if(currentUser.role === 'super') {
+                        deleteBtnHTML = `<button class="btn-delete-finding" onclick="deleteSingleFinding('${data.id}', '${accNo}')">🗑️ DEL</button>`;
+                    }
+
+                    let histRemark = '';
+                    if(data.remark1 || data.remark2 || data.remark3 || data.remark4) {
+                        let combinedStr = [data.remark1, data.remark2, data.remark3, data.remark4].filter(Boolean).join(' ');
+                        histRemark = `<div style="font-size: 11px; line-height: 1.5; margin-top: 8px; color: var(--text-main); font-weight: normal; text-align: justify;">${combinedStr}</div>`;
+                    } else {
+                        histRemark = `<div style="font-size: 11px; line-height: 1.5; margin-top: 8px; color: var(--text-main); font-weight: normal; text-align: justify;">${data.remark || ''}</div>`;
+                    }
+
+                    historyBox.innerHTML += `
+                        <div class="history-item" style="overflow: hidden; padding: 12px; margin-bottom: 12px; background-color: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+                            <div class="history-meta" style="font-weight: 600; font-size: 11px; color: var(--text-muted);">
+                                UPDATE BY: ${data.updated_by ? data.updated_by.toUpperCase() : 'SYSTEM'} | ${dateFormatted}${statusBadgeHTML}
+                                ${deleteBtnHTML}
+                            </div>
+                            ${histRemark}
+                        </div>`;
+                });
+            }
+            setTimeout(() => document.getElementById('single-remark-box').focus(), 100);
+        };
     
             const historyBox = document.querySelector('.history-box');
             historyBox.innerHTML = '<div style="text-align:center; padding:10px;">Loading history trail...</div>';
