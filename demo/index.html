@@ -3178,8 +3178,10 @@ window.openModal = async function(accNo) {
             let d = accountInfo.details || {};
             let todayDate = new Date().toLocaleDateString('en-GB');
             let displayArrMth = accountInfo.arrs_mth ? Math.abs(parseFloat(accountInfo.arrs_mth)) : '-';
-            let singleLine = `INTERNAL DATA-VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
-            let wText = `${singleLine.repeat(8)}\n`.repeat(100);
+let baseText = `INTERNAL DATA-VIEWED BY:${currentUser.username.toUpperCase()} - ${todayDate}    `;
+let line1 = baseText.repeat(8) + "\n";
+let line2 = "                  " + baseText.repeat(8) + "\n"; 
+let wText = (line1 + line2).repeat(50);
 
 document.getElementById('modal-details-container').innerHTML = `
                 <div class="details-box" style="grid-column: 1 / -1;" data-watermark="${wText}">
