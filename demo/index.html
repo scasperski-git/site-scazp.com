@@ -1829,8 +1829,8 @@ async function fetchFullDatabaseData() {
                 const pageSize = 1000;
                 
                 while(true) {
-                    // [ADD ZONE COLUMN TO FETCH]
-                    let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id, collector');
+                    // KOREKSI: Tambah lajur batch_name dan uploaded_by ke dalam select query di bawah
+                    let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id, collector, batch_name, uploaded_by');
                     
                     // [FIX HIERARCHY ACCESS]
                     if (currentUser.role === 'user') {
@@ -3152,7 +3152,7 @@ window.processExcelUpload = async function() {
                 totalProcessed += chunk.length;
             }
 
-            if (!hasError) {
+if (!hasError) {
                 progressBar.style.width = '100%';
                 progressText.innerText = '100%';
                 progressSubtext.innerText = `Completely done! Reloading ledger structure...`;
@@ -3168,8 +3168,11 @@ window.processExcelUpload = async function() {
                     document.getElementById('excel-file-input').value = ''; 
                     alert(`Successfully processed ${totalProcessed.toLocaleString()} accounts.`);
                     
-                    await localforage.removeItem('scazp_cache_all');
-                    localStorage.removeItem('scazp_time_all');
+                    // KOREKSI: Padam mengikut ID khusus yang betul, bukannya '_all'
+                    const cacheKey = `scazp_cache_${currentUser.id}`;
+                    const timeKey = `scazp_time_${currentUser.id}`;
+                    await localforage.removeItem(cacheKey);
+                    localStorage.removeItem(timeKey);
                     
                     await fetchFullDatabaseData(); 
                     resetStatusCardHighlight();
