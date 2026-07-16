@@ -1198,10 +1198,16 @@ th {
                     <label style="color: var(--accent-gold); font-weight: bold;">Assign to ZONE (For Manager)</label>
                     <select id="new-user-zone" class="form-control"></select>
                 </div>
-                <div class="form-group" id="form-area-group" style="display: none;">
-                    <label style="color: var(--status-ptp); font-weight: bold;">Assign to AREA (For Admin)</label>
-                    <select id="new-user-area" class="form-control"></select>
-                </div>
+<div class="form-group" id="form-zone-group" style="display: none;">
+    <label style="color: var(--accent-gold); font-weight: bold;">Assign to ZONE (For Manager)</label>
+    <select id="new-user-zone" class="form-control">
+        <option value="ALL">ALL ZONES</option>
+        <option value="BC">BC</option>
+        <option value="WEST">WEST</option>
+        <option value="EAST">EAST</option>
+        <option value="HO">HO</option>
+    </select>
+</div>
 
                 <button class="btn-submit" onclick="addNewUser()">Save User Configuration</button>
             </div>
@@ -2318,19 +2324,13 @@ window.renderUserTablePage = async function() {
                     });
                     let reportSelect = `<select id="edit-report-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; max-width:110px;">${reportToOptions}</select>`;
 
-                    // Dropdown ZONE dinamik (Untuk Manager)
-                    let zoneOptions = `<option value="ALL" ${!user.assignedzone || user.assignedzone==='ALL'?'selected':''}>ALL ZONES</option>`;
-                    uniqueZones.forEach(z => {
-                        zoneOptions += `<option value="${z}" ${user.assignedzone===z?'selected':''}>${z}</option>`;
-                    });
-                    let zoneSelect = `<select id="edit-zone-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; display: ${rName === 'manager' ? 'inline-block' : 'none'};">${zoneOptions}</select>`;
-                    
-                    // Dropdown AREA dinamik (Untuk Admin)
-                    let areaOptions = `<option value="ALL" ${!user.assignedarea || user.assignedarea==='ALL'?'selected':''}>ALL AREAS</option>`;
-                    uniqueAreas.forEach(a => {
-                        areaOptions += `<option value="${a}" ${user.assignedarea===a?'selected':''}>${a}</option>`;
-                    });
-                    let areaSelect = `<select id="edit-area-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; display: ${rName === 'admin' ? 'inline-block' : 'none'};">${areaOptions}</select>`;
+                    // Dropdown ZONE statik (Untuk Manager)
+let zoneOptions = `<option value="ALL" ${!user.assignedzone || user.assignedzone==='ALL'?'selected':''}>ALL ZONES</option>`;
+const staticZones = ['BC', 'WEST', 'EAST', 'HO'];
+staticZones.forEach(z => {
+    zoneOptions += `<option value="${z}" ${user.assignedzone===z?'selected':''}>${z}</option>`;
+});
+let zoneSelect = `<select id="edit-zone-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; display: ${rName === 'manager' ? 'inline-block' : 'none'};">${zoneOptions}</select>`;
                     
                     // Kapsul fallback jika User/Super
                     let noneText = `<span id="edit-none-${user.id}" style="font-size: 11px; color: var(--text-muted); display: ${(rName === 'user' || rName === 'super') ? 'inline-block' : 'none'};">N/A (Global/PIC)</span>`;
@@ -2381,23 +2381,18 @@ tbody.innerHTML += `
             }
         };
 
-        window.toggleFormRoleSelect = async function() {
-            const role = document.getElementById('new-user-role').value;
-            const reportGroup = document.getElementById('form-report-group');
-            const reportSelect = document.getElementById('new-user-report-to');
-            const zoneGroup = document.getElementById('form-zone-group');
-            const areaGroup = document.getElementById('form-area-group');
-            
-            // Toggle paparan Zone / Area
-            if (role === 'manager') {
-                zoneGroup.style.display = 'block'; areaGroup.style.display = 'none';
-                populateFilterDropdown('new-user-zone', 'zone_name');
-            } else if (role === 'admin') {
-                zoneGroup.style.display = 'none'; areaGroup.style.display = 'block';
-                populateFilterDropdown('new-user-area', 'area_name');
-            } else {
-                zoneGroup.style.display = 'none'; areaGroup.style.display = 'none';
-            }
+window.toggleFormRoleSelect = async function() {
+    const role = document.getElementById('new-user-role').value;
+    const reportGroup = document.getElementById('form-report-group');
+    const reportSelect = document.getElementById('new-user-report-to');
+    const zoneGroup = document.getElementById('form-zone-group');
+
+    // Toggle paparan Zone sahaja
+    if (role === 'manager') {
+        zoneGroup.style.display = 'block';
+    } else {
+        zoneGroup.style.display = 'none';
+    }
             
             if (role === 'super') {
                 reportGroup.style.display = 'none';
@@ -2472,7 +2467,7 @@ window.addNewUser = async function() {
                     pass: pass, 
                     role: role, 
                     assignedzone: finalZone,
-                    assignedarea: finalArea,
+                    assignedarea: null,
                     assignedregion: null, // Boleh dibiarkan null
                     report_to: reportTo || null,
                     status: 'ACTIVE' 
@@ -2535,7 +2530,7 @@ if(error) {
             let newRole = document.getElementById(`edit-role-${userId}`).value;
             let newReportTo = document.getElementById(`edit-report-${userId}`).value;
             let newZone = document.getElementById(`edit-zone-${userId}`).value;
-            let newArea = document.getElementById(`edit-area-${userId}`).value;
+            //let newArea = document.getElementById(`edit-area-${userId}`).value;
 
             if (newReportTo === "") newReportTo = null;
             if (newZone === "ALL") newZone = null;
@@ -2548,7 +2543,7 @@ if(error) {
                 role: newRole, 
                 report_to: newReportTo,
                 assignedzone: newRole === 'manager' ? newZone : null,
-                assignedarea: newRole === 'admin' ? newArea : null
+                assignedarea: null
             }).eq('id', userId);
 
             if (!error) { 
