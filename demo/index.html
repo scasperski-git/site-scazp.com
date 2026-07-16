@@ -1540,6 +1540,18 @@ th {
         </div>
     </div>
 
+    <div class="modal-overlay" id="batchPromptModal" style="z-index: 1100;">
+    <div class="modal-content" style="text-align: center; max-width: 360px;">
+        <h2 style="color: var(--text-main); margin-top: 0; font-size: 20px;">NAMA BATCH EXCEL</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Sila masukkan nama batch rujukan (Cth: KUTIPAN_OGOS_26)</p>
+        <input type="text" id="batchPromptInput" class="form-control" placeholder="Tulis nama batch..." style="text-align: center; margin-bottom: 25px; font-size: 16px; font-weight: bold; text-transform: uppercase;">
+        <div style="display: flex; gap: 12px;">
+            <button class="btn-cancel" style="flex: 1;" id="btnBatchCancel">BATAL</button>
+            <button class="btn-submit" style="flex: 1; background-color: var(--success-green);" id="btnBatchOk">TERUSKAN UPLOAD</button>
+        </div>
+    </div>
+</div>
+    
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
@@ -1662,6 +1674,29 @@ async function checkLoginSession() {
                 };
             });
         };
+
+        window.requestBatchName = function() {
+    return new Promise((resolve) => {
+        document.getElementById('batchPromptInput').value = '';
+        document.getElementById('batchPromptModal').style.display = 'flex';
+        setTimeout(() => document.getElementById('batchPromptInput').focus(), 100);
+
+        document.getElementById('btnBatchOk').onclick = function() {
+            let val = document.getElementById('batchPromptInput').value.trim();
+            document.getElementById('batchPromptModal').style.display = 'none';
+            resolve(val);
+        };
+        
+        document.getElementById('btnBatchCancel').onclick = function() {
+            document.getElementById('batchPromptModal').style.display = 'none';
+            resolve(null);
+        };
+        
+        document.getElementById('batchPromptInput').onkeypress = function(e) {
+            if (e.key === 'Enter') document.getElementById('btnBatchOk').click();
+        };
+    });
+};
 
         window.handleLogin = async function() {
             const user = document.getElementById('username').value.trim();
@@ -2922,7 +2957,7 @@ window.handleExcelFileSelect = function(e) {
 
 window.processExcelUpload = async function() {
     // 1. Dapatkan nama batch dari user
-    let batchInput = await customPrompt("Sila masukkan NAMA BATCH untuk muat naik ini (Cth: KUTIPAN_OGOS):");
+    let batchInput = await requestBatchName();
     if (!batchInput) return; 
 
     // Bersihkan input supaya tiada simbol pelik, dan sambungkan dengan tarikh & masa
