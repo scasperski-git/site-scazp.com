@@ -3258,8 +3258,19 @@ window.renderBatchList = function() {
         return;
     }
 
-    batchKeys.forEach(bName => {
+batchKeys.forEach(bName => {
         let bInfo = batchGroups[bName];
+        
+        let actionButtons = '';
+        if (currentUser.role !== 'admin') {
+            actionButtons = `
+                <button class="btn-update" style="color: var(--status-call); border-color: var(--status-call); margin-right: 5px;" onclick="openTransferBatchModal('${bName}')">🔄 TRANSFER</button>
+                <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteBatch('${bName}')">🗑️ DELETE</button>
+            `;
+        } else {
+            actionButtons = '<span style="font-size: 10px; font-weight: 600; color: var(--text-muted);">VIEW ONLY</span>';
+        }
+
         tbody.innerHTML += `
             <tr>
                 <td style="font-weight: 700; color: var(--text-main);">${bName}</td>
@@ -3267,8 +3278,7 @@ window.renderBatchList = function() {
                 <td>${bInfo.uploaded_by.toUpperCase()}</td>
                 <td>${bInfo.count} Akaun</td>
                 <td style="text-align: right; white-space: nowrap;">
-                    <button class="btn-update" style="color: var(--status-call); border-color: var(--status-call); margin-right: 5px;" onclick="openTransferBatchModal('${bName}')">🔄 TRANSFER</button>
-                    <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteBatch('${bName}')">🗑️ DELETE</button>
+                    ${actionButtons}
                 </td>
             </tr>
         `;
@@ -3861,7 +3871,7 @@ function updateAssignHeaderArrows(activeCol) {
             });
         }
 
-        window.populateAssignSubordinates = function() {
+window.populateAssignSubordinates = function() {
             const dropdown = document.getElementById('assign-target-user');
             if (!dropdown) return;
             
@@ -3884,6 +3894,9 @@ function updateAssignHeaderArrows(activeCol) {
                     return uStatus === 'ACTIVE' && uReportTo === currentUserIdClean;
                 });
             }
+
+            // TAMBAHAN BARU: Pilihan untuk assign ke diri sendiri
+            dropdown.innerHTML += `<option value="${currentUserIdClean}" style="font-weight:bold; color:var(--accent-gold);">⭐ ASSIGN TO MYSELF (${currentUserIdClean.toUpperCase()})</option>`;
 
             subordinates.forEach(u => {
                 dropdown.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
