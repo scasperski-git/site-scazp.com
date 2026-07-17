@@ -1564,6 +1564,23 @@ th {
         </div>
     </div>
 </div>
+
+    <div class="modal-overlay" id="transferBatchModal" style="z-index: 1100;">
+    <div class="modal-content" style="text-align: center; max-width: 400px;">
+        <h2 style="color: var(--text-main); margin-top: 0; font-size: 20px;">TRANSFER BATCH</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Pilih staf penyelia (Admin / PIC) untuk menerima keseluruhan <br>akaun dari batch <b id="transferBatchNameDisplay" style="color: var(--accent-gold);"></b>.</p>
+        
+        <div class="form-group" style="text-align: left; margin-bottom: 25px;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">PILIH PENERIMA:</label>
+            <select id="transferTargetUser" class="form-control" style="font-weight: bold; text-align: center;"></select>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+            <button class="btn-cancel" style="flex: 1;" onclick="document.getElementById('transferBatchModal').style.display='none'">BATAL</button>
+            <button class="btn-submit" style="flex: 1; background-color: var(--status-call);" id="btnConfirmTransfer">TRANSFER SEKARANG</button>
+        </div>
+    </div>
+</div>
     
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
@@ -3243,7 +3260,7 @@ window.renderBatchList = function() {
         return;
     }
 
-    batchKeys.forEach(bName => {
+batchKeys.forEach(bName => {
         let bInfo = batchGroups[bName];
         tbody.innerHTML += `
             <tr>
@@ -3251,7 +3268,9 @@ window.renderBatchList = function() {
                 <td style="font-weight: 600; color: var(--accent-gold);">${bInfo.zone}</td>
                 <td>${bInfo.uploaded_by.toUpperCase()}</td>
                 <td>${bInfo.count} Akaun</td>
-                <td style="text-align: right;">
+                <td style="text-align: right; white-space: nowrap;">
+                    <!-- TAMBAH BUTANG TRANSFER DI SINI -->
+                    <button class="btn-update" style="color: var(--status-call); border-color: var(--status-call); margin-right: 5px;" onclick="openTransferModal('${bName}')">🔄 TRANSFER</button>
                     <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteBatch('${bName}')">🗑️ DELETE</button>
                 </td>
             </tr>
@@ -3297,6 +3316,146 @@ window.deleteBatch = async function(batchName) {
     }
 };
 
+        let activeTransferBatch = null;
+
+window.openTransferModal = function(batchName) {
+    activeTransferBatch = batchName;
+    document.getElementById('transferBatchNameDisplay').innerText = batchName;
+    
+    let dropdown = document.getElementById('transferTargetUser');
+    dropdown.innerHTML = '<option value="">-- PILIH PENERIMA --</option>';
+    
+    let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
+    let subordinates = [];
+
+    // Tapis senarai staf bawahan berdasarkan hierarchy
+    if (currentUser.role === 'super') {
+        subordinates = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.id.toLowerCase() !== currentUserIdClean);
+    } else {
+        subordinates = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.report_to === currentUserIdClean);
+    }
+
+    subordinates.forEach(u => {
+        dropdown.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
+    });
+
+    document.getElementById('transferBatchModal').style.display = 'flex';
+};
+
+document.getElementById('btnConfirmTransfer').onclick = async function() {
+    let targetUser = document.getElementById('transferTargetUser').value;
+    if (!targetUser) { alert("Sila pilih penerima!"); return; }
+
+    let isConfirmed = await customConfirm(`Anda pasti mahu memindahkan semua akaun dalam batch ${activeTransferBatch} kepada ${targetUser.toUpperCase()}?`);
+    if (!isConfirmed) return;
+
+    document.getElementById('transferBatchModal').style.display = 'none';
+    document.getElementById('loadingText').innerText = "Memindahkan batch kepada penerima...";
+    document.getElementById('loadingModal').style.display = 'flex';
+
+    try {
+        let cleanTarget = targetUser.toLowerCase().trim();
+        
+        // Update kolum assignee_id di Supabase mengikut nama batch
+        const { error } = await supabase.from('accounts')
+            .update({ assignee_id: cleanTarget })
+            .eq('batch_name', activeTransferBatch);
+            
+        if (error) throw error;
+
+        // Update cache lokal (supaya UI terus berubah tanpa perlu fetch semula database)
+        globalAccounts.forEach(acc => {
+            if (acc.batch_name === activeTransferBatch) {
+                acc.assignee_id = cleanTarget;
+            }
+        });
+
+        const cacheKey = `scazp_cache_${currentUser.id}`;
+        await localforage.setItem(cacheKey, globalAccounts);
+
+        showNotification("TRANSFER BERJAYA", `Keseluruhan batch <b>${activeTransferBatch}</b> telah berjaya dipindahkan kepada ${cleanTarget.toUpperCase()}.`);
+        
+        // Refresh jadual Assign
+        applyFilterAndRender();
+        renderAssignTable();
+        
+    } catch (err) {
+        showNotification("TRANSFER ERROR", err.message, true);
+    } finally {
+        document.getElementById('loadingModal').style.display = 'none';
+    }
+};
+
+        let activeTransferBatch = null;
+
+window.openTransferModal = function(batchName) {
+    activeTransferBatch = batchName;
+    document.getElementById('transferBatchNameDisplay').innerText = batchName;
+    
+    let dropdown = document.getElementById('transferTargetUser');
+    dropdown.innerHTML = '<option value="">-- PILIH PENERIMA --</option>';
+    
+    let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
+    let subordinates = [];
+
+    // Tapis senarai staf bawahan berdasarkan hierarchy
+    if (currentUser.role === 'super') {
+        subordinates = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.id.toLowerCase() !== currentUserIdClean);
+    } else {
+        subordinates = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.report_to === currentUserIdClean);
+    }
+
+    subordinates.forEach(u => {
+        dropdown.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
+    });
+
+    document.getElementById('transferBatchModal').style.display = 'flex';
+};
+
+document.getElementById('btnConfirmTransfer').onclick = async function() {
+    let targetUser = document.getElementById('transferTargetUser').value;
+    if (!targetUser) { alert("Sila pilih penerima!"); return; }
+
+    let isConfirmed = await customConfirm(`Anda pasti mahu memindahkan semua akaun dalam batch ${activeTransferBatch} kepada ${targetUser.toUpperCase()}?`);
+    if (!isConfirmed) return;
+
+    document.getElementById('transferBatchModal').style.display = 'none';
+    document.getElementById('loadingText').innerText = "Memindahkan batch kepada penerima...";
+    document.getElementById('loadingModal').style.display = 'flex';
+
+    try {
+        let cleanTarget = targetUser.toLowerCase().trim();
+        
+        // Update kolum assignee_id di Supabase mengikut nama batch
+        const { error } = await supabase.from('accounts')
+            .update({ assignee_id: cleanTarget })
+            .eq('batch_name', activeTransferBatch);
+            
+        if (error) throw error;
+
+        // Update cache lokal (supaya UI terus berubah tanpa perlu fetch semula database)
+        globalAccounts.forEach(acc => {
+            if (acc.batch_name === activeTransferBatch) {
+                acc.assignee_id = cleanTarget;
+            }
+        });
+
+        const cacheKey = `scazp_cache_${currentUser.id}`;
+        await localforage.setItem(cacheKey, globalAccounts);
+
+        showNotification("TRANSFER BERJAYA", `Keseluruhan batch <b>${activeTransferBatch}</b> telah berjaya dipindahkan kepada ${cleanTarget.toUpperCase()}.`);
+        
+        // Refresh jadual Assign
+        applyFilterAndRender();
+        renderAssignTable();
+        
+    } catch (err) {
+        showNotification("TRANSFER ERROR", err.message, true);
+    } finally {
+        document.getElementById('loadingModal').style.display = 'none';
+    }
+};
+        
         window.toggleExpand = function(acct) {
             const row = document.getElementById('details-' + acct);
             if (row.style.display === 'none') {
