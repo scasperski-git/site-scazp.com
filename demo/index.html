@@ -3347,30 +3347,29 @@ window.executeBatchTransfer = async function(batchName, targetUser) {
         return;
     }
 
-    // KOREKSI: Tutup popup transfer BUKA popup confirmation
     document.getElementById('batchTransferModal').style.display = 'none';
 
-    let isConfirmed = await customConfirm(`PENGESAHAN:\nAnda pasti mahu memindahkan KESELURUHAN data di dalam batch ${batchName} kepada staf ${targetUser.toUpperCase()}?`);
-    if (!isConfirmed) return; // Kalau batal, proses terhenti di sini
+    let isConfirmed = await customConfirm(`PENGESAHAN:\nAnda pasti mahu memindahkan HAK MILIK KESELURUHAN data di dalam batch ${batchName} kepada staf ${targetUser.toUpperCase()}?`);
+    if (!isConfirmed) return;
 
-    document.getElementById('loadingText').innerText = "Memindahkan batch di pangkalan data pelayan...";
+    document.getElementById('loadingText').innerText = "Memindahkan hak milik batch di pangkalan data pelayan...";
     document.getElementById('loadingModal').style.display = 'flex';
 
     try {
         let cleanTargetUser = targetUser.toLowerCase().trim();
 
-        // Update keseluruhan rekod yang ada batch_name yang sama
-        const { error } = await supabase.from('accounts').update({ assignee_id: cleanTargetUser }).eq('batch_name', batchName);
+        // [KOREKSI LOGIK]: Tukar dari assignee_id kepada uploaded_by
+        const { error } = await supabase.from('accounts').update({ uploaded_by: cleanTargetUser }).eq('batch_name', batchName);
         if (error) throw error;
 
         // Rekod audit ke dalam findings
         await supabase.from('findings').insert([{
             acct: 'SYSTEM',
-            remark1: `BATCH TRANSFER: Batch ${batchName} dipindahkan kepada ${cleanTargetUser.toUpperCase()} oleh ${currentUser.id.toUpperCase()}`,
+            remark1: `BATCH OWNERSHIP TRANSFER: Hak milik Batch ${batchName} dipindahkan kepada ${cleanTargetUser.toUpperCase()} oleh ${currentUser.id.toUpperCase()}`,
             updated_by: currentUser.username
         }]);
 
-        showNotification("SUCCESS", `Batch <b>${batchName}</b> telah berjaya diagihkan kepada ${cleanTargetUser.toUpperCase()}.`);
+        showNotification("SUCCESS", `Hak milik Batch <b>${batchName}</b> telah berjaya dipindahkan kepada ${cleanTargetUser.toUpperCase()}.`);
 
         // Buang cache supaya data sinkronisasi semula
         const cacheKey = `scazp_cache_${currentUser.id}`;
