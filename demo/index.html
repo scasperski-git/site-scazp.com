@@ -1165,47 +1165,47 @@ th {
         </div>
 
         <div id="settings-panel" class="main-panel">
-            <div class="settings-box" style="margin-bottom: 20px;">
-                <h2>Add New Portal User (Syncs to Cloud Ledger)</h2>
-                <div class="form-group">
-                    <label>Nama Penuh / Nama Panggilan</label>
-                    <input type="text" id="new-user-name" class="form-control" placeholder="Cth: Ali Bin Abu">
-                </div>
-                <div class="form-group">
-                    <label>User ID / Username</label>
-                    <input type="text" id="new-user-id" class="form-control" placeholder="e.g., pic_north">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="new-user-pass" class="form-control" placeholder="••••••••">
-                </div>
-                <div class="form-group">
-                    <label>Access Privilege (Role)</label>
-                    <select id="new-user-role" class="form-control" onchange="toggleFormRoleSelect()">
-                        <option value="user">PIC User (Field Staff / Collector)</option>
-                        <option value="admin">Admin (Branch / Area Head)</option>
-                        <option value="manager">Manager (Regional/Zone Head)</option>
-                        <option value="super">Super Admin (Mastermind)</option>
-                    </select>
-                </div>
-                <div class="form-group" id="form-report-group" style="display: block;">
-                    <label>Report To (Assign Supervisor)</label>
-                    <select id="new-user-report-to" class="form-control">
-                        <option value="">-- No Supervisor Required --</option>
-                    </select>
-                </div>
-                <div class="form-group" id="form-zone-group" style="display: none;">
-                    <label style="color: var(--accent-gold); font-weight: bold;">Assign to ZONE (For Manager)</label>
-                    <select id="new-user-zone" class="form-control"></select>
-                </div>
-                <div class="form-group" id="form-area-group" style="display: none;">
-                    <label style="color: var(--status-ptp); font-weight: bold;">Assign to AREA (For Admin)</label>
-                    <select id="new-user-area" class="form-control"></select>
-                </div>
-
-                <button class="btn-submit" onclick="addNewUser()">Save User Configuration</button>
-            </div>
-
+    <div class="settings-box" style="margin-bottom: 20px;">
+        <h2>Add New Portal User (Syncs to Cloud Ledger)</h2>
+        <div class="form-group">
+            <label>Nama Penuh / Nama Panggilan</label>
+            <input type="text" id="new-user-name" class="form-control" placeholder="Cth: Ali Bin Abu">
+        </div>
+        <div class="form-group">
+            <label>User ID / Username</label>
+            <input type="text" id="new-user-id" class="form-control" placeholder="e.g., pic_north">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="new-user-pass" class="form-control" placeholder="••••••••">
+        </div>
+        <div class="form-group">
+            <label>Access Privilege (Role)</label>
+            <select id="new-user-role" class="form-control" onchange="toggleFormRoleSelect()">
+                <option value="user">PIC User (Field Staff / Collector)</option>
+                <option value="admin">Admin (Branch / Area Head)</option>
+                <option value="manager">Manager (Regional/Zone Head)</option>
+                <option value="super">Super Admin (Mastermind)</option>
+            </select>
+        </div>
+        <div class="form-group" id="form-report-group" style="display: block;">
+            <label>Report To (Assign Supervisor)</label>
+            <select id="new-user-report-to" class="form-control">
+                <option value="">-- No Supervisor Required --</option>
+            </select>
+        </div>
+        <div class="form-group" id="form-zone-group" style="display: none;">
+            <label style="color: var(--accent-gold); font-weight: bold;">Assign to ZONE (For Manager)</label>
+            <select id="new-user-zone" class="form-control">
+                <option value="ALL">ALL ZONES</option>
+                <option value="BC">BC</option>
+                <option value="WEST">WEST</option>
+                <option value="EAST">EAST</option>
+                <option value="HO">HO</option>
+            </select>
+        </div>
+        <button class="btn-submit" onclick="addNewUser()">Save User Configuration</button>
+    </div>
             <div class="settings-box" style="max-width: 100%;">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                     <h2 style="margin: 0; border: none; padding: 0;">System User List (<span id="total-users-count" style="color: var(--text-main);">0</span> Users)</h2>
@@ -1280,6 +1280,27 @@ th {
                 </select>
             </div>
         </div>
+
+        <div class="settings-box" style="max-width: 100%; margin-top: 25px;" id="batch-management-section">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px;">
+        <h2 style="margin: 0; padding: 0;">Pengurusan Batch (Upload History)</h2>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>NAMA BATCH</th>
+                    <th>UPLOADED BY</th>
+                    <th>JUMLAH AKAUN</th>
+                    <th style="text-align: right;">TINDAKAN</th>
+                </tr>
+            </thead>
+            <tbody id="batch-table-body">
+                <tr><td colspan="4" style="text-align:center;">Sila tunggu, memuatkan senarai batch...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
         <div class="settings-box" style="max-width: 100%; margin-top: 25px;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
@@ -1519,6 +1540,18 @@ th {
         </div>
     </div>
 
+    <div class="modal-overlay" id="batchPromptModal" style="z-index: 1100;">
+    <div class="modal-content" style="text-align: center; max-width: 360px;">
+        <h2 style="color: var(--text-main); margin-top: 0; font-size: 20px;">NAMA BATCH EXCEL</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Sila masukkan nama batch rujukan (Cth: KUTIPAN_OGOS_26)</p>
+        <input type="text" id="batchPromptInput" class="form-control" placeholder="Tulis nama batch..." style="text-align: center; margin-bottom: 25px; font-size: 16px; font-weight: bold; text-transform: uppercase;">
+        <div style="display: flex; gap: 12px;">
+            <button class="btn-cancel" style="flex: 1;" id="btnBatchCancel">BATAL</button>
+            <button class="btn-submit" style="flex: 1; background-color: var(--success-green);" id="btnBatchOk">TERUSKAN UPLOAD</button>
+        </div>
+    </div>
+</div>
+    
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
@@ -1641,6 +1674,29 @@ async function checkLoginSession() {
                 };
             });
         };
+
+        window.requestBatchName = function() {
+    return new Promise((resolve) => {
+        document.getElementById('batchPromptInput').value = '';
+        document.getElementById('batchPromptModal').style.display = 'flex';
+        setTimeout(() => document.getElementById('batchPromptInput').focus(), 100);
+
+        document.getElementById('btnBatchOk').onclick = function() {
+            let val = document.getElementById('batchPromptInput').value.trim();
+            document.getElementById('batchPromptModal').style.display = 'none';
+            resolve(val);
+        };
+        
+        document.getElementById('btnBatchCancel').onclick = function() {
+            document.getElementById('batchPromptModal').style.display = 'none';
+            resolve(null);
+        };
+        
+        document.getElementById('batchPromptInput').onkeypress = function(e) {
+            if (e.key === 'Enter') document.getElementById('btnBatchOk').click();
+        };
+    });
+};
 
         window.handleLogin = async function() {
             const user = document.getElementById('username').value.trim();
@@ -1773,8 +1829,8 @@ async function fetchFullDatabaseData() {
                 const pageSize = 1000;
                 
                 while(true) {
-                    // [ADD ZONE COLUMN TO FETCH]
-                    let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id, collector');
+                    // KOREKSI: Tambah lajur batch_name dan uploaded_by ke dalam select query di bawah
+                    let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id, collector, batch_name, uploaded_by');
                     
                     // [FIX HIERARCHY ACCESS]
                     if (currentUser.role === 'user') {
@@ -2249,6 +2305,7 @@ function resetHeaderArrows() {
                 populateAssignSubordinates();
                 populateCollectorFilters();
                 renderAssignTable();
+                renderBatchList();
             }
             
             localStorage.setItem('scazp_active_tab', target);
@@ -2276,95 +2333,86 @@ window.fetchAndRenderUsers = async function() {
         };
 
 window.renderUserTablePage = async function() {
-            const tbody = document.getElementById('users-table-body');
-            tbody.innerHTML = '';
+    const tbody = document.getElementById('users-table-body');
+    tbody.innerHTML = '';
+    
+    let total = filteredSystemUsers.length;
+    document.getElementById('total-users-count').innerText = total;
+    
+    let totalPages = Math.ceil(total / usersPerPage) || 1;
+    if(userCurrentPage > totalPages) userCurrentPage = totalPages;
+    if(userCurrentPage < 1) userCurrentPage = 1;
+    
+    let start = (userCurrentPage - 1) * usersPerPage;
+    let end = start + usersPerPage;
+    let pageData = filteredSystemUsers.slice(start, end);
+    
+    if(pageData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No users found.</td></tr>';
+    } else {
+        pageData.forEach((user, index) => {
+            let rName = user.role ? user.role.toLowerCase().trim() : 'user';
+            let userStatus = user.status || 'ACTIVE';
+            let statusBadge = userStatus === 'ACTIVE' ? 'status-done' : 'status-pending';
             
-            const uniqueZones = [...new Set(masterLocations.map(m => m.zone_name))].filter(Boolean).sort();
-            const uniqueAreas = [...new Set(masterLocations.map(m => m.area_name))].filter(Boolean).sort();
+            let toggleBtnText = userStatus === 'ACTIVE' ? 'DEACTIVATE' : 'ACTIVATE';
+            let toggleBtnColor = userStatus === 'ACTIVE' ? 'var(--error-red)' : 'var(--success-green)';
             
-            let total = filteredSystemUsers.length;
-            document.getElementById('total-users-count').innerText = total;
-            
-            let totalPages = Math.ceil(total / usersPerPage) || 1;
-            if(userCurrentPage > totalPages) userCurrentPage = totalPages;
-            if(userCurrentPage < 1) userCurrentPage = 1;
-            
-            let start = (userCurrentPage - 1) * usersPerPage;
-            let end = start + usersPerPage;
-            let pageData = filteredSystemUsers.slice(start, end);
-            
-            if(pageData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No users found.</td></tr>';
-            } else {
-                pageData.forEach((user, index) => {
-                    let rName = user.role ? user.role.toLowerCase().trim() : 'user';
-                    let userStatus = user.status || 'ACTIVE';
-                    let statusBadge = userStatus === 'ACTIVE' ? 'status-done' : 'status-pending';
-                    
-                    let toggleBtnText = userStatus === 'ACTIVE' ? 'DEACTIVATE' : 'ACTIVATE';
-                    let toggleBtnColor = userStatus === 'ACTIVE' ? 'var(--error-red)' : 'var(--success-green)';
-                    
-                    let roleSelect = `
-                        <select id="edit-role-${user.id}" onchange="toggleInlineAccessSelect('${user.id}')" style="padding:4px; font-size:11px; font-weight:600; border:1px solid var(--border-color); border-radius:4px;">
-                            <option value="user" ${rName==='user'?'selected':''}>USER</option>
-                            <option value="admin" ${rName==='admin'?'selected':''}>ADMIN</option>
-                            <option value="manager" ${rName==='manager'?'selected':''}>MANAGER</option>
-                            <option value="super" ${rName==='super'?'selected':''}>SUPER</option>
-                        </select>`;
+            let roleSelect = `
+                <select id="edit-role-${user.id}" onchange="toggleInlineAccessSelect('${user.id}')" style="padding:4px; font-size:11px; font-weight:600; border:1px solid var(--border-color); border-radius:4px;">
+                    <option value="user" ${rName==='user'?'selected':''}>USER</option>
+                    <option value="admin" ${rName==='admin'?'selected':''}>ADMIN</option>
+                    <option value="manager" ${rName==='manager'?'selected':''}>MANAGER</option>
+                    <option value="super" ${rName==='super'?'selected':''}>SUPER</option>
+                </select>`;
 
-                    let reportToOptions = `<option value="">-- NONE --</option>`;
-                    allSystemUsers.filter(u => u.role !== 'user' && u.id !== user.id).forEach(u => {
-                        reportToOptions += `<option value="${u.id}" ${user.report_to===u.id?'selected':''}>${u.id.toUpperCase()}</option>`;
-                    });
-                    let reportSelect = `<select id="edit-report-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; max-width:110px;">${reportToOptions}</select>`;
+            let reportToOptions = `<option value="">-- NONE --</option>`;
+            allSystemUsers.filter(u => u.role !== 'user' && u.id !== user.id).forEach(u => {
+                reportToOptions += `<option value="${u.id}" ${user.report_to===u.id?'selected':''}>${u.id.toUpperCase()}</option>`;
+            });
+            let reportSelect = `<select id="edit-report-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; max-width:110px;">${reportToOptions}</select>`;
 
-                    // Dropdown ZONE dinamik (Untuk Manager)
-                    let zoneOptions = `<option value="ALL" ${!user.assignedzone || user.assignedzone==='ALL'?'selected':''}>ALL ZONES</option>`;
-                    uniqueZones.forEach(z => {
-                        zoneOptions += `<option value="${z}" ${user.assignedzone===z?'selected':''}>${z}</option>`;
-                    });
-                    let zoneSelect = `<select id="edit-zone-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; display: ${rName === 'manager' ? 'inline-block' : 'none'};">${zoneOptions}</select>`;
-                    
-                    // Dropdown AREA dinamik (Untuk Admin)
-                    let areaOptions = `<option value="ALL" ${!user.assignedarea || user.assignedarea==='ALL'?'selected':''}>ALL AREAS</option>`;
-                    uniqueAreas.forEach(a => {
-                        areaOptions += `<option value="${a}" ${user.assignedarea===a?'selected':''}>${a}</option>`;
-                    });
-                    let areaSelect = `<select id="edit-area-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; display: ${rName === 'admin' ? 'inline-block' : 'none'};">${areaOptions}</select>`;
-                    
-                    // Kapsul fallback jika User/Super
-                    let noneText = `<span id="edit-none-${user.id}" style="font-size: 11px; color: var(--text-muted); display: ${(rName === 'user' || rName === 'super') ? 'inline-block' : 'none'};">N/A (Global/PIC)</span>`;
+            // Dropdown ZONE statik (Untuk Manager)
+            let zoneOptions = `<option value="ALL" ${!user.assignedzone || user.assignedzone==='ALL'?'selected':''}>ALL ZONES</option>`;
+            const staticZones = ['BC', 'WEST', 'EAST', 'HO'];
+            staticZones.forEach(z => {
+                zoneOptions += `<option value="${z}" ${user.assignedzone===z?'selected':''}>${z}</option>`;
+            });
+            let zoneSelect = `<select id="edit-zone-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; display: ${rName === 'manager' ? 'inline-block' : 'none'};">${zoneOptions}</select>`;
+            
+            // Kapsul fallback jika User/Super/Admin
+            let noneText = `<span id="edit-none-${user.id}" style="font-size: 11px; color: var(--text-muted); display: ${(rName === 'user' || rName === 'super' || rName === 'admin') ? 'inline-block' : 'none'};">N/A (Global/PIC)</span>`;
 
-                    let fullNameDisp = user.name ? user.name.toUpperCase() : '<span style="color:#cbd5e1;">TIADA DATA</span>'; // <-- SETTING NAMA
-                    
-tbody.innerHTML += `
-        <tr>
-            <td style="text-align: center;">${start + index + 1}</td>
-            <td style="font-weight:700; color:var(--text-main);">${user.id.toUpperCase()}</td>
-            <td style="font-size:12px;">${fullNameDisp}</td> <td>${roleSelect}</td>
-            <td>${reportSelect}</td>
-            <td>${zoneSelect}${areaSelect}${noneText}</td>
-            <td><span class="status-badge ${statusBadge}">${userStatus}</span></td>
-            <td style="white-space: nowrap;">
-                <button class="btn-update" style="color: var(--accent-gold); border-color: var(--accent-gold); margin-right: 5px; font-weight:600;" onclick="updateUserInline('${user.id}')">💾 SAVE</button>
-                <button class="btn-update" style="color: ${toggleBtnColor}; border-color: ${toggleBtnColor}; margin-right: 5px;" onclick="toggleUserStatus('${user.id}', '${userStatus}')">${toggleBtnText}</button>
-                <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteUser('${user.id}')">DEL</button>
-            </td>
-        </tr>
-    `;
-});
-            }
-            document.getElementById('user-page-info').innerText = `Page ${userCurrentPage} of ${totalPages}`;
-            document.getElementById('btn-user-prev').disabled = userCurrentPage === 1;
-            document.getElementById('btn-user-next').disabled = userCurrentPage === totalPages;
-        };
+            let fullNameDisp = user.name ? user.name.toUpperCase() : '<span style="color:#cbd5e1;">TIADA DATA</span>'; 
+            
+            tbody.innerHTML += `
+                <tr>
+                    <td style="text-align: center;">${start + index + 1}</td>
+                    <td style="font-weight:700; color:var(--text-main);">${user.id.toUpperCase()}</td>
+                    <td style="font-size:12px;">${fullNameDisp}</td> 
+                    <td>${roleSelect}</td>
+                    <td>${reportSelect}</td>
+                    <td>${zoneSelect}${noneText}</td>
+                    <td><span class="status-badge ${statusBadge}">${userStatus}</span></td>
+                    <td style="white-space: nowrap;">
+                        <button class="btn-update" style="color: var(--accent-gold); border-color: var(--accent-gold); margin-right: 5px; font-weight:600;" onclick="updateUserInline('${user.id}')">💾 SAVE</button>
+                        <button class="btn-update" style="color: ${toggleBtnColor}; border-color: ${toggleBtnColor}; margin-right: 5px;" onclick="toggleUserStatus('${user.id}', '${userStatus}')">${toggleBtnText}</button>
+                        <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteUser('${user.id}')">DEL</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+    document.getElementById('user-page-info').innerText = `Page ${userCurrentPage} of ${totalPages}`;
+    document.getElementById('btn-user-prev').disabled = userCurrentPage === 1;
+    document.getElementById('btn-user-next').disabled = userCurrentPage === totalPages;
+};
 
-        window.toggleInlineAccessSelect = function(userId) {
-            let role = document.getElementById(`edit-role-${userId}`).value;
-            document.getElementById(`edit-zone-${userId}`).style.display = role === 'manager' ? 'inline-block' : 'none';
-            document.getElementById(`edit-area-${userId}`).style.display = role === 'admin' ? 'inline-block' : 'none';
-            document.getElementById(`edit-none-${userId}`).style.display = (role === 'user' || role === 'super') ? 'inline-block' : 'none';
-        }
+window.toggleInlineAccessSelect = function(userId) {
+    let role = document.getElementById(`edit-role-${userId}`).value;
+    document.getElementById(`edit-zone-${userId}`).style.display = role === 'manager' ? 'inline-block' : 'none';
+    document.getElementById(`edit-none-${userId}`).style.display = (role === 'user' || role === 'super' || role === 'admin') ? 'inline-block' : 'none';
+}
         
         window.nextUserPage = function() {
             const totalPages = Math.ceil(filteredSystemUsers.length / usersPerPage);
@@ -2381,47 +2429,41 @@ tbody.innerHTML += `
             }
         };
 
-        window.toggleFormRoleSelect = async function() {
-            const role = document.getElementById('new-user-role').value;
-            const reportGroup = document.getElementById('form-report-group');
-            const reportSelect = document.getElementById('new-user-report-to');
-            const zoneGroup = document.getElementById('form-zone-group');
-            const areaGroup = document.getElementById('form-area-group');
-            
-            // Toggle paparan Zone / Area
-            if (role === 'manager') {
-                zoneGroup.style.display = 'block'; areaGroup.style.display = 'none';
-                populateFilterDropdown('new-user-zone', 'zone_name');
-            } else if (role === 'admin') {
-                zoneGroup.style.display = 'none'; areaGroup.style.display = 'block';
-                populateFilterDropdown('new-user-area', 'area_name');
-            } else {
-                zoneGroup.style.display = 'none'; areaGroup.style.display = 'none';
+window.toggleFormRoleSelect = async function() {
+    const role = document.getElementById('new-user-role').value;
+    const reportGroup = document.getElementById('form-report-group');
+    const reportSelect = document.getElementById('new-user-report-to');
+    const zoneGroup = document.getElementById('form-zone-group');
+    
+    if (role === 'manager') {
+        zoneGroup.style.display = 'block'; 
+    } else {
+        zoneGroup.style.display = 'none'; 
+    }
+    
+    if (role === 'super') {
+        reportGroup.style.display = 'none';
+        reportSelect.innerHTML = '<option value="">-- N/A --</option>';
+    } else {
+        reportGroup.style.display = 'block';
+        reportSelect.innerHTML = '<option value="">Loading Supervisor List...</option>';
+        
+        let allowedRoles = role === 'user' ? ['admin', 'manager', 'super'] : 
+                           (role === 'admin' ? ['manager', 'super'] : ['super']);
+        
+        try {
+            const { data, error } = await supabase.from('users').select('id, role').in('role', allowedRoles).eq('status', 'ACTIVE');
+            reportSelect.innerHTML = '<option value="">-- TANGGUH DULU / TIADA SUPERVISOR --</option>';
+            if (data && data.length > 0) {
+                data.forEach(u => {
+                    reportSelect.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
+                });
             }
-            
-            if (role === 'super') {
-                reportGroup.style.display = 'none';
-                reportSelect.innerHTML = '<option value="">-- N/A --</option>';
-            } else {
-                reportGroup.style.display = 'block';
-                reportSelect.innerHTML = '<option value="">Loading Supervisor List...</option>';
-                
-                let allowedRoles = role === 'user' ? ['admin', 'manager', 'super'] : 
-                                   (role === 'admin' ? ['manager', 'super'] : ['super']);
-                
-                try {
-                    const { data, error } = await supabase.from('users').select('id, role').in('role', allowedRoles).eq('status', 'ACTIVE');
-                    reportSelect.innerHTML = '<option value="">-- TANGGUH DULU / TIADA SUPERVISOR --</option>';
-                    if (data && data.length > 0) {
-                        data.forEach(u => {
-                            reportSelect.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
-                        });
-                    }
-                } catch(err) {
-                    reportSelect.innerHTML = '<option value="">-- TANGGUH DULU / TIADA SUPERVISOR --</option>';
-                }
-            }
-        };
+        } catch(err) {
+            reportSelect.innerHTML = '<option value="">-- TANGGUH DULU / TIADA SUPERVISOR --</option>';
+        }
+    }
+};
 
         function populateFilterDropdown(dropdownId, keyName) {
             const dropdown = document.getElementById(dropdownId);
@@ -2472,7 +2514,7 @@ window.addNewUser = async function() {
                     pass: pass, 
                     role: role, 
                     assignedzone: finalZone,
-                    assignedarea: finalArea,
+                    assignedarea: null,
                     assignedregion: null, // Boleh dibiarkan null
                     report_to: reportTo || null,
                     status: 'ACTIVE' 
@@ -2535,7 +2577,7 @@ if(error) {
             let newRole = document.getElementById(`edit-role-${userId}`).value;
             let newReportTo = document.getElementById(`edit-report-${userId}`).value;
             let newZone = document.getElementById(`edit-zone-${userId}`).value;
-            let newArea = document.getElementById(`edit-area-${userId}`).value;
+            //let newArea = document.getElementById(`edit-area-${userId}`).value;
 
             if (newReportTo === "") newReportTo = null;
             if (newZone === "ALL") newZone = null;
@@ -2548,7 +2590,7 @@ if(error) {
                 role: newRole, 
                 report_to: newReportTo,
                 assignedzone: newRole === 'manager' ? newZone : null,
-                assignedarea: newRole === 'admin' ? newArea : null
+                assignedarea: null
             }).eq('id', userId);
 
             if (!error) { 
@@ -2914,201 +2956,190 @@ window.handleExcelFileSelect = function(e) {
         };
 
 window.processExcelUpload = async function() {
-            document.getElementById('mappingModal').style.display = 'none';
-            document.getElementById('progressModal').style.display = 'flex';
-            
-            const progressBar = document.getElementById('upload-progress-bar');
-            const progressText = document.getElementById('upload-progress-text');
-            const progressSubtext = document.getElementById('upload-progress-subtext');
-            
-            // Tambah sikit safety supaya kalau ID tak wujud, sistem tak error
-            const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : '';
-            
-            const formatIC = (newIcKey, oldIcKey, rowData) => {
-                let nKey = getVal(newIcKey);
-                let oKey = getVal(oldIcKey);
-                let n = nKey ? String(rowData[nKey] || '').trim() : '';
-                let o = oKey ? String(rowData[oKey] || '').trim() : '';
-                if(n && n !== 'undefined' && o && o !== 'undefined') return `${n} / ${o}`;
-                if(n && n !== 'undefined') return n;
-                if(o && o !== 'undefined') return o;
-                return '';
-            };
+    // 1. Dapatkan nama batch dari user
+    let batchInput = await requestBatchName();
+    if (!batchInput) return; 
 
-            let bulkData = [];
-            for (const row of parsedExcelRows) {
-                const rawAccountNo = String(row[getVal('map-acct')]).trim();
-                if (!rawAccountNo || rawAccountNo === "undefined") continue; 
+    // Bersihkan input supaya tiada simbol pelik, dan sambungkan dengan tarikh & masa
+    let rawBatchName = batchInput.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_');
+    if (!rawBatchName) {
+        alert("Nama batch tidak sah!");
+        return;
+    }
+
+    let d = new Date();
+    let timeSuffix = String(d.getDate()).padStart(2, '0') + String(d.getMonth() + 1).padStart(2, '0') + d.getFullYear() + '_' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0');
+    let finalBatchName = `${rawBatchName}_${timeSuffix}`;
+
+    document.getElementById('mappingModal').style.display = 'none';
+    document.getElementById('progressModal').style.display = 'flex';
+    
+    const progressBar = document.getElementById('upload-progress-bar');
+    const progressText = document.getElementById('upload-progress-text');
+    const progressSubtext = document.getElementById('upload-progress-subtext');
+
+    const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : '';
+    
+    const formatIC = (newIcKey, oldIcKey, rowData) => {
+        let nKey = getVal(newIcKey);
+        let oKey = getVal(oldIcKey);
+        let n = nKey ? String(rowData[nKey] || '').trim() : '';
+        let o = oKey ? String(rowData[oKey] || '').trim() : '';
+        if(n && n !== 'undefined' && o && o !== 'undefined') return `${n} / ${o}`;
+        if(n && n !== 'undefined') return n;
+        if(o && o !== 'undefined') return o;
+        return '';
+    };
+
+    let bulkData = [];
+    for (const row of parsedExcelRows) {
+        const rawAccountNo = String(row[getVal('map-acct')]).trim();
+        if (!rawAccountNo || rawAccountNo === "undefined") continue; 
+        
+        let existingAcc = globalAccounts.find(a => a.acct === rawAccountNo);
+        let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; 
+        let currentFindingStatus = existingAcc ? existingAcc.finding_status : '';
+
+        const parseAndFlip = (val) => {
+            if (!val || val === "undefined") return 0;
+            let str = String(val).trim();
+            let isNegative = str.startsWith('-') || str.endsWith('-') || (str.startsWith('(') && str.endsWith(')'));
+            let num = parseFloat(str.replace(/[^0-9.]/g, '')) || 0;
+            return isNegative ? num : -num;
+        };
+
+        const formatExcelDate = (val) => {
+            if (!val || String(val).trim() === "") return "";
+            if (isNaN(val) || String(val).includes('/') || String(val).includes('-')) return String(val).trim();
+            let serial = parseFloat(val);
+            let date_info = new Date(Math.round((serial - 25569) * 86400 * 1000));
+            let day = String(date_info.getUTCDate()).padStart(2, '0');
+            let month = String(date_info.getUTCMonth() + 1).padStart(2, '0');
+            let year = date_info.getUTCFullYear();
+            return `${day}/${month}/${year}`;
+        };
+
+        let bal = parseFloat(String(row[getVal('map-bal') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+        let odp = parseFloat(String(row[getVal('map-odp') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+        let adch = parseFloat(String(row[getVal('map-adch') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
+
+        let rawArrMth = row[getVal('map-arrs')];
+        let finalArrMth = parseAndFlip(rawArrMth);
+
+        let rawArrAmtKey = getVal('map-arr-amt') || 'ARR_AMT';
+        let rawArrAmt = row[rawArrAmtKey];
+        let finalArrAmt = parseAndFlip(rawArrAmt);
+
+        let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
+        let finalOsb = 0;
+        if (type === 'EP') {
+            finalOsb = bal + adch;
+        } else if (type === 'HP') {
+            finalOsb = (bal + odp) + adch;
+        } else {
+            finalOsb = bal + odp + adch;
+        }
+        
+        let keyLoc = getVal('map-loc');
+        let keyZone = getVal('map-zone');
+        let keyReg = getVal('map-region');
+        let keyArea = getVal('map-area');
+
+        let rawLocCd = (keyLoc && row[keyLoc]) ? String(row[keyLoc]).trim() : "";
+        let finalZone = (keyZone && row[keyZone]) ? String(row[keyZone]).toUpperCase().trim() : "";
+        let finalRegion = (keyReg && row[keyReg]) ? String(row[keyReg]).toUpperCase().trim() : "";
+        let finalArea = (keyArea && row[keyArea]) ? String(row[keyArea]).toUpperCase().trim() : "";
+
+        if (rawLocCd !== "") {
+            let cleanRawLoc = rawLocCd.replace(/^0+/, '').toUpperCase();
+            let matchedLoc = masterLocations.find(loc => {
+                let locKey = Object.keys(loc).find(k => k.toLowerCase() === 'loc_cd' || k.toLowerCase() === 'loc');
+                let locValue = locKey ? loc[locKey] : '';
+                let cleanMasterLoc = String(locValue).replace(/^0+/, '').trim().toUpperCase();
+                return cleanMasterLoc === cleanRawLoc;
+            });
+            if (matchedLoc) {
+                let zKey = Object.keys(matchedLoc).find(k => k.toLowerCase() === 'zone_name' || k.toLowerCase() === 'zone');
+                let regKey = Object.keys(matchedLoc).find(k => k.toLowerCase() === 'region_name' || k.toLowerCase() === 'region');
+                let areaKey = Object.keys(matchedLoc).find(k => k.toLowerCase() === 'area_name' || k.toLowerCase() === 'area');
                 
-                let existingAcc = globalAccounts.find(a => a.acct === rawAccountNo);
-                let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; 
-                let currentFindingStatus = existingAcc ? existingAcc.finding_status : '';
-
-// --- 0. FUNGSI KHAS UNTUK BACA DAN TERBALIKKAN NOMBOR (+/-) ---
-const parseAndFlip = (val) => {
-    if (!val || val === "undefined") return 0;
-    let str = String(val).trim();
-    
-    // Kenal pasti kalau asalnya negatif (ada '-' di depan/belakang atau guna kurungan)
-    let isNegative = str.startsWith('-') || str.endsWith('-') || (str.startsWith('(') && str.endsWith(')'));
-    
-    // Ekstrak nombor sahaja (buang koma, kurungan, atau huruf)
-    let num = parseFloat(str.replace(/[^0-9.]/g, '')) || 0;
-    
-    // LOGIK FLIP: 
-    // Kalau asal negatif -> jadi positif (pulangkan num)
-    // Kalau asal positif -> jadi negatif (pulangkan -num)
-    return isNegative ? num : -num;
-};
-
-// --- 0.1 FUNGSI KHAS UNTUK CONVERT EXCEL DATE KE DD/MM/YYYY ---
-const formatExcelDate = (val) => {
-    if (!val || String(val).trim() === "") return "";
-    
-    // Kalau data dah sedia ada bentuk tarikh "11/07/2021" (bukan nombor), biarkan sahaja
-    if (isNaN(val) || String(val).includes('/') || String(val).includes('-')) return String(val).trim(); 
-    
-    let serial = parseFloat(val);
-    // Formula kalis Timezone untuk tukar Serial Excel ke Tarikh JS
-    let date_info = new Date(Math.round((serial - 25569) * 86400 * 1000));
-    
-    let day = String(date_info.getUTCDate()).padStart(2, '0');
-    let month = String(date_info.getUTCMonth() + 1).padStart(2, '0');
-    let year = date_info.getUTCFullYear();
-    
-    return `${day}/${month}/${year}`;
-};
-
-// --- 1. AMBIL & BERSIHKAN DATA MENTAH DARI EXCEL ---
-let bal = parseFloat(String(row[getVal('map-bal') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
-let odp = parseFloat(String(row[getVal('map-odp') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
-let adch = parseFloat(String(row[getVal('map-adch') || '']).replace(/,/g, '').replace(/[^0-9.-]+/g,"")) || 0;
-
-// --- 2. LOGIK PENGIRAAN PINTAR (TUKAR TANDA +/- UNTUK ARR_MTH & ARR_AMT) ---
-
-// Guna fungsi parseAndFlip untuk ARR_MTH
-let rawArrMth = row[getVal('map-arrs')];
-let finalArrMth = parseAndFlip(rawArrMth);
-
-// Guna fungsi parseAndFlip untuk ARR_AMT
-let rawArrAmtKey = getVal('map-arr-amt') || 'ARR_AMT';
-let rawArrAmt = row[rawArrAmtKey];
-let finalArrAmt = parseAndFlip(rawArrAmt);
-
-let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
-                
-                // Formula 3: Kira FS_AMT_TO_COLLECT (OSB) mengikut jenis akaun
-                let finalOsb = 0;
-                if (type === 'EP') {
-                    finalOsb = bal + adch;
-                } else if (type === 'HP') {
-                    finalOsb = (bal + odp) + adch;
-                } else {
-                    finalOsb = bal + odp + adch;
-                }
-                
-                let keyLoc = getVal('map-loc');
-                let keyZone = getVal('map-zone');
-                let keyReg = getVal('map-region');
-                let keyArea = getVal('map-area');
-
-                let rawLocCd = (keyLoc && row[keyLoc]) ? String(row[keyLoc]).trim() : "";
-                let finalZone = (keyZone && row[keyZone]) ? String(row[keyZone]).toUpperCase().trim() : "";
-                let finalRegion = (keyReg && row[keyReg]) ? String(row[keyReg]).toUpperCase().trim() : "";
-                let finalArea = (keyArea && row[keyArea]) ? String(row[keyArea]).toUpperCase().trim() : "";
-
-                // AUTO MATCH ZONE/REGION/AREA DARI LOC_CD
-                if (rawLocCd !== "") {
-                    let cleanRawLoc = rawLocCd.replace(/^0+/, '').toUpperCase();
-                    let matchedLoc = masterLocations.find(loc => {
-                        let locKey = Object.keys(loc).find(k => k.toLowerCase() === 'loc_cd' || k.toLowerCase() === 'loc');
-                        let locValue = locKey ? loc[locKey] : '';
-                        let cleanMasterLoc = String(locValue).replace(/^0+/, '').trim().toUpperCase();
-                        return cleanMasterLoc === cleanRawLoc;
-                    });
-
-                    if (matchedLoc) {
-                        let zKey = Object.keys(matchedLoc).find(k => k.toLowerCase() === 'zone_name' || k.toLowerCase() === 'zone');
-                        let regKey = Object.keys(matchedLoc).find(k => k.toLowerCase() === 'region_name' || k.toLowerCase() === 'region');
-                        let areaKey = Object.keys(matchedLoc).find(k => k.toLowerCase() === 'area_name' || k.toLowerCase() === 'area');
-                        
-                        let dbZone = zKey ? matchedLoc[zKey] : "";
-                        let dbRegion = regKey ? matchedLoc[regKey] : "";
-                        let dbArea = areaKey ? matchedLoc[areaKey] : "";
-
-                        finalZone = dbZone !== "" ? String(dbZone).toUpperCase().trim() : finalZone;
-                        finalRegion = dbRegion !== "" ? String(dbRegion).toUpperCase().trim() : finalRegion;
-                        finalArea = dbArea !== "" ? String(dbArea).toUpperCase().trim() : finalArea;
-                    }
-                }             
-                
-                if (finalZone === "UNDEFINED") finalZone = "";
-                if (finalRegion === "UNDEFINED") finalRegion = "";
-                if (finalArea === "UNDEFINED") finalArea = "";
-                if (rawLocCd === "UNDEFINED") rawLocCd = "";
-                
-                let rawType = String(row[getVal('map-type')]).trim();
-                if (rawType === "undefined") rawType = "";
-                let rawDelq = String(row[getVal('map-delq')]).trim();
-                if (rawDelq === "undefined") rawDelq = "";
-                
-                let keyColl = getVal('map-collector');
-                let rawColl = (keyColl && row[keyColl]) ? String(row[keyColl]).toUpperCase().trim() : "";
-                if (rawColl === "UNDEFINED") rawColl = "";
-
-                let salesKey = getVal('map-sales-rep-dt') || 'SALES_REP_DT';
-                let matureKey = getVal('map-hp-mature-dt') || 'HP_MATURE_DT';
-
-                let detailsJSON = {
-                    ...row, // 🌟 INI MAGIC TRICK NYA! Auto-sedut semua header Excel kau (CASH_PRICE, REFEREE1_NAME dll) bulat-bulat
-                    SALES_REP_DT: formatExcelDate(row[salesKey]),
-                    HP_MATURE_DT: formatExcelDate(row[matureKey]),
-                    h_name: row[getVal('map-h-name')] || '',
-                    h_nric: formatIC('map-h-nric-new', 'map-h-nric-old', row),
-                    h_tel: row[getVal('map-h-tel')] || '',
-                    h_add1: row[getVal('map-h-add1')] || '',
-                    h_add2: row[getVal('map-h-add2')] || '',
-                    h_add3: row[getVal('map-h-add3')] || '',
-                    hc_name: row[getVal('map-hc-name')] || '',
-                    hc_tel: row[getVal('map-hc-tel')] || '',
-                    hc_add1: row[getVal('map-hc-add1')] || '',
-                    hc_add2: row[getVal('map-hc-add2')] || '',
-                    s_name: row[getVal('map-s-name')] || '',
-                    s_nric: formatIC('map-s-nric-new', 'map-s-nric-old', row),
-                    s_tel: row[getVal('map-s-tel')] || '',
-                    g_name: row[getVal('map-g-name')] || '',
-                    g_nric: formatIC('map-g-nric-new', 'map-g-nric-old', row),
-                    g_tel: row[getVal('map-g-tel')] || '',
-                    g_add1: row[getVal('map-g-add1')] || '',
-                    g_add2: row[getVal('map-g-add2')] || '',
-                    gc_name: row[getVal('map-gc-name')] || '',
-                    gc_tel: row[getVal('map-gc-tel')] || '',
-                    prod: row[getVal('map-prod')] || '',
-                    plate: row[getVal('map-plate')] || '',
-                    bal: row[getVal('map-bal')] || '',
-                    odp: row[getVal('map-odp')] || '',
-                    adch: row[getVal('map-adch')] || '',
-                    ARR_AMT: finalArrAmt,
-                    finding_status: currentFindingStatus 
-                };
-
-                bulkData.push({
-                    zone: finalZone,
-                    region: finalRegion, 
-                    area: finalArea,     
-                    loc: rawLocCd,
-                    type: type, 
-                    acct: rawAccountNo,
-                    delq: rawDelq, 
-                    arrs_mth: finalArrMth, 
-                    osb: finalOsb,         
-                    status: currentStatus, 
-                    collector: rawColl,
-                    details: detailsJSON 
-                });
+                let dbZone = zKey ? matchedLoc[zKey] : "";
+                let dbRegion = regKey ? matchedLoc[regKey] : "";
+                let dbArea = areaKey ? matchedLoc[areaKey] : "";
+                finalZone = dbZone !== "" ? String(dbZone).toUpperCase().trim() : finalZone;
+                finalRegion = dbRegion !== "" ? String(dbRegion).toUpperCase().trim() : finalRegion;
+                finalArea = dbArea !== "" ? String(dbArea).toUpperCase().trim() : finalArea;
             }
+        }             
+        
+        if (finalZone === "UNDEFINED") finalZone = "";
+        if (finalRegion === "UNDEFINED") finalRegion = "";
+        if (finalArea === "UNDEFINED") finalArea = "";
+        if (rawLocCd === "UNDEFINED") rawLocCd = "";
+        
+        let rawType = String(row[getVal('map-type')]).trim();
+        if (rawType === "undefined") rawType = "";
+        let rawDelq = String(row[getVal('map-delq')]).trim();
+        if (rawDelq === "undefined") rawDelq = "";
+        
+        let keyColl = getVal('map-collector');
+        let rawColl = (keyColl && row[keyColl]) ? String(row[keyColl]).toUpperCase().trim() : "";
+        if (rawColl === "UNDEFINED") rawColl = "";
+        let salesKey = getVal('map-sales-rep-dt') || 'SALES_REP_DT';
+        let matureKey = getVal('map-hp-mature-dt') || 'HP_MATURE_DT';
 
-            const CHUNK_SIZE = 1000;
+        let detailsJSON = {
+            ...row, 
+            SALES_REP_DT: formatExcelDate(row[salesKey]),
+            HP_MATURE_DT: formatExcelDate(row[matureKey]),
+            h_name: row[getVal('map-h-name')] || '',
+            h_nric: formatIC('map-h-nric-new', 'map-h-nric-old', row),
+            h_tel: row[getVal('map-h-tel')] || '',
+            h_add1: row[getVal('map-h-add1')] || '',
+            h_add2: row[getVal('map-h-add2')] || '',
+            h_add3: row[getVal('map-h-add3')] || '',
+            hc_name: row[getVal('map-hc-name')] || '',
+            hc_tel: row[getVal('map-hc-tel')] || '',
+            hc_add1: row[getVal('map-hc-add1')] || '',
+            hc_add2: row[getVal('map-hc-add2')] || '',
+            s_name: row[getVal('map-s-name')] || '',
+            s_nric: formatIC('map-s-nric-new', 'map-s-nric-old', row),
+            s_tel: row[getVal('map-s-tel')] || '',
+            g_name: row[getVal('map-g-name')] || '',
+            g_nric: formatIC('map-g-nric-new', 'map-g-nric-old', row),
+            g_tel: row[getVal('map-g-tel')] || '',
+            g_add1: row[getVal('map-g-add1')] || '',
+            g_add2: row[getVal('map-g-add2')] || '',
+            gc_name: row[getVal('map-gc-name')] || '',
+            gc_tel: row[getVal('map-gc-tel')] || '',
+            prod: row[getVal('map-prod')] || '',
+            plate: row[getVal('map-plate')] || '',
+            bal: row[getVal('map-bal')] || '',
+            odp: row[getVal('map-odp')] || '',
+            adch: row[getVal('map-adch')] || '',
+            ARR_AMT: finalArrAmt,
+            finding_status: currentFindingStatus 
+        };
+
+        bulkData.push({
+            zone: finalZone,
+            region: finalRegion, 
+            area: finalArea,     
+            loc: rawLocCd,
+            type: type, 
+            acct: rawAccountNo,
+            delq: rawDelq, 
+            arrs_mth: finalArrMth, 
+            osb: finalOsb,  
+            status: currentStatus, 
+            collector: rawColl,
+            details: detailsJSON,
+            batch_name: finalBatchName, // Data disuntik di sini
+            uploaded_by: currentUser.id // Data disuntik di sini
+        });
+    }
+
+    const CHUNK_SIZE = 1000;
             let totalProcessed = 0; let hasError = false;
             for (let i = 0; i < bulkData.length; i += CHUNK_SIZE) {
                 const chunk = bulkData.slice(i, i + CHUNK_SIZE);
@@ -3121,7 +3152,7 @@ let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
                 totalProcessed += chunk.length;
             }
 
-            if (!hasError) {
+if (!hasError) {
                 progressBar.style.width = '100%';
                 progressText.innerText = '100%';
                 progressSubtext.innerText = `Completely done! Reloading ledger structure...`;
@@ -3137,8 +3168,11 @@ let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
                     document.getElementById('excel-file-input').value = ''; 
                     alert(`Successfully processed ${totalProcessed.toLocaleString()} accounts.`);
                     
-                    await localforage.removeItem('scazp_cache_all');
-                    localStorage.removeItem('scazp_time_all');
+                    // KOREKSI: Padam mengikut ID khusus yang betul, bukannya '_all'
+                    const cacheKey = `scazp_cache_${currentUser.id}`;
+                    const timeKey = `scazp_time_${currentUser.id}`;
+                    await localforage.removeItem(cacheKey);
+                    localStorage.removeItem(timeKey);
                     
                     await fetchFullDatabaseData(); 
                     resetStatusCardHighlight();
@@ -3146,6 +3180,83 @@ let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
                 }, 800);
             } else { document.getElementById('progressModal').style.display = 'none'; }
         };
+
+        window.renderBatchList = function() {
+    const tbody = document.getElementById('batch-table-body');
+    if (!tbody) return;
+
+    let batchGroups = {};
+    // Kumpulkan data batch dari cache global
+    globalAccounts.forEach(acc => {
+        if (acc.batch_name) {
+            if (!batchGroups[acc.batch_name]) {
+                batchGroups[acc.batch_name] = { count: 0, uploaded_by: acc.uploaded_by || 'UNKNOWN' };
+            }
+            batchGroups[acc.batch_name].count++;
+        }
+    });
+
+    tbody.innerHTML = '';
+    // Susun jadual dari yang paling terkini (descending)
+    let batchKeys = Object.keys(batchGroups).sort().reverse(); 
+
+    if (batchKeys.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Tiada rekod batch ditemui.</td></tr>';
+        return;
+    }
+
+    batchKeys.forEach(bName => {
+        let bInfo = batchGroups[bName];
+        tbody.innerHTML += `
+            <tr>
+                <td style="font-weight: 700; color: var(--text-main);">${bName}</td>
+                <td>${bInfo.uploaded_by.toUpperCase()}</td>
+                <td>${bInfo.count} Akaun</td>
+                <td style="text-align: right;">
+                    <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteBatch('${bName}')">🗑️ DELETE</button>
+                </td>
+            </tr>
+        `;
+    });
+};
+
+window.deleteBatch = async function(batchName) {
+    let isConfirmed = await customConfirm(`STRICT WARNING:\nAdakah anda pasti mahu memadam KESELURUHAN akaun untuk batch ${batchName}? Tindakan ini akan memadam data sepenuhnya dari pelayan.`);
+    if (!isConfirmed) return;
+
+    let isVerified = await verifyAdminPasscode();
+    if (!isVerified) return;
+
+    document.getElementById('loadingText').innerText = "Memadam rekod batch dari pangkalan data...";
+    document.getElementById('loadingModal').style.display = 'flex';
+
+    try {
+        const { error } = await supabase.from('accounts').delete().eq('batch_name', batchName);
+        if (error) throw error;
+
+        showNotification("SUCCESS", `Batch <b>${batchName}</b> telah berjaya dipadam sepenuhnya.`);
+        
+        // Buang cache lama dan paksa sistem download data terbaru
+        const cacheKey = `scazp_cache_${currentUser.id}`;
+        const timeKey = `scazp_time_${currentUser.id}`;
+        await localforage.removeItem(cacheKey);
+        localStorage.removeItem(timeKey);
+        
+        await fetchFullDatabaseData();
+        applyFilterAndRender();
+        
+        // Muat semula jadual jika user masih di tab Assignment
+        if (document.getElementById('assign-panel').style.display === 'block') {
+            renderBatchList();
+            renderAssignTable();
+        }
+
+    } catch (err) {
+        showNotification("DELETE ERROR", err.message, true);
+    } finally {
+        document.getElementById('loadingModal').style.display = 'none';
+    }
+};
 
         window.toggleExpand = function(acct) {
             const row = document.getElementById('details-' + acct);
