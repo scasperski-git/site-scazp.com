@@ -1291,6 +1291,7 @@ th {
             <thead>
                 <tr>
                     <th>NAMA BATCH</th>
+                    <th>ZON</th>
                     <th>UPLOADED BY</th>
                     <th>JUMLAH AKAUN</th>
                     <th style="text-align: right;">TINDAKAN</th>
@@ -1694,16 +1695,54 @@ async function checkLoginSession() {
             });
         };
 
-        window.requestBatchName = function() {
+window.requestBatchName = function() {
     return new Promise((resolve) => {
         document.getElementById('batchPromptInput').value = '';
+        
+        // --- LOGIK KENAL PASTI ZON ---
+        let zoneSelect = document.getElementById('batchPromptZone');
+        zoneSelect.innerHTML = '';
+        
+        let myZone = null;
+        if (currentUser.role === 'manager') {
+            myZone = currentUser.assignedzone;
+        } else if (currentUser.role === 'admin') {
+            // Admin takde zon, kita cari manager dia untuk dapatkan zon
+            let myManager = allSystemUsers.find(u => u.id === currentUser.report_to);
+            myZone = myManager ? myManager.assignedzone : 'NO_MANAGER_FOUND';
+        }
+
+        if (currentUser.role === 'super') {
+            // Super Admin bebas pilih zon
+            zoneSelect.innerHTML = `
+                <option value="BC">BC</option>
+                <option value="WEST">WEST</option>
+                <option value="EAST">EAST</option>
+                <option value="HO">HO</option>
+            `;
+            zoneSelect.disabled = false;
+        } else {
+            // Manager & Admin akan dikunci pada zon mereka
+            if (myZone && myZone !== 'NO_MANAGER_FOUND') {
+                zoneSelect.innerHTML = `<option value="${myZone}">${myZone}</option>`;
+            } else {
+                zoneSelect.innerHTML = `<option value="UNKNOWN">TIADA ZON (Hubungi Super)</option>`;
+            }
+            zoneSelect.disabled = true; // Lock supaya tak boleh ubah
+        }
+
         document.getElementById('batchPromptModal').style.display = 'flex';
         setTimeout(() => document.getElementById('batchPromptInput').focus(), 100);
 
         document.getElementById('btnBatchOk').onclick = function() {
             let val = document.getElementById('batchPromptInput').value.trim();
+            let selectedZone = document.getElementById('batchPromptZone').value;
+            
+            if (!val) { alert("Sila isi nama batch!"); return; }
+            if (selectedZone === "UNKNOWN" || !selectedZone) { alert("Zon tidak ditemui!"); return; }
+            
             document.getElementById('batchPromptModal').style.display = 'none';
-            resolve(val);
+            resolve({ name: val, zone: selectedZone }); // Hantar nama & zon
         };
         
         document.getElementById('btnBatchCancel').onclick = function() {
@@ -3203,47 +3242,60 @@ if (!hasError) {
             } else { document.getElementById('progressModal').style.display = 'none'; }
         };
 
-        window.renderBatchList = function() {
+window.renderBatchList = function() {
     const tbody = document.getElementById('batch-table-body');
     if (!tbody) return;
 
     let batchGroups = {};
-    // Kumpulkan data batch dari cache global
     globalAccounts.forEach(acc => {
         if (acc.batch_name) {
             if (!batchGroups[acc.batch_name]) {
-                batchGroups[acc.batch_name] = { count: 0, uploaded_by: acc.uploaded_by || 'UNKNOWN' };
+                batchGroups[acc.batch_name] = { 
+                    count: 0, 
+                    // Guna || 'N/A' untuk elak undefined
+                    uploaded_by: acc.uploaded_by ? acc.uploaded_by.toUpperCase() : 'N/A', 
+                    zone: acc.zone || 'N/A' 
+                };
             }
             batchGroups[acc.batch_name].count++;
         }
     });
 
     tbody.innerHTML = '';
-    // Susun jadual dari yang paling terkini (descending)
-    let batchKeys = Object.keys(batchGroups).sort().reverse(); 
+    // Tapis supaya Manager/Admin nampak batch zon mereka saja
+    let batchKeys = Object.keys(batchGroups).filter(bName => {
+        if (currentUser.role === 'super') return true;
+        let bZone = batchGroups[bName].zone;
+        let myZone = (currentUser.role === 'manager') ? currentUser.assignedzone : null;
+        
+        if (currentUser.role === 'admin') {
+            let myManager = allSystemUsers.find(u => u.id === currentUser.report_to);
+            myZone = myManager ? myManager.assignedzone : null;
+        }
+        return bZone === myZone;
+    }).sort().reverse(); 
 
     if (batchKeys.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Tiada rekod batch ditemui.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Tiada rekod batch ditemui untuk zon anda.</td></tr>';
         return;
     }
 
-batchKeys.forEach(bName => {
+    batchKeys.forEach(bName => {
         let bInfo = batchGroups[bName];
         tbody.innerHTML += `
             <tr>
                 <td style="font-weight: 700; color: var(--text-main);">${bName}</td>
                 <td style="font-weight: 600; color: var(--accent-gold);">${bInfo.zone}</td>
-                <td>${bInfo.uploaded_by.toUpperCase()}</td>
+                <td>${bInfo.uploaded_by}</td>
                 <td>${bInfo.count} Akaun</td>
                 <td style="text-align: right; white-space: nowrap;">
-                    <!-- TAMBAH BUTANG TRANSFER DI SINI -->
                     <button class="btn-update" style="color: var(--status-call); border-color: var(--status-call); margin-right: 5px;" onclick="openTransferModal('${bName}')">🔄 TRANSFER</button>
                     <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteBatch('${bName}')">🗑️ DELETE</button>
                 </td>
             </tr>
         `;
     });
-    };
+};
 
 window.deleteBatch = async function(batchName) {
     let isConfirmed = await customConfirm(`STRICT WARNING:\nAdakah anda pasti mahu memadam KESELURUHAN akaun untuk batch ${batchName}? Tindakan ini akan memadam data sepenuhnya dari pelayan.`);
