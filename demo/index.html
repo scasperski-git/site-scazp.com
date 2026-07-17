@@ -3347,10 +3347,12 @@ window.executeBatchTransfer = async function(batchName, targetUser) {
         return;
     }
 
-    let isConfirmed = await customConfirm(`PENGESAHAN:\nAnda pasti mahu memindahkan KESELURUHAN data di dalam batch ${batchName} kepada staf ${targetUser.toUpperCase()}?`);
-    if (!isConfirmed) return;
-
+    // KOREKSI: Tutup popup transfer BUKA popup confirmation
     document.getElementById('batchTransferModal').style.display = 'none';
+
+    let isConfirmed = await customConfirm(`PENGESAHAN:\nAnda pasti mahu memindahkan KESELURUHAN data di dalam batch ${batchName} kepada staf ${targetUser.toUpperCase()}?`);
+    if (!isConfirmed) return; // Kalau batal, proses terhenti di sini
+
     document.getElementById('loadingText').innerText = "Memindahkan batch di pangkalan data pelayan...";
     document.getElementById('loadingModal').style.display = 'flex';
 
