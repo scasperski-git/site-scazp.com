@@ -1141,6 +1141,7 @@ th {
                             <th class="sortable" onclick="sortTable('region')" id="th-region">REGION ⇅</th>
                             <th class="sortable" onclick="sortTable('area')" id="th-area">AREA ⇅</th>
                             <th class="sortable" onclick="sortTable('loc')" id="th-loc">LOC CD ⇅</th>
+                            <th class="sortable" onclick="sortTable('pack_cd')" id="th-pack_cd">PACK CD ⇅</th>
                             <th class="sortable" onclick="sortTable('type')" id="th-type">TYPE ⇅</th>
                             <th class="sortable" onclick="sortTable('acct')" id="th-acct">ACCT NO ⇅</th>
                             <th class="sortable" onclick="sortTable('delq')" id="th-delq">DELQ ⇅</th>
@@ -1336,6 +1337,7 @@ th {
                             <th class="sortable" onclick="sortAssignTable('zone')" id="tha-zone">ZONE ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('region')" id="tha-region">REGION ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('area')" id="tha-area">AREA ⇅</th>
+                            <th class="sortable" onclick="sortAssignTable('pack_cd')" id="tha-pack_cd">PACK CD ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('osb')" id="tha-osb">OSB (RM) ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('status')" id="tha-status">STATUS ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('collector')" id="tha-collector">COLLECTOR ⇅</th>
@@ -1832,17 +1834,18 @@ async function fetchFullDatabaseData() {
                     // KOREKSI: Tambah lajur batch_name dan uploaded_by ke dalam select query di bawah
                     let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id, collector, batch_name, uploaded_by');
                     
-                    // [FIX HIERARCHY ACCESS]
-                    if (currentUser.role === 'user') {
-                        let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
-                        fetchQuery = fetchQuery.eq('assignee_id', currentUserIdClean);
-                    } else if (currentUser.role === 'admin') {
-                        let safeArea = currentUser.assignedarea ? currentUser.assignedarea.toUpperCase().trim() : 'NONE';
-                        fetchQuery = fetchQuery.eq('area', safeArea);
-                    } else if (currentUser.role === 'manager') {
-                        let safeZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : 'NONE';
-                        fetchQuery = fetchQuery.eq('zone', safeZone);
-                    }
+// [FIX HIERARCHY ACCESS]
+if (currentUser.role === 'user') {
+    let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
+    fetchQuery = fetchQuery.eq('assignee_id', currentUserIdClean);
+} else if (currentUser.role === 'admin') {
+    let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
+    // Admin tarik data jika dia yang upload ATAU data diagih kepadanya
+    fetchQuery = fetchQuery.or(`uploaded_by.eq.${currentUserIdClean},assignee_id.eq.${currentUserIdClean}`);
+} else if (currentUser.role === 'manager') {
+    let safeZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : 'NONE';
+    fetchQuery = fetchQuery.eq('zone', safeZone);
+}
                     // 'super' fetches everything.
                     
                     const { data, error } = await fetchQuery.range(page * pageSize, (page + 1) * pageSize - 1);
@@ -2258,6 +2261,7 @@ function resetHeaderArrows() {
                         <td>${row.region || '-'}</td>
                         <td>${row.area || '-'}</td>
                         <td>${row.loc || '-'}</td>
+                        <td>${d.PACK_CD || '-'}</td>
                         <td>${row.type || '-'}</td>
                         <td style="font-weight: 700; white-space: nowrap;">
     <span style="color: var(--accent-gold); cursor: pointer; text-decoration: underline;" onclick="openModal('${row.acct}')">${row.acct}</span>
@@ -2573,33 +2577,32 @@ if(error) {
             }
         };
 
-        window.updateUserInline = async function(userId) {
-            let newRole = document.getElementById(`edit-role-${userId}`).value;
-            let newReportTo = document.getElementById(`edit-report-${userId}`).value;
-            let newZone = document.getElementById(`edit-zone-${userId}`).value;
-            //let newArea = document.getElementById(`edit-area-${userId}`).value;
+window.updateUserInline = async function(userId) {
+    let newRole = document.getElementById(`edit-role-${userId}`).value;
+    let newReportTo = document.getElementById(`edit-report-${userId}`).value;
+    let newZone = document.getElementById(`edit-zone-${userId}`).value;
+    // Rujukan kepada edit-area telah dibuang sepenuhnya
 
-            if (newReportTo === "") newReportTo = null;
-            if (newZone === "ALL") newZone = null;
-            if (newArea === "ALL") newArea = null;
+    if (newReportTo === "") newReportTo = null;
+    if (newZone === "ALL") newZone = null;
 
-            let isVerified = await verifyAdminPasscode();
-            if (!isVerified) return;
+    let isVerified = await verifyAdminPasscode();
+    if (!isVerified) return;
 
-            const { error } = await supabase.from('users').update({ 
-                role: newRole, 
-                report_to: newReportTo,
-                assignedzone: newRole === 'manager' ? newZone : null,
-                assignedarea: null
-            }).eq('id', userId);
+    const { error } = await supabase.from('users').update({ 
+        role: newRole, 
+        report_to: newReportTo,
+        assignedzone: newRole === 'manager' ? newZone : null,
+        assignedarea: null // Paksa sentiasa null
+    }).eq('id', userId);
 
-            if (!error) { 
-                showNotification("UPDATE SUCCESS", `Konfigurasi untuk user <b>${userId.toUpperCase()}</b> telah berjaya dikemas kini.`);
-                fetchAndRenderUsers();
-            } else { 
-                showNotification("UPDATE ERROR", error.message, true); 
-            }
-        };
+    if (!error) { 
+        showNotification("UPDATE SUCCESS", `Konfigurasi untuk user <b>${userId.toUpperCase()}</b> telah berjaya dikemas kini.`);
+        fetchAndRenderUsers();
+    } else { 
+        showNotification("UPDATE ERROR", error.message, true); 
+    }
+};
 
         window.renderReportCenter = async function() {
             const tbody = document.getElementById('report-table-body');
@@ -3826,6 +3829,7 @@ window.renderAssignTable = function() {
                 pageData.forEach(row => {
                 let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '🔴 UNASSIGNED';
                 let colDisp = row.collector ? row.collector.toUpperCase() : '-'; // [UPDATE]
+                let d = row.details || {};
 
                 tbody.innerHTML += `
                     <tr>
@@ -3839,6 +3843,7 @@ window.renderAssignTable = function() {
                         <td>${row.zone || '-'}</td>
                         <td>${row.region || '-'}</td>
                         <td>${row.area || '-'}</td>
+                        <td>${d.PACK_CD || '-'}</td>
                         <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td><span class="status-badge status-pending">${row.status}</span></td>
                         <td style="font-weight:bold; color:var(--success-green);">${colDisp}</td>
