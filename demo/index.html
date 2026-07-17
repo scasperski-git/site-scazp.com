@@ -3243,6 +3243,7 @@ batchKeys.forEach(bName => {
             </tr>
         `;
     });
+    };
 
 window.deleteBatch = async function(batchName) {
     let isConfirmed = await customConfirm(`STRICT WARNING:\nAdakah anda pasti mahu memadam KESELURUHAN akaun untuk batch ${batchName}? Tindakan ini akan memadam data sepenuhnya dari pelayan.`);
