@@ -1291,6 +1291,7 @@ th {
             <thead>
                 <tr>
                     <th>NAMA BATCH</th>
+                    <th>ZON</th>
                     <th>UPLOADED BY</th>
                     <th>JUMLAH AKAUN</th>
                     <th style="text-align: right;">TINDAKAN</th>
@@ -1542,14 +1543,24 @@ th {
         </div>
     </div>
 
-    <div class="modal-overlay" id="batchPromptModal" style="z-index: 1100;">
+<div class="modal-overlay" id="batchPromptModal" style="z-index: 1100;">
     <div class="modal-content" style="text-align: center; max-width: 360px;">
-        <h2 style="color: var(--text-main); margin-top: 0; font-size: 20px;">NAMA BATCH EXCEL</h2>
-        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Sila masukkan nama batch rujukan (Cth: KUTIPAN_OGOS_26)</p>
-        <input type="text" id="batchPromptInput" class="form-control" placeholder="Tulis nama batch..." style="text-align: center; margin-bottom: 25px; font-size: 16px; font-weight: bold; text-transform: uppercase;">
+        <h2 style="color: var(--text-main); margin-top: 0; font-size: 20px;">MAKLUMAT BATCH EXCEL</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Sila masukkan nama rujukan dan pilih zon.</p>
+        
+        <div class="form-group" style="text-align: left; margin-bottom: 15px;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">1. NAMA BATCH (Cth: KUTIPAN_OGOS_26)</label>
+            <input type="text" id="batchPromptInput" class="form-control" placeholder="Tulis nama batch..." style="text-align: center; font-size: 16px; font-weight: bold; text-transform: uppercase;">
+        </div>
+
+        <div class="form-group" style="text-align: left; margin-bottom: 25px;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">2. PILIH ZON TUGASAN</label>
+            <select id="batchPromptZone" class="form-control" style="font-weight: bold; text-align: center;"></select>
+        </div>
+
         <div style="display: flex; gap: 12px;">
             <button class="btn-cancel" style="flex: 1;" id="btnBatchCancel">BATAL</button>
-            <button class="btn-submit" style="flex: 1; background-color: var(--success-green);" id="btnBatchOk">TERUSKAN UPLOAD</button>
+            <button class="btn-submit" style="flex: 1; background-color: var(--success-green);" id="btnBatchOk">TERUSKAN</button>
         </div>
     </div>
 </div>
@@ -1677,29 +1688,64 @@ async function checkLoginSession() {
             });
         };
 
-        window.requestBatchName = function() {
+window.requestBatchName = function() {
     return new Promise((resolve) => {
         document.getElementById('batchPromptInput').value = '';
+        
+        // --- LOGIK KENAL PASTI ZON ---
+        let zoneSelect = document.getElementById('batchPromptZone');
+        zoneSelect.innerHTML = '';
+        
+        let myZone = null;
+        if (currentUser.role === 'manager') {
+            myZone = currentUser.assignedzone;
+        } else if (currentUser.role === 'admin') {
+            // Admin takde zon, jadi kita pinjam zon dari Manager yang dia report_to
+            let myManager = allSystemUsers.find(u => u.id === currentUser.report_to);
+            myZone = myManager ? myManager.assignedzone : null;
+        }
+
+        if (currentUser.role === 'super') {
+            // Super boleh pilih bebas
+            zoneSelect.innerHTML = `
+                <option value="">-- PILIH ZON TUGASAN --</option>
+                <option value="BC">BC</option>
+                <option value="WEST">WEST</option>
+                <option value="EAST">EAST</option>
+                <option value="HO">HO</option>
+            `;
+            zoneSelect.disabled = false;
+        } else {
+            // Manager & Admin akan di-lock pada zon mereka
+            if (myZone) {
+                zoneSelect.innerHTML = `<option value="${myZone}">${myZone}</option>`;
+            } else {
+                zoneSelect.innerHTML = `<option value="UNKNOWN">TIADA ZON (Hubungi Super)</option>`;
+            }
+            zoneSelect.disabled = true; // Lock dropdown
+        }
+
         document.getElementById('batchPromptModal').style.display = 'flex';
         setTimeout(() => document.getElementById('batchPromptInput').focus(), 100);
 
         document.getElementById('btnBatchOk').onclick = function() {
             let val = document.getElementById('batchPromptInput').value.trim();
+            let selectedZone = document.getElementById('batchPromptZone').value;
+            
+            if (!val) { alert("Sila isi nama batch!"); return; }
+            if (currentUser.role === 'super' && !selectedZone) { alert("Sila pilih Zon untuk batch ini!"); return; }
+            
             document.getElementById('batchPromptModal').style.display = 'none';
-            resolve(val);
+            resolve({ name: val, zone: selectedZone }); // Hantar kedua-dua nilai
         };
         
         document.getElementById('btnBatchCancel').onclick = function() {
             document.getElementById('batchPromptModal').style.display = 'none';
             resolve(null);
         };
-        
-        document.getElementById('batchPromptInput').onkeypress = function(e) {
-            if (e.key === 'Enter') document.getElementById('btnBatchOk').click();
-        };
     });
 };
-
+        
         window.handleLogin = async function() {
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
@@ -2961,16 +3007,12 @@ window.handleExcelFileSelect = function(e) {
         };
 
 window.processExcelUpload = async function() {
-    // 1. Dapatkan nama batch dari user
-    let batchInput = await requestBatchName();
-    if (!batchInput) return; 
+    // 1. Dapatkan nama batch & zon dari user
+    let batchData = await requestBatchName();
+    if (!batchData || !batchData.name) return; 
 
-    // Bersihkan input supaya tiada simbol pelik, dan sambungkan dengan tarikh & masa
-    let rawBatchName = batchInput.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_');
-    if (!rawBatchName) {
-        alert("Nama batch tidak sah!");
-        return;
-    }
+    let rawBatchName = batchData.name.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_');
+    let batchZone = batchData.zone.toUpperCase(); // Ambil Zon dari Modal
 
     let d = new Date();
     let timeSuffix = String(d.getDate()).padStart(2, '0') + String(d.getMonth() + 1).padStart(2, '0') + d.getFullYear() + '_' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0');
@@ -3045,41 +3087,14 @@ window.processExcelUpload = async function() {
             finalOsb = bal + odp + adch;
         }
         
+        // --- LOGIK LOKASI BAHARU ---
         let keyLoc = getVal('map-loc');
-        let keyZone = getVal('map-zone');
-        let keyReg = getVal('map-region');
-        let keyArea = getVal('map-area');
-
         let rawLocCd = (keyLoc && row[keyLoc]) ? String(row[keyLoc]).trim() : "";
-        let finalZone = (keyZone && row[keyZone]) ? String(row[keyZone]).toUpperCase().trim() : "";
-        let finalRegion = (keyReg && row[keyReg]) ? String(row[keyReg]).toUpperCase().trim() : "";
-        let finalArea = (keyArea && row[keyArea]) ? String(row[keyArea]).toUpperCase().trim() : "";
-
-        if (rawLocCd !== "") {
-            let cleanRawLoc = rawLocCd.replace(/^0+/, '').toUpperCase();
-            let matchedLoc = masterLocations.find(loc => {
-                let locKey = Object.keys(loc).find(k => k.toLowerCase() === 'loc_cd' || k.toLowerCase() === 'loc');
-                let locValue = locKey ? loc[locKey] : '';
-                let cleanMasterLoc = String(locValue).replace(/^0+/, '').trim().toUpperCase();
-                return cleanMasterLoc === cleanRawLoc;
-            });
-            if (matchedLoc) {
-                let zKey = Object.keys(matchedLoc).find(k => k.toLowerCase() === 'zone_name' || k.toLowerCase() === 'zone');
-                let regKey = Object.keys(matchedLoc).find(k => k.toLowerCase() === 'region_name' || k.toLowerCase() === 'region');
-                let areaKey = Object.keys(matchedLoc).find(k => k.toLowerCase() === 'area_name' || k.toLowerCase() === 'area');
-                
-                let dbZone = zKey ? matchedLoc[zKey] : "";
-                let dbRegion = regKey ? matchedLoc[regKey] : "";
-                let dbArea = areaKey ? matchedLoc[areaKey] : "";
-                finalZone = dbZone !== "" ? String(dbZone).toUpperCase().trim() : finalZone;
-                finalRegion = dbRegion !== "" ? String(dbRegion).toUpperCase().trim() : finalRegion;
-                finalArea = dbArea !== "" ? String(dbArea).toUpperCase().trim() : finalArea;
-            }
-        }             
         
-        if (finalZone === "UNDEFINED") finalZone = "";
-        if (finalRegion === "UNDEFINED") finalRegion = "";
-        if (finalArea === "UNDEFINED") finalArea = "";
+        let finalZone = batchZone; // KITA PAKSA SEMUA DATA GUNA ZON DARI POPUP
+        let finalRegion = ""; // Boleh dibiarkan kosong kerana tidak guna master_locations
+        let finalArea = "";   // Boleh dibiarkan kosong 
+
         if (rawLocCd === "UNDEFINED") rawLocCd = "";
         
         let rawType = String(row[getVal('map-type')]).trim();
@@ -3186,7 +3201,7 @@ if (!hasError) {
             } else { document.getElementById('progressModal').style.display = 'none'; }
         };
 
-        window.renderBatchList = function() {
+window.renderBatchList = function() {
     const tbody = document.getElementById('batch-table-body');
     if (!tbody) return;
 
@@ -3195,18 +3210,36 @@ if (!hasError) {
     globalAccounts.forEach(acc => {
         if (acc.batch_name) {
             if (!batchGroups[acc.batch_name]) {
-                batchGroups[acc.batch_name] = { count: 0, uploaded_by: acc.uploaded_by || 'UNKNOWN' };
+                batchGroups[acc.batch_name] = { 
+                    count: 0, 
+                    uploaded_by: acc.uploaded_by || 'UNKNOWN',
+                    zone: acc.zone || 'UNKNOWN' // Tangkap Zon Batch Tersebut
+                };
             }
             batchGroups[acc.batch_name].count++;
         }
     });
 
     tbody.innerHTML = '';
-    // Susun jadual dari yang paling terkini (descending)
-    let batchKeys = Object.keys(batchGroups).sort().reverse(); 
+    
+    // Tapis list untuk Manager/Admin supaya nampak batch zon diorang je
+    let batchKeys = Object.keys(batchGroups).filter(bName => {
+        if (currentUser.role === 'super') return true; // Super nampak semua
+        let bZone = batchGroups[bName].zone;
+        
+        let myZone = null;
+        if(currentUser.role === 'manager') {
+            myZone = currentUser.assignedzone;
+        } else if(currentUser.role === 'admin') {
+            let myManager = allSystemUsers.find(u => u.id === currentUser.report_to);
+            myZone = myManager ? myManager.assignedzone : null;
+        }
+        
+        return bZone === myZone; // Filter ikut zon
+    }).sort().reverse(); 
 
     if (batchKeys.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Tiada rekod batch ditemui.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Tiada rekod batch ditemui untuk zon anda.</td></tr>';
         return;
     }
 
@@ -3215,6 +3248,7 @@ if (!hasError) {
         tbody.innerHTML += `
             <tr>
                 <td style="font-weight: 700; color: var(--text-main);">${bName}</td>
+                <td style="font-weight: 600; color: var(--accent-gold);">${bInfo.zone}</td>
                 <td>${bInfo.uploaded_by.toUpperCase()}</td>
                 <td>${bInfo.count} Akaun</td>
                 <td style="text-align: right;">
