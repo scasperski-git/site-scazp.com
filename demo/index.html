@@ -1141,7 +1141,6 @@ th {
                             <th class="sortable" onclick="sortTable('region')" id="th-region">REGION ⇅</th>
                             <th class="sortable" onclick="sortTable('area')" id="th-area">AREA ⇅</th>
                             <th class="sortable" onclick="sortTable('loc')" id="th-loc">LOC CD ⇅</th>
-                            <th class="sortable" onclick="sortTable('pack_cd')" id="th-pack_cd">PACK CD ⇅</th>
                             <th class="sortable" onclick="sortTable('type')" id="th-type">TYPE ⇅</th>
                             <th class="sortable" onclick="sortTable('acct')" id="th-acct">ACCT NO ⇅</th>
                             <th class="sortable" onclick="sortTable('delq')" id="th-delq">DELQ ⇅</th>
@@ -1291,7 +1290,6 @@ th {
             <thead>
                 <tr>
                     <th>NAMA BATCH</th>
-                    <th>ZON</th>
                     <th>UPLOADED BY</th>
                     <th>JUMLAH AKAUN</th>
                     <th style="text-align: right;">TINDAKAN</th>
@@ -1338,7 +1336,6 @@ th {
                             <th class="sortable" onclick="sortAssignTable('zone')" id="tha-zone">ZONE ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('region')" id="tha-region">REGION ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('area')" id="tha-area">AREA ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('pack_cd')" id="tha-pack_cd">PACK CD ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('osb')" id="tha-osb">OSB (RM) ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('status')" id="tha-status">STATUS ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('collector')" id="tha-collector">COLLECTOR ⇅</th>
@@ -1554,23 +1551,6 @@ th {
         </div>
     </div>
 </div>
-
-    <div class="modal-overlay" id="transferBatchModal" style="z-index: 1100;">
-    <div class="modal-content" style="text-align: center; max-width: 400px;">
-        <h2 style="color: var(--text-main); margin-top: 0; font-size: 20px;">TRANSFER BATCH</h2>
-        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Pilih staf penyelia (Admin / PIC) untuk menerima keseluruhan <br>akaun dari batch <b id="transferBatchNameDisplay" style="color: var(--accent-gold);"></b>.</p>
-        
-        <div class="form-group" style="text-align: left; margin-bottom: 25px;">
-            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">PILIH PENERIMA:</label>
-            <select id="transferTargetUser" class="form-control" style="font-weight: bold; text-align: center;"></select>
-        </div>
-
-        <div style="display: flex; gap: 12px;">
-            <button class="btn-cancel" style="flex: 1;" onclick="document.getElementById('transferBatchModal').style.display='none'">BATAL</button>
-            <button class="btn-submit" style="flex: 1; background-color: var(--status-call);" id="btnConfirmTransfer">TRANSFER SEKARANG</button>
-        </div>
-    </div>
-</div>
     
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
@@ -1695,54 +1675,16 @@ async function checkLoginSession() {
             });
         };
 
-window.requestBatchName = function() {
+        window.requestBatchName = function() {
     return new Promise((resolve) => {
         document.getElementById('batchPromptInput').value = '';
-        
-        // --- LOGIK KENAL PASTI ZON ---
-        let zoneSelect = document.getElementById('batchPromptZone');
-        zoneSelect.innerHTML = '';
-        
-        let myZone = null;
-        if (currentUser.role === 'manager') {
-            myZone = currentUser.assignedzone;
-        } else if (currentUser.role === 'admin') {
-            // Admin takde zon, kita cari manager dia untuk dapatkan zon
-            let myManager = allSystemUsers.find(u => u.id === currentUser.report_to);
-            myZone = myManager ? myManager.assignedzone : 'NO_MANAGER_FOUND';
-        }
-
-        if (currentUser.role === 'super') {
-            // Super Admin bebas pilih zon
-            zoneSelect.innerHTML = `
-                <option value="BC">BC</option>
-                <option value="WEST">WEST</option>
-                <option value="EAST">EAST</option>
-                <option value="HO">HO</option>
-            `;
-            zoneSelect.disabled = false;
-        } else {
-            // Manager & Admin akan dikunci pada zon mereka
-            if (myZone && myZone !== 'NO_MANAGER_FOUND') {
-                zoneSelect.innerHTML = `<option value="${myZone}">${myZone}</option>`;
-            } else {
-                zoneSelect.innerHTML = `<option value="UNKNOWN">TIADA ZON (Hubungi Super)</option>`;
-            }
-            zoneSelect.disabled = true; // Lock supaya tak boleh ubah
-        }
-
         document.getElementById('batchPromptModal').style.display = 'flex';
         setTimeout(() => document.getElementById('batchPromptInput').focus(), 100);
 
         document.getElementById('btnBatchOk').onclick = function() {
             let val = document.getElementById('batchPromptInput').value.trim();
-            let selectedZone = document.getElementById('batchPromptZone').value;
-            
-            if (!val) { alert("Sila isi nama batch!"); return; }
-            if (selectedZone === "UNKNOWN" || !selectedZone) { alert("Zon tidak ditemui!"); return; }
-            
             document.getElementById('batchPromptModal').style.display = 'none';
-            resolve({ name: val, zone: selectedZone }); // Hantar nama & zon
+            resolve(val);
         };
         
         document.getElementById('btnBatchCancel').onclick = function() {
@@ -1890,18 +1832,17 @@ async function fetchFullDatabaseData() {
                     // KOREKSI: Tambah lajur batch_name dan uploaded_by ke dalam select query di bawah
                     let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id, collector, batch_name, uploaded_by');
                     
-// [FIX HIERARCHY ACCESS]
-if (currentUser.role === 'user') {
-    let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
-    fetchQuery = fetchQuery.eq('assignee_id', currentUserIdClean);
-} else if (currentUser.role === 'admin') {
-    let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
-    // Admin tarik data jika dia yang upload ATAU data diagih kepadanya
-    fetchQuery = fetchQuery.or(`uploaded_by.eq.${currentUserIdClean},assignee_id.eq.${currentUserIdClean}`);
-} else if (currentUser.role === 'manager') {
-    let safeZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : 'NONE';
-    fetchQuery = fetchQuery.eq('zone', safeZone);
-}
+                    // [FIX HIERARCHY ACCESS]
+                    if (currentUser.role === 'user') {
+                        let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
+                        fetchQuery = fetchQuery.eq('assignee_id', currentUserIdClean);
+                    } else if (currentUser.role === 'admin') {
+                        let safeArea = currentUser.assignedarea ? currentUser.assignedarea.toUpperCase().trim() : 'NONE';
+                        fetchQuery = fetchQuery.eq('area', safeArea);
+                    } else if (currentUser.role === 'manager') {
+                        let safeZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : 'NONE';
+                        fetchQuery = fetchQuery.eq('zone', safeZone);
+                    }
                     // 'super' fetches everything.
                     
                     const { data, error } = await fetchQuery.range(page * pageSize, (page + 1) * pageSize - 1);
@@ -2227,8 +2168,8 @@ if (currentUser.role === 'user') {
             }
 
             filteredAccounts.sort((a, b) => {
-                let valueA = columnName === 'pack_cd' ? (a.details && a.details.PACK_CD ? a.details.PACK_CD : '') : a[columnName];
-                let valueB = columnName === 'pack_cd' ? (b.details && b.details.PACK_CD ? b.details.PACK_CD : '') : b[columnName];
+                let valueA = a[columnName];
+                let valueB = b[columnName];
 
                 if (columnName === 'last_date') {
                     let dateA = (a.details && a.details.last_remark_date) ? a.details.last_remark_date : '';
@@ -2257,14 +2198,12 @@ if (currentUser.role === 'user') {
         };
 
 function resetHeaderArrows() {
-            // 1. TAMBAH 'pack_cd' DALAM ARRAY INI
-            const cols = ['zone', 'region', 'area', 'loc', 'pack_cd', 'type', 'acct', 'delq', 'arrs_mth', 'osb', 'status', 'assignee_id', 'last_date'];
+            const cols = ['zone', 'region', 'area', 'loc', 'type', 'acct', 'delq', 'arrs_mth', 'osb', 'status', 'assignee_id', 'last_date'];
             cols.forEach(c => {
                 const el = document.getElementById(`th-${c}`);
                 if (el) {
                     if(c === 'last_date') el.innerHTML = "ATTEND DATE ⇅";
                     else if(c === 'assignee_id') el.innerHTML = "ASSIGNED TO ⇅";
-                    else if(c === 'pack_cd') el.innerHTML = "PACK CD ⇅"; // 2. TAMBAH BARIS INI
                     else el.innerHTML = `${el.innerText.split(' ')[0]} ⇅`;
                 }
             });
@@ -2319,7 +2258,6 @@ function resetHeaderArrows() {
                         <td>${row.region || '-'}</td>
                         <td>${row.area || '-'}</td>
                         <td>${row.loc || '-'}</td>
-                        <td>${d.PACK_CD || '-'}</td>
                         <td>${row.type || '-'}</td>
                         <td style="font-weight: 700; white-space: nowrap;">
     <span style="color: var(--accent-gold); cursor: pointer; text-decoration: underline;" onclick="openModal('${row.acct}')">${row.acct}</span>
@@ -2635,32 +2573,33 @@ if(error) {
             }
         };
 
-window.updateUserInline = async function(userId) {
-    let newRole = document.getElementById(`edit-role-${userId}`).value;
-    let newReportTo = document.getElementById(`edit-report-${userId}`).value;
-    let newZone = document.getElementById(`edit-zone-${userId}`).value;
-    // Rujukan kepada edit-area telah dibuang sepenuhnya
+        window.updateUserInline = async function(userId) {
+            let newRole = document.getElementById(`edit-role-${userId}`).value;
+            let newReportTo = document.getElementById(`edit-report-${userId}`).value;
+            let newZone = document.getElementById(`edit-zone-${userId}`).value;
+            //let newArea = document.getElementById(`edit-area-${userId}`).value;
 
-    if (newReportTo === "") newReportTo = null;
-    if (newZone === "ALL") newZone = null;
+            if (newReportTo === "") newReportTo = null;
+            if (newZone === "ALL") newZone = null;
+            if (newArea === "ALL") newArea = null;
 
-    let isVerified = await verifyAdminPasscode();
-    if (!isVerified) return;
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
 
-    const { error } = await supabase.from('users').update({ 
-        role: newRole, 
-        report_to: newReportTo,
-        assignedzone: newRole === 'manager' ? newZone : null,
-        assignedarea: null // Paksa sentiasa null
-    }).eq('id', userId);
+            const { error } = await supabase.from('users').update({ 
+                role: newRole, 
+                report_to: newReportTo,
+                assignedzone: newRole === 'manager' ? newZone : null,
+                assignedarea: null
+            }).eq('id', userId);
 
-    if (!error) { 
-        showNotification("UPDATE SUCCESS", `Konfigurasi untuk user <b>${userId.toUpperCase()}</b> telah berjaya dikemas kini.`);
-        fetchAndRenderUsers();
-    } else { 
-        showNotification("UPDATE ERROR", error.message, true); 
-    }
-};
+            if (!error) { 
+                showNotification("UPDATE SUCCESS", `Konfigurasi untuk user <b>${userId.toUpperCase()}</b> telah berjaya dikemas kini.`);
+                fetchAndRenderUsers();
+            } else { 
+                showNotification("UPDATE ERROR", error.message, true); 
+            }
+        };
 
         window.renderReportCenter = async function() {
             const tbody = document.getElementById('report-table-body');
@@ -3242,41 +3181,27 @@ if (!hasError) {
             } else { document.getElementById('progressModal').style.display = 'none'; }
         };
 
-window.renderBatchList = function() {
+        window.renderBatchList = function() {
     const tbody = document.getElementById('batch-table-body');
     if (!tbody) return;
 
     let batchGroups = {};
+    // Kumpulkan data batch dari cache global
     globalAccounts.forEach(acc => {
         if (acc.batch_name) {
             if (!batchGroups[acc.batch_name]) {
-                batchGroups[acc.batch_name] = { 
-                    count: 0, 
-                    // Guna || 'N/A' untuk elak undefined
-                    uploaded_by: acc.uploaded_by ? acc.uploaded_by.toUpperCase() : 'N/A', 
-                    zone: acc.zone || 'N/A' 
-                };
+                batchGroups[acc.batch_name] = { count: 0, uploaded_by: acc.uploaded_by || 'UNKNOWN' };
             }
             batchGroups[acc.batch_name].count++;
         }
     });
 
     tbody.innerHTML = '';
-    // Tapis supaya Manager/Admin nampak batch zon mereka saja
-    let batchKeys = Object.keys(batchGroups).filter(bName => {
-        if (currentUser.role === 'super') return true;
-        let bZone = batchGroups[bName].zone;
-        let myZone = (currentUser.role === 'manager') ? currentUser.assignedzone : null;
-        
-        if (currentUser.role === 'admin') {
-            let myManager = allSystemUsers.find(u => u.id === currentUser.report_to);
-            myZone = myManager ? myManager.assignedzone : null;
-        }
-        return bZone === myZone;
-    }).sort().reverse(); 
+    // Susun jadual dari yang paling terkini (descending)
+    let batchKeys = Object.keys(batchGroups).sort().reverse(); 
 
     if (batchKeys.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Tiada rekod batch ditemui untuk zon anda.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Tiada rekod batch ditemui.</td></tr>';
         return;
     }
 
@@ -3285,11 +3210,9 @@ window.renderBatchList = function() {
         tbody.innerHTML += `
             <tr>
                 <td style="font-weight: 700; color: var(--text-main);">${bName}</td>
-                <td style="font-weight: 600; color: var(--accent-gold);">${bInfo.zone}</td>
-                <td>${bInfo.uploaded_by}</td>
+                <td>${bInfo.uploaded_by.toUpperCase()}</td>
                 <td>${bInfo.count} Akaun</td>
-                <td style="text-align: right; white-space: nowrap;">
-                    <button class="btn-update" style="color: var(--status-call); border-color: var(--status-call); margin-right: 5px;" onclick="openTransferModal('${bName}')">🔄 TRANSFER</button>
+                <td style="text-align: right;">
                     <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteBatch('${bName}')">🗑️ DELETE</button>
                 </td>
             </tr>
@@ -3330,76 +3253,6 @@ window.deleteBatch = async function(batchName) {
 
     } catch (err) {
         showNotification("DELETE ERROR", err.message, true);
-    } finally {
-        document.getElementById('loadingModal').style.display = 'none';
-    }
-};
-
-            let activeTransferBatch = null;
-
-window.openTransferModal = function(batchName) {
-    activeTransferBatch = batchName;
-    document.getElementById('transferBatchNameDisplay').innerText = batchName;
-    
-    let dropdown = document.getElementById('transferTargetUser');
-    dropdown.innerHTML = '<option value="">-- PILIH PENERIMA --</option>';
-    
-    let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
-    let subordinates = [];
-
-    // Tapis senarai staf bawahan berdasarkan hierarchy
-    if (currentUser.role === 'super') {
-        subordinates = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.id.toLowerCase() !== currentUserIdClean);
-    } else {
-        subordinates = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.report_to === currentUserIdClean);
-    }
-
-    subordinates.forEach(u => {
-        dropdown.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
-    });
-
-    document.getElementById('transferBatchModal').style.display = 'flex';
-};
-
-document.getElementById('btnConfirmTransfer').onclick = async function() {
-    let targetUser = document.getElementById('transferTargetUser').value;
-    if (!targetUser) { alert("Sila pilih penerima!"); return; }
-
-    let isConfirmed = await customConfirm(`Anda pasti mahu memindahkan semua akaun dalam batch ${activeTransferBatch} kepada ${targetUser.toUpperCase()}?`);
-    if (!isConfirmed) return;
-
-    document.getElementById('transferBatchModal').style.display = 'none';
-    document.getElementById('loadingText').innerText = "Memindahkan batch kepada penerima...";
-    document.getElementById('loadingModal').style.display = 'flex';
-
-    try {
-        let cleanTarget = targetUser.toLowerCase().trim();
-        
-        // Update kolum assignee_id di Supabase mengikut nama batch
-        const { error } = await supabase.from('accounts')
-            .update({ assignee_id: cleanTarget })
-            .eq('batch_name', activeTransferBatch);
-            
-        if (error) throw error;
-
-        // Update cache lokal (supaya UI terus berubah tanpa perlu fetch semula database)
-        globalAccounts.forEach(acc => {
-            if (acc.batch_name === activeTransferBatch) {
-                acc.assignee_id = cleanTarget;
-            }
-        });
-
-        const cacheKey = `scazp_cache_${currentUser.id}`;
-        await localforage.setItem(cacheKey, globalAccounts);
-
-        showNotification("TRANSFER BERJAYA", `Keseluruhan batch <b>${activeTransferBatch}</b> telah berjaya dipindahkan kepada ${cleanTarget.toUpperCase()}.`);
-        
-        // Refresh jadual Assign
-        applyFilterAndRender();
-        renderAssignTable();
-        
-    } catch (err) {
-        showNotification("TRANSFER ERROR", err.message, true);
     } finally {
         document.getElementById('loadingModal').style.display = 'none';
     }
@@ -3852,9 +3705,8 @@ window.saveFinding = async function() {
             renderAssignTable(); // Panggil semula table untuk filter & susun
         };
 
-function updateAssignHeaderArrows(activeCol) {
-            // 1. TAMBAH 'pack_cd' DALAM ARRAY INI
-            const cols = ['acct', 'zone', 'region', 'area', 'pack_cd', 'osb', 'status', 'assignee_id', 'collector'];
+        function updateAssignHeaderArrows(activeCol) {
+            const cols = ['acct', 'zone', 'region', 'area', 'osb', 'status', 'assignee_id', 'collector'];
             cols.forEach(c => {
                 const el = document.getElementById(`tha-${c}`);
                 if (el) {
@@ -3862,7 +3714,6 @@ function updateAssignHeaderArrows(activeCol) {
                     if(c === 'acct') baseText = "ACCT NO";
                     else if(c === 'assignee_id') baseText = "CURRENT ASSIGNEE";
                     else if(c === 'osb') baseText = "OSB (RM)";
-                    else if(c === 'pack_cd') baseText = "PACK CD"; // 2. TAMBAH BARIS INI
                     
                     if (c === activeCol) {
                         let arrow = currentAssignSortDirection === 'asc' ? '▲' : '▼';
@@ -3936,17 +3787,16 @@ window.renderAssignTable = function() {
         return matchStatus && matchCollector;
     });
 
-if (currentAssignSortColumn) {
-        assignAccounts.sort((a, b) => {
-            // TARIK DATA DARI DALAM DETAILS JIKA COLUMN = PACK_CD
-            let valueA = currentAssignSortColumn === 'pack_cd' ? (a.details && a.details.PACK_CD ? a.details.PACK_CD : '') : a[currentAssignSortColumn];
-            let valueB = currentAssignSortColumn === 'pack_cd' ? (b.details && b.details.PACK_CD ? b.details.PACK_CD : '') : b[currentAssignSortColumn];
+    if (currentAssignSortColumn) {
+                assignAccounts.sort((a, b) => {
+                    let valueA = a[currentAssignSortColumn];
+                    let valueB = b[currentAssignSortColumn];
 
-            if (currentAssignSortColumn === 'osb') {
-                let numA = parseFloat(valueA) || 0;
-                let numB = parseFloat(valueB) || 0;
-                return currentAssignSortDirection === 'asc' ? numA - numB : numB - numA;
-            }
+                    if (currentAssignSortColumn === 'osb') {
+                        let numA = parseFloat(valueA) || 0;
+                        let numB = parseFloat(valueB) || 0;
+                        return currentAssignSortDirection === 'asc' ? numA - numB : numB - numA;
+                    } 
                     
                     let strA = valueA ? String(valueA).toUpperCase().trim() : '';
                     let strB = valueB ? String(valueB).toUpperCase().trim() : '';
@@ -3973,11 +3823,9 @@ if (currentAssignSortColumn) {
             if(pageData.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Tiada akaun dijumpai untuk kategori ini.</td></tr>';
             } else {
-                
-pageData.forEach(row => {
+                pageData.forEach(row => {
                 let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '🔴 UNASSIGNED';
-                let colDisp = row.collector ? row.collector.toUpperCase() : '-';
-                let d = row.details || {}; // Wajib ada untuk tarik PACK_CD
+                let colDisp = row.collector ? row.collector.toUpperCase() : '-'; // [UPDATE]
 
                 tbody.innerHTML += `
                     <tr>
@@ -3985,21 +3833,18 @@ pageData.forEach(row => {
                             <input type="checkbox" class="chk-assign-row" value="${row.acct}" style="cursor:pointer; transform: scale(1.2);">
                         </td>
                         <td style="font-weight: bold; color: var(--text-main); white-space: nowrap;">
-                            ${row.acct}
-                            <button onclick="copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0; display: inline-block;" title="Copy Account No">📋</button>
-                        </td>
+    ${row.acct}
+    <button onclick="copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0; display: inline-block;" title="Copy Account No">📋</button>
+</td>
                         <td>${row.zone || '-'}</td>
                         <td>${row.region || '-'}</td>
                         <td>${row.area || '-'}</td>
-                        <td style="font-weight: 700; color: var(--accent-gold);">${d.PACK_CD || '-'}</td> <!-- INI YANG TERTINGGAL -->
                         <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td><span class="status-badge status-pending">${row.status}</span></td>
                         <td style="font-weight:bold; color:var(--success-green);">${colDisp}</td>
-                        <td style="font-weight:bold; color:var(--accent-gold);">${assigneeDisp}</td>
-                    </tr>
+                        <td style="font-weight:bold; color:var(--accent-gold);">${assigneeDisp}</td> </tr>
                 `;
             });
-                
             }
 
             document.getElementById('assign-page-info').innerText = `Page ${currentAssignPage} of ${totalPages}`;
