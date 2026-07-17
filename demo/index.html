@@ -1565,7 +1565,7 @@ th {
     </div>
 </div>
 
-    <div class="modal-overlay" id="transferBatchModal" style="z-index: 1100;">
+<div class="modal-overlay" id="transferBatchModal" style="z-index: 1100;">
     <div class="modal-content" style="text-align: center; max-width: 400px;">
         <h2 style="color: var(--text-main); margin-top: 0; font-size: 20px;">TRANSFER BATCH</h2>
         <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Pilih staf penyelia (Admin / PIC) untuk menerima keseluruhan <br>akaun dari batch <b id="transferBatchNameDisplay" style="color: var(--accent-gold);"></b>.</p>
@@ -1582,7 +1582,7 @@ th {
     </div>
 </div>
     
-    <script type="module">
+<script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
         const IS_MAINTENANCE = false; 
@@ -1709,7 +1709,6 @@ window.requestBatchName = function() {
     return new Promise((resolve) => {
         document.getElementById('batchPromptInput').value = '';
         
-        // --- LOGIK KENAL PASTI ZON ---
         let zoneSelect = document.getElementById('batchPromptZone');
         zoneSelect.innerHTML = '';
         
@@ -1717,13 +1716,11 @@ window.requestBatchName = function() {
         if (currentUser.role === 'manager') {
             myZone = currentUser.assignedzone;
         } else if (currentUser.role === 'admin') {
-            // Admin takde zon, jadi kita pinjam zon dari Manager yang dia report_to
             let myManager = allSystemUsers.find(u => u.id === currentUser.report_to);
             myZone = myManager ? myManager.assignedzone : null;
         }
 
         if (currentUser.role === 'super') {
-            // Super boleh pilih bebas
             zoneSelect.innerHTML = `
                 <option value="">-- PILIH ZON TUGASAN --</option>
                 <option value="BC">BC</option>
@@ -1733,13 +1730,12 @@ window.requestBatchName = function() {
             `;
             zoneSelect.disabled = false;
         } else {
-            // Manager & Admin akan di-lock pada zon mereka
             if (myZone) {
                 zoneSelect.innerHTML = `<option value="${myZone}">${myZone}</option>`;
             } else {
                 zoneSelect.innerHTML = `<option value="UNKNOWN">TIADA ZON (Hubungi Super)</option>`;
             }
-            zoneSelect.disabled = true; // Lock dropdown
+            zoneSelect.disabled = true;
         }
 
         document.getElementById('batchPromptModal').style.display = 'flex';
@@ -1753,7 +1749,7 @@ window.requestBatchName = function() {
             if (currentUser.role === 'super' && !selectedZone) { alert("Sila pilih Zon untuk batch ini!"); return; }
             
             document.getElementById('batchPromptModal').style.display = 'none';
-            resolve({ name: val, zone: selectedZone }); // Hantar kedua-dua nilai
+            resolve({ name: val, zone: selectedZone });
         };
         
         document.getElementById('btnBatchCancel').onclick = function() {
@@ -1894,22 +1890,18 @@ async function fetchFullDatabaseData() {
                 const pageSize = 1000;
                 
                 while(true) {
-                    // KOREKSI: Tambah lajur batch_name dan uploaded_by ke dalam select query di bawah
                     let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id, collector, batch_name, uploaded_by');
                     
-// [FIX HIERARCHY ACCESS]
-if (currentUser.role === 'user') {
-    let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
-    fetchQuery = fetchQuery.eq('assignee_id', currentUserIdClean);
-} else if (currentUser.role === 'admin') {
-    let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
-    // Admin tarik data jika dia yang upload ATAU data diagih kepadanya
-    fetchQuery = fetchQuery.or(`uploaded_by.eq.${currentUserIdClean},assignee_id.eq.${currentUserIdClean}`);
-} else if (currentUser.role === 'manager') {
-    let safeZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : 'NONE';
-    fetchQuery = fetchQuery.eq('zone', safeZone);
-}
-                    // 'super' fetches everything.
+                    if (currentUser.role === 'user') {
+                        let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
+                        fetchQuery = fetchQuery.eq('assignee_id', currentUserIdClean);
+                    } else if (currentUser.role === 'admin') {
+                        let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
+                        fetchQuery = fetchQuery.or(`uploaded_by.eq.${currentUserIdClean},assignee_id.eq.${currentUserIdClean}`);
+                    } else if (currentUser.role === 'manager') {
+                        let safeZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : 'NONE';
+                        fetchQuery = fetchQuery.eq('zone', safeZone);
+                    }
                     
                     const { data, error } = await fetchQuery.range(page * pageSize, (page + 1) * pageSize - 1);
                     if (error) { console.error("Error fetching data:", error); break; }
@@ -1962,7 +1954,6 @@ if (currentUser.role === 'user') {
                 document.getElementById('tab-report').style.display = currentUser.role === 'super' ? 'block' : 'none';
                 document.getElementById('tab-settings').style.display = currentUser.role === 'super' ? 'inline-block' : 'none';
                 
-                // FILTER HIERARCHY LOGIC
                 if(currentUser.role === 'super') {
                     document.getElementById('zone-filters-container').style.display = 'block';
                     renderZoneSelectionUI();
@@ -1976,7 +1967,6 @@ if (currentUser.role === 'user') {
                     document.getElementById('region-filters-container').style.display = 'block';
                     renderRegionSelectionUI(currentZone);
                 } else if(currentUser.role === 'admin') {
-                    // [BUG FIX]: Admin cannot select region/zone. Stick strictly to their assigned area.
                     document.getElementById('area-filters-container').style.display = 'block';
                     document.getElementById('area-filters-container').innerHTML = `
                         <span class="filter-title">My Assigned Area</span>
@@ -1990,7 +1980,6 @@ if (currentUser.role === 'user') {
                 if(currentUser.role === 'super') renderReportCenter(); 
                 toggleFormRoleSelect();
             } else {
-                // Untuk PIC USER biasa
                 document.getElementById('master-nav-tabs').style.display = 'none';
                 document.getElementById('upload-action-container').style.display = 'none';
                 
@@ -2263,15 +2252,14 @@ if (currentUser.role === 'user') {
             renderTablePage();
         };
 
-function resetHeaderArrows() {
-            // 1. TAMBAH 'pack_cd' DALAM ARRAY INI
+        function resetHeaderArrows() {
             const cols = ['zone', 'region', 'area', 'loc', 'pack_cd', 'type', 'acct', 'delq', 'arrs_mth', 'osb', 'status', 'assignee_id', 'last_date'];
             cols.forEach(c => {
                 const el = document.getElementById(`th-${c}`);
                 if (el) {
                     if(c === 'last_date') el.innerHTML = "ATTEND DATE ⇅";
                     else if(c === 'assignee_id') el.innerHTML = "ASSIGNED TO ⇅";
-                    else if(c === 'pack_cd') el.innerHTML = "PACK CD ⇅"; // 2. TAMBAH BARIS INI
+                    else if(c === 'pack_cd') el.innerHTML = "PACK CD ⇅";
                     else el.innerHTML = `${el.innerText.split(' ')[0]} ⇅`;
                 }
             });
@@ -2326,12 +2314,12 @@ function resetHeaderArrows() {
                         <td>${row.region || '-'}</td>
                         <td>${row.area || '-'}</td>
                         <td>${row.loc || '-'}</td>
-                        <td>${d.PACK_CD || '-'}</td>
+                        <td style="font-weight: 700; color: var(--accent-gold);">${d.PACK_CD || '-'}</td>
                         <td>${row.type || '-'}</td>
                         <td style="font-weight: 700; white-space: nowrap;">
-    <span style="color: var(--accent-gold); cursor: pointer; text-decoration: underline;" onclick="openModal('${row.acct}')">${row.acct}</span>
-    <button onclick="event.stopPropagation(); copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0; display: inline-block;" title="Copy Account No">📋</button>
-</td>
+                            <span style="color: var(--accent-gold); cursor: pointer; text-decoration: underline;" onclick="openModal('${row.acct}')">${row.acct}</span>
+                            <button onclick="event.stopPropagation(); copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0; display: inline-block;" title="Copy Account No">📋</button>
+                        </td>
                         <td>${row.delq || '-'}</td>
                         <td style="color: ${parseFloat(row.arrs_mth) > 0 ? 'var(--error-red)' : 'inherit'}; font-weight: ${parseFloat(row.arrs_mth) > 0 ? '700' : 'normal'};">${row.arrs_mth || '0'}</td>
                         <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
@@ -2380,19 +2368,17 @@ function resetHeaderArrows() {
             localStorage.setItem('scazp_active_tab', target);
         };
 
-window.fetchAndRenderUsers = async function() {
-    try {
-        // TAMBAHKAN 'name' DALAM SELECT QUERY DI BAWAH
-        const { data, error } = await supabase.from('users').select('id, name, role, assignedzone, assignedregion, assignedarea, status, report_to').order('id', { ascending: true });
-        
-        if (error) throw error;
-        allSystemUsers = data;
-        filterUserList();
-        populateAssignSubordinates();
-    } catch (err) {
-        console.error("Failed to fetch user list:", err);
-    }
-};
+        window.fetchAndRenderUsers = async function() {
+            try {
+                const { data, error } = await supabase.from('users').select('id, name, role, assignedzone, assignedregion, assignedarea, status, report_to').order('id', { ascending: true });
+                if (error) throw error;
+                allSystemUsers = data;
+                filterUserList();
+                populateAssignSubordinates();
+            } catch (err) {
+                console.error("Failed to fetch user list:", err);
+            }
+        };
 
         window.filterUserList = function() {
             let query = document.getElementById('search-user').value.toLowerCase().trim();
@@ -2401,87 +2387,85 @@ window.fetchAndRenderUsers = async function() {
             renderUserTablePage();
         };
 
-window.renderUserTablePage = async function() {
-    const tbody = document.getElementById('users-table-body');
-    tbody.innerHTML = '';
-    
-    let total = filteredSystemUsers.length;
-    document.getElementById('total-users-count').innerText = total;
-    
-    let totalPages = Math.ceil(total / usersPerPage) || 1;
-    if(userCurrentPage > totalPages) userCurrentPage = totalPages;
-    if(userCurrentPage < 1) userCurrentPage = 1;
-    
-    let start = (userCurrentPage - 1) * usersPerPage;
-    let end = start + usersPerPage;
-    let pageData = filteredSystemUsers.slice(start, end);
-    
-    if(pageData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No users found.</td></tr>';
-    } else {
-        pageData.forEach((user, index) => {
-            let rName = user.role ? user.role.toLowerCase().trim() : 'user';
-            let userStatus = user.status || 'ACTIVE';
-            let statusBadge = userStatus === 'ACTIVE' ? 'status-done' : 'status-pending';
+        window.renderUserTablePage = async function() {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
             
-            let toggleBtnText = userStatus === 'ACTIVE' ? 'DEACTIVATE' : 'ACTIVATE';
-            let toggleBtnColor = userStatus === 'ACTIVE' ? 'var(--error-red)' : 'var(--success-green)';
+            let total = filteredSystemUsers.length;
+            document.getElementById('total-users-count').innerText = total;
             
-            let roleSelect = `
-                <select id="edit-role-${user.id}" onchange="toggleInlineAccessSelect('${user.id}')" style="padding:4px; font-size:11px; font-weight:600; border:1px solid var(--border-color); border-radius:4px;">
-                    <option value="user" ${rName==='user'?'selected':''}>USER</option>
-                    <option value="admin" ${rName==='admin'?'selected':''}>ADMIN</option>
-                    <option value="manager" ${rName==='manager'?'selected':''}>MANAGER</option>
-                    <option value="super" ${rName==='super'?'selected':''}>SUPER</option>
-                </select>`;
-
-            let reportToOptions = `<option value="">-- NONE --</option>`;
-            allSystemUsers.filter(u => u.role !== 'user' && u.id !== user.id).forEach(u => {
-                reportToOptions += `<option value="${u.id}" ${user.report_to===u.id?'selected':''}>${u.id.toUpperCase()}</option>`;
-            });
-            let reportSelect = `<select id="edit-report-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; max-width:110px;">${reportToOptions}</select>`;
-
-            // Dropdown ZONE statik (Untuk Manager)
-            let zoneOptions = `<option value="ALL" ${!user.assignedzone || user.assignedzone==='ALL'?'selected':''}>ALL ZONES</option>`;
-            const staticZones = ['BC', 'WEST', 'EAST', 'HO'];
-            staticZones.forEach(z => {
-                zoneOptions += `<option value="${z}" ${user.assignedzone===z?'selected':''}>${z}</option>`;
-            });
-            let zoneSelect = `<select id="edit-zone-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; display: ${rName === 'manager' ? 'inline-block' : 'none'};">${zoneOptions}</select>`;
+            let totalPages = Math.ceil(total / usersPerPage) || 1;
+            if(userCurrentPage > totalPages) userCurrentPage = totalPages;
+            if(userCurrentPage < 1) userCurrentPage = 1;
             
-            // Kapsul fallback jika User/Super/Admin
-            let noneText = `<span id="edit-none-${user.id}" style="font-size: 11px; color: var(--text-muted); display: ${(rName === 'user' || rName === 'super' || rName === 'admin') ? 'inline-block' : 'none'};">N/A (Global/PIC)</span>`;
-
-            let fullNameDisp = user.name ? user.name.toUpperCase() : '<span style="color:#cbd5e1;">TIADA DATA</span>'; 
+            let start = (userCurrentPage - 1) * usersPerPage;
+            let end = start + usersPerPage;
+            let pageData = filteredSystemUsers.slice(start, end);
             
-            tbody.innerHTML += `
-                <tr>
-                    <td style="text-align: center;">${start + index + 1}</td>
-                    <td style="font-weight:700; color:var(--text-main);">${user.id.toUpperCase()}</td>
-                    <td style="font-size:12px;">${fullNameDisp}</td> 
-                    <td>${roleSelect}</td>
-                    <td>${reportSelect}</td>
-                    <td>${zoneSelect}${noneText}</td>
-                    <td><span class="status-badge ${statusBadge}">${userStatus}</span></td>
-                    <td style="white-space: nowrap;">
-                        <button class="btn-update" style="color: var(--accent-gold); border-color: var(--accent-gold); margin-right: 5px; font-weight:600;" onclick="updateUserInline('${user.id}')">💾 SAVE</button>
-                        <button class="btn-update" style="color: ${toggleBtnColor}; border-color: ${toggleBtnColor}; margin-right: 5px;" onclick="toggleUserStatus('${user.id}', '${userStatus}')">${toggleBtnText}</button>
-                        <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteUser('${user.id}')">DEL</button>
-                    </td>
-                </tr>
-            `;
-        });
-    }
-    document.getElementById('user-page-info').innerText = `Page ${userCurrentPage} of ${totalPages}`;
-    document.getElementById('btn-user-prev').disabled = userCurrentPage === 1;
-    document.getElementById('btn-user-next').disabled = userCurrentPage === totalPages;
-};
+            if(pageData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No users found.</td></tr>';
+            } else {
+                pageData.forEach((user, index) => {
+                    let rName = user.role ? user.role.toLowerCase().trim() : 'user';
+                    let userStatus = user.status || 'ACTIVE';
+                    let statusBadge = userStatus === 'ACTIVE' ? 'status-done' : 'status-pending';
+                    
+                    let toggleBtnText = userStatus === 'ACTIVE' ? 'DEACTIVATE' : 'ACTIVATE';
+                    let toggleBtnColor = userStatus === 'ACTIVE' ? 'var(--error-red)' : 'var(--success-green)';
+                    
+                    let roleSelect = `
+                        <select id="edit-role-${user.id}" onchange="toggleInlineAccessSelect('${user.id}')" style="padding:4px; font-size:11px; font-weight:600; border:1px solid var(--border-color); border-radius:4px;">
+                            <option value="user" ${rName==='user'?'selected':''}>USER</option>
+                            <option value="admin" ${rName==='admin'?'selected':''}>ADMIN</option>
+                            <option value="manager" ${rName==='manager'?'selected':''}>MANAGER</option>
+                            <option value="super" ${rName==='super'?'selected':''}>SUPER</option>
+                        </select>`;
 
-window.toggleInlineAccessSelect = function(userId) {
-    let role = document.getElementById(`edit-role-${userId}`).value;
-    document.getElementById(`edit-zone-${userId}`).style.display = role === 'manager' ? 'inline-block' : 'none';
-    document.getElementById(`edit-none-${userId}`).style.display = (role === 'user' || role === 'super' || role === 'admin') ? 'inline-block' : 'none';
-}
+                    let reportToOptions = `<option value="">-- NONE --</option>`;
+                    allSystemUsers.filter(u => u.role !== 'user' && u.id !== user.id).forEach(u => {
+                        reportToOptions += `<option value="${u.id}" ${user.report_to===u.id?'selected':''}>${u.id.toUpperCase()}</option>`;
+                    });
+                    let reportSelect = `<select id="edit-report-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; max-width:110px;">${reportToOptions}</select>`;
+
+                    let zoneOptions = `<option value="ALL" ${!user.assignedzone || user.assignedzone==='ALL'?'selected':''}>ALL ZONES</option>`;
+                    const staticZones = ['BC', 'WEST', 'EAST', 'HO'];
+                    staticZones.forEach(z => {
+                        zoneOptions += `<option value="${z}" ${user.assignedzone===z?'selected':''}>${z}</option>`;
+                    });
+                    let zoneSelect = `<select id="edit-zone-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; display: ${rName === 'manager' ? 'inline-block' : 'none'};">${zoneOptions}</select>`;
+                    
+                    let noneText = `<span id="edit-none-${user.id}" style="font-size: 11px; color: var(--text-muted); display: ${(rName === 'user' || rName === 'super' || rName === 'admin') ? 'inline-block' : 'none'};">N/A (Global/PIC)</span>`;
+
+                    let fullNameDisp = user.name ? user.name.toUpperCase() : '<span style="color:#cbd5e1;">TIADA DATA</span>'; 
+                    
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="text-align: center;">${start + index + 1}</td>
+                            <td style="font-weight:700; color:var(--text-main);">${user.id.toUpperCase()}</td>
+                            <td style="font-size:12px;">${fullNameDisp}</td> 
+                            <td>${roleSelect}</td>
+                            <td>${reportSelect}</td>
+                            <td>${zoneSelect}${noneText}</td>
+                            <td><span class="status-badge ${statusBadge}">${userStatus}</span></td>
+                            <td style="white-space: nowrap;">
+                                <button class="btn-update" style="color: var(--accent-gold); border-color: var(--accent-gold); margin-right: 5px; font-weight:600;" onclick="updateUserInline('${user.id}')">💾 SAVE</button>
+                                <button class="btn-update" style="color: ${toggleBtnColor}; border-color: ${toggleBtnColor}; margin-right: 5px;" onclick="toggleUserStatus('${user.id}', '${userStatus}')">${toggleBtnText}</button>
+                                <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteUser('${user.id}')">DEL</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+            document.getElementById('user-page-info').innerText = `Page ${userCurrentPage} of ${totalPages}`;
+            document.getElementById('btn-user-prev').disabled = userCurrentPage === 1;
+            document.getElementById('btn-user-next').disabled = userCurrentPage === totalPages;
+        };
+
+        window.toggleInlineAccessSelect = function(userId) {
+            let role = document.getElementById(`edit-role-${userId}`).value;
+            document.getElementById(`edit-zone-${userId}`).style.display = role === 'manager' ? 'inline-block' : 'none';
+            document.getElementById(`edit-none-${userId}`).style.display = (role === 'user' || role === 'super' || role === 'admin') ? 'inline-block' : 'none';
+        };
         
         window.nextUserPage = function() {
             const totalPages = Math.ceil(filteredSystemUsers.length / usersPerPage);
@@ -2498,41 +2482,41 @@ window.toggleInlineAccessSelect = function(userId) {
             }
         };
 
-window.toggleFormRoleSelect = async function() {
-    const role = document.getElementById('new-user-role').value;
-    const reportGroup = document.getElementById('form-report-group');
-    const reportSelect = document.getElementById('new-user-report-to');
-    const zoneGroup = document.getElementById('form-zone-group');
-    
-    if (role === 'manager') {
-        zoneGroup.style.display = 'block'; 
-    } else {
-        zoneGroup.style.display = 'none'; 
-    }
-    
-    if (role === 'super') {
-        reportGroup.style.display = 'none';
-        reportSelect.innerHTML = '<option value="">-- N/A --</option>';
-    } else {
-        reportGroup.style.display = 'block';
-        reportSelect.innerHTML = '<option value="">Loading Supervisor List...</option>';
-        
-        let allowedRoles = role === 'user' ? ['admin', 'manager', 'super'] : 
-                           (role === 'admin' ? ['manager', 'super'] : ['super']);
-        
-        try {
-            const { data, error } = await supabase.from('users').select('id, role').in('role', allowedRoles).eq('status', 'ACTIVE');
-            reportSelect.innerHTML = '<option value="">-- TANGGUH DULU / TIADA SUPERVISOR --</option>';
-            if (data && data.length > 0) {
-                data.forEach(u => {
-                    reportSelect.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
-                });
+        window.toggleFormRoleSelect = async function() {
+            const role = document.getElementById('new-user-role').value;
+            const reportGroup = document.getElementById('form-report-group');
+            const reportSelect = document.getElementById('new-user-report-to');
+            const zoneGroup = document.getElementById('form-zone-group');
+            
+            if (role === 'manager') {
+                zoneGroup.style.display = 'block'; 
+            } else {
+                zoneGroup.style.display = 'none'; 
             }
-        } catch(err) {
-            reportSelect.innerHTML = '<option value="">-- TANGGUH DULU / TIADA SUPERVISOR --</option>';
-        }
-    }
-};
+            
+            if (role === 'super') {
+                reportGroup.style.display = 'none';
+                reportSelect.innerHTML = '<option value="">-- N/A --</option>';
+            } else {
+                reportGroup.style.display = 'block';
+                reportSelect.innerHTML = '<option value="">Loading Supervisor List...</option>';
+                
+                let allowedRoles = role === 'user' ? ['admin', 'manager', 'super'] : 
+                                   (role === 'admin' ? ['manager', 'super'] : ['super']);
+                
+                try {
+                    const { data, error } = await supabase.from('users').select('id, role').in('role', allowedRoles).eq('status', 'ACTIVE');
+                    reportSelect.innerHTML = '<option value="">-- TANGGUH DULU / TIADA SUPERVISOR --</option>';
+                    if (data && data.length > 0) {
+                        data.forEach(u => {
+                            reportSelect.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
+                        });
+                    }
+                } catch(err) {
+                    reportSelect.innerHTML = '<option value="">-- TANGGUH DULU / TIADA SUPERVISOR --</option>';
+                }
+            }
+        };
 
         function populateFilterDropdown(dropdownId, keyName) {
             const dropdown = document.getElementById(dropdownId);
@@ -2544,7 +2528,7 @@ window.toggleFormRoleSelect = async function() {
             });
         }
 
-window.addNewUser = async function() {
+        window.addNewUser = async function() {
             const id = document.getElementById('new-user-id').value.trim();
             const name = document.getElementById('new-user-name').value.trim();
             const pass = document.getElementById('new-user-pass').value.trim();
@@ -2552,12 +2536,11 @@ window.addNewUser = async function() {
             const reportTo = document.getElementById('new-user-report-to').value; 
             
             const zone = document.getElementById('new-user-zone') ? document.getElementById('new-user-zone').value : null;
-            const area = document.getElementById('new-user-area') ? document.getElementById('new-user-area').value : null;
             
-        if(!id || !pass || !name) { // Wajibkan isi nama
-            showNotification("ERROR", "Sila lengkapkan ruangan Nama, User ID dan Password.", true);
-            return; 
-    }
+            if(!id || !pass || !name) { 
+                showNotification("ERROR", "Sila lengkapkan ruangan Nama, User ID dan Password.", true);
+                return; 
+            }
 
             if(role !== 'super' && !reportTo) {
                 let proceed = await customConfirm(`INFO:\nID ini dicipta TANPA sebarang Supervisor (Tangguh). Ia boleh di-update kemudian. Teruskan?`);
@@ -2575,7 +2558,6 @@ window.addNewUser = async function() {
                 }
 
                 let finalZone = (role === 'manager' && zone !== 'ALL') ? zone : null;
-                let finalArea = (role === 'admin' && area !== 'ALL') ? area : null;
 
                 const { error } = await supabase.from('users').insert([{ 
                     id: id, 
@@ -2584,20 +2566,20 @@ window.addNewUser = async function() {
                     role: role, 
                     assignedzone: finalZone,
                     assignedarea: null,
-                    assignedregion: null, // Boleh dibiarkan null
+                    assignedregion: null, 
                     report_to: reportTo || null,
                     status: 'ACTIVE' 
                 }]);
                 
-if(error) {
-            showNotification("DATABASE ERROR", error.message, true);
-        } else {
-            showNotification("SUCCESS", `Akaun pengguna <b>${id}</b> telah didaftarkan.`);
-            document.getElementById('new-user-id').value = ''; 
-            document.getElementById('new-user-name').value = ''; // Kosongkan lepas save
-            document.getElementById('new-user-pass').value = '';
-            fetchAndRenderUsers(); 
-        }
+                if(error) {
+                    showNotification("DATABASE ERROR", error.message, true);
+                } else {
+                    showNotification("SUCCESS", `Akaun pengguna <b>${id}</b> telah didaftarkan.`);
+                    document.getElementById('new-user-id').value = ''; 
+                    document.getElementById('new-user-name').value = ''; 
+                    document.getElementById('new-user-pass').value = '';
+                    fetchAndRenderUsers(); 
+                }
             } catch (err) {
                 showNotification("SYSTEM ERROR", "Check console for details.", true);
             }
@@ -2642,32 +2624,31 @@ if(error) {
             }
         };
 
-window.updateUserInline = async function(userId) {
-    let newRole = document.getElementById(`edit-role-${userId}`).value;
-    let newReportTo = document.getElementById(`edit-report-${userId}`).value;
-    let newZone = document.getElementById(`edit-zone-${userId}`).value;
-    // Rujukan kepada edit-area telah dibuang sepenuhnya
+        window.updateUserInline = async function(userId) {
+            let newRole = document.getElementById(`edit-role-${userId}`).value;
+            let newReportTo = document.getElementById(`edit-report-${userId}`).value;
+            let newZone = document.getElementById(`edit-zone-${userId}`).value;
 
-    if (newReportTo === "") newReportTo = null;
-    if (newZone === "ALL") newZone = null;
+            if (newReportTo === "") newReportTo = null;
+            if (newZone === "ALL") newZone = null;
 
-    let isVerified = await verifyAdminPasscode();
-    if (!isVerified) return;
+            let isVerified = await verifyAdminPasscode();
+            if (!isVerified) return;
 
-    const { error } = await supabase.from('users').update({ 
-        role: newRole, 
-        report_to: newReportTo,
-        assignedzone: newRole === 'manager' ? newZone : null,
-        assignedarea: null // Paksa sentiasa null
-    }).eq('id', userId);
+            const { error } = await supabase.from('users').update({ 
+                role: newRole, 
+                report_to: newReportTo,
+                assignedzone: newRole === 'manager' ? newZone : null,
+                assignedarea: null 
+            }).eq('id', userId);
 
-    if (!error) { 
-        showNotification("UPDATE SUCCESS", `Konfigurasi untuk user <b>${userId.toUpperCase()}</b> telah berjaya dikemas kini.`);
-        fetchAndRenderUsers();
-    } else { 
-        showNotification("UPDATE ERROR", error.message, true); 
-    }
-};
+            if (!error) { 
+                showNotification("UPDATE SUCCESS", `Konfigurasi untuk user <b>${userId.toUpperCase()}</b> telah berjaya dikemas kini.`);
+                fetchAndRenderUsers();
+            } else { 
+                showNotification("UPDATE ERROR", error.message, true); 
+            }
+        };
 
         window.renderReportCenter = async function() {
             const tbody = document.getElementById('report-table-body');
@@ -2739,7 +2720,7 @@ window.updateUserInline = async function(userId) {
             }
         };
 
-window.exportDataByDate = async function(dateStr) {
+        window.exportDataByDate = async function(dateStr) {
             let isConfirmed = await customConfirm(`Are you sure you want to export findings data for the date ${dateStr}?`);
             if (!isConfirmed) return;
 
@@ -2747,11 +2728,9 @@ window.exportDataByDate = async function(dateStr) {
             document.getElementById('loadingModal').style.display = 'flex';
 
             try {
-                // [FIX TIMEZONE]: Tukar tarikh input kepada julat permulaan dan penghujung ISO UTC yang tepat
                 let startOfDay = new Date(`${dateStr}T00:00:00`).toISOString();
                 let endOfDay = new Date(`${dateStr}T23:59:59.999`).toISOString();
 
-                // Tarik data findings dari Supabase
                 const { data, error } = await supabase
                     .from('findings')
                     .select('id, acct, remark1, remark2, remark3, remark4, remark5, region, is_exported')
@@ -2761,14 +2740,12 @@ window.exportDataByDate = async function(dateStr) {
 
                 if (error) throw error;
                 
-                // Semak jika tiada langsung rekod untuk tarikh tersebut
                 if (!data || data.length === 0) {
                     showNotification("NO RECORDS", `Tiada sebarang log penemuan (findings) ditemui pada tarikh ${dateStr}.`, true);
                     document.getElementById('loadingModal').style.display = 'none';
                     return;
                 }
 
-                // Tapis hanya rekod yang belum dieksport sahaja
                 let pendingRows = data.filter(row => row.is_exported === false || row.is_exported === null);
 
                 if (pendingRows.length === 0) {
@@ -2784,7 +2761,6 @@ window.exportDataByDate = async function(dateStr) {
                     let reg = row.region ? row.region.toUpperCase().trim() : 'UNKNOWN';
                     if (!groupedData[reg]) groupedData[reg] = [];
                     
-                    // Mengekalkan susunan asal kau: REMARK5 di kedudukan atas sekali sebelum REMARK1
                     groupedData[reg].push({
                         "ACCT": row.acct,
                         "REMARK1": row.remark5 || '',
@@ -2799,7 +2775,6 @@ window.exportDataByDate = async function(dateStr) {
 
                 let formattedDate = dateStr.replace(/-/g, ''); 
                 
-                // Jana fail Excel mengikut Wilayah (Region)
                 Object.keys(groupedData).forEach(reg => {
                     const ws = XLSX.utils.json_to_sheet(groupedData[reg]);
                     const wb = XLSX.utils.book_new();
@@ -2809,7 +2784,6 @@ window.exportDataByDate = async function(dateStr) {
                     XLSX.writeFile(wb, fileName);
                 });
 
-                // Kunci status log di database supaya tidak dieksport bertindih
                 const { error: updateError } = await supabase
                     .from('findings')
                     .update({ is_exported: true })
@@ -2874,7 +2848,7 @@ window.exportDataByDate = async function(dateStr) {
             }
         };
 
-window.handleExcelFileSelect = function(e) {
+        window.handleExcelFileSelect = function(e) {
             const file = e.target.files[0]; 
             if (!file) return;
             
@@ -2903,13 +2877,11 @@ window.handleExcelFileSelect = function(e) {
                             
                             const id = select.id;
 
-                            // --- COLLECTOR & ASSIGNMENT INFO (KEKAL) ---
                             if(id === 'map-collector') preSelectOption(select, ['collector', 'COLLECTOR', 'caller', 'CALLER']);
                             if(id === 'map-zone') preSelectOption(select, ['zone', 'ZONE', 'Zone']);
                             if(id === 'map-area') preSelectOption(select, ['area', 'AREA', 'Area']);
                             if(id === 'map-osb') preSelectOption(select, ['osb', 'OSB', 'FS_AMT_TO_COLLECT']);
                             
-                            // --- ACCOUNT BALANCE INFO ---
                             if(id === 'map-acct') preSelectOption(select, ['ACCT', 'acct', 'account']);
                             if(id === 'map-type' || id === 'map-acct-type') preSelectOption(select, ['ACCT_TYPE', 'type', 'TYPE']);
                             if(id === 'map-region' || id === 'map-region-cd') preSelectOption(select, ['REGION_CD', 'region', 'REGION']);
@@ -2935,7 +2907,6 @@ window.handleExcelFileSelect = function(e) {
                             if(id === 'map-coll-comm-cat') preSelectOption(select, ['COLL_COMM_CAT']);
                             if(id === 'map-co-ind') preSelectOption(select, ['CO_IND']);
 
-                            // --- HIRER INFO ---
                             if(id === 'map-h-name' || id === 'map-hirer-name') preSelectOption(select, ['HIRER_NAME', 'h_name']);
                             if(id === 'map-h-nric-old' || id === 'map-hirer-old-ic') preSelectOption(select, ['HIRER_OLD_IC_NO', 'h_nric_old']);
                             if(id === 'map-h-nric-new' || id === 'map-hirer-new-ic') preSelectOption(select, ['HIRER_NEW_IC_NO', 'h_nric_new']);
@@ -2946,7 +2917,6 @@ window.handleExcelFileSelect = function(e) {
                             if(id === 'map-h-tel' || id === 'map-hirer-tel') preSelectOption(select, ['HIRER_TEL_NO', 'h_tel']);
                             if(id === 'map-hirer-email') preSelectOption(select, ['HIRER_EMAIL']);
 
-                            // --- HIRER CO INFO ---
                             if(id === 'map-hirer-occ-cd') preSelectOption(select, ['HIRER_OCC_CD']);
                             if(id === 'map-hc-name' || id === 'map-hirer-co-name') preSelectOption(select, ['HIRER_CO_NAME', 'hc_name']);
                             if(id === 'map-hc-add1' || id === 'map-hirer-co-addr1') preSelectOption(select, ['HIRER_CO_ADDR1', 'hc_add1']);
@@ -2955,7 +2925,6 @@ window.handleExcelFileSelect = function(e) {
                             if(id === 'map-hirer-co-post-cd') preSelectOption(select, ['HIRER_CO_POST_CD']);
                             if(id === 'map-hc-tel' || id === 'map-hirer-co-tel') preSelectOption(select, ['HIRER_CO_TEL', 'hc_tel']);
 
-                            // --- SPOUSE INFO ---
                             if(id === 'map-s-name' || id === 'map-spouse-name') preSelectOption(select, ['SPOUSE_NAME', 's_name']);
                             if(id === 'map-s-nric-old' || id === 'map-spouse-old-ic') preSelectOption(select, ['SPOUSE_OLD_IC_NO', 's_nric_old']);
                             if(id === 'map-s-nric-new' || id === 'map-spouse-new-ic') preSelectOption(select, ['SPOUSE_NEW_IC_NO', 's_nric_new']);
@@ -2966,7 +2935,6 @@ window.handleExcelFileSelect = function(e) {
                             if(id === 'map-s-tel' || id === 'map-spouse-tel') preSelectOption(select, ['SPOUSE_TEL_NO', 's_tel']);
                             if(id === 'map-spouse-occ-cd') preSelectOption(select, ['SPOUSE_OCC_CD']);
 
-                            // --- GTOR INFO ---
                             if(id === 'map-g-name' || id === 'map-gtor-name') preSelectOption(select, ['GUAR_NAME', 'g_name']);
                             if(id === 'map-g-nric-old' || id === 'map-gtor-old-ic') preSelectOption(select, ['GUAR_OLD_IC_NO', 'g_nric_old']);
                             if(id === 'map-g-nric-new' || id === 'map-gtor-new-ic') preSelectOption(select, ['GUAR_NEW_IC_NO', 'g_nric_new']);
@@ -2979,7 +2947,6 @@ window.handleExcelFileSelect = function(e) {
                             if(id === 'map-gc-name') preSelectOption(select, ['GUAR_CO_NAME']);
                             if(id === 'map-gc-tel') preSelectOption(select, ['GUAR_CO_TEL']);
 
-                            // --- REF 1 INFO ---
                             if(id === 'map-ref1-name') preSelectOption(select, ['REFEREE1_NAME']);
                             if(id === 'map-ref1-tel') preSelectOption(select, ['REFEREE1_TEL']);
                             if(id === 'map-ref1-addr1') preSelectOption(select, ['REF_ADDRESS1_1']);
@@ -2990,7 +2957,6 @@ window.handleExcelFileSelect = function(e) {
                             if(id === 'map-ref1-off-no') preSelectOption(select, ['REF_OFF_PHONE_NO_1']);
                             if(id === 'map-ref1-relation') preSelectOption(select, ['RELATIONSHIP_WITH_HIRER_1']);
 
-                            // --- REF 2 INFO ---
                             if(id === 'map-ref2-name') preSelectOption(select, ['REFEREE2_NAME']);
                             if(id === 'map-ref2-tel') preSelectOption(select, ['REFEREE2_TEL']);
                             if(id === 'map-ref2-addr1') preSelectOption(select, ['REF_ADDRESS1_2']);
@@ -3024,12 +2990,11 @@ window.handleExcelFileSelect = function(e) {
         };
 
 window.processExcelUpload = async function() {
-    // 1. Dapatkan nama batch & zon dari user
     let batchData = await requestBatchName();
     if (!batchData || !batchData.name) return; 
 
     let rawBatchName = batchData.name.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_');
-    let batchZone = batchData.zone.toUpperCase(); // Ambil Zon dari Modal
+    let batchZone = batchData.zone.toUpperCase(); 
 
     let d = new Date();
     let timeSuffix = String(d.getDate()).padStart(2, '0') + String(d.getMonth() + 1).padStart(2, '0') + d.getFullYear() + '_' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0');
@@ -3096,7 +3061,7 @@ window.processExcelUpload = async function() {
 
         let type = String(row[getVal('map-type') || '']).trim().toUpperCase();
         let finalOsb = 0;
-if (type === 'EP') {
+        if (type === 'EP') {
             finalOsb = bal + adch;
         } else if (type === 'HP') {
             finalOsb = (bal + odp) + adch;
@@ -3104,13 +3069,12 @@ if (type === 'EP') {
             finalOsb = bal + odp + adch;
         }
         
-        // --- LOGIK LOKASI BAHARU ---
         let keyLoc = getVal('map-loc');
         let rawLocCd = (keyLoc && row[keyLoc]) ? String(row[keyLoc]).trim() : "";
         
-        let finalZone = batchZone; // KITA PAKSA SEMUA DATA GUNA ZON DARI POPUP
-        let finalRegion = ""; // Boleh dibiarkan kosong kerana tidak guna master_locations
-        let finalArea = "";   // Boleh dibiarkan kosong 
+        let finalZone = batchZone; 
+        let finalRegion = ""; 
+        let finalArea = "";   
 
         if (rawLocCd === "UNDEFINED") rawLocCd = "";
         
@@ -3171,66 +3135,64 @@ if (type === 'EP') {
             status: currentStatus, 
             collector: rawColl,
             details: detailsJSON,
-            batch_name: finalBatchName, // Data disuntik di sini
-            uploaded_by: currentUser.id // Data disuntik di sini
+            batch_name: finalBatchName, 
+            uploaded_by: currentUser.id 
         });
     }
 
     const CHUNK_SIZE = 1000;
-            let totalProcessed = 0; let hasError = false;
-            for (let i = 0; i < bulkData.length; i += CHUNK_SIZE) {
-                const chunk = bulkData.slice(i, i + CHUNK_SIZE);
-                const currentProgress = Math.round((i / bulkData.length) * 100);
-                progressBar.style.width = `${currentProgress}%`; progressText.innerText = `${currentProgress}%`;
-                progressSubtext.innerText = `Submitting data: ${i.toLocaleString()} of ${bulkData.length.toLocaleString()} records...`;
-                
-                const { error } = await supabase.from('accounts').upsert(chunk, { onConflict: 'acct' });
-                if (error) { alert("Error: " + error.message); hasError = true; break; }
-                totalProcessed += chunk.length;
-            }
+    let totalProcessed = 0; let hasError = false;
+    for (let i = 0; i < bulkData.length; i += CHUNK_SIZE) {
+        const chunk = bulkData.slice(i, i + CHUNK_SIZE);
+        const currentProgress = Math.round((i / bulkData.length) * 100);
+        progressBar.style.width = `${currentProgress}%`; progressText.innerText = `${currentProgress}%`;
+        progressSubtext.innerText = `Submitting data: ${i.toLocaleString()} of ${bulkData.length.toLocaleString()} records...`;
+        
+        const { error } = await supabase.from('accounts').upsert(chunk, { onConflict: 'acct' });
+        if (error) { alert("Error: " + error.message); hasError = true; break; }
+        totalProcessed += chunk.length;
+    }
 
-if (!hasError) {
-                progressBar.style.width = '100%';
-                progressText.innerText = '100%';
-                progressSubtext.innerText = `Completely done! Reloading ledger structure...`;
-                
-                await supabase.from('findings').insert([{
-                    acct: 'SYSTEM',
-                    remark1: `BULK DATA UPLOADED BY ${currentUser.id.toUpperCase()}`,
-                    updated_by: currentUser.username
-                }]);
+    if (!hasError) {
+        progressBar.style.width = '100%';
+        progressText.innerText = '100%';
+        progressSubtext.innerText = `Completely done! Reloading ledger structure...`;
+        
+        await supabase.from('findings').insert([{
+            acct: 'SYSTEM',
+            remark1: `BULK DATA UPLOADED BY ${currentUser.id.toUpperCase()}`,
+            updated_by: currentUser.username
+        }]);
 
-                setTimeout(async () => {
-                    document.getElementById('progressModal').style.display = 'none';
-                    document.getElementById('excel-file-input').value = ''; 
-                    alert(`Successfully processed ${totalProcessed.toLocaleString()} accounts.`);
-                    
-                    // KOREKSI: Padam mengikut ID khusus yang betul, bukannya '_all'
-                    const cacheKey = `scazp_cache_${currentUser.id}`;
-                    const timeKey = `scazp_time_${currentUser.id}`;
-                    await localforage.removeItem(cacheKey);
-                    localStorage.removeItem(timeKey);
-                    
-                    await fetchFullDatabaseData(); 
-                    resetStatusCardHighlight();
-                    initDashboardView();
-                }, 800);
-            } else { document.getElementById('progressModal').style.display = 'none'; }
-        };
+        setTimeout(async () => {
+            document.getElementById('progressModal').style.display = 'none';
+            document.getElementById('excel-file-input').value = ''; 
+            alert(`Successfully processed ${totalProcessed.toLocaleString()} accounts.`);
+            
+            const cacheKey = `scazp_cache_${currentUser.id}`;
+            const timeKey = `scazp_time_${currentUser.id}`;
+            await localforage.removeItem(cacheKey);
+            localStorage.removeItem(timeKey);
+            
+            await fetchFullDatabaseData(); 
+            resetStatusCardHighlight();
+            initDashboardView();
+        }, 800);
+    } else { document.getElementById('progressModal').style.display = 'none'; }
+};
 
 window.renderBatchList = function() {
     const tbody = document.getElementById('batch-table-body');
     if (!tbody) return;
 
     let batchGroups = {};
-    // Kumpulkan data batch dari cache global
     globalAccounts.forEach(acc => {
         if (acc.batch_name) {
             if (!batchGroups[acc.batch_name]) {
                 batchGroups[acc.batch_name] = { 
                     count: 0, 
                     uploaded_by: acc.uploaded_by || 'UNKNOWN',
-                    zone: acc.zone || 'UNKNOWN' // Tangkap Zon Batch Tersebut
+                    zone: acc.zone || 'UNKNOWN'
                 };
             }
             batchGroups[acc.batch_name].count++;
@@ -3239,9 +3201,8 @@ window.renderBatchList = function() {
 
     tbody.innerHTML = '';
     
-    // Tapis list untuk Manager/Admin supaya nampak batch zon diorang je
     let batchKeys = Object.keys(batchGroups).filter(bName => {
-        if (currentUser.role === 'super') return true; // Super nampak semua
+        if (currentUser.role === 'super') return true; 
         let bZone = batchGroups[bName].zone;
         
         let myZone = null;
@@ -3252,7 +3213,7 @@ window.renderBatchList = function() {
             myZone = myManager ? myManager.assignedzone : null;
         }
         
-        return bZone === myZone; // Filter ikut zon
+        return bZone === myZone; 
     }).sort().reverse(); 
 
     if (batchKeys.length === 0) {
@@ -3260,7 +3221,7 @@ window.renderBatchList = function() {
         return;
     }
 
-batchKeys.forEach(bName => {
+    batchKeys.forEach(bName => {
         let bInfo = batchGroups[bName];
         tbody.innerHTML += `
             <tr>
@@ -3269,7 +3230,6 @@ batchKeys.forEach(bName => {
                 <td>${bInfo.uploaded_by.toUpperCase()}</td>
                 <td>${bInfo.count} Akaun</td>
                 <td style="text-align: right; white-space: nowrap;">
-                    <!-- TAMBAH BUTANG TRANSFER DI SINI -->
                     <button class="btn-update" style="color: var(--status-call); border-color: var(--status-call); margin-right: 5px;" onclick="openTransferModal('${bName}')">🔄 TRANSFER</button>
                     <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteBatch('${bName}')">🗑️ DELETE</button>
                 </td>
@@ -3294,7 +3254,6 @@ window.deleteBatch = async function(batchName) {
 
         showNotification("SUCCESS", `Batch <b>${batchName}</b> telah berjaya dipadam sepenuhnya.`);
         
-        // Buang cache lama dan paksa sistem download data terbaru
         const cacheKey = `scazp_cache_${currentUser.id}`;
         const timeKey = `scazp_time_${currentUser.id}`;
         await localforage.removeItem(cacheKey);
@@ -3303,7 +3262,6 @@ window.deleteBatch = async function(batchName) {
         await fetchFullDatabaseData();
         applyFilterAndRender();
         
-        // Muat semula jadual jika user masih di tab Assignment
         if (document.getElementById('assign-panel').style.display === 'block') {
             renderBatchList();
             renderAssignTable();
@@ -3316,7 +3274,7 @@ window.deleteBatch = async function(batchName) {
     }
 };
 
-        let activeTransferBatch = null;
+let activeTransferBatch = null;
 
 window.openTransferModal = function(batchName) {
     activeTransferBatch = batchName;
@@ -3328,7 +3286,6 @@ window.openTransferModal = function(batchName) {
     let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
     let subordinates = [];
 
-    // Tapis senarai staf bawahan berdasarkan hierarchy
     if (currentUser.role === 'super') {
         subordinates = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.id.toLowerCase() !== currentUserIdClean);
     } else {
@@ -3342,120 +3299,54 @@ window.openTransferModal = function(batchName) {
     document.getElementById('transferBatchModal').style.display = 'flex';
 };
 
-document.getElementById('btnConfirmTransfer').onclick = async function() {
-    let targetUser = document.getElementById('transferTargetUser').value;
-    if (!targetUser) { alert("Sila pilih penerima!"); return; }
+// Pastikan fungsi pencetus event klik transfer batch diikat dengan selamat
+setTimeout(() => {
+    const btnTransfer = document.getElementById('btnConfirmTransfer');
+    if (btnTransfer) {
+        btnTransfer.onclick = async function() {
+            let targetUser = document.getElementById('transferTargetUser').value;
+            if (!targetUser) { alert("Sila pilih penerima!"); return; }
 
-    let isConfirmed = await customConfirm(`Anda pasti mahu memindahkan semua akaun dalam batch ${activeTransferBatch} kepada ${targetUser.toUpperCase()}?`);
-    if (!isConfirmed) return;
+            let isConfirmed = await customConfirm(`Anda pasti mahu memindahkan semua akaun dalam batch ${activeTransferBatch} kepada ${targetUser.toUpperCase()}?`);
+            if (!isConfirmed) return;
 
-    document.getElementById('transferBatchModal').style.display = 'none';
-    document.getElementById('loadingText').innerText = "Memindahkan batch kepada penerima...";
-    document.getElementById('loadingModal').style.display = 'flex';
+            document.getElementById('transferBatchModal').style.display = 'none';
+            document.getElementById('loadingText').innerText = "Memindahkan batch kepada penerima...";
+            document.getElementById('loadingModal').style.display = 'flex';
 
-    try {
-        let cleanTarget = targetUser.toLowerCase().trim();
-        
-        // Update kolum assignee_id di Supabase mengikut nama batch
-        const { error } = await supabase.from('accounts')
-            .update({ assignee_id: cleanTarget })
-            .eq('batch_name', activeTransferBatch);
-            
-        if (error) throw error;
+            try {
+                let cleanTarget = targetUser.toLowerCase().trim();
+                
+                const { error } = await supabase.from('accounts')
+                    .update({ assignee_id: cleanTarget })
+                    .eq('batch_name', activeTransferBatch);
+                    
+                if (error) throw error;
 
-        // Update cache lokal (supaya UI terus berubah tanpa perlu fetch semula database)
-        globalAccounts.forEach(acc => {
-            if (acc.batch_name === activeTransferBatch) {
-                acc.assignee_id = cleanTarget;
+                globalAccounts.forEach(acc => {
+                    if (acc.batch_name === activeTransferBatch) {
+                        acc.assignee_id = cleanTarget;
+                    }
+                });
+
+                const cacheKey = `scazp_cache_${currentUser.id}`;
+                await localforage.setItem(cacheKey, globalAccounts);
+
+                showNotification("TRANSFER BERJAYA", `Keseluruhan batch <b>${activeTransferBatch}</b> telah berjaya dipindahkan kepada ${cleanTarget.toUpperCase()}.`);
+                
+                applyFilterAndRender();
+                renderAssignTable();
+                renderBatchList();
+                
+            } catch (err) {
+                showNotification("TRANSFER ERROR", err.message, true);
+            } finally {
+                document.getElementById('loadingModal').style.display = 'none';
             }
-        });
-
-        const cacheKey = `scazp_cache_${currentUser.id}`;
-        await localforage.setItem(cacheKey, globalAccounts);
-
-        showNotification("TRANSFER BERJAYA", `Keseluruhan batch <b>${activeTransferBatch}</b> telah berjaya dipindahkan kepada ${cleanTarget.toUpperCase()}.`);
-        
-        // Refresh jadual Assign
-        applyFilterAndRender();
-        renderAssignTable();
-        
-    } catch (err) {
-        showNotification("TRANSFER ERROR", err.message, true);
-    } finally {
-        document.getElementById('loadingModal').style.display = 'none';
+        };
     }
-};
+}, 500);
 
-        let activeTransferBatch = null;
-
-window.openTransferModal = function(batchName) {
-    activeTransferBatch = batchName;
-    document.getElementById('transferBatchNameDisplay').innerText = batchName;
-    
-    let dropdown = document.getElementById('transferTargetUser');
-    dropdown.innerHTML = '<option value="">-- PILIH PENERIMA --</option>';
-    
-    let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
-    let subordinates = [];
-
-    // Tapis senarai staf bawahan berdasarkan hierarchy
-    if (currentUser.role === 'super') {
-        subordinates = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.id.toLowerCase() !== currentUserIdClean);
-    } else {
-        subordinates = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.report_to === currentUserIdClean);
-    }
-
-    subordinates.forEach(u => {
-        dropdown.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
-    });
-
-    document.getElementById('transferBatchModal').style.display = 'flex';
-};
-
-document.getElementById('btnConfirmTransfer').onclick = async function() {
-    let targetUser = document.getElementById('transferTargetUser').value;
-    if (!targetUser) { alert("Sila pilih penerima!"); return; }
-
-    let isConfirmed = await customConfirm(`Anda pasti mahu memindahkan semua akaun dalam batch ${activeTransferBatch} kepada ${targetUser.toUpperCase()}?`);
-    if (!isConfirmed) return;
-
-    document.getElementById('transferBatchModal').style.display = 'none';
-    document.getElementById('loadingText').innerText = "Memindahkan batch kepada penerima...";
-    document.getElementById('loadingModal').style.display = 'flex';
-
-    try {
-        let cleanTarget = targetUser.toLowerCase().trim();
-        
-        // Update kolum assignee_id di Supabase mengikut nama batch
-        const { error } = await supabase.from('accounts')
-            .update({ assignee_id: cleanTarget })
-            .eq('batch_name', activeTransferBatch);
-            
-        if (error) throw error;
-
-        // Update cache lokal (supaya UI terus berubah tanpa perlu fetch semula database)
-        globalAccounts.forEach(acc => {
-            if (acc.batch_name === activeTransferBatch) {
-                acc.assignee_id = cleanTarget;
-            }
-        });
-
-        const cacheKey = `scazp_cache_${currentUser.id}`;
-        await localforage.setItem(cacheKey, globalAccounts);
-
-        showNotification("TRANSFER BERJAYA", `Keseluruhan batch <b>${activeTransferBatch}</b> telah berjaya dipindahkan kepada ${cleanTarget.toUpperCase()}.`);
-        
-        // Refresh jadual Assign
-        applyFilterAndRender();
-        renderAssignTable();
-        
-    } catch (err) {
-        showNotification("TRANSFER ERROR", err.message, true);
-    } finally {
-        document.getElementById('loadingModal').style.display = 'none';
-    }
-};
-        
         window.toggleExpand = function(acct) {
             const row = document.getElementById('details-' + acct);
             if (row.style.display === 'none') {
@@ -3492,19 +3383,15 @@ window.openModal = async function(accNo) {
 
 let baseText = `INTERNAL DATA-VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
 
-// Baris 1: Biasa
 let line1 = baseText.repeat(8) + "\n";
-// Baris 2: Ditambah jarak kosong (offset) di hadapan untuk efek tertolak (zig-zag)
 let line2 = "                  " + baseText.repeat(8) + "\n"; 
 
-// Ulang gandingan Baris 1 & Baris 2 sebanyak 50 kali (menjadi 100 baris keseluruhan)
 let wText = (line1 + line2).repeat(50);
 
             document.getElementById('modal-details-container').innerHTML = `
                 <div class="details-box" style="grid-column: 1 / -1;" data-watermark="${wText}">
                     <h4>ACCOUNT INFO & BALANCE</h4>
                     
-                    <!-- KUMPULAN 1: INFO AKAUN -->
                     <div class="info-grid-2col">
                         <p><span class="lbl">ACCT NO:</span> <span class="val">${accountInfo.acct || '-'}</span></p>
                         <p><span class="lbl">ACCT TYPE:</span> <span class="val">${accountInfo.type || '-'}</span></p>
@@ -3522,9 +3409,8 @@ let wText = (line1 + line2).repeat(50);
                         <p><span class="lbl">CONT. LEN:</span> <span class="val">${d.CONTRACT_LEN || '-'}</span></p>
                     </div>
                     
-                    <div style="height: 18px;"></div> <!-- Ruang Pemisah -->
+                    <div style="height: 18px;"></div> 
 
-                    <!-- KUMPULAN 2: INFO KEWANGAN -->
                     <div class="info-grid-2col">
                         <p><span class="lbl">CASH PRICE:</span> <span class="val">RM ${d.CASH_PRICE || '0.00'}</span></p>
                         <p><span class="lbl">EP PRICE:</span> <span class="val">RM ${d.EP_PRICE || '0.00'}</span></p>
@@ -3550,7 +3436,6 @@ let wText = (line1 + line2).repeat(50);
                         <p><span class="lbl">OSB:</span> <span class="val">RM ${Number(accountInfo.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></p>
                     </div>
 
-                    <!-- KUMPULAN 3: PRODUK DI BAWAH GARISAN -->
                     <div style="margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
                         <p style="margin-bottom: 6px;"><span class="lbl">PRODUCT:</span> <span class="val" style="color: var(--accent-gold);">${d.PROD_SALES_CD || ''} ${d.PROD_SALES_DESC || d.prod || '-'}</span></p>
                         <p><span class="lbl">PLATE NO:</span> <span class="val">${d.PLATE_NO || d.plate || '-'}</span></p>
@@ -3648,13 +3533,9 @@ let wText = (line1 + line2).repeat(50);
                         deleteBtnHTML = `<button class="btn-delete-finding" onclick="deleteSingleFinding('${data.id}', '${accNo}')">🗑️ DEL</button>`;
                     }
 
-// --- GABUNGKAN SEMULA AYAT SUPAYA TAK NAMPAK TERKERAT ---
                     let histRemark = '';
                     if(data.remark1 || data.remark2 || data.remark3 || data.remark4) {
-                        // Gabung remark1, 2, 3, 4 dengan jarak ruang (space)
                         let combinedStr = [data.remark1, data.remark2, data.remark3, data.remark4].filter(Boolean).join(' ');
-                        
-                        // Letak text-align: justify supaya kiri kanan sama rata cantik
                         histRemark = `<div style="font-size: 11px; line-height: 1.5; margin-top: 8px; color: var(--text-main); font-weight: normal; text-align: justify;">${combinedStr}</div>`;
                     } else {
                         histRemark = `<div style="font-size: 11px; line-height: 1.5; margin-top: 8px; color: var(--text-main); font-weight: normal; text-align: justify;">${data.remark || ''}</div>`;
@@ -3670,7 +3551,6 @@ let wText = (line1 + line2).repeat(50);
                         </div>`;
                 });
             }
-            //setTimeout(() => document.getElementById('single-remark-box').focus(), 100); //auto cursor masuk area textbox log
         };
         
         window.navigateModal = function(direction) {
@@ -3710,8 +3590,6 @@ let wText = (line1 + line2).repeat(50);
 window.saveFinding = async function() {
     let selectedStatus = document.getElementById('finding-status-select').value;
     let accNo = document.getElementById('modalAccNo').innerText;
-    
-    // TUKAR DI SINI: Tukar kepada huruf besar SELEPAS user tekan COMMIT ENTRY
     let fullStory = document.getElementById('single-remark-box').value.trim().toUpperCase();
     
     if(!selectedStatus) {
@@ -3725,7 +3603,6 @@ window.saveFinding = async function() {
         return; 
     }
 
-            // [FASA 5 PINTAR]: Pecah cerita panjang kepada chunk 50 karakter tanpa putuskan perkataan
             let words = fullStory.split(' ');
             let chunks = [];
             let currentChunk = "";
@@ -3747,8 +3624,6 @@ window.saveFinding = async function() {
             let r3 = (chunks[2] || '').toUpperCase();
             let r4 = (chunks[3] || '').toUpperCase();
             
-            // 🛑 KOD LAMA REGEX & IF-STATEMENT SEBELUM NI DAH DIBUANG TERUS DI SINI!
-            
             const btn = document.getElementById('btnSaveFinding'); 
             btn.innerText = "SAVING...";
             
@@ -3765,7 +3640,6 @@ window.saveFinding = async function() {
             updatedDetailsObj.last_remark_date = dateStr;
             updatedDetailsObj.timestamp = today.getTime();
             
-            // Ambil waktu sekarang untuk tarikh dan masa tanpa saat (Format: DD/MM/YYYY HH:MM AM/PM)
             let currentDateTime = new Date();
             let formattedDate = String(currentDateTime.getDate()).padStart(2, '0') + '/' + 
                                 String(currentDateTime.getMonth() + 1).padStart(2, '0') + '/' + 
@@ -3776,7 +3650,6 @@ window.saveFinding = async function() {
                 hour12: true 
             });
 
-            // [FASA 5 PINTAR]: Remark 5 lengkap dengan tarikh & masa tanpa saat mengikut standard MIS SINGER
             let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${formattedDate} ${formattedTime}`;
             
             try {
@@ -3855,7 +3728,7 @@ window.saveFinding = async function() {
         
         window.onclick = function(e) { 
             if(e.target == document.getElementById('mappingModal')) closeMappingModal();
-        }
+        };
 
         checkLoginSession();
 
@@ -3900,30 +3773,8 @@ window.saveFinding = async function() {
                 currentAssignSortDirection = 'asc';
             }
             currentAssignPage = 1;
-            renderAssignTable(); // Panggil semula table untuk filter & susun
+            renderAssignTable(); 
         };
-
-function updateAssignHeaderArrows(activeCol) {
-            // 1. TAMBAH 'pack_cd' DALAM ARRAY INI
-            const cols = ['acct', 'zone', 'region', 'area', 'pack_cd', 'osb', 'status', 'assignee_id', 'collector'];
-            cols.forEach(c => {
-                const el = document.getElementById(`tha-${c}`);
-                if (el) {
-                    let baseText = el.innerText.split(' ')[0];
-                    if(c === 'acct') baseText = "ACCT NO";
-                    else if(c === 'assignee_id') baseText = "CURRENT ASSIGNEE";
-                    else if(c === 'osb') baseText = "OSB (RM)";
-                    else if(c === 'pack_cd') baseText = "PACK CD"; // 2. TAMBAH BARIS INI
-                    
-                    if (c === activeCol) {
-                        let arrow = currentAssignSortDirection === 'asc' ? '▲' : '▼';
-                        el.innerHTML = `<span style="color:var(--text-main);">${baseText} ${arrow}</span>`;
-                    } else {
-                        el.innerHTML = `${baseText} ⇅`;
-                    }
-                }
-            });
-        }
 
         window.populateAssignSubordinates = function() {
             const dropdown = document.getElementById('assign-target-user');
@@ -3955,49 +3806,44 @@ function updateAssignHeaderArrows(activeCol) {
         };
 
         window.populateCollectorFilters = function() {
-    const dropdown = document.getElementById('filter-collector-dropdown');
-    if (!dropdown) return;
-    
-    // Ambil senarai unik collector, buang yang kosong, susun A-Z
-    let collectors = [...new Set(globalAccounts.map(a => a.collector).filter(Boolean))].sort();
-    
-    dropdown.innerHTML = '<option value="ALL">SEMUA COLLECTOR</option>';
-    collectors.forEach(c => {
-        dropdown.innerHTML += `<option value="${c}">${c.toUpperCase()}</option>`;
-    });
-};
+            const dropdown = document.getElementById('filter-collector-dropdown');
+            if (!dropdown) return;
+            let collectors = [...new Set(globalAccounts.map(a => a.collector).filter(Boolean))].sort();
+            dropdown.innerHTML = '<option value="ALL">SEMUA COLLECTOR</option>';
+            collectors.forEach(c => {
+                dropdown.innerHTML += `<option value="${c}">${c.toUpperCase()}</option>`;
+            });
+        };
 
-window.renderAssignTable = function() {
-    const statusFilter = document.getElementById('assign-filter-status').value;
-    const collectorFilter = document.getElementById('filter-collector-dropdown').value; // [UPDATE]
+        window.renderAssignTable = function() {
+            const statusFilter = document.getElementById('assign-filter-status').value;
+            const collectorFilter = document.getElementById('filter-collector-dropdown').value; 
 
-    const tbody = document.getElementById('assign-table-body');
-    
-    assignAccounts = globalAccounts.filter(row => {
-        let isUnassigned = !row.assignee_id || row.assignee_id === 'UNASSIGNED';
-        
-        let matchStatus = false;
-        if (statusFilter === 'UNASSIGNED') matchStatus = isUnassigned;
-        else if (statusFilter === 'ASSIGNED') matchStatus = !isUnassigned;
-        else matchStatus = true;
+            const tbody = document.getElementById('assign-table-body');
+            
+            assignAccounts = globalAccounts.filter(row => {
+                let isUnassigned = !row.assignee_id || row.assignee_id === 'UNASSIGNED';
+                
+                let matchStatus = false;
+                if (statusFilter === 'UNASSIGNED') matchStatus = isUnassigned;
+                else if (statusFilter === 'ASSIGNED') matchStatus = !isUnassigned;
+                else matchStatus = true;
 
-        // [UPDATE: Filter Collector]
-        let matchCollector = (collectorFilter === 'ALL' || !collectorFilter) ? true : (row.collector === collectorFilter);
-        
-        return matchStatus && matchCollector;
-    });
+                let matchCollector = (collectorFilter === 'ALL' || !collectorFilter) ? true : (row.collector === collectorFilter);
+                
+                return matchStatus && matchCollector;
+            });
 
-if (currentAssignSortColumn) {
-        assignAccounts.sort((a, b) => {
-            // TARIK DATA DARI DALAM DETAILS JIKA COLUMN = PACK_CD
-            let valueA = currentAssignSortColumn === 'pack_cd' ? (a.details && a.details.PACK_CD ? a.details.PACK_CD : '') : a[currentAssignSortColumn];
-            let valueB = currentAssignSortColumn === 'pack_cd' ? (b.details && b.details.PACK_CD ? b.details.PACK_CD : '') : b[currentAssignSortColumn];
+            if (currentAssignSortColumn) {
+                assignAccounts.sort((a, b) => {
+                    let valueA = currentAssignSortColumn === 'pack_cd' ? (a.details && a.details.PACK_CD ? a.details.PACK_CD : '') : a[currentAssignSortColumn];
+                    let valueB = currentAssignSortColumn === 'pack_cd' ? (b.details && b.details.PACK_CD ? b.details.PACK_CD : '') : b[currentAssignSortColumn];
 
-            if (currentAssignSortColumn === 'osb') {
-                let numA = parseFloat(valueA) || 0;
-                let numB = parseFloat(valueB) || 0;
-                return currentAssignSortDirection === 'asc' ? numA - numB : numB - numA;
-            }
+                    if (currentAssignSortColumn === 'osb') {
+                        let numA = parseFloat(valueA) || 0;
+                        let numB = parseFloat(valueB) || 0;
+                        return currentAssignSortDirection === 'asc' ? numA - numB : numB - numA;
+                    }
                     
                     let strA = valueA ? String(valueA).toUpperCase().trim() : '';
                     let strB = valueB ? String(valueB).toUpperCase().trim() : '';
@@ -4022,35 +3868,33 @@ if (currentAssignSortColumn) {
 
             tbody.innerHTML = '';
             if(pageData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Tiada akaun dijumpai untuk kategori ini.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Tiada akaun dijumpai untuk kategori ini.</td></tr>';
             } else {
-                
-pageData.forEach(row => {
-                let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '🔴 UNASSIGNED';
-                let colDisp = row.collector ? row.collector.toUpperCase() : '-';
-                let d = row.details || {}; // Wajib ada untuk tarik PACK_CD
+                pageData.forEach(row => {
+                    let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '🔴 UNASSIGNED';
+                    let colDisp = row.collector ? row.collector.toUpperCase() : '-';
+                    let d = row.details || {}; 
 
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="text-align: center;">
-                            <input type="checkbox" class="chk-assign-row" value="${row.acct}" style="cursor:pointer; transform: scale(1.2);">
-                        </td>
-                        <td style="font-weight: bold; color: var(--text-main); white-space: nowrap;">
-                            ${row.acct}
-                            <button onclick="copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0; display: inline-block;" title="Copy Account No">📋</button>
-                        </td>
-                        <td>${row.zone || '-'}</td>
-                        <td>${row.region || '-'}</td>
-                        <td>${row.area || '-'}</td>
-                        <td style="font-weight: 700; color: var(--accent-gold);">${d.PACK_CD || '-'}</td> <!-- INI YANG TERTINGGAL -->
-                        <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td><span class="status-badge status-pending">${row.status}</span></td>
-                        <td style="font-weight:bold; color:var(--success-green);">${colDisp}</td>
-                        <td style="font-weight:bold; color:var(--accent-gold);">${assigneeDisp}</td>
-                    </tr>
-                `;
-            });
-                
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="text-align: center;">
+                                <input type="checkbox" class="chk-assign-row" value="${row.acct}" style="cursor:pointer; transform: scale(1.2);">
+                            </td>
+                            <td style="font-weight: bold; color: var(--text-main); white-space: nowrap;">
+                                ${row.acct}
+                                <button onclick="copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0; display: inline-block;" title="Copy Account No">📋</button>
+                            </td>
+                            <td>${row.zone || '-'}</td>
+                            <td>${row.region || '-'}</td>
+                            <td>${row.area || '-'}</td>
+                            <td style="font-weight: 700; color: var(--accent-gold);">${d.PACK_CD || '-'}</td>
+                            <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td><span class="status-badge status-pending">${row.status}</span></td>
+                            <td style="font-weight:bold; color:var(--success-green);">${colDisp}</td>
+                            <td style="font-weight:bold; color:var(--accent-gold);">${assigneeDisp}</td>
+                        </tr>
+                    `;
+                });
             }
 
             document.getElementById('assign-page-info').innerText = `Page ${currentAssignPage} of ${totalPages}`;
@@ -4106,7 +3950,7 @@ pageData.forEach(row => {
                 const { error } = await supabase.from('accounts').update({ assignee_id: cleanTargetUser }).in('acct', selectedAccts);
                 if(error) throw error;
 
-            await supabase.from('findings').insert([{
+                await supabase.from('findings').insert([{
                     acct: 'SYSTEM',
                     remark1: `BATCH ASSIGNMENT: ${selectedAccts.length} akaun kepada ${cleanTargetUser} BY ${currentUser.id.toUpperCase()}`,
                     updated_by: currentUser.id
@@ -4127,21 +3971,153 @@ pageData.forEach(row => {
             }
         };
 
-        // --- KOD BARU: FUNGSI UTK COPY ACCT NO ---
-window.copyToClipboard = function(text, btnElement) {
-    navigator.clipboard.writeText(text).then(() => {
-        const originalHTML = btnElement.innerHTML;
-        btnElement.innerHTML = '✅';
-        btnElement.style.color = 'var(--success-green)';
-        
+        window.copyToClipboard = function(text, btnElement) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalHTML = btnElement.innerHTML;
+                btnElement.innerHTML = '✅';
+                btnElement.style.color = 'var(--success-green)';
+                
+                setTimeout(() => {
+                    btnElement.innerHTML = '📋';
+                    btnElement.style.color = 'var(--accent-gold)';
+                }, 1000);
+            }).catch(err => {
+                console.error('Gagal menyalin text: ', err);
+            });
+        };
+
+        // ========================================================
+        // KOD KEMAS KINI: PENGURUSAN BATCH & BULK TRANSFER LOGIC
+        // ========================================================
+        window.renderBatchList = function() {
+            const tbody = document.getElementById('batch-table-body');
+            if (!tbody) return;
+
+            let batchGroups = {};
+            globalAccounts.forEach(acc => {
+                if (acc.batch_name) {
+                    if (!batchGroups[acc.batch_name]) {
+                        batchGroups[acc.batch_name] = { 
+                            count: 0, 
+                            uploaded_by: acc.uploaded_by || 'UNKNOWN',
+                            zone: acc.zone || 'UNKNOWN'
+                        };
+                    }
+                    batchGroups[acc.batch_name].count++;
+                }
+            });
+
+            tbody.innerHTML = '';
+            
+            let batchKeys = Object.keys(batchGroups).filter(bName => {
+                if (currentUser.role === 'super') return true; 
+                let bZone = batchGroups[bName].zone;
+                
+                let myZone = null;
+                if(currentUser.role === 'manager') {
+                    myZone = currentUser.assignedzone;
+                } else if(currentUser.role === 'admin') {
+                    let myManager = allSystemUsers.find(u => u.id === currentUser.report_to);
+                    myZone = myManager ? myManager.assignedzone : null;
+                }
+                
+                return bZone === myZone; 
+            }).sort().reverse(); 
+
+            if (batchKeys.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Tiada rekod batch ditemui untuk zon anda.</td></tr>';
+                return;
+            }
+
+            batchKeys.forEach(bName => {
+                let bInfo = batchGroups[bName];
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight: 700; color: var(--text-main);">${bName}</td>
+                        <td style="font-weight: 600; color: var(--accent-gold);">${bInfo.zone}</td>
+                        <td>${bInfo.uploaded_by.toUpperCase()}</td>
+                        <td>${bInfo.count} Akaun</td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            <button class="btn-update" style="color: var(--status-call); border-color: var(--status-call); margin-right: 5px;" onclick="openTransferModal('${bName}')">🔄 TRANSFER</button>
+                            <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteBatch('${bName}')">🗑️ DELETE</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        };
+
+        let activeTransferBatch = null;
+
+        window.openTransferModal = function(batchName) {
+            activeTransferBatch = batchName;
+            document.getElementById('transferBatchNameDisplay').innerText = batchName;
+            
+            let dropdown = document.getElementById('transferTargetUser');
+            dropdown.innerHTML = '<option value="">-- PILIH PENERIMA --</option>';
+            
+            let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
+            let subordinates = [];
+
+            if (currentUser.role === 'super') {
+                subordinates = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.id.toLowerCase() !== currentUserIdClean);
+            } else {
+                subordinates = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.report_to === currentUserIdClean);
+            }
+
+            subordinates.forEach(u => {
+                dropdown.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
+            });
+
+            document.getElementById('transferBatchModal').style.display = 'flex';
+        };
+
+        // Mengikat event onclick butang pengesahan transfer secara dinamik dan kalis ralat
         setTimeout(() => {
-            btnElement.innerHTML = '📋';
-            btnElement.style.color = 'var(--accent-gold)';
-        }, 1000);
-    }).catch(err => {
-        console.error('Gagal menyalin text: ', err);
-    });
-};
+            const btnTransfer = document.getElementById('btnConfirmTransfer');
+            if (btnTransfer) {
+                btnTransfer.onclick = async function() {
+                    let targetUser = document.getElementById('transferTargetUser').value;
+                    if (!targetUser) { alert("Sila pilih penerima!"); return; }
+
+                    let isConfirmed = await customConfirm(`Anda pasti mahu memindahkan semua akaun dalam batch ${activeTransferBatch} kepada ${targetUser.toUpperCase()}?`);
+                    if (!isConfirmed) return;
+
+                    document.getElementById('transferBatchModal').style.display = 'none';
+                    document.getElementById('loadingText').innerText = "Memindahkan batch kepada penerima...";
+                    document.getElementById('loadingModal').style.display = 'flex';
+
+                    try {
+                        let cleanTarget = targetUser.toLowerCase().trim();
+                        
+                        const { error } = await supabase.from('accounts')
+                            .update({ assignee_id: cleanTarget })
+                            .eq('batch_name', activeTransferBatch);
+                            
+                        if (error) throw error;
+
+                        globalAccounts.forEach(acc => {
+                            if (acc.batch_name === activeTransferBatch) {
+                                acc.assignee_id = cleanTarget;
+                            }
+                        });
+
+                        const cacheKey = `scazp_cache_${currentUser.id}`;
+                        await localforage.setItem(cacheKey, globalAccounts);
+
+                        showNotification("TRANSFER BERJAYA", `Keseluruhan batch <b>${activeTransferBatch}</b> telah berjaya dipindahkan kepada ${cleanTarget.toUpperCase()}.`);
+                        
+                        applyFilterAndRender();
+                        renderAssignTable();
+                        renderBatchList();
+                        
+                    } catch (err) {
+                        showNotification("TRANSFER ERROR", err.message, true);
+                    } finally {
+                        document.getElementById('loadingModal').style.display = 'none';
+                    }
+                };
+            }
+        }, 500);
         
     </script>
 </body>
