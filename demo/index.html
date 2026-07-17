@@ -1564,6 +1564,21 @@ th {
         </div>
     </div>
 </div>
+
+    <div class="modal-overlay" id="batchTransferModal" style="z-index: 1100;">
+    <div class="modal-content" style="text-align: center; max-width: 360px;">
+        <h2 style="color: var(--text-main); margin-top: 0; font-size: 20px;">TRANSFER BATCH</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Sila pilih penerima untuk pindahan pukal data: <br><b id="transferBatchNameDisplay" style="color: var(--accent-gold);"></b></p>
+        
+        <select id="batchTransferTarget" class="form-control" style="margin-bottom: 25px; font-weight: bold; text-align: center;">
+        </select>
+        
+        <div style="display: flex; gap: 12px;">
+            <button class="btn-cancel" style="flex: 1;" onclick="document.getElementById('batchTransferModal').style.display='none'">BATAL</button>
+            <button class="btn-submit" style="flex: 1; background-color: var(--status-call);" id="btnConfirmTransfer">TRANSFER</button>
+        </div>
+    </div>
+</div>
     
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
@@ -3251,7 +3266,8 @@ window.renderBatchList = function() {
                 <td style="font-weight: 600; color: var(--accent-gold);">${bInfo.zone}</td>
                 <td>${bInfo.uploaded_by.toUpperCase()}</td>
                 <td>${bInfo.count} Akaun</td>
-                <td style="text-align: right;">
+                <td style="text-align: right; white-space: nowrap;">
+                    <button class="btn-update" style="color: var(--status-call); border-color: var(--status-call); margin-right: 5px;" onclick="openTransferBatchModal('${bName}')">🔄 TRANSFER</button>
                     <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteBatch('${bName}')">🗑️ DELETE</button>
                 </td>
             </tr>
@@ -3297,6 +3313,84 @@ window.deleteBatch = async function(batchName) {
     }
 };
 
+window.openTransferBatchModal = function(batchName) {
+    document.getElementById('transferBatchNameDisplay').innerText = batchName;
+    let dropdown = document.getElementById('batchTransferTarget');
+    dropdown.innerHTML = '<option value="">-- PILIH PENERIMA --</option>';
+
+    // Tapis penerima berdasarkan role (Super boleh ke semua, Manager ke Admin, Admin ke PIC)
+    let currentUserIdClean = String(currentUser.id).toLowerCase();
+    let targets = [];
+
+    if (currentUser.role === 'super') {
+        targets = allSystemUsers.filter(u => u.status === 'ACTIVE' && (u.role === 'manager' || u.role === 'admin') && u.id.toLowerCase() !== currentUserIdClean);
+    } else if (currentUser.role === 'manager') {
+        targets = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.role === 'admin' && String(u.report_to).toLowerCase() === currentUserIdClean);
+    } else if (currentUser.role === 'admin') {
+        targets = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.role === 'user' && String(u.report_to).toLowerCase() === currentUserIdClean);
+    }
+
+    targets.forEach(u => {
+        dropdown.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()})</option>`;
+    });
+
+    document.getElementById('btnConfirmTransfer').onclick = function() {
+        executeBatchTransfer(batchName, dropdown.value);
+    };
+
+    document.getElementById('batchTransferModal').style.display = 'flex';
+};
+
+window.executeBatchTransfer = async function(batchName, targetUser) {
+    if (!targetUser) {
+        alert("Sila pilih penerima dari senarai terlebih dahulu!");
+        return;
+    }
+
+    let isConfirmed = await customConfirm(`PENGESAHAN:\nAnda pasti mahu memindahkan KESELURUHAN data di dalam batch ${batchName} kepada staf ${targetUser.toUpperCase()}?`);
+    if (!isConfirmed) return;
+
+    document.getElementById('batchTransferModal').style.display = 'none';
+    document.getElementById('loadingText').innerText = "Memindahkan batch di pangkalan data pelayan...";
+    document.getElementById('loadingModal').style.display = 'flex';
+
+    try {
+        let cleanTargetUser = targetUser.toLowerCase().trim();
+
+        // Update keseluruhan rekod yang ada batch_name yang sama
+        const { error } = await supabase.from('accounts').update({ assignee_id: cleanTargetUser }).eq('batch_name', batchName);
+        if (error) throw error;
+
+        // Rekod audit ke dalam findings
+        await supabase.from('findings').insert([{
+            acct: 'SYSTEM',
+            remark1: `BATCH TRANSFER: Batch ${batchName} dipindahkan kepada ${cleanTargetUser.toUpperCase()} oleh ${currentUser.id.toUpperCase()}`,
+            updated_by: currentUser.username
+        }]);
+
+        showNotification("SUCCESS", `Batch <b>${batchName}</b> telah berjaya diagihkan kepada ${cleanTargetUser.toUpperCase()}.`);
+
+        // Buang cache supaya data sinkronisasi semula
+        const cacheKey = `scazp_cache_${currentUser.id}`;
+        const timeKey = `scazp_time_${currentUser.id}`;
+        await localforage.removeItem(cacheKey);
+        localStorage.removeItem(timeKey);
+
+        await fetchFullDatabaseData();
+        applyFilterAndRender();
+
+        if (document.getElementById('assign-panel').style.display === 'block') {
+            renderBatchList();
+            renderAssignTable();
+        }
+
+    } catch (err) {
+        showNotification("TRANSFER ERROR", err.message, true);
+    } finally {
+        document.getElementById('loadingModal').style.display = 'none';
+    }
+};
+        
         window.toggleExpand = function(acct) {
             const row = document.getElementById('details-' + acct);
             if (row.style.display === 'none') {
