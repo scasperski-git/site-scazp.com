@@ -2171,8 +2171,8 @@ if (currentUser.role === 'user') {
             }
 
             filteredAccounts.sort((a, b) => {
-                let valueA = a[columnName];
-                let valueB = b[columnName];
+                let valueA = columnName === 'pack_cd' ? (a.details && a.details.PACK_CD ? a.details.PACK_CD : '') : a[columnName];
+                let valueB = columnName === 'pack_cd' ? (b.details && b.details.PACK_CD ? b.details.PACK_CD : '') : b[columnName];
 
                 if (columnName === 'last_date') {
                     let dateA = (a.details && a.details.last_remark_date) ? a.details.last_remark_date : '';
@@ -2201,12 +2201,14 @@ if (currentUser.role === 'user') {
         };
 
 function resetHeaderArrows() {
-            const cols = ['zone', 'region', 'area', 'loc', 'type', 'acct', 'delq', 'arrs_mth', 'osb', 'status', 'assignee_id', 'last_date'];
+            // 1. TAMBAH 'pack_cd' DALAM ARRAY INI
+            const cols = ['zone', 'region', 'area', 'loc', 'pack_cd', 'type', 'acct', 'delq', 'arrs_mth', 'osb', 'status', 'assignee_id', 'last_date'];
             cols.forEach(c => {
                 const el = document.getElementById(`th-${c}`);
                 if (el) {
                     if(c === 'last_date') el.innerHTML = "ATTEND DATE ⇅";
                     else if(c === 'assignee_id') el.innerHTML = "ASSIGNED TO ⇅";
+                    else if(c === 'pack_cd') el.innerHTML = "PACK CD ⇅"; // 2. TAMBAH BARIS INI
                     else el.innerHTML = `${el.innerText.split(' ')[0]} ⇅`;
                 }
             });
@@ -3708,8 +3710,9 @@ window.saveFinding = async function() {
             renderAssignTable(); // Panggil semula table untuk filter & susun
         };
 
-        function updateAssignHeaderArrows(activeCol) {
-            const cols = ['acct', 'zone', 'region', 'area', 'osb', 'status', 'assignee_id', 'collector'];
+function updateAssignHeaderArrows(activeCol) {
+            // 1. TAMBAH 'pack_cd' DALAM ARRAY INI
+            const cols = ['acct', 'zone', 'region', 'area', 'pack_cd', 'osb', 'status', 'assignee_id', 'collector'];
             cols.forEach(c => {
                 const el = document.getElementById(`tha-${c}`);
                 if (el) {
@@ -3717,6 +3720,7 @@ window.saveFinding = async function() {
                     if(c === 'acct') baseText = "ACCT NO";
                     else if(c === 'assignee_id') baseText = "CURRENT ASSIGNEE";
                     else if(c === 'osb') baseText = "OSB (RM)";
+                    else if(c === 'pack_cd') baseText = "PACK CD"; // 2. TAMBAH BARIS INI
                     
                     if (c === activeCol) {
                         let arrow = currentAssignSortDirection === 'asc' ? '▲' : '▼';
@@ -3790,16 +3794,17 @@ window.renderAssignTable = function() {
         return matchStatus && matchCollector;
     });
 
-    if (currentAssignSortColumn) {
-                assignAccounts.sort((a, b) => {
-                    let valueA = a[currentAssignSortColumn];
-                    let valueB = b[currentAssignSortColumn];
+if (currentAssignSortColumn) {
+        assignAccounts.sort((a, b) => {
+            // TARIK DATA DARI DALAM DETAILS JIKA COLUMN = PACK_CD
+            let valueA = currentAssignSortColumn === 'pack_cd' ? (a.details && a.details.PACK_CD ? a.details.PACK_CD : '') : a[currentAssignSortColumn];
+            let valueB = currentAssignSortColumn === 'pack_cd' ? (b.details && b.details.PACK_CD ? b.details.PACK_CD : '') : b[currentAssignSortColumn];
 
-                    if (currentAssignSortColumn === 'osb') {
-                        let numA = parseFloat(valueA) || 0;
-                        let numB = parseFloat(valueB) || 0;
-                        return currentAssignSortDirection === 'asc' ? numA - numB : numB - numA;
-                    } 
+            if (currentAssignSortColumn === 'osb') {
+                let numA = parseFloat(valueA) || 0;
+                let numB = parseFloat(valueB) || 0;
+                return currentAssignSortDirection === 'asc' ? numA - numB : numB - numA;
+            }
                     
                     let strA = valueA ? String(valueA).toUpperCase().trim() : '';
                     let strB = valueB ? String(valueB).toUpperCase().trim() : '';
