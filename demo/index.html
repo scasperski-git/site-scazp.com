@@ -4152,6 +4152,18 @@ window.copyToClipboard = function(text, btnElement) {
     
     return html;
 };
+
+    window.goToPage = function(p) {
+    if (p < 1 || p > Math.ceil(filteredAccounts.length / rowsPerPage)) return;
+    currentPage = p;
+    renderTablePage();
+};
+
+window.goToAssignPage = function(p) {
+    if (p < 1 || p > Math.ceil(assignAccounts.length / assignRowsPerPage)) return;
+    currentAssignPage = p;
+    renderAssignTable();
+};
         
     </script>
 </body>
