@@ -1490,9 +1490,10 @@ th {
                             </div>
                         </div>
                         
-                        <textarea id="single-remark-box" class="form-control" rows="4" 
-                                  placeholder="Taip nota pemerhatian di sini... (Maksimum 200 huruf)"
-                                  style="font-size: 12px; resize: none; line-height: 1.6;"></textarea>
+<textarea id="single-remark-box" class="form-control" rows="4" 
+          placeholder="Taip nota pemerhatian di sini... (Maksimum 200 huruf)"
+          style="font-size: 12px; resize: none; line-height: 1.6;"
+          oninput="updateTextareaInfo(this)" maxlength="200"></textarea>
                     </div>
 
                     <div style="display: flex; gap: 12px;">
@@ -3854,10 +3855,11 @@ let wText = (line1 + line2).repeat(50);
             }
         };
         
-        window.updateTextareaInfo = function(el) {
+window.updateTextareaInfo = function(el) {
             el.value = el.value.toUpperCase(); 
             if (el.value.length > 200) { el.value = el.value.substring(0, 200); }
-            document.getElementById('textarea-info').innerText = `Jumlah Karakter: ${el.value.length}/200`;
+            // Tukar output supaya ringkas dan kemas
+            document.getElementById('textarea-info').innerText = `${el.value.length}/200`;
         };
         
         window.closeModal = function() { 
