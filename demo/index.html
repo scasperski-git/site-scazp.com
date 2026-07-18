@@ -1330,26 +1330,26 @@ th {
             
             <div class="table-container">
                 <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 40px; text-align: center;">
-                                <input type="checkbox" id="check-all-assign" onclick="toggleAllAssignCheckboxes(this)" style="cursor: pointer; transform: scale(1.2);">
-                            </th>
-                            <th style="width: 40px; text-align: center;">NO</th>
-                            <th class="sortable" onclick="sortAssignTable('zone')" id="tha-zone">ZONE ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('type')" id="tha-type">TYPE ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('loc')" id="tha-loc">LOC CD ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('pack_cd')" id="tha-pack_cd">PACK CD ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('acct')" id="tha-acct">ACCT NO ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('delq')" id="tha-delq">DELQ ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('arrs_mth')" id="tha-arrs_mth">ARRS MTH ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('osb')" id="tha-osb">OSB (RM) ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('status')" id="tha-status">STATUS ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('batch_owner')" id="tha-batch_owner">OWNER BY ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('collector')" id="tha-collector">COLLECTOR ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('assignee_id')" id="tha-assignee_id">CURRENT ASSIGNEE ⇅</th>
-                        </tr>
-                    </thead>
+<thead>
+    <tr>
+        <th style="width: 40px; text-align: center;">
+            <input type="checkbox" id="check-all-assign" onclick="toggleAllAssignCheckboxes(this)" style="cursor: pointer; transform: scale(1.2);">
+        </th>
+        <th style="width: 40px; text-align: center;">NO</th>
+        <th class="sortable" onclick="sortAssignTable('zone')" id="tha-zone">ZONE ⇅</th>
+        <th class="sortable" onclick="sortAssignTable('type')" id="tha-type">TYPE ⇅</th>
+        <th class="sortable" onclick="sortAssignTable('loc')" id="tha-loc">LOC CD ⇅</th>
+        <th class="sortable" onclick="sortAssignTable('pack_cd')" id="tha-pack_cd">PACK CD ⇅</th>
+        <th class="sortable" onclick="sortAssignTable('acct')" id="tha-acct">ACCT NO ⇅</th>
+        <th class="sortable" onclick="sortAssignTable('delq')" id="tha-delq">DELQ ⇅</th>
+        <th class="sortable" onclick="sortAssignTable('arrs_mth')" id="tha-arrs_mth">ARRS MTH ⇅</th>
+        <th class="sortable" onclick="sortAssignTable('osb')" id="tha-osb">OSB (RM) ⇅</th>
+        <th class="sortable" onclick="sortAssignTable('status')" id="tha-status">STATUS ⇅</th>
+        <th class="sortable" onclick="sortAssignTable('batch_owner')" id="tha-batch_owner">OWNER BY ⇅</th>
+        <th class="sortable" onclick="sortAssignTable('collector')" id="tha-collector">COLLECTOR ⇅</th>
+        <th class="sortable" onclick="sortAssignTable('assignee_id')" id="tha-assignee_id">CURRENT ASSIGNEE ⇅</th>
+    </tr>
+</thead>
                     <tbody id="assign-table-body">
                         <tr><td colspan="9" style="text-align:center;">Sila tunggu, sedang memuatkan data...</td></tr>
                     </tbody>
@@ -3953,101 +3953,66 @@ window.populateAssignSubordinates = function() {
 
 window.renderAssignTable = function() {
     const statusFilter = document.getElementById('assign-filter-status').value;
-    const collectorFilter = document.getElementById('filter-collector-dropdown').value; // [UPDATE]
-
+    const collectorFilter = document.getElementById('filter-collector-dropdown').value;
     const tbody = document.getElementById('assign-table-body');
     
     assignAccounts = globalAccounts.filter(row => {
         let isUnassigned = !row.assignee_id || row.assignee_id === 'UNASSIGNED';
-        
-        let matchStatus = false;
-        if (statusFilter === 'UNASSIGNED') matchStatus = isUnassigned;
-        else if (statusFilter === 'ASSIGNED') matchStatus = !isUnassigned;
-        else matchStatus = true;
-
-        // [UPDATE: Filter Collector]
+        let matchStatus = (statusFilter === 'UNASSIGNED') ? isUnassigned : (statusFilter === 'ASSIGNED' ? !isUnassigned : true);
         let matchCollector = (collectorFilter === 'ALL' || !collectorFilter) ? true : (row.collector === collectorFilter);
-        
         return matchStatus && matchCollector;
     });
 
-if (currentAssignSortColumn) {
+    if (currentAssignSortColumn) {
         assignAccounts.sort((a, b) => {
-            // TARIK DATA DARI DALAM DETAILS JIKA COLUMN = PACK_CD
             let valueA = currentAssignSortColumn === 'pack_cd' ? (a.details && a.details.PACK_CD ? a.details.PACK_CD : '') : a[currentAssignSortColumn];
             let valueB = currentAssignSortColumn === 'pack_cd' ? (b.details && b.details.PACK_CD ? b.details.PACK_CD : '') : b[currentAssignSortColumn];
+            if (currentAssignSortColumn === 'osb') return currentAssignSortDirection === 'asc' ? (parseFloat(valueA)||0) - (parseFloat(valueB)||0) : (parseFloat(valueB)||0) - (parseFloat(valueA)||0);
+            let strA = String(valueA||'').toUpperCase().trim();
+            let strB = String(valueB||'').toUpperCase().trim();
+            return currentAssignSortDirection === 'asc' ? strA.localeCompare(strB) : strB.localeCompare(strA);
+        });
+        updateAssignHeaderArrows(currentAssignSortColumn);
+    }
 
-            if (currentAssignSortColumn === 'osb') {
-                let numA = parseFloat(valueA) || 0;
-                let numB = parseFloat(valueB) || 0;
-                return currentAssignSortDirection === 'asc' ? numA - numB : numB - numA;
-            }
-                    
-                    let strA = valueA ? String(valueA).toUpperCase().trim() : '';
-                    let strB = valueB ? String(valueB).toUpperCase().trim() : '';
-                    
-                    if (strA < strB) return currentAssignSortDirection === 'asc' ? -1 : 1;
-                    if (strA > strB) return currentAssignSortDirection === 'asc' ? 1 : -1;
-                    return 0;
-                });
-                updateAssignHeaderArrows(currentAssignSortColumn);
-            }
+    let total = assignAccounts.length;
+    document.getElementById('assign-total-count').innerText = total.toLocaleString();
+    let totalPages = Math.ceil(total / assignRowsPerPage) || 1;
+    let start = (currentAssignPage - 1) * assignRowsPerPage;
+    let pageData = assignAccounts.slice(start, start + assignRowsPerPage);
 
-            let total = assignAccounts.length;
-            document.getElementById('assign-total-count').innerText = total.toLocaleString();
-
-            let totalPages = Math.ceil(total / assignRowsPerPage) || 1;
-            if(currentAssignPage > totalPages) currentAssignPage = totalPages;
-            if(currentAssignPage < 1) currentAssignPage = 1;
-
-            let start = (currentAssignPage - 1) * assignRowsPerPage;
-            let end = start + assignRowsPerPage;
-            let pageData = assignAccounts.slice(start, end);
-
-            tbody.innerHTML = '';
-            if(pageData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;">Tiada akaun dijumpai untuk kategori ini.</td></tr>';
-            } else {
-                pageData.forEach(row => {
-                let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '🔴 UNASSIGNED';
-                let colDisp = row.collector ? row.collector.toUpperCase() : '-';
-                let ownerDisp = row.batch_owner ? row.batch_owner.toUpperCase() : 'UNKNOWN';
-                let d = row.details || {}; 
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="text-align: center;"><input type="checkbox" class="chk-assign-row" value="${row.acct}" style="cursor:pointer; transform: scale(1.2);"></td>
-                        <td style="text-align: center; font-weight: 600; color: var(--text-muted);">${start + index + 1}</td>
-                        <td>${row.zone || '-'}</td>
-                        <td>${row.type || '-'}</td>
-                        <td>${row.loc || '-'}</td>
-                        <td style="font-weight: 700; color: var(--accent-gold);">${d.PACK_CD || '-'}</td>
-                        <td style="font-weight: bold; color: var(--text-main); white-space: nowrap;">
-                            ${row.acct}
-                            <button onclick="copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0; display: inline-block;" title="Copy Account No">📋</button>
-                        </td>
-                        <td>${row.delq || '-'}</td>
-                        <td style="color: ${parseFloat(row.arrs_mth) > 0 ? 'var(--error-red)' : 'inherit'}; font-weight: ${parseFloat(row.arrs_mth) > 0 ? '700' : 'normal'};">${row.arrs_mth || '0'}</td>
-                        <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td><span class="status-badge status-pending">${row.status}</span></td>
-                        <td style="font-weight: 600; color: var(--text-main);">${ownerDisp}</td>
-                        <td style="font-weight:bold; color:var(--success-green);">${colDisp}</td>
-                        <td style="font-weight:bold; color:var(--accent-gold);">${assigneeDisp}</td>
-                    </tr>
-                `;
-            });
-            }
-
-            document.getElementById('assign-page-info').innerText = `Page ${currentAssignPage} of ${totalPages}`;
-            document.getElementById('btn-assign-prev').disabled = currentAssignPage === 1;
-            document.getElementById('btn-assign-next').disabled = currentAssignPage === totalPages;
-            document.getElementById('assign-page-info').innerText = `Page ${currentAssignPage} of ${totalPages}`;
-            const assignPaginationDiv = document.querySelector('#assign-panel .pagination-controls');
-            if(assignPaginationDiv) {
-                assignPaginationDiv.innerHTML = buildPaginationControls(currentAssignPage, totalPages, 'goToAssignPage');
-            }
-            document.getElementById('check-all-assign').checked = false; 
-        };
+    tbody.innerHTML = '';
+    if(pageData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;">Tiada akaun dijumpai.</td></tr>';
+    } else {
+        pageData.forEach((row, index) => {
+            let d = row.details || {};
+            tbody.innerHTML += `
+                <tr>
+                    <td style="text-align: center;"><input type="checkbox" class="chk-assign-row" value="${row.acct}" style="cursor:pointer; transform: scale(1.2);"></td>
+                    <td style="text-align: center; font-weight: 600; color: var(--text-muted);">${start + index + 1}</td>
+                    <td>${row.zone || '-'}</td>
+                    <td>${row.type || '-'}</td>
+                    <td>${row.loc || '-'}</td>
+                    <td style="font-weight: 700; color: var(--accent-gold);">${d.PACK_CD || '-'}</td>
+                    <td style="font-weight: bold; color: var(--text-main); white-space: nowrap;">
+                        ${row.acct}
+                        <button onclick="copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0;" title="Copy">📋</button>
+                    </td>
+                    <td>${row.delq || '-'}</td>
+                    <td>${row.arrs_mth || '0'}</td>
+                    <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                    <td><span class="status-badge ${row.status==='UPDATED'?'status-done':'status-pending'}">${row.status}</span></td>
+                    <td style="font-weight: 600;">${row.batch_owner ? row.batch_owner.toUpperCase() : 'UNKNOWN'}</td>
+                    <td>${row.collector ? row.collector.toUpperCase() : '-'}</td>
+                    <td style="font-weight:bold; color:var(--accent-gold);">${row.assignee_id ? row.assignee_id.toUpperCase() : '🔴 UNASSIGNED'}</td>
+                </tr>
+            `;
+        });
+    }
+    document.getElementById('assign-page-info').innerText = `Page ${currentAssignPage} of ${totalPages}`;
+    document.querySelector('#assign-panel .pagination-controls').innerHTML = buildPaginationControls(currentAssignPage, totalPages, 'goToAssignPage');
+};
 
         window.nextAssignPage = function() {
             const totalPages = Math.ceil(assignAccounts.length / assignRowsPerPage);
