@@ -1293,6 +1293,7 @@ th {
                     <th>NAMA BATCH</th>
                     <th>ZON</th>
                     <th>UPLOADED BY</th>
+                    <th>CURRENT OWNER</th>
                     <th>JUMLAH AKAUN</th>
                     <th style="text-align: right;">TINDAKAN</th>
                 </tr>
@@ -1893,16 +1894,16 @@ async function fetchFullDatabaseData() {
                 
                 while(true) {
                     // KOREKSI: Tambah lajur batch_name dan uploaded_by ke dalam select query di bawah
-                    let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id, collector, batch_name, uploaded_by');
-                    
+                    let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id, collector, batch_name, uploaded_by, batch_owner');
+
 // [FIX HIERARCHY ACCESS]
 if (currentUser.role === 'user') {
     let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
     fetchQuery = fetchQuery.eq('assignee_id', currentUserIdClean);
 } else if (currentUser.role === 'admin') {
     let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
-    // Admin tarik data jika dia yang upload ATAU data diagih kepadanya
-    fetchQuery = fetchQuery.or(`uploaded_by.eq.${currentUserIdClean},assignee_id.eq.${currentUserIdClean}`);
+    // [KOREKSI LOGIK]: Admin tarik data jika dia pemilik batch (batch_owner) ATAU data diagih kepadanya
+    fetchQuery = fetchQuery.or(`batch_owner.eq.${currentUserIdClean},assignee_id.eq.${currentUserIdClean}`);
 } else if (currentUser.role === 'manager') {
     let safeZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : 'NONE';
     fetchQuery = fetchQuery.eq('zone', safeZone);
@@ -3170,7 +3171,8 @@ window.processExcelUpload = async function() {
             collector: rawColl,
             details: detailsJSON,
             batch_name: finalBatchName, // Data disuntik di sini
-            uploaded_by: currentUser.id // Data disuntik di sini
+            uploaded_by: currentUser.id,
+            batch_owner: currentUser.id
         });
     }
 
@@ -3221,14 +3223,14 @@ window.renderBatchList = function() {
     if (!tbody) return;
 
     let batchGroups = {};
-    // Kumpulkan data batch dari cache global
     globalAccounts.forEach(acc => {
         if (acc.batch_name) {
             if (!batchGroups[acc.batch_name]) {
                 batchGroups[acc.batch_name] = { 
                     count: 0, 
                     uploaded_by: acc.uploaded_by || 'UNKNOWN',
-                    zone: acc.zone || 'UNKNOWN' // Tangkap Zon Batch Tersebut
+                    batch_owner: acc.batch_owner || acc.uploaded_by || 'UNKNOWN', // Fallback perlindungan jika data lapuk
+                    zone: acc.zone || 'UNKNOWN' 
                 };
             }
             batchGroups[acc.batch_name].count++;
@@ -3237,9 +3239,8 @@ window.renderBatchList = function() {
 
     tbody.innerHTML = '';
     
-    // Tapis list untuk Manager/Admin supaya nampak batch zon diorang je
     let batchKeys = Object.keys(batchGroups).filter(bName => {
-        if (currentUser.role === 'super') return true; // Super nampak semua
+        if (currentUser.role === 'super') return true; 
         let bZone = batchGroups[bName].zone;
         
         let myZone = null;
@@ -3250,15 +3251,15 @@ window.renderBatchList = function() {
             myZone = myManager ? myManager.assignedzone : null;
         }
         
-        return bZone === myZone; // Filter ikut zon
+        return bZone === myZone; 
     }).sort().reverse(); 
 
     if (batchKeys.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Tiada rekod batch ditemui untuk zon anda.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Tiada rekod batch ditemui untuk zon anda.</td></tr>';
         return;
     }
 
-batchKeys.forEach(bName => {
+    batchKeys.forEach(bName => {
         let bInfo = batchGroups[bName];
         
         let actionButtons = '';
@@ -3275,7 +3276,8 @@ batchKeys.forEach(bName => {
             <tr>
                 <td style="font-weight: 700; color: var(--text-main);">${bName}</td>
                 <td style="font-weight: 600; color: var(--accent-gold);">${bInfo.zone}</td>
-                <td>${bInfo.uploaded_by.toUpperCase()}</td>
+                <td style="color: var(--text-muted);">${bInfo.uploaded_by.toUpperCase()}</td>
+                <td style="font-weight: bold; color: var(--text-main);">${bInfo.batch_owner.toUpperCase()}</td>
                 <td>${bInfo.count} Akaun</td>
                 <td style="text-align: right; white-space: nowrap;">
                     ${actionButtons}
@@ -3366,10 +3368,10 @@ window.executeBatchTransfer = async function(batchName, targetUser) {
     document.getElementById('loadingModal').style.display = 'flex';
 
     try {
-        let cleanTargetUser = targetUser.toLowerCase().trim();
+let cleanTargetUser = targetUser.toLowerCase().trim();
 
-        // [KOREKSI LOGIK]: Tukar dari assignee_id kepada uploaded_by
-        const { error } = await supabase.from('accounts').update({ uploaded_by: cleanTargetUser }).eq('batch_name', batchName);
+        // [KOREKSI LOGIK]: Sistem HANYA mengubah batch_owner. uploaded_by & assignee_id kekal seperti asal.
+        const { error } = await supabase.from('accounts').update({ batch_owner: cleanTargetUser }).eq('batch_name', batchName);
         if (error) throw error;
 
         // Rekod audit ke dalam findings
