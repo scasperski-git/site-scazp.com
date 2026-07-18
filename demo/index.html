@@ -3997,6 +3997,7 @@ window.renderAssignTable = function() {
     if(pageData.length === 0) {
         tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;">Tiada akaun dijumpai.</td></tr>';
     } else {
+        // HANYA ADA SATU LOOP DI SINI
         pageData.forEach((row, index) => {
             let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '🔴 UNASSIGNED';
             let colDisp = row.collector ? row.collector.toUpperCase() : '-';
