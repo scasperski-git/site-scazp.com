@@ -2178,8 +2178,8 @@ if (currentUser.role === 'user') {
 function renderZoneSelectionUI() {
             const container = document.getElementById('zone-buttons');
             
-            // 1. Butang VVIP untuk Super Admin (Master Access)
-            container.innerHTML = '<button class="btn-filter active" style="font-weight: 800; color: var(--accent-gold); border-color: var(--accent-gold); box-shadow: 0 0 5px rgba(59,130,246,0.3);" onclick="clearZoneSelection(this)">👑 ALL ZONES (MASTER ACCESS)</button>';
+            // [FIX]: Buang 'color: var(--accent-gold)' supaya tulisan kembali menjadi putih
+            container.innerHTML = '<button class="btn-filter active" style="font-weight: 800; box-shadow: 0 0 8px rgba(59,130,246,0.4);" onclick="clearZoneSelection(this)">👑 ALL ZONES (MASTER ACCESS)</button>';
             
             // 2. Senarai zon rasmi syarikat (Supaya butang tak hilang walaupun database kosong)
             let masterZones = new Set(['BC', 'WEST', 'EAST', 'HO']);
