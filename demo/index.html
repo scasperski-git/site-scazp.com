@@ -1138,18 +1138,17 @@ th {
                     <thead>
                         <tr>
                             <th class="sortable" onclick="sortTable('zone')" id="th-zone">ZONE ⇅</th>
-                            <th class="sortable" onclick="sortTable('region')" id="th-region">REGION ⇅</th>
-                            <th class="sortable" onclick="sortTable('area')" id="th-area">AREA ⇅</th>
+                            <th class="sortable" onclick="sortTable('batch_owner')" id="th-batch_owner">OWNER BY ⇅</th>
+                            <th class="sortable" onclick="sortTable('type')" id="th-type">TYPE ⇅</th>
                             <th class="sortable" onclick="sortTable('loc')" id="th-loc">LOC CD ⇅</th>
                             <th class="sortable" onclick="sortTable('pack_cd')" id="th-pack_cd">PACK CD ⇅</th>
-                            <th class="sortable" onclick="sortTable('type')" id="th-type">TYPE ⇅</th>
                             <th class="sortable" onclick="sortTable('acct')" id="th-acct">ACCT NO ⇅</th>
                             <th class="sortable" onclick="sortTable('delq')" id="th-delq">DELQ ⇅</th>
                             <th class="sortable" onclick="sortTable('arrs_mth')" id="th-arrs_mth">ARRS MTH ⇅</th>
                             <th class="sortable" onclick="sortTable('osb')" id="th-osb">OSB (RM) ⇅</th>
                             <th class="sortable" onclick="sortTable('status')" id="th-status">STATUS ⇅</th>
-                            <th class="sortable" onclick="sortTable('assignee_id')" id="th-assignee_id">ASSIGNED TO ⇅</th>
                             <th class="sortable" onclick="sortTable('last_date')" id="th-last_date" style="color: var(--accent-gold);">ATTEND DATE ⇅</th>
+                            <th class="sortable" onclick="sortTable('assignee_id')" id="th-assignee_id">ASSIGNED TO ⇅</th>
                         </tr>
                     </thead>
                     <tbody id="table-body"></tbody>
@@ -1335,13 +1334,16 @@ th {
                             <th style="width: 40px; text-align: center;">
                                 <input type="checkbox" id="check-all-assign" onclick="toggleAllAssignCheckboxes(this)" style="cursor: pointer; transform: scale(1.2);">
                             </th>
-                            <th class="sortable" onclick="sortAssignTable('acct')" id="tha-acct">ACCT NO ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('zone')" id="tha-zone">ZONE ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('region')" id="tha-region">REGION ⇅</th>
-                            <th class="sortable" onclick="sortAssignTable('area')" id="tha-area">AREA ⇅</th>
+                            <th class="sortable" onclick="sortAssignTable('type')" id="tha-type">TYPE ⇅</th>
+                            <th class="sortable" onclick="sortAssignTable('loc')" id="tha-loc">LOC CD ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('pack_cd')" id="tha-pack_cd">PACK CD ⇅</th>
+                            <th class="sortable" onclick="sortAssignTable('acct')" id="tha-acct">ACCT NO ⇅</th>
+                            <th class="sortable" onclick="sortAssignTable('delq')" id="tha-delq">DELQ ⇅</th>
+                            <th class="sortable" onclick="sortAssignTable('arrs_mth')" id="tha-arrs_mth">ARRS MTH ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('osb')" id="tha-osb">OSB (RM) ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('status')" id="tha-status">STATUS ⇅</th>
+                            <th class="sortable" onclick="sortAssignTable('batch_owner')" id="tha-batch_owner">OWNER BY ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('collector')" id="tha-collector">COLLECTOR ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('assignee_id')" id="tha-assignee_id">CURRENT ASSIGNEE ⇅</th>
                         </tr>
@@ -2263,14 +2265,18 @@ if (currentUser.role === 'user') {
         };
 
 function resetHeaderArrows() {
-            // 1. TAMBAH 'pack_cd' DALAM ARRAY INI
-            const cols = ['zone', 'region', 'area', 'loc', 'pack_cd', 'type', 'acct', 'delq', 'arrs_mth', 'osb', 'status', 'assignee_id', 'last_date'];
+            const cols = ['zone', 'batch_owner', 'type', 'loc', 'pack_cd', 'acct', 'delq', 'arrs_mth', 'osb', 'status', 'last_date', 'assignee_id'];
             cols.forEach(c => {
                 const el = document.getElementById(`th-${c}`);
                 if (el) {
                     if(c === 'last_date') el.innerHTML = "ATTEND DATE ⇅";
                     else if(c === 'assignee_id') el.innerHTML = "ASSIGNED TO ⇅";
-                    else if(c === 'pack_cd') el.innerHTML = "PACK CD ⇅"; // 2. TAMBAH BARIS INI
+                    else if(c === 'pack_cd') el.innerHTML = "PACK CD ⇅";
+                    else if(c === 'batch_owner') el.innerHTML = "OWNER BY ⇅";
+                    else if(c === 'arrs_mth') el.innerHTML = "ARRS MTH ⇅";
+                    else if(c === 'loc') el.innerHTML = "LOC CD ⇅";
+                    else if(c === 'acct') el.innerHTML = "ACCT NO ⇅";
+                    else if(c === 'osb') el.innerHTML = "OSB (RM) ⇅";
                     else el.innerHTML = `${el.innerText.split(' ')[0]} ⇅`;
                 }
             });
@@ -2283,6 +2289,12 @@ function resetHeaderArrows() {
                 let text = el.innerText.split(' ')[0];
                 if(activeCol === 'last_date') text = "ATTEND DATE";
                 else if(activeCol === 'assignee_id') text = "ASSIGNED TO";
+                else if(activeCol === 'pack_cd') text = "PACK CD";
+                else if(activeCol === 'batch_owner') text = "OWNER BY";
+                else if(activeCol === 'arrs_mth') text = "ARRS MTH";
+                else if(activeCol === 'loc') text = "LOC CD";
+                else if(activeCol === 'acct') text = "ACCT NO";
+                else if(activeCol === 'osb') text = "OSB (RM)";
                 
                 let arrow = currentSortDirection === 'asc' ? '▲' : '▼';
                 el.innerHTML = `<span style="color:var(--text-main);">${text} ${arrow}</span>`;
@@ -2307,10 +2319,11 @@ function resetHeaderArrows() {
             const endIndex = startIndex + rowsPerPage;
             const pageData = filteredAccounts.slice(startIndex, endIndex);
 
-            pageData.forEach(row => {
+pageData.forEach(row => {
                 let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
                 let d = row.details || {};
                 let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '-';
+                let ownerDisp = row.batch_owner ? row.batch_owner.toUpperCase() : 'UNKNOWN';
 
                 let timeDisplay = '';
                 if (d.timestamp) {
@@ -2322,24 +2335,23 @@ function resetHeaderArrows() {
                 tbody.innerHTML += `
                     <tr>
                         <td>${row.zone || '-'}</td>
-                        <td>${row.region || '-'}</td>
-                        <td>${row.area || '-'}</td>
-                        <td>${row.loc || '-'}</td>
-                        <td>${d.PACK_CD || '-'}</td>
+                        <td style="font-weight: 600; color: var(--text-main);">${ownerDisp}</td>
                         <td>${row.type || '-'}</td>
+                        <td>${row.loc || '-'}</td>
+                        <td style="font-weight: 700; color: var(--accent-gold);">${d.PACK_CD || '-'}</td>
                         <td style="font-weight: 700; white-space: nowrap;">
-    <span style="color: var(--accent-gold); cursor: pointer; text-decoration: underline;" onclick="openModal('${row.acct}')">${row.acct}</span>
-    <button onclick="event.stopPropagation(); copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0; display: inline-block;" title="Copy Account No">📋</button>
-</td>
+                            <span style="color: var(--accent-gold); cursor: pointer; text-decoration: underline;" onclick="openModal('${row.acct}')">${row.acct}</span>
+                            <button onclick="event.stopPropagation(); copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0; display: inline-block;" title="Copy Account No">📋</button>
+                        </td>
                         <td>${row.delq || '-'}</td>
                         <td style="color: ${parseFloat(row.arrs_mth) > 0 ? 'var(--error-red)' : 'inherit'}; font-weight: ${parseFloat(row.arrs_mth) > 0 ? '700' : 'normal'};">${row.arrs_mth || '0'}</td>
                         <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td><span class="status-badge ${badgeClass}">${row.status === 'UPDATED' ? 'ATTENDED' : row.status}</span></td>
-                        <td style="font-weight: 600; color: var(--text-main);">${assigneeDisp}</td>
                         <td>
                             <span style="font-weight: 600; color: var(--text-muted); font-size: 12px;">${d.last_remark_date || '-'}</span>
                             ${timeDisplay}
                         </td>
+                        <td style="font-weight: 600; color: var(--text-main);">${assigneeDisp}</td>
                     </tr>
                 `;
             });
@@ -3852,8 +3864,7 @@ window.saveFinding = async function() {
         };
 
 function updateAssignHeaderArrows(activeCol) {
-            // 1. TAMBAH 'pack_cd' DALAM ARRAY INI
-            const cols = ['acct', 'zone', 'region', 'area', 'pack_cd', 'osb', 'status', 'assignee_id', 'collector'];
+            const cols = ['zone', 'type', 'loc', 'pack_cd', 'acct', 'delq', 'arrs_mth', 'osb', 'status', 'batch_owner', 'collector', 'assignee_id'];
             cols.forEach(c => {
                 const el = document.getElementById(`tha-${c}`);
                 if (el) {
@@ -3861,7 +3872,10 @@ function updateAssignHeaderArrows(activeCol) {
                     if(c === 'acct') baseText = "ACCT NO";
                     else if(c === 'assignee_id') baseText = "CURRENT ASSIGNEE";
                     else if(c === 'osb') baseText = "OSB (RM)";
-                    else if(c === 'pack_cd') baseText = "PACK CD"; // 2. TAMBAH BARIS INI
+                    else if(c === 'pack_cd') baseText = "PACK CD";
+                    else if(c === 'batch_owner') baseText = "OWNER BY";
+                    else if(c === 'arrs_mth') baseText = "ARRS MTH";
+                    else if(c === 'loc') baseText = "LOC CD";
                     
                     if (c === activeCol) {
                         let arrow = currentAssignSortDirection === 'asc' ? '▲' : '▼';
@@ -3977,26 +3991,31 @@ if (currentAssignSortColumn) {
             } else {
                 pageData.forEach(row => {
                 let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '🔴 UNASSIGNED';
-                let colDisp = row.collector ? row.collector.toUpperCase() : '-'; // [UPDATE]
-                let d = row.details || {};
+                let colDisp = row.collector ? row.collector.toUpperCase() : '-';
+                let ownerDisp = row.batch_owner ? row.batch_owner.toUpperCase() : 'UNKNOWN';
+                let d = row.details || {}; 
 
                 tbody.innerHTML += `
                     <tr>
                         <td style="text-align: center;">
                             <input type="checkbox" class="chk-assign-row" value="${row.acct}" style="cursor:pointer; transform: scale(1.2);">
                         </td>
-                        <td style="font-weight: bold; color: var(--text-main); white-space: nowrap;">
-    ${row.acct}
-    <button onclick="copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0; display: inline-block;" title="Copy Account No">📋</button>
-</td>
                         <td>${row.zone || '-'}</td>
-                        <td>${row.region || '-'}</td>
-                        <td>${row.area || '-'}</td>
-                        <td>${d.PACK_CD || '-'}</td>
+                        <td>${row.type || '-'}</td>
+                        <td>${row.loc || '-'}</td>
+                        <td style="font-weight: 700; color: var(--accent-gold);">${d.PACK_CD || '-'}</td>
+                        <td style="font-weight: bold; color: var(--text-main); white-space: nowrap;">
+                            ${row.acct}
+                            <button onclick="copyToClipboard('${row.acct}', this)" style="background: none; border: none; cursor: pointer; font-size: 11px; margin-left: 5px; color: var(--accent-gold); padding: 0; display: inline-block;" title="Copy Account No">📋</button>
+                        </td>
+                        <td>${row.delq || '-'}</td>
+                        <td style="color: ${parseFloat(row.arrs_mth) > 0 ? 'var(--error-red)' : 'inherit'}; font-weight: ${parseFloat(row.arrs_mth) > 0 ? '700' : 'normal'};">${row.arrs_mth || '0'}</td>
                         <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td><span class="status-badge status-pending">${row.status}</span></td>
+                        <td style="font-weight: 600; color: var(--text-main);">${ownerDisp}</td>
                         <td style="font-weight:bold; color:var(--success-green);">${colDisp}</td>
-                        <td style="font-weight:bold; color:var(--accent-gold);">${assigneeDisp}</td> </tr>
+                        <td style="font-weight:bold; color:var(--accent-gold);">${assigneeDisp}</td>
+                    </tr>
                 `;
             });
             }
