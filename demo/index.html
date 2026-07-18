@@ -2496,11 +2496,15 @@ window.toggleInlineAccessSelect = function(userId) {
 }
 
 window.updateUserInline = async function(userId) {
+    let targetUserId = userId.toLowerCase().trim(); // Pastikan lowercase
     let newRole = document.getElementById(`edit-role-${userId}`).value;
     let newReportTo = document.getElementById(`edit-report-${userId}`).value;
     
-    // [FIX]: Baca semula semua checkbox pada baris user itu sahaja
-    let checkedBoxes = Array.from(document.querySelectorAll(`.edit-chk-zone-${userId}:checked`));
+    // [FIX]: Cari checkbox guna targetUserId yang dah diselaraskan
+    let checkedBoxes = Array.from(document.querySelectorAll(`.edit-chk-zone-${targetUserId}:checked`));
+    
+    // Kalau checkbox tak jumpa (newZone jadi null), kita bagi nilai asal (fallback)
+    // Atau kalau bos nak paksa kosong, kita kena check kenapa querySelector tu gagal
     let newZone = checkedBoxes.length > 0 ? checkedBoxes.map(cb => cb.value).join(', ') : null;
 
     if (newReportTo === "") newReportTo = null;
@@ -2508,8 +2512,9 @@ window.updateUserInline = async function(userId) {
     let isVerified = await verifyAdminPasscode();
     if (!isVerified) return;
 
-    // Debugging (optional): Tengok apa yang sistem hantar ke Supabase
-    console.log("Saving user:", userId, "Role:", newRole, "Zones:", newZone);
+    // Tambah console log untuk tengok apa yang dia jumpa
+    console.log("Mencari checkbox dengan class:", `.edit-chk-zone-${targetUserId}:checked`);
+    console.log("Jumlah checkbox di-tick:", checkedBoxes.length);
 
     const { error } = await supabase.from('users').update({ 
         role: newRole, 
@@ -2519,8 +2524,7 @@ window.updateUserInline = async function(userId) {
     }).eq('id', userId);
 
     if (!error) { 
-        showNotification("UPDATE SUCCESS", `Konfigurasi untuk user <b>${userId.toUpperCase()}</b> telah berjaya dikemas kini.`);
-        // Reload data terus supaya UI kembali segar
+        showNotification("UPDATE SUCCESS", `User <b>${userId.toUpperCase()}</b> dikemas kini dengan Zon: ${newZone || 'TIADA ZON'}`);
         await fetchAndRenderUsers();
     } else { 
         showNotification("UPDATE ERROR", error.message, true); 
