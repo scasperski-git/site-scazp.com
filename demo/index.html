@@ -949,6 +949,7 @@ th {
             #dashboard-panel, #assign-panel, #settings-panel, #report-panel { padding-bottom: 20px; }
 
                         /* --- HEADER MOBILE REDESIGN (CLEAN & COMPACT) --- */
+/* --- HEADER MOBILE REDESIGN (CLEAN & COMPACT) --- */
             .header {
                 flex-direction: column;
                 align-items: center; 
@@ -959,44 +960,25 @@ th {
                 font-size: 16px; 
                 text-align: center; 
             }
-            .header > div {
-                flex-direction: row !important; /* Paksa duduk sebaris */
-                flex-wrap: nowrap !important; /* Elak elemen jatuh ke bawah */
-                align-items: center;
+            #header-user-section {
+                flex-direction: row !important; 
+                justify-content: space-between;
                 width: 100%;
-                background: #f8fafc; /* Buat satu bar kelabu lembut */
-                padding: 8px 12px;
+                background: #f8fafc; 
+                padding: 10px 15px;
                 border-radius: var(--radius-md);
                 border: 1px solid var(--border-color); 
-                gap: 8px;
                 box-sizing: border-box;
             }
+            #header-user-section > div:first-child {
+                align-items: flex-start !important; /* Tolak teks nama ke kiri di skrin telefon */
+            }
             #display-username {
-                width: auto !important; 
-                text-align: left !important;
-                background: transparent !important;
-                padding: 0 !important;
-                border: none !important; 
-                order: 1 !important; 
-                font-weight: 700 !important;
-                font-size: 11px !important;
-                color: var(--accent-gold) !important;
-                margin-right: auto; /* Tolak nama ke kiri sepenuhnya */
                 white-space: nowrap;
                 overflow: hidden;
-                text-overflow: ellipsis; /* Kalau nama panjang sangat, dia jadi titik-titik */
+                text-overflow: ellipsis; 
+                max-width: 150px; /* Elak nama panjang langgar butang */
             }
-            .header .btn-logout {
-                flex: 0 0 auto !important; /* Kunci saiz butang supaya tak jadi gedabak */
-                padding: 6px 12px !important;
-                font-size: 10px !important;
-                font-weight: 700 !important;
-                border-radius: 6px !important;
-                white-space: nowrap;
-                margin: 0 !important;
-            }
-            .header .btn-logout:nth-of-type(1) { order: 2 !important; } 
-            .header .btn-logout:nth-of-type(2) { order: 3 !important; } 
 
             .nav-tabs { padding: 10px; margin-bottom: 15px; }
 
@@ -1068,12 +1050,19 @@ th {
     </div>
 
     <div id="dashboard-section">
-        <div class="header">
+<div class="header">
             <h1>FINDINGS MONITORING SYSTEM</h1>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <span id="display-username" style="font-size: 12px; color: var(--text-muted);"></span>
-                <button class="btn-logout" style="color: var(--text-main); border-color: var(--border-color);" onclick="forceSyncData()">⟳ SYNC</button>
-                <button class="btn-logout" onclick="handleLogout()">Sign Out</button>
+            <div id="header-user-section" style="display: flex; align-items: center; gap: 15px;">
+                <!-- Lajur Teks -->
+                <div style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1.4;">
+                    <span id="display-username" style="font-size: 12px; color: var(--text-main); font-weight: 700;"></span>
+                    <span id="display-report-to" style="font-size: 9px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.3px;"></span>
+                </div>
+                <!-- Lajur Butang (Tersusun Atas Bawah) -->
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <button class="btn-logout" onclick="handleLogout()" style="padding: 4px 12px; font-size: 9px; border-radius: 4px; line-height: 1.2;">SIGN OUT</button>
+                    <button class="btn-logout" onclick="forceSyncData()" style="color: var(--text-main); border-color: var(--border-color); padding: 4px 12px; font-size: 9px; border-radius: 4px; line-height: 1.2;">⟳ SYNC</button>
+                </div>
             </div>
         </div>
 
@@ -1675,6 +1664,10 @@ async function checkLoginSession() {
         dashboardSection.style.display = 'block';
         loginSection.style.display = 'none';
         document.getElementById('display-username').innerText = "Logged in as: " + currentUser.id.toUpperCase();
+
+        let repToText = currentUser.report_to ? currentUser.report_to.toUpperCase() : 'N/A';
+        if(currentUser.role === 'super') repToText = 'SYSTEM MASTER';
+        document.getElementById('display-report-to').innerText = "Report to: " + repToText;
         
         await fetchFullDatabaseData();
         await fetchMasterLocations(); 
@@ -1810,6 +1803,10 @@ window.requestBatchName = function() {
                     document.getElementById('login-section').style.display = 'none';
                     document.getElementById('dashboard-section').style.display = 'block';
                     document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
+
+                    let repToText = data.report_to ? data.report_to.toUpperCase() : 'N/A';
+                    if(data.role === 'super') repToText = 'SYSTEM MASTER';
+                    document.getElementById('display-report-to').innerText = "Report to: " + repToText;
                     
                     if (IS_MAINTENANCE && data.role === 'super') {
                         document.getElementById('maintenance-bar').style.display = 'block';
