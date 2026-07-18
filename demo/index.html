@@ -961,24 +961,34 @@ th {
                 text-align: center; 
             }
             #header-user-section {
-                flex-direction: row !important; 
-                justify-content: space-between;
+                flex-direction: column !important; /* Susun menegak (atas-bawah) di mobile */
+                align-items: stretch !important;   /* Penuhi lebar skrin */
                 width: 100%;
                 background: #f8fafc; 
                 padding: 10px 15px;
                 border-radius: var(--radius-md);
                 border: 1px solid var(--border-color); 
                 box-sizing: border-box;
+                gap: 10px !important;              /* Jarak antara teks dan butang */
             }
+
+            /* Container teks: biar dia guna ruang penuh */
             #header-user-section > div:first-child {
-                align-items: flex-start !important; /* Tolak teks nama ke kiri di skrin telefon */
+                align-items: flex-start !important; 
+                width: 100%;
             }
+
+            /* Container butang: jadikan sebaris (flex-row) supaya jimat ruang */
+            #header-user-section > div:nth-child(2) {
+                flex-direction: row !important; 
+                gap: 8px !important;
+            }
+
             #display-username {
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis; 
-                max-width: 150px; /* Elak nama panjang langgar butang */
+                max-width: 100% !important; /* Benarkan nama guna ruang penuh */
+                font-size: 13px !important;
             }
+
 
             .nav-tabs { padding: 10px; margin-bottom: 15px; }
 
