@@ -2384,8 +2384,9 @@ pageData.forEach(row => {
                 
                 populateAssignSubordinates();
                 populateCollectorFilters();
-                renderAssignTable();
                 renderBatchList();
+                renderAssignTable();
+               
             }
             
             localStorage.setItem('scazp_active_tab', target);
@@ -3393,21 +3394,21 @@ let cleanTargetUser = targetUser.toLowerCase().trim();
             updated_by: currentUser.username
         }]);
 
-        showNotification("SUCCESS", `Hak milik Batch <b>${batchName}</b> telah berjaya dipindahkan kepada ${cleanTargetUser.toUpperCase()}.`);
+    showNotification("SUCCESS", `Hak milik Batch <b>${batchName}</b> telah berjaya dipindahkan kepada ${cleanTargetUser.toUpperCase()}.`);
 
-        // Buang cache supaya data sinkronisasi semula
+        // FIX CACHE: Hapuskan rujukan cache secara total bagi ID semasa untuk paksa muat turun baru
         const cacheKey = `scazp_cache_${currentUser.id}`;
         const timeKey = `scazp_time_${currentUser.id}`;
         await localforage.removeItem(cacheKey);
         localStorage.removeItem(timeKey);
 
+        // Paksa pangkalan data buat muat turun bersih
         await fetchFullDatabaseData();
         applyFilterAndRender();
 
-        if (document.getElementById('assign-panel').style.display === 'block') {
-            renderBatchList();
-            renderAssignTable();
-        }
+        // Pastikan kedua-dua jadual dirender semula dengan data segar dari pelayan
+        renderBatchList();
+        renderAssignTable();
 
     } catch (err) {
         showNotification("TRANSFER ERROR", err.message, true);
