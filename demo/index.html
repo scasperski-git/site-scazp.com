@@ -3858,8 +3858,8 @@ let wText = (line1 + line2).repeat(50);
 window.updateTextareaInfo = function(el) {
             el.value = el.value.toUpperCase(); 
             if (el.value.length > 200) { el.value = el.value.substring(0, 200); }
-            // Tukar output supaya ringkas dan kemas
-            document.getElementById('textarea-info').innerText = `${el.value.length}/200`;
+            // Letak balik perkataan Jumlah Karakter
+            document.getElementById('textarea-info').innerText = `Jumlah Karakter: ${el.value.length}/200`;
         };
         
         window.closeModal = function() { 
