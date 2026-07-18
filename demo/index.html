@@ -1195,15 +1195,14 @@ th {
                 <option value="">-- No Supervisor Required --</option>
             </select>
         </div>
-        <div class="form-group" id="form-zone-group" style="display: none;">
-            <label style="color: var(--accent-gold); font-weight: bold;">Assign to ZONE (For Manager)</label>
-            <select id="new-user-zone" class="form-control">
-                <option value="ALL">ALL ZONES</option>
-                <option value="BC">BC</option>
-                <option value="WEST">WEST</option>
-                <option value="EAST">EAST</option>
-                <option value="HO">HO</option>
-            </select>
+<div class="form-group" id="form-zone-group" style="display: none;">
+            <label style="color: var(--accent-gold); font-weight: bold;">Assign to ZONE (For Manager & Admin)</label>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; background: #f8fafc; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <label style="font-weight: 600; cursor: pointer;"><input type="checkbox" value="BC" class="chk-zone-new" style="transform: scale(1.2); margin-right: 5px;"> BC</label>
+                <label style="font-weight: 600; cursor: pointer;"><input type="checkbox" value="WEST" class="chk-zone-new" style="transform: scale(1.2); margin-right: 5px;"> WEST</label>
+                <label style="font-weight: 600; cursor: pointer;"><input type="checkbox" value="EAST" class="chk-zone-new" style="transform: scale(1.2); margin-right: 5px;"> EAST</label>
+                <label style="font-weight: 600; cursor: pointer;"><input type="checkbox" value="HO" class="chk-zone-new" style="transform: scale(1.2); margin-right: 5px;"> HO</label>
+            </div>
         </div>
         <button class="btn-submit" onclick="addNewUser()">Save User Configuration</button>
     </div>
@@ -1712,37 +1711,32 @@ window.requestBatchName = function() {
     return new Promise((resolve) => {
         document.getElementById('batchPromptInput').value = '';
         
-        // --- LOGIK KENAL PASTI ZON ---
         let zoneSelect = document.getElementById('batchPromptZone');
         zoneSelect.innerHTML = '';
         
         let myZone = null;
-        if (currentUser.role === 'manager') {
-            myZone = currentUser.assignedzone;
-        } else if (currentUser.role === 'admin') {
-            // Admin takde zon, jadi kita pinjam zon dari Manager yang dia report_to
-            let myManager = allSystemUsers.find(u => u.id === currentUser.report_to);
-            myZone = myManager ? myManager.assignedzone : null;
+        if (currentUser.role === 'manager' || currentUser.role === 'admin') {
+            myZone = currentUser.assignedzone; // Boleh jadi "BC, WEST"
         }
 
         if (currentUser.role === 'super') {
-            // Super boleh pilih bebas
-            zoneSelect.innerHTML = `
-                <option value="">-- PILIH ZON TUGASAN --</option>
-                <option value="BC">BC</option>
-                <option value="WEST">WEST</option>
-                <option value="EAST">EAST</option>
-                <option value="HO">HO</option>
-            `;
+            zoneSelect.innerHTML = `<option value="">-- PILIH ZON TUGASAN --</option><option value="BC">BC</option><option value="WEST">WEST</option><option value="EAST">EAST</option><option value="HO">HO</option>`;
             zoneSelect.disabled = false;
         } else {
-            // Manager & Admin akan di-lock pada zon mereka
             if (myZone) {
-                zoneSelect.innerHTML = `<option value="${myZone}">${myZone}</option>`;
+                let zones = myZone.split(',').map(z => z.trim());
+                if(zones.length > 1) {
+                    zoneSelect.innerHTML = `<option value="">-- PILIH ZON TUGASAN --</option>`;
+                    zones.forEach(z => zoneSelect.innerHTML += `<option value="${z}">${z}</option>`);
+                    zoneSelect.disabled = false; // Buka lock supaya dia boleh pilih
+                } else {
+                    zoneSelect.innerHTML = `<option value="${zones[0]}">${zones[0]}</option>`;
+                    zoneSelect.disabled = true; // Lock kalau cuma 1 zon
+                }
             } else {
-                zoneSelect.innerHTML = `<option value="UNKNOWN">TIADA ZON (Hubungi Super)</option>`;
+                zoneSelect.innerHTML = `<option value="UNKNOWN">TIADA ZON (Sila Reply Email Super)</option>`;
+                zoneSelect.disabled = true;
             }
-            zoneSelect.disabled = true; // Lock dropdown
         }
 
         document.getElementById('batchPromptModal').style.display = 'flex';
@@ -2434,7 +2428,7 @@ window.renderUserTablePage = async function() {
     let pageData = filteredSystemUsers.slice(start, end);
     
     if(pageData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No users found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No users found.</td></tr>';
     } else {
         pageData.forEach((user, index) => {
             let rName = user.role ? user.role.toLowerCase().trim() : 'user';
@@ -2458,16 +2452,17 @@ window.renderUserTablePage = async function() {
             });
             let reportSelect = `<select id="edit-report-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; max-width:110px;">${reportToOptions}</select>`;
 
-            // Dropdown ZONE statik (Untuk Manager)
-            let zoneOptions = `<option value="ALL" ${!user.assignedzone || user.assignedzone==='ALL'?'selected':''}>ALL ZONES</option>`;
-            const staticZones = ['BC', 'WEST', 'EAST', 'HO'];
-            staticZones.forEach(z => {
-                zoneOptions += `<option value="${z}" ${user.assignedzone===z?'selected':''}>${z}</option>`;
+            // --- SISTEM CHECKBOX ZON UNTUK MANAGER & ADMIN ---
+            let userZones = user.assignedzone ? user.assignedzone.split(',').map(z => z.trim()) : [];
+            let zoneCheckboxes = '';
+            ['BC', 'WEST', 'EAST', 'HO'].forEach(z => {
+                let isChecked = userZones.includes(z) ? 'checked' : '';
+                zoneCheckboxes += `<label style="margin-right:8px; white-space:nowrap; font-weight:bold; color:var(--accent-gold);"><input type="checkbox" value="${z}" class="edit-chk-zone-${user.id}" ${isChecked}> ${z}</label>`;
             });
-            let zoneSelect = `<select id="edit-zone-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; display: ${rName === 'manager' ? 'inline-block' : 'none'};">${zoneOptions}</select>`;
+            let zoneSelect = `<div id="edit-zone-${user.id}" style="font-size:10px; display: ${(rName === 'manager' || rName === 'admin') ? 'flex' : 'none'}; flex-wrap:wrap; max-width:150px;">${zoneCheckboxes}</div>`;
             
-            // Kapsul fallback jika User/Super/Admin
-            let noneText = `<span id="edit-none-${user.id}" style="font-size: 11px; color: var(--text-muted); display: ${(rName === 'user' || rName === 'super' || rName === 'admin') ? 'inline-block' : 'none'};">N/A (Global/PIC)</span>`;
+            // Kapsul fallback jika User/Super
+            let noneText = `<span id="edit-none-${user.id}" style="font-size: 11px; color: var(--text-muted); display: ${(rName === 'user' || rName === 'super') ? 'inline-block' : 'none'};">N/A (Global/PIC)</span>`;
 
             let fullNameDisp = user.name ? user.name.toUpperCase() : '<span style="color:#cbd5e1;">TIADA DATA</span>'; 
             
@@ -2496,9 +2491,37 @@ window.renderUserTablePage = async function() {
 
 window.toggleInlineAccessSelect = function(userId) {
     let role = document.getElementById(`edit-role-${userId}`).value;
-    document.getElementById(`edit-zone-${userId}`).style.display = role === 'manager' ? 'inline-block' : 'none';
-    document.getElementById(`edit-none-${userId}`).style.display = (role === 'user' || role === 'super' || role === 'admin') ? 'inline-block' : 'none';
+    document.getElementById(`edit-zone-${userId}`).style.display = (role === 'manager' || role === 'admin') ? 'flex' : 'none';
+    document.getElementById(`edit-none-${userId}`).style.display = (role === 'user' || role === 'super') ? 'inline-block' : 'none';
 }
+
+window.updateUserInline = async function(userId) {
+    let newRole = document.getElementById(`edit-role-${userId}`).value;
+    let newReportTo = document.getElementById(`edit-report-${userId}`).value;
+    
+    // Tarik semua checkbox yang di-tick
+    let checkedBoxes = Array.from(document.querySelectorAll(`.edit-chk-zone-${userId}:checked`)).map(cb => cb.value);
+    let newZone = checkedBoxes.length > 0 ? checkedBoxes.join(', ') : null;
+
+    if (newReportTo === "") newReportTo = null;
+
+    let isVerified = await verifyAdminPasscode();
+    if (!isVerified) return;
+
+    const { error } = await supabase.from('users').update({ 
+        role: newRole, 
+        report_to: newReportTo,
+        assignedzone: (newRole === 'manager' || newRole === 'admin') ? newZone : null,
+        assignedarea: null
+    }).eq('id', userId);
+
+    if (!error) { 
+        showNotification("UPDATE SUCCESS", `Konfigurasi untuk user <b>${userId.toUpperCase()}</b> telah berjaya dikemas kini.`);
+        fetchAndRenderUsers();
+    } else { 
+        showNotification("UPDATE ERROR", error.message, true); 
+    }
+};
         
         window.nextUserPage = function() {
             const totalPages = Math.ceil(filteredSystemUsers.length / usersPerPage);
@@ -2521,7 +2544,7 @@ window.toggleFormRoleSelect = async function() {
     const reportSelect = document.getElementById('new-user-report-to');
     const zoneGroup = document.getElementById('form-zone-group');
     
-    if (role === 'manager') {
+    if (role === 'manager' || role === 'admin') {
         zoneGroup.style.display = 'block'; 
     } else {
         zoneGroup.style.display = 'none'; 
@@ -2591,8 +2614,9 @@ window.addNewUser = async function() {
                     return;
                 }
 
-                let finalZone = (role === 'manager' && zone !== 'ALL') ? zone : null;
-                let finalArea = (role === 'admin' && area !== 'ALL') ? area : null;
+            let checkedZones = Array.from(document.querySelectorAll('.chk-zone-new:checked')).map(cb => cb.value);
+            let finalZone = (role === 'manager' || role === 'admin') ? (checkedZones.length > 0 ? checkedZones.join(', ') : null) : null;
+            let finalArea = null;
 
                 const { error } = await supabase.from('users').insert([{ 
                     id: id, 
