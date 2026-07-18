@@ -4117,44 +4117,41 @@ window.copyToClipboard = function(text, btnElement) {
     });
 };
 
-        // --- ENJIN PAGINATION DINAMIK ---
         window.buildPaginationControls = function(currentPage, totalPages, funcName) {
-            if (totalPages <= 0) return '';
-            let html = `<button onclick="${funcName}(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>◄</button>`;
-
-            let startPage = Math.max(1, currentPage - 2);
-            let endPage = Math.min(totalPages, currentPage + 2);
-
-            if (startPage > 1) {
-                html += `<button onclick="${funcName}(1)">1</button>`;
-                if (startPage > 2) html += `<span style="padding: 0 5px; color: var(--text-muted); font-weight: bold;">...</span>`;
-            }
-
-            for (let i = startPage; i <= endPage; i++) {
-                let activeStyle = i === currentPage ? 'background-color: var(--accent-gold); color: #ffffff; border-color: var(--accent-gold);' : '';
-                html += `<button onclick="${funcName}(${i})" style="${activeStyle}">${i}</button>`;
-            }
-
-            if (endPage < totalPages) {
-                if (endPage < totalPages - 1) html += `<span style="padding: 0 5px; color: var(--text-muted); font-weight: bold;">...</span>`;
-                html += `<button onclick="${funcName}(${totalPages})">${totalPages}</button>`;
-            }
-
-            html += `<button onclick="${funcName}(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>►</button>`;
-            return html;
-        };
-
-        window.goToPage = function(p) {
-            if(p < 1 || p > Math.ceil(filteredAccounts.length / rowsPerPage)) return;
-            currentPage = p;
-            renderTablePage();
-        };
-
-        window.goToAssignPage = function(p) {
-            if(p < 1 || p > Math.ceil(assignAccounts.length / assignRowsPerPage)) return;
-            currentAssignPage = p;
-            renderAssignTable();
-        };
+    if (totalPages <= 0) return '';
+    
+    // Butang First Page
+    let html = `<button onclick="${funcName}(1)" ${currentPage === 1 ? 'disabled' : ''}>«</button>`;
+    
+    // Butang Previous
+    html += `<button onclick="${funcName}(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>◄</button>`;
+    
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+    
+    if (startPage > 1) {
+        html += `<button onclick="${funcName}(1)">1</button>`;
+        if (startPage > 2) html += `<span style="padding: 0 5px; color: var(--text-muted); font-weight: bold;">...</span>`;
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        let activeStyle = i === currentPage ? 'background-color: var(--accent-gold); color: #ffffff; border-color: var(--accent-gold);' : '';
+        html += `<button onclick="${funcName}(${i})" style="${activeStyle}">${i}</button>`;
+    }
+    
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) html += `<span style="padding: 0 5px; color: var(--text-muted); font-weight: bold;">...</span>`;
+        html += `<button onclick="${funcName}(${totalPages})">${totalPages}</button>`;
+    }
+    
+    // Butang Next
+    html += `<button onclick="${funcName}(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>►</button>`;
+    
+    // Butang Last Page
+    html += `<button onclick="${funcName}(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}>»</button>`;
+    
+    return html;
+};
         
     </script>
 </body>
