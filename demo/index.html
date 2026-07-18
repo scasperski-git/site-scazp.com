@@ -1862,6 +1862,13 @@ window.forceSyncData = async function() {
             syncBtn.disabled = true;
             syncBtn.innerText = "SYNCING...";
 
+            // [FIX 1]: Refresh profil user dari database secara diam-diam sebelum tarik data
+            const { data: userRefreshed } = await supabase.from('users').select('*').eq('id', currentUser.id).single();
+            if (userRefreshed) {
+                currentUser = { ...currentUser, ...userRefreshed };
+                localStorage.setItem('scazp_user_session', JSON.stringify(currentUser));
+            }
+
             const cacheKey = `scazp_cache_${currentUser.id}`;
             const timeKey = `scazp_time_${currentUser.id}`;
 
@@ -1988,15 +1995,27 @@ if (currentUser.role === 'user') {
                 if(currentUser.role === 'super') {
                     document.getElementById('zone-filters-container').style.display = 'block';
                     renderZoneSelectionUI();
-                } else if(currentUser.role === 'manager') {
-                    document.getElementById('zone-filters-container').style.display = 'block';
-                    document.getElementById('zone-filters-container').innerHTML = `
-                        <span class="filter-title">My Assigned Zone</span>
-                        <div class="btn-group"><button class="btn-filter active">${currentUser.assignedzone || 'NO ZONE'}</button></div>
-                    `;
-                    currentZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : null;
-                    document.getElementById('region-filters-container').style.display = 'block';
-                    renderRegionSelectionUI(currentZone);
+        } else if(currentUser.role === 'manager') {
+            document.getElementById('zone-filters-container').style.display = 'block';
+            
+            // Pecahkan koma kepada array
+            let myZones = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(z => z.trim().toUpperCase()) : [];
+            
+            // Cipta butang secara dinamik untuk setiap zon yang manager tu pegang
+            let zoneHtml = `<button class="btn-filter active" onclick="clearZoneSelection(this)">ALL MY ZONES</button>`;
+            myZones.forEach(z => {
+                zoneHtml += `<button class="btn-filter" onclick="applyZoneFilter('${z}', this)">${z}</button>`;
+            });
+            
+            document.getElementById('zone-filters-container').innerHTML = `
+                <span class="filter-title">My Assigned Zone</span>
+                <div class="btn-group" id="zone-buttons">${zoneHtml}</div>
+            `;
+            
+            // Set kepada null supaya Dashboard tunjuk KESEMUA data dari myZones
+            currentZone = null; 
+            document.getElementById('region-filters-container').style.display = 'block';
+                    
                 } else if(currentUser.role === 'admin') {
                     // [BUG FIX]: Admin cannot select region/zone. Stick strictly to their assigned area.
                     document.getElementById('area-filters-container').style.display = 'block';
@@ -2624,6 +2643,11 @@ document.getElementById('btn-tw-confirm').onclick = async function() {
                 }]);
             }
 
+            // --- [FIX BARU]: Transfer pegangan individu (assignee_id) di zon yang ditinggalkan ---
+            await supabase.from('accounts')
+                .update({ assignee_id: replacement })
+                .eq('assignee_id', userId)
+                .in('zone', lostZones);
             // 2. Transfer Staf Bawahan (Report To)
             if (subordinates.length > 0) {
                 let subIds = subordinates.map(s => s.id);
