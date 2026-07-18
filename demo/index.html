@@ -2683,32 +2683,6 @@ if(error) {
             }
         };
 
-window.updateUserInline = async function(userId) {
-    let newRole = document.getElementById(`edit-role-${userId}`).value;
-    let newReportTo = document.getElementById(`edit-report-${userId}`).value;
-    let newZone = document.getElementById(`edit-zone-${userId}`).value;
-    // Rujukan kepada edit-area telah dibuang sepenuhnya
-
-    if (newReportTo === "") newReportTo = null;
-    if (newZone === "ALL") newZone = null;
-
-    let isVerified = await verifyAdminPasscode();
-    if (!isVerified) return;
-
-    const { error } = await supabase.from('users').update({ 
-        role: newRole, 
-        report_to: newReportTo,
-        assignedzone: newRole === 'manager' ? newZone : null,
-        assignedarea: null // Paksa sentiasa null
-    }).eq('id', userId);
-
-    if (!error) { 
-        showNotification("UPDATE SUCCESS", `Konfigurasi untuk user <b>${userId.toUpperCase()}</b> telah berjaya dikemas kini.`);
-        fetchAndRenderUsers();
-    } else { 
-        showNotification("UPDATE ERROR", error.message, true); 
-    }
-};
 
         window.renderReportCenter = async function() {
             const tbody = document.getElementById('report-table-body');
