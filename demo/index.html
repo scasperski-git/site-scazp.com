@@ -1583,6 +1583,24 @@ th {
         </div>
     </div>
 </div>
+
+    <!-- TRANSFER WIZARD MODAL -->
+    <div class="modal-overlay" id="transferWizardModal" style="z-index: 1200;">
+        <div class="modal-content" style="max-width: 450px;">
+            <h2 style="color: var(--text-main); margin-top: 0; font-size: 20px;">TRANSFER WIZARD</h2>
+            <div id="tw-message" style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5;"></div>
+            
+            <div class="form-group" style="text-align: left; margin-bottom: 25px;">
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">PILIH PENGGANTI (NEW IN-CHARGE):</label>
+                <select id="tw-replacement" class="form-control" style="font-weight: bold;"></select>
+            </div>
+            
+            <div style="display: flex; gap: 12px;">
+                <button class="btn-cancel" style="flex: 1;" onclick="closeTransferWizard()">BATALKAN</button>
+                <button class="btn-submit" style="flex: 1; background-color: var(--success-green);" id="btn-tw-confirm">SAHKAN SERAHAN</button>
+            </div>
+        </div>
+    </div>
     
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
@@ -2506,38 +2524,134 @@ window.toggleInlineAccessSelect = function(userId) {
     document.getElementById(`edit-none-${userId}`).style.display = (role === 'user' || role === 'super') ? 'inline-block' : 'none';
 }
 
+// --- KEMAS KINI FUNGSI SAVE USER (DILENGKAPI TRANSFER WIZARD) ---
 window.updateUserInline = async function(userId) {
     let newRole = document.getElementById(`edit-role-${userId}`).value;
     let newReportTo = document.getElementById(`edit-report-${userId}`).value;
     
-    // [FIX 1]: Gunakan attribute selector yang lebih selamat untuk elak error jika userId ada special character
+    // [FIX CSS SELECTOR]: Guna kaedah ini supaya tak error kalau ID ada simbol
     let checkedBoxes = Array.from(document.querySelectorAll(`input[class="edit-chk-zone-${userId}"]:checked`));
     let newZone = checkedBoxes.length > 0 ? checkedBoxes.map(cb => cb.value).join(', ') : null;
-
     if (newReportTo === "") newReportTo = null;
 
+    let currentUserData = allSystemUsers.find(u => u.id === userId);
+    let currentArea = currentUserData ? currentUserData.assignedarea : null;
+    let oldZone = currentUserData ? currentUserData.assignedzone : null;
+
+    // --- LOGIK TRANSFER WIZARD BERMULA DI SINI ---
+    let oldZonesArr = oldZone ? oldZone.split(',').map(z => z.trim()) : [];
+    let newZonesArr = newZone ? newZone.split(',').map(z => z.trim()) : [];
+    
+    // Cari zon mana yang "dibuang / hilang" dari pegangan staf ini
+    let lostZones = oldZonesArr.filter(z => !newZonesArr.includes(z));
+
+    if (lostZones.length > 0) {
+        // Semak 1: Ada pegang batch tak di zon yang hilang ni?
+        let userBatches = [...new Set(globalAccounts.filter(a => a.batch_owner === userId && lostZones.includes(a.zone)).map(a => a.batch_name))];
+        
+        // Semak 2: Ada staf bawahan tak yang sedang report kat dia?
+        let userSubs = allSystemUsers.filter(u => u.report_to === userId);
+
+        if (userBatches.length > 0 || userSubs.length > 0) {
+            // SEKAT SAVE & BUKA WIZARD JIKA ADA DATA TERSANGKUT!
+            openTransferWizard(userId, newRole, newReportTo, newZone, currentArea, lostZones, userBatches, userSubs);
+            return; // Hentikan fungsi ni, biar Wizard ambil alih
+        }
+    }
+    // --- TAMAT LOGIK TRANSFER WIZARD ---
+
+    // Jika tak ada data tersangkut, teruskan Save secara normal
     let isVerified = await verifyAdminPasscode();
     if (!isVerified) return;
 
-    // [FIX 2]: Dapatkan assignedarea sedia ada supaya tidak dipadamkan secara tak sengaja
-    let currentUserData = allSystemUsers.find(u => u.id === userId);
-    let currentArea = currentUserData ? currentUserData.assignedarea : null;
-
-    console.log("Saving user:", userId, "Role:", newRole, "Zones:", newZone);
-
     const { error } = await supabase.from('users').update({ 
-        role: newRole, 
-        report_to: newReportTo,
-        assignedzone: (newRole === 'manager' || newRole === 'admin') ? newZone : null,
-        assignedarea: currentArea // [FIX 3]: Gantikan 'null' dengan currentArea
+        role: newRole, report_to: newReportTo, assignedzone: (newRole === 'manager' || newRole === 'admin') ? newZone : null, assignedarea: currentArea 
     }).eq('id', userId);
 
     if (!error) { 
-        showNotification("UPDATE SUCCESS", `Konfigurasi untuk user <b>${userId.toUpperCase()}</b> telah berjaya dikemas kini.`);
+        showNotification("UPDATE SUCCESS", `Profil <b>${userId.toUpperCase()}</b> berjaya dikemas kini.`);
         await fetchAndRenderUsers();
     } else { 
         showNotification("UPDATE ERROR", error.message, true); 
     }
+};
+
+// --- FUNGSI SOKONGAN TRANSFER WIZARD ---
+window.openTransferWizard = function(userId, newRole, newReportTo, newZone, currentArea, lostZones, batches, subordinates) {
+    let msg = `Tindakan anda akan mengeluarkan <b>${userId.toUpperCase()}</b> dari zon <b>${lostZones.join(', ')}</b>.<br><br>`;
+    if (batches.length > 0) msg += `📦 <b>${batches.length} Batch Tugasan</b> sedang dipegangnya.<br>`;
+    if (subordinates.length > 0) msg += `👥 <b>${subordinates.length} Staf Bawahan</b> melapor kepadanya.<br>`;
+    msg += `<br>Sila pilih PENGGANTI untuk mengambil alih kesemua aset ini sebelum sistem membenarkan pertukaran zon dilakukan.`;
+
+    document.getElementById('tw-message').innerHTML = msg;
+
+    let dropdown = document.getElementById('tw-replacement');
+    dropdown.innerHTML = '<option value="">-- PILIH PENGGANTI --</option>';
+    
+    // Tapis senarai pengganti (Hanya Manager & Admin yang aktif dan bukan diri dia sendiri)
+    let targets = allSystemUsers.filter(u => u.status === 'ACTIVE' && (u.role === 'manager' || u.role === 'admin') && u.id !== userId);
+    targets.forEach(u => {
+        dropdown.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()} - ${u.assignedzone || 'TIADA'})</option>`;
+    });
+
+    document.getElementById('transferWizardModal').style.display = 'flex';
+
+    document.getElementById('btn-tw-confirm').onclick = async function() {
+        let replacement = dropdown.value;
+        if (!replacement) { alert("Sila pilih pengganti dari senarai terlebih dahulu!"); return; }
+
+        let isVerified = await verifyAdminPasscode();
+        if (!isVerified) return;
+
+        document.getElementById('transferWizardModal').style.display = 'none';
+        document.getElementById('loadingText').innerText = "Sedang memindahkan beratus data & staf bawahan. Sila tunggu...";
+        document.getElementById('loadingModal').style.display = 'flex';
+
+        try {
+            // 1. Transfer Pemilikan Batch (Pukal)
+            if (batches.length > 0) {
+                const { error: batchErr } = await supabase.from('accounts').update({ batch_owner: replacement }).in('batch_name', batches);
+                if (batchErr) throw batchErr;
+                
+                await supabase.from('findings').insert([{
+                    acct: 'SYSTEM', remark1: `TRANSFER WIZARD: ${batches.length} Batch milik ${userId.toUpperCase()} dipindahkan ke ${replacement.toUpperCase()}`, updated_by: currentUser.username
+                }]);
+            }
+
+            // 2. Transfer Staf Bawahan (Report To)
+            if (subordinates.length > 0) {
+                let subIds = subordinates.map(s => s.id);
+                const { error: subErr } = await supabase.from('users').update({ report_to: replacement }).in('id', subIds);
+                if (subErr) throw subErr;
+            }
+
+            // 3. Akhir sekali, kemas kini profil bos asal tadi
+            const { error: userErr } = await supabase.from('users').update({ 
+                role: newRole, report_to: newReportTo, assignedzone: (newRole === 'manager' || newRole === 'admin') ? newZone : null, assignedarea: currentArea
+            }).eq('id', userId);
+            if (userErr) throw userErr;
+
+            showNotification("SERAHAN SELESAI", `Semua fail dan anak buah diserahkan kepada <b>${replacement.toUpperCase()}</b>. Profil bos asal telah dikemas kini.`);
+            
+            // Buang cache supaya sistem download data terbaru
+            const cacheKey = `scazp_cache_${currentUser.id}`;
+            const timeKey = `scazp_time_${currentUser.id}`;
+            await localforage.removeItem(cacheKey);
+            localStorage.removeItem(timeKey);
+            
+            await fetchFullDatabaseData();
+            await fetchAndRenderUsers();
+
+        } catch (err) {
+            showNotification("WIZARD ERROR", err.message, true);
+        } finally {
+            document.getElementById('loadingModal').style.display = 'none';
+        }
+    };
+};
+
+window.closeTransferWizard = function() {
+    document.getElementById('transferWizardModal').style.display = 'none';
 };
         
         window.nextUserPage = function() {
