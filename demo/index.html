@@ -2175,14 +2175,28 @@ if (currentUser.role === 'user') {
             applyFilterAndRender();
         };
 
-        function renderZoneSelectionUI() {
+function renderZoneSelectionUI() {
             const container = document.getElementById('zone-buttons');
-            container.innerHTML = '<button class="btn-filter active" onclick="clearZoneSelection(this)">ALL ZONES</button>';
+            
+            // 1. Butang VVIP untuk Super Admin (Master Access)
+            container.innerHTML = '<button class="btn-filter active" style="font-weight: 800; color: var(--accent-gold); border-color: var(--accent-gold); box-shadow: 0 0 5px rgba(59,130,246,0.3);" onclick="clearZoneSelection(this)">👑 ALL ZONES (MASTER ACCESS)</button>';
+            
+            // 2. Senarai zon rasmi syarikat (Supaya butang tak hilang walaupun database kosong)
+            let masterZones = new Set(['BC', 'WEST', 'EAST', 'HO']);
+            
+            // 3. Tambah juga apa-apa zon baru yang mungkin wujud dalam database secara automatik
             Object.keys(geoMap).forEach(zone => {
+                if (zone && zone !== 'SYSTEM' && zone !== 'UNKNOWN') {
+                    masterZones.add(zone.toUpperCase().trim());
+                }
+            });
+
+            // 4. Hasilkan butang mengikut susunan A-Z
+            Array.from(masterZones).sort().forEach(zone => {
                 container.innerHTML += `<button class="btn-filter" onclick="applyZoneFilter('${zone}', this)">${zone}</button>`;
             });
         }
-
+        
         function renderRegionSelectionUI(zone) {
             const container = document.getElementById('region-buttons');
             let activeAll = !currentRegion ? 'active' : '';
