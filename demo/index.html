@@ -1665,10 +1665,13 @@ async function checkLoginSession() {
         loginSection.style.display = 'none';
         document.getElementById('display-username').innerText = "Logged in as: " + currentUser.id.toUpperCase();
 
-        let repToText = currentUser.report_to ? currentUser.report_to.toUpperCase() : 'N/A';
-        if(currentUser.role === 'super') repToText = 'SYSTEM MASTER';
+    let repToText = currentUser.report_to ? currentUser.report_to.toUpperCase() : 'N/A';
+        if(currentUser.role === 'super') {
+            repToText = 'SYSTEM';
+        } else if (currentUser.role === 'manager' && !currentUser.report_to) {
+            repToText = 'MANAGEMENT';
+        }
         document.getElementById('display-report-to').innerText = "Report to: " + repToText;
-        
         await fetchFullDatabaseData();
         await fetchMasterLocations(); 
         
@@ -1804,8 +1807,12 @@ window.requestBatchName = function() {
                     document.getElementById('dashboard-section').style.display = 'block';
                     document.getElementById('display-username').innerText = "Logged in as: " + user.toUpperCase();
 
-                    let repToText = data.report_to ? data.report_to.toUpperCase() : 'N/A';
-                    if(data.role === 'super') repToText = 'SYSTEM MASTER';
+            let repToText = data.report_to ? data.report_to.toUpperCase() : 'N/A';
+                    if(data.role === 'super') {
+                        repToText = 'SYSTEM';
+                    } else if (data.role === 'manager' && !data.report_to) {
+                        repToText = 'MANAGEMENT';
+                    }
                     document.getElementById('display-report-to').innerText = "Report to: " + repToText;
                     
                     if (IS_MAINTENANCE && data.role === 'super') {
