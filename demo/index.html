@@ -2499,14 +2499,17 @@ window.updateUserInline = async function(userId) {
     let newRole = document.getElementById(`edit-role-${userId}`).value;
     let newReportTo = document.getElementById(`edit-report-${userId}`).value;
     
-    // Tarik semua checkbox yang di-tick
-    let checkedBoxes = Array.from(document.querySelectorAll(`.edit-chk-zone-${userId}:checked`)).map(cb => cb.value);
-    let newZone = checkedBoxes.length > 0 ? checkedBoxes.join(', ') : null;
+    // [FIX]: Baca semula semua checkbox pada baris user itu sahaja
+    let checkedBoxes = Array.from(document.querySelectorAll(`.edit-chk-zone-${userId}:checked`));
+    let newZone = checkedBoxes.length > 0 ? checkedBoxes.map(cb => cb.value).join(', ') : null;
 
     if (newReportTo === "") newReportTo = null;
 
     let isVerified = await verifyAdminPasscode();
     if (!isVerified) return;
+
+    // Debugging (optional): Tengok apa yang sistem hantar ke Supabase
+    console.log("Saving user:", userId, "Role:", newRole, "Zones:", newZone);
 
     const { error } = await supabase.from('users').update({ 
         role: newRole, 
@@ -2517,7 +2520,8 @@ window.updateUserInline = async function(userId) {
 
     if (!error) { 
         showNotification("UPDATE SUCCESS", `Konfigurasi untuk user <b>${userId.toUpperCase()}</b> telah berjaya dikemas kini.`);
-        fetchAndRenderUsers();
+        // Reload data terus supaya UI kembali segar
+        await fetchAndRenderUsers();
     } else { 
         showNotification("UPDATE ERROR", error.message, true); 
     }
