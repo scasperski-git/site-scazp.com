@@ -1137,6 +1137,7 @@ th {
                 <table>
                     <thead>
                         <tr>
+                            <th style="width: 40px; text-align: center;">NO</th>
                             <th class="sortable" onclick="sortTable('zone')" id="th-zone">ZONE ⇅</th>
                             <th class="sortable" onclick="sortTable('batch_owner')" id="th-batch_owner">OWNER BY ⇅</th>
                             <th class="sortable" onclick="sortTable('type')" id="th-type">TYPE ⇅</th>
@@ -1331,9 +1332,10 @@ th {
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 40px; text-align: center;">
-                                <input type="checkbox" id="check-all-assign" onclick="toggleAllAssignCheckboxes(this)" style="cursor: pointer; transform: scale(1.2);">
-                            </th>
+                        <th style="width: 40px; text-align: center;">
+                            <input type="checkbox" id="check-all-assign" onclick="toggleAllAssignCheckboxes(this)" style="cursor: pointer; transform: scale(1.2);">
+                        </th>
+                            <th style="width: 40px; text-align: center;">NO</th>
                             <th class="sortable" onclick="sortAssignTable('zone')" id="tha-zone">ZONE ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('type')" id="tha-type">TYPE ⇅</th>
                             <th class="sortable" onclick="sortAssignTable('loc')" id="tha-loc">LOC CD ⇅</th>
@@ -2304,10 +2306,10 @@ function resetHeaderArrows() {
         function renderTablePage() {
             const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
             
-            if(filteredAccounts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;">No records match the active criteria.</td></tr>`;
+                if(filteredAccounts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;">No records match the active criteria.</td></tr>`;
                 document.getElementById('page-info').innerText = `Page 0 of 0`;
-                document.getElementById('btn-prev').disabled = true; document.getElementById('btn-next').disabled = true;
+                document.querySelector('#dashboard-panel .pagination-controls').innerHTML = '';
                 return;
             }
 
@@ -2334,6 +2336,7 @@ pageData.forEach(row => {
 
                 tbody.innerHTML += `
                     <tr>
+                        <td style="text-align: center; font-weight: 600; color: var(--text-muted);">${startIndex + index + 1}</td>
                         <td>${row.zone || '-'}</td>
                         <td style="font-weight: 600; color: var(--text-main);">${ownerDisp}</td>
                         <td>${row.type || '-'}</td>
@@ -2357,9 +2360,10 @@ pageData.forEach(row => {
             });
 
             document.getElementById('page-info').innerText = `Page ${currentPage} of ${totalPages} (Total: ${filteredAccounts.length.toLocaleString()} Records)`;
-            document.getElementById('btn-prev').disabled = currentPage === 1;
-            document.getElementById('btn-next').disabled = currentPage === totalPages;
-        }
+            const paginationDiv = document.querySelector('#dashboard-panel .pagination-controls');
+            if(paginationDiv) {
+                paginationDiv.innerHTML = buildPaginationControls(currentPage, totalPages, 'goToPage');
+            }
 
         window.switchTab = function(target) {
             if (target === 'settings' && currentUser.role !== 'super') target = 'dashboard';
@@ -3998,9 +4002,10 @@ if (currentAssignSortColumn) {
 
             tbody.innerHTML = '';
             if(pageData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Tiada akaun dijumpai untuk kategori ini.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;">Tiada akaun dijumpai untuk kategori ini.</td></tr>';
             } else {
                 pageData.forEach(row => {
+                pageData.forEach((row, index) => {
                 let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '🔴 UNASSIGNED';
                 let colDisp = row.collector ? row.collector.toUpperCase() : '-';
                 let ownerDisp = row.batch_owner ? row.batch_owner.toUpperCase() : 'UNKNOWN';
@@ -4008,10 +4013,11 @@ if (currentAssignSortColumn) {
 
                 tbody.innerHTML += `
                     <tr>
-                        <td style="text-align: center;">
-                            <input type="checkbox" class="chk-assign-row" value="${row.acct}" style="cursor:pointer; transform: scale(1.2);">
-                        </td>
-                        <td>${row.zone || '-'}</td>
+                            <td style="text-align: center;">
+                                <input type="checkbox" class="chk-assign-row" value="${row.acct}" style="cursor:pointer; transform: scale(1.2);">
+                            </td>
+                            <td style="text-align: center; font-weight: 600; color: var(--text-muted);">${start + index + 1}</td>
+                            <td>${row.zone || '-'}</td>
                         <td>${row.type || '-'}</td>
                         <td>${row.loc || '-'}</td>
                         <td style="font-weight: 700; color: var(--accent-gold);">${d.PACK_CD || '-'}</td>
@@ -4032,11 +4038,12 @@ if (currentAssignSortColumn) {
             }
 
             document.getElementById('assign-page-info').innerText = `Page ${currentAssignPage} of ${totalPages}`;
-            document.getElementById('btn-assign-prev').disabled = currentAssignPage === 1;
-            document.getElementById('btn-assign-next').disabled = currentAssignPage === totalPages;
-            document.getElementById('check-all-assign').checked = false; 
-        };
-
+            const assignPaginationDiv = document.querySelector('#assign-panel .pagination-controls');
+            if(assignPaginationDiv) {
+                assignPaginationDiv.innerHTML = buildPaginationControls(currentAssignPage, totalPages, 'goToAssignPage');
+            }
+            document.getElementById('check-all-assign').checked = false;
+                
         window.nextAssignPage = function() {
             const totalPages = Math.ceil(assignAccounts.length / assignRowsPerPage);
             if (currentAssignPage < totalPages) {
@@ -4120,6 +4127,45 @@ window.copyToClipboard = function(text, btnElement) {
         console.error('Gagal menyalin text: ', err);
     });
 };
+
+        // --- ENJIN PAGINATION DINAMIK ---
+        window.buildPaginationControls = function(currentPage, totalPages, funcName) {
+            if (totalPages <= 0) return '';
+            let html = `<button onclick="${funcName}(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>◄</button>`;
+
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, currentPage + 2);
+
+            if (startPage > 1) {
+                html += `<button onclick="${funcName}(1)">1</button>`;
+                if (startPage > 2) html += `<span style="padding: 0 5px; color: var(--text-muted); font-weight: bold;">...</span>`;
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                let activeStyle = i === currentPage ? 'background-color: var(--accent-gold); color: #ffffff; border-color: var(--accent-gold);' : '';
+                html += `<button onclick="${funcName}(${i})" style="${activeStyle}">${i}</button>`;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span style="padding: 0 5px; color: var(--text-muted); font-weight: bold;">...</span>`;
+                html += `<button onclick="${funcName}(${totalPages})">${totalPages}</button>`;
+            }
+
+            html += `<button onclick="${funcName}(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>►</button>`;
+            return html;
+        };
+
+        window.goToPage = function(p) {
+            if(p < 1 || p > Math.ceil(filteredAccounts.length / rowsPerPage)) return;
+            currentPage = p;
+            renderTablePage();
+        };
+
+        window.goToAssignPage = function(p) {
+            if(p < 1 || p > Math.ceil(assignAccounts.length / assignRowsPerPage)) return;
+            currentAssignPage = p;
+            renderAssignTable();
+        };
         
     </script>
 </body>
