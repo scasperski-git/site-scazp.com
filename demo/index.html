@@ -1903,8 +1903,15 @@ if (currentUser.role === 'user') {
     // [KOREKSI LOGIK]: Admin tarik data jika dia pemilik batch (batch_owner) ATAU data diagih kepadanya
     fetchQuery = fetchQuery.or(`batch_owner.eq.${currentUserIdClean},assignee_id.eq.${currentUserIdClean}`);
 } else if (currentUser.role === 'manager') {
+    let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
     let safeZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : 'NONE';
-    fetchQuery = fetchQuery.eq('zone', safeZone);
+    
+    // Pecahkan zon jika manager jaga lebih dari 1 zon (cth: "BC, WEST")
+    let zones = safeZone.split(',').map(z => z.trim());
+    let zoneOrs = zones.map(z => `zone.eq.${z}`).join(',');
+    
+    // [FIX]: Manager kini tarik data jika dia pemilik batch ATAU data dalam zon jagaannya
+    fetchQuery = fetchQuery.or(`batch_owner.eq.${currentUserIdClean},assignee_id.eq.${currentUserIdClean},${zoneOrs}`);
 }
                     // 'super' fetches everything.
                     
@@ -3277,9 +3284,10 @@ window.renderBatchList = function() {
             return true;
         }
 
-        // 3. Jika bukan pemilik mutlak, baru semak Zon (Untuk Manager)
-        let bZone = bInfo.zone;
+// 3. Jika bukan pemilik mutlak, baru semak Zon (Untuk Manager/Admin)
+        let bZone = bInfo.zone ? bInfo.zone.toUpperCase().trim() : '';
         let myZone = null;
+        
         if(currentUser.role === 'manager') {
             myZone = currentUser.assignedzone;
         } else if(currentUser.role === 'admin') {
@@ -3287,8 +3295,14 @@ window.renderBatchList = function() {
             myZone = myManager ? myManager.assignedzone : null;
         }
         
-        return bZone === myZone && myZone !== null; 
-    }).sort().reverse(); 
+        // [FIX]: Pecahkan string zon (cth: "BC, WEST") kepada array dan semak padanan
+        if (myZone) {
+            let allowedZones = myZone.split(',').map(z => z.trim().toUpperCase());
+            return allowedZones.includes(bZone);
+        }
+        
+        return false;
+    }).sort().reverse();
 
     if (batchKeys.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Tiada rekod batch ditemui untuk anda.</td></tr>';
