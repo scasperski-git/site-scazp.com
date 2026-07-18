@@ -2596,15 +2596,21 @@ window.openTransferWizard = function(userId, newRole, newReportTo, newZone, curr
 
     document.getElementById('transferWizardModal').style.display = 'flex';
 
-    document.getElementById('btn-tw-confirm').onclick = async function() {
+document.getElementById('btn-tw-confirm').onclick = async function() {
         let replacement = dropdown.value;
         if (!replacement) { alert("Sila pilih pengganti dari senarai terlebih dahulu!"); return; }
 
-        let isVerified = await verifyAdminPasscode();
-        if (!isVerified) return;
-
+        // [FIX DI SINI]: Tutup modal wizard awal-awal supaya ia tidak menghalang Passcode Prompt
         document.getElementById('transferWizardModal').style.display = 'none';
-        document.getElementById('loadingText').innerText = "Sedang memindahkan beratus data & staf bawahan. Sila tunggu...";
+
+        let isVerified = await verifyAdminPasscode();
+        if (!isVerified) {
+            // Jika tersalah masuk password atau batal, fungsi terhenti.
+            // (User hanya perlu tekan butang SAVE semula di profil)
+            return; 
+        }
+
+        document.getElementById('loadingText').innerText = "Sedang memindahkan data & staf bawahan. Sila tunggu...";
         document.getElementById('loadingModal').style.display = 'flex';
 
         try {
@@ -2625,7 +2631,7 @@ window.openTransferWizard = function(userId, newRole, newReportTo, newZone, curr
                 if (subErr) throw subErr;
             }
 
-            // 3. Akhir sekali, kemas kini profil bos asal tadi
+            // 3. Akhir sekali, kemas kini profil bos asal
             const { error: userErr } = await supabase.from('users').update({ 
                 role: newRole, report_to: newReportTo, assignedzone: (newRole === 'manager' || newRole === 'admin') ? newZone : null, assignedarea: currentArea
             }).eq('id', userId);
