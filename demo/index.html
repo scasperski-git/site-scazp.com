@@ -2393,24 +2393,28 @@ function renderTablePage() {
 
 window.fetchAndRenderUsers = async function() {
     try {
-        // TAMBAHKAN 'name' DALAM SELECT QUERY DI BAWAH
         const { data, error } = await supabase.from('users').select('id, name, role, assignedzone, assignedregion, assignedarea, status, report_to').order('id', { ascending: true });
         
         if (error) throw error;
         allSystemUsers = data;
-        filterUserList();
+        filterUserList(true); // <--- Hantar parameter 'true' supaya ia tak reset ke Page 1 selepas save
         populateAssignSubordinates();
     } catch (err) {
         console.error("Failed to fetch user list:", err);
     }
 };
 
-        window.filterUserList = function() {
-            let query = document.getElementById('search-user').value.toLowerCase().trim();
-            filteredSystemUsers = allSystemUsers.filter(u => u.id.toLowerCase().includes(query));
-            userCurrentPage = 1; 
-            renderUserTablePage();
-        };
+window.filterUserList = function(keepPage = false) { // <--- Tambah parameter keepPage
+    let query = document.getElementById('search-user').value.toLowerCase().trim();
+    filteredSystemUsers = allSystemUsers.filter(u => u.id.toLowerCase().includes(query));
+    
+    // <--- Hanya reset page jika pengguna membuat carian baru di search box
+    if (!keepPage) {
+        userCurrentPage = 1; 
+    }
+    
+    renderUserTablePage();
+};
 
 window.renderUserTablePage = async function() {
     const tbody = document.getElementById('users-table-body');
@@ -2496,15 +2500,11 @@ window.toggleInlineAccessSelect = function(userId) {
 }
 
 window.updateUserInline = async function(userId) {
-    let targetUserId = userId.toLowerCase().trim(); // Pastikan lowercase
     let newRole = document.getElementById(`edit-role-${userId}`).value;
     let newReportTo = document.getElementById(`edit-report-${userId}`).value;
     
-    // [FIX]: Cari checkbox guna targetUserId yang dah diselaraskan
-    let checkedBoxes = Array.from(document.querySelectorAll(`.edit-chk-zone-${targetUserId}:checked`));
-    
-    // Kalau checkbox tak jumpa (newZone jadi null), kita bagi nilai asal (fallback)
-    // Atau kalau bos nak paksa kosong, kita kena check kenapa querySelector tu gagal
+    // [FIX 1]: Gunakan attribute selector yang lebih selamat untuk elak error jika userId ada special character
+    let checkedBoxes = Array.from(document.querySelectorAll(`input[class="edit-chk-zone-${userId}"]:checked`));
     let newZone = checkedBoxes.length > 0 ? checkedBoxes.map(cb => cb.value).join(', ') : null;
 
     if (newReportTo === "") newReportTo = null;
@@ -2512,19 +2512,21 @@ window.updateUserInline = async function(userId) {
     let isVerified = await verifyAdminPasscode();
     if (!isVerified) return;
 
-    // Tambah console log untuk tengok apa yang dia jumpa
-    console.log("Mencari checkbox dengan class:", `.edit-chk-zone-${targetUserId}:checked`);
-    console.log("Jumlah checkbox di-tick:", checkedBoxes.length);
+    // [FIX 2]: Dapatkan assignedarea sedia ada supaya tidak dipadamkan secara tak sengaja
+    let currentUserData = allSystemUsers.find(u => u.id === userId);
+    let currentArea = currentUserData ? currentUserData.assignedarea : null;
+
+    console.log("Saving user:", userId, "Role:", newRole, "Zones:", newZone);
 
     const { error } = await supabase.from('users').update({ 
         role: newRole, 
         report_to: newReportTo,
         assignedzone: (newRole === 'manager' || newRole === 'admin') ? newZone : null,
-        assignedarea: null
+        assignedarea: currentArea // [FIX 3]: Gantikan 'null' dengan currentArea
     }).eq('id', userId);
 
     if (!error) { 
-        showNotification("UPDATE SUCCESS", `User <b>${userId.toUpperCase()}</b> dikemas kini dengan Zon: ${newZone || 'TIADA ZON'}`);
+        showNotification("UPDATE SUCCESS", `Konfigurasi untuk user <b>${userId.toUpperCase()}</b> telah berjaya dikemas kini.`);
         await fetchAndRenderUsers();
     } else { 
         showNotification("UPDATE ERROR", error.message, true); 
