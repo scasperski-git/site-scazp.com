@@ -3242,7 +3242,7 @@ window.renderBatchList = function() {
                 batchGroups[acc.batch_name] = { 
                     count: 0, 
                     uploaded_by: acc.uploaded_by || 'UNKNOWN',
-                    batch_owner: acc.batch_owner || acc.uploaded_by || 'UNKNOWN', // Fallback perlindungan jika data lapuk
+                    batch_owner: acc.batch_owner || acc.uploaded_by || 'UNKNOWN', 
                     zone: acc.zone || 'UNKNOWN' 
                 };
             }
@@ -3253,9 +3253,19 @@ window.renderBatchList = function() {
     tbody.innerHTML = '';
     
     let batchKeys = Object.keys(batchGroups).filter(bName => {
+        // 1. Super Admin nampak semua
         if (currentUser.role === 'super') return true; 
-        let bZone = batchGroups[bName].zone;
         
+        let bInfo = batchGroups[bName];
+        let currentUserIdClean = String(currentUser.id).toLowerCase();
+        
+        // 2. [KOREKSI LOGIK]: Jika user adalah Pemilik Batch atau Uploader, WAJIB nampak!
+        if (bInfo.batch_owner.toLowerCase() === currentUserIdClean || bInfo.uploaded_by.toLowerCase() === currentUserIdClean) {
+            return true;
+        }
+
+        // 3. Jika bukan pemilik mutlak, baru semak Zon (Untuk Manager)
+        let bZone = bInfo.zone;
         let myZone = null;
         if(currentUser.role === 'manager') {
             myZone = currentUser.assignedzone;
@@ -3264,11 +3274,11 @@ window.renderBatchList = function() {
             myZone = myManager ? myManager.assignedzone : null;
         }
         
-        return bZone === myZone; 
+        return bZone === myZone && myZone !== null; 
     }).sort().reverse(); 
 
     if (batchKeys.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Tiada rekod batch ditemui untuk zon anda.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Tiada rekod batch ditemui untuk anda.</td></tr>';
         return;
     }
 
