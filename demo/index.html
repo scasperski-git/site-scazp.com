@@ -1356,10 +1356,10 @@ th {
         </div>
     </div>
 
-            <div style="text-align: center; padding: 25px 10px 15px 10px; margin-top: 30px; font-size: 11px; color: var(--text-muted); border-top: 1px dashed var(--border-color); letter-spacing: 0.5px;">
-            Copyright &copy; <span id="auto-year"></span> <span style="color: #2196f3; font-weight: bold;">System Findings v3.0</span>. All Rights Reserved.
-        </div>
-    </div> 
+<!-- BUNGKUS DENGAN ID INI -->
+<div id="main-footer" style="display: none; text-align: center; padding: 25px 10px 15px 10px; margin-top: 30px; font-size: 11px; color: var(--text-muted); border-top: 1px dashed var(--border-color); letter-spacing: 0.5px;">
+    Copyright &copy; <span id="auto-year"></span> <span style="color: #2196f3; font-weight: bold;">System Findings v3.0</span>. All Rights Reserved.
+</div>
 
     <div class="modal-overlay" id="loadingModal">
         <div class="modal-content">
@@ -1668,6 +1668,7 @@ async function checkLoginSession() {
         }
 
         dashboardSection.style.display = 'block';
+        document.getElementById('main-footer').style.display = 'block';
         loginSection.style.display = 'none';
         document.getElementById('display-username').innerText = "Welcome: " + currentUser.id.toUpperCase();
 
@@ -1865,6 +1866,7 @@ window.handleLogout = async function() {
             document.getElementById('password').value = '';
             document.getElementById('dashboard-section').style.display = 'none';
             document.getElementById('login-section').style.display = 'flex';
+            document.getElementById('main-footer').style.display = 'none';
         };
 
 window.forceSyncData = async function() {
