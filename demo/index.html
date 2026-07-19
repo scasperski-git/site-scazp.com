@@ -949,7 +949,7 @@ th {
             #dashboard-panel, #assign-panel, #settings-panel, #report-panel { padding-bottom: 20px; }
 
                         /* --- HEADER MOBILE REDESIGN (CLEAN & COMPACT) --- */
-/* --- HEADER MOBILE REDESIGN (CLEAN & COMPACT) --- */
+/* --- HEADER MOBILE REDESIGN --- */
             .header {
                 flex-direction: column;
                 align-items: center; 
@@ -961,27 +961,32 @@ th {
                 text-align: center; 
             }
             #header-user-section {
-                flex-direction: column !important; /* Susun menegak (atas-bawah) di mobile */
-                align-items: stretch !important;   /* Penuhi lebar skrin */
+                flex-direction: column !important; /* Paksa nama kat atas, butang kat bawah */
+                align-items: flex-start !important; 
                 width: 100%;
                 background: #f8fafc; 
-                padding: 10px 15px;
+                padding: 12px;
                 border-radius: var(--radius-md);
                 border: 1px solid var(--border-color); 
                 box-sizing: border-box;
-                gap: 10px !important;              /* Jarak antara teks dan butang */
+                gap: 10px !important;
             }
-
-            /* Container teks: biar dia guna ruang penuh */
             #header-user-section > div:first-child {
-                align-items: flex-start !important; 
+                align-items: flex-start !important; /* Tolak teks nama ke kiri */
                 width: 100%;
             }
-
-            /* Container butang: jadikan sebaris (flex-row) supaya jimat ruang */
-            #header-user-section > div:nth-child(2) {
-                flex-direction: row !important; 
-                gap: 8px !important;
+            #display-username {
+                white-space: normal; /* Kalau nama panjang sangat, dia akan turun bawah, tak terpotong */
+                word-break: break-word;
+            }
+            #header-user-section > div:last-child {
+                flex-direction: row !important; /* Paksa butang jadi sebaris untuk Mobile */
+                width: 100%;
+                gap: 8px;
+            }
+            #header-user-section > div:last-child > button {
+                flex: 1; /* Butang kongsi ruang lebar 50-50 */
+                padding: 8px !important; 
             }
 
             #display-username {
@@ -1068,14 +1073,14 @@ th {
                     <span id="display-username" style="font-size: 12px; color: var(--text-main); font-weight: 700;"></span>
                     <span id="display-report-to" style="font-size: 9px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.3px;"></span>
                 </div>
-                <!-- Lajur Butang (Tersusun Atas Bawah) -->
+                <!-- Lajur Butang (Atas Bawah untuk Desktop) -->
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <button class="btn-logout" onclick="handleLogout()" style="padding: 4px 12px; font-size: 9px; border-radius: 4px; line-height: 1.2;">SIGN OUT</button>
                     <button class="btn-logout" onclick="forceSyncData()" style="color: var(--text-main); border-color: var(--border-color); padding: 4px 12px; font-size: 9px; border-radius: 4px; line-height: 1.2;">⟳ SYNC</button>
                 </div>
             </div>
         </div>
-
+        
         <div class="nav-tabs" id="master-nav-tabs">
             <button class="nav-btn active" id="tab-dash" onclick="switchTab('dashboard')">Dashboard</button>
             <button class="nav-btn" id="tab-assign" onclick="switchTab('assign')">Assignment</button>
