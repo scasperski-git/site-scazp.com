@@ -4237,7 +4237,7 @@ window.renderAssignTable = function() {
             checkboxes.forEach(chk => chk.checked = masterCheckbox.checked);
         };
 
-        window.executeBatchAssignment = async function() {
+window.executeBatchAssignment = async function() {
             const targetUser = document.getElementById('assign-target-user').value;
             if(!targetUser) {
                 alert("Sila pilih Staf/Collector terlebih dahulu!");
@@ -4264,9 +4264,11 @@ window.renderAssignTable = function() {
                 const { error } = await supabase.from('accounts').update({ assignee_id: cleanTargetUser }).in('acct', selectedAccts);
                 if(error) throw error;
 
-            await supabase.from('findings').insert([{
+                // [FIX MIS REMARK]: Log audit disalurkan ke column 'audit_remark' dan 'status' disetkan sebagai 'SYSTEM LOG'
+                await supabase.from('findings').insert([{
                     acct: 'SYSTEM',
-                    remark1: `BATCH ASSIGNMENT: ${selectedAccts.length} akaun kepada ${cleanTargetUser} BY ${currentUser.id.toUpperCase()}`,
+                    audit_remark: `BATCH ASSIGNMENT: ${selectedAccts.length} akaun kepada ${cleanTargetUser} BY ${currentUser.id.toUpperCase()}`,
+                    status: 'SYSTEM LOG', 
                     updated_by: currentUser.id
                 }]);
 
