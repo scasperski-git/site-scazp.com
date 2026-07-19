@@ -10,15 +10,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Tech Premium Colors - No Gold */
       --bg-dark: #050508;
-      --panel: rgba(15, 15, 20, 0.45);
-      --panel-border: rgba(255, 255, 255, 0.08);
+      --panel: rgba(10, 15, 20, 0.55);
+      --panel-border: rgba(255, 255, 255, 0.1);
       --text: #e5e7eb;
       --muted: #9ca3af;
-      --accent: #00ff88; /* Neon Green */
-      --accent-glow: rgba(0, 255, 136, 0.35);
-      --glass-blur: blur(16px);
+      --accent: #00ff88;
+      --accent-glow: rgba(0, 255, 136, 0.4);
+      --glass-blur: blur(20px);
     }
 
     * {
@@ -29,17 +28,22 @@
 
     body {
       font-family: 'Inter', system-ui, sans-serif;
-      /* Space Background with dark overlay for readability */
-      background: linear-gradient(to bottom, rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.95)), 
-                  url('https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=3000&auto=format&fit=crop') no-repeat center center fixed;
+      /* Latar belakang angkasa yang LEBIH menyerlah */
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(0, 255, 136, 0.15), transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(0, 195, 255, 0.1), transparent 40%),
+        linear-gradient(to bottom, rgba(3, 5, 10, 0.4), rgba(3, 5, 10, 0.8)), 
+        url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2048&auto=format&fit=crop');
       background-size: cover;
+      background-position: center;
+      background-attachment: fixed; /* Jadikan background statik bila scroll */
       color: var(--text);
       line-height: 1.6;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ===== SHOOTING STARS ANIMATION ===== */
+    /* ===== SHOOTING STARS ANIMATION (Dipertingkatkan) ===== */
     .stars-container {
       position: fixed;
       top: 0;
@@ -53,37 +57,38 @@
 
     .shooting-star {
       position: absolute;
-      width: 150px;
+      width: 200px;
       height: 2px;
-      background: linear-gradient(90deg, rgba(255,255,255,0), var(--accent));
+      background: linear-gradient(90deg, rgba(255,255,255,0), #ffffff);
       transform: rotate(-45deg);
       animation: shooting 4s ease-in-out infinite;
       opacity: 0;
     }
 
+    /* Kepala tahi bintang yang lebih terang */
     .shooting-star::before {
       content: '';
       position: absolute;
       top: 50%;
       right: 0;
       transform: translateY(-50%);
-      width: 4px;
-      height: 4px;
+      width: 5px;
+      height: 5px;
       background: #fff;
       border-radius: 50%;
-      box-shadow: 0 0 15px 3px var(--accent);
+      box-shadow: 0 0 20px 5px var(--accent), 0 0 40px 10px rgba(255, 255, 255, 0.8);
     }
 
-    /* Randomizing star positions and delays */
-    .star-1 { top: 10%; left: 30%; animation-delay: 0s; }
-    .star-2 { top: 25%; left: 70%; animation-delay: 2.5s; animation-duration: 5s; }
-    .star-3 { top: 5%; left: 85%; animation-delay: 4s; animation-duration: 3.5s;}
-    .star-4 { top: 40%; left: 20%; animation-delay: 7s; }
+    .star-1 { top: 15%; left: 35%; animation-delay: 0s; }
+    .star-2 { top: 30%; left: 80%; animation-delay: 2.2s; animation-duration: 4.5s; }
+    .star-3 { top: 5%; left: 90%; animation-delay: 3.5s; animation-duration: 3s;}
+    .star-4 { top: 45%; left: 25%; animation-delay: 6s; }
+    .star-5 { top: 10%; left: 60%; animation-delay: 8.5s; animation-duration: 5s;} /* Tambah satu lagi bintang */
 
     @keyframes shooting {
-      0% { transform: translateX(100px) translateY(-100px) rotate(-45deg); opacity: 1; }
-      20% { transform: translateX(-600px) translateY(600px) rotate(-45deg); opacity: 0; }
-      100% { transform: translateX(-600px) translateY(600px) rotate(-45deg); opacity: 0; }
+      0% { transform: translateX(150px) translateY(-150px) rotate(-45deg); opacity: 1; }
+      20% { transform: translateX(-800px) translateY(800px) rotate(-45deg); opacity: 0; }
+      100% { transform: translateX(-800px) translateY(800px) rotate(-45deg); opacity: 0; }
     }
 
     /* ===== NAVBAR ===== */
@@ -91,7 +96,7 @@
       position: sticky;
       top: 0;
       z-index: 1000;
-      background: rgba(5, 5, 8, 0.6);
+      background: rgba(5, 5, 8, 0.4);
       backdrop-filter: var(--glass-blur);
       -webkit-backdrop-filter: var(--glass-blur);
       border-bottom: 1px solid var(--panel-border);
@@ -129,8 +134,8 @@
       height: 100%;
       object-fit: cover;
       border-radius: 50%;
-      border: 2px solid rgba(0, 255, 136, 0.3);
-      box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+      border: 2px solid rgba(0, 255, 136, 0.4);
+      box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
       z-index: 2;
       background: #111;
     }
@@ -206,6 +211,11 @@
 
     .hero-content {
       max-width: 780px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 40px;
+      border-radius: 20px;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .tag {
@@ -253,7 +263,7 @@
     }
 
     .subtitle {
-      color: var(--muted);
+      color: #cbd5e1;
       font-size: clamp(1.15rem, 3.5vw, 1.35rem);
       max-width: 520px;
       margin: 0 auto 32px;
@@ -268,7 +278,7 @@
 
     .btn {
       padding: 14px 32px;
-      border-radius: 8px; /* Sharper corners for tech look */
+      border-radius: 8px;
       font-weight: 600;
       text-decoration: none;
       display: inline-flex;
@@ -287,20 +297,20 @@
 
     .btn-primary:hover {
       transform: translateY(-4px);
-      box-shadow: 0 10px 30px rgba(0, 255, 136, 0.5);
+      box-shadow: 0 10px 30px rgba(0, 255, 136, 0.6);
     }
 
     .btn-outline {
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       color: #fff;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(5px);
     }
 
     .btn-outline:hover {
       border-color: var(--accent);
       color: var(--accent);
-      background: rgba(0, 255, 136, 0.05);
+      background: rgba(0, 255, 136, 0.1);
       transform: translateY(-4px);
     }
 
@@ -329,7 +339,7 @@
     }
 
     .section-header p {
-      color: var(--muted);
+      color: #cbd5e1;
       max-width: 420px;
       margin: 0 auto;
     }
@@ -341,21 +351,21 @@
       padding: 40px;
       backdrop-filter: var(--glass-blur);
       -webkit-backdrop-filter: var(--glass-blur);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .card-section:hover {
       transform: translateY(-5px);
-      box-shadow: 0 15px 40px rgba(0, 255, 136, 0.1);
-      border-color: rgba(0, 255, 136, 0.2);
+      box-shadow: 0 15px 40px rgba(0, 255, 136, 0.15);
+      border-color: rgba(0, 255, 136, 0.3);
     }
 
     /* About */
     .about-text {
       font-size: 1.15rem;
       line-height: 1.75;
-      color: #cbd5e1;
+      color: #e2e8f0;
     }
 
     .about-strong {
@@ -374,8 +384,8 @@
     }
 
     .skill-card {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid var(--panel-border);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
       padding: 24px;
       border-radius: 12px;
       transition: all 0.3s ease;
@@ -383,9 +393,9 @@
 
     .skill-card:hover {
       border-color: var(--accent);
-      background: rgba(0, 255, 136, 0.05);
+      background: rgba(0, 255, 136, 0.08);
       transform: scale(1.02);
-      box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
     }
 
     .skill-name {
@@ -404,16 +414,16 @@
     }
 
     .project-card {
-      background: rgba(255,255,255,0.02);
+      background: rgba(255,255,255,0.03);
       border-radius: 12px;
       overflow: hidden;
-      border: 1px solid var(--panel-border);
+      border: 1px solid rgba(255,255,255,0.1);
       transition: all 0.4s ease;
     }
 
     .project-card:hover {
       transform: translateY(-8px);
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
       border-color: var(--accent);
     }
 
@@ -437,7 +447,7 @@
     }
 
     .project-info p {
-      color: var(--muted);
+      color: #cbd5e1;
       font-size: 0.95rem;
     }
 
@@ -449,13 +459,13 @@
     }
 
     .tag-pill {
-      background: rgba(0, 255, 136, 0.1);
+      background: rgba(0, 255, 136, 0.15);
       color: var(--accent);
       font-size: 0.8rem;
       padding: 4px 12px;
       border-radius: 4px;
       font-family: 'Fira Code', monospace;
-      border: 1px solid rgba(0, 255, 136, 0.2);
+      border: 1px solid rgba(0, 255, 136, 0.25);
     }
 
     /* Contact */
@@ -463,10 +473,10 @@
       max-width: 520px;
       margin: 0 auto;
       text-align: center;
-      background: rgba(255,255,255,0.02);
+      background: rgba(255,255,255,0.03);
       padding: 48px 32px;
       border-radius: 16px;
-      border: 1px solid var(--panel-border);
+      border: 1px solid rgba(255,255,255,0.1);
     }
 
     .email {
@@ -495,10 +505,10 @@
       z-index: 2;
       text-align: center;
       padding: 60px 20px 40px;
-      color: var(--muted);
+      color: #94a3b8;
       font-size: 0.9rem;
       border-top: 1px solid var(--panel-border);
-      background: rgba(5, 5, 8, 0.8);
+      background: rgba(5, 5, 8, 0.6);
       backdrop-filter: blur(10px);
     }
 
@@ -510,7 +520,7 @@
     }
 
     .social-links a {
-      color: var(--muted);
+      color: #94a3b8;
       font-size: 1.5rem;
       text-decoration: none;
       transition: all 0.3s;
@@ -589,6 +599,7 @@
     <div class="shooting-star star-2"></div>
     <div class="shooting-star star-3"></div>
     <div class="shooting-star star-4"></div>
+    <div class="shooting-star star-5"></div>
   </div>
 
   <!-- NAVBAR -->
@@ -726,7 +737,7 @@
     <section id="contact" class="card-section fade-in">
       <div class="contact-box">
         <h2 style="margin-bottom: 16px;">Let's Connect</h2>
-        <p style="color: var(--muted); font-size: 1.1rem;">Interested in collaborating or just want to say hi?</p>
+        <p style="color: #cbd5e1; font-size: 1.1rem; margin-bottom: 20px;">Interested in collaborating or just want to say hi?</p>
         <a href="mailto:ceo@scazp.com" class="email">ceo@scazp.com</a>
       </div>
     </section>
