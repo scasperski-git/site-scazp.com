@@ -3829,15 +3829,6 @@ let wText = (line1 + line2).repeat(50);
                             </div>
                             ${histRemark}
                         </div>`;
-                    
-                    historyBox.innerHTML += `
-                        <div class="history-item" style="overflow: hidden; padding: 12px; margin-bottom: 12px; background-color: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
-                            <div class="history-meta" style="font-weight: 600; font-size: 11px; color: var(--text-muted);">
-                                UPDATE BY: ${data.updated_by ? data.updated_by.toUpperCase() : 'SYSTEM'} | ${dateFormatted}${statusBadgeHTML}
-                                ${deleteBtnHTML}
-                            </div>
-                            ${histRemark}
-                        </div>`;
                 });
             }
             //setTimeout(() => document.getElementById('single-remark-box').focus(), 100); //auto cursor masuk area textbox log
