@@ -3809,7 +3809,11 @@ let wText = (line1 + line2).repeat(50);
 
 // --- GABUNGKAN SEMULA AYAT SUPAYA TAK NAMPAK TERKERAT ---
                     let histRemark = '';
-                    if(data.remark1 || data.remark2 || data.remark3 || data.remark4) {
+                    
+                    if (data.audit_remark) {
+                        // Paparan khas untuk System Log / Audit Trail (Halimunan dari MIS)
+                        histRemark = `<div style="font-size: 11px; line-height: 1.5; margin-top: 8px; color: var(--accent-gold); font-weight: 700; text-align: left;">⚙️ ${data.audit_remark}</div>`;
+                    } else if(data.remark1 || data.remark2 || data.remark3 || data.remark4) {
                         // Gabung remark1, 2, 3, 4 dengan jarak ruang (space)
                         let combinedStr = [data.remark1, data.remark2, data.remark3, data.remark4].filter(Boolean).join(' ');
                         
@@ -4258,19 +4262,22 @@ window.executeBatchAssignment = async function() {
             document.getElementById('loadingText').innerText = "Mengagihkan akaun ke pelayan (server)...";
             document.getElementById('loadingModal').style.display = 'flex';
 
-            try {
+try {
                 let cleanTargetUser = targetUser.toLowerCase().trim();
                 
                 const { error } = await supabase.from('accounts').update({ assignee_id: cleanTargetUser }).in('acct', selectedAccts);
                 if(error) throw error;
 
-                // [FIX MIS REMARK]: Log audit disalurkan ke column 'audit_remark' dan 'status' disetkan sebagai 'SYSTEM LOG'
-                await supabase.from('findings').insert([{
-                    acct: 'SYSTEM',
-                    audit_remark: `BATCH ASSIGNMENT: ${selectedAccts.length} akaun kepada ${cleanTargetUser} BY ${currentUser.id.toUpperCase()}`,
-                    status: 'SYSTEM LOG', 
-                    updated_by: currentUser.id
-                }]);
+                // [FIX MIS REMARK]: Hasilkan log untuk SETIAP akaun yang di-tick
+                let auditData = selectedAccts.map(accNo => ({
+                    acct: accNo,
+                    audit_remark: `ASSIGNED TO ${cleanTargetUser.toUpperCase()} BY ${currentUser.username.toUpperCase()}`,
+                    status: 'SYSTEM LOG',
+                    updated_by: currentUser.username
+                }));
+
+                // Hantar rekod pukal ke table findings
+                await supabase.from('findings').insert(auditData);
 
                 selectedAccts.forEach(acct => {
                     let accObj = globalAccounts.find(a => a.acct === acct);
@@ -4285,7 +4292,6 @@ window.executeBatchAssignment = async function() {
             } finally {
                 document.getElementById('loadingModal').style.display = 'none';
             }
-        };
 
         // --- KOD BARU: FUNGSI UTK COPY ACCT NO ---
 window.copyToClipboard = function(text, btnElement) {
