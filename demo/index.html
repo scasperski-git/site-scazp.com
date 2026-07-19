@@ -948,7 +948,7 @@ th {
             /* Letak padding pada panel supaya ada ruang nafas kat bawah */
             #dashboard-panel, #assign-panel, #settings-panel, #report-panel { padding-bottom: 20px; }
 
-/* --- HEADER MOBILE REDESIGN --- */
+/* --- HEADER MOBILE REDESIGN (GRID SYSTEM) --- */
             .header {
                 flex-direction: column;
                 align-items: center; 
@@ -960,40 +960,23 @@ th {
                 text-align: center; 
             }
             #header-user-section {
-                flex-direction: row !important; /* Susun Kiri dan Kanan */
-                justify-content: space-between !important;
-                align-items: flex-end !important; /* Sebaris dengan Report To */
                 width: 100%;
                 background: #f8fafc; 
-                padding: 10px 12px !important;
+                padding: 12px !important;
                 border-radius: var(--radius-md);
                 border: 1px solid var(--border-color); 
-                box-sizing: border-box;
                 margin-top: 10px;
+                gap: 8px 10px !important; /* Jarak antara baris dan lajur */
             }
-            #header-text-group {
-                align-items: flex-start !important; /* Nama dan Report To rata kiri */
-                max-width: 55%; /* Elak tolak butang */
-                overflow: hidden;
+            #display-username, #display-report-to {
+                justify-self: start !important; /* Paksa teks rata kiri di mobile */
+                text-align: left;
             }
-            #display-username {
-                width: 100%;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                text-align: left !important;
-            }
-            #header-btn-group {
-                display: flex !important;
-                flex-direction: row !important; /* Pastikan butang sentiasa sebaris di mobile */
-                gap: 5px;
-            }
-            #header-btn-group .btn-logout {
-                padding: 5px 8px !important;
+            #header-user-section .btn-logout {
+                padding: 5px 10px !important;
                 font-size: 9px !important;
-                margin: 0 !important;
+                width: 100%; /* Biar butang saiz seragam */
             }
-
 
             .nav-tabs { padding: 10px; margin-bottom: 15px; }
 
@@ -1067,19 +1050,15 @@ th {
     <div id="dashboard-section">
 <div class="header">
             <h1>FINDINGS MONITORING SYSTEM</h1>
-            <div id="header-user-section" style="display: flex; align-items: center; gap: 15px;">
+            <div id="header-user-section" style="display: grid; grid-template-columns: 1fr auto; gap: 4px 15px; align-items: center;">
                 
-                <!-- Lajur Teks -->
-                <div id="header-text-group" style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1.4;">
-                    <span id="display-username" style="font-size: 12px; color: var(--text-main); font-weight: 700;"></span>
-                    <span id="display-report-to" style="font-size: 10px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.3px;"></span>
-                </div>
+                <!-- Baris 1: Kiri (Nama), Kanan (Sign Out) -->
+                <span id="display-username" style="grid-column: 1; grid-row: 1; justify-self: end; font-size: 12px; color: var(--text-main); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
+                <button class="btn-logout" onclick="handleLogout()" style="grid-column: 2; grid-row: 1; padding: 4px 12px; font-weight: 600; font-size: 10px;">SIGN OUT</button>
                 
-                <!-- Lajur Butang -->
-                <div id="header-btn-group" style="display: flex; gap: 8px;">
-                    <button class="btn-logout" onclick="handleLogout()" style="padding: 6px 12px; font-weight: 600;">SIGN OUT</button>
-                    <button class="btn-logout" onclick="forceSyncData()" style="color: var(--text-main); border-color: var(--border-color); padding: 6px 12px; font-weight: 600;">⟳ SYNC</button>
-                </div>
+                <!-- Baris 2: Kiri (Report To), Kanan (Sync) -->
+                <span id="display-report-to" style="grid-column: 1; grid-row: 2; justify-self: end; font-size: 9px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.3px;"></span>
+                <button class="btn-logout" onclick="forceSyncData()" style="grid-column: 2; grid-row: 2; color: var(--text-main); border-color: var(--border-color); padding: 4px 12px; font-weight: 600; font-size: 10px;">⟳ SYNC</button>
                 
             </div>
         </div>
