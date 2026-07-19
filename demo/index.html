@@ -960,38 +960,35 @@ th {
                 font-size: 16px; 
                 text-align: center; 
             }
-            #header-user-section {
-                flex-direction: column !important; /* Paksa nama kat atas, butang kat bawah */
-                align-items: flex-start !important; 
-                width: 100%;
-                background: #f8fafc; 
-                padding: 12px;
-                border-radius: var(--radius-md);
-                border: 1px solid var(--border-color); 
-                box-sizing: border-box;
-                gap: 10px !important;
+#header-user-section {
+                flex-direction: row !important; /* Kekal sebaris kiri dan kanan */
+                justify-content: space-between !important;
+                align-items: flex-end !important; /* Samakan level butang dengan teks bawah */
+                padding: 12px 10px !important;
             }
             #header-user-section > div:first-child {
-                align-items: flex-start !important; /* Tolak teks nama ke kiri */
-                width: 100%;
+                align-items: flex-start !important;
+                width: auto;
             }
             #display-username {
-                white-space: normal; /* Kalau nama panjang sangat, dia akan turun bawah, tak terpotong */
-                word-break: break-word;
+                max-width: 140px; /* Elak nama potong butang di skrin kecil */
+                white-space: nowrap; 
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             #header-user-section > div:last-child {
-                flex-direction: row !important; /* Paksa butang jadi sebaris untuk Mobile */
-                width: 100%;
-                gap: 8px;
+                flex-direction: row !important; /* Pastikan butang sentiasa sebaris */
+                width: auto;
+                gap: 6px;
             }
             #header-user-section > div:last-child > button {
-                flex: 1; /* Butang kongsi ruang lebar 50-50 */
-                padding: 8px !important; 
+                padding: 6px 10px !important; /* Saiz butang yang ngam untuk jari di mobile */
+                font-size: 9px !important;
             }
 
             #display-username {
                 max-width: 100% !important; /* Benarkan nama guna ruang penuh */
-                font-size: 13px !important;
+                font-size: 12px !important;
             }
 
 
@@ -1067,18 +1064,23 @@ th {
     <div id="dashboard-section">
 <div class="header">
             <h1>FINDINGS MONITORING SYSTEM</h1>
-            <div id="header-user-section" style="display: flex; align-items: center; gap: 15px;">
-                <!-- Lajur Teks -->
-                <div style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1.4;">
-                    <span id="display-username" style="font-size: 12px; color: var(--text-main); font-weight: 700;"></span>
-                    <span id="display-report-to" style="font-size: 9px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.3px;"></span>
+            
+            <div id="header-user-section" style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%; background: #f8fafc; padding: 12px 15px; border-radius: var(--radius-md); border: 1px solid var(--border-color); box-sizing: border-box; gap: 10px;">
+                
+                <!-- Lajur Teks (Kiri) -->
+                <div style="display: flex; flex-direction: column; align-items: flex-start; line-height: 1.4; overflow: hidden;">
+                    <span id="display-username" style="font-size: 13px; color: var(--text-main); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
+                    <span id="display-report-to" style="font-size: 10px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.3px;"></span>
                 </div>
-                <!-- Lajur Butang (Atas Bawah untuk Desktop) -->
-                <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <button class="btn-logout" onclick="handleLogout()" style="padding: 4px 12px; font-size: 9px; border-radius: 4px; line-height: 1.2;">SIGN OUT</button>
-                    <button class="btn-logout" onclick="forceSyncData()" style="color: var(--text-main); border-color: var(--border-color); padding: 4px 12px; font-size: 9px; border-radius: 4px; line-height: 1.2;">⟳ SYNC</button>
+                
+                <!-- Lajur Butang (Kanan - Sebaris) -->
+                <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                    <button class="btn-logout" onclick="handleLogout()" style="padding: 5px 12px; font-size: 10px; border-radius: 4px; font-weight: 600;">SIGN OUT</button>
+                    <button class="btn-logout" onclick="forceSyncData()" style="color: var(--text-main); border-color: var(--border-color); padding: 5px 12px; font-size: 10px; border-radius: 4px; font-weight: 600;">⟳ SYNC</button>
                 </div>
+                
             </div>
+            
         </div>
         
         <div class="nav-tabs" id="master-nav-tabs">
