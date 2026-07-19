@@ -962,20 +962,20 @@ th {
             #header-user-section {
                 width: 100%;
                 background: #f8fafc; 
-                padding: 12px !important;
+                padding: 10px 12px !important; /* Kurangkan sedikit ruang kosong sekeliling kotak */
                 border-radius: var(--radius-md);
                 border: 1px solid var(--border-color); 
                 margin-top: 10px;
-                gap: 8px 10px !important; /* Jarak antara baris dan lajur */
+                gap: 2px 10px !important; /* [FIX]: Jarak atas-bawah dirapatkan dari 8px kepada 2px */
             }
             #display-username, #display-report-to {
-                justify-self: start !important; /* Paksa teks rata kiri di mobile */
+                justify-self: start !important; 
                 text-align: left;
             }
             #header-user-section .btn-logout {
-                padding: 5px 10px !important;
+                padding: 3px 10px !important; /* [FIX]: Butang dikuruskan (padding atas/bawah dari 5px ke 3px) */
                 font-size: 9px !important;
-                width: 100%; /* Biar butang saiz seragam */
+                width: 100%; 
             }
 
             .nav-tabs { padding: 10px; margin-bottom: 15px; }
