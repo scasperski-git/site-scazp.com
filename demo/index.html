@@ -2936,93 +2936,88 @@ if(error) {
         };
 
 window.exportDataByDate = async function(dateStr) {
-            let isConfirmed = await customConfirm(`Are you sure you want to export findings data for the date ${dateStr}?`);
-            if (!isConfirmed) return;
+    let isConfirmed = await customConfirm(`Are you sure you want to export findings data for the date ${dateStr}?`);
+    if (!isConfirmed) return;
 
-            document.getElementById('loadingText').innerText = "Generating Excel file and sorting data by region...";
-            document.getElementById('loadingModal').style.display = 'flex';
+    document.getElementById('loadingText').innerText = "Generating Excel file and sorting data by region...";
+    document.getElementById('loadingModal').style.display = 'flex';
 
-            try {
-                // [FIX TIMEZONE]: Tukar tarikh input kepada julat permulaan dan penghujung ISO UTC yang tepat
-                let startOfDay = new Date(`${dateStr}T00:00:00`).toISOString();
-                let endOfDay = new Date(`${dateStr}T23:59:59.999`).toISOString();
+    try {
+        // [FIX]: Definisi tarikh diletakkan di dalam fungsi supaya sistem kenal
+        let startOfDay = new Date(`${dateStr}T00:00:00`).toISOString();
+        let endOfDay = new Date(`${dateStr}T23:59:59.999`).toISOString();
 
-                // Tarik data findings dari Supabase
-                const { data, error } = await supabase
-                    .from('findings')
-                    .select('id, acct, remark1, remark2, remark3, remark4, remark5, region, is_exported')
-                    .gte('updated_at', startOfDay)
-                    .lte('updated_at', endOfDay)
-                    .neq('acct', 'SYSTEM');
+        // Tarik data findings dari Supabase
+        const { data, error } = await supabase
+            .from('findings')
+            .select('id, acct, remark1, remark2, remark3, remark4, remark5, region, is_exported, audit_remark') // [FIX]: Tambah audit_remark dalam select
+            .gte('updated_at', startOfDay)
+            .lte('updated_at', endOfDay)
+            .neq('acct', 'SYSTEM')
+            .is('audit_remark', null); // [FIX]: Tapis keluar log audit sistem
 
-                if (error) throw error;
-                
-                // Semak jika tiada langsung rekod untuk tarikh tersebut
-                if (!data || data.length === 0) {
-                    showNotification("NO RECORDS", `Tiada sebarang log penemuan (findings) ditemui pada tarikh ${dateStr}.`, true);
-                    document.getElementById('loadingModal').style.display = 'none';
-                    return;
-                }
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            showNotification("NO RECORDS", `Tiada sebarang log penemuan (findings) ditemui pada tarikh ${dateStr}.`, true);
+            document.getElementById('loadingModal').style.display = 'none';
+            return;
+        }
 
-                // Tapis hanya rekod yang belum dieksport sahaja
-                let pendingRows = data.filter(row => row.is_exported === false || row.is_exported === null);
+        let pendingRows = data.filter(row => row.is_exported === false || row.is_exported === null);
 
-                if (pendingRows.length === 0) {
-                    showNotification("ALREADY EXPORTED", `Semua rekod pada tarikh ${dateStr} telah pun selamat dieksport sebelum ini (Status Locked).`, true);
-                    document.getElementById('loadingModal').style.display = 'none';
-                    return;
-                }
+        if (pendingRows.length === 0) {
+            showNotification("ALREADY EXPORTED", `Semua rekod pada tarikh ${dateStr} telah pun selamat dieksport sebelum ini (Status Locked).`, true);
+            document.getElementById('loadingModal').style.display = 'none';
+            return;
+        }
 
-                let groupedData = {};
-                let idsToUpdate = [];
+        let groupedData = {};
+        let idsToUpdate = [];
 
-                pendingRows.forEach(row => {
-                    let reg = row.region ? row.region.toUpperCase().trim() : 'UNKNOWN';
-                    if (!groupedData[reg]) groupedData[reg] = [];
-                    
-                    // Mengekalkan susunan asal kau: REMARK5 di kedudukan atas sekali sebelum REMARK1
-                    groupedData[reg].push({
-                        "ACCT": row.acct,
-                        "REMARK1": row.remark5 || '',
-                        "REMARK2": row.remark1 || '',
-                        "REMARK3": row.remark2 || '',
-                        "REMARK4": row.remark3 || '',
-                        "REMARK5": row.remark4 || ''
-                    });
-                    
-                    idsToUpdate.push(row.id); 
-                }); 
+        pendingRows.forEach(row => {
+            let reg = row.region ? row.region.toUpperCase().trim() : 'UNKNOWN';
+            if (!groupedData[reg]) groupedData[reg] = [];
+            
+            groupedData[reg].push({
+                "ACCT": row.acct,
+                "REMARK1": row.remark5 || '',
+                "REMARK2": row.remark1 || '',
+                "REMARK3": row.remark2 || '',
+                "REMARK4": row.remark3 || '',
+                "REMARK5": row.remark4 || ''
+            });
+            
+            idsToUpdate.push(row.id); 
+        }); 
 
-                let formattedDate = dateStr.replace(/-/g, ''); 
-                
-                // Jana fail Excel mengikut Wilayah (Region)
-                Object.keys(groupedData).forEach(reg => {
-                    const ws = XLSX.utils.json_to_sheet(groupedData[reg]);
-                    const wb = XLSX.utils.book_new();
-                    XLSX.utils.book_append_sheet(wb, ws, "Findings");
-                    
-                    const fileName = `${reg}_FINDINGS_${formattedDate}.xlsx`;
-                    XLSX.writeFile(wb, fileName);
-                });
+        let formattedDate = dateStr.replace(/-/g, ''); 
+        
+        Object.keys(groupedData).forEach(reg => {
+            const ws = XLSX.utils.json_to_sheet(groupedData[reg]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Findings");
+            
+            const fileName = `${reg}_FINDINGS_${formattedDate}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        });
 
-                // Kunci status log di database supaya tidak dieksport bertindih
-                const { error: updateError } = await supabase
-                    .from('findings')
-                    .update({ is_exported: true })
-                    .in('id', idsToUpdate);
-                
-                if (updateError) throw updateError;
+        const { error: updateError } = await supabase
+            .from('findings')
+            .update({ is_exported: true })
+            .in('id', idsToUpdate);
+        
+        if (updateError) throw updateError;
 
-                document.getElementById('loadingModal').style.display = 'none';
-                showNotification("EXPORT SUCCESSFUL", `${idsToUpdate.length} akaun berjaya diproses. Fail Excel telah dimuat turun mengikut wilayah.`);
-                
-                renderReportCenter(); 
+        document.getElementById('loadingModal').style.display = 'none';
+        showNotification("EXPORT SUCCESSFUL", `${idsToUpdate.length} akaun berjaya diproses.`);
+        renderReportCenter(); 
 
-            } catch (err) {
-                document.getElementById('loadingModal').style.display = 'none';
-                showNotification("EXPORT ERROR", err.message, true);
-            }
-        };
+    } catch (err) {
+        document.getElementById('loadingModal').style.display = 'none';
+        showNotification("EXPORT ERROR", err.message, true);
+    }
+};
         
         window.showNotification = function(title, message, isError = false) {
             document.getElementById('notif-title').innerText = title;
