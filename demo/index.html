@@ -1088,18 +1088,22 @@ th {
             </div>
             
             <div class="action-bar">
-    <div class="action-bar">
+<div class="action-bar" style="display: block; width: 100%;">
                 <div class="filter-section">
                     <div id="zone-filters-container">
                         <span class="filter-title">Select Zone</span>
                         <div class="btn-group" id="zone-buttons"></div>
                     </div>
-                    <!-- KOTAK ADMIN & PIC MENGGANTIKAN REGION & AREA -->
-                    <div id="admin-filters-container" style="display: none; padding-top: 5px;">
+                    <!-- HIERARKI BARU: KINI ADA MANAGER! -->
+                    <div id="manager-filters-container" style="display: none; padding-top: 10px; border-top: 1px dashed var(--border-color); margin-top: 5px;">
+                        <span class="filter-title">Select Manager</span>
+                        <div class="btn-group" id="manager-buttons"></div>
+                    </div>
+                    <div id="admin-filters-container" style="display: none; padding-top: 10px; border-top: 1px dashed var(--border-color); margin-top: 5px;">
                         <span class="filter-title">Select Admin (Batch Owner)</span>
                         <div class="btn-group" id="admin-buttons"></div>
                     </div>
-                    <div id="pic-filters-container" style="display: none; padding-top: 5px;">
+                    <div id="pic-filters-container" style="display: none; padding-top: 10px; border-top: 1px dashed var(--border-color); margin-top: 5px;">
                         <span class="filter-title">Select PIC User (Assignee)</span>
                         <div class="btn-group" id="pic-buttons"></div>
                     </div>
@@ -1609,8 +1613,9 @@ th {
         let currentUser = null; 
         // [ZONE HIERARCHY]
         let currentZone = null;
-        let currentAdmin = null; // Ganti currentRegion
-        let currentPic = null;   // Ganti currentArea
+        let currentManager = null; // <-- Ini yang hilang tadi!
+        let currentAdmin = null; 
+        let currentPic = null;
         let currentStatusFilter = null;
         
         let globalAccounts = []; 
@@ -1839,8 +1844,9 @@ window.handleLogout = async function() {
             filteredAccounts = []; 
             geoMap = {};
             currentZone = null;
-            currentAdmin = null; // Ganti currentRegion
-            currentPic = null;   // Ganti currentArea
+            currentManager = null; // <-- Reset manager
+            currentAdmin = null; 
+            currentPic = null;   
             currentStatusFilter = null;
             activeSearchType = null;
             activeSearchQuery = '';
@@ -1974,9 +1980,8 @@ if (currentUser.role === 'user') {
             loadingModal.style.display = 'none';
         }
 
-// 1. KOSONGKAN GEOMAP LAMA
-        function rebuildGeoMapFromData() {
-            // Tak perlu lagi peta lokasi, kita tapis Admin & PIC secara dinamik (Real-time)
+function rebuildGeoMapFromData() {
+            // Dikosongkan kerana sistem kini menapis secara live (Real-time Filtering)
         }
         
         function initDashboardView() {
@@ -2005,8 +2010,9 @@ if (currentUser.role === 'user') {
                     `;
                     
                     currentZone = null; 
+                    currentManager = currentUser.id.toUpperCase().trim();
                     document.getElementById('admin-filters-container').style.display = 'block';
-                    renderAdminSelectionUI(currentZone, myZones); // Tunjuk admin untuk zon manager sahaja
+                    renderAdminSelectionUI(currentZone, myZones, currentManager); 
                     
                 } else if(currentUser.role === 'admin') {
                     document.getElementById('pic-filters-container').style.display = 'block';
@@ -2015,7 +2021,7 @@ if (currentUser.role === 'user') {
                         <div class="btn-group" id="pic-buttons"></div>
                     `;
                     currentAdmin = currentUser.id.toUpperCase().trim();
-                    renderPicSelectionUI(currentAdmin); // Admin hanya nampak PIC bawah dia
+                    renderPicSelectionUI(currentAdmin); 
                 }
 
                 applyFilterAndRender(); 
@@ -2023,7 +2029,6 @@ if (currentUser.role === 'user') {
                 if(currentUser.role === 'super') renderReportCenter(); 
                 toggleFormRoleSelect();
             } else {
-                // Untuk PIC USER biasa
                 document.getElementById('master-nav-tabs').style.display = 'none';
                 document.getElementById('upload-action-container').style.display = 'none';
                 
@@ -2057,9 +2062,7 @@ if (currentUser.role === 'user') {
                         let h_ic = d.h_nric ? String(d.h_nric).toUpperCase().replace(/[\s-/]/g, '') : '';
                         let s_ic = d.s_nric ? String(d.s_nric).toUpperCase().replace(/[\s-/]/g, '') : '';
                         let g_ic = d.g_nric ? String(d.g_nric).toUpperCase().replace(/[\s-/]/g, '') : '';
-                        if (!h_ic.includes(q) && !s_ic.includes(q) && !g_ic.includes(q)) {
-                            return false; 
-                        }
+                        if (!h_ic.includes(q) && !s_ic.includes(q) && !g_ic.includes(q)) { return false; }
                     }
                 }
 
@@ -2075,10 +2078,20 @@ if (currentUser.role === 'user') {
                     matchZone = myZones.includes(z);
                 }
 
+                // Check Manager filter
+                let matchManager = true;
+                if (currentManager && currentManager !== 'ALL') {
+                    let adminObj = allSystemUsers.find(u => u.id.toUpperCase().trim() === adminOwner);
+                    let repTo = adminObj && adminObj.report_to ? adminObj.report_to.toUpperCase().trim() : '';
+                    if (adminOwner !== currentManager && repTo !== currentManager) {
+                        matchManager = false;
+                    }
+                }
+
                 let matchAdmin = (currentAdmin && currentAdmin !== 'ALL') ? adminOwner === currentAdmin : true;
                 let matchPic = (currentPic && currentPic !== 'ALL') ? picUser === currentPic : true;
                 
-                return matchZone && matchAdmin && matchPic;
+                return matchZone && matchManager && matchAdmin && matchPic;
             });
             
             updateKPICards(scopedGeoData);
@@ -2123,18 +2136,20 @@ if (currentUser.role === 'user') {
         // --- HIERARKI PENAPIS BAHARU ---
         window.clearZoneSelection = function(btnElement) {
             updateActiveFilterHighlight('zone-buttons', btnElement);
+            document.getElementById('manager-filters-container').style.display = 'none';
             document.getElementById('admin-filters-container').style.display = 'none';
             document.getElementById('pic-filters-container').style.display = 'none';
-            currentZone = null; currentAdmin = null; currentPic = null;
+            currentZone = null; currentManager = null; currentAdmin = null; currentPic = null;
             resetStatusCardHighlight();
             
             if (currentUser.role === 'manager') {
                 document.getElementById('admin-filters-container').style.display = 'block';
                 let myZones = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(z => z.trim().toUpperCase()) : [];
-                renderAdminSelectionUI(null, myZones);
+                currentManager = currentUser.id.toUpperCase().trim();
+                renderAdminSelectionUI(null, myZones, currentManager);
             } else if (currentUser.role === 'super') {
-                document.getElementById('admin-filters-container').style.display = 'block';
-                renderAdminSelectionUI(null, []);
+                document.getElementById('manager-filters-container').style.display = 'block';
+                renderManagerSelectionUI(null);
             }
             
             applyFilterAndRender();
@@ -2142,10 +2157,41 @@ if (currentUser.role === 'user') {
 
         window.applyZoneFilter = function(zone, btnElement) {
             updateActiveFilterHighlight('zone-buttons', btnElement);
-            currentZone = zone; currentAdmin = null; currentPic = null;
+            currentZone = zone; currentManager = null; currentAdmin = null; currentPic = null;
+            
+            document.getElementById('admin-filters-container').style.display = 'none';
+            document.getElementById('pic-filters-container').style.display = 'none';
+
+            if (currentUser.role === 'super') {
+                document.getElementById('manager-filters-container').style.display = 'block';
+                renderManagerSelectionUI(zone);
+            } else if (currentUser.role === 'manager') {
+                document.getElementById('admin-filters-container').style.display = 'block';
+                currentManager = currentUser.id.toUpperCase().trim();
+                renderAdminSelectionUI(zone, [], currentManager);
+            }
+
+            resetStatusCardHighlight();
+            applyFilterAndRender();
+        };
+
+        window.clearManagerSelection = function(btnElement) {
+            updateActiveFilterHighlight('manager-buttons', btnElement);
+            document.getElementById('admin-filters-container').style.display = 'none';
+            document.getElementById('pic-filters-container').style.display = 'none';
+            currentManager = null; currentAdmin = null; currentPic = null;
+            resetStatusCardHighlight();
+            applyFilterAndRender();
+        };
+
+        window.applyManagerFilter = function(manager, btnElement) {
+            updateActiveFilterHighlight('manager-buttons', btnElement);
+            currentManager = manager; currentAdmin = null; currentPic = null;
             document.getElementById('admin-filters-container').style.display = 'block';
             document.getElementById('pic-filters-container').style.display = 'none';
-            renderAdminSelectionUI(zone, []);
+            
+            let myZones = currentZone ? [currentZone] : [];
+            renderAdminSelectionUI(currentZone, myZones, currentManager);
             resetStatusCardHighlight();
             applyFilterAndRender();
         };
@@ -2183,7 +2229,7 @@ if (currentUser.role === 'user') {
 
         function renderZoneSelectionUI() {
             const container = document.getElementById('zone-buttons');
-            container.innerHTML = '<button class="btn-filter active" style="font-weight: 800; box-shadow: 0 0 8px rgba(59,130,246,0.4);" onclick="clearZoneSelection(this)">👑 ALL ZONES (MASTER ACCESS)</button>';
+            container.innerHTML = '<button class="btn-filter active" style="font-weight: 800; box-shadow: 0 0 8px rgba(59,130,246,0.4);" onclick="clearZoneSelection(this)">👑 ALL ZONES</button>';
             
             let masterZones = new Set(['BC', 'WEST', 'EAST', 'HO']);
             globalAccounts.forEach(row => {
@@ -2193,9 +2239,34 @@ if (currentUser.role === 'user') {
             Array.from(masterZones).sort().forEach(zone => {
                 container.innerHTML += `<button class="btn-filter" onclick="applyZoneFilter('${zone}', this)">${zone}</button>`;
             });
+            
+            // SUPER ADMIN Wajib nampak Manager sejurus login
+            document.getElementById('manager-filters-container').style.display = 'block';
+            renderManagerSelectionUI(null);
         }
 
-        function renderAdminSelectionUI(zone, multiZones = []) {
+        function renderManagerSelectionUI(zone) {
+            const container = document.getElementById('manager-buttons');
+            let activeAll = !currentManager ? 'active' : '';
+            container.innerHTML = `<button class="btn-filter ${activeAll}" onclick="clearManagerSelection(this)">ALL MANAGERS</button>`;
+            
+            let managers = new Set();
+            let validManagers = allSystemUsers.filter(u => u.role === 'manager' && u.status === 'ACTIVE');
+            
+            validManagers.forEach(m => {
+                let mZones = m.assignedzone ? m.assignedzone.split(',').map(z => z.trim().toUpperCase()) : [];
+                if (!zone || mZones.includes(zone)) {
+                    managers.add(m.id.toUpperCase().trim());
+                }
+            });
+
+            Array.from(managers).sort().forEach(mgr => {
+                let activeStyle = (currentManager === mgr) ? 'active' : '';
+                container.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyManagerFilter('${mgr}', this)">${mgr}</button>`;
+            });
+        }
+
+        function renderAdminSelectionUI(zone, multiZones = [], managerFilter = null) {
             const container = document.getElementById('admin-buttons');
             let activeAll = !currentAdmin ? 'active' : '';
             container.innerHTML = `<button class="btn-filter ${activeAll}" onclick="clearAdminSelection(this)">ALL ADMINS</button>`;
@@ -2205,12 +2276,25 @@ if (currentUser.role === 'user') {
                 let rZone = row.zone ? row.zone.toUpperCase().trim() : '';
                 let rOwner = row.batch_owner ? row.batch_owner.toUpperCase().trim() : '';
                 
+                let inZone = false;
                 if (zone) {
-                    if (rZone === zone && rOwner) admins.add(rOwner);
+                    if (rZone === zone) inZone = true;
                 } else if (multiZones.length > 0) {
-                    if (multiZones.includes(rZone) && rOwner) admins.add(rOwner);
-                } else if (currentUser.role === 'super') {
-                    if (rOwner) admins.add(rOwner);
+                    if (multiZones.includes(rZone)) inZone = true;
+                } else {
+                    inZone = true; // Super admin melihat semua tanpa filter
+                }
+
+                if (inZone && rOwner && rOwner !== 'SUPER' && rOwner !== 'SYSTEM') {
+                    if (managerFilter) {
+                        let ownerObj = allSystemUsers.find(u => u.id.toUpperCase().trim() === rOwner);
+                        let repTo = ownerObj && ownerObj.report_to ? ownerObj.report_to.toUpperCase().trim() : '';
+                        if (rOwner === managerFilter || repTo === managerFilter) {
+                            admins.add(rOwner);
+                        }
+                    } else {
+                        admins.add(rOwner);
+                    }
                 }
             });
 
@@ -2262,9 +2346,11 @@ if (currentUser.role === 'user') {
             }
 
             if(currentUser.role === 'super') {
-                currentZone = null; currentAdmin = null; currentPic = null;
+                currentZone = null; currentManager = null; currentAdmin = null; currentPic = null;
+                const mgrContainer = document.getElementById('manager-filters-container');
                 const admContainer = document.getElementById('admin-filters-container');
                 const picContainer = document.getElementById('pic-filters-container');
+                if(mgrContainer) mgrContainer.style.display = 'none';
                 if(admContainer) admContainer.style.display = 'none';
                 if(picContainer) picContainer.style.display = 'none';
                 
