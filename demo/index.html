@@ -1088,18 +1088,20 @@ th {
             </div>
             
             <div class="action-bar">
+    <div class="action-bar">
                 <div class="filter-section">
                     <div id="zone-filters-container">
                         <span class="filter-title">Select Zone</span>
                         <div class="btn-group" id="zone-buttons"></div>
                     </div>
-                    <div id="region-filters-container">
-                        <span class="filter-title">Select Region</span>
-                        <div class="btn-group" id="region-buttons"></div>
+                    <!-- KOTAK ADMIN & PIC MENGGANTIKAN REGION & AREA -->
+                    <div id="admin-filters-container" style="display: none; padding-top: 5px;">
+                        <span class="filter-title">Select Admin (Batch Owner)</span>
+                        <div class="btn-group" id="admin-buttons"></div>
                     </div>
-                    <div id="area-filters-container">
-                        <span class="filter-title">Select Area</span>
-                        <div class="btn-group" id="area-buttons"></div>
+                    <div id="pic-filters-container" style="display: none; padding-top: 5px;">
+                        <span class="filter-title">Select PIC User (Assignee)</span>
+                        <div class="btn-group" id="pic-buttons"></div>
                     </div>
                 </div>
             </div>
@@ -1607,9 +1609,9 @@ th {
         let currentUser = null; 
         // [ZONE HIERARCHY]
         let currentZone = null;
-        let currentRegion = null; 
-        let currentArea = null;
-        let currentStatusFilter = null; 
+        let currentAdmin = null; // Ganti currentRegion
+        let currentPic = null;   // Ganti currentArea
+        let currentStatusFilter = null;
         
         let globalAccounts = []; 
         let filteredAccounts = []; 
@@ -1831,14 +1833,14 @@ window.requestBatchName = function() {
             btn.innerText = "SIGN IN";
         };
 
-        window.handleLogout = async function() {
+window.handleLogout = async function() {
             currentUser = null; 
             globalAccounts = []; 
             filteredAccounts = []; 
             geoMap = {};
             currentZone = null;
-            currentRegion = null; 
-            currentArea = null;
+            currentAdmin = null; // Ganti currentRegion
+            currentPic = null;   // Ganti currentArea
             currentStatusFilter = null;
             activeSearchType = null;
             activeSearchQuery = '';
@@ -1972,19 +1974,9 @@ if (currentUser.role === 'user') {
             loadingModal.style.display = 'none';
         }
 
+// 1. KOSONGKAN GEOMAP LAMA
         function rebuildGeoMapFromData() {
-            geoMap = {};
-            globalAccounts.forEach(row => {
-                let z = row.zone ? row.zone.toUpperCase().trim() : '';
-                let r = row.region ? row.region.toUpperCase().trim() : '';
-                let a = row.area ? row.area.toUpperCase().trim() : '';
-                
-                if (z && r && a) {
-                    if (!geoMap[z]) geoMap[z] = {};
-                    if (!geoMap[z][r]) geoMap[z][r] = [];
-                    if (!geoMap[z][r].includes(a)) geoMap[z][r].push(a);
-                }
-            });
+            // Tak perlu lagi peta lokasi, kita tapis Admin & PIC secara dinamik (Real-time)
         }
         
         function initDashboardView() {
@@ -1998,35 +1990,32 @@ if (currentUser.role === 'user') {
                 if(currentUser.role === 'super') {
                     document.getElementById('zone-filters-container').style.display = 'block';
                     renderZoneSelectionUI();
-        } else if(currentUser.role === 'manager') {
-            document.getElementById('zone-filters-container').style.display = 'block';
-            
-            // Pecahkan koma kepada array
-            let myZones = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(z => z.trim().toUpperCase()) : [];
-            
-            // Cipta butang secara dinamik untuk setiap zon yang manager tu pegang
-            let zoneHtml = `<button class="btn-filter active" onclick="clearZoneSelection(this)">ALL MY ZONES</button>`;
-            myZones.forEach(z => {
-                zoneHtml += `<button class="btn-filter" onclick="applyZoneFilter('${z}', this)">${z}</button>`;
-            });
-            
-            document.getElementById('zone-filters-container').innerHTML = `
-                <span class="filter-title">My Assigned Zone</span>
-                <div class="btn-group" id="zone-buttons">${zoneHtml}</div>
-            `;
-            
-            // Set kepada null supaya Dashboard tunjuk KESEMUA data dari myZones
-            currentZone = null; 
-            document.getElementById('region-filters-container').style.display = 'block';
+                } else if(currentUser.role === 'manager') {
+                    document.getElementById('zone-filters-container').style.display = 'block';
+                    
+                    let myZones = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(z => z.trim().toUpperCase()) : [];
+                    let zoneHtml = `<button class="btn-filter active" onclick="clearZoneSelection(this)">ALL MY ZONES</button>`;
+                    myZones.forEach(z => {
+                        zoneHtml += `<button class="btn-filter" onclick="applyZoneFilter('${z}', this)">${z}</button>`;
+                    });
+                    
+                    document.getElementById('zone-filters-container').innerHTML = `
+                        <span class="filter-title">My Assigned Zone</span>
+                        <div class="btn-group" id="zone-buttons">${zoneHtml}</div>
+                    `;
+                    
+                    currentZone = null; 
+                    document.getElementById('admin-filters-container').style.display = 'block';
+                    renderAdminSelectionUI(currentZone, myZones); // Tunjuk admin untuk zon manager sahaja
                     
                 } else if(currentUser.role === 'admin') {
-                    // [BUG FIX]: Admin cannot select region/zone. Stick strictly to their assigned area.
-                    document.getElementById('area-filters-container').style.display = 'block';
-                    document.getElementById('area-filters-container').innerHTML = `
-                        <span class="filter-title">My Assigned Area</span>
-                        <div class="btn-group"><button class="btn-filter active">${currentUser.assignedarea || 'NO AREA'}</button></div>
+                    document.getElementById('pic-filters-container').style.display = 'block';
+                    document.getElementById('pic-filters-container').innerHTML = `
+                        <span class="filter-title">My PIC Users</span>
+                        <div class="btn-group" id="pic-buttons"></div>
                     `;
-                    currentArea = currentUser.assignedarea ? currentUser.assignedarea.toUpperCase().trim() : null;
+                    currentAdmin = currentUser.id.toUpperCase().trim();
+                    renderPicSelectionUI(currentAdmin); // Admin hanya nampak PIC bawah dia
                 }
 
                 applyFilterAndRender(); 
@@ -2038,8 +2027,8 @@ if (currentUser.role === 'user') {
                 document.getElementById('master-nav-tabs').style.display = 'none';
                 document.getElementById('upload-action-container').style.display = 'none';
                 
-                document.getElementById('area-filters-container').style.display = 'block';
-                document.getElementById('area-filters-container').innerHTML = `
+                document.getElementById('pic-filters-container').style.display = 'block';
+                document.getElementById('pic-filters-container').innerHTML = `
                     <span class="filter-title">My Assigned Accounts</span>
                     <div class="btn-group"><button class="btn-filter active">Showing My Accounts Only</button></div>
                 `;
@@ -2075,14 +2064,21 @@ if (currentUser.role === 'user') {
                 }
 
                 let z = row.zone ? row.zone.toUpperCase().trim() : '';
-                let r = row.region ? row.region.toUpperCase().trim() : '';
-                let a = row.area ? row.area.toUpperCase().trim() : '';
+                let adminOwner = row.batch_owner ? row.batch_owner.toUpperCase().trim() : 'UNKNOWN';
+                let picUser = row.assignee_id ? row.assignee_id.toUpperCase().trim() : 'UNASSIGNED';
                 
                 let matchZone = (currentZone && currentZone !== 'ALL') ? z === currentZone : true;
-                let matchRegion = (currentRegion && currentRegion !== 'ALL') ? r === currentRegion : true;
-                let matchArea = (currentArea && currentArea !== 'ALL') ? a === currentArea : true;
                 
-                return matchZone && matchRegion && matchArea;
+                // Manager "ALL MY ZONES" override
+                if (!currentZone && currentUser.role === 'manager') {
+                    let myZones = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(zo => zo.trim().toUpperCase()) : [];
+                    matchZone = myZones.includes(z);
+                }
+
+                let matchAdmin = (currentAdmin && currentAdmin !== 'ALL') ? adminOwner === currentAdmin : true;
+                let matchPic = (currentPic && currentPic !== 'ALL') ? picUser === currentPic : true;
+                
+                return matchZone && matchAdmin && matchPic;
             });
             
             updateKPICards(scopedGeoData);
@@ -2106,7 +2102,6 @@ if (currentUser.role === 'user') {
             });
 
             updateHeaderArrows('last_date');
-
             currentPage = 1;
             renderTablePage();
         }
@@ -2125,105 +2120,126 @@ if (currentUser.role === 'user') {
             if (totalCard) totalCard.classList.add('active');
         }
 
-        // ZONE FILTERS
+        // --- HIERARKI PENAPIS BAHARU ---
         window.clearZoneSelection = function(btnElement) {
             updateActiveFilterHighlight('zone-buttons', btnElement);
-            document.getElementById('region-filters-container').style.display = 'none';
-            document.getElementById('area-filters-container').style.display = 'none';
-            currentZone = null; currentRegion = null; currentArea = null;
+            document.getElementById('admin-filters-container').style.display = 'none';
+            document.getElementById('pic-filters-container').style.display = 'none';
+            currentZone = null; currentAdmin = null; currentPic = null;
             resetStatusCardHighlight();
+            
+            if (currentUser.role === 'manager') {
+                document.getElementById('admin-filters-container').style.display = 'block';
+                let myZones = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(z => z.trim().toUpperCase()) : [];
+                renderAdminSelectionUI(null, myZones);
+            } else if (currentUser.role === 'super') {
+                document.getElementById('admin-filters-container').style.display = 'block';
+                renderAdminSelectionUI(null, []);
+            }
+            
             applyFilterAndRender();
         };
 
         window.applyZoneFilter = function(zone, btnElement) {
             updateActiveFilterHighlight('zone-buttons', btnElement);
-            currentZone = zone; currentRegion = null; currentArea = null;
-            document.getElementById('region-filters-container').style.display = 'block';
-            document.getElementById('area-filters-container').style.display = 'none';
-            renderRegionSelectionUI(zone);
+            currentZone = zone; currentAdmin = null; currentPic = null;
+            document.getElementById('admin-filters-container').style.display = 'block';
+            document.getElementById('pic-filters-container').style.display = 'none';
+            renderAdminSelectionUI(zone, []);
             resetStatusCardHighlight();
             applyFilterAndRender();
         };
 
-        // REGION FILTERS
-        window.clearRegionSelection = function(btnElement) {
-            updateActiveFilterHighlight('region-buttons', btnElement);
-            document.getElementById('area-filters-container').style.display = 'none';
-            currentRegion = null; currentArea = null;
+        window.clearAdminSelection = function(btnElement) {
+            updateActiveFilterHighlight('admin-buttons', btnElement);
+            document.getElementById('pic-filters-container').style.display = 'none';
+            currentAdmin = null; currentPic = null;
             resetStatusCardHighlight();
             applyFilterAndRender();
         };
 
-        window.applyRegionFilter = function(region, btnElement) {
-            updateActiveFilterHighlight('region-buttons', btnElement);
-            currentRegion = region; currentArea = null;
-            document.getElementById('area-filters-container').style.display = 'block';
-            renderAreaSelectionUI(currentZone, region);
+        window.applyAdminFilter = function(admin, btnElement) {
+            updateActiveFilterHighlight('admin-buttons', btnElement);
+            currentAdmin = admin; currentPic = null;
+            document.getElementById('pic-filters-container').style.display = 'block';
+            renderPicSelectionUI(admin);
             resetStatusCardHighlight();
             applyFilterAndRender();
         };
 
-        // AREA FILTERS
-        window.clearAreaSelection = function(btnElement) {
-            updateActiveFilterHighlight('area-buttons', btnElement);
-            currentArea = null;
+        window.clearPicSelection = function(btnElement) {
+            updateActiveFilterHighlight('pic-buttons', btnElement);
+            currentPic = null;
             resetStatusCardHighlight();
             applyFilterAndRender();
         };
 
-        window.applyAreaFilter = function(area, btnElement) {
-            updateActiveFilterHighlight('area-buttons', btnElement);
-            currentArea = area;
+        window.applyPicFilter = function(pic, btnElement) {
+            updateActiveFilterHighlight('pic-buttons', btnElement);
+            currentPic = pic;
             resetStatusCardHighlight();
             applyFilterAndRender();
         };
 
-function renderZoneSelectionUI() {
+        function renderZoneSelectionUI() {
             const container = document.getElementById('zone-buttons');
-            
-            // [FIX]: Buang 'color: var(--accent-gold)' supaya tulisan kembali menjadi putih
             container.innerHTML = '<button class="btn-filter active" style="font-weight: 800; box-shadow: 0 0 8px rgba(59,130,246,0.4);" onclick="clearZoneSelection(this)">👑 ALL ZONES (MASTER ACCESS)</button>';
             
-            // 2. Senarai zon rasmi syarikat (Supaya butang tak hilang walaupun database kosong)
             let masterZones = new Set(['BC', 'WEST', 'EAST', 'HO']);
-            
-            // 3. Tambah juga apa-apa zon baru yang mungkin wujud dalam database secara automatik
-            Object.keys(geoMap).forEach(zone => {
-                if (zone && zone !== 'SYSTEM' && zone !== 'UNKNOWN') {
-                    masterZones.add(zone.toUpperCase().trim());
-                }
+            globalAccounts.forEach(row => {
+                if (row.zone && row.zone !== 'SYSTEM' && row.zone !== 'UNKNOWN') masterZones.add(row.zone.toUpperCase().trim());
             });
 
-            // 4. Hasilkan butang mengikut susunan A-Z
             Array.from(masterZones).sort().forEach(zone => {
                 container.innerHTML += `<button class="btn-filter" onclick="applyZoneFilter('${zone}', this)">${zone}</button>`;
             });
         }
-        
-        function renderRegionSelectionUI(zone) {
-            const container = document.getElementById('region-buttons');
-            let activeAll = !currentRegion ? 'active' : '';
-            container.innerHTML = `<button class="btn-filter ${activeAll}" onclick="clearRegionSelection(this)">ALL REGIONS</button>`;
+
+        function renderAdminSelectionUI(zone, multiZones = []) {
+            const container = document.getElementById('admin-buttons');
+            let activeAll = !currentAdmin ? 'active' : '';
+            container.innerHTML = `<button class="btn-filter ${activeAll}" onclick="clearAdminSelection(this)">ALL ADMINS</button>`;
             
-            if(geoMap[zone]) {
-                Object.keys(geoMap[zone]).forEach(reg => {
-                    let activeStyle = (currentRegion === reg) ? 'active' : '';
-                    container.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyRegionFilter('${reg}', this)">${reg}</button>`;
-                });
-            }
+            let admins = new Set();
+            globalAccounts.forEach(row => {
+                let rZone = row.zone ? row.zone.toUpperCase().trim() : '';
+                let rOwner = row.batch_owner ? row.batch_owner.toUpperCase().trim() : '';
+                
+                if (zone) {
+                    if (rZone === zone && rOwner) admins.add(rOwner);
+                } else if (multiZones.length > 0) {
+                    if (multiZones.includes(rZone) && rOwner) admins.add(rOwner);
+                } else if (currentUser.role === 'super') {
+                    if (rOwner) admins.add(rOwner);
+                }
+            });
+
+            Array.from(admins).sort().forEach(adm => {
+                let activeStyle = (currentAdmin === adm) ? 'active' : '';
+                container.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAdminFilter('${adm}', this)">${adm}</button>`;
+            });
         }
 
-        function renderAreaSelectionUI(zone, region) {
-            const areaContainer = document.getElementById('area-buttons');
-            let activeAll = !currentArea ? 'active' : '';
-            areaContainer.innerHTML = `<button class="btn-filter ${activeAll}" onclick="clearAreaSelection(this)">ALL AREAS</button>`;
+        function renderPicSelectionUI(admin) {
+            const container = document.getElementById('pic-buttons');
+            let activeAll = !currentPic ? 'active' : '';
+            container.innerHTML = `<button class="btn-filter ${activeAll}" onclick="clearPicSelection(this)">ALL PIC</button>`;
             
-            if(geoMap[zone] && geoMap[zone][region] && geoMap[zone][region].length > 0) {
-                geoMap[zone][region].forEach((area) => {
-                    let activeStyle = (currentArea === area) ? 'active' : '';
-                    areaContainer.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyAreaFilter('${area}', this)">${area}</button>`;
-                });
-            }
+            let pics = new Set();
+            globalAccounts.forEach(row => {
+                let rOwner = row.batch_owner ? row.batch_owner.toUpperCase().trim() : '';
+                let rAssignee = row.assignee_id ? row.assignee_id.toUpperCase().trim() : 'UNASSIGNED';
+                
+                if (rOwner === admin && rAssignee) {
+                    pics.add(rAssignee);
+                }
+            });
+
+            Array.from(pics).sort().forEach(p => {
+                let activeStyle = (currentPic === p) ? 'active' : '';
+                let label = p === 'UNASSIGNED' ? '🔴 UNASSIGNED' : p;
+                container.innerHTML += `<button class="btn-filter ${activeStyle}" onclick="applyPicFilter('${p}', this)">${label}</button>`;
+            });
         }
 
         function updateActiveFilterHighlight(containerId, activeBtn) {
@@ -2246,11 +2262,11 @@ function renderZoneSelectionUI() {
             }
 
             if(currentUser.role === 'super') {
-                currentZone = null; currentRegion = null; currentArea = null;
-                const regContainer = document.getElementById('region-filters-container');
-                const areaContainer = document.getElementById('area-filters-container');
-                if(regContainer) regContainer.style.display = 'none';
-                if(areaContainer) areaContainer.style.display = 'none';
+                currentZone = null; currentAdmin = null; currentPic = null;
+                const admContainer = document.getElementById('admin-filters-container');
+                const picContainer = document.getElementById('pic-filters-container');
+                if(admContainer) admContainer.style.display = 'none';
+                if(picContainer) picContainer.style.display = 'none';
                 
                 let zoneBtns = document.getElementById('zone-buttons');
                 if (zoneBtns) {
