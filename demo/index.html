@@ -8,13 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
 <style>
-    * { box-sizing: border-box !important; }
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    overflow-x: hidden;
-}
         :root {
             /* Palet warna baharu yang lebih clean & premium */
             --bg-color: #f4f7f9;
@@ -74,11 +67,11 @@ html, body {
             background: rgba(255, 255, 255, 0.95); /* Sedikit lutsinar */
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            padding: 70px 40px;
+            padding: 50px 40px;
             border-radius: 24px; /* Bucu lebih bulat dan moden */
             border: 1px solid rgba(255, 255, 255, 0.8); 
             width: 100%; 
-            max-width: 500px; 
+            max-width: 380px; 
             /* Bayang-bayang besar tapi lembut (diffused shadow) */
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(226, 232, 240, 0.5); 
             text-align: center;
@@ -1048,7 +1041,7 @@ th {
             <input type="password" id="password" class="login-input" placeholder="Password">
             <button class="btn-login" onclick="handleLogin()">SIGN IN</button>
             <p id="login-error" style="color: var(--error-red); font-size: 13px; display: none; margin-top: 15px; font-weight: 500;">Invalid User ID or Password!</p>
-            <div style="margin-top: 30px; padding-top: 20px; font-size: 9px; color: var(--text-muted); border-top: 1px solid var(--border-color); letter-spacing: 0.5px; text-align: center;">
+            <div style="margin-top: 30px; padding-top: 20px; font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--border-color); letter-spacing: 0.5px; text-align: center;">
                 Copyright &copy; <span id="auto-year"></span> <span style="color: var(--text-main); font-weight: 600;">System Findings v3.0</span>. All Rights Reserved.
             </div>
         </div>
@@ -1364,7 +1357,7 @@ th {
     </div>
 
 <!-- BUNGKUS DENGAN ID INI -->
-<div id="main-footer" style="display: none; text-align: center; padding: 25px 10px 15px 10px; margin-top: 30px; font-size: 9px; color: var(--text-muted); border-top: 1px dashed var(--border-color); letter-spacing: 0.5px;">
+<div id="main-footer" style="display: none; text-align: center; padding: 25px 10px 15px 10px; margin-top: 30px; font-size: 11px; color: var(--text-muted); border-top: 1px dashed var(--border-color); letter-spacing: 0.5px;">
     Copyright &copy; <span id="auto-year"></span> <span style="color: #2196f3; font-weight: bold;">System Findings v3.0</span>. All Rights Reserved.
 </div>
 
@@ -1819,7 +1812,6 @@ window.requestBatchName = function() {
                     document.getElementById('login-error').style.display = 'none';
                     document.getElementById('login-section').style.display = 'none';
                     document.getElementById('dashboard-section').style.display = 'block';
-                    document.getElementById('main-footer').style.display = 'block';
                     document.getElementById('display-username').innerText = "Welcome: " + user.toUpperCase();
 
             let repToText = data.report_to ? data.report_to.toUpperCase() : 'N/A';
@@ -2088,23 +2080,15 @@ function rebuildGeoMapFromData() {
                     matchZone = myZones.includes(z);
                 }
 
-// Check Manager filter
-let matchManager = true;
-if (currentManager && currentManager !== 'ALL') {
-    if (currentUser.role === 'manager') {
-        // Abaikan semakan hierarki (report_to) jika yang login adalah Manager.
-        // Asalkan matchZone = true, Manager akan nampak semua data dalam zonnya.
-        matchManager = true;
-    } else {
-        // Kekalkan semakan hierarki ini untuk kegunaan Super Admin
-        // apabila Super Admin menggunakan butang 'filter by Manager'.
-        let adminObj = allSystemUsers.find(u => u.id.toUpperCase().trim() === adminOwner);
-        let repTo = adminObj && adminObj.report_to ? adminObj.report_to.toUpperCase().trim() : '';
-        if (adminOwner !== currentManager && repTo !== currentManager) {
-            matchManager = false;
-        }
-    }
-}
+                // Check Manager filter
+                let matchManager = true;
+                if (currentManager && currentManager !== 'ALL') {
+                    let adminObj = allSystemUsers.find(u => u.id.toUpperCase().trim() === adminOwner);
+                    let repTo = adminObj && adminObj.report_to ? adminObj.report_to.toUpperCase().trim() : '';
+                    if (adminOwner !== currentManager && repTo !== currentManager) {
+                        matchManager = false;
+                    }
+                }
 
                 let matchAdmin = (currentAdmin && currentAdmin !== 'ALL') ? adminOwner === currentAdmin : true;
                 let matchPic = (currentPic && currentPic !== 'ALL') ? picUser === currentPic : true;
