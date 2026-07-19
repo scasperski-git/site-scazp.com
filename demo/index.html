@@ -1683,7 +1683,7 @@ async function checkLoginSession() {
 
         dashboardSection.style.display = 'block';
         loginSection.style.display = 'none';
-        document.getElementById('display-username').innerText = ": " + currentUser.id.toUpperCase();
+        document.getElementById('display-username').innerText = "Welcome: " + currentUser.id.toUpperCase();
 
     let repToText = currentUser.report_to ? currentUser.report_to.toUpperCase() : 'N/A';
         if(currentUser.role === 'super') {
@@ -1825,7 +1825,7 @@ window.requestBatchName = function() {
                     document.getElementById('login-error').style.display = 'none';
                     document.getElementById('login-section').style.display = 'none';
                     document.getElementById('dashboard-section').style.display = 'block';
-                    document.getElementById('display-username').innerText = "Logged as: " + user.toUpperCase();
+                    document.getElementById('display-username').innerText = "Welcome: " + user.toUpperCase();
 
             let repToText = data.report_to ? data.report_to.toUpperCase() : 'N/A';
                     if(data.role === 'super') {
