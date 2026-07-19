@@ -4,21 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SCAZP | Personal Site</title>
-  <meta name="description" content="Personal portfolio of SCAZP - Aspiring Developer &amp; Tech Enthusiast">
+  <meta name="description" content="Personal portfolio of SCAZP - Aspiring Developer & Tech Enthusiast">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Theme Colors */
-      --bg: #09090b;
-      --panel: rgba(24, 24, 27, 0.75);
+      /* Tech Premium Colors - No Gold */
+      --bg-dark: #050508;
+      --panel: rgba(15, 15, 20, 0.45);
       --panel-border: rgba(255, 255, 255, 0.08);
       --text: #e5e7eb;
-      --muted: #a1a1aa;
-      --accent: #d4af37;
-      --accent-glow: rgba(212, 175, 55, 0.35);
-      --success: #22c55e;
+      --muted: #9ca3af;
+      --accent: #00ff88; /* Neon Green */
+      --accent-glow: rgba(0, 255, 136, 0.35);
+      --glass-blur: blur(16px);
     }
 
     * {
@@ -29,15 +29,61 @@
 
     body {
       font-family: 'Inter', system-ui, sans-serif;
-      background-color: var(--bg);
-      background-image: 
-        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-      background-size: 40px 40px;
+      /* Space Background with dark overlay for readability */
+      background: linear-gradient(to bottom, rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.95)), 
+                  url('https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=3000&auto=format&fit=crop') no-repeat center center fixed;
+      background-size: cover;
       color: var(--text);
       line-height: 1.6;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== SHOOTING STARS ANIMATION ===== */
+    .stars-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .shooting-star {
+      position: absolute;
+      width: 150px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(255,255,255,0), var(--accent));
+      transform: rotate(-45deg);
+      animation: shooting 4s ease-in-out infinite;
+      opacity: 0;
+    }
+
+    .shooting-star::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 4px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 15px 3px var(--accent);
+    }
+
+    /* Randomizing star positions and delays */
+    .star-1 { top: 10%; left: 30%; animation-delay: 0s; }
+    .star-2 { top: 25%; left: 70%; animation-delay: 2.5s; animation-duration: 5s; }
+    .star-3 { top: 5%; left: 85%; animation-delay: 4s; animation-duration: 3.5s;}
+    .star-4 { top: 40%; left: 20%; animation-delay: 7s; }
+
+    @keyframes shooting {
+      0% { transform: translateX(100px) translateY(-100px) rotate(-45deg); opacity: 1; }
+      20% { transform: translateX(-600px) translateY(600px) rotate(-45deg); opacity: 0; }
+      100% { transform: translateX(-600px) translateY(600px) rotate(-45deg); opacity: 0; }
     }
 
     /* ===== NAVBAR ===== */
@@ -45,8 +91,9 @@
       position: sticky;
       top: 0;
       z-index: 1000;
-      background: rgba(9, 9, 11, 0.92);
-      backdrop-filter: blur(16px);
+      background: rgba(5, 5, 8, 0.6);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
       border-bottom: 1px solid var(--panel-border);
     }
 
@@ -82,9 +129,10 @@
       height: 100%;
       object-fit: cover;
       border-radius: 50%;
-      border: 2px solid rgba(212, 175, 55, 0.3);
-      box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+      border: 2px solid rgba(0, 255, 136, 0.3);
+      box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
       z-index: 2;
+      background: #111;
     }
 
     .moving-line {
@@ -120,11 +168,12 @@
       color: var(--text);
       text-decoration: none;
       font-weight: 500;
-      transition: color 0.3s ease;
+      transition: color 0.3s ease, text-shadow 0.3s ease;
     }
 
     .nav-links a:hover {
       color: var(--accent);
+      text-shadow: 0 0 10px var(--accent-glow);
     }
 
     .hamburger {
@@ -140,6 +189,7 @@
       height: 3px;
       background: var(--accent);
       transition: all 0.3s ease;
+      box-shadow: 0 0 8px var(--accent-glow);
     }
 
     /* ===== HERO ===== */
@@ -151,23 +201,11 @@
       text-align: center;
       padding: 0 20px;
       position: relative;
-      overflow: hidden;
-    }
-
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at center, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
-      pointer-events: none;
+      z-index: 2;
     }
 
     .hero-content {
       max-width: 780px;
-      z-index: 2;
     }
 
     .tag {
@@ -187,6 +225,7 @@
       background: var(--accent);
       vertical-align: middle;
       animation: blink 0.8s step-end infinite;
+      box-shadow: 0 0 10px var(--accent-glow);
     }
 
     @keyframes blink {
@@ -202,15 +241,15 @@
     }
 
     .gradient-text {
-      background: linear-gradient(90deg, #bf953f, #fcf6ba, #f0d070, #b38728);
-      background-size: 300% auto;
+      background: linear-gradient(90deg, #00ff88, #00c3ff, #00ff88);
+      background-size: 200% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      animation: shine 5s linear infinite;
+      animation: shine 4s linear infinite;
     }
 
     @keyframes shine {
-      to { background-position: 300% center; }
+      to { background-position: 200% center; }
     }
 
     .subtitle {
@@ -229,7 +268,7 @@
 
     .btn {
       padding: 14px 32px;
-      border-radius: 9999px;
+      border-radius: 8px; /* Sharper corners for tech look */
       font-weight: 600;
       text-decoration: none;
       display: inline-flex;
@@ -237,25 +276,31 @@
       gap: 10px;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       font-size: 1.05rem;
+      font-family: 'Fira Code', monospace;
     }
 
     .btn-primary {
       background: var(--accent);
-      color: #111;
+      color: #050508;
+      box-shadow: 0 0 15px var(--accent-glow);
     }
 
     .btn-primary:hover {
       transform: translateY(-4px);
-      box-shadow: 0 10px 30px var(--accent-glow);
+      box-shadow: 0 10px 30px rgba(0, 255, 136, 0.5);
     }
 
     .btn-outline {
-      border: 2px solid var(--accent);
-      color: var(--accent);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(5px);
     }
 
     .btn-outline:hover {
-      background: rgba(212, 175, 55, 0.1);
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0, 255, 136, 0.05);
       transform: translateY(-4px);
     }
 
@@ -267,6 +312,8 @@
       display: flex;
       flex-direction: column;
       gap: 100px;
+      position: relative;
+      z-index: 2;
     }
 
     .section-header {
@@ -278,6 +325,7 @@
       font-size: clamp(2rem, 5vw, 2.8rem);
       margin-bottom: 12px;
       color: #fff;
+      font-family: 'Fira Code', monospace;
     }
 
     .section-header p {
@@ -291,21 +339,23 @@
       border: 1px solid var(--panel-border);
       border-radius: 16px;
       padding: 40px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .card-section:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 20px 50px rgba(212, 175, 55, 0.15);
-      border-color: rgba(212, 175, 55, 0.25);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 255, 136, 0.1);
+      border-color: rgba(0, 255, 136, 0.2);
     }
 
     /* About */
     .about-text {
       font-size: 1.15rem;
       line-height: 1.75;
+      color: #cbd5e1;
     }
 
     .about-strong {
@@ -313,7 +363,7 @@
       font-weight: 700;
       font-size: 1.35rem;
       margin-bottom: 16px;
-      color: #fff;
+      color: var(--accent);
     }
 
     /* Skills */
@@ -324,7 +374,7 @@
     }
 
     .skill-card {
-      background: rgba(255,255,255,0.03);
+      background: rgba(255,255,255,0.02);
       border: 1px solid var(--panel-border);
       padding: 24px;
       border-radius: 12px;
@@ -333,14 +383,16 @@
 
     .skill-card:hover {
       border-color: var(--accent);
-      background: rgba(212, 175, 55, 0.06);
-      transform: scale(1.03);
+      background: rgba(0, 255, 136, 0.05);
+      transform: scale(1.02);
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
     }
 
     .skill-name {
+      font-family: 'Fira Code', monospace;
       font-weight: 600;
       margin-bottom: 12px;
-      color: var(--accent);
+      color: #fff;
       font-size: 1.1rem;
     }
 
@@ -352,7 +404,7 @@
     }
 
     .project-card {
-      background: rgba(255,255,255,0.03);
+      background: rgba(255,255,255,0.02);
       border-radius: 12px;
       overflow: hidden;
       border: 1px solid var(--panel-border);
@@ -360,19 +412,19 @@
     }
 
     .project-card:hover {
-      transform: translateY(-12px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
       border-color: var(--accent);
     }
 
     .project-img {
       height: 180px;
-      background: linear-gradient(135deg, #1f2937, #334155);
+      background: linear-gradient(135deg, #0f172a, #1e293b);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 3rem;
-      color: #64748b;
+      border-bottom: 1px solid var(--panel-border);
     }
 
     .project-info {
@@ -381,6 +433,12 @@
 
     .project-info h3 {
       margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .project-info p {
+      color: var(--muted);
+      font-size: 0.95rem;
     }
 
     .project-tags {
@@ -391,12 +449,13 @@
     }
 
     .tag-pill {
-      background: rgba(212, 175, 55, 0.15);
+      background: rgba(0, 255, 136, 0.1);
       color: var(--accent);
       font-size: 0.8rem;
-      padding: 3px 12px;
-      border-radius: 9999px;
+      padding: 4px 12px;
+      border-radius: 4px;
       font-family: 'Fira Code', monospace;
+      border: 1px solid rgba(0, 255, 136, 0.2);
     }
 
     /* Contact */
@@ -404,38 +463,43 @@
       max-width: 520px;
       margin: 0 auto;
       text-align: center;
-      background: rgba(255,255,255,0.025);
+      background: rgba(255,255,255,0.02);
       padding: 48px 32px;
       border-radius: 16px;
       border: 1px solid var(--panel-border);
     }
 
     .email {
-      font-size: 1.35rem;
+      font-size: 1.2rem;
       font-family: 'Fira Code', monospace;
       color: var(--accent);
       text-decoration: none;
       padding: 12px 28px;
-      border: 2px solid var(--accent);
-      border-radius: 9999px;
+      border: 1px solid var(--accent);
+      border-radius: 8px;
       display: inline-block;
       margin-top: 20px;
       transition: all 0.3s;
+      background: rgba(0, 255, 136, 0.05);
     }
 
     .email:hover {
       background: var(--accent);
-      color: #111;
+      color: #050508;
       box-shadow: 0 0 25px var(--accent-glow);
     }
 
     /* Footer */
     footer {
+      position: relative;
+      z-index: 2;
       text-align: center;
       padding: 60px 20px 40px;
       color: var(--muted);
       font-size: 0.9rem;
       border-top: 1px solid var(--panel-border);
+      background: rgba(5, 5, 8, 0.8);
+      backdrop-filter: blur(10px);
     }
 
     .social-links {
@@ -448,12 +512,14 @@
     .social-links a {
       color: var(--muted);
       font-size: 1.5rem;
+      text-decoration: none;
       transition: all 0.3s;
     }
 
     .social-links a:hover {
       color: var(--accent);
       transform: translateY(-3px);
+      text-shadow: 0 0 10px var(--accent-glow);
     }
 
     /* ===== MOBILE ===== */
@@ -463,14 +529,15 @@
         top: 70px;
         left: 0;
         right: 0;
-        background: var(--bg);
+        background: rgba(5, 5, 8, 0.95);
+        backdrop-filter: blur(15px);
         flex-direction: column;
         padding: 30px;
         gap: 24px;
         text-align: center;
-        transform: translateY(-120%);
+        transform: translateY(-150%);
         transition: transform 0.4s ease;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        border-bottom: 1px solid var(--panel-border);
       }
 
       .nav-links.active {
@@ -516,6 +583,14 @@
 </head>
 <body>
 
+  <!-- Shooting Stars Background -->
+  <div class="stars-container">
+    <div class="shooting-star star-1"></div>
+    <div class="shooting-star star-2"></div>
+    <div class="shooting-star star-3"></div>
+    <div class="shooting-star star-4"></div>
+  </div>
+
   <!-- NAVBAR -->
   <header class="navbar">
     <div class="nav-container">
@@ -523,12 +598,11 @@
         <div class="logo-wrapper">
           <img src="logo.png" alt="SCAZP Logo" class="logo-img" onerror="this.style.display='none'">
           <svg class="moving-line" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="46" stroke="url(#gold-gradient)" stroke-width="3" fill="none" stroke-dasharray="120 180"/>
+            <circle cx="50" cy="50" r="46" stroke="url(#neon-gradient)" stroke-width="2" fill="none" stroke-dasharray="120 180"/>
             <defs>
-              <linearGradient id="gold-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#bf953f"/>
-                <stop offset="50%" stop-color="#fcf6ba"/>
-                <stop offset="100%" stop-color="#b38728"/>
+              <linearGradient id="neon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#00ff88"/>
+                <stop offset="100%" stop-color="#00c3ff"/>
               </linearGradient>
             </defs>
           </svg>
@@ -575,6 +649,7 @@
       <div class="about-text">
         <span class="about-strong">Built to learn 📚 • Built to grow 🌱</span>
         <p>Turning curiosity into production-ready code, one commit at a time. Passionate about clean architecture, modern web technologies, and creating delightful user interfaces.</p>
+        <br>
         <p>Currently exploring full-stack development, automation with Google Apps Script, and building tools that make life easier.</p>
       </div>
     </section>
