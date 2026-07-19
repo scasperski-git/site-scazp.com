@@ -1503,7 +1503,8 @@ th {
 <textarea id="single-remark-box" class="form-control" rows="4" 
           placeholder="Taip nota pemerhatian di sini... (Maksimum 200 huruf)"
           style="font-size: 12px; resize: none; line-height: 1.6;"
-          oninput="updateTextareaInfo(this)" maxlength="200"></textarea>
+          oninput="updateTextareaInfo(this)" maxlength="200"
+          autocorrect="on" spellcheck="true"></textarea>
                     </div>
 
                     <div style="display: flex; gap: 12px;">
@@ -3866,11 +3867,10 @@ let wText = (line1 + line2).repeat(50);
         };
         
 window.updateTextareaInfo = function(el) {
-            el.value = el.value.toUpperCase(); 
-            if (el.value.length > 200) { el.value = el.value.substring(0, 200); }
-            // Letak balik perkataan Jumlah Karakter
-            document.getElementById('textarea-info').innerText = `Jumlah Karakter: ${el.value.length}/200`;
-        };
+    // Kira karakter sahaja, jangan kacau value/typing flow
+    if (el.value.length > 200) { el.value = el.value.substring(0, 200); }
+    document.getElementById('textarea-info').innerText = `Jumlah Karakter: ${el.value.length}/200`;
+};
         
         window.closeModal = function() { 
             document.getElementById('updateModal').style.display = 'none'; 
@@ -3883,7 +3883,7 @@ window.saveFinding = async function() {
     let selectedStatus = document.getElementById('finding-status-select').value;
     let accNo = document.getElementById('modalAccNo').innerText;
     
-    // TUKAR DI SINI: Tukar kepada huruf besar SELEPAS user tekan COMMIT ENTRY
+    // [FIX]: TUKAR KEPADA UPPERCASE HANYA BILA TEKAN BUTTON SAVE
     let fullStory = document.getElementById('single-remark-box').value.trim().toUpperCase();
     
     if(!selectedStatus) {
@@ -3891,7 +3891,7 @@ window.saveFinding = async function() {
         document.getElementById('finding-status-select').focus();
         return;
     }
-
+    
     if(!fullStory) { 
         alert("Sila isi nota pemeriksaan terlebih dahulu."); 
         return; 
