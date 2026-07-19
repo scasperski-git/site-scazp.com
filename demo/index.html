@@ -4264,19 +4264,26 @@ window.executeBatchAssignment = async function() {
             try {
                 let cleanTargetUser = targetUser.toLowerCase().trim();
                 
-                const { error } = await supabase.from('accounts').update({ assignee_id: cleanTargetUser }).in('acct', selectedAccts);
-                if(error) throw error;
+                const { error: accErr } = await supabase.from('accounts').update({ assignee_id: cleanTargetUser }).in('acct', selectedAccts);
+                if(accErr) throw accErr;
 
-                // [FIX MIS REMARK]: Hasilkan log untuk SETIAP akaun yang di-tick
-                let auditData = selectedAccts.map(accNo => ({
-                    acct: accNo,
-                    audit_remark: `ASSIGNED TO ${cleanTargetUser.toUpperCase()} BY ${currentUser.username.toUpperCase()}`,
-                    status: 'SYSTEM LOG',
-                    updated_by: currentUser.username
-                }));
+                // [FIX PANGKALAN DATA]: Hasilkan log halimunan tanpa memanggil column 'status' yang tak wujud
+                let auditData = selectedAccts.map(accNo => {
+                    let accObj = globalAccounts.find(a => a.acct === accNo) || {};
+                    return {
+                        acct: accNo,
+                        audit_remark: `ASSIGNED TO ${cleanTargetUser.toUpperCase()} BY ${currentUser.username.toUpperCase()}`,
+                        type: accObj.type || '',
+                        loc: accObj.loc || '',
+                        region: accObj.region || '',
+                        updated_by: currentUser.username,
+                        updated_at: new Date().toISOString() // WAJIB ADA SUPAYA SUSUNAN MASA JADI BETUL
+                    };
+                });
 
-                // Hantar rekod pukal ke table findings
-                await supabase.from('findings').insert(auditData);
+                // Hantar rekod pukal ke table findings & TANGKAP error jika Supabase reject
+                const { error: auditErr } = await supabase.from('findings').insert(auditData);
+                if (auditErr) throw auditErr;
 
                 selectedAccts.forEach(acct => {
                     let accObj = globalAccounts.find(a => a.acct === acct);
@@ -4287,6 +4294,7 @@ window.executeBatchAssignment = async function() {
                 renderAssignTable(); 
 
             } catch (err) {
+                // Sekarang kalau ada error dari Supabase, dia akan keluar notification merah
                 showNotification("ERROR", err.message, true);
             } finally {
                 document.getElementById('loadingModal').style.display = 'none';
