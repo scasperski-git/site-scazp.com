@@ -2871,11 +2871,14 @@ if(error) {
             let startDateStr = thirtyDaysAgo.toISOString().split('T')[0] + 'T00:00:00+08:00';
 
             try {
+// [FIX EXPORT]: Tapis keluar rekod yang ada audit_remark (System Logs)
                 const { data, error } = await supabase
                     .from('findings')
-                    .select('updated_at, is_exported')
-                    .gte('updated_at', startDateStr)
-                    .neq('acct', 'SYSTEM'); 
+                    .select('id, acct, remark1, remark2, remark3, remark4, remark5, region, is_exported, audit_remark')
+                    .gte('updated_at', startOfDay)
+                    .lte('updated_at', endOfDay)
+                    .neq('acct', 'SYSTEM')
+                    .is('audit_remark', null); // <-- BARIS INI: Hanya tarik rekod yang tiada audit_remark
                 
                 if (error) throw error;
 
