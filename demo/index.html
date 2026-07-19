@@ -3821,6 +3821,7 @@ let wText = (line1 + line2).repeat(50);
                         histRemark = `<div style="font-size: 11px; line-height: 1.5; margin-top: 8px; color: var(--text-main); font-weight: normal; text-align: justify;">${data.remark || ''}</div>`;
                     }
 
+                    // [FIX]: Hanya panggil SATU kali sahaja di sini untuk elakkan duplikasi paparan log
                     historyBox.innerHTML += `
                         <div class="history-item" style="overflow: hidden; padding: 12px; margin-bottom: 12px; background-color: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
                             <div class="history-meta" style="font-weight: 600; font-size: 11px; color: var(--text-muted);">
@@ -3831,8 +3832,6 @@ let wText = (line1 + line2).repeat(50);
                         </div>`;
                 });
             }
-            //setTimeout(() => document.getElementById('single-remark-box').focus(), 100); //auto cursor masuk area textbox log
-        };
         
         window.navigateModal = function(direction) {
             if (currentModalIndex === -1) return;
