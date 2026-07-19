@@ -3816,13 +3816,20 @@ let wText = (line1 + line2).repeat(50);
                     } else if(data.remark1 || data.remark2 || data.remark3 || data.remark4) {
                         // Gabung remark1, 2, 3, 4 dengan jarak ruang (space)
                         let combinedStr = [data.remark1, data.remark2, data.remark3, data.remark4].filter(Boolean).join(' ');
-                        
-                        // Letak text-align: justify supaya kiri kanan sama rata cantik
                         histRemark = `<div style="font-size: 11px; line-height: 1.5; margin-top: 8px; color: var(--text-main); font-weight: normal; text-align: justify;">${combinedStr}</div>`;
                     } else {
                         histRemark = `<div style="font-size: 11px; line-height: 1.5; margin-top: 8px; color: var(--text-main); font-weight: normal; text-align: justify;">${data.remark || ''}</div>`;
                     }
 
+                    historyBox.innerHTML += `
+                        <div class="history-item" style="overflow: hidden; padding: 12px; margin-bottom: 12px; background-color: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+                            <div class="history-meta" style="font-weight: 600; font-size: 11px; color: var(--text-muted);">
+                                UPDATE BY: ${data.updated_by ? data.updated_by.toUpperCase() : 'SYSTEM'} | ${dateFormatted}${statusBadgeHTML}
+                                ${deleteBtnHTML}
+                            </div>
+                            ${histRemark}
+                        </div>`;
+                    
                     historyBox.innerHTML += `
                         <div class="history-item" style="overflow: hidden; padding: 12px; margin-bottom: 12px; background-color: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
                             <div class="history-meta" style="font-weight: 600; font-size: 11px; color: var(--text-muted);">
@@ -4262,7 +4269,7 @@ window.executeBatchAssignment = async function() {
             document.getElementById('loadingText').innerText = "Mengagihkan akaun ke pelayan (server)...";
             document.getElementById('loadingModal').style.display = 'flex';
 
-try {
+            try {
                 let cleanTargetUser = targetUser.toLowerCase().trim();
                 
                 const { error } = await supabase.from('accounts').update({ assignee_id: cleanTargetUser }).in('acct', selectedAccts);
@@ -4292,6 +4299,7 @@ try {
             } finally {
                 document.getElementById('loadingModal').style.display = 'none';
             }
+        };
 
         // --- KOD BARU: FUNGSI UTK COPY ACCT NO ---
 window.copyToClipboard = function(text, btnElement) {
