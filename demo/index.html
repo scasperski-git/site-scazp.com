@@ -4449,6 +4449,16 @@ window.goToAssignPage = function(p) {
     currentAssignPage = p;
     renderAssignTable();
 };
+
+        // Auto-Uppercase untuk User ID masa Login
+document.getElementById('username').addEventListener('input', function(e) {
+    this.value = this.value.toUpperCase();
+});
+
+// Auto-Uppercase untuk User ID masa Add New User di Settings
+document.getElementById('new-user-id').addEventListener('input', function(e) {
+    this.value = this.value.toUpperCase();
+});
         
     </script>
 </body>
