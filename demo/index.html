@@ -2088,15 +2088,23 @@ function rebuildGeoMapFromData() {
                     matchZone = myZones.includes(z);
                 }
 
-                // Check Manager filter
-                let matchManager = true;
-                if (currentManager && currentManager !== 'ALL') {
-                    let adminObj = allSystemUsers.find(u => u.id.toUpperCase().trim() === adminOwner);
-                    let repTo = adminObj && adminObj.report_to ? adminObj.report_to.toUpperCase().trim() : '';
-                    if (adminOwner !== currentManager && repTo !== currentManager) {
-                        matchManager = false;
-                    }
-                }
+// Check Manager filter
+let matchManager = true;
+if (currentManager && currentManager !== 'ALL') {
+    if (currentUser.role === 'manager') {
+        // Abaikan semakan hierarki (report_to) jika yang login adalah Manager.
+        // Asalkan matchZone = true, Manager akan nampak semua data dalam zonnya.
+        matchManager = true;
+    } else {
+        // Kekalkan semakan hierarki ini untuk kegunaan Super Admin
+        // apabila Super Admin menggunakan butang 'filter by Manager'.
+        let adminObj = allSystemUsers.find(u => u.id.toUpperCase().trim() === adminOwner);
+        let repTo = adminObj && adminObj.report_to ? adminObj.report_to.toUpperCase().trim() : '';
+        if (adminOwner !== currentManager && repTo !== currentManager) {
+            matchManager = false;
+        }
+    }
+}
 
                 let matchAdmin = (currentAdmin && currentAdmin !== 'ALL') ? adminOwner === currentAdmin : true;
                 let matchPic = (currentPic && currentPic !== 'ALL') ? picUser === currentPic : true;
