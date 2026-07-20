@@ -1744,7 +1744,7 @@ window.requestBatchName = function() {
         zoneSelect.innerHTML = '';
         
         let myZone = null;
-        if (currentUser.role === 'manager' || currentUser.role === 'admin') {
+        if (currentUser.role === 'manager' || currentUser.role === 'admin' || currentUser.role === 'master') {
             myZone = currentUser.assignedzone; // Boleh jadi "BC, WEST"
         }
 
@@ -1941,29 +1941,28 @@ async function fetchFullDatabaseData() {
                     // KOREKSI: Tambah lajur batch_name dan uploaded_by ke dalam select query di bawah
                     let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id, collector, batch_name, uploaded_by, batch_owner');
 
-// [FIX HIERARCHY ACCESS]
-if (currentUser.role === 'user') {
-    let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
-    fetchQuery = fetchQuery.eq('assignee_id', currentUserIdClean);
-} else if (currentUser.role === 'admin') {
-    let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
-    // [KOREKSI LOGIK]: Admin tarik data jika dia pemilik batch (batch_owner) ATAU data diagih kepadanya
-    fetchQuery = fetchQuery.or(`batch_owner.eq.${currentUserIdClean},assignee_id.eq.${currentUserIdClean}`);
-} else if (currentUser.role === 'manager') {
-    let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
-    let safeZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : 'NONE';
-    
-    let zones = safeZone.split(',').map(z => z.trim());
-    let zoneOrs = zones.map(z => `zone.eq.${z}`).join(',');
-    
-    fetchQuery = fetchQuery.or(`batch_owner.eq.${currentUserIdClean},assignee_id.eq.${currentUserIdClean},${zoneOrs}`);
-} else if (currentUser.role === 'master') {
-    let safeZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : 'NONE';
-    let zones = safeZone.split(',').map(z => z.trim());
-    let zoneOrs = zones.map(z => `zone.eq.${z}`).join(',');
-    
-    fetchQuery = fetchQuery.or(`${zoneOrs}`);
-}
+                    // [FIX HIERARCHY ACCESS]
+                    if (currentUser.role === 'user') {
+                        let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
+                        fetchQuery = fetchQuery.eq('assignee_id', currentUserIdClean);
+                    } else if (currentUser.role === 'admin') {
+                        let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
+                        fetchQuery = fetchQuery.or(`batch_owner.eq.${currentUserIdClean},assignee_id.eq.${currentUserIdClean}`);
+                    } else if (currentUser.role === 'manager') {
+                        let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
+                        let safeZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : 'NONE';
+                        
+                        let zones = safeZone.split(',').map(z => z.trim());
+                        let zoneOrs = zones.map(z => `zone.eq.${z}`).join(',');
+                        
+                        fetchQuery = fetchQuery.or(`batch_owner.eq.${currentUserIdClean},assignee_id.eq.${currentUserIdClean},${zoneOrs}`);
+                    } else if (currentUser.role === 'master') {
+                        let safeZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : 'NONE';
+                        let zones = safeZone.split(',').map(z => z.trim());
+                        let zoneOrs = zones.map(z => `zone.eq.${z}`).join(',');
+                        
+                        fetchQuery = fetchQuery.or(`${zoneOrs}`);
+                    }
                     // 'super' fetches everything.
                     
                     const { data, error } = await fetchQuery.range(page * pageSize, (page + 1) * pageSize - 1);
@@ -2000,41 +1999,38 @@ function rebuildGeoMapFromData() {
         }
         
         function initDashboardView() {
-            if (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') {
+            if (currentUser.role === 'super' || currentUser.role === 'master' || currentUser.role === 'manager' || currentUser.role === 'admin') {
                 document.getElementById('master-nav-tabs').style.display = 'flex';
                 document.getElementById('upload-action-container').style.display = 'block';
-document.getElementById('tab-report').style.display = (currentUser.role === 'super' || currentUser.role === 'master') ? 'block' : 'none';
-document.getElementById('tab-settings').style.display = (currentUser.role === 'super' || currentUser.role === 'master') ? 'inline-block' : 'none';
+                document.getElementById('tab-report').style.display = (currentUser.role === 'super' || currentUser.role === 'master') ? 'block' : 'none';
+                document.getElementById('tab-settings').style.display = (currentUser.role === 'super' || currentUser.role === 'master') ? 'inline-block' : 'none';
 
-if(currentUser.role === 'super') {
-    document.getElementById('zone-filters-container').style.display = 'block';
-    renderZoneSelectionUI();
-} else if(currentUser.role === 'master' || currentUser.role === 'manager') {
-    document.getElementById('zone-filters-container').style.display = 'block';
-    
-    let myZones = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(z => z.trim().toUpperCase()) : [];
-    let zoneHtml = `<button class="btn-filter active" onclick="clearZoneSelection(this)">ALL MY ZONES</button>`;
-    myZones.forEach(z => {
-        zoneHtml += `<button class="btn-filter" onclick="applyZoneFilter('${z}', this)">${z}</button>`;
-    });
-    
-    document.getElementById('zone-filters-container').innerHTML = `
-        <span class="filter-title">My Assigned Zone</span>
-        <div class="btn-group" id="zone-buttons">${zoneHtml}</div>
-    `;
-    
-    currentZone = null; 
-    if(currentUser.role === 'master') {
-        // Master nampak senarai Manager
-        document.getElementById('manager-filters-container').style.display = 'block';
-        renderManagerSelectionUI(null);
-    } else {
-        // Manager nampak senarai Admin
-        currentManager = currentUser.id.toUpperCase().trim();
-        document.getElementById('admin-filters-container').style.display = 'block';
-        renderAdminSelectionUI(currentZone, myZones, currentManager); 
-    }
+                if(currentUser.role === 'super') {
+                    document.getElementById('zone-filters-container').style.display = 'block';
+                    renderZoneSelectionUI();
+                } else if(currentUser.role === 'master' || currentUser.role === 'manager') {
+                    document.getElementById('zone-filters-container').style.display = 'block';
                     
+                    let myZones = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(z => z.trim().toUpperCase()) : [];
+                    let zoneHtml = `<button class="btn-filter active" onclick="clearZoneSelection(this)">ALL MY ZONES</button>`;
+                    myZones.forEach(z => {
+                        zoneHtml += `<button class="btn-filter" onclick="applyZoneFilter('${z}', this)">${z}</button>`;
+                    });
+                    
+                    document.getElementById('zone-filters-container').innerHTML = `
+                        <span class="filter-title">My Assigned Zone</span>
+                        <div class="btn-group" id="zone-buttons">${zoneHtml}</div>
+                    `;
+                    
+                    currentZone = null; 
+                    if(currentUser.role === 'master') {
+                        document.getElementById('manager-filters-container').style.display = 'block';
+                        renderManagerSelectionUI(null);
+                    } else {
+                        currentManager = currentUser.id.toUpperCase().trim();
+                        document.getElementById('admin-filters-container').style.display = 'block';
+                        renderAdminSelectionUI(currentZone, myZones, currentManager); 
+                    }
                 } else if(currentUser.role === 'admin') {
                     document.getElementById('pic-filters-container').style.display = 'block';
                     document.getElementById('pic-filters-container').innerHTML = `
@@ -2047,7 +2043,7 @@ if(currentUser.role === 'super') {
 
                 applyFilterAndRender(); 
                 fetchAndRenderUsers();
-                if(currentUser.role === 'super') renderReportCenter(); 
+                if(currentUser.role === 'super' || currentUser.role === 'master') renderReportCenter(); 
                 toggleFormRoleSelect();
             } else {
                 document.getElementById('master-nav-tabs').style.display = 'none';
@@ -2094,7 +2090,7 @@ if(currentUser.role === 'super') {
                 let matchZone = (currentZone && currentZone !== 'ALL') ? z === currentZone : true;
                 
                 // Manager "ALL MY ZONES" override
-                if (!currentZone && currentUser.role === 'manager') {
+                if (!currentZone && (currentUser.role === 'manager' || currentUser.role === 'master')) {
                     let myZones = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(zo => zo.trim().toUpperCase()) : [];
                     matchZone = myZones.includes(z);
                 }
@@ -2168,6 +2164,9 @@ if(currentUser.role === 'super') {
                 let myZones = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(z => z.trim().toUpperCase()) : [];
                 currentManager = currentUser.id.toUpperCase().trim();
                 renderAdminSelectionUI(null, myZones, currentManager);
+            } else if (currentUser.role === 'master') {
+                document.getElementById('manager-filters-container').style.display = 'block';
+                renderManagerSelectionUI(null);
             } else if (currentUser.role === 'super') {
                 document.getElementById('manager-filters-container').style.display = 'block';
                 renderManagerSelectionUI(null);
@@ -2183,7 +2182,7 @@ if(currentUser.role === 'super') {
             document.getElementById('admin-filters-container').style.display = 'none';
             document.getElementById('pic-filters-container').style.display = 'none';
 
-            if (currentUser.role === 'super') {
+            if (currentUser.role === 'super' || currentUser.role === 'master') {
                 document.getElementById('manager-filters-container').style.display = 'block';
                 renderManagerSelectionUI(zone);
             } else if (currentUser.role === 'manager') {
@@ -2366,7 +2365,7 @@ if(currentUser.role === 'super') {
                 return;
             }
 
-            if(currentUser.role === 'super') {
+            if(currentUser.role === 'super' || currentUser.role === 'master') {
                 currentZone = null; currentManager = null; currentAdmin = null; currentPic = null;
                 const mgrContainer = document.getElementById('manager-filters-container');
                 const admContainer = document.getElementById('admin-filters-container');
@@ -2545,9 +2544,9 @@ function renderTablePage() {
         }
 
         window.switchTab = function(target) {
-            if (target === 'settings' && currentUser.role !== 'super') target = 'dashboard';
-            if (target === 'assign' && (currentUser.role !== 'super' && currentUser.role !== 'manager' && currentUser.role !== 'admin')) target = 'dashboard';
-            if (target === 'report' && currentUser.role !== 'super') target = 'dashboard';
+            if (target === 'settings' && (currentUser.role !== 'super' && currentUser.role !== 'master')) target = 'dashboard';
+            if (target === 'assign' && (currentUser.role !== 'super' && currentUser.role !== 'master' && currentUser.role !== 'manager' && currentUser.role !== 'admin')) target = 'dashboard';
+            if (target === 'report' && (currentUser.role !== 'super' && currentUser.role !== 'master')) target = 'dashboard';
 
             document.querySelectorAll('.main-panel').forEach(p => p.style.display = 'none');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -2641,14 +2640,14 @@ window.renderUserTablePage = async function() {
             });
             let reportSelect = `<select id="edit-report-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; max-width:110px;">${reportToOptions}</select>`;
 
-            // --- SISTEM CHECKBOX ZON UNTUK MANAGER & ADMIN ---
+            // --- SISTEM CHECKBOX ZON UNTUK MANAGER, MASTER & ADMIN ---
             let userZones = user.assignedzone ? user.assignedzone.split(',').map(z => z.trim()) : [];
             let zoneCheckboxes = '';
             ['BC', 'WEST', 'EAST', 'HO'].forEach(z => {
                 let isChecked = userZones.includes(z) ? 'checked' : '';
                 zoneCheckboxes += `<label style="margin-right:8px; white-space:nowrap; font-weight:bold; color:var(--accent-gold);"><input type="checkbox" value="${z}" class="edit-chk-zone-${user.id}" ${isChecked}> ${z}</label>`;
             });
-            let zoneSelect = `<div id="edit-zone-${user.id}" style="font-size:10px; display: ${(rName === 'manager' || rName === 'admin') ? 'flex' : 'none'}; flex-wrap:wrap; max-width:150px;">${zoneCheckboxes}</div>`;
+            let zoneSelect = `<div id="edit-zone-${user.id}" style="font-size:10px; display: ${(rName === 'master' || rName === 'manager' || rName === 'admin') ? 'flex' : 'none'}; flex-wrap:wrap; max-width:150px;">${zoneCheckboxes}</div>`;
             
             // Kapsul fallback jika User/Super
             let noneText = `<span id="edit-none-${user.id}" style="font-size: 11px; color: var(--text-muted); display: ${(rName === 'user' || rName === 'super') ? 'inline-block' : 'none'};">N/A (Global/PIC)</span>`;
@@ -2680,7 +2679,7 @@ window.renderUserTablePage = async function() {
 
 window.toggleInlineAccessSelect = function(userId) {
     let role = document.getElementById(`edit-role-${userId}`).value;
-    document.getElementById(`edit-zone-${userId}`).style.display = (role === 'manager' || role === 'admin') ? 'flex' : 'none';
+    document.getElementById(`edit-zone-${userId}`).style.display = (role === 'master' || role === 'manager' || role === 'admin') ? 'flex' : 'none';
     document.getElementById(`edit-none-${userId}`).style.display = (role === 'user' || role === 'super') ? 'inline-block' : 'none';
 }
 
@@ -2689,7 +2688,6 @@ window.updateUserInline = async function(userId) {
     let newRole = document.getElementById(`edit-role-${userId}`).value;
     let newReportTo = document.getElementById(`edit-report-${userId}`).value;
     
-    // [FIX CSS SELECTOR]: Guna kaedah ini supaya tak error kalau ID ada simbol
     let checkedBoxes = Array.from(document.querySelectorAll(`input[class="edit-chk-zone-${userId}"]:checked`));
     let newZone = checkedBoxes.length > 0 ? checkedBoxes.map(cb => cb.value).join(', ') : null;
     if (newReportTo === "") newReportTo = null;
@@ -2725,7 +2723,7 @@ window.updateUserInline = async function(userId) {
     if (!isVerified) return;
 
     const { error } = await supabase.from('users').update({ 
-        role: newRole, report_to: newReportTo, assignedzone: (newRole === 'manager' || newRole === 'admin') ? newZone : null, assignedarea: currentArea 
+        role: newRole, report_to: newReportTo, assignedzone: (newRole === 'master' || newRole === 'manager' || newRole === 'admin') ? newZone : null, assignedarea: currentArea 
     }).eq('id', userId);
 
     if (!error) { 
@@ -2748,8 +2746,8 @@ window.openTransferWizard = function(userId, newRole, newReportTo, newZone, curr
     let dropdown = document.getElementById('tw-replacement');
     dropdown.innerHTML = '<option value="">-- PILIH PENGGANTI --</option>';
     
-    // Tapis senarai pengganti (Hanya Manager & Admin yang aktif dan bukan diri dia sendiri)
-    let targets = allSystemUsers.filter(u => u.status === 'ACTIVE' && (u.role === 'manager' || u.role === 'admin') && u.id !== userId);
+    // Tapis senarai pengganti (Hanya Master, Manager & Admin yang aktif dan bukan diri dia sendiri)
+    let targets = allSystemUsers.filter(u => u.status === 'ACTIVE' && (u.role === 'master' || u.role === 'manager' || u.role === 'admin') && u.id !== userId);
     targets.forEach(u => {
         dropdown.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()} - ${u.assignedzone || 'TIADA'})</option>`;
     });
@@ -2760,13 +2758,10 @@ document.getElementById('btn-tw-confirm').onclick = async function() {
         let replacement = dropdown.value;
         if (!replacement) { alert("Sila pilih pengganti dari senarai terlebih dahulu!"); return; }
 
-        // [FIX DI SINI]: Tutup modal wizard awal-awal supaya ia tidak menghalang Passcode Prompt
         document.getElementById('transferWizardModal').style.display = 'none';
 
         let isVerified = await verifyAdminPasscode();
         if (!isVerified) {
-            // Jika tersalah masuk password atau batal, fungsi terhenti.
-            // (User hanya perlu tekan butang SAVE semula di profil)
             return; 
         }
 
@@ -2784,7 +2779,7 @@ document.getElementById('btn-tw-confirm').onclick = async function() {
                 }]);
             }
 
-            // --- [FIX BARU]: Transfer pegangan individu (assignee_id) di zon yang ditinggalkan ---
+            // Transfer pegangan individu (assignee_id) di zon yang ditinggalkan
             await supabase.from('accounts')
                 .update({ assignee_id: replacement })
                 .eq('assignee_id', userId)
@@ -2798,7 +2793,7 @@ document.getElementById('btn-tw-confirm').onclick = async function() {
 
             // 3. Akhir sekali, kemas kini profil bos asal
             const { error: userErr } = await supabase.from('users').update({ 
-                role: newRole, report_to: newReportTo, assignedzone: (newRole === 'manager' || newRole === 'admin') ? newZone : null, assignedarea: currentArea
+                role: newRole, report_to: newReportTo, assignedzone: (newRole === 'master' || newRole === 'manager' || newRole === 'admin') ? newZone : null, assignedarea: currentArea
             }).eq('id', userId);
             if (userErr) throw userErr;
 
@@ -2860,8 +2855,8 @@ window.toggleFormRoleSelect = async function() {
         reportSelect.innerHTML = '<option value="">Loading Supervisor List...</option>';
         
         let allowedRoles = role === 'user' ? ['admin', 'manager', 'master', 'super'] : 
-                   (role === 'admin' ? ['manager', 'master', 'super'] : 
-                   (role === 'manager' ? ['master', 'super'] : ['super']));
+                           (role === 'admin' ? ['manager', 'master', 'super'] : 
+                           (role === 'manager' ? ['master', 'super'] : ['super']));
         
         try {
             const { data, error } = await supabase.from('users').select('id, role').in('role', allowedRoles).eq('status', 'ACTIVE');
@@ -2918,7 +2913,7 @@ window.addNewUser = async function() {
                 }
 
             let checkedZones = Array.from(document.querySelectorAll('.chk-zone-new:checked')).map(cb => cb.value);
-            let finalZone = (role === 'manager' || role === 'admin') ? (checkedZones.length > 0 ? checkedZones.join(', ') : null) : null;
+            let finalZone = (role === 'master' || role === 'manager' || role === 'admin') ? (checkedZones.length > 0 ? checkedZones.join(', ') : null) : null;
             let finalArea = null;
 
                 const { error } = await supabase.from('users').insert([{ 
@@ -3065,11 +3060,9 @@ window.exportDataByDate = async function(dateStr) {
             document.getElementById('loadingModal').style.display = 'flex';
 
             try {
-                // [FIX TIMEZONE]: Tukar tarikh input kepada julat permulaan dan penghujung ISO UTC yang tepat
                 let startOfDay = new Date(`${dateStr}T00:00:00`).toISOString();
                 let endOfDay = new Date(`${dateStr}T23:59:59.999`).toISOString();
 
-                // Tarik data findings dari Supabase
                 const { data, error } = await supabase
                     .from('findings')
                     .select('id, acct, remark1, remark2, remark3, remark4, remark5, region, is_exported')
@@ -3079,14 +3072,12 @@ window.exportDataByDate = async function(dateStr) {
 
                 if (error) throw error;
                 
-                // Semak jika tiada langsung rekod untuk tarikh tersebut
                 if (!data || data.length === 0) {
                     showNotification("NO RECORDS", `Tiada sebarang log penemuan (findings) ditemui pada tarikh ${dateStr}.`, true);
                     document.getElementById('loadingModal').style.display = 'none';
                     return;
                 }
 
-                // Tapis hanya rekod yang belum dieksport sahaja
                 let pendingRows = data.filter(row => row.is_exported === false || row.is_exported === null);
 
                 if (pendingRows.length === 0) {
@@ -3102,7 +3093,6 @@ window.exportDataByDate = async function(dateStr) {
                     let reg = row.region ? row.region.toUpperCase().trim() : 'UNKNOWN';
                     if (!groupedData[reg]) groupedData[reg] = [];
                     
-                    // Mengekalkan susunan asal kau: REMARK5 di kedudukan atas sekali sebelum REMARK1
                     groupedData[reg].push({
                         "ACCT": row.acct,
                         "REMARK1": row.remark5 || '',
@@ -3117,7 +3107,6 @@ window.exportDataByDate = async function(dateStr) {
 
                 let formattedDate = dateStr.replace(/-/g, ''); 
                 
-                // Jana fail Excel mengikut Wilayah (Region)
                 Object.keys(groupedData).forEach(reg => {
                     const ws = XLSX.utils.json_to_sheet(groupedData[reg]);
                     const wb = XLSX.utils.book_new();
@@ -3127,7 +3116,6 @@ window.exportDataByDate = async function(dateStr) {
                     XLSX.writeFile(wb, fileName);
                 });
 
-                // Kunci status log di database supaya tidak dieksport bertindih
                 const { error: updateError } = await supabase
                     .from('findings')
                     .update({ is_exported: true })
@@ -3221,13 +3209,11 @@ window.handleExcelFileSelect = function(e) {
                             
                             const id = select.id;
 
-                            // --- COLLECTOR & ASSIGNMENT INFO (KEKAL) ---
                             if(id === 'map-collector') preSelectOption(select, ['collector', 'COLLECTOR', 'caller', 'CALLER']);
                             if(id === 'map-zone') preSelectOption(select, ['zone', 'ZONE', 'Zone']);
                             if(id === 'map-area') preSelectOption(select, ['area', 'AREA', 'Area']);
                             if(id === 'map-osb') preSelectOption(select, ['osb', 'OSB', 'FS_AMT_TO_COLLECT']);
                             
-                            // --- ACCOUNT BALANCE INFO ---
                             if(id === 'map-acct') preSelectOption(select, ['ACCT', 'acct', 'account']);
                             if(id === 'map-type' || id === 'map-acct-type') preSelectOption(select, ['ACCT_TYPE', 'type', 'TYPE']);
                             if(id === 'map-region' || id === 'map-region-cd') preSelectOption(select, ['REGION_CD', 'region', 'REGION']);
@@ -3253,7 +3239,6 @@ window.handleExcelFileSelect = function(e) {
                             if(id === 'map-coll-comm-cat') preSelectOption(select, ['COLL_COMM_CAT']);
                             if(id === 'map-co-ind') preSelectOption(select, ['CO_IND']);
 
-                            // --- HIRER INFO ---
                             if(id === 'map-h-name' || id === 'map-hirer-name') preSelectOption(select, ['HIRER_NAME', 'h_name']);
                             if(id === 'map-h-nric-old' || id === 'map-hirer-old-ic') preSelectOption(select, ['HIRER_OLD_IC_NO', 'h_nric_old']);
                             if(id === 'map-h-nric-new' || id === 'map-hirer-new-ic') preSelectOption(select, ['HIRER_NEW_IC_NO', 'h_nric_new']);
@@ -3264,7 +3249,6 @@ window.handleExcelFileSelect = function(e) {
                             if(id === 'map-h-tel' || id === 'map-hirer-tel') preSelectOption(select, ['HIRER_TEL_NO', 'h_tel']);
                             if(id === 'map-hirer-email') preSelectOption(select, ['HIRER_EMAIL']);
 
-                            // --- HIRER CO INFO ---
                             if(id === 'map-hirer-occ-cd') preSelectOption(select, ['HIRER_OCC_CD']);
                             if(id === 'map-hc-name' || id === 'map-hirer-co-name') preSelectOption(select, ['HIRER_CO_NAME', 'hc_name']);
                             if(id === 'map-hc-add1' || id === 'map-hirer-co-addr1') preSelectOption(select, ['HIRER_CO_ADDR1', 'hc_add1']);
@@ -3273,7 +3257,6 @@ window.handleExcelFileSelect = function(e) {
                             if(id === 'map-hirer-co-post-cd') preSelectOption(select, ['HIRER_CO_POST_CD']);
                             if(id === 'map-hc-tel' || id === 'map-hirer-co-tel') preSelectOption(select, ['HIRER_CO_TEL', 'hc_tel']);
 
-                            // --- SPOUSE INFO ---
                             if(id === 'map-s-name' || id === 'map-spouse-name') preSelectOption(select, ['SPOUSE_NAME', 's_name']);
                             if(id === 'map-s-nric-old' || id === 'map-spouse-old-ic') preSelectOption(select, ['SPOUSE_OLD_IC_NO', 's_nric_old']);
                             if(id === 'map-s-nric-new' || id === 'map-spouse-new-ic') preSelectOption(select, ['SPOUSE_NEW_IC_NO', 's_nric_new']);
@@ -3284,7 +3267,6 @@ window.handleExcelFileSelect = function(e) {
                             if(id === 'map-s-tel' || id === 'map-spouse-tel') preSelectOption(select, ['SPOUSE_TEL_NO', 's_tel']);
                             if(id === 'map-spouse-occ-cd') preSelectOption(select, ['SPOUSE_OCC_CD']);
 
-                            // --- GTOR INFO ---
                             if(id === 'map-g-name' || id === 'map-gtor-name') preSelectOption(select, ['GUAR_NAME', 'g_name']);
                             if(id === 'map-g-nric-old' || id === 'map-gtor-old-ic') preSelectOption(select, ['GUAR_OLD_IC_NO', 'g_nric_old']);
                             if(id === 'map-g-nric-new' || id === 'map-gtor-new-ic') preSelectOption(select, ['GUAR_NEW_IC_NO', 'g_nric_new']);
@@ -3297,7 +3279,6 @@ window.handleExcelFileSelect = function(e) {
                             if(id === 'map-gc-name') preSelectOption(select, ['GUAR_CO_NAME']);
                             if(id === 'map-gc-tel') preSelectOption(select, ['GUAR_CO_TEL']);
 
-                            // --- REF 1 INFO ---
                             if(id === 'map-ref1-name') preSelectOption(select, ['REFEREE1_NAME']);
                             if(id === 'map-ref1-tel') preSelectOption(select, ['REFEREE1_TEL']);
                             if(id === 'map-ref1-addr1') preSelectOption(select, ['REF_ADDRESS1_1']);
@@ -3308,7 +3289,6 @@ window.handleExcelFileSelect = function(e) {
                             if(id === 'map-ref1-off-no') preSelectOption(select, ['REF_OFF_PHONE_NO_1']);
                             if(id === 'map-ref1-relation') preSelectOption(select, ['RELATIONSHIP_WITH_HIRER_1']);
 
-                            // --- REF 2 INFO ---
                             if(id === 'map-ref2-name') preSelectOption(select, ['REFEREE2_NAME']);
                             if(id === 'map-ref2-tel') preSelectOption(select, ['REFEREE2_TEL']);
                             if(id === 'map-ref2-addr1') preSelectOption(select, ['REF_ADDRESS1_2']);
@@ -3342,12 +3322,11 @@ window.handleExcelFileSelect = function(e) {
         };
 
 window.processExcelUpload = async function() {
-    // 1. Dapatkan nama batch & zon dari user
     let batchData = await requestBatchName();
     if (!batchData || !batchData.name) return; 
 
     let rawBatchName = batchData.name.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_');
-    let batchZone = batchData.zone.toUpperCase(); // Ambil Zon dari Modal
+    let batchZone = batchData.zone.toUpperCase();
 
     let d = new Date();
     let timeSuffix = String(d.getDate()).padStart(2, '0') + String(d.getMonth() + 1).padStart(2, '0') + d.getFullYear() + '_' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0');
@@ -3422,13 +3401,12 @@ window.processExcelUpload = async function() {
             finalOsb = bal + odp + adch;
         }
         
-        // --- LOGIK LOKASI BAHARU ---
         let keyLoc = getVal('map-loc');
         let rawLocCd = (keyLoc && row[keyLoc]) ? String(row[keyLoc]).trim() : "";
         
-        let finalZone = batchZone; // KITA PAKSA SEMUA DATA GUNA ZON DARI POPUP
-        let finalRegion = ""; // Boleh dibiarkan kosong kerana tidak guna master_locations
-        let finalArea = "";   // Boleh dibiarkan kosong 
+        let finalZone = batchZone; 
+        let finalRegion = ""; 
+        let finalArea = "";   
 
         if (rawLocCd === "UNDEFINED") rawLocCd = "";
         
@@ -3489,7 +3467,7 @@ window.processExcelUpload = async function() {
             status: currentStatus, 
             collector: rawColl,
             details: detailsJSON,
-            batch_name: finalBatchName, // Data disuntik di sini
+            batch_name: finalBatchName, 
             uploaded_by: currentUser.id,
             batch_owner: currentUser.id
         });
@@ -3524,7 +3502,6 @@ if (!hasError) {
                     document.getElementById('excel-file-input').value = ''; 
                     alert(`Successfully processed ${totalProcessed.toLocaleString()} accounts.`);
                     
-                    // KOREKSI: Padam mengikut ID khusus yang betul, bukannya '_all'
                     const cacheKey = `scazp_cache_${currentUser.id}`;
                     const timeKey = `scazp_time_${currentUser.id}`;
                     await localforage.removeItem(cacheKey);
@@ -3559,10 +3536,9 @@ window.renderBatchList = function() {
     tbody.innerHTML = '';
     
     let batchKeys = Object.keys(batchGroups).filter(bName => {
-        // 1. Super Admin nampak semua
-if (currentUser.role === 'super') return true; 
+        if (currentUser.role === 'super') return true; 
 
-        let bInfo = batchGroups[bName]; // Deklarasi bInfo DULU!
+        let bInfo = batchGroups[bName];
         let currentUserIdClean = String(currentUser.id).toLowerCase();
 
         if (currentUser.role === 'master') {
@@ -3571,14 +3547,10 @@ if (currentUser.role === 'super') return true;
             return myZone.includes(bZone);
         }
         
-        let currentUserIdClean = String(currentUser.id).toLowerCase();
-        
-        // 2. [KOREKSI LOGIK]: Jika user adalah Pemilik Batch atau Uploader, WAJIB nampak!
         if (bInfo.batch_owner.toLowerCase() === currentUserIdClean || bInfo.uploaded_by.toLowerCase() === currentUserIdClean) {
             return true;
         }
 
-// 3. Jika bukan pemilik mutlak, baru semak Zon (Untuk Manager/Admin)
         let bZone = bInfo.zone ? bInfo.zone.toUpperCase().trim() : '';
         let myZone = null;
         
@@ -3589,7 +3561,6 @@ if (currentUser.role === 'super') return true;
             myZone = myManager ? myManager.assignedzone : null;
         }
         
-        // [FIX]: Pecahkan string zon (cth: "BC, WEST") kepada array dan semak padanan
         if (myZone) {
             let allowedZones = myZone.split(',').map(z => z.trim().toUpperCase());
             return allowedZones.includes(bZone);
@@ -3647,7 +3618,6 @@ window.deleteBatch = async function(batchName) {
 
         showNotification("SUCCESS", `Batch <b>${batchName}</b> telah berjaya dipadam sepenuhnya.`);
         
-        // Buang cache lama dan paksa sistem download data terbaru
         const cacheKey = `scazp_cache_${currentUser.id}`;
         const timeKey = `scazp_time_${currentUser.id}`;
         await localforage.removeItem(cacheKey);
@@ -3656,7 +3626,6 @@ window.deleteBatch = async function(batchName) {
         await fetchFullDatabaseData();
         applyFilterAndRender();
         
-        // Muat semula jadual jika user masih di tab Assignment
         if (document.getElementById('assign-panel').style.display === 'block') {
             renderBatchList();
             renderAssignTable();
@@ -3674,12 +3643,11 @@ window.openTransferBatchModal = function(batchName) {
     let dropdown = document.getElementById('batchTransferTarget');
     dropdown.innerHTML = '<option value="">-- PILIH PENERIMA --</option>';
 
-    // Tapis penerima berdasarkan role (Super boleh ke semua, Manager ke Admin, Admin ke PIC)
     let currentUserIdClean = String(currentUser.id).toLowerCase();
     let targets = [];
 
-    if (currentUser.role === 'super') {
-        targets = allSystemUsers.filter(u => u.status === 'ACTIVE' && (u.role === 'manager' || u.role === 'admin') && u.id.toLowerCase() !== currentUserIdClean);
+    if (currentUser.role === 'super' || currentUser.role === 'master') {
+        targets = allSystemUsers.filter(u => u.status === 'ACTIVE' && (u.role === 'master' || u.role === 'manager' || u.role === 'admin') && u.id.toLowerCase() !== currentUserIdClean);
     } else if (currentUser.role === 'manager') {
         targets = allSystemUsers.filter(u => u.status === 'ACTIVE' && u.role === 'admin' && String(u.report_to).toLowerCase() === currentUserIdClean);
     } else if (currentUser.role === 'admin') {
@@ -3712,32 +3680,27 @@ window.executeBatchTransfer = async function(batchName, targetUser) {
     document.getElementById('loadingModal').style.display = 'flex';
 
     try {
-let cleanTargetUser = targetUser.toLowerCase().trim();
+        let cleanTargetUser = targetUser.toLowerCase().trim();
 
-        // [KOREKSI LOGIK]: Sistem HANYA mengubah batch_owner. uploaded_by & assignee_id kekal seperti asal.
         const { error } = await supabase.from('accounts').update({ batch_owner: cleanTargetUser }).eq('batch_name', batchName);
         if (error) throw error;
 
-        // Rekod audit ke dalam findings
         await supabase.from('findings').insert([{
             acct: 'SYSTEM',
             remark1: `BATCH OWNERSHIP TRANSFER: Hak milik Batch ${batchName} dipindahkan kepada ${cleanTargetUser.toUpperCase()} oleh ${currentUser.id.toUpperCase()}`,
             updated_by: currentUser.username
         }]);
 
-    showNotification("SUCCESS", `Hak milik Batch <b>${batchName}</b> telah berjaya dipindahkan kepada ${cleanTargetUser.toUpperCase()}.`);
+        showNotification("SUCCESS", `Hak milik Batch <b>${batchName}</b> telah berjaya dipindahkan kepada ${cleanTargetUser.toUpperCase()}.`);
 
-        // FIX CACHE: Hapuskan rujukan cache secara total bagi ID semasa untuk paksa muat turun baru
         const cacheKey = `scazp_cache_${currentUser.id}`;
         const timeKey = `scazp_time_${currentUser.id}`;
         await localforage.removeItem(cacheKey);
         localStorage.removeItem(timeKey);
 
-        // Paksa pangkalan data buat muat turun bersih
         await fetchFullDatabaseData();
         applyFilterAndRender();
 
-        // Pastikan kedua-dua jadual dirender semula dengan data segar dari pelayan
         renderBatchList();
         renderAssignTable();
 
@@ -3770,7 +3733,7 @@ window.openModal = async function(accNo) {
                 btnNext.disabled = currentModalIndex === -1 || currentModalIndex >= filteredAccounts.length - 1;
             }
             
-            document.getElementById('btnResetPending').style.display = (currentUser.role === 'super') ? 'block' : 'none';
+            document.getElementById('btnResetPending').style.display = (currentUser.role === 'super' || currentUser.role === 'master') ? 'block' : 'none';
             document.getElementById('finding-status-select').value = "";
 
             let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
@@ -3784,19 +3747,15 @@ window.openModal = async function(accNo) {
 
 let baseText = `INTERNAL DATA-VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
 
-// Baris 1: Biasa
 let line1 = baseText.repeat(8) + "\n";
-// Baris 2: Ditambah jarak kosong (offset) di hadapan untuk efek tertolak (zig-zag)
 let line2 = "                  " + baseText.repeat(8) + "\n"; 
 
-// Ulang gandingan Baris 1 & Baris 2 sebanyak 50 kali (menjadi 100 baris keseluruhan)
 let wText = (line1 + line2).repeat(50);
 
             document.getElementById('modal-details-container').innerHTML = `
                 <div class="details-box" style="grid-column: 1 / -1;" data-watermark="${wText}">
                     <h4>ACCOUNT INFO & BALANCE</h4>
                     
-                    <!-- KUMPULAN 1: INFO AKAUN -->
                     <div class="info-grid-2col">
                         <p><span class="lbl">ACCT NO:</span> <span class="val">${accountInfo.acct || '-'}</span></p>
                         <p><span class="lbl">ACCT TYPE:</span> <span class="val">${accountInfo.type || '-'}</span></p>
@@ -3814,9 +3773,8 @@ let wText = (line1 + line2).repeat(50);
                         <p><span class="lbl">CONT. LEN:</span> <span class="val">${d.CONTRACT_LEN || '-'}</span></p>
                     </div>
                     
-                    <div style="height: 18px;"></div> <!-- Ruang Pemisah -->
+                    <div style="height: 18px;"></div> 
 
-                    <!-- KUMPULAN 2: INFO KEWANGAN -->
                     <div class="info-grid-2col">
                         <p><span class="lbl">CASH PRICE:</span> <span class="val">RM ${d.CASH_PRICE || '0.00'}</span></p>
                         <p><span class="lbl">EP PRICE:</span> <span class="val">RM ${d.EP_PRICE || '0.00'}</span></p>
@@ -3842,7 +3800,6 @@ let wText = (line1 + line2).repeat(50);
                         <p><span class="lbl">OSB:</span> <span class="val">RM ${Number(accountInfo.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></p>
                     </div>
 
-                    <!-- KUMPULAN 3: PRODUK DI BAWAH GARISAN -->
                     <div style="margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
                         <p style="margin-bottom: 6px;"><span class="lbl">PRODUCT:</span> <span class="val" style="color: var(--accent-gold);">${d.PROD_SALES_CD || ''} ${d.PROD_SALES_DESC || d.prod || '-'}</span></p>
                         <p><span class="lbl">PLATE NO:</span> <span class="val">${d.PLATE_NO || d.plate || '-'}</span></p>
@@ -3936,17 +3893,13 @@ let wText = (line1 + line2).repeat(50);
                     }
 
                 let deleteBtnHTML = '';
-                    if(currentUser.role === 'super') {
+                    if(currentUser.role === 'super' || currentUser.role === 'master') {
                         deleteBtnHTML = `<button class="btn-delete-finding" onclick="deleteSingleFinding('${data.id}', '${accNo}')">🗑️ DEL</button>`;
                     }
 
-// --- GABUNGKAN SEMULA AYAT SUPAYA TAK NAMPAK TERKERAT ---
                     let histRemark = '';
                     if(data.remark1 || data.remark2 || data.remark3 || data.remark4) {
-                        // Gabung remark1, 2, 3, 4 dengan jarak ruang (space)
                         let combinedStr = [data.remark1, data.remark2, data.remark3, data.remark4].filter(Boolean).join(' ');
-                        
-                        // Letak text-align: justify supaya kiri kanan sama rata cantik
                         histRemark = `<div style="font-size: 11px; line-height: 1.5; margin-top: 8px; color: var(--text-main); font-weight: normal; text-align: justify;">${combinedStr}</div>`;
                     } else {
                         histRemark = `<div style="font-size: 11px; line-height: 1.5; margin-top: 8px; color: var(--text-main); font-weight: normal; text-align: justify;">${data.remark || ''}</div>`;
@@ -3962,7 +3915,6 @@ let wText = (line1 + line2).repeat(50);
                         </div>`;
                 });
             }
-            //setTimeout(() => document.getElementById('single-remark-box').focus(), 100); //auto cursor masuk area textbox log
         };
         
         window.navigateModal = function(direction) {
@@ -3987,7 +3939,6 @@ let wText = (line1 + line2).repeat(50);
         };
         
 window.updateTextareaInfo = function(el) {
-    // Kira karakter sahaja, jangan kacau value/typing flow
     if (el.value.length > 200) { el.value = el.value.substring(0, 200); }
     document.getElementById('textarea-info').innerText = `Jumlah Karakter: ${el.value.length}/200`;
 };
@@ -4003,7 +3954,6 @@ window.saveFinding = async function() {
     let selectedStatus = document.getElementById('finding-status-select').value;
     let accNo = document.getElementById('modalAccNo').innerText;
     
-    // [FIX]: TUKAR KEPADA UPPERCASE HANYA BILA TEKAN BUTTON SAVE
     let fullStory = document.getElementById('single-remark-box').value.trim().toUpperCase();
     
     if(!selectedStatus) {
@@ -4017,7 +3967,6 @@ window.saveFinding = async function() {
         return; 
     }
 
-            // [FASA 5 PINTAR]: Pecah cerita panjang kepada chunk 50 karakter tanpa putuskan perkataan
             let words = fullStory.split(' ');
             let chunks = [];
             let currentChunk = "";
@@ -4039,8 +3988,6 @@ window.saveFinding = async function() {
             let r3 = (chunks[2] || '').toUpperCase();
             let r4 = (chunks[3] || '').toUpperCase();
             
-            // 🛑 KOD LAMA REGEX & IF-STATEMENT SEBELUM NI DAH DIBUANG TERUS DI SINI!
-            
             const btn = document.getElementById('btnSaveFinding'); 
             btn.innerText = "SAVING...";
             
@@ -4057,7 +4004,6 @@ window.saveFinding = async function() {
             updatedDetailsObj.last_remark_date = dateStr;
             updatedDetailsObj.timestamp = today.getTime();
             
-            // Ambil waktu sekarang untuk tarikh dan masa tanpa saat (Format: DD/MM/YYYY HH:MM AM/PM)
             let currentDateTime = new Date();
             let formattedDate = String(currentDateTime.getDate()).padStart(2, '0') + '/' + 
                                 String(currentDateTime.getMonth() + 1).padStart(2, '0') + '/' + 
@@ -4068,7 +4014,6 @@ window.saveFinding = async function() {
                 hour12: true 
             });
 
-            // [FASA 5 PINTAR]: Remark 5 lengkap dengan tarikh & masa tanpa saat mengikut standard MIS SINGER
             let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${formattedDate} ${formattedTime}`;
             
             try {
@@ -4192,7 +4137,7 @@ window.saveFinding = async function() {
                 currentAssignSortDirection = 'asc';
             }
             currentAssignPage = 1;
-            renderAssignTable(); // Panggil semula table untuk filter & susun
+            renderAssignTable(); 
         };
 
 function updateAssignHeaderArrows(activeCol) {
@@ -4229,7 +4174,7 @@ window.populateAssignSubordinates = function() {
             let subordinates = [];
             let currentUserIdClean = String(currentUser.id || currentUser.username || "").trim().toLowerCase();
 
-            if (currentUser.role === 'super') {
+            if (currentUser.role === 'super' || currentUser.role === 'master') {
                 subordinates = allSystemUsers.filter(u => {
                     let uStatus = String(u.status || '').toUpperCase().trim();
                     let uId = String(u.id || '').toLowerCase().trim();
@@ -4243,7 +4188,6 @@ window.populateAssignSubordinates = function() {
                 });
             }
 
-            // TAMBAHAN BARU: Pilihan untuk assign ke diri sendiri
             dropdown.innerHTML += `<option value="${currentUserIdClean}" style="font-weight:bold; color:var(--accent-gold);">⭐ ASSIGN TO MYSELF (${currentUserIdClean.toUpperCase()})</option>`;
 
             subordinates.forEach(u => {
@@ -4255,7 +4199,6 @@ window.populateAssignSubordinates = function() {
     const dropdown = document.getElementById('filter-collector-dropdown');
     if (!dropdown) return;
     
-    // Ambil senarai unik collector, buang yang kosong, susun A-Z
     let collectors = [...new Set(globalAccounts.map(a => a.collector).filter(Boolean))].sort();
     
     dropdown.innerHTML = '<option value="ALL">SEMUA COLLECTOR</option>';
@@ -4311,7 +4254,6 @@ window.renderAssignTable = function() {
     if(pageData.length === 0) {
         tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;">Tiada akaun dijumpai.</td></tr>';
     } else {
-        // HANYA ADA SATU LOOP DI SINI
         pageData.forEach((row, index) => {
             let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '🔴 UNASSIGNED';
             let colDisp = row.collector ? row.collector.toUpperCase() : '-';
@@ -4418,7 +4360,6 @@ window.renderAssignTable = function() {
             }
         };
 
-        // --- KOD BARU: FUNGSI UTK COPY ACCT NO ---
 window.copyToClipboard = function(text, btnElement) {
     navigator.clipboard.writeText(text).then(() => {
         const originalHTML = btnElement.innerHTML;
@@ -4437,10 +4378,8 @@ window.copyToClipboard = function(text, btnElement) {
         window.buildPaginationControls = function(currentPage, totalPages, funcName) {
     if (totalPages <= 0) return '';
     
-    // Butang First Page
     let html = `<button onclick="${funcName}(1)" ${currentPage === 1 ? 'disabled' : ''}>«</button>`;
     
-    // Butang Previous
     html += `<button onclick="${funcName}(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>◄</button>`;
     
     let startPage = Math.max(1, currentPage - 2);
@@ -4461,10 +4400,8 @@ window.copyToClipboard = function(text, btnElement) {
         html += `<button onclick="${funcName}(${totalPages})">${totalPages}</button>`;
     }
     
-    // Butang Next
     html += `<button onclick="${funcName}(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>►</button>`;
     
-    // Butang Last Page
     html += `<button onclick="${funcName}(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}>»</button>`;
     
     return html;
@@ -4482,12 +4419,10 @@ window.goToAssignPage = function(p) {
     renderAssignTable();
 };
 
-        // Auto-Uppercase untuk User ID masa Login
 document.getElementById('username').addEventListener('input', function(e) {
     this.value = this.value.toUpperCase();
 });
 
-// Auto-Uppercase untuk User ID masa Add New User di Settings
 document.getElementById('new-user-id').addEventListener('input', function(e) {
     this.value = this.value.toUpperCase();
 });
