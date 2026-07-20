@@ -384,6 +384,16 @@ html, body {
 #card-pending.active { 
     border-radius: 0 0 11px 11px !important; 
 }
+
+/* 3. Mobile: Lengkungan bucu ditolak 1px dari kotak luar mobile (10px - 1px = 9px) */
+@media (max-width: 768px) {
+    #card-done.active { 
+        border-radius: 9px 9px 0 0 !important; 
+    }
+    #card-pending.active { 
+        border-radius: 0 0 9px 9px !important; 
+    }
+}
     
         /* --- ENHANCED TABLES --- */
         .table-container { 
@@ -994,14 +1004,6 @@ th {
                 font-size: 9px !important;
                 width: 100%; 
             }
-
-            #card-done.active { 
-        border-radius: 9px 9px 0 0 !important; 
-    }
-    #card-pending.active { 
-        border-radius: 0 0 9px 9px !important; 
-    }
-}
 
         .nav-tabs { padding: 10px; margin-bottom: 15px; }
             
