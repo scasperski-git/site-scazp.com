@@ -354,6 +354,13 @@ html, body {
             background-color: #eff6ff; 
             box-shadow: 0 0 0 1px var(--accent-gold);
         }
+
+    .kpi-clickable.active {
+    background-color: #eff6ff !important;
+    box-shadow: inset 0 0 0 2px var(--accent-gold) !important; 
+    /* Guna 'inset' supaya border di dalam dan tak rosakkan bucu bulat (border-radius) parent */
+}
+    
         .kpi-card h3 { 
             margin: 0 0 8px 0; 
             font-size: 11px; 
@@ -1001,7 +1008,13 @@ th {
                 font-weight: 800; 
             }
 
-            .action-bar { padding: 15px; }
+            #btn-kpi-all, #btn-kpi-today {
+            padding: 4px 8px !important;
+            font-size: 9px !important;
+            letter-spacing: 0.2px;
+            }
+
+            .action-bar { padding: 0 !important; margin-bottom: 15px; }
             .pagination-container { padding: 15px; flex-direction: column; gap: 12px; }
             .search-container { flex-direction: column; }
             .search-container select, .search-container input, .search-container div { width: 100%; max-width: 100% !important; }
