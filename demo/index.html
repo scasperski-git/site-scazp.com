@@ -360,6 +360,21 @@ html, body {
     box-shadow: inset 0 0 0 2px var(--accent-gold) !important; 
     /* Guna 'inset' supaya border di dalam dan tak rosakkan bucu bulat (border-radius) parent */
 }
+
+    .kpi-clickable.active {
+    background-color: #eff6ff !important;
+    box-shadow: inset 0 0 0 2px var(--accent-gold) !important; 
+}
+
+/* Bucu atas membulat untuk kotak ATTENDED */
+#card-done.active {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+/* Bucu bawah membulat untuk kotak PENDING */
+#card-pending.active {
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
     
         .kpi-card h3 { 
             margin: 0 0 8px 0; 
@@ -1013,6 +1028,13 @@ th {
             font-size: 9px !important;
             letter-spacing: 0.2px;
             }
+
+            #card-done.active { 
+        border-radius: 10px 10px 0 0 !important; 
+    }
+    #card-pending.active { 
+        border-radius: 0 0 10px 10px !important; 
+    }
 
             .action-bar { padding: 0 !important; margin-bottom: 15px; }
             .pagination-container { padding: 15px; flex-direction: column; gap: 12px; }
