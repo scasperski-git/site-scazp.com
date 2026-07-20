@@ -1184,6 +1184,7 @@ th {
                 <option value="user">PIC User (Field Staff / Collector)</option>
                 <option value="admin">Admin (Branch / Area Head)</option>
                 <option value="manager">Manager (Regional/Zone Head)</option>
+                <option value="master">Master (MD / GM Of Zone)</option>
                 <option value="super">Super Admin (Mastermind)</option>
             </select>
         </div>
@@ -1959,6 +1960,15 @@ if (currentUser.role === 'user') {
     // [FIX]: Manager kini tarik data jika dia pemilik batch ATAU data dalam zon jagaannya
     fetchQuery = fetchQuery.or(`batch_owner.eq.${currentUserIdClean},assignee_id.eq.${currentUserIdClean},${zoneOrs}`);
 }
+
+    } else if (currentUser.role === 'master') {
+    // MASTER tarik semua data dalam zon dia tanpa hiraukan batch_owner atau assignee
+    let safeZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : 'NONE';
+    let zones = safeZone.split(',').map(z => z.trim());
+    let zoneOrs = zones.map(z => `zone.eq.${z}`).join(',');
+    
+    fetchQuery = fetchQuery.or(`${zoneOrs}`);
+}
                     // 'super' fetches everything.
                     
                     const { data, error } = await fetchQuery.range(page * pageSize, (page + 1) * pageSize - 1);
@@ -1998,31 +2008,38 @@ function rebuildGeoMapFromData() {
             if (currentUser.role === 'super' || currentUser.role === 'manager' || currentUser.role === 'admin') {
                 document.getElementById('master-nav-tabs').style.display = 'flex';
                 document.getElementById('upload-action-container').style.display = 'block';
-                document.getElementById('tab-report').style.display = currentUser.role === 'super' ? 'block' : 'none';
-                document.getElementById('tab-settings').style.display = currentUser.role === 'super' ? 'inline-block' : 'none';
-                
-                // FILTER HIERARCHY LOGIC
-                if(currentUser.role === 'super') {
-                    document.getElementById('zone-filters-container').style.display = 'block';
-                    renderZoneSelectionUI();
-                } else if(currentUser.role === 'manager') {
-                    document.getElementById('zone-filters-container').style.display = 'block';
-                    
-                    let myZones = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(z => z.trim().toUpperCase()) : [];
-                    let zoneHtml = `<button class="btn-filter active" onclick="clearZoneSelection(this)">ALL MY ZONES</button>`;
-                    myZones.forEach(z => {
-                        zoneHtml += `<button class="btn-filter" onclick="applyZoneFilter('${z}', this)">${z}</button>`;
-                    });
-                    
-                    document.getElementById('zone-filters-container').innerHTML = `
-                        <span class="filter-title">My Assigned Zone</span>
-                        <div class="btn-group" id="zone-buttons">${zoneHtml}</div>
-                    `;
-                    
-                    currentZone = null; 
-                    currentManager = currentUser.id.toUpperCase().trim();
-                    document.getElementById('admin-filters-container').style.display = 'block';
-                    renderAdminSelectionUI(currentZone, myZones, currentManager); 
+document.getElementById('tab-report').style.display = (currentUser.role === 'super' || currentUser.role === 'master') ? 'block' : 'none';
+document.getElementById('tab-settings').style.display = (currentUser.role === 'super' || currentUser.role === 'master') ? 'inline-block' : 'none';
+
+if(currentUser.role === 'super') {
+    document.getElementById('zone-filters-container').style.display = 'block';
+    renderZoneSelectionUI();
+} else if(currentUser.role === 'master' || currentUser.role === 'manager') {
+    document.getElementById('zone-filters-container').style.display = 'block';
+    
+    let myZones = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(z => z.trim().toUpperCase()) : [];
+    let zoneHtml = `<button class="btn-filter active" onclick="clearZoneSelection(this)">ALL MY ZONES</button>`;
+    myZones.forEach(z => {
+        zoneHtml += `<button class="btn-filter" onclick="applyZoneFilter('${z}', this)">${z}</button>`;
+    });
+    
+    document.getElementById('zone-filters-container').innerHTML = `
+        <span class="filter-title">My Assigned Zone</span>
+        <div class="btn-group" id="zone-buttons">${zoneHtml}</div>
+    `;
+    
+    currentZone = null; 
+    if(currentUser.role === 'master') {
+        // Master nampak senarai Manager
+        document.getElementById('manager-filters-container').style.display = 'block';
+        renderManagerSelectionUI(null);
+    } else {
+        // Manager nampak senarai Admin
+        currentManager = currentUser.id.toUpperCase().trim();
+        document.getElementById('admin-filters-container').style.display = 'block';
+        renderAdminSelectionUI(currentZone, myZones, currentManager); 
+    }
+}
                     
                 } else if(currentUser.role === 'admin') {
                     document.getElementById('pic-filters-container').style.display = 'block';
@@ -2620,6 +2637,7 @@ window.renderUserTablePage = async function() {
                     <option value="user" ${rName==='user'?'selected':''}>USER</option>
                     <option value="admin" ${rName==='admin'?'selected':''}>ADMIN</option>
                     <option value="manager" ${rName==='manager'?'selected':''}>MANAGER</option>
+                    <option value="master" ${rName==='master'?'selected':''}>MASTER</option>
                     <option value="super" ${rName==='super'?'selected':''}>SUPER</option>
                 </select>`;
 
@@ -2834,7 +2852,7 @@ window.toggleFormRoleSelect = async function() {
     const reportSelect = document.getElementById('new-user-report-to');
     const zoneGroup = document.getElementById('form-zone-group');
     
-    if (role === 'manager' || role === 'admin') {
+    if (role === 'master' || role === 'manager' || role === 'admin') {
         zoneGroup.style.display = 'block'; 
     } else {
         zoneGroup.style.display = 'none'; 
@@ -2847,8 +2865,9 @@ window.toggleFormRoleSelect = async function() {
         reportGroup.style.display = 'block';
         reportSelect.innerHTML = '<option value="">Loading Supervisor List...</option>';
         
-        let allowedRoles = role === 'user' ? ['admin', 'manager', 'super'] : 
-                           (role === 'admin' ? ['manager', 'super'] : ['super']);
+        let allowedRoles = role === 'user' ? ['admin', 'manager', 'master', 'super'] : 
+                   (role === 'admin' ? ['manager', 'master', 'super'] : 
+                   (role === 'manager' ? ['master', 'super'] : ['super']));
         
         try {
             const { data, error } = await supabase.from('users').select('id, role').in('role', allowedRoles).eq('status', 'ACTIVE');
@@ -3548,6 +3567,12 @@ window.renderBatchList = function() {
     let batchKeys = Object.keys(batchGroups).filter(bName => {
         // 1. Super Admin nampak semua
         if (currentUser.role === 'super') return true; 
+
+        if (currentUser.role === 'master') {
+    let bZone = bInfo.zone ? bInfo.zone.toUpperCase().trim() : '';
+    let myZone = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(z => z.trim().toUpperCase()) : [];
+    return myZone.includes(bZone);
+}
         
         let bInfo = batchGroups[bName];
         let currentUserIdClean = String(currentUser.id).toLowerCase();
