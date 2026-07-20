@@ -7,7 +7,6 @@
   <meta name="description" content="Personal portfolio of SCAZP - Aspiring Developer & Tech Enthusiast">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Menukar font kepada Outfit (moden) dan JetBrains Mono (tech/code) -->
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -88,6 +87,52 @@
       0% { transform: translateX(150px) translateY(-150px) rotate(-45deg); opacity: 1; }
       20% { transform: translateX(-800px) translateY(800px) rotate(-45deg); opacity: 0; }
       100% { transform: translateX(-800px) translateY(800px) rotate(-45deg); opacity: 0; }
+    }
+
+    /* ===== MUSIC PLAYER BUTTON ===== */
+    .music-player-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      background: rgba(10, 15, 20, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 50px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .music-player-btn:hover {
+      background: rgba(0, 255, 136, 0.1);
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+      transform: translateY(-2px);
+    }
+
+    .music-icon {
+      font-size: 1.2rem;
+      animation: pulse 2s infinite;
+    }
+
+    .music-icon.paused {
+      animation: none;
+      opacity: 0.5;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
     }
 
     /* ===== NAVBAR ===== */
@@ -243,7 +288,7 @@
     }
 
     .hero h1 {
-      font-size: clamp(2.2rem, 6vw, 4rem); /* Dikecilkan sikit untuk balance */
+      font-size: clamp(2.2rem, 6vw, 4rem); 
       font-weight: 700;
       line-height: 1.1;
       margin-bottom: 16px;
@@ -552,7 +597,7 @@
       }
       
       .hero h1 {
-        font-size: 2rem; /* Override saiz fon yang terlalu besar */
+        font-size: 2rem; 
         letter-spacing: -0.5px;
       }
       
@@ -563,11 +608,11 @@
 
       .content-wrapper {
         padding: 50px 15px;
-        gap: 50px; /* Kurangkan jarak antara seksyen */
+        gap: 50px; 
       }
 
       .card-section {
-        padding: 24px 20px; /* Kurangkan padding dalam kad */
+        padding: 24px 20px; 
       }
       
       .section-header h2 {
@@ -583,7 +628,6 @@
         font-size: 1.1rem;
       }
       
-      /* Jadikan butang memanjang penuh untuk mudah sentuh di mobile */
       .cta-buttons {
         flex-direction: column;
         gap: 12px;
@@ -628,7 +672,6 @@
       }
     }
     
-    /* Untuk skrin telefon yang sangat kecil (seperti iPhone SE dll) */
     @media (max-width: 480px) {
       .hero h1 {
         font-size: 1.75rem;
@@ -638,6 +681,12 @@
       }
       .project-img {
         height: 140px;
+      }
+      .music-player-btn {
+        bottom: 16px;
+        right: 16px;
+        padding: 10px 16px;
+        font-size: 0.75rem;
       }
     }
 
@@ -652,43 +701,22 @@
       opacity: 1;
       transform: translateY(0);
     }
-
-    /* Animasi Pulse Baru */
-.pulse-style {
-  position: relative;
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pulse-style::before, .pulse-style::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 50%;
-  border: 2px solid var(--accent);
-  animation: pulse-ring 2s linear infinite;
-  z-index: 1;
-}
-
-.pulse-style::after {
-  animation-delay: 1s; /* Gelombang kedua */
-}
-
-@keyframes pulse-ring {
-  0% { transform: scale(1); opacity: 0.8; }
-  100% { transform: scale(1.6); opacity: 0; }
-}
-    
   </style>
 </head>
 <body>
+
+  <!-- Audio Element (Hidden) -->
+  <!-- Tukar 'interstellar.mp3' dengan nama fail lagu anda -->
+  <audio id="bgMusic" loop>
+    <source src="interstellar.mp3" type="audio/mpeg">
+    Browser anda tidak menyokong elemen audio.
+  </audio>
+
+  <!-- Floating Music Toggle Button -->
+  <button id="musicToggle" class="music-player-btn">
+    <span class="music-icon paused" id="musicIcon">🎵</span>
+    <span id="musicText">BGM: OFF</span>
+  </button>
 
   <!-- Shooting Stars Background -->
   <div class="stars-container">
@@ -703,8 +731,8 @@
   <header class="navbar">
     <div class="nav-container">
       <a href="#" class="brand">
-<div class="logo-wrapper pulse-style">
-  <img src="logo.png" alt="SCAZP Logo" class="logo-img" onerror="this.style.display='none'">
+        <div class="logo-wrapper">
+          <img src="logo.png" alt="SCAZP Logo" class="logo-img" onerror="this.style.display='none'">
           <svg class="moving-line" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <circle cx="50" cy="50" r="46" stroke="url(#neon-gradient)" stroke-width="2" fill="none" stroke-dasharray="120 180"/>
             <defs>
@@ -853,6 +881,29 @@
   </footer>
 
   <script>
+    // Music Player Logic
+    const bgMusic = document.getElementById('bgMusic');
+    const musicToggle = document.getElementById('musicToggle');
+    const musicIcon = document.getElementById('musicIcon');
+    const musicText = document.getElementById('musicText');
+    let isPlaying = false;
+
+    // Supaya muzik tak terlalu kuat (0.5 = 50% volume)
+    bgMusic.volume = 0.5;
+
+    musicToggle.addEventListener('click', () => {
+      if (isPlaying) {
+        bgMusic.pause();
+        musicIcon.classList.add('paused');
+        musicText.innerText = 'BGM: OFF';
+      } else {
+        bgMusic.play();
+        musicIcon.classList.remove('paused');
+        musicText.innerText = 'BGM: ON';
+      }
+      isPlaying = !isPlaying;
+    });
+
     // Mobile Menu
     const hamburger = document.getElementById('hamburger');
     const navLinks = document.getElementById('navLinks');
