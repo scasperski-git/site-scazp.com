@@ -371,25 +371,44 @@ html, body {
             letter-spacing: -0.5px;
         }
 
-    /* 1. Hilangkan garisan biru dari kotak dalam, kita cuma nak background dia je bertukar biru */
-#card-done.active, #card-pending.active {
+/* 1. Reset: Buang semua shadow yang hodoh tu, kita tukar background je */
+.kpi-clickable.active, #card-done.active, #card-pending.active {
     background-color: #eff6ff !important;
     box-shadow: none !important;
 }
 
-/* 2. TRICK SEBENAR: Kita letak border biru tu pada KOTAK LUAR (Parent) bila kotak dalam ditekan */
-.kpi-card:has(#card-done.active),
-.kpi-card:has(#card-pending.active) {
-    border-color: var(--accent-gold) !important;
-    box-shadow: 0 0 0 1px var(--accent-gold) !important;
-    background-color: transparent !important;
+/* 2. Setkan posisi relatif supaya border tak lari ke tempat lain */
+#card-done, #card-pending {
+    position: relative;
 }
 
-    #card-pending.active::after {
-        border-radius: 0 0 10px 10px !important;
+/* 3. Lukis bingkai biru menggunakan ::after di sebelah dalam kotak yang aktif */
+#card-done.active::after, #card-pending.active::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border: 2px solid var(--accent-gold);
+    pointer-events: none; /* Supaya tak halang jari bila klik */
+}
+
+/* 4. Desktop: Lengkungkan ikut bucu kotak besar (12px tolak 1px border luar = 11px) */
+#card-done.active::after { 
+    border-radius: 11px 11px 0 0; 
+}
+#card-pending.active::after { 
+    border-radius: 0 0 11px 11px; 
+}
+
+/* 5. Mobile: Lengkungkan ikut bucu kotak besar versi mobile (10px tolak 1px = 9px) */
+@media (max-width: 768px) {
+    #card-done.active::after { 
+        border-radius: 9px 9px 0 0 !important; 
+    }
+    #card-pending.active::after { 
+        border-radius: 0 0 9px 9px !important; 
     }
 }
-
+    
         /* --- ENHANCED TABLES --- */
         .table-container { 
             background-color: var(--card-bg); 
