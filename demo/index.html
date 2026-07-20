@@ -1953,16 +1953,11 @@ if (currentUser.role === 'user') {
     let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
     let safeZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : 'NONE';
     
-    // Pecahkan zon jika manager jaga lebih dari 1 zon (cth: "BC, WEST")
     let zones = safeZone.split(',').map(z => z.trim());
     let zoneOrs = zones.map(z => `zone.eq.${z}`).join(',');
     
-    // [FIX]: Manager kini tarik data jika dia pemilik batch ATAU data dalam zon jagaannya
     fetchQuery = fetchQuery.or(`batch_owner.eq.${currentUserIdClean},assignee_id.eq.${currentUserIdClean},${zoneOrs}`);
-}
-
-    } else if (currentUser.role === 'master') {
-    // MASTER tarik semua data dalam zon dia tanpa hiraukan batch_owner atau assignee
+} else if (currentUser.role === 'master') {
     let safeZone = currentUser.assignedzone ? currentUser.assignedzone.toUpperCase().trim() : 'NONE';
     let zones = safeZone.split(',').map(z => z.trim());
     let zoneOrs = zones.map(z => `zone.eq.${z}`).join(',');
@@ -2039,7 +2034,6 @@ if(currentUser.role === 'super') {
         document.getElementById('admin-filters-container').style.display = 'block';
         renderAdminSelectionUI(currentZone, myZones, currentManager); 
     }
-}
                     
                 } else if(currentUser.role === 'admin') {
                     document.getElementById('pic-filters-container').style.display = 'block';
@@ -3566,15 +3560,17 @@ window.renderBatchList = function() {
     
     let batchKeys = Object.keys(batchGroups).filter(bName => {
         // 1. Super Admin nampak semua
-        if (currentUser.role === 'super') return true; 
+if (currentUser.role === 'super') return true; 
+
+        let bInfo = batchGroups[bName]; // Deklarasi bInfo DULU!
+        let currentUserIdClean = String(currentUser.id).toLowerCase();
 
         if (currentUser.role === 'master') {
-    let bZone = bInfo.zone ? bInfo.zone.toUpperCase().trim() : '';
-    let myZone = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(z => z.trim().toUpperCase()) : [];
-    return myZone.includes(bZone);
-}
+            let bZone = bInfo.zone ? bInfo.zone.toUpperCase().trim() : '';
+            let myZone = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(z => z.trim().toUpperCase()) : [];
+            return myZone.includes(bZone);
+        }
         
-        let bInfo = batchGroups[bName];
         let currentUserIdClean = String(currentUser.id).toLowerCase();
         
         // 2. [KOREKSI LOGIK]: Jika user adalah Pemilik Batch atau Uploader, WAJIB nampak!
