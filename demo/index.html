@@ -1023,6 +1023,55 @@ th {
             
             .btn-delete-finding { padding: 2px 6px !important; font-size: 8px !important; height: 18px; line-height: 1.2; }
         }
+/* --- FIX 1: RAPATKAN KOTAK FILTER ZONE/MANAGER KE TEPI PADA MOBILE --- */
+@media (max-width: 768px) {
+    .action-bar .filter-section {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-radius: 0 !important;
+        padding: 12px 10px !important;
+    }
+}
+
+/* --- FIX 2: SAIZ BUTANG ALL TIME & TODAY YANG LEBIH KEMAS --- */
+.kpi-toggle-btn {
+    background-color: #f8fafc;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    padding: 5px 12px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    transition: all 0.2s;
+}
+.kpi-toggle-btn:hover {
+    border-color: var(--accent-gold);
+    color: var(--accent-gold);
+    background-color: #eff6ff;
+}
+.kpi-toggle-btn.active {
+    background-color: var(--accent-gold);
+    color: #ffffff;
+    border-color: var(--accent-gold);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+/* --- FIX 3: KESAN SEMPADAN BIRU UNTUK KOTAK ATTENDED & PENDING --- */
+.kpi-sub-clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.kpi-sub-clickable:hover {
+    background-color: #eff6ff !important;
+}
+.kpi-sub-active {
+    background-color: #eff6ff !important;
+    box-shadow: inset 0 0 0 2px var(--accent-gold);
+}
+    
     </style>
 </head>
 <body>
@@ -1105,12 +1154,12 @@ th {
                 </div>
             </div>
 
-            <!-- TOGGLE KPI ALL/TODAY -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px;">
-                <div style="font-size: 14px; font-weight: 700; color: var(--text-main);">OVERALL PERFORMANCE</div>
-                <div class="btn-group">
-                    <button class="btn-filter active" id="btn-kpi-all" onclick="toggleKPIMode('ALL')" style="font-weight:bold; font-size:11px;">📊 ALL TIME</button>
-                    <button class="btn-filter" id="btn-kpi-today" onclick="toggleKPIMode('TODAY')" style="font-weight:bold; font-size:11px;">🔥 TODAY</button>
+<!-- TOGGLE KPI ALL/TODAY -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 5px;">
+                <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">OVERALL PERFORMANCE</div>
+                <div style="display: flex; gap: 6px;">
+                    <button class="kpi-toggle-btn active" id="btn-kpi-all" onclick="toggleKPIMode('ALL')">📊 ALL TIME</button>
+                    <button class="kpi-toggle-btn" id="btn-kpi-today" onclick="toggleKPIMode('TODAY')">🔥 TODAY</button>
                 </div>
             </div>
 
@@ -1122,11 +1171,11 @@ th {
                 
                 <!-- Box 2: Split (Attended & Pending) -->
                 <div class="kpi-card" style="padding: 0; display: flex; flex-direction: column; overflow: hidden;">
-                    <div class="kpi-clickable" id="card-done" onclick="applyStatusFilter('UPDATED', this)" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; border-bottom: 1px solid var(--border-color); padding: 8px;">
+                    <div class="kpi-sub-clickable kpi-sub-active" id="sub-card-done" onclick="applyStatusFilter('UPDATED', this)" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; border-bottom: 1px solid var(--border-color); padding: 8px;">
                         <h3 style="margin: 0 0 2px 0; font-size: 10px; line-height: 1;">ATTENDED <span id="kpi-lbl-done" style="font-weight:normal; font-size:9px; color:#94a3b8;">(All)</span></h3>
                         <p id="kpi-done" style="color: var(--success-green); font-size: 18px; line-height: 1; margin:0;">0</p>
                     </div>
-                    <div class="kpi-clickable" id="card-pending" onclick="applyStatusFilter('PENDING', this)" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 8px; background: #fafbfc;">
+                    <div class="kpi-sub-clickable" id="sub-card-pending" onclick="applyStatusFilter('PENDING', this)" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 8px; background: #fafbfc;">
                         <h3 style="margin: 0 0 2px 0; font-size: 10px; line-height: 1;">PENDING <span style="font-weight:normal; font-size:9px; color:#94a3b8;">(Overall)</span></h3>
                         <p id="kpi-pending" style="color: var(--error-red); font-size: 18px; line-height: 1; margin:0;">0</p>
                     </div>
@@ -2075,7 +2124,7 @@ function rebuildGeoMapFromData() {
             switchTab(lastActiveTab);
         }
 
-        window.toggleKPIMode = function(mode) {
+window.toggleKPIMode = function(mode) {
             currentKPIMode = mode;
             document.getElementById('btn-kpi-all').classList.remove('active');
             document.getElementById('btn-kpi-today').classList.remove('active');
@@ -2160,16 +2209,32 @@ function rebuildGeoMapFromData() {
             renderTablePage();
         }
         
-        window.applyStatusFilter = function(status, element) {
+window.applyStatusFilter = function(status, element) {
             currentStatusFilter = status;
+            
+            // Buang semua kesan aktif lama
             document.querySelectorAll('.kpi-clickable').forEach(card => card.classList.remove('active'));
-            if (element) element.classList.add('active');
+            document.getElementById('sub-card-done').classList.remove('kpi-sub-active');
+            document.getElementById('sub-card-pending').classList.remove('kpi-sub-active');
+
+            if (element) {
+                if (element.id === 'card-total') {
+                    element.classList.add('active');
+                } else if (element.id === 'sub-card-done') {
+                    document.getElementById('sub-card-done').classList.add('kpi-sub-active');
+                } else if (element.id === 'sub-card-pending') {
+                    document.getElementById('sub-card-pending').classList.add('kpi-sub-active');
+                }
+            }
             applyFilterAndRender();
         };
 
-        function resetStatusCardHighlight() {
+function resetStatusCardHighlight() {
             currentStatusFilter = null;
             document.querySelectorAll('.kpi-clickable').forEach(card => card.classList.remove('active'));
+            document.getElementById('sub-card-done').classList.remove('kpi-sub-active');
+            document.getElementById('sub-card-pending').classList.remove('kpi-sub-active');
+            
             const totalCard = document.getElementById('card-total');
             if (totalCard) totalCard.classList.add('active');
         }
