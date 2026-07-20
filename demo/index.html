@@ -371,39 +371,20 @@ html, body {
             letter-spacing: -0.5px;
         }
 
-    /* 1. Buang semua shadow cacat & tukar background */
-.kpi-clickable.active {
+    /* 1. Hilangkan garisan biru dari kotak dalam, kita cuma nak background dia je bertukar biru */
+#card-done.active, #card-pending.active {
     background-color: #eff6ff !important;
     box-shadow: none !important;
 }
 
-/* 2. Jadikan kotak rujukan posisi (relative) */
-#card-done, #card-pending {
-    position: relative;
+/* 2. TRICK SEBENAR: Kita letak border biru tu pada KOTAK LUAR (Parent) bila kotak dalam ditekan */
+.kpi-card:has(#card-done.active),
+.kpi-card:has(#card-pending.active) {
+    border-color: var(--accent-gold) !important;
+    box-shadow: 0 0 0 1px var(--accent-gold) !important;
+    background-color: transparent !important;
 }
 
-/* 3. Lukis bingkai (border) menggunakan pseudo-element */
-#card-done.active::after, #card-pending.active::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    border: 2px solid var(--accent-gold);
-    pointer-events: none; /* Supaya tak kacau klik user */
-}
-
-/* 4. Lengkungan Desktop (Ikut saiz parent 12px) */
-#card-done.active::after {
-    border-radius: 12px 12px 0 0;
-}
-#card-pending.active::after {
-    border-radius: 0 0 12px 12px;
-}
-
-/* 5. Lengkungan Mobile (Ikut saiz parent 10px) */
-@media (max-width: 768px) {
-    #card-done.active::after {
-        border-radius: 10px 10px 0 0 !important;
-    }
     #card-pending.active::after {
         border-radius: 0 0 10px 10px !important;
     }
