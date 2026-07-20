@@ -3207,11 +3207,23 @@ window.exportDataByDate = async function(dateStr) {
 
             const { error } = await supabase.from('findings').delete().eq('id', findingId);
             if(!error) {
+            
                 if (findingData && findingData.remark5 && findingData.remark5.includes('PAID')) {
                     let accountInfo = globalAccounts.find(a => a.acct === accNo);
                     if(accountInfo) {
                         let d = accountInfo.details || {};
-                        d.amt_collected = 0;
+                        
+                        // Ekstrak nilai RM dari ayat log sejarah untuk ditolak dari jumlah terkumpul
+                        let match = findingData.remark5.match(/RM\s*([\d,]+\.\d{2})/);
+                        let amountToDeduct = 0;
+                        if (match) {
+                            amountToDeduct = parseFloat(match[1].replace(/,/g, ''));
+                        }
+                        
+                        let currentAmt = parseFloat(d.amt_collected) || 0;
+                        // Tolak nilai yang didelete dari jumlah terkumpul (Pastikan tak negatif)
+                        d.amt_collected = Math.max(0, currentAmt - amountToDeduct); 
+                        
                         await supabase.from('accounts').update({ details: d }).eq('acct', accNo);
                         const cacheKey = `scazp_cache_${currentUser.id}`;
                         await localforage.setItem(cacheKey, globalAccounts);
@@ -4091,13 +4103,18 @@ window.saveFinding = async function() {
                 hour12: true 
             });
 
-            let r5Auto = "";
+let r5Auto = "";
+            // Ambil jumlah sedia ada dalam database. Jika tiada, mula dengan 0.
+            let currentCollected = parseFloat(updatedDetailsObj.amt_collected) || 0; 
+
             if (selectedStatus === 'PAID') {
                 r5Auto = `[${selectedStatus} : RM ${amtCollected.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${formattedDate} ${formattedTime}`;
-                updatedDetailsObj.amt_collected = amtCollected;
+                // Campurkan bayaran baharu ke dalam jumlah sedia ada (Accumulate)
+                updatedDetailsObj.amt_collected = currentCollected + amtCollected;
             } else {
                 r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${formattedDate} ${formattedTime}`;
-                updatedDetailsObj.amt_collected = 0; 
+                // Biarkan jumlah terkumpul kekal seperti asal, JANGAN reset ke 0
+                updatedDetailsObj.amt_collected = currentCollected; 
             }
             
             try {
