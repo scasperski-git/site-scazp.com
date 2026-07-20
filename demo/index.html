@@ -729,7 +729,7 @@ th {
     font-family: inherit;
     font-size: 8px; font-weight: 900;
     color: rgba(30, 41, 59, 0.06); 
-    white-space: pre-wrap; word-break: break-all; /* <-- Tukar normal jadi pre-wrap di sini */
+    white-space: pre-wrap; word-break: break-all;
     line-height: 2.2; letter-spacing: 1px;
     padding: 10px; box-sizing: border-box;
     transform: rotate(-10deg) scale(1.2);
@@ -768,7 +768,6 @@ th {
             word-break: break-word;
         }
         
-        /* Grid untuk paparan 2 lajur (Kiri Kanan) */
         .info-grid-2col {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -902,11 +901,11 @@ th {
             background-color: #fef2f2;
             border: 1px solid #fecaca;
             color: var(--error-red);
-            border-radius: 3px; /* Disamakan dengan badge */
+            border-radius: 3px;
             cursor: pointer;
-            font-size: 8px; /* Disamakan dengan badge */
-            padding: 2px 5px; /* Disamakan dengan badge */
-            font-weight: 700; /* Disamakan dengan badge */
+            font-size: 8px; 
+            padding: 2px 5px; 
+            font-weight: 700; 
             transition: all 0.2s ease;
             margin-left: 10px;
             display: inline-flex;
@@ -938,11 +937,9 @@ th {
             min-width: 160px;
         }
 
-/* --- MOBILE RESPONSIVENESS (Diperbaiki & Rapat Ke Tepi) --- */
         @media (max-width: 768px) {
             body { padding: 0; background-color: var(--bg-color); }
             
-            /* RAPATKAN SEMUA KOTAK UTAMA KE TEPI SKRIN */
             .header, .nav-tabs, .filter-section, .settings-box, .table-container, .pagination-container, .action-bar {
                 border-radius: 0 !important;
                 border-left: none !important;
@@ -952,10 +949,8 @@ th {
                 margin-right: 0 !important;
             }
             
-            /* Letak padding pada panel supaya ada ruang nafas kat bawah */
             #dashboard-panel, #assign-panel, #settings-panel, #report-panel { padding-bottom: 20px; }
 
-/* --- HEADER MOBILE REDESIGN (GRID SYSTEM) --- */
             .header {
                 flex-direction: column;
                 align-items: center; 
@@ -969,45 +964,43 @@ th {
             #header-user-section {
                 width: 100%;
                 background: #f8fafc; 
-                padding: 10px 12px !important; /* Kurangkan sedikit ruang kosong sekeliling kotak */
+                padding: 10px 12px !important; 
                 border-radius: var(--radius-md);
                 border: 1px solid var(--border-color); 
                 margin-top: 10px;
-                gap: 2px 10px !important; /* [FIX]: Jarak atas-bawah dirapatkan dari 8px kepada 2px */
+                gap: 2px 10px !important; 
             }
             #display-username, #display-report-to {
                 justify-self: start !important; 
                 text-align: left;
             }
             #header-user-section .btn-logout {
-                padding: 3px 10px !important; /* [FIX]: Butang dikuruskan (padding atas/bawah dari 5px ke 3px) */
+                padding: 3px 10px !important; 
                 font-size: 9px !important;
                 width: 100%; 
             }
 
         .nav-tabs { padding: 10px; margin-bottom: 15px; }
             
-            /* --- KPI CARDS MOBILE (COMPACT & KEMAS) --- */
             .kpi-container { 
-                grid-template-columns: repeat(2, 1fr); 
-                gap: 8px; /* Kurangkan jarak antara kotak */
+                grid-template-columns: repeat(2, 1fr) !important; 
+                gap: 8px; 
                 padding: 0 10px; 
             }
             .kpi-card { 
-                padding: 10px 8px; /* Kurangkan ruang kosong dalam kotak */
-                border-radius: 10px; /* Bucu tak terlalu bulat untuk kotak kecil */
+                padding: 10px 8px; 
+                border-radius: 10px; 
             }
             .kpi-card h3 { 
-                font-size: 9px; /* Tajuk lebih halus */
+                font-size: 9px; 
                 margin-bottom: 4px; 
                 letter-spacing: 0.2px;
             }
             .kpi-card p { 
-                font-size: 16px; /* Saiz nombor dikecilkan dari 20px ke 16px */
-                font-weight: 800; /* Ditebalkan sikit supaya tetap menonjol */
+                font-size: 16px; 
+                font-weight: 800; 
             }
 
-            /* General Layout */
             .action-bar { padding: 15px; }
             .pagination-container { padding: 15px; flex-direction: column; gap: 12px; }
             .search-container { flex-direction: column; }
@@ -1015,7 +1008,6 @@ th {
             table { font-size: 12px; }
             th, td { padding: 12px 10px; }
 
-            /* --- FAKE PAGE & AUDIT TRAIL --- */
             .fp-header { padding: 15px 10px !important; flex-direction: column; gap: 12px; align-items: flex-start; border-radius: 0 !important; }
             .fp-header > div { width: 100%; justify-content: space-between; }
             
@@ -1059,11 +1051,9 @@ th {
             <h1>FINDINGS MONITORING SYSTEM</h1>
             <div id="header-user-section" style="display: grid; grid-template-columns: 1fr auto; gap: 4px 15px; align-items: center;">
                 
-                <!-- Baris 1: Kiri (Nama), Kanan (Sign Out) -->
                 <span id="display-username" style="grid-column: 1; grid-row: 1; justify-self: end; font-size: 12px; color: var(--text-main); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
                 <button class="btn-logout" onclick="handleLogout()" style="grid-column: 2; grid-row: 1; padding: 4px 12px; font-weight: 600; font-size: 10px;">SIGN OUT</button>
                 
-                <!-- Baris 2: Kiri (Report To), Kanan (Sync) -->
                 <span id="display-report-to" style="grid-column: 1; grid-row: 2; justify-self: end; font-size: 9px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.3px;"></span>
                 <button class="btn-logout" onclick="forceSyncData()" style="grid-column: 2; grid-row: 2; color: var(--text-main); border-color: var(--border-color); padding: 4px 12px; font-weight: 600; font-size: 10px;">⟳ SYNC</button>
                 
@@ -1100,7 +1090,6 @@ th {
                         <span class="filter-title">Select Zone</span>
                         <div class="btn-group" id="zone-buttons"></div>
                     </div>
-                    <!-- HIERARKI BARU: KINI ADA MANAGER! -->
                     <div id="manager-filters-container" style="display: none; padding-top: 10px; border-top: 1px dashed var(--border-color); margin-top: 5px;">
                         <span class="filter-title">Select Manager</span>
                         <div class="btn-group" id="manager-buttons"></div>
@@ -1116,18 +1105,42 @@ th {
                 </div>
             </div>
 
-            <div class="kpi-container">
+            <!-- TOGGLE KPI ALL/TODAY -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px;">
+                <div style="font-size: 14px; font-weight: 700; color: var(--text-main);">PRESTASI KESELURUHAN</div>
+                <div class="btn-group">
+                    <button class="btn-filter active" id="btn-kpi-all" onclick="toggleKPIMode('ALL')" style="font-weight:bold; font-size:11px;">📊 ALL TIME</button>
+                    <button class="btn-filter" id="btn-kpi-today" onclick="toggleKPIMode('TODAY')" style="font-weight:bold; font-size:11px;">🔥 TODAY</button>
+                </div>
+            </div>
+
+            <div class="kpi-container" style="grid-template-columns: repeat(4, 1fr);">
+                <!-- Box 1: Total Accounts -->
                 <div class="kpi-card kpi-clickable active" id="card-total" onclick="applyStatusFilter(null, this)">
                     <h3>Total Accounts</h3><p id="kpi-total">0</p>
                 </div>
-                <div class="kpi-card kpi-clickable" id="card-done" onclick="applyStatusFilter('UPDATED', this)">
-                    <h3>ATTENDED</h3><p id="kpi-done" style="color: var(--success-green);">0</p>
+                
+                <!-- Box 2: Split (Attended & Pending) -->
+                <div class="kpi-card" style="padding: 0; display: flex; flex-direction: column; overflow: hidden;">
+                    <div class="kpi-clickable" id="card-done" onclick="applyStatusFilter('UPDATED', this)" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; border-bottom: 1px solid var(--border-color); padding: 8px;">
+                        <h3 style="margin: 0 0 2px 0; font-size: 10px; line-height: 1;">ATTENDED <span id="kpi-lbl-done" style="font-weight:normal; font-size:9px; color:#94a3b8;">(All)</span></h3>
+                        <p id="kpi-done" style="color: var(--success-green); font-size: 18px; line-height: 1; margin:0;">0</p>
+                    </div>
+                    <div class="kpi-clickable" id="card-pending" onclick="applyStatusFilter('PENDING', this)" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 8px; background: #fafbfc;">
+                        <h3 style="margin: 0 0 2px 0; font-size: 10px; line-height: 1;">PENDING <span style="font-weight:normal; font-size:9px; color:#94a3b8;">(Overall)</span></h3>
+                        <p id="kpi-pending" style="color: var(--error-red); font-size: 18px; line-height: 1; margin:0;">0</p>
+                    </div>
                 </div>
-                <div class="kpi-card kpi-clickable" id="card-pending" onclick="applyStatusFilter('PENDING', this)">
-                    <h3>Pending</h3><p id="kpi-pending" style="color: var(--error-red);">0</p>
-                </div>
+
+                <!-- Box 3: Total OSB -->
                 <div class="kpi-card" style="cursor: default;">
                     <h3>Total OSB</h3><p id="kpi-osb">RM 0.00</p>
+                </div>
+
+                <!-- Box 4: Total Collected -->
+                <div class="kpi-card" style="cursor: default; border-color: var(--status-paid); background-color: #f0fdf4;">
+                    <h3 style="color: var(--status-paid);">TOTAL COLLECTED <span id="kpi-lbl-coll" style="font-weight:normal; font-size:9px;">(All)</span></h3>
+                    <p id="kpi-collected" style="color: var(--status-paid);">RM 0.00</p>
                 </div>
             </div>
 
@@ -1485,10 +1498,10 @@ th {
                         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; flex-wrap: wrap; gap: 10px;">
                             <label style="color: var(--text-main); font-size: 12px; font-weight: 700; margin-bottom: 0;">VERIFICATION FINDING LOG:</label>
                             
-                            <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                                 <div style="display: flex; align-items: center; gap: 6px;">
                                     <span style="font-size: 10px; font-weight: 700; color: var(--text-muted);">STATUS:</span>
-                                    <select id="finding-status-select" class="form-control" style="font-weight: 700; padding: 4px 24px 4px 8px; font-size: 11px; height: 26px; width: auto; border: 1px solid var(--accent-gold); color: var(--accent-gold); background-color: #eff6ff !important; cursor: pointer;">
+                                    <select id="finding-status-select" class="form-control" style="font-weight: 700; padding: 4px 24px 4px 8px; font-size: 11px; height: 26px; width: auto; border: 1px solid var(--accent-gold); color: var(--accent-gold); background-color: #eff6ff !important; cursor: pointer;" onchange="togglePaidInput()">
                                         <option value="">-- PILIH --</option>
                                         <option value="CALL" style="color: var(--status-call);">CALL</option>
                                         <option value="UCT" style="color: var(--status-uct);">UCT</option>
@@ -1497,7 +1510,11 @@ th {
                                         <option value="PAID" style="color: var(--status-paid);">PAID</option>
                                     </select>
                                 </div>
-                                <span id="textarea-info" style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Jumlah Karakter: 0/200</span>
+                                <div id="paid-amount-container" style="display: none; align-items: center; gap: 4px; margin-left: 10px;">
+                                    <span style="font-size: 10px; font-weight: 700; color: var(--text-muted);">RM:</span>
+                                    <input type="number" id="paid-amount-input" class="form-control" style="padding: 4px 8px; font-size: 11px; height: 26px; width: 90px; font-weight: bold; border: 1px solid var(--status-paid); color: var(--status-paid);" placeholder="0.00" min="0" step="0.01">
+                                </div>
+                                <span id="textarea-info" style="font-size: 11px; color: var(--text-muted); font-weight: 600; margin-left: auto;">Jumlah Karakter: 0/200</span>
                             </div>
                         </div>
                         
@@ -1619,16 +1636,18 @@ th {
         });
 
         let currentUser = null; 
-        // [ZONE HIERARCHY]
         let currentZone = null;
-        let currentManager = null; // <-- Ini yang hilang tadi!
+        let currentManager = null; 
         let currentAdmin = null; 
         let currentPic = null;
         let currentStatusFilter = null;
         
+        // --- KPI TOGGLE STATE ---
+        let currentKPIMode = 'ALL'; 
+
         let globalAccounts = []; 
         let filteredAccounts = []; 
-        let geoMap = {}; // Menggantikan regionsMap -> Menyimpan Zone -> Region -> Area
+        let geoMap = {}; 
         let parsedExcelRows = []; 
         let masterLocations = [];
         let currentModalIndex = -1;
@@ -1656,7 +1675,6 @@ async function checkLoginSession() {
     if (storedSession) {
         let userTmp = JSON.parse(storedSession);
         
-        // [FIX DB SELECT] Tarik zone dan area sekali
         const { data, error } = await supabase.from('users').select('status, role, assignedzone, assignedregion, assignedarea, report_to').eq('id', userTmp.id).single();
 
         if (error || !data || data.status === 'INACTIVE') {
@@ -1745,7 +1763,7 @@ window.requestBatchName = function() {
         
         let myZone = null;
         if (currentUser.role === 'manager' || currentUser.role === 'admin' || currentUser.role === 'master') {
-            myZone = currentUser.assignedzone; // Boleh jadi "BC, WEST"
+            myZone = currentUser.assignedzone; 
         }
 
         if (currentUser.role === 'super') {
@@ -1757,10 +1775,10 @@ window.requestBatchName = function() {
                 if(zones.length > 1) {
                     zoneSelect.innerHTML = `<option value="">-- PILIH ZON TUGASAN --</option>`;
                     zones.forEach(z => zoneSelect.innerHTML += `<option value="${z}">${z}</option>`);
-                    zoneSelect.disabled = false; // Buka lock supaya dia boleh pilih
+                    zoneSelect.disabled = false; 
                 } else {
                     zoneSelect.innerHTML = `<option value="${zones[0]}">${zones[0]}</option>`;
-                    zoneSelect.disabled = true; // Lock kalau cuma 1 zon
+                    zoneSelect.disabled = true; 
                 }
             } else {
                 zoneSelect.innerHTML = `<option value="UNKNOWN">TIADA ZON (Sila Reply Email Super)</option>`;
@@ -1779,7 +1797,7 @@ window.requestBatchName = function() {
             if (currentUser.role === 'super' && !selectedZone) { alert("Sila pilih Zon untuk batch ini!"); return; }
             
             document.getElementById('batchPromptModal').style.display = 'none';
-            resolve({ name: val, zone: selectedZone }); // Hantar kedua-dua nilai
+            resolve({ name: val, zone: selectedZone }); 
         };
         
         document.getElementById('btnBatchCancel').onclick = function() {
@@ -1854,7 +1872,7 @@ window.handleLogout = async function() {
             filteredAccounts = []; 
             geoMap = {};
             currentZone = null;
-            currentManager = null; // <-- Reset manager
+            currentManager = null; 
             currentAdmin = null; 
             currentPic = null;   
             currentStatusFilter = null;
@@ -1884,7 +1902,6 @@ window.forceSyncData = async function() {
             syncBtn.disabled = true;
             syncBtn.innerText = "SYNCING...";
 
-            // [FIX 1]: Refresh profil user dari database secara diam-diam sebelum tarik data
             const { data: userRefreshed } = await supabase.from('users').select('*').eq('id', currentUser.id).single();
             if (userRefreshed) {
                 currentUser = { ...currentUser, ...userRefreshed };
@@ -1938,10 +1955,8 @@ async function fetchFullDatabaseData() {
                 const pageSize = 1000;
                 
                 while(true) {
-                    // KOREKSI: Tambah lajur batch_name dan uploaded_by ke dalam select query di bawah
                     let fetchQuery = supabase.from('accounts').select('acct, zone, region, area, loc, type, delq, arrs_mth, osb, status, details, assignee_id, collector, batch_name, uploaded_by, batch_owner');
 
-                    // [FIX HIERARCHY ACCESS]
                     if (currentUser.role === 'user') {
                         let currentUserIdClean = String(currentUser.id).trim().toLowerCase();
                         fetchQuery = fetchQuery.eq('assignee_id', currentUserIdClean);
@@ -1963,7 +1978,6 @@ async function fetchFullDatabaseData() {
                         
                         fetchQuery = fetchQuery.or(`${zoneOrs}`);
                     }
-                    // 'super' fetches everything.
                     
                     const { data, error } = await fetchQuery.range(page * pageSize, (page + 1) * pageSize - 1);
                     if (error) { console.error("Error fetching data:", error); break; }
@@ -2061,6 +2075,18 @@ function rebuildGeoMapFromData() {
             switchTab(lastActiveTab);
         }
 
+        window.toggleKPIMode = function(mode) {
+            currentKPIMode = mode;
+            document.getElementById('btn-kpi-all').classList.remove('active');
+            document.getElementById('btn-kpi-today').classList.remove('active');
+            if(mode === 'ALL') {
+                document.getElementById('btn-kpi-all').classList.add('active');
+            } else {
+                document.getElementById('btn-kpi-today').classList.add('active');
+            }
+            applyFilterAndRender();
+        };
+
         function applyFilterAndRender() {
             let scopedGeoData = globalAccounts.filter(row => {
                 if (activeSearchQuery) {
@@ -2089,13 +2115,11 @@ function rebuildGeoMapFromData() {
                 
                 let matchZone = (currentZone && currentZone !== 'ALL') ? z === currentZone : true;
                 
-                // Manager "ALL MY ZONES" override
                 if (!currentZone && (currentUser.role === 'manager' || currentUser.role === 'master')) {
                     let myZones = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(zo => zo.trim().toUpperCase()) : [];
                     matchZone = myZones.includes(z);
                 }
 
-                // Check Manager filter
                 let matchManager = true;
                 if (currentManager && currentManager !== 'ALL') {
                     let adminObj = allSystemUsers.find(u => u.id.toUpperCase().trim() === adminOwner);
@@ -2150,7 +2174,6 @@ function rebuildGeoMapFromData() {
             if (totalCard) totalCard.classList.add('active');
         }
 
-        // --- HIERARKI PENAPIS BAHARU ---
         window.clearZoneSelection = function(btnElement) {
             updateActiveFilterHighlight('zone-buttons', btnElement);
             document.getElementById('manager-filters-container').style.display = 'none';
@@ -2164,13 +2187,10 @@ function rebuildGeoMapFromData() {
                 let myZones = currentUser.assignedzone ? currentUser.assignedzone.split(',').map(z => z.trim().toUpperCase()) : [];
                 currentManager = currentUser.id.toUpperCase().trim();
                 renderAdminSelectionUI(null, myZones, currentManager);
-            } else if (currentUser.role === 'master') {
+            } else if (currentUser.role === 'master' || currentUser.role === 'super') {
                 document.getElementById('manager-filters-container').style.display = 'block';
                 renderManagerSelectionUI(null);
-            } else if (currentUser.role === 'super') {
-                document.getElementById('manager-filters-container').style.display = 'block';
-                renderManagerSelectionUI(null);
-            }
+            } 
             
             applyFilterAndRender();
         };
@@ -2260,7 +2280,6 @@ function rebuildGeoMapFromData() {
                 container.innerHTML += `<button class="btn-filter" onclick="applyZoneFilter('${zone}', this)">${zone}</button>`;
             });
             
-            // SUPER ADMIN Wajib nampak Manager sejurus login
             document.getElementById('manager-filters-container').style.display = 'block';
             renderManagerSelectionUI(null);
         }
@@ -2302,7 +2321,7 @@ function rebuildGeoMapFromData() {
                 } else if (multiZones.length > 0) {
                     if (multiZones.includes(rZone)) inZone = true;
                 } else {
-                    inZone = true; // Super admin melihat semua tanpa filter
+                    inZone = true; 
                 }
 
                 if (inZone && rOwner && rOwner !== 'SUPER' && rOwner !== 'SYSTEM') {
@@ -2394,15 +2413,46 @@ function rebuildGeoMapFromData() {
         };
 
         function updateKPICards(dataArray) {
-            let countDone = 0; let totalOsbValue = 0;
+            let todayStr = new Date().toLocaleDateString('en-GB'); 
+
+            let countTotal = dataArray.length;
+            let countDoneAll = 0;
+            let countDoneToday = 0;
+            let totalOsbValue = 0;
+            let totalCollectedAll = 0;
+            let totalCollectedToday = 0;
+
             dataArray.forEach(row => {
-                if(row.status === 'UPDATED') countDone++;
+                let d = row.details || {};
                 totalOsbValue += parseFloat(row.osb) || 0;
+                
+                if (row.status === 'UPDATED') {
+                    countDoneAll++;
+                    totalCollectedAll += parseFloat(d.amt_collected) || 0;
+                    
+                    if (d.last_remark_date === todayStr) {
+                        countDoneToday++;
+                        totalCollectedToday += parseFloat(d.amt_collected) || 0;
+                    }
+                }
             });
-            document.getElementById('kpi-total').innerText = dataArray.length.toLocaleString();
-            document.getElementById('kpi-done').innerText = countDone.toLocaleString();
-            document.getElementById('kpi-pending').innerText = (dataArray.length - countDone).toLocaleString();
+
+            document.getElementById('kpi-total').innerText = countTotal.toLocaleString();
             document.getElementById('kpi-osb').innerText = 'RM ' + totalOsbValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            if (currentKPIMode === 'TODAY') {
+                document.getElementById('kpi-lbl-done').innerText = '(Today)';
+                document.getElementById('kpi-lbl-coll').innerText = '(Today)';
+                document.getElementById('kpi-done').innerText = countDoneToday.toLocaleString();
+                document.getElementById('kpi-pending').innerText = (countTotal - countDoneAll).toLocaleString(); 
+                document.getElementById('kpi-collected').innerText = 'RM ' + totalCollectedToday.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            } else {
+                document.getElementById('kpi-lbl-done').innerText = '(All)';
+                document.getElementById('kpi-lbl-coll').innerText = '(All)';
+                document.getElementById('kpi-done').innerText = countDoneAll.toLocaleString();
+                document.getElementById('kpi-pending').innerText = (countTotal - countDoneAll).toLocaleString();
+                document.getElementById('kpi-collected').innerText = 'RM ' + totalCollectedAll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            }
         }
 
         window.sortTable = function(columnName) {
@@ -2498,7 +2548,7 @@ function renderTablePage() {
             const endIndex = startIndex + rowsPerPage;
             const pageData = filteredAccounts.slice(startIndex, endIndex);
 
-            pageData.forEach((row, index) => { // Pastikan ada index
+            pageData.forEach((row, index) => { 
                 let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
                 let d = row.details || {};
                 let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '-';
@@ -2580,18 +2630,17 @@ window.fetchAndRenderUsers = async function() {
         
         if (error) throw error;
         allSystemUsers = data;
-        filterUserList(true); // <--- Hantar parameter 'true' supaya ia tak reset ke Page 1 selepas save
+        filterUserList(true); 
         populateAssignSubordinates();
     } catch (err) {
         console.error("Failed to fetch user list:", err);
     }
 };
 
-window.filterUserList = function(keepPage = false) { // <--- Tambah parameter keepPage
+window.filterUserList = function(keepPage = false) { 
     let query = document.getElementById('search-user').value.toLowerCase().trim();
     filteredSystemUsers = allSystemUsers.filter(u => u.id.toLowerCase().includes(query));
     
-    // <--- Hanya reset page jika pengguna membuat carian baru di search box
     if (!keepPage) {
         userCurrentPage = 1; 
     }
@@ -2640,7 +2689,6 @@ window.renderUserTablePage = async function() {
             });
             let reportSelect = `<select id="edit-report-${user.id}" style="padding:4px; font-size:11px; border:1px solid var(--border-color); border-radius:4px; max-width:110px;">${reportToOptions}</select>`;
 
-            // --- SISTEM CHECKBOX ZON UNTUK MANAGER, MASTER & ADMIN ---
             let userZones = user.assignedzone ? user.assignedzone.split(',').map(z => z.trim()) : [];
             let zoneCheckboxes = '';
             ['BC', 'WEST', 'EAST', 'HO'].forEach(z => {
@@ -2649,7 +2697,6 @@ window.renderUserTablePage = async function() {
             });
             let zoneSelect = `<div id="edit-zone-${user.id}" style="font-size:10px; display: ${(rName === 'master' || rName === 'manager' || rName === 'admin') ? 'flex' : 'none'}; flex-wrap:wrap; max-width:150px;">${zoneCheckboxes}</div>`;
             
-            // Kapsul fallback jika User/Super
             let noneText = `<span id="edit-none-${user.id}" style="font-size: 11px; color: var(--text-muted); display: ${(rName === 'user' || rName === 'super') ? 'inline-block' : 'none'};">N/A (Global/PIC)</span>`;
 
             let fullNameDisp = user.name ? user.name.toUpperCase() : '<span style="color:#cbd5e1;">TIADA DATA</span>'; 
@@ -2683,7 +2730,6 @@ window.toggleInlineAccessSelect = function(userId) {
     document.getElementById(`edit-none-${userId}`).style.display = (role === 'user' || role === 'super') ? 'inline-block' : 'none';
 }
 
-// --- KEMAS KINI FUNGSI SAVE USER (DILENGKAPI TRANSFER WIZARD) ---
 window.updateUserInline = async function(userId) {
     let newRole = document.getElementById(`edit-role-${userId}`).value;
     let newReportTo = document.getElementById(`edit-report-${userId}`).value;
@@ -2696,29 +2742,22 @@ window.updateUserInline = async function(userId) {
     let currentArea = currentUserData ? currentUserData.assignedarea : null;
     let oldZone = currentUserData ? currentUserData.assignedzone : null;
 
-    // --- LOGIK TRANSFER WIZARD BERMULA DI SINI ---
     let oldZonesArr = oldZone ? oldZone.split(',').map(z => z.trim()) : [];
     let newZonesArr = newZone ? newZone.split(',').map(z => z.trim()) : [];
     
-    // Cari zon mana yang "dibuang / hilang" dari pegangan staf ini
     let lostZones = oldZonesArr.filter(z => !newZonesArr.includes(z));
 
     if (lostZones.length > 0) {
-        // Semak 1: Ada pegang batch tak di zon yang hilang ni?
         let userBatches = [...new Set(globalAccounts.filter(a => a.batch_owner === userId && lostZones.includes(a.zone)).map(a => a.batch_name))];
         
-        // Semak 2: Ada staf bawahan tak yang sedang report kat dia?
         let userSubs = allSystemUsers.filter(u => u.report_to === userId);
 
         if (userBatches.length > 0 || userSubs.length > 0) {
-            // SEKAT SAVE & BUKA WIZARD JIKA ADA DATA TERSANGKUT!
             openTransferWizard(userId, newRole, newReportTo, newZone, currentArea, lostZones, userBatches, userSubs);
-            return; // Hentikan fungsi ni, biar Wizard ambil alih
+            return; 
         }
     }
-    // --- TAMAT LOGIK TRANSFER WIZARD ---
 
-    // Jika tak ada data tersangkut, teruskan Save secara normal
     let isVerified = await verifyAdminPasscode();
     if (!isVerified) return;
 
@@ -2734,7 +2773,6 @@ window.updateUserInline = async function(userId) {
     }
 };
 
-// --- FUNGSI SOKONGAN TRANSFER WIZARD ---
 window.openTransferWizard = function(userId, newRole, newReportTo, newZone, currentArea, lostZones, batches, subordinates) {
     let msg = `Tindakan anda akan mengeluarkan <b>${userId.toUpperCase()}</b> dari zon <b>${lostZones.join(', ')}</b>.<br><br>`;
     if (batches.length > 0) msg += `📦 <b>${batches.length} Batch Tugasan</b> sedang dipegangnya.<br>`;
@@ -2746,7 +2784,6 @@ window.openTransferWizard = function(userId, newRole, newReportTo, newZone, curr
     let dropdown = document.getElementById('tw-replacement');
     dropdown.innerHTML = '<option value="">-- PILIH PENGGANTI --</option>';
     
-    // Tapis senarai pengganti (Hanya Master, Manager & Admin yang aktif dan bukan diri dia sendiri)
     let targets = allSystemUsers.filter(u => u.status === 'ACTIVE' && (u.role === 'master' || u.role === 'manager' || u.role === 'admin') && u.id !== userId);
     targets.forEach(u => {
         dropdown.innerHTML += `<option value="${u.id}">${u.id.toUpperCase()} (${u.role.toUpperCase()} - ${u.assignedzone || 'TIADA'})</option>`;
@@ -2769,7 +2806,6 @@ document.getElementById('btn-tw-confirm').onclick = async function() {
         document.getElementById('loadingModal').style.display = 'flex';
 
         try {
-            // 1. Transfer Pemilikan Batch (Pukal)
             if (batches.length > 0) {
                 const { error: batchErr } = await supabase.from('accounts').update({ batch_owner: replacement }).in('batch_name', batches);
                 if (batchErr) throw batchErr;
@@ -2779,19 +2815,16 @@ document.getElementById('btn-tw-confirm').onclick = async function() {
                 }]);
             }
 
-            // Transfer pegangan individu (assignee_id) di zon yang ditinggalkan
             await supabase.from('accounts')
                 .update({ assignee_id: replacement })
                 .eq('assignee_id', userId)
                 .in('zone', lostZones);
-            // 2. Transfer Staf Bawahan (Report To)
             if (subordinates.length > 0) {
                 let subIds = subordinates.map(s => s.id);
                 const { error: subErr } = await supabase.from('users').update({ report_to: replacement }).in('id', subIds);
                 if (subErr) throw subErr;
             }
 
-            // 3. Akhir sekali, kemas kini profil bos asal
             const { error: userErr } = await supabase.from('users').update({ 
                 role: newRole, report_to: newReportTo, assignedzone: (newRole === 'master' || newRole === 'manager' || newRole === 'admin') ? newZone : null, assignedarea: currentArea
             }).eq('id', userId);
@@ -2799,7 +2832,6 @@ document.getElementById('btn-tw-confirm').onclick = async function() {
 
             showNotification("SERAHAN SELESAI", `Semua fail dan anak buah diserahkan kepada <b>${replacement.toUpperCase()}</b>. Profil bos asal telah dikemas kini.`);
             
-            // Buang cache supaya sistem download data terbaru
             const cacheKey = `scazp_cache_${currentUser.id}`;
             const timeKey = `scazp_time_${currentUser.id}`;
             await localforage.removeItem(cacheKey);
@@ -2892,7 +2924,7 @@ window.addNewUser = async function() {
             const zone = document.getElementById('new-user-zone') ? document.getElementById('new-user-zone').value : null;
             const area = document.getElementById('new-user-area') ? document.getElementById('new-user-area').value : null;
             
-        if(!id || !pass || !name) { // Wajibkan isi nama
+        if(!id || !pass || !name) { 
             showNotification("ERROR", "Sila lengkapkan ruangan Nama, User ID dan Password.", true);
             return; 
     }
@@ -2923,7 +2955,7 @@ window.addNewUser = async function() {
                     role: role, 
                     assignedzone: finalZone,
                     assignedarea: null,
-                    assignedregion: null, // Boleh dibiarkan null
+                    assignedregion: null, 
                     report_to: reportTo || null,
                     status: 'ACTIVE' 
                 }]);
@@ -2933,7 +2965,7 @@ if(error) {
         } else {
             showNotification("SUCCESS", `Akaun pengguna <b>${id}</b> telah didaftarkan.`);
             document.getElementById('new-user-id').value = ''; 
-            document.getElementById('new-user-name').value = ''; // Kosongkan lepas save
+            document.getElementById('new-user-name').value = ''; 
             document.getElementById('new-user-pass').value = '';
             fetchAndRenderUsers(); 
         }
@@ -3171,9 +3203,22 @@ window.exportDataByDate = async function(dateStr) {
             let isVerified = await verifyAdminPasscode();
             if (!isVerified) return;
 
+            const { data: findingData } = await supabase.from('findings').select('remark5').eq('id', findingId).single();
+
             const { error } = await supabase.from('findings').delete().eq('id', findingId);
             if(!error) {
+                if (findingData && findingData.remark5 && findingData.remark5.includes('PAID')) {
+                    let accountInfo = globalAccounts.find(a => a.acct === accNo);
+                    if(accountInfo) {
+                        let d = accountInfo.details || {};
+                        d.amt_collected = 0;
+                        await supabase.from('accounts').update({ details: d }).eq('acct', accNo);
+                        const cacheKey = `scazp_cache_${currentUser.id}`;
+                        await localforage.setItem(cacheKey, globalAccounts);
+                    }
+                }
                 showNotification("SUCCESSFULLY DELETED", "The findings row has been removed from the database.");
+                applyFilterAndRender(); 
                 openModal(accNo); 
             } else {
                 showNotification("ERROR", error.message, true);
@@ -3735,13 +3780,19 @@ window.openModal = async function(accNo) {
             
             document.getElementById('btnResetPending').style.display = (currentUser.role === 'super' || currentUser.role === 'master') ? 'block' : 'none';
             document.getElementById('finding-status-select').value = "";
+            document.getElementById('paid-amount-input').value = "";
 
             let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
+            let d = accountInfo.details || {};
+
             if(accountInfo.finding_status) {
                 document.getElementById('finding-status-select').value = accountInfo.finding_status;
+                if(accountInfo.finding_status === 'PAID' && d.amt_collected) {
+                    document.getElementById('paid-amount-input').value = d.amt_collected;
+                }
             }
+            togglePaidInput();
 
-            let d = accountInfo.details || {};
             let todayDate = new Date().toLocaleDateString('en-GB');
             let displayArrMth = accountInfo.arrs_mth ? Math.abs(parseFloat(accountInfo.arrs_mth)) : '-';
 
@@ -3883,11 +3934,11 @@ let wText = (line1 + line2).repeat(50);
                     if (data.remark5 && data.remark5.startsWith('[')) {
                         let extractedStatus = data.remark5.substring(1, data.remark5.indexOf(']'));
                         let badgeColor = 'var(--text-muted)';
-                        if (extractedStatus === 'CALL') badgeColor = 'var(--status-call)';
-                        if (extractedStatus === 'UCT') badgeColor = 'var(--status-uct)';
-                        if (extractedStatus === 'PTP') badgeColor = 'var(--status-ptp)';
-                        if (extractedStatus === 'PV') badgeColor = 'var(--status-pv)';
-                        if (extractedStatus === 'PAID') badgeColor = 'var(--status-paid)';
+                        if (extractedStatus.includes('CALL')) badgeColor = 'var(--status-call)';
+                        if (extractedStatus.includes('UCT')) badgeColor = 'var(--status-uct)';
+                        if (extractedStatus.includes('PTP')) badgeColor = 'var(--status-ptp)';
+                        if (extractedStatus.includes('PV')) badgeColor = 'var(--status-pv)';
+                        if (extractedStatus.includes('PAID')) badgeColor = 'var(--status-paid)';
 
                         statusBadgeHTML = ` | <span style="background-color: ${badgeColor}; color: white; padding: 2px 5px; border-radius: 3px; font-weight: 700; font-size: 8px; display: inline-block; vertical-align: middle; line-height: 1.2;">${extractedStatus}</span>`;
                     }
@@ -3916,6 +3967,17 @@ let wText = (line1 + line2).repeat(50);
                 });
             }
         };
+
+window.togglePaidInput = function() {
+    let val = document.getElementById('finding-status-select').value;
+    if(val === 'PAID') {
+        document.getElementById('paid-amount-container').style.display = 'flex';
+        document.getElementById('paid-amount-input').focus();
+    } else {
+        document.getElementById('paid-amount-container').style.display = 'none';
+        document.getElementById('paid-amount-input').value = '';
+    }
+};
         
         window.navigateModal = function(direction) {
             if (currentModalIndex === -1) return;
@@ -3932,6 +3994,8 @@ let wText = (line1 + line2).repeat(50);
                 
                 document.getElementById('single-remark-box').value = ''; 
                 document.getElementById('finding-status-select').value = '';
+                document.getElementById('paid-amount-input').value = '';
+                togglePaidInput();
                 document.getElementById('textarea-info').innerText = `Jumlah Karakter: 0/200`;
                 
                 openModal(nextAcc);
@@ -3947,6 +4011,8 @@ window.updateTextareaInfo = function(el) {
             document.getElementById('updateModal').style.display = 'none'; 
             document.getElementById('single-remark-box').value = ''; 
             document.getElementById('finding-status-select').value = '';
+            document.getElementById('paid-amount-input').value = '';
+            togglePaidInput();
             document.getElementById('textarea-info').innerText = `Jumlah Karakter: 0/200`;
         };
 
@@ -3960,6 +4026,17 @@ window.saveFinding = async function() {
         alert("Sila PILIH ACTION STATUS sedia ada terlebih dahulu!");
         document.getElementById('finding-status-select').focus();
         return;
+    }
+
+    let amtCollected = 0;
+    if(selectedStatus === 'PAID') {
+        let val = document.getElementById('paid-amount-input').value;
+        if(!val || parseFloat(val) <= 0) {
+            alert("Sila masukkan jumlah bayaran (RM) yang sah untuk status PAID.");
+            document.getElementById('paid-amount-input').focus();
+            return;
+        }
+        amtCollected = parseFloat(val);
     }
     
     if(!fullStory) { 
@@ -4014,7 +4091,14 @@ window.saveFinding = async function() {
                 hour12: true 
             });
 
-            let r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${formattedDate} ${formattedTime}`;
+            let r5Auto = "";
+            if (selectedStatus === 'PAID') {
+                r5Auto = `[${selectedStatus} : RM ${amtCollected.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${formattedDate} ${formattedTime}`;
+                updatedDetailsObj.amt_collected = amtCollected;
+            } else {
+                r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${formattedDate} ${formattedTime}`;
+                updatedDetailsObj.amt_collected = 0; 
+            }
             
             try {
                 const { data: insertedData, error: insertError } = await supabase
@@ -4070,6 +4154,7 @@ window.saveFinding = async function() {
                 resetDetails.finding_status = ""; 
                 resetDetails.last_remark_date = "";
                 resetDetails.timestamp = "";
+                resetDetails.amt_collected = 0; 
 
                 const { error: updError = null } = await supabase.from('accounts').update({ status: 'PENDING', details: resetDetails }).eq('acct', accNo);
                 if (updError) throw updError;
