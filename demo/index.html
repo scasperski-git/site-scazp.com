@@ -355,27 +355,6 @@ html, body {
             box-shadow: 0 0 0 1px var(--accent-gold);
         }
 
-    .kpi-clickable.active {
-    background-color: #eff6ff !important;
-    box-shadow: inset 0 0 0 2px var(--accent-gold) !important; 
-    /* Guna 'inset' supaya border di dalam dan tak rosakkan bucu bulat (border-radius) parent */
-}
-
-    .kpi-clickable.active {
-    background-color: #eff6ff !important;
-    box-shadow: inset 0 0 0 2px var(--accent-gold) !important; 
-}
-
-/* Bucu atas membulat untuk kotak ATTENDED */
-#card-done.active {
-border-radius: 11px 11px 0 0 !important;
-}
-
-/* Bucu bawah membulat untuk kotak PENDING */
-#card-pending.active {
-border-radius: 0 0 11px 11px !important;
-}
-    
         .kpi-card h3 { 
             margin: 0 0 8px 0; 
             font-size: 11px; 
@@ -391,6 +370,44 @@ border-radius: 0 0 11px 11px !important;
             color: var(--text-main); 
             letter-spacing: -0.5px;
         }
+
+    /* 1. Buang semua shadow cacat & tukar background */
+.kpi-clickable.active {
+    background-color: #eff6ff !important;
+    box-shadow: none !important;
+}
+
+/* 2. Jadikan kotak rujukan posisi (relative) */
+#card-done, #card-pending {
+    position: relative;
+}
+
+/* 3. Lukis bingkai (border) menggunakan pseudo-element */
+#card-done.active::after, #card-pending.active::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border: 2px solid var(--accent-gold);
+    pointer-events: none; /* Supaya tak kacau klik user */
+}
+
+/* 4. Lengkungan Desktop (Ikut saiz parent 12px) */
+#card-done.active::after {
+    border-radius: 12px 12px 0 0;
+}
+#card-pending.active::after {
+    border-radius: 0 0 12px 12px;
+}
+
+/* 5. Lengkungan Mobile (Ikut saiz parent 10px) */
+@media (max-width: 768px) {
+    #card-done.active::after {
+        border-radius: 10px 10px 0 0 !important;
+    }
+    #card-pending.active::after {
+        border-radius: 0 0 10px 10px !important;
+    }
+}
 
         /* --- ENHANCED TABLES --- */
         .table-container { 
@@ -1029,12 +1046,6 @@ th {
             letter-spacing: 0.2px;
             }
 
-            #card-done.active { 
-  border-radius: 9px 9px 0 0 !important;
-    }
-    #card-pending.active { 
-  border-radius: 0 0 9px 9px !important;
-    }
 
             .action-bar { padding: 0 !important; margin-bottom: 15px; }
             .pagination-container { padding: 15px; flex-direction: column; gap: 12px; }
