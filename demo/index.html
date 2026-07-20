@@ -371,13 +371,16 @@ html, body {
             letter-spacing: -0.5px;
         }
 
-/* 1. Gunakan shadow 1px ke dalam (inset) supaya saiz garisan sama macam Total Accounts */
+/* --- FIX FINAL KOTAK SPLIT --- */
+
+/* 1. Fix shadow & tembak garisan kelabu yang bertindih */
 .kpi-clickable.active {
     background-color: #eff6ff !important;
     box-shadow: inset 0 0 0 1px var(--accent-gold) !important;
+    border-bottom-color: transparent !important; /* Ini penyelesaian magik dia */
 }
 
-/* 2. Desktop: Lengkungan bucu mesti ditolak 1px dari kotak luar (12px - 1px = 11px) */
+/* 2. Desktop: Lengkungan bucu (12px - 1px = 11px) */
 #card-done.active { 
     border-radius: 11px 11px 0 0 !important; 
 }
@@ -385,7 +388,7 @@ html, body {
     border-radius: 0 0 11px 11px !important; 
 }
 
-/* 3. Mobile: Lengkungan bucu ditolak 1px dari kotak luar mobile (10px - 1px = 9px) */
+/* 3. Mobile: Lengkungan bucu (10px - 1px = 9px) */
 @media (max-width: 768px) {
     #card-done.active { 
         border-radius: 9px 9px 0 0 !important; 
