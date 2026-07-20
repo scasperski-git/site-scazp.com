@@ -652,6 +652,40 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    /* Animasi Pulse Baru */
+.pulse-style {
+  position: relative;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulse-style::before, .pulse-style::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  animation: pulse-ring 2s linear infinite;
+  z-index: 1;
+}
+
+.pulse-style::after {
+  animation-delay: 1s; /* Gelombang kedua */
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+    
   </style>
 </head>
 <body>
@@ -669,8 +703,9 @@
   <header class="navbar">
     <div class="nav-container">
       <a href="#" class="brand">
-        <div class="logo-wrapper">
-          <img src="logo.png" alt="SCAZP Logo" class="logo-img" onerror="this.style.display='none'">
+<div class="logo-wrapper pulse-style">
+  <img src="logo.png" alt="SCAZP Logo" class="logo-img" onerror="this.style.display='none'">
+</div>
           <svg class="moving-line" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <circle cx="50" cy="50" r="46" stroke="url(#neon-gradient)" stroke-width="2" fill="none" stroke-dasharray="120 180"/>
             <defs>
