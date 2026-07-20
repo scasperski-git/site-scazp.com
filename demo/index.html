@@ -371,42 +371,18 @@ html, body {
             letter-spacing: -0.5px;
         }
 
-/* 1. Reset: Buang semua shadow yang hodoh tu, kita tukar background je */
-.kpi-clickable.active, #card-done.active, #card-pending.active {
+/* 1. Gunakan shadow 1px ke dalam (inset) supaya saiz garisan sama macam Total Accounts */
+.kpi-clickable.active {
     background-color: #eff6ff !important;
-    box-shadow: none !important;
+    box-shadow: inset 0 0 0 1px var(--accent-gold) !important;
 }
 
-/* 2. Setkan posisi relatif supaya border tak lari ke tempat lain */
-#card-done, #card-pending {
-    position: relative;
+/* 2. Desktop: Lengkungan bucu mesti ditolak 1px dari kotak luar (12px - 1px = 11px) */
+#card-done.active { 
+    border-radius: 11px 11px 0 0 !important; 
 }
-
-/* 3. Lukis bingkai biru menggunakan ::after di sebelah dalam kotak yang aktif */
-#card-done.active::after, #card-pending.active::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    border: 2px solid var(--accent-gold);
-    pointer-events: none; /* Supaya tak halang jari bila klik */
-}
-
-/* 4. Desktop: Lengkungkan ikut bucu kotak besar (12px tolak 1px border luar = 11px) */
-#card-done.active::after { 
-    border-radius: 11px 11px 0 0; 
-}
-#card-pending.active::after { 
-    border-radius: 0 0 11px 11px; 
-}
-
-/* 5. Mobile: Lengkungkan ikut bucu kotak besar versi mobile (10px tolak 1px = 9px) */
-@media (max-width: 768px) {
-    #card-done.active::after { 
-        border-radius: 9px 9px 0 0 !important; 
-    }
-    #card-pending.active::after { 
-        border-radius: 0 0 9px 9px !important; 
-    }
+#card-pending.active { 
+    border-radius: 0 0 11px 11px !important; 
 }
     
         /* --- ENHANCED TABLES --- */
@@ -1018,6 +994,14 @@ th {
                 font-size: 9px !important;
                 width: 100%; 
             }
+
+            #card-done.active { 
+        border-radius: 9px 9px 0 0 !important; 
+    }
+    #card-pending.active { 
+        border-radius: 0 0 9px 9px !important; 
+    }
+}
 
         .nav-tabs { padding: 10px; margin-bottom: 15px; }
             
