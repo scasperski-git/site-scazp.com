@@ -3750,7 +3750,7 @@ window.renderBatchList = function() {
     // --- KOD BARU: Masukkan senarai batch ke dalam dropdown bawah ---
     const batchDropdown = document.getElementById('filter-batch-dropdown');
     if (batchDropdown) {
-        batchDropdown.innerHTML = '<option value="ALL">📦 SEMUA BATCH</option>';
+        batchDropdown.innerHTML = '<option value="ALL">📦 ALL BATCH</option>';
         batchKeys.forEach(bName => {
             batchDropdown.innerHTML += `<option value="${bName}">${bName}</option>`;
         });
