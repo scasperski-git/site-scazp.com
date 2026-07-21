@@ -1383,16 +1383,23 @@ th {
             <!-- CONTAINER KAWALAN JADUAL (KIRI & KANAN) -->
             <div class="agih-container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; background: #f8fafc; padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 20px;">
                 
-                <!-- KUMPULAN KIRI (TAPISAN) -->
+<!-- KUMPULAN KIRI (TAPISAN) -->
                 <div style="display: flex; gap: 10px; align-items: center; flex: 1; min-width: 300px; flex-wrap: wrap;">
                     <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); min-width: 65px;">🔍 TAPIS:</span>
-<select id="assign-filter-status" class="form-control" style="width: auto; flex: 1; min-width: 180px; padding: 8px 12px; font-weight: 600;" onchange="renderAssignTable()">
+                    
+                    <!-- KOD BARU: Dropdown Pilih Batch -->
+                    <select id="filter-batch-dropdown" class="form-control" style="width: auto; flex: 1; min-width: 150px; padding: 8px 12px; font-weight: 600; color: var(--accent-gold) !important;" onchange="renderAssignTable()">
+                        <option value="ALL">📦 SEMUA BATCH</option>
+                    </select>
+
+                    <select id="assign-filter-status" class="form-control" style="width: auto; flex: 1; min-width: 150px; padding: 8px 12px; font-weight: 600;" onchange="renderAssignTable()">
                         <option value="ALL">👑 ALL (Assigned & Unassigned)</option>
                         <option value="UNASSIGNED">🔴 UNASSIGNED (Belum Agih)</option>
                         <option value="ASSIGNED">🟢 ASSIGNED (Sudah Agih)</option>
                     </select>
-                    <select id="filter-collector-dropdown" class="form-control" style="width: auto; flex: 1; min-width: 180px; padding: 8px 12px;" onchange="renderAssignTable()">
-                        <option value="ALL">SEMUA COLLECTOR</option>
+                    
+                    <select id="filter-collector-dropdown" class="form-control" style="width: auto; flex: 1; min-width: 150px; padding: 8px 12px;" onchange="renderAssignTable()">
+                        <option value="ALL">SELECT PIC</option>
                     </select>
                 </div>
                 
@@ -3737,6 +3744,16 @@ window.renderBatchList = function() {
         return false;
     }).sort().reverse();
 
+    // --- KOD BARU: Masukkan senarai batch ke dalam dropdown bawah ---
+    const batchDropdown = document.getElementById('filter-batch-dropdown');
+    if (batchDropdown) {
+        batchDropdown.innerHTML = '<option value="ALL">📦 SEMUA BATCH</option>';
+        batchKeys.forEach(bName => {
+            batchDropdown.innerHTML += `<option value="${bName}">${bName}</option>`;
+        });
+    }
+    // ----------------------------------------------------------------
+
     if (batchKeys.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Tiada rekod batch ditemui untuk anda.</td></tr>';
         return;
@@ -3757,7 +3774,7 @@ window.renderBatchList = function() {
 
         tbody.innerHTML += `
             <tr>
-                <td style="font-weight: 700; color: var(--text-main);">${bName}</td>
+                <td style="font-weight: 700; color: var(--accent-gold); cursor: pointer; text-decoration: underline;" onclick="filterByBatch('${bName}')" title="Klik untuk lihat akaun batch ini">${bName}</td>
                 <td style="font-weight: 600; color: var(--accent-gold);">${bInfo.zone}</td>
                 <td style="color: var(--text-muted);">${bInfo.uploaded_by.toUpperCase()}</td>
                 <td style="font-weight: bold; color: var(--text-main);">${bInfo.batch_owner.toUpperCase()}</td>
@@ -4420,6 +4437,7 @@ window.populateAssignSubordinates = function() {
 window.renderAssignTable = function() {
     const statusFilter = document.getElementById('assign-filter-status').value;
     const collectorFilter = document.getElementById('filter-collector-dropdown').value;
+    const batchFilter = document.getElementById('filter-batch-dropdown').value; // <-- KOD BARU
 
     const tbody = document.getElementById('assign-table-body');
     
@@ -4429,8 +4447,13 @@ window.renderAssignTable = function() {
         if (statusFilter === 'UNASSIGNED') matchStatus = isUnassigned;
         else if (statusFilter === 'ASSIGNED') matchStatus = !isUnassigned;
         else matchStatus = true;
+        
         let matchCollector = (collectorFilter === 'ALL' || !collectorFilter) ? true : (row.collector === collectorFilter);
-        return matchStatus && matchCollector;
+        
+        // --- KOD BARU: Syarat tapisan Batch ---
+        let matchBatch = (batchFilter === 'ALL' || !batchFilter) ? true : (row.batch_name === batchFilter);
+        
+        return matchStatus && matchCollector && matchBatch;
     });
 
     if (currentAssignSortColumn) {
@@ -4493,6 +4516,16 @@ window.renderAssignTable = function() {
             `;
         });
     }
+
+    window.filterByBatch = function(batchName) {
+    const dropdown = document.getElementById('filter-batch-dropdown');
+    if(dropdown) {
+        dropdown.value = batchName; // Automatik tukar nilai dropdown
+        renderAssignTable();        // Kemas kini jadual
+        // Auto-scroll skrin ke bahagian jadual akaun supaya user nampak
+        document.getElementById('assign-filter-status').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+};
 
     document.getElementById('assign-page-info').innerText = `Page ${currentAssignPage} of ${totalPages}`;
     const assignPaginationDiv = document.querySelector('#assign-panel .pagination-controls');
