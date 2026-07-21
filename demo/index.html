@@ -2533,7 +2533,7 @@ filteredAccounts.sort((a, b) => {
             }
         }
 
-        window.sortTable = function(columnName) {
+window.sortTable = function(columnName) {
             if (currentSortColumn === columnName) {
                 currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
             } else {
@@ -2552,18 +2552,12 @@ filteredAccounts.sort((a, b) => {
                     let normalizeDate = (d) => {
                         if (!d) return '';
                         let p = d.split('/');
-                        if (p.length === 3 && p[2].length === 2) p[2] = '20' + p[2]; // Paksa jadi 2026 kalau data baru
+                        if (p.length === 3 && p[2].length === 2) p[2] = '20' + p[2];
                         return p.reverse().join('');
                     };
                     
                     valueA = normalizeDate(dateA);
                     valueB = normalizeDate(dateB);
-                }
-                
-                    let dateA = (a.details && a.details.last_remark_date) ? a.details.last_remark_date : '';
-                    let dateB = (b.details && b.details.last_remark_date) ? b.details.last_remark_date : '';
-                    valueA = dateA ? dateA.split('/').reverse().join('') : '';
-                    valueB = dateB ? dateB.split('/').reverse().join('') : '';
                 }
 
                 if (columnName === 'osb' || columnName === 'arrs_mth' || columnName === 'delq') {
