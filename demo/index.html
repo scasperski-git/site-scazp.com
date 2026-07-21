@@ -1405,12 +1405,13 @@ th {
                 
                 <!-- KUMPULAN KANAN (TINDAKAN) -->
                 <!-- Kekalkan flex: 1 untuk kumpulan ini -->
-                <div style="display: flex; gap: 10px; align-items: center; flex: 1; min-width: 300px; justify-content: flex-end; flex-wrap: wrap;">
-                    <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">⚙️ AGIH KEPADA:</span>
-                    <!-- Buang flex: 1 dari select ini, gantikan dengan max-width: 250px -->
-                    <select id="assign-target-user" class="form-control" style="width: 100%; max-width: 250px; padding: 8px 12px;">
+                <div style="display: flex; gap: 10px; align-items: center; flex: 1; min-width: 380px; justify-content: flex-end; flex-wrap: wrap;">
+                    <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); white-space: nowrap;">⚙️ AGIH KEPADA:</span>
+                <!-- Tukar style kat select ni: buang width 100% -->
+                    <select id="assign-target-user" class="form-control" style="width: auto; flex: 1; min-width: 180px; max-width: 250px; padding: 8px 12px;">
                         <option value="">-- SELECT USER ID --</option>
                     </select>
+                    
                     <button class="btn-submit" onclick="executeBatchAssignment()" style="background-color: var(--success-green); padding: 9px 18px; font-size: 12px; white-space: nowrap;">✅ ASSIGN</button>
                 </div>
             </div>
