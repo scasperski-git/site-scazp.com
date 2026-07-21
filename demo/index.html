@@ -2188,8 +2188,23 @@ function rebuildGeoMapFromData() {
             
             updateKPICards(scopedGeoData);
             
+// --- KOD BARU: Cipta format tarikh HARI INI yang tepat (DD/MM/YYYY) ---
+            let t = new Date();
+            let exactToday = String(t.getDate()).padStart(2, '0') + '/' + String(t.getMonth() + 1).padStart(2, '0') + '/' + t.getFullYear();
+
             filteredAccounts = scopedGeoData.filter(row => {
-                return currentStatusFilter ? row.status === currentStatusFilter : true;
+                let matchStatus = currentStatusFilter ? row.status === currentStatusFilter : true;
+                
+                let matchDate = true;
+                // Jika butang TODAY aktif DAN user klik kotak ATTENDED, table patut tunjuk hari ni punya je
+                if (currentKPIMode === 'TODAY' && currentStatusFilter === 'UPDATED') {
+                    let rowDate = (row.details && row.details.last_remark_date) ? row.details.last_remark_date : '';
+                    if (rowDate !== exactToday) {
+                        matchDate = false;
+                    }
+                }
+                
+                return matchStatus && matchDate;
             });
             
             currentSortColumn = 'last_date'; 
@@ -2464,7 +2479,8 @@ function rebuildGeoMapFromData() {
         };
 
         function updateKPICards(dataArray) {
-            let todayStr = new Date().toLocaleDateString('en-GB'); 
+            let t = new Date();
+            let todayStr = String(t.getDate()).padStart(2, '0') + '/' + String(t.getMonth() + 1).padStart(2, '0') + '/' + t.getFullYear();
 
             let countTotal = dataArray.length;
             let countDoneAll = 0;
