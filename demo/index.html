@@ -3266,15 +3266,28 @@ window.exportDataByDate = async function(dateStr) {
                     idsToUpdate.push(row.id); 
                 }); 
 
-                let formattedDate = dateStr.replace(/-/g, ''); 
+            let formattedDate = dateStr.replace(/-/g, ''); 
+                
+                // --- KOD BARU: Jana masa semasa (HHMMSS) ---
+                let now = new Date();
+                let hh = String(now.getHours()).padStart(2, '0');
+                let min = String(now.getMinutes()).padStart(2, '0');
+                let ss = String(now.getSeconds()).padStart(2, '0');
+                let timeStr = `${hh}${min}${ss}`;
+                // -------------------------------------------
                 
                 Object.keys(groupedData).forEach(reg => {
                     const ws = XLSX.utils.json_to_sheet(groupedData[reg]);
                     const wb = XLSX.utils.book_new();
                     XLSX.utils.book_append_sheet(wb, ws, "Findings");
                     
-                    const fileName = `${reg}_FINDINGS_${formattedDate}.xlsx`;
+                    // --- KOD BARU: Buang 'UNKNOWN' dan tambah masa ---
+                    // Kalau region tu UNKNOWN, nama fail mula dengan 'FINDINGS' je. Kalau ada region, guna nama region tu.
+                    let prefix = reg === 'UNKNOWN' ? 'FINDINGS' : `${reg}_FINDINGS`;
+                    
+                    const fileName = `${prefix}_${formattedDate}_${timeStr}.xlsx`;
                     XLSX.writeFile(wb, fileName);
+                    // -------------------------------------------------
                 });
 
                 const { error: updateError } = await supabase
