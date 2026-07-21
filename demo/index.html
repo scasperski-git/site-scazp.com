@@ -1380,35 +1380,35 @@ th {
                 </div>
             </div>
             
-<!-- CONTAINER KAWALAN JADUAL (KIRI & KANAN) -->
-            <div class="agih-container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; background: #f8fafc; padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 20px;">
+            <!-- CONTAINER KAWALAN JADUAL (KIRI & KANAN) -->
+            <div class="agih-container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; background: #f8fafc; padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 20px;">
                 
                 <!-- KUMPULAN KIRI (TAPISAN) -->
-                <!-- Tukar flex: 1 kepada flex: 2 supaya dia dapat lebih banyak ruang untuk bernafas -->
-                <div style="display: flex; gap: 10px; align-items: center; flex: 2; min-width: 300px; flex-wrap: wrap;">
-                    <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); min-width: 65px;">🔍 FILTER:</span>
+                <div style="display: flex; gap: 10px; align-items: center; flex: 2; min-width: 250px; flex-wrap: wrap;">
+                    <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); min-width: 60px;">🔍 FILTER:</span>
                     
-                    <select id="filter-batch-dropdown" class="form-control" style="width: auto; flex: 1; min-width: 150px; padding: 8px 12px; font-weight: 600; color: var(--accent-gold) !important;" onchange="renderAssignTable()">
+                    <select id="filter-batch-dropdown" class="form-control" style="flex: 1; min-width: 130px; padding: 8px 12px; font-weight: 600; color: var(--accent-gold) !important;" onchange="renderAssignTable()">
                         <option value="ALL">📦 ALL BATCH</option>
                     </select>
 
-                    <select id="assign-filter-status" class="form-control" style="width: auto; flex: 1; min-width: 150px; padding: 8px 12px; font-weight: 600;" onchange="renderAssignTable()">
+                    <select id="assign-filter-status" class="form-control" style="flex: 1; min-width: 130px; padding: 8px 12px; font-weight: 600;" onchange="renderAssignTable()">
                         <option value="ALL">👑 ALL (Assigned & Unassigned)</option>
                         <option value="UNASSIGNED">🔴 UNASSIGNED </option>
                         <option value="ASSIGNED">🟢 ASSIGNED</option>
                     </select>
                     
-                    <select id="filter-collector-dropdown" class="form-control" style="width: auto; flex: 1; min-width: 150px; padding: 8px 12px;" onchange="renderAssignTable()">
+                    <select id="filter-collector-dropdown" class="form-control" style="flex: 1; min-width: 130px; padding: 8px 12px;" onchange="renderAssignTable()">
                         <option value="ALL">ALL COLLECTOR</option>
                     </select>
                 </div>
                 
                 <!-- KUMPULAN KANAN (TINDAKAN) -->
-                <!-- Kekalkan flex: 1 untuk kumpulan ini -->
-                <div style="display: flex; gap: 10px; align-items: center; flex: 1; min-width: 380px; justify-content: flex-end; flex-wrap: wrap;">
+                <!-- Tukar min-width kepada 200px supaya ngam di mobile -->
+                <div style="display: flex; gap: 10px; align-items: center; flex: 1; min-width: 200px; justify-content: flex-end; flex-wrap: wrap;">
                     <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); white-space: nowrap;">⚙️ AGIH KEPADA:</span>
-                <!-- Tukar style kat select ni: buang width 100% -->
-                    <select id="assign-target-user" class="form-control" style="width: auto; flex: 1; min-width: 180px; max-width: 250px; padding: 8px 12px;">
+                    
+                    <!-- Buang width: 100%, gantikan dengan flex: 1 -->
+                    <select id="assign-target-user" class="form-control" style="flex: 1; min-width: 140px; max-width: 250px; padding: 8px 12px;">
                         <option value="">-- SELECT USER ID --</option>
                     </select>
                     
