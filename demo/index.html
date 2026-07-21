@@ -2649,15 +2649,22 @@ function renderTablePage() {
             const endIndex = startIndex + rowsPerPage;
             const pageData = filteredAccounts.slice(startIndex, endIndex);
 
-            pageData.forEach((row, index) => { 
+pageData.forEach((row, index) => { 
                 let badgeClass = row.status === 'UPDATED' ? 'status-done' : 'status-pending';
                 let d = row.details || {};
                 let assigneeDisp = row.assignee_id && row.assignee_id !== 'UNASSIGNED' ? row.assignee_id.toUpperCase() : '-';
                 let ownerDisp = row.batch_owner ? row.batch_owner.toUpperCase() : 'UNKNOWN';
 
+                // --- KOD BARU: Potong YYYY jadi YY untuk paparan sahaja ---
+                let rawDate = d.last_remark_date || '-';
+                if (rawDate.length === 10) { 
+                    rawDate = rawDate.substring(0, 6) + rawDate.substring(8); // Cth: 21/07/2026 jadi 21/07/26
+                }
+
                 let timeDisplay = '';
                 if (d.timestamp) {
                     let timeObj = new Date(d.timestamp);
+                    // Format masa ke HH:MM AM/PM
                     let formattedTime = timeObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
                     timeDisplay = `<br><span style="font-size: 10px; color: #94a3b8; font-weight: normal;">${formattedTime}</span>`;
                 }
@@ -2679,7 +2686,8 @@ function renderTablePage() {
                         <td>${Number(row.osb).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td><span class="status-badge ${badgeClass}">${row.status === 'UPDATED' ? 'ATTENDED' : row.status}</span></td>
                         <td>
-                            <span style="font-weight: 600; color: var(--text-muted); font-size: 12px;">${d.last_remark_date || '-'}</span>
+                            <!-- KOD BARU: Guna rawDate yang dah dipotong -->
+                            <span style="font-weight: 600; color: var(--text-muted); font-size: 12px;">${rawDate}</span>
                             ${timeDisplay}
                         </td>
                         <td style="font-weight: 600; color: var(--text-main);">${assigneeDisp}</td>
@@ -3178,7 +3186,7 @@ if(error) {
                     let mm = String(loopDate.getMonth() + 1).padStart(2, '0');
                     let dd = String(loopDate.getDate()).padStart(2, '0');
                     let dateKey = `${yyyy}-${mm}-${dd}`;
-                    let displayDate = `${dd}/${mm}/${yyyy}`;
+                    let displayDate = `${dd}/${mm}/${String(yyyy).slice(-2)}`;
 
                     let statusObj = dateMap[dateKey];
                     let statusHtml = ''; let actionHtml = '-';
@@ -3932,8 +3940,8 @@ window.openModal = async function(accNo) {
         
         togglePaidInput();
 
-            let todayDate = new Date().toLocaleDateString('en-GB');
-            let displayArrMth = accountInfo.arrs_mth ? Math.abs(parseFloat(accountInfo.arrs_mth)) : '-';
+            let tDate = new Date();
+            let todayDate = String(tDate.getDate()).padStart(2, '0') + '/' + String(tDate.getMonth() + 1).padStart(2, '0') + '/' + String(tDate.getFullYear()).slice(-2);
 
 let baseText = `INTERNAL DATA-VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
 
@@ -4063,10 +4071,12 @@ let wText = (line1 + line2).repeat(50);
                 findingsList.forEach((data) => {
                     let dateFormatted = 'N/A';
                     if (data.updated_at) {
-                        dateFormatted = new Date(data.updated_at).toLocaleString('en-GB', {
-                            day: '2-digit', month: '2-digit', year: 'numeric',
-                            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
-                        });
+                        let dtObj = new Date(data.updated_at);
+                        let dd = String(dtObj.getDate()).padStart(2, '0');
+                        let mm = String(dtObj.getMonth() + 1).padStart(2, '0');
+                        let yy = String(dtObj.getFullYear()).slice(-2); // Ambil 2 digit tahun terakhir
+                        let tm = dtObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+                        dateFormatted = `${dd}/${mm}/${yy} ${tm}`; // Output: 21/07/26 08:53 PM
                     }
                     
                     let statusBadgeHTML = '';
@@ -4223,7 +4233,7 @@ window.saveFinding = async function() {
             let currentDateTime = new Date();
             let formattedDate = String(currentDateTime.getDate()).padStart(2, '0') + '/' + 
                                 String(currentDateTime.getMonth() + 1).padStart(2, '0') + '/' + 
-                                currentDateTime.getFullYear();
+                                String(currentDateTime.getFullYear()).slice(-2); // YY (Untuk paparan log teks)
             let formattedTime = currentDateTime.toLocaleTimeString('en-US', { 
                 hour: '2-digit', 
                 minute: '2-digit', 
