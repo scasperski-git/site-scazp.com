@@ -1125,9 +1125,15 @@ th {
         </div>
 
         <div id="dashboard-panel" class="main-panel">
-            <div class="filter-section" style="margin-bottom: 20px;">
-                <span class="filter-title">Advanced Search By:</span>
-                <div class="search-container">
+<div class="filter-section" style="margin-bottom: 20px;">
+                <!-- Bahagian Tajuk Yang Boleh Diklik -->
+                <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none;" onclick="toggleAdvancedSearch()">
+                    <span class="filter-title" style="margin-bottom: 0;">🔍 ADVANCED SEARCH</span>
+                    <span id="adv-search-icon" style="font-size: 10px; font-weight: 700; color: var(--text-muted); background: #f8fafc; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px;">► SHOW</span>
+                </div>
+                
+                <!-- Container Carian (Disembunyikan secara lalai dengan display: none) -->
+                <div class="search-container" id="adv-search-container" style="margin-top: 15px; display: none;">
                     <select id="search-type" class="form-control" style="width: 100%; max-width: 200px;">
                         <option value="acct">Account No</option>
                         <option value="nric">NRIC (All Linked)</option>
@@ -4609,6 +4615,25 @@ document.getElementById('username').addEventListener('input', function(e) {
 document.getElementById('new-user-id').addEventListener('input', function(e) {
     this.value = this.value.toUpperCase();
 });
+
+window.toggleAdvancedSearch = function() {
+            const container = document.getElementById('adv-search-container');
+            const icon = document.getElementById('adv-search-icon');
+            
+            if (container.style.display === 'none') {
+                container.style.display = ''; // Kosongkan supaya ia ikut CSS asal (flex)
+                icon.innerText = '▼ HIDE';
+                icon.style.color = 'var(--accent-gold)';
+                icon.style.borderColor = 'var(--accent-gold)';
+                icon.style.backgroundColor = '#eff6ff';
+            } else {
+                container.style.display = 'none';
+                icon.innerText = '► SHOW';
+                icon.style.color = 'var(--text-muted)';
+                icon.style.borderColor = 'var(--border-color)';
+                icon.style.backgroundColor = '#f8fafc';
+            }
+        };
         
     </script>
 </body>
