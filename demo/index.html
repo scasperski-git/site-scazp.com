@@ -4258,11 +4258,11 @@ let r5Auto = "";
             let currentCollected = parseFloat(updatedDetailsObj.amt_collected) || 0; 
 
             if (selectedStatus === 'PAID') {
-                r5Auto = `[${selectedStatus} : RM ${amtCollected.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${formattedDate} ${formattedTime}`;
+                r5Auto = `${selectedStatus}:RM ${amtCollected.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}-BY (${currentUser.username.toUpperCase()})-${formattedDate} ${formattedTime}`;
                 // Campurkan bayaran baharu ke dalam jumlah sedia ada (Accumulate)
                 updatedDetailsObj.amt_collected = currentCollected + amtCollected;
             } else {
-                r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${formattedDate} ${formattedTime}`;
+                r5Auto = `${selectedStatus} BY-(${currentUser.username.toUpperCase()})-${formattedDate} ${formattedTime}`;
                 // Biarkan jumlah terkumpul kekal seperti asal, JANGAN reset ke 0
                 updatedDetailsObj.amt_collected = currentCollected; 
             }
