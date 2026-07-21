@@ -4375,6 +4375,7 @@ window.populateAssignSubordinates = function() {
             if (!dropdown) return;
             
             dropdown.innerHTML = '<option value="">-- PILIH STAF BAWAHAN --</option>';
+            dropdown.innerHTML += '<option value="UNASSIGNED" style="font-weight:bold; color:var(--error-red);">🔴 KEMBALIKAN KE BAKUL (UNASSIGN)</option>';
             if (!allSystemUsers || allSystemUsers.length === 0) return;
             
             let subordinates = [];
@@ -4540,7 +4541,8 @@ window.renderAssignTable = function() {
             document.getElementById('loadingModal').style.display = 'flex';
 
             try {
-                let cleanTargetUser = targetUser.toLowerCase().trim();
+                // Pastikan nilai UNASSIGNED kekal format asal, kalau staf biasa baru huruf kecil
+                let cleanTargetUser = targetUser === 'UNASSIGNED' ? 'UNASSIGNED' : targetUser.toLowerCase().trim();
                 
                 const { error } = await supabase.from('accounts').update({ assignee_id: cleanTargetUser }).in('acct', selectedAccts);
                 if(error) throw error;
