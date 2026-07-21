@@ -2126,16 +2126,20 @@ function rebuildGeoMapFromData() {
             switchTab(lastActiveTab);
         }
 
-        window.toggleKPIMode = function(mode) {
+    window.toggleKPIMode = function(mode) {
             currentKPIMode = mode;
             document.getElementById('btn-kpi-all').classList.remove('active');
             document.getElementById('btn-kpi-today').classList.remove('active');
+            
             if(mode === 'ALL') {
                 document.getElementById('btn-kpi-all').classList.add('active');
+                // Sistem auto-klik kotak 'Total Accounts' bila kembali ke ALL TIME
+                applyStatusFilter(null, document.getElementById('card-total')); 
             } else {
                 document.getElementById('btn-kpi-today').classList.add('active');
+                // Sistem auto-klik kotak 'ATTENDED' supaya jadual terus menapis hasil HARI INI
+                applyStatusFilter('UPDATED', document.getElementById('card-done')); 
             }
-            applyFilterAndRender();
         };
 
         function applyFilterAndRender() {
