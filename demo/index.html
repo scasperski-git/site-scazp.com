@@ -4431,7 +4431,7 @@ window.populateAssignSubordinates = function() {
     
     let collectors = [...new Set(globalAccounts.map(a => a.collector).filter(Boolean))].sort();
     
-    dropdown.innerHTML = '<option value="ALL">SEMUA COLLECTOR</option>';
+    dropdown.innerHTML = '<option value="ALL">ALL COLLECTOR</option>';
     collectors.forEach(c => {
         dropdown.innerHTML += `<option value="${c}">${c.toUpperCase()}</option>`;
     });
