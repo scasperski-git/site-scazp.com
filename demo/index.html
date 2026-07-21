@@ -2729,6 +2729,26 @@ window.filterUserList = function(keepPage = false) {
     let query = document.getElementById('search-user').value.toLowerCase().trim();
     filteredSystemUsers = allSystemUsers.filter(u => u.id.toLowerCase().includes(query));
     
+    // --- KOD BARU: Susunan Hierarki Pangkat ---
+    const roleWeight = { 'super': 1, 'master': 2, 'manager': 3, 'admin': 4, 'user': 5 };
+    
+    filteredSystemUsers.sort((a, b) => {
+        let wA = roleWeight[a.role ? a.role.toLowerCase().trim() : 'user'] || 99;
+        let wB = roleWeight[b.role ? b.role.toLowerCase().trim() : 'user'] || 99;
+        
+        // 1. Susun ikut Pangkat (Super -> Master -> Manager -> Admin -> User)
+        if (wA !== wB) return wA - wB;
+        
+        // 2. Kalau pangkat sama, susun ikut nama Bos (report_to) supaya berkumpul
+        let rA = a.report_to ? a.report_to.toLowerCase() : 'zzz';
+        let rB = b.report_to ? b.report_to.toLowerCase() : 'zzz';
+        if (rA !== rB) return rA.localeCompare(rB);
+        
+        // 3. Akhir sekali, baru susun ikut abjad ID
+        return a.id.localeCompare(b.id);
+    });
+    // ------------------------------------------
+
     if (!keepPage) {
         userCurrentPage = 1; 
     }
