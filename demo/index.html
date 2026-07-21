@@ -302,6 +302,12 @@ html, body {
             box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
         }
 
+    /* Efek kotak hijau bila kotak TOTAL COLLECTED ditekan */
+#card-collected.active {
+    background-color: #dcfce7 !important; 
+    box-shadow: inset 0 0 0 1px var(--status-paid) !important;
+}
+
         #zone-filters-container, #region-filters-container, #area-filters-container { 
             display: none;
             padding-top: 5px; 
@@ -1188,8 +1194,8 @@ th {
                     <h3>Total OSB</h3><p id="kpi-osb">RM 0.00</p>
                 </div>
 
-                <!-- Box 4: Total Collected -->
-                <div class="kpi-card" style="cursor: default; border-color: var(--status-paid); background-color: #f0fdf4;">
+<!-- Box 4: Total Collected -->
+                <div class="kpi-card kpi-clickable" id="card-collected" onclick="applyStatusFilter('PAID', this)" style="border-color: var(--status-paid); background-color: #f0fdf4;">
                     <h3 style="color: var(--status-paid);">TOTAL COLLECTED <span id="kpi-lbl-coll" style="font-weight:normal; font-size:9px;">(All)</span></h3>
                     <p id="kpi-collected" style="color: var(--status-paid);">RM 0.00</p>
                 </div>
@@ -2197,11 +2203,19 @@ window.toggleKPIMode = function(mode) {
             let exactToday = String(t.getDate()).padStart(2, '0') + '/' + String(t.getMonth() + 1).padStart(2, '0') + '/' + t.getFullYear();
 
             filteredAccounts = scopedGeoData.filter(row => {
-                let matchStatus = currentStatusFilter ? row.status === currentStatusFilter : true;
+                let matchStatus = true;
+                
+                // Tambahan logik untuk tapis kotak PAID
+                if (currentStatusFilter === 'PAID') {
+                    // Cari akaun yang ada rekod finding_status 'PAID'
+                    matchStatus = row.finding_status === 'PAID';
+                } else if (currentStatusFilter) {
+                    matchStatus = row.status === currentStatusFilter;
+                }
                 
                 let matchDate = true;
-                // Jika butang TODAY aktif DAN user klik kotak ATTENDED, table patut tunjuk hari ni punya je
-                if (currentKPIMode === 'TODAY' && currentStatusFilter === 'UPDATED') {
+                // Jika butang TODAY aktif DAN user klik kotak ATTENDED atau PAID
+                if (currentKPIMode === 'TODAY' && (currentStatusFilter === 'UPDATED' || currentStatusFilter === 'PAID')) {
                     let rowDate = (row.details && row.details.last_remark_date) ? row.details.last_remark_date : '';
                     if (rowDate !== exactToday) {
                         matchDate = false;
