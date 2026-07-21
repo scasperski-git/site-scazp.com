@@ -2188,9 +2188,10 @@ function rebuildGeoMapFromData() {
             
             updateKPICards(scopedGeoData);
             
-// --- KOD BARU: Cipta format tarikh HARI INI yang tepat (DD/MM/YYYY) ---
+            // Cipta format tarikh HARI INI yang tepat (DD/MM/YY)
             let t = new Date();
-            let exactToday = String(t.getDate()).padStart(2, '0') + '/' + String(t.getMonth() + 1).padStart(2, '0') + '/' + t.getFullYear();
+            let shortYear = t.getFullYear().toString().slice(-2);
+            let exactToday = String(t.getDate()).padStart(2, '0') + '/' + String(t.getMonth() + 1).padStart(2, '0') + '/' + shortYear;
 
             filteredAccounts = scopedGeoData.filter(row => {
                 let matchStatus = currentStatusFilter ? row.status === currentStatusFilter : true;
@@ -2210,15 +2211,25 @@ function rebuildGeoMapFromData() {
             currentSortColumn = 'last_date'; 
             currentSortDirection = 'desc';
 
-            filteredAccounts.sort((a, b) => {
-                let dateA = (a.details && a.details.last_remark_date) ? a.details.last_remark_date.split('/').reverse().join('') : '';
-                let dateB = (b.details && b.details.last_remark_date) ? b.details.last_remark_date.split('/').reverse().join('') : '';
+filteredAccounts.sort((a, b) => {
+                let dateA = (a.details && a.details.last_remark_date) ? a.details.last_remark_date : '';
+                let dateB = (b.details && b.details.last_remark_date) ? b.details.last_remark_date : '';
+                
+                let normalizeDate = (d) => {
+                    if (!d) return '';
+                    let p = d.split('/');
+                    if (p.length === 3 && p[2].length === 2) p[2] = '20' + p[2];
+                    return p.reverse().join('');
+                };
+
+                let valA = normalizeDate(dateA);
+                let valB = normalizeDate(dateB);
                 
                 let timeA = (a.details && a.details.timestamp) ? a.details.timestamp : 0;
                 let timeB = (b.details && b.details.timestamp) ? b.details.timestamp : 0;
 
-                if (dateA === dateB) return timeB - timeA;
-                return dateB.localeCompare(dateA);
+                if (valA === valB) return timeB - timeA;
+                return valB.localeCompare(valA);
             });
 
             updateHeaderArrows('last_date');
@@ -2535,6 +2546,20 @@ function rebuildGeoMapFromData() {
                 let valueB = columnName === 'pack_cd' ? (b.details && b.details.PACK_CD ? b.details.PACK_CD : '') : b[columnName];
 
                 if (columnName === 'last_date') {
+                    let dateA = (a.details && a.details.last_remark_date) ? a.details.last_remark_date : '';
+                    let dateB = (b.details && b.details.last_remark_date) ? b.details.last_remark_date : '';
+                    
+                    let normalizeDate = (d) => {
+                        if (!d) return '';
+                        let p = d.split('/');
+                        if (p.length === 3 && p[2].length === 2) p[2] = '20' + p[2]; // Paksa jadi 2026 kalau data baru
+                        return p.reverse().join('');
+                    };
+                    
+                    valueA = normalizeDate(dateA);
+                    valueB = normalizeDate(dateB);
+                }
+                
                     let dateA = (a.details && a.details.last_remark_date) ? a.details.last_remark_date : '';
                     let dateB = (b.details && b.details.last_remark_date) ? b.details.last_remark_date : '';
                     valueA = dateA ? dateA.split('/').reverse().join('') : '';
@@ -3868,7 +3893,7 @@ let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
         
         togglePaidInput();
 
-            let todayDate = new Date().toLocaleDateString('en-GB');
+            let todayDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' });
             let displayArrMth = accountInfo.arrs_mth ? Math.abs(parseFloat(accountInfo.arrs_mth)) : '-';
 
 let baseText = `INTERNAL DATA-VIEWED BY: ${currentUser.username.toUpperCase()} - ${todayDate}    `;
@@ -3997,12 +4022,12 @@ let wText = (line1 + line2).repeat(50);
                 historyBox.innerHTML = '<div style="color: var(--text-muted); text-align:center; padding:10px;">No historical findings found.</div>';
             } else {
                 findingsList.forEach((data) => {
-                    let dateFormatted = 'N/A';
+                let dateFormatted = 'N/A';
                     if (data.updated_at) {
                         dateFormatted = new Date(data.updated_at).toLocaleString('en-GB', {
-                            day: '2-digit', month: '2-digit', year: 'numeric',
-                            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
-                        });
+                            day: '2-digit', month: '2-digit', year: '2-digit',
+                            hour: '2-digit', minute: '2-digit', hour12: true
+                        }).toUpperCase();
                     }
                     
                     let statusBadgeHTML = '';
@@ -4152,14 +4177,16 @@ window.saveFinding = async function() {
             updatedDetailsObj.finding_status = selectedStatus; 
 
             let today = new Date();
-            let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
+            let shortYearToday = today.getFullYear().toString().slice(-2);
+            let dateStr = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + shortYearToday;
             updatedDetailsObj.last_remark_date = dateStr;
             updatedDetailsObj.timestamp = today.getTime();
             
             let currentDateTime = new Date();
+            let shortYear = currentDateTime.getFullYear().toString().slice(-2);
             let formattedDate = String(currentDateTime.getDate()).padStart(2, '0') + '/' + 
                                 String(currentDateTime.getMonth() + 1).padStart(2, '0') + '/' + 
-                                currentDateTime.getFullYear();
+                                shortYear;
             let formattedTime = currentDateTime.toLocaleTimeString('en-US', { 
                 hour: '2-digit', 
                 minute: '2-digit', 
