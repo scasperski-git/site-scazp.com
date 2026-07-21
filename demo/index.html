@@ -3845,16 +3845,12 @@ window.openModal = async function(accNo) {
             document.getElementById('finding-status-select').value = "";
             document.getElementById('paid-amount-input').value = "";
 
-            let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
-            let d = accountInfo.details || {};
+let accountInfo = globalAccounts.find(a => a.acct === accNo) || {};
+        let d = accountInfo.details || {};
 
-            if(accountInfo.finding_status) {
-                document.getElementById('finding-status-select').value = accountInfo.finding_status;
-                if(accountInfo.finding_status === 'PAID' && d.amt_collected) {
-                    document.getElementById('paid-amount-input').value = d.amt_collected;
-                }
-            }
-            togglePaidInput();
+        // Blok auto-select status lama dah dibuang supaya sentiasa reset ke "-- PILIH --"
+        
+        togglePaidInput();
 
             let todayDate = new Date().toLocaleDateString('en-GB');
             let displayArrMth = accountInfo.arrs_mth ? Math.abs(parseFloat(accountInfo.arrs_mth)) : '-';
