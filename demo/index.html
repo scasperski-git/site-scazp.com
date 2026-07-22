@@ -1207,6 +1207,49 @@ th {
                 </div>
             </div>
 
+            <!-- 📊 PECAHAN STATUS (STATUS BREAKDOWN) -->
+            <div class="status-breakdown-box" style="background: #ffffff; padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 0.5px;">📊 PECAHAN STATUS TINDAKAN (BERDASARKAN TAPISAN SEMASA):</div>
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                    <!-- UNATTENDED -->
+                    <div style="display: flex; align-items: center; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 20px;">
+                        <span style="font-size: 10px; font-weight: 700; color: #64748b; margin-right: 8px;">UNATTENDED</span>
+                        <span id="count-unattended" style="font-size: 14px; font-weight: 800; color: #334155;">0</span>
+                    </div>
+                    <!-- CALL -->
+                    <div style="display: flex; align-items: center; background: #fff7ed; border: 1px solid #fdba74; padding: 6px 12px; border-radius: 20px;">
+                        <span style="font-size: 10px; font-weight: 700; color: #ea580c; margin-right: 8px;">CALL</span>
+                        <span id="count-call" style="font-size: 14px; font-weight: 800; color: #c2410c;">0</span>
+                    </div>
+                    <!-- UTC -->
+                    <div style="display: flex; align-items: center; background: #fef2f2; border: 1px solid #fca5a5; padding: 6px 12px; border-radius: 20px;">
+                        <span style="font-size: 10px; font-weight: 700; color: #dc2626; margin-right: 8px;">UTC</span>
+                        <span id="count-utc" style="font-size: 14px; font-weight: 800; color: #b91c1c;">0</span>
+                    </div>
+                    <!-- PTP -->
+                    <div style="display: flex; align-items: center; background: #eff6ff; border: 1px solid #93c5fd; padding: 6px 12px; border-radius: 20px;">
+                        <span style="font-size: 10px; font-weight: 700; color: #2563eb; margin-right: 8px;">PTP</span>
+                        <span id="count-ptp" style="font-size: 14px; font-weight: 800; color: #1d4ed8;">0</span>
+                    </div>
+                    <!-- PV -->
+                    <div style="display: flex; align-items: center; background: #f5f3ff; border: 1px solid #c4b5fd; padding: 6px 12px; border-radius: 20px;">
+                        <span style="font-size: 10px; font-weight: 700; color: #7c3aed; margin-right: 8px;">PV</span>
+                        <span id="count-pv" style="font-size: 14px; font-weight: 800; color: #6d28d9;">0</span>
+                    </div>
+                    <!-- PAID -->
+                    <div style="display: flex; align-items: center; background: #f0fdf4; border: 1px solid #86efac; padding: 6px 12px; border-radius: 20px;">
+                        <span style="font-size: 10px; font-weight: 700; color: #16a34a; margin-right: 8px;">PAID</span>
+                        <span id="count-paid" style="font-size: 14px; font-weight: 800; color: #15803d;">0</span>
+                    </div>
+                    <!-- OTHERS -->
+                    <div style="display: flex; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 20px;">
+                        <span style="font-size: 10px; font-weight: 700; color: #94a3b8; margin-right: 8px;">OTHERS</span>
+                        <span id="count-others" style="font-size: 14px; font-weight: 800; color: #64748b;">0</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="table-container">
                 <table>
                     <thead>
@@ -2261,6 +2304,7 @@ window.toggleKPIMode = function(mode) {
             updateHeaderArrows('last_date');
             currentPage = 1;
             renderTablePage();
+            updateStatusBreakdown(filteredAccounts);
         }
         
         window.applyStatusFilter = function(status, element) {
@@ -4714,6 +4758,36 @@ window.toggleAdvancedSearch = function() {
                 icon.style.borderColor = 'var(--border-color)';
                 icon.style.backgroundColor = '#f8fafc';
             }
+        };
+
+        window.updateStatusBreakdown = function(dataArray) {
+            let counts = { unattended: 0, call: 0, utc: 0, ptp: 0, pv: 0, paid: 0, others: 0 };
+
+            dataArray.forEach(row => {
+                // Jika status masih PENDING atau finding_status kosong
+                if (row.status === 'PENDING' || !row.finding_status) {
+                    counts.unattended++;
+                } else {
+                    // Normalize teks supaya tak ada isu huruf besar/kecil atau space tambahan
+                    let fStatus = row.finding_status.toUpperCase().trim(); 
+                    
+                    if (fStatus === 'CALL') counts.call++;
+                    else if (fStatus === 'UTC') counts.utc++;
+                    else if (fStatus === 'PTP') counts.ptp++;
+                    else if (fStatus === 'PV') counts.pv++;
+                    else if (fStatus === 'PAID') counts.paid++;
+                    else counts.others++; // Untuk status selain yang di atas (jika ada)
+                }
+            });
+
+            // Kemas kini nombor pada HTML
+            document.getElementById('count-unattended').innerText = counts.unattended;
+            document.getElementById('count-call').innerText = counts.call;
+            document.getElementById('count-utc').innerText = counts.utc;
+            document.getElementById('count-ptp').innerText = counts.ptp;
+            document.getElementById('count-pv').innerText = counts.pv;
+            document.getElementById('count-paid').innerText = counts.paid;
+            document.getElementById('count-others').innerText = counts.others;
         };
         
     </script>
