@@ -4781,8 +4781,8 @@ window.updateStatusBreakdown = function(dataArray) {
             document.getElementById('count-paid').innerText = counts.paid;
         };
 
-        window.exportByBatch = function(batchName) {
-    // 1. Tapis data dari memori (globalAccounts) untuk batch ini sahaja
+window.exportByBatch = function(batchName) {
+    // 1. Tapis data dari memori untuk batch ini sahaja
     let batchAccounts = globalAccounts.filter(a => a.batch_name === batchName);
     
     if (batchAccounts.length === 0) {
@@ -4790,91 +4790,120 @@ window.updateStatusBreakdown = function(dataArray) {
         return;
     }
 
-    // 2. Ekstrak data unik (Sebab kalau Bos yang download, mungkin ada gabungan banyak Zon & PIC)
+    // 2. Ekstrak data unik (Zone)
     let zones = [...new Set(batchAccounts.map(a => a.zone).filter(Boolean))].join(', ') || 'UNKNOWN';
-    let pics = [...new Set(batchAccounts.map(a => a.assignee_id).filter(Boolean))].join(', ') || 'UNASSIGNED';
     
-    // Untuk hierarki, kita ambil dari profil user yang sedang login 
-    // (Boleh diubah suai kalau database kau simpan hierarki berbeza)
-    let managerName = currentUser.role === 'manager' ? currentUser.id.toUpperCase() : (currentUser.report_to ? currentUser.report_to.toUpperCase() : '-'); 
-    let adminName = currentUser.role === 'admin' ? currentUser.id.toUpperCase() : '-';
+    // 3. Logik Pintar Cari Manager & Admin
+    let currentRole = currentUser.role ? currentUser.role.toLowerCase() : 'user';
+    let managerName = '-';
+    let adminName = '-';
+    
+    // Cuba korek dari senarai allSystemUsers jika ada
+    if (typeof allSystemUsers !== 'undefined' && allSystemUsers.length > 0) {
+        if (currentRole === 'user' || currentRole === 'pic') {
+            let myAdmin = allSystemUsers.find(u => u.id === currentUser.report_to);
+            adminName = myAdmin ? myAdmin.id : (currentUser.report_to || '-');
+            if (myAdmin && myAdmin.report_to) {
+                managerName = myAdmin.report_to;
+            }
+        } else if (currentRole === 'admin') {
+            adminName = currentUser.id;
+            managerName = currentUser.report_to || '-';
+        } else if (currentRole === 'manager') {
+            managerName = currentUser.id;
+        }
+    } else {
+        // Fallback kalau tak jumpa allSystemUsers
+        if (currentRole === 'admin') { adminName = currentUser.id; managerName = currentUser.report_to || '-'; }
+        else if (currentRole === 'manager') { managerName = currentUser.id; }
+        else { adminName = currentUser.report_to || '-'; }
+    }
+
     let currentUserId = currentUser.id ? currentUser.id.toUpperCase() : 'USER';
 
-    // 3. Bina Kepala Excel (Baris 1 hingga 5) - Array of Arrays
+    // 4. Bina Kepala Excel (Baris 1 hingga 4) - PIC USER dibuang
     let wsData = [
         ["BATCH NAME", batchName],
-        ["MANAGER", managerName],
-        ["ADMIN", adminName],
-        ["PIC USER", pics], // Akan senaraikan semua PIC dalam batch ni
+        ["MANAGER", managerName.toUpperCase()],
+        ["ADMIN", adminName.toUpperCase()],
         ["ZONE", zones],
-        [] // Baris ke-6 kosong sebagai pemisah (Spacer)
+        [] // Baris ke-5 kosong sebagai pemisah (Spacer)
     ];
 
-    // Convert kepada worksheet
     let ws = XLSX.utils.aoa_to_sheet(wsData);
 
-    // 4. Bina Data Jadual
+    // 5. Bina Data Jadual
     let rowData = batchAccounts.map((r, i) => {
         let d = r.details || {};
         
-        // Gabung findings dari Remark 5 hingga Remark 1
-        let findingsArr = [];
-        if (r.remark5) findingsArr.push(r.remark5);
-        if (r.remark1) findingsArr.push(r.remark1);
-        if (r.remark2) findingsArr.push(r.remark2);
-        if (r.remark3) findingsArr.push(r.remark3);
-        if (r.remark4) findingsArr.push(r.remark4);
+        // Tarik findings dengan lebih kebal (Check luar dan dalam details, huruf besar/kecil)
+        let r5 = r.remark5 || d.remark5 || d.REMARK5 || '';
+        let r1 = r.remark1 || d.remark1 || d.REMARK1 || '';
+        let r2 = r.remark2 || d.remark2 || d.REMARK2 || '';
+        let r3 = r.remark3 || d.remark3 || d.REMARK3 || '';
+        let r4 = r.remark4 || d.remark4 || d.REMARK4 || '';
         
-        // Cipta satu gabungan panjang yang dipisahkan oleh tanda ( | )
+        // Gabung findings 
+        let findingsArr = [];
+        if (r5) findingsArr.push(r5);
+        if (r1) findingsArr.push(r1);
+        if (r2) findingsArr.push(r2);
+        if (r3) findingsArr.push(r3);
+        if (r4) findingsArr.push(r4);
+        
         let combinedFindings = findingsArr.join(' | ');
+
+        // Format OSB supaya jadi nombor 2 tempat perpuluhan (jika ada nilai)
+        let osbVal = r.osb ? Number(r.osb).toFixed(2) : '0.00';
 
         return {
             "NO": i + 1,
             "ZONE": r.zone || '-',
-            "ID": r.assignee_id && r.assignee_id !== 'UNASSIGNED' ? r.assignee_id.toUpperCase() : '-',
+            "ASSIGNED TO": r.assignee_id && r.assignee_id !== 'UNASSIGNED' ? r.assignee_id.toUpperCase() : '-',
             "TYPE": r.type || '-',
             "LOC CD": r.loc || '-',
             "PACK CD": d.PACK_CD || '-',
             "ACCT": r.acct || '-',
             "ARRS MTH": r.arrs_mth || '0',
             "DELQ": r.delq || '-',
+            "OSB": osbVal,
             "STATUS": r.status === 'UPDATED' ? (r.finding_status || 'ATTENDED') : 'PENDING',
             "FINDINGS": combinedFindings
         };
     });
 
-    // 5. Masukkan data jadual tadi bermula dari baris ke-7 (A7)
-    XLSX.utils.sheet_add_json(ws, rowData, { origin: "A7" });
+    // 6. Masukkan data jadual tadi bermula dari baris ke-6 (A6) sebab kita dah delete satu baris kat atas
+    XLSX.utils.sheet_add_json(ws, rowData, { origin: "A6" });
 
-    // (Opsional) Cantikkan lebar lajur Excel secara automatik
+    // Cantikkan lebar lajur Excel
     ws['!cols'] = [
         {wch: 5},  // NO
         {wch: 10}, // ZONE
-        {wch: 15}, // ID
+        {wch: 15}, // ASSIGNED TO
         {wch: 8},  // TYPE
         {wch: 10}, // LOC CD
         {wch: 15}, // PACK CD
         {wch: 20}, // ACCT
         {wch: 10}, // ARRS MTH
         {wch: 10}, // DELQ
+        {wch: 15}, // OSB
         {wch: 15}, // STATUS
-        {wch: 80}  // FINDINGS (Lebar sikit sebab dah gabung semua)
+        {wch: 80}  // FINDINGS
     ];
 
     let wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Batch Data");
 
-    // 6. Format Nama Fail: ID_BATCHNAME_ZONE_DATE_TIME
+    // 7. Format Nama Fail
     let now = new Date();
-    let y = String(now.getFullYear()).slice(-2); // Guna format YY
+    let y = String(now.getFullYear()).slice(-2); 
     let m = String(now.getMonth() + 1).padStart(2, '0');
     let d = String(now.getDate()).padStart(2, '0');
     let hh = String(now.getHours()).padStart(2, '0');
     let min = String(now.getMinutes()).padStart(2, '0');
     
-    // Ambil zone pertama je kalau batch tu ada banyak zone, supaya nama fail tak panjang sangat
-    let safeZone = zones.split(',')[0]; 
-    let safeBatch = batchName.replace(/[^a-zA-Z0-9_-]/g, ''); // Buang simbol pelik dari nama fail
+    let safeZone = zones.split(',')[0].trim(); 
+    let safeBatch = batchName.replace(/[^a-zA-Z0-9_-]/g, ''); 
 
     let fileName = `${currentUserId}_${safeBatch}_${safeZone}_${d}${m}${y}_${hh}${min}.xlsx`;
 
