@@ -4863,10 +4863,10 @@ window.exportByBatch = async function(batchName) {
         let currentUserId = currentUser.id ? currentUser.id.toUpperCase() : 'USER';
 
         let wsData = [
-            ["BATCH NAME", batchName],
-            ["MANAGER", managerName],
-            ["BATCH OWNER", batchOwner], 
-            ["ZONE", zones],
+            ["BATCH NAME :", batchName],
+            ["REPORT TO :", managerName],
+            ["BATCH OWNER :", batchOwner], 
+            ["ZONE :", zones],
             [] 
         ];
 
@@ -4907,13 +4907,13 @@ window.exportByBatch = async function(batchName) {
                     "PRODUCT": fullProduct,       
                     "ARRS MTH": acc.arrs_mth || '0',
                     "DELQ": acc.delq || '',
-                    "BALANCE": balVal,            
-                    "LATE BAL": lateBalVal,       
-                    "ADCH BAL": adchBalVal,       
-                    "OSB": osbVal,                
+                    "BALANCE (RM)": balVal,            
+                    "LATE BAL (RM)": lateBalVal,       
+                    "ADCH BAL (RM)": adchBalVal,       
+                    "OSB (RM)": osbVal,                
                     "STATUS": sysStatus,
                     "FINDING STATUS": fStatus,
-                    "FINDINGS": fFindings
+                    "FINDINGS REMARK": fFindings
                 });
             };
 
