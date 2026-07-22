@@ -4797,7 +4797,7 @@ window.exportByBatch = async function(batchName) {
         let acctList = batchAccounts.map(a => a.acct);
         let zones = [...new Set(batchAccounts.map(a => a.zone).filter(Boolean))].join(', ') || 'UNKNOWN';
 
-        // 1. JIMAT KUOTA SUPABASE: finding_status dah dibuang dari select
+        // 1. JIMAT KUOTA SUPABASE: Tukar created_at kepada updated_at mengikut skema database sebenar
         let findingsData = [];
         let chunkSize = 800;
         
@@ -4805,7 +4805,7 @@ window.exportByBatch = async function(batchName) {
             let chunk = acctList.slice(i, i + chunkSize);
             const { data, error } = await supabase
                 .from('findings')
-                .select('acct, remark1, remark2, remark3, remark4, remark5, created_at') // <--- DIBETULKAN DI SINI
+                .select('acct, remark1, remark2, remark3, remark4, remark5, updated_at') // <--- DIBETULKAN DI SINI
                 .in('acct', chunk);
                 
             if (error) throw error;
@@ -4853,7 +4853,8 @@ window.exportByBatch = async function(batchName) {
             let sysStatus = acc.status || 'PENDING';
 
             if (accFindings.length > 0) {
-                accFindings.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                // Susun ikut tarikh updated_at (lama ke baru)
+                accFindings.sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
                 
                 accFindings.forEach(f => {
                     let findingsArr = [];
@@ -4865,7 +4866,7 @@ window.exportByBatch = async function(batchName) {
                     
                     let combinedFindings = findingsArr.filter(Boolean).join(' | ');
 
-                    // --- KOD BARU: Detektif baca remark5 untuk cari status sebenar ---
+                    // Ekstrak status dari remark5
                     let extractedStatus = '-';
                     if (f.remark5) {
                         let r5 = String(f.remark5).toUpperCase();
@@ -4873,9 +4874,8 @@ window.exportByBatch = async function(batchName) {
                         else if (r5.includes('[UCT]')) extractedStatus = 'UCT';
                         else if (r5.includes('[PTP]')) extractedStatus = 'PTP';
                         else if (r5.includes('[PV]')) extractedStatus = 'PV';
-                        else if (r5.includes('[PAID')) extractedStatus = 'PAID'; // Menangkap '[PAID : RM xxx]'
+                        else if (r5.includes('[PAID')) extractedStatus = 'PAID';
                     }
-                    // -----------------------------------------------------------------
 
                     rowData.push({
                         "NO": rowCounter++,
@@ -4889,7 +4889,7 @@ window.exportByBatch = async function(batchName) {
                         "DELQ": acc.delq || '-',
                         "OSB": parseFloat(osbVal),
                         "STATUS": sysStatus,
-                        "FINDING STATUS": extractedStatus, // <--- Sekarang status ditarik ngam-ngam
+                        "FINDING STATUS": extractedStatus,
                         "FINDINGS": combinedFindings
                     });
                 });
