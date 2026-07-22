@@ -4829,7 +4829,6 @@ window.exportByBatch = async function(batchName) {
         let acctList = batchAccounts.map(a => a.acct);
         let zones = [...new Set(batchAccounts.map(a => a.zone).filter(Boolean))].join(', ') || '';
         
-        // --- KOD BARU: Dapatkan nama BATCH OWNER dari akaun pertama ---
         let batchOwner = batchAccounts[0].batch_owner ? batchAccounts[0].batch_owner.toUpperCase() : 'UNKNOWN';
 
         // 1. Gali Supabase
@@ -4847,24 +4846,25 @@ window.exportByBatch = async function(batchName) {
             if (data) findingsData = findingsData.concat(data);
         }
 
-        // 2. LOGIK MANAGER (Kekalkan Manager, ADMIN dibuang)
-        let currentRole = currentUser.role ? currentUser.role.toLowerCase() : 'user';
-        let managerName = '';
+        // --- KOD BARU: Logik pintar cari MANAGER (Siapa bos kepada Batch Owner) ---
+        let managerName = '-';
         
-        if (currentRole === 'user' || currentRole === 'pic') {
-            managerName = 'MANAGEMENT'; 
-        } else if (currentRole === 'admin') {
-            managerName = currentUser.report_to || 'MANAGEMENT';
-        } else if (currentRole === 'manager') {
-            managerName = currentUser.id || '';
+        // Semak dalam senarai global pengguna (allSystemUsers)
+        if (typeof allSystemUsers !== 'undefined' && allSystemUsers.length > 0) {
+            let ownerProfile = allSystemUsers.find(u => u.id.toUpperCase() === batchOwner);
+            
+            // Kalau jumpa profil owner batch tu dan dia ada bos (report_to)
+            if (ownerProfile && ownerProfile.report_to) {
+                managerName = ownerProfile.report_to.toUpperCase();
+            }
         }
+        // --------------------------------------------------------------------------
 
         let currentUserId = currentUser.id ? currentUser.id.toUpperCase() : 'USER';
 
-        // --- KOD BARU: Tukar ADMIN ke BATCH OWNER ---
         let wsData = [
             ["BATCH NAME", batchName],
-            ["MANAGER", managerName.toUpperCase()],
+            ["MANAGER", managerName],
             ["BATCH OWNER", batchOwner], 
             ["ZONE", zones],
             [] 
@@ -4877,18 +4877,16 @@ window.exportByBatch = async function(batchName) {
 
         batchAccounts.forEach(acc => {
             let accFindings = findingsData.filter(f => f.acct === acc.acct);
-            let d = acc.details || {}; // Ekstrak maklumat details
+            let d = acc.details || {}; 
             
             let assignedTo = acc.assignee_id && acc.assignee_id !== 'UNASSIGNED' ? acc.assignee_id.toUpperCase() : '';
             let packCd = d.PACK_CD ? d.PACK_CD : '';
             
-            // --- KOD BARU: Tarik field baru dari details ---
             let hirerName = d.HIRER_NAME || d.h_name || '';
             let prodCd = d.PROD_SALES_CD || '';
             let prodDesc = d.PROD_SALES_DESC || d.prod || '';
             let fullProduct = (prodCd + ' ' + prodDesc).trim();
             
-            // Format kewangan pastikan kekal sebagai nombor
             let balVal = parseFloat(d.BALANCE || d.bal || 0);
             let lateBalVal = parseFloat(d.LATE_BAL || d.odp || 0);
             let adchBalVal = parseFloat(d.ADCH_BAL || d.adch || 0);
@@ -4896,7 +4894,6 @@ window.exportByBatch = async function(batchName) {
             
             let sysStatus = acc.status || 'PENDING';
 
-            // Fungsi mini (Helper) untuk mengelakkan tulis benda sama dua kali
             let pushData = (fStatus, fFindings) => {
                 rowData.push({
                     "NO": rowCounter++,
@@ -4905,15 +4902,15 @@ window.exportByBatch = async function(batchName) {
                     "TYPE": acc.type || '',
                     "LOC CD": acc.loc || '',
                     "PACK CD": packCd,
-                    "HIRER NAME": hirerName,      // <-- SEBELUM ACCT
+                    "HIRER NAME": hirerName,      
                     "ACCT": acc.acct || '',
-                    "PRODUCT": fullProduct,       // <-- SEBELUM ARRS MTH
+                    "PRODUCT": fullProduct,       
                     "ARRS MTH": acc.arrs_mth || '0',
                     "DELQ": acc.delq || '',
-                    "BALANCE": balVal,            // <-- SELEPAS DELQ
-                    "LATE BAL": lateBalVal,       // <-- SELEPAS BALANCE
-                    "ADCH BAL": adchBalVal,       // <-- SELEPAS LATE BAL
-                    "OSB": osbVal,                // <-- SELEPAS ADCH BAL
+                    "BALANCE": balVal,            
+                    "LATE BAL": lateBalVal,       
+                    "ADCH BAL": adchBalVal,       
+                    "OSB": osbVal,                
                     "STATUS": sysStatus,
                     "FINDING STATUS": fStatus,
                     "FINDINGS": fFindings
@@ -4951,7 +4948,6 @@ window.exportByBatch = async function(batchName) {
 
         XLSX.utils.sheet_add_json(ws, rowData, { origin: "A6" });
 
-        // --- KOD BARU: Tambah lebar lajur (Column Width) untuk field baru ---
         ws['!cols'] = [
             {wch: 5},  // NO
             {wch: 10}, // ZONE
