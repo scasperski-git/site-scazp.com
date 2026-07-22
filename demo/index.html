@@ -4828,6 +4828,9 @@ window.exportByBatch = async function(batchName) {
 
         let acctList = batchAccounts.map(a => a.acct);
         let zones = [...new Set(batchAccounts.map(a => a.zone).filter(Boolean))].join(', ') || '';
+        
+        // --- KOD BARU: Dapatkan nama BATCH OWNER dari akaun pertama ---
+        let batchOwner = batchAccounts[0].batch_owner ? batchAccounts[0].batch_owner.toUpperCase() : 'UNKNOWN';
 
         // 1. Gali Supabase
         let findingsData = [];
@@ -4844,28 +4847,25 @@ window.exportByBatch = async function(batchName) {
             if (data) findingsData = findingsData.concat(data);
         }
 
-        // 2. LOGIK MANAGER & ADMIN (Buang tanda '-')
+        // 2. LOGIK MANAGER (Kekalkan Manager, ADMIN dibuang)
         let currentRole = currentUser.role ? currentUser.role.toLowerCase() : 'user';
-        let adminName = '';
         let managerName = '';
         
         if (currentRole === 'user' || currentRole === 'pic') {
-            adminName = currentUser.report_to || ''; 
             managerName = 'MANAGEMENT'; 
         } else if (currentRole === 'admin') {
-            adminName = currentUser.id || '';
             managerName = currentUser.report_to || 'MANAGEMENT';
         } else if (currentRole === 'manager') {
             managerName = currentUser.id || '';
-            adminName = '';
         }
 
         let currentUserId = currentUser.id ? currentUser.id.toUpperCase() : 'USER';
 
+        // --- KOD BARU: Tukar ADMIN ke BATCH OWNER ---
         let wsData = [
             ["BATCH NAME", batchName],
             ["MANAGER", managerName.toUpperCase()],
-            ["ADMIN", adminName.toUpperCase()],
+            ["BATCH OWNER", batchOwner], 
             ["ZONE", zones],
             [] 
         ];
@@ -4877,20 +4877,54 @@ window.exportByBatch = async function(batchName) {
 
         batchAccounts.forEach(acc => {
             let accFindings = findingsData.filter(f => f.acct === acc.acct);
+            let d = acc.details || {}; // Ekstrak maklumat details
             
-            let osbVal = acc.osb ? Number(acc.osb).toFixed(2) : '0.00';
             let assignedTo = acc.assignee_id && acc.assignee_id !== 'UNASSIGNED' ? acc.assignee_id.toUpperCase() : '';
-            let packCd = (acc.details && acc.details.PACK_CD) ? acc.details.PACK_CD : '';
+            let packCd = d.PACK_CD ? d.PACK_CD : '';
+            
+            // --- KOD BARU: Tarik field baru dari details ---
+            let hirerName = d.HIRER_NAME || d.h_name || '';
+            let prodCd = d.PROD_SALES_CD || '';
+            let prodDesc = d.PROD_SALES_DESC || d.prod || '';
+            let fullProduct = (prodCd + ' ' + prodDesc).trim();
+            
+            // Format kewangan pastikan kekal sebagai nombor
+            let balVal = parseFloat(d.BALANCE || d.bal || 0);
+            let lateBalVal = parseFloat(d.LATE_BAL || d.odp || 0);
+            let adchBalVal = parseFloat(d.ADCH_BAL || d.adch || 0);
+            let osbVal = parseFloat(acc.osb || 0);
             
             let sysStatus = acc.status || 'PENDING';
 
+            // Fungsi mini (Helper) untuk mengelakkan tulis benda sama dua kali
+            let pushData = (fStatus, fFindings) => {
+                rowData.push({
+                    "NO": rowCounter++,
+                    "ZONE": acc.zone || '',
+                    "ASSIGNED TO": assignedTo,
+                    "TYPE": acc.type || '',
+                    "LOC CD": acc.loc || '',
+                    "PACK CD": packCd,
+                    "HIRER NAME": hirerName,      // <-- SEBELUM ACCT
+                    "ACCT": acc.acct || '',
+                    "PRODUCT": fullProduct,       // <-- SEBELUM ARRS MTH
+                    "ARRS MTH": acc.arrs_mth || '0',
+                    "DELQ": acc.delq || '',
+                    "BALANCE": balVal,            // <-- SELEPAS DELQ
+                    "LATE BAL": lateBalVal,       // <-- SELEPAS BALANCE
+                    "ADCH BAL": adchBalVal,       // <-- SELEPAS LATE BAL
+                    "OSB": osbVal,                // <-- SELEPAS ADCH BAL
+                    "STATUS": sysStatus,
+                    "FINDING STATUS": fStatus,
+                    "FINDINGS": fFindings
+                });
+            };
+
             if (accFindings.length > 0) {
-                // Susun ikut tarikh updated_at (lama ke baru)
                 accFindings.sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
                 
                 accFindings.forEach(f => {
                     let findingsArr = [];
-                    // KOD BARU: remark5 dah tak dimasukkan ke dalam gabungan text findings ini
                     if (f.remark1) findingsArr.push(String(f.remark1).trim());
                     if (f.remark2) findingsArr.push(String(f.remark2).trim());
                     if (f.remark3) findingsArr.push(String(f.remark3).trim());
@@ -4898,7 +4932,6 @@ window.exportByBatch = async function(batchName) {
                     
                     let combinedFindings = findingsArr.filter(Boolean).join(' | ');
 
-                    // Ekstrak status dari remark5
                     let extractedStatus = '';
                     if (f.remark5) {
                         let r5 = String(f.remark5).toUpperCase();
@@ -4909,48 +4942,35 @@ window.exportByBatch = async function(batchName) {
                         else if (r5.includes('[PAID')) extractedStatus = 'PAID';
                     }
 
-                    // KOD BARU: Semua fallback || '-' ditukar jadi || ''
-                    rowData.push({
-                        "NO": rowCounter++,
-                        "ZONE": acc.zone || '',
-                        "ASSIGNED TO": assignedTo,
-                        "TYPE": acc.type || '',
-                        "LOC CD": acc.loc || '',
-                        "PACK CD": packCd,
-                        "ACCT": acc.acct || '',
-                        "ARRS MTH": acc.arrs_mth || '0',
-                        "DELQ": acc.delq || '',
-                        "OSB": parseFloat(osbVal),
-                        "STATUS": sysStatus,
-                        "FINDING STATUS": extractedStatus,
-                        "FINDINGS": combinedFindings
-                    });
+                    pushData(extractedStatus, combinedFindings);
                 });
             } else {
-                rowData.push({
-                    "NO": rowCounter++,
-                    "ZONE": acc.zone || '',
-                    "ASSIGNED TO": assignedTo,
-                    "TYPE": acc.type || '',
-                    "LOC CD": acc.loc || '',
-                    "PACK CD": packCd,
-                    "ACCT": acc.acct || '',
-                    "ARRS MTH": acc.arrs_mth || '0',
-                    "DELQ": acc.delq || '',
-                    "OSB": parseFloat(osbVal),
-                    "STATUS": 'PENDING',
-                    "FINDING STATUS": "",
-                    "FINDINGS": ""
-                });
+                pushData('', '');
             }
         });
 
         XLSX.utils.sheet_add_json(ws, rowData, { origin: "A6" });
 
+        // --- KOD BARU: Tambah lebar lajur (Column Width) untuk field baru ---
         ws['!cols'] = [
-            {wch: 5}, {wch: 10}, {wch: 15}, {wch: 8}, {wch: 10}, 
-            {wch: 15}, {wch: 20}, {wch: 10}, {wch: 10}, {wch: 15}, 
-            {wch: 15}, {wch: 15}, {wch: 90} 
+            {wch: 5},  // NO
+            {wch: 10}, // ZONE
+            {wch: 15}, // ASSIGNED TO
+            {wch: 8},  // TYPE
+            {wch: 10}, // LOC CD
+            {wch: 15}, // PACK CD
+            {wch: 35}, // HIRER NAME
+            {wch: 20}, // ACCT
+            {wch: 30}, // PRODUCT
+            {wch: 10}, // ARRS MTH
+            {wch: 10}, // DELQ
+            {wch: 15}, // BALANCE
+            {wch: 15}, // LATE BAL
+            {wch: 15}, // ADCH BAL
+            {wch: 15}, // OSB
+            {wch: 15}, // STATUS
+            {wch: 15}, // FINDING STATUS
+            {wch: 90}  // FINDINGS
         ];
 
         let wb = XLSX.utils.book_new();
@@ -4963,7 +4983,6 @@ window.exportByBatch = async function(batchName) {
         let hh = String(now.getHours()).padStart(2, '0');
         let min = String(now.getMinutes()).padStart(2, '0');
         
-        // Kita letak default UNKNOWN kalau zone kosong khas untuk nama file je supaya tak cacat nama fail
         let safeZone = zones.split(',')[0].trim() || 'UNKNOWN'; 
         let safeBatch = batchName.replace(/[^a-zA-Z0-9_-]/g, ''); 
 
@@ -4979,7 +4998,6 @@ window.exportByBatch = async function(batchName) {
         alert("Ralat semasa mengekstrak batch: " + err.message);
     }
 };
-
         
     </script>
 </body>
