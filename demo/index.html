@@ -4795,9 +4795,9 @@ window.exportByBatch = async function(batchName) {
         }
 
         let acctList = batchAccounts.map(a => a.acct);
-        let zones = [...new Set(batchAccounts.map(a => a.zone).filter(Boolean))].join(', ') || 'UNKNOWN';
+        let zones = [...new Set(batchAccounts.map(a => a.zone).filter(Boolean))].join(', ') || '';
 
-        // 1. JIMAT KUOTA SUPABASE: Tukar created_at kepada updated_at mengikut skema database sebenar
+        // 1. JIMAT KUOTA SUPABASE
         let findingsData = [];
         let chunkSize = 800;
         
@@ -4805,7 +4805,7 @@ window.exportByBatch = async function(batchName) {
             let chunk = acctList.slice(i, i + chunkSize);
             const { data, error } = await supabase
                 .from('findings')
-                .select('acct, remark1, remark2, remark3, remark4, remark5, updated_at') // <--- DIBETULKAN DI SINI
+                .select('acct, remark1, remark2, remark3, remark4, remark5, updated_at') 
                 .in('acct', chunk);
                 
             if (error) throw error;
@@ -4814,18 +4814,18 @@ window.exportByBatch = async function(batchName) {
 
         // 2. LOGIK MANAGER & ADMIN
         let currentRole = currentUser.role ? currentUser.role.toLowerCase() : 'user';
-        let adminName = '-';
-        let managerName = '-';
+        let adminName = '';
+        let managerName = '';
         
         if (currentRole === 'user' || currentRole === 'pic') {
-            adminName = currentUser.report_to || '-'; 
+            adminName = currentUser.report_to || ''; 
             managerName = 'MANAGEMENT'; 
         } else if (currentRole === 'admin') {
-            adminName = currentUser.id || '-';
+            adminName = currentUser.id || '';
             managerName = currentUser.report_to || 'MANAGEMENT';
         } else if (currentRole === 'manager') {
-            managerName = currentUser.id || '-';
-            adminName = '-';
+            managerName = currentUser.id || '';
+            adminName = '';
         }
 
         let currentUserId = currentUser.id ? currentUser.id.toUpperCase() : 'USER';
@@ -4847,13 +4847,12 @@ window.exportByBatch = async function(batchName) {
             let accFindings = findingsData.filter(f => f.acct === acc.acct);
             
             let osbVal = acc.osb ? Number(acc.osb).toFixed(2) : '0.00';
-            let assignedTo = acc.assignee_id && acc.assignee_id !== 'UNASSIGNED' ? acc.assignee_id.toUpperCase() : '-';
-            let packCd = (acc.details && acc.details.PACK_CD) ? acc.details.PACK_CD : '-';
+            let assignedTo = acc.assignee_id && acc.assignee_id !== 'UNASSIGNED' ? acc.assignee_id.toUpperCase() : '';
+            let packCd = (acc.details && acc.details.PACK_CD) ? acc.details.PACK_CD : '';
             
             let sysStatus = acc.status || 'PENDING';
 
             if (accFindings.length > 0) {
-                // Susun ikut tarikh updated_at (lama ke baru)
                 accFindings.sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
                 
                 accFindings.forEach(f => {
@@ -4866,8 +4865,7 @@ window.exportByBatch = async function(batchName) {
                     
                     let combinedFindings = findingsArr.filter(Boolean).join(' | ');
 
-                    // Ekstrak status dari remark5
-                    let extractedStatus = '-';
+                    let extractedStatus = '';
                     if (f.remark5) {
                         let r5 = String(f.remark5).toUpperCase();
                         if (r5.includes('[CALL]')) extractedStatus = 'CALL';
@@ -4879,14 +4877,14 @@ window.exportByBatch = async function(batchName) {
 
                     rowData.push({
                         "NO": rowCounter++,
-                        "ZONE": acc.zone || '-',
+                        "ZONE": acc.zone || '',
                         "ASSIGNED TO": assignedTo,
-                        "TYPE": acc.type || '-',
-                        "LOC CD": acc.loc || '-',
+                        "TYPE": acc.type || '',
+                        "LOC CD": acc.loc || '',
                         "PACK CD": packCd,
-                        "ACCT": acc.acct || '-',
-                        "ARRS MTH": acc.arrs_mth || '0',
-                        "DELQ": acc.delq || '-',
+                        "ACCT": acc.acct || '',
+                        "ARRS MTH": acc.arrs_mth || '0', // Kekalkan 0 untuk bulan sebab ini data nombor
+                        "DELQ": acc.delq || '',
                         "OSB": parseFloat(osbVal),
                         "STATUS": sysStatus,
                         "FINDING STATUS": extractedStatus,
@@ -4896,17 +4894,17 @@ window.exportByBatch = async function(batchName) {
             } else {
                 rowData.push({
                     "NO": rowCounter++,
-                    "ZONE": acc.zone || '-',
+                    "ZONE": acc.zone || '',
                     "ASSIGNED TO": assignedTo,
-                    "TYPE": acc.type || '-',
-                    "LOC CD": acc.loc || '-',
+                    "TYPE": acc.type || '',
+                    "LOC CD": acc.loc || '',
                     "PACK CD": packCd,
-                    "ACCT": acc.acct || '-',
+                    "ACCT": acc.acct || '',
                     "ARRS MTH": acc.arrs_mth || '0',
-                    "DELQ": acc.delq || '-',
+                    "DELQ": acc.delq || '',
                     "OSB": parseFloat(osbVal),
                     "STATUS": 'PENDING',
-                    "FINDING STATUS": "-",
+                    "FINDING STATUS": "",
                     "FINDINGS": ""
                 });
             }
@@ -4930,7 +4928,8 @@ window.exportByBatch = async function(batchName) {
         let hh = String(now.getHours()).padStart(2, '0');
         let min = String(now.getMinutes()).padStart(2, '0');
         
-        let safeZone = zones.split(',')[0].trim(); 
+        // Tetapan khas supaya nama fail tak rosak kalau zon kosong
+        let safeZone = zones ? zones.split(',')[0].trim() : 'ALL'; 
         let safeBatch = batchName.replace(/[^a-zA-Z0-9_-]/g, ''); 
 
         let fileName = `${currentUserId}_${safeBatch}_${safeZone}_${d}${m}${y}_${hh}${min}.xlsx`;
