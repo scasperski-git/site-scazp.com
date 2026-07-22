@@ -987,6 +987,36 @@ th {
             min-width: 160px;
         }
 
+    /* --- STATUS PILLS STYLING --- */
+        .pill-container { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .status-pill { display: flex; align-items: center; padding: 6px 12px; border-radius: 20px; border: 1px solid transparent; }
+        .pill-label { font-size: 10px; font-weight: 700; margin-right: 8px; }
+        .pill-count { font-size: 14px; font-weight: 800; }
+        
+        .pill-unattended { background: #f1f5f9; border-color: #cbd5e1; }
+        .pill-unattended .pill-label { color: #64748b; }
+        .pill-unattended .pill-count { color: #334155; }
+        
+        .pill-call { background: #fff7ed; border-color: #fdba74; }
+        .pill-call .pill-label { color: #ea580c; }
+        .pill-call .pill-count { color: #c2410c; }
+        
+        .pill-uct { background: #fef2f2; border-color: #fca5a5; }
+        .pill-uct .pill-label { color: #dc2626; }
+        .pill-uct .pill-count { color: #b91c1c; }
+        
+        .pill-ptp { background: #eff6ff; border-color: #93c5fd; }
+        .pill-ptp .pill-label { color: #2563eb; }
+        .pill-ptp .pill-count { color: #1d4ed8; }
+        
+        .pill-pv { background: #f5f3ff; border-color: #c4b5fd; }
+        .pill-pv .pill-label { color: #7c3aed; }
+        .pill-pv .pill-count { color: #6d28d9; }
+        
+        .pill-paid { background: #f0fdf4; border-color: #86efac; }
+        .pill-paid .pill-label { color: #16a34a; }
+        .pill-paid .pill-count { color: #15803d; }
+    
         @media (max-width: 768px) {
             body { padding: 0; background-color: var(--bg-color); }
             
@@ -998,6 +1028,13 @@ th {
                 margin-left: 0 !important;
                 margin-right: 0 !important;
             }
+
+            /* Khas untuk kecilkan kotak dan pills di mobile */
+            .status-breakdown-box { padding: 12px 10px !important; margin-bottom: 15px !important; }
+            .pill-container { gap: 6px; }
+            .status-pill { padding: 4px 8px; }
+            .pill-label { font-size: 8px; margin-right: 5px; }
+            .pill-count { font-size: 12px; }
             
             #dashboard-panel, #assign-panel, #settings-panel, #report-panel { padding-bottom: 20px; }
 
@@ -1211,39 +1248,34 @@ th {
             <div class="status-breakdown-box" style="background: #ffffff; padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                 <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 0.5px;">📊 PECAHAN STATUS TINDAKAN (BERDASARKAN TAPISAN SEMASA):</div>
                 
-                <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-                    <!-- UNATTENDED -->
-                    <div style="display: flex; align-items: center; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 20px;">
-                        <span style="font-size: 10px; font-weight: 700; color: #64748b; margin-right: 8px;">UNATTENDED</span>
-                        <span id="count-unattended" style="font-size: 14px; font-weight: 800; color: #334155;">0</span>
+                <div class="pill-container">
+                    <div class="status-pill pill-unattended">
+                        <span class="pill-label">UNATTENDED</span>
+                        <span class="pill-count" id="count-unattended">0</span>
                     </div>
-                    <!-- CALL -->
-                    <div style="display: flex; align-items: center; background: #fff7ed; border: 1px solid #fdba74; padding: 6px 12px; border-radius: 20px;">
-                        <span style="font-size: 10px; font-weight: 700; color: #ea580c; margin-right: 8px;">CALL</span>
-                        <span id="count-call" style="font-size: 14px; font-weight: 800; color: #c2410c;">0</span>
+                    <div class="status-pill pill-call">
+                        <span class="pill-label">CALL</span>
+                        <span class="pill-count" id="count-call">0</span>
                     </div>
-                    <!-- UCT -->
-                    <div style="display: flex; align-items: center; background: #fef2f2; border: 1px solid #fca5a5; padding: 6px 12px; border-radius: 20px;">
-                        <span style="font-size: 10px; font-weight: 700; color: #dc2626; margin-right: 8px;">UCT</span>
-                        <span id="count-uct" style="font-size: 14px; font-weight: 800; color: #b91c1c;">0</span>
+                    <div class="status-pill pill-uct">
+                        <span class="pill-label">UCT</span>
+                        <span class="pill-count" id="count-uct">0</span>
                     </div>
-                    <!-- PTP -->
-                    <div style="display: flex; align-items: center; background: #eff6ff; border: 1px solid #93c5fd; padding: 6px 12px; border-radius: 20px;">
-                        <span style="font-size: 10px; font-weight: 700; color: #2563eb; margin-right: 8px;">PTP</span>
-                        <span id="count-ptp" style="font-size: 14px; font-weight: 800; color: #1d4ed8;">0</span>
+                    <div class="status-pill pill-ptp">
+                        <span class="pill-label">PTP</span>
+                        <span class="pill-count" id="count-ptp">0</span>
                     </div>
-                    <!-- PV -->
-                    <div style="display: flex; align-items: center; background: #f5f3ff; border: 1px solid #c4b5fd; padding: 6px 12px; border-radius: 20px;">
-                        <span style="font-size: 10px; font-weight: 700; color: #7c3aed; margin-right: 8px;">PV</span>
-                        <span id="count-pv" style="font-size: 14px; font-weight: 800; color: #6d28d9;">0</span>
+                    <div class="status-pill pill-pv">
+                        <span class="pill-label">PV</span>
+                        <span class="pill-count" id="count-pv">0</span>
                     </div>
-                    <!-- PAID -->
-                    <div style="display: flex; align-items: center; background: #f0fdf4; border: 1px solid #86efac; padding: 6px 12px; border-radius: 20px;">
-                        <span style="font-size: 10px; font-weight: 700; color: #16a34a; margin-right: 8px;">PAID</span>
-                        <span id="count-paid" style="font-size: 14px; font-weight: 800; color: #15803d;">0</span>
+                    <div class="status-pill pill-paid">
+                        <span class="pill-label">PAID</span>
+                        <span class="pill-count" id="count-paid">0</span>
                     </div>
                 </div>
             </div>
+            
             <div class="table-container">
                 <table>
                     <thead>
