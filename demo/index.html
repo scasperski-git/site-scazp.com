@@ -4915,6 +4915,143 @@ window.exportByBatch = async function(batchName) {
         ws['!cols'] = [
             {wch: 5}, {wch: 10}, {wch: 15}, {wch: 8}, {wch: 10}, 
             {wch: 15}, {wch: 20}, {wch: 10}, {wch: 10}, {wch: 15}, 
+window.exportByBatch = async function(batchName) {
+    if(document.getElementById('loadingText')) document.getElementById('loadingText').innerText = "Sedang menggali data sejarah findings...";
+    if(document.getElementById('loadingModal')) document.getElementById('loadingModal').style.display = 'flex';
+
+    try {
+        let batchAccounts = globalAccounts.filter(a => a.batch_name === batchName);
+        
+        if (batchAccounts.length === 0) {
+            if(document.getElementById('loadingModal')) document.getElementById('loadingModal').style.display = 'none';
+            alert("Tiada data ditemui untuk batch ini.");
+            return;
+        }
+
+        let acctList = batchAccounts.map(a => a.acct);
+        let zones = [...new Set(batchAccounts.map(a => a.zone).filter(Boolean))].join(', ') || '';
+
+        // 1. Gali Supabase
+        let findingsData = [];
+        let chunkSize = 800;
+        
+        for (let i = 0; i < acctList.length; i += chunkSize) {
+            let chunk = acctList.slice(i, i + chunkSize);
+            const { data, error } = await supabase
+                .from('findings')
+                .select('acct, remark1, remark2, remark3, remark4, remark5, updated_at') 
+                .in('acct', chunk);
+                
+            if (error) throw error;
+            if (data) findingsData = findingsData.concat(data);
+        }
+
+        // 2. LOGIK MANAGER & ADMIN (Buang tanda '-')
+        let currentRole = currentUser.role ? currentUser.role.toLowerCase() : 'user';
+        let adminName = '';
+        let managerName = '';
+        
+        if (currentRole === 'user' || currentRole === 'pic') {
+            adminName = currentUser.report_to || ''; 
+            managerName = 'MANAGEMENT'; 
+        } else if (currentRole === 'admin') {
+            adminName = currentUser.id || '';
+            managerName = currentUser.report_to || 'MANAGEMENT';
+        } else if (currentRole === 'manager') {
+            managerName = currentUser.id || '';
+            adminName = '';
+        }
+
+        let currentUserId = currentUser.id ? currentUser.id.toUpperCase() : 'USER';
+
+        let wsData = [
+            ["BATCH NAME", batchName],
+            ["MANAGER", managerName.toUpperCase()],
+            ["ADMIN", adminName.toUpperCase()],
+            ["ZONE", zones],
+            [] 
+        ];
+
+        let ws = XLSX.utils.aoa_to_sheet(wsData);
+
+        let rowData = [];
+        let rowCounter = 1;
+
+        batchAccounts.forEach(acc => {
+            let accFindings = findingsData.filter(f => f.acct === acc.acct);
+            
+            let osbVal = acc.osb ? Number(acc.osb).toFixed(2) : '0.00';
+            let assignedTo = acc.assignee_id && acc.assignee_id !== 'UNASSIGNED' ? acc.assignee_id.toUpperCase() : '';
+            let packCd = (acc.details && acc.details.PACK_CD) ? acc.details.PACK_CD : '';
+            
+            let sysStatus = acc.status || 'PENDING';
+
+            if (accFindings.length > 0) {
+                // Susun ikut tarikh updated_at (lama ke baru)
+                accFindings.sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
+                
+                accFindings.forEach(f => {
+                    let findingsArr = [];
+                    // KOD BARU: remark5 dah tak dimasukkan ke dalam gabungan text findings ini
+                    if (f.remark1) findingsArr.push(String(f.remark1).trim());
+                    if (f.remark2) findingsArr.push(String(f.remark2).trim());
+                    if (f.remark3) findingsArr.push(String(f.remark3).trim());
+                    if (f.remark4) findingsArr.push(String(f.remark4).trim());
+                    
+                    let combinedFindings = findingsArr.filter(Boolean).join(' | ');
+
+                    // Ekstrak status dari remark5
+                    let extractedStatus = '';
+                    if (f.remark5) {
+                        let r5 = String(f.remark5).toUpperCase();
+                        if (r5.includes('[CALL]')) extractedStatus = 'CALL';
+                        else if (r5.includes('[UCT]')) extractedStatus = 'UCT';
+                        else if (r5.includes('[PTP]')) extractedStatus = 'PTP';
+                        else if (r5.includes('[PV]')) extractedStatus = 'PV';
+                        else if (r5.includes('[PAID')) extractedStatus = 'PAID';
+                    }
+
+                    // KOD BARU: Semua fallback || '-' ditukar jadi || ''
+                    rowData.push({
+                        "NO": rowCounter++,
+                        "ZONE": acc.zone || '',
+                        "ASSIGNED TO": assignedTo,
+                        "TYPE": acc.type || '',
+                        "LOC CD": acc.loc || '',
+                        "PACK CD": packCd,
+                        "ACCT": acc.acct || '',
+                        "ARRS MTH": acc.arrs_mth || '0',
+                        "DELQ": acc.delq || '',
+                        "OSB": parseFloat(osbVal),
+                        "STATUS": sysStatus,
+                        "FINDING STATUS": extractedStatus,
+                        "FINDINGS": combinedFindings
+                    });
+                });
+            } else {
+                rowData.push({
+                    "NO": rowCounter++,
+                    "ZONE": acc.zone || '',
+                    "ASSIGNED TO": assignedTo,
+                    "TYPE": acc.type || '',
+                    "LOC CD": acc.loc || '',
+                    "PACK CD": packCd,
+                    "ACCT": acc.acct || '',
+                    "ARRS MTH": acc.arrs_mth || '0',
+                    "DELQ": acc.delq || '',
+                    "OSB": parseFloat(osbVal),
+                    "STATUS": 'PENDING',
+                    "FINDING STATUS": "",
+                    "FINDINGS": ""
+                });
+            }
+        });
+
+        XLSX.utils.sheet_add_json(ws, rowData, { origin: "A6" });
+
+        ws['!cols'] = [
+            {wch: 5}, {wch: 10}, {wch: 15}, {wch: 8}, {wch: 10}, 
+            {wch: 15}, {wch: 20}, {wch: 10}, {wch: 10}, {wch: 15}, 
             {wch: 15}, {wch: 15}, {wch: 90} 
         ];
 
@@ -4928,8 +5065,8 @@ window.exportByBatch = async function(batchName) {
         let hh = String(now.getHours()).padStart(2, '0');
         let min = String(now.getMinutes()).padStart(2, '0');
         
-        // Tetapan khas supaya nama fail tak rosak kalau zon kosong
-        let safeZone = zones ? zones.split(',')[0].trim() : 'ALL'; 
+        // Kita letak default UNKNOWN kalau zone kosong khas untuk nama file je supaya tak cacat nama fail
+        let safeZone = zones.split(',')[0].trim() || 'UNKNOWN'; 
         let safeBatch = batchName.replace(/[^a-zA-Z0-9_-]/g, ''); 
 
         let fileName = `${currentUserId}_${safeBatch}_${safeZone}_${d}${m}${y}_${hh}${min}.xlsx`;
@@ -4944,6 +5081,7 @@ window.exportByBatch = async function(batchName) {
         alert("Ralat semasa mengekstrak batch: " + err.message);
     }
 };
+
         
     </script>
 </body>
