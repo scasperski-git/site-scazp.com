@@ -4782,12 +4782,10 @@ window.updateStatusBreakdown = function(dataArray) {
         };
 
 window.exportByBatch = async function(batchName) {
-    // Tunjuk loading (sebab kita nak tarik data dari database sekarang)
     if(document.getElementById('loadingText')) document.getElementById('loadingText').innerText = "Sedang menggali data sejarah findings...";
     if(document.getElementById('loadingModal')) document.getElementById('loadingModal').style.display = 'flex';
 
     try {
-        // 1. Dapatkan senarai akaun untuk batch ini dari memori
         let batchAccounts = globalAccounts.filter(a => a.batch_name === batchName);
         
         if (batchAccounts.length === 0) {
@@ -4799,8 +4797,7 @@ window.exportByBatch = async function(batchName) {
         let acctList = batchAccounts.map(a => a.acct);
         let zones = [...new Set(batchAccounts.map(a => a.zone).filter(Boolean))].join(', ') || 'UNKNOWN';
 
-        // 2. Gali jadual 'findings' dari Supabase untuk tarik SEMUA sejarah akaun-akaun ini
-        // Kita pecahkan (chunk) 800 akaun sekali jalan supaya tak langgar limit API Supabase
+        // 1. JIMAT KUOTA SUPABASE: finding_status dah dibuang dari select
         let findingsData = [];
         let chunkSize = 800;
         
@@ -4808,62 +4805,54 @@ window.exportByBatch = async function(batchName) {
             let chunk = acctList.slice(i, i + chunkSize);
             const { data, error } = await supabase
                 .from('findings')
-                .select('*')
+                .select('acct, remark1, remark2, remark3, remark4, remark5, created_at') // <--- DIBETULKAN DI SINI
                 .in('acct', chunk);
                 
             if (error) throw error;
             if (data) findingsData = findingsData.concat(data);
         }
 
-        // 3. Logik Pintar Cari Manager & Admin
+        // 2. LOGIK MANAGER & ADMIN
         let currentRole = currentUser.role ? currentUser.role.toLowerCase() : 'user';
-        let managerName = '-';
         let adminName = '-';
+        let managerName = '-';
         
-        if (typeof allSystemUsers !== 'undefined' && allSystemUsers.length > 0) {
-            if (currentRole === 'user' || currentRole === 'pic') {
-                let myAdmin = allSystemUsers.find(u => u.id === currentUser.report_to);
-                adminName = myAdmin ? myAdmin.id : (currentUser.report_to || currentUser.id);
-                if (myAdmin && myAdmin.report_to) managerName = myAdmin.report_to;
-            } else if (currentRole === 'admin') {
-                adminName = currentUser.id;
-                managerName = currentUser.report_to || '-';
-            } else if (currentRole === 'manager') {
-                managerName = currentUser.id;
-            }
-        } else {
-            // Kalau allSystemUsers tak load, kita guna fallback
-            adminName = currentRole === 'admin' ? currentUser.id : (currentUser.report_to || currentUser.id);
-            managerName = currentRole === 'manager' ? currentUser.id : '-';
+        if (currentRole === 'user' || currentRole === 'pic') {
+            adminName = currentUser.report_to || '-'; 
+            managerName = 'MANAGEMENT'; 
+        } else if (currentRole === 'admin') {
+            adminName = currentUser.id || '-';
+            managerName = currentUser.report_to || 'MANAGEMENT';
+        } else if (currentRole === 'manager') {
+            managerName = currentUser.id || '-';
+            adminName = '-';
         }
 
         let currentUserId = currentUser.id ? currentUser.id.toUpperCase() : 'USER';
 
-        // 4. Bina Kepala Excel (Baris 1 hingga 4)
         let wsData = [
             ["BATCH NAME", batchName],
             ["MANAGER", managerName.toUpperCase()],
             ["ADMIN", adminName.toUpperCase()],
             ["ZONE", zones],
-            [] // Baris ke-5 kosong 
+            [] 
         ];
 
         let ws = XLSX.utils.aoa_to_sheet(wsData);
 
-        // 5. Bina Data Jadual (Gabung maklumat akaun + Sejarah findings)
         let rowData = [];
         let rowCounter = 1;
 
         batchAccounts.forEach(acc => {
-            // Cari semua sejarah untuk akaun ini
             let accFindings = findingsData.filter(f => f.acct === acc.acct);
             
             let osbVal = acc.osb ? Number(acc.osb).toFixed(2) : '0.00';
             let assignedTo = acc.assignee_id && acc.assignee_id !== 'UNASSIGNED' ? acc.assignee_id.toUpperCase() : '-';
             let packCd = (acc.details && acc.details.PACK_CD) ? acc.details.PACK_CD : '-';
+            
+            let sysStatus = acc.status || 'PENDING';
 
             if (accFindings.length > 0) {
-                // Susun ikut tarikh lama ke baru supaya cantik bila dipivot
                 accFindings.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
                 
                 accFindings.forEach(f => {
@@ -4876,6 +4865,18 @@ window.exportByBatch = async function(batchName) {
                     
                     let combinedFindings = findingsArr.filter(Boolean).join(' | ');
 
+                    // --- KOD BARU: Detektif baca remark5 untuk cari status sebenar ---
+                    let extractedStatus = '-';
+                    if (f.remark5) {
+                        let r5 = String(f.remark5).toUpperCase();
+                        if (r5.includes('[CALL]')) extractedStatus = 'CALL';
+                        else if (r5.includes('[UCT]')) extractedStatus = 'UCT';
+                        else if (r5.includes('[PTP]')) extractedStatus = 'PTP';
+                        else if (r5.includes('[PV]')) extractedStatus = 'PV';
+                        else if (r5.includes('[PAID')) extractedStatus = 'PAID'; // Menangkap '[PAID : RM xxx]'
+                    }
+                    // -----------------------------------------------------------------
+
                     rowData.push({
                         "NO": rowCounter++,
                         "ZONE": acc.zone || '-',
@@ -4886,13 +4887,13 @@ window.exportByBatch = async function(batchName) {
                         "ACCT": acc.acct || '-',
                         "ARRS MTH": acc.arrs_mth || '0',
                         "DELQ": acc.delq || '-',
-                        "OSB": parseFloat(osbVal), // Jadikan format nombor untuk Excel
-                        "STATUS": f.finding_status || 'ATTENDED',
+                        "OSB": parseFloat(osbVal),
+                        "STATUS": sysStatus,
+                        "FINDING STATUS": extractedStatus, // <--- Sekarang status ditarik ngam-ngam
                         "FINDINGS": combinedFindings
                     });
                 });
             } else {
-                // Kalau akaun ni belum ada siapa-siapa call/update lagi (PENDING)
                 rowData.push({
                     "NO": rowCounter++,
                     "ZONE": acc.zone || '-',
@@ -4905,24 +4906,23 @@ window.exportByBatch = async function(batchName) {
                     "DELQ": acc.delq || '-',
                     "OSB": parseFloat(osbVal),
                     "STATUS": 'PENDING',
+                    "FINDING STATUS": "-",
                     "FINDINGS": ""
                 });
             }
         });
 
-        // 6. Masukkan data jadual ke dalam Excel bermula baris ke-6 (A6)
         XLSX.utils.sheet_add_json(ws, rowData, { origin: "A6" });
 
         ws['!cols'] = [
             {wch: 5}, {wch: 10}, {wch: 15}, {wch: 8}, {wch: 10}, 
             {wch: 15}, {wch: 20}, {wch: 10}, {wch: 10}, {wch: 15}, 
-            {wch: 15}, {wch: 90}
+            {wch: 15}, {wch: 15}, {wch: 90} 
         ];
 
         let wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Batch Data");
 
-        // 7. Format Nama Fail
         let now = new Date();
         let y = String(now.getFullYear()).slice(-2); 
         let m = String(now.getMonth() + 1).padStart(2, '0');
@@ -4937,7 +4937,6 @@ window.exportByBatch = async function(batchName) {
 
         XLSX.writeFile(wb, fileName);
         
-        // Tutup loading
         if(document.getElementById('loadingModal')) document.getElementById('loadingModal').style.display = 'none';
 
     } catch (err) {
