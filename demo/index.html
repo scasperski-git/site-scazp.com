@@ -3674,15 +3674,26 @@ window.processExcelUpload = async function() {
 
     document.getElementById('loadingModal').style.display = 'none';
 
-    // Jika ada pertindihan, sekat dan tunjuk amaran!
+// 3. Jika ada pertindihan, sekat dan tunjuk amaran!
     if (duplicateAccounts.length > 0) {
         let dupCount = duplicateAccounts.length;
-        // Ambil 3 contoh teratas untuk dipaparkan
-        let examples = duplicateAccounts.slice(0, 3).map(d => `${d.acct} (${d.batch_name})`).join('\n- ');
         
-        let confirmMsg = `AMARAN KESELAMATAN DATA! 🚨\n\nTerdapat ${dupCount} akaun di dalam fail Excel ini yang MASIH AKTIF dalam sistem.\n\nContoh Akaun Bertindih:\n- ${examples}\n\nOleh kerana akaun-akaun ini masih aktif, sistem menghalang muat naik ini bagi mengelakkan pertindihan data.\n\nSila CLOSE/ABORT batch yang lama dahulu, atau buang akaun tersebut dari fail Excel anda.`;
+        // Kumpul semua nombor akaun dan jadikan list HTML
+        let listHtml = duplicateAccounts.map(d => `<li style="margin-bottom: 4px;"><b>${d.acct}</b> <span style="color: #94a3b8; font-size: 9px;">(${d.batch_name})</span></li>`).join('');
         
-        alert(confirmMsg);
+        let confirmMsg = `
+            Terdapat <b style="font-size: 16px;">${dupCount} akaun</b> di dalam fail Excel ini yang MASIH AKTIF dalam sistem.<br><br>
+            Sila <b>CLOSE/ABORT</b> batch yang lama dahulu, atau buang akaun tersebut dari fail Excel anda.<br>
+            
+            <div style="max-height: 150px; overflow-y: auto; background: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 8px; text-align: left; font-size: 12px; margin-top: 15px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                <ul style="margin: 0; padding-left: 20px; color: var(--error-red);">
+                    ${listHtml}
+                </ul>
+            </div>
+        `;
+        
+        // Panggil fungsi modal lawa kita (true = warna merah untuk ralat)
+        showNotification("AMARAN KESELAMATAN DATA! 🚨", confirmMsg, true);
         document.getElementById('excel-file-input').value = ''; // Reset input fail
         return; // HENTIKAN PROSES SEPENUHNYA!
     }
