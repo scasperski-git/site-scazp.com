@@ -5085,34 +5085,35 @@ window.executeEditExpiry = async function(batchName, newDate) {
     try {
         let batchAccs = globalAccounts.filter(a => a.batch_name === batchName);
         
+        // FUNGSI PENYELAMAT: Tukar string kosong "" jadi null. Supabase takkan marah lagi.
+        const toNull = (val) => (val === "" || val === "undefined" || val === undefined || val === null) ? null : val;
+        
         let bulkData = batchAccs.map(acc => {
             let currentDetails = acc.details || {};
             let newDetails = { ...currentDetails, BATCH_EXPIRY: newDate };
-            
-            // Kemas kini memori tempatan
             acc.details = newDetails; 
             
-            // KOD YANG DIBETULKAN: Paksa convert ke Nombor untuk elak ralat numeric ""
-            let safeArrsMth = Number(acc.arrs_mth);
-            let safeOsb = Number(acc.osb);
+            // Wajibkan nilai ini sebagai nombor bulat / perpuluhan
+            let safeArrs = parseFloat(acc.arrs_mth);
+            let safeOsb = parseFloat(acc.osb);
             
             return {
-                zone: acc.zone || '',
-                region: acc.region || '',
-                area: acc.area || '',
-                loc: acc.loc || '',
-                type: acc.type || '',
-                acct: acc.acct || '',
-                delq: String(acc.delq || ''), // Pastikan ini sentiasa format teks
-                arrs_mth: isNaN(safeArrsMth) ? 0 : safeArrsMth, // Guna 0 kalau bukan nombor
-                osb: isNaN(safeOsb) ? 0 : safeOsb,             // Guna 0 kalau bukan nombor
-                status: acc.status || 'PENDING',
-                collector: acc.collector || '',
+                zone: toNull(acc.zone),
+                region: toNull(acc.region),
+                area: toNull(acc.area),
+                loc: toNull(acc.loc),
+                type: toNull(acc.type),
+                acct: acc.acct, 
+                delq: toNull(acc.delq), // Kadang-kadang delq ni numeric di database, jadi guna null
+                arrs_mth: isNaN(safeArrs) ? 0 : safeArrs,
+                osb: isNaN(safeOsb) ? 0 : safeOsb,
+                status: toNull(acc.status) || 'PENDING',
+                collector: toNull(acc.collector),
                 details: newDetails,
-                batch_name: acc.batch_name || '',
-                uploaded_by: acc.uploaded_by || '',
-                batch_owner: acc.batch_owner || '',
-                assignee_id: acc.assignee_id || 'UNASSIGNED'
+                batch_name: toNull(acc.batch_name),
+                uploaded_by: toNull(acc.uploaded_by),
+                batch_owner: toNull(acc.batch_owner),
+                assignee_id: toNull(acc.assignee_id) || 'UNASSIGNED'
             };
         });
 
@@ -5131,7 +5132,6 @@ window.executeEditExpiry = async function(batchName, newDate) {
         localStorage.removeItem(timeKey);
         
         await fetchFullDatabaseData(); 
-        
         renderBatchList();
 
     } catch (err) {
