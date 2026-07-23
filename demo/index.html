@@ -3631,15 +3631,16 @@ window.processExcelUpload = async function() {
 
     document.getElementById('mappingModal').style.display = 'none';
 
+    // 1. PINDAHKAN GETVAL KE ATAS SEKALI SUPAYA BOLEH DIGUNA SEMUA & TAK BERTINDIH
+    const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : '';
+
     // ----------------------------------------------------------------------
     // 🛡️ KOD BARU: PENGESAN PRA-MUAT NAIK (SERVER-SIDE VALIDATION)
     // ----------------------------------------------------------------------
-    const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : '';
-    
     document.getElementById('loadingText').innerText = "Menyemak pertindihan akaun dengan pangkalan data...";
     document.getElementById('loadingModal').style.display = 'flex';
 
-    // 1. Kumpul semua nombor akaun dari Excel
+    // Kumpul semua nombor akaun dari Excel
     let uploadedAccts = [];
     for (const row of parsedExcelRows) {
         let acctVal = String(row[getVal('map-acct')]).trim();
@@ -3648,7 +3649,7 @@ window.processExcelUpload = async function() {
         }
     }
 
-    // 2. Semak dengan Supabase (Secara berperingkat untuk elak server jam)
+    // Semak dengan Supabase (Secara berperingkat untuk elak server jam)
     let duplicateAccounts = [];
     let checkChunkSize = 300; 
     
@@ -3673,7 +3674,7 @@ window.processExcelUpload = async function() {
 
     document.getElementById('loadingModal').style.display = 'none';
 
-    // 3. Jika ada pertindihan, sekat dan tunjuk amaran!
+    // Jika ada pertindihan, sekat dan tunjuk amaran!
     if (duplicateAccounts.length > 0) {
         let dupCount = duplicateAccounts.length;
         // Ambil 3 contoh teratas untuk dipaparkan
@@ -3689,7 +3690,6 @@ window.processExcelUpload = async function() {
     // 🛡️ TAMAT KOD PENGESAN KESELAMATAN
     // ----------------------------------------------------------------------
 
-
     // Kalau lulus semakan, baru teruskan dengan Progress Bar dan proses Upsert
     document.getElementById('progressModal').style.display = 'flex';
     
@@ -3697,8 +3697,8 @@ window.processExcelUpload = async function() {
     const progressText = document.getElementById('upload-progress-text');
     const progressSubtext = document.getElementById('upload-progress-subtext');
 
-    const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : '';
-    
+    // GETVAL YANG BERTINDIH DI SINI TELAH DIPADAM
+
     const formatIC = (newIcKey, oldIcKey, rowData) => {
         let nKey = getVal(newIcKey);
         let oKey = getVal(oldIcKey);
@@ -3781,7 +3781,7 @@ window.processExcelUpload = async function() {
 
         let detailsJSON = {
             ...row, 
-            BATCH_EXPIRY: batchExpiry, // KOD BARU: Sumbat tarikh luput ke dalam objek details
+            BATCH_EXPIRY: batchExpiry, 
             SALES_REP_DT: formatExcelDate(row[salesKey]),
             HP_MATURE_DT: formatExcelDate(row[matureKey]),
             h_name: row[getVal('map-h-name')] || '',
