@@ -1422,6 +1422,7 @@ th {
                             <th>UPLOADED BY</th>
                             <th>CURRENT OWNER</th>
                             <th>JUMLAH AKAUN</th>
+                            <th>EXPIRY DATE</th> <!-- KOD BARU SELIT DI SINI -->
                             <th style="text-align: right;">TINDAKAN</th>
                         </tr>
                     </thead>
@@ -1706,16 +1707,22 @@ th {
 <div class="modal-overlay" id="batchPromptModal" style="z-index: 1100;">
     <div class="modal-content" style="text-align: center; max-width: 360px;">
         <h2 style="color: var(--text-main); margin-top: 0; font-size: 20px;">MAKLUMAT BATCH EXCEL</h2>
-        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Sila masukkan nama rujukan dan pilih zon.</p>
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Sila masukkan nama rujukan, pilih zon dan tarikh luput.</p>
         
         <div class="form-group" style="text-align: left; margin-bottom: 15px;">
-            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">1. NAMA BATCH (Cth: KUTIPAN_OGOS_26)</label>
-            <input type="text" id="batchPromptInput" class="form-control" placeholder="Tulis nama batch..." style="text-align: center; font-size: 16px; font-weight: bold; text-transform: uppercase;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">1. NAMA BATCH</label>
+            <input type="text" id="batchPromptInput" class="form-control" placeholder="Cth: KUTIPAN_OGOS_26" style="text-align: center; font-size: 16px; font-weight: bold; text-transform: uppercase;">
         </div>
 
-        <div class="form-group" style="text-align: left; margin-bottom: 25px;">
+        <div class="form-group" style="text-align: left; margin-bottom: 15px;">
             <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">2. PILIH ZON TUGASAN</label>
             <select id="batchPromptZone" class="form-control" style="font-weight: bold; text-align: center;"></select>
+        </div>
+
+        <!-- KOD BARU: Input Tarikh Luput -->
+        <div class="form-group" style="text-align: left; margin-bottom: 25px;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">3. TARIKH LUPUT (EXPIRY DATE)</label>
+            <input type="date" id="batchPromptExpiry" class="form-control" style="font-weight: bold; text-align: center; font-family: inherit;">
         </div>
 
         <div style="display: flex; gap: 12px;">
@@ -1895,6 +1902,11 @@ window.requestBatchName = function() {
     return new Promise((resolve) => {
         document.getElementById('batchPromptInput').value = '';
         
+        // KOD BARU: Reset nilai tarikh luput kalau modal dibuka semula
+        if(document.getElementById('batchPromptExpiry')) {
+            document.getElementById('batchPromptExpiry').value = ''; 
+        }
+        
         let zoneSelect = document.getElementById('batchPromptZone');
         zoneSelect.innerHTML = '';
         
@@ -1929,12 +1941,15 @@ window.requestBatchName = function() {
         document.getElementById('btnBatchOk').onclick = function() {
             let val = document.getElementById('batchPromptInput').value.trim();
             let selectedZone = document.getElementById('batchPromptZone').value;
+            // KOD BARU: Ambil tarikh dari input HTML
+            let expiryDate = document.getElementById('batchPromptExpiry') ? document.getElementById('batchPromptExpiry').value : '';
             
             if (!val) { alert("Sila isi nama batch!"); return; }
             if (currentUser.role === 'super' && !selectedZone) { alert("Sila pilih Zon untuk batch ini!"); return; }
+            if (!expiryDate) { alert("Sila tetapkan Tarikh Luput (Expiry Date) untuk batch ini!"); return; } 
             
             document.getElementById('batchPromptModal').style.display = 'none';
-            resolve({ name: val, zone: selectedZone }); 
+            resolve({ name: val, zone: selectedZone, expiry: expiryDate }); // KOD BARU: Luluskan data expiry ke proses seterusnya
         };
         
         document.getElementById('btnBatchCancel').onclick = function() {
@@ -3594,6 +3609,7 @@ window.processExcelUpload = async function() {
 
     let rawBatchName = batchData.name.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_');
     let batchZone = batchData.zone.toUpperCase();
+    let batchExpiry = batchData.expiry; // KOD BARU: Terima tarikh luput
 
     let d = new Date();
     let timeSuffix = String(d.getDate()).padStart(2, '0') + String(d.getMonth() + 1).padStart(2, '0') + d.getFullYear() + '_' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0');
@@ -3690,6 +3706,7 @@ window.processExcelUpload = async function() {
 
         let detailsJSON = {
             ...row, 
+            BATCH_EXPIRY: batchExpiry, // KOD BARU: Sumbat tarikh luput ke dalam objek details
             SALES_REP_DT: formatExcelDate(row[salesKey]),
             HP_MATURE_DT: formatExcelDate(row[matureKey]),
             h_name: row[getVal('map-h-name')] || '',
@@ -3741,45 +3758,45 @@ window.processExcelUpload = async function() {
     }
 
     const CHUNK_SIZE = 1000;
-            let totalProcessed = 0; let hasError = false;
-            for (let i = 0; i < bulkData.length; i += CHUNK_SIZE) {
-                const chunk = bulkData.slice(i, i + CHUNK_SIZE);
-                const currentProgress = Math.round((i / bulkData.length) * 100);
-                progressBar.style.width = `${currentProgress}%`; progressText.innerText = `${currentProgress}%`;
-                progressSubtext.innerText = `Submitting data: ${i.toLocaleString()} of ${bulkData.length.toLocaleString()} records...`;
-                
-                const { error } = await supabase.from('accounts').upsert(chunk, { onConflict: 'acct' });
-                if (error) { alert("Error: " + error.message); hasError = true; break; }
-                totalProcessed += chunk.length;
-            }
+    let totalProcessed = 0; let hasError = false;
+    for (let i = 0; i < bulkData.length; i += CHUNK_SIZE) {
+        const chunk = bulkData.slice(i, i + CHUNK_SIZE);
+        const currentProgress = Math.round((i / bulkData.length) * 100);
+        progressBar.style.width = `${currentProgress}%`; progressText.innerText = `${currentProgress}%`;
+        progressSubtext.innerText = `Submitting data: ${i.toLocaleString()} of ${bulkData.length.toLocaleString()} records...`;
+        
+        const { error } = await supabase.from('accounts').upsert(chunk, { onConflict: 'acct' });
+        if (error) { alert("Error: " + error.message); hasError = true; break; }
+        totalProcessed += chunk.length;
+    }
 
-if (!hasError) {
-                progressBar.style.width = '100%';
-                progressText.innerText = '100%';
-                progressSubtext.innerText = `Completely done! Reloading ledger structure...`;
-                
-                await supabase.from('findings').insert([{
-                    acct: 'SYSTEM',
-                    remark1: `BULK DATA UPLOADED BY ${currentUser.id.toUpperCase()}`,
-                    updated_by: currentUser.username
-                }]);
+    if (!hasError) {
+        progressBar.style.width = '100%';
+        progressText.innerText = '100%';
+        progressSubtext.innerText = `Completely done! Reloading ledger structure...`;
+        
+        await supabase.from('findings').insert([{
+            acct: 'SYSTEM',
+            remark1: `BULK DATA UPLOADED BY ${currentUser.id.toUpperCase()}`,
+            updated_by: currentUser.username
+        }]);
 
-                setTimeout(async () => {
-                    document.getElementById('progressModal').style.display = 'none';
-                    document.getElementById('excel-file-input').value = ''; 
-                    alert(`Successfully processed ${totalProcessed.toLocaleString()} accounts.`);
-                    
-                    const cacheKey = `scazp_cache_${currentUser.id}`;
-                    const timeKey = `scazp_time_${currentUser.id}`;
-                    await localforage.removeItem(cacheKey);
-                    localStorage.removeItem(timeKey);
-                    
-                    await fetchFullDatabaseData(); 
-                    resetStatusCardHighlight();
-                    initDashboardView();
-                }, 800);
-            } else { document.getElementById('progressModal').style.display = 'none'; }
-        };
+        setTimeout(async () => {
+            document.getElementById('progressModal').style.display = 'none';
+            document.getElementById('excel-file-input').value = ''; 
+            alert(`Successfully processed ${totalProcessed.toLocaleString()} accounts.`);
+            
+            const cacheKey = `scazp_cache_${currentUser.id}`;
+            const timeKey = `scazp_time_${currentUser.id}`;
+            await localforage.removeItem(cacheKey);
+            localStorage.removeItem(timeKey);
+            
+            await fetchFullDatabaseData(); 
+            resetStatusCardHighlight();
+            initDashboardView();
+        }, 800);
+    } else { document.getElementById('progressModal').style.display = 'none'; }
+};
 
 window.renderBatchList = function() {
     const tbody = document.getElementById('batch-table-body');
@@ -3793,7 +3810,8 @@ window.renderBatchList = function() {
                     count: 0, 
                     uploaded_by: acc.uploaded_by || 'UNKNOWN',
                     batch_owner: acc.batch_owner || acc.uploaded_by || 'UNKNOWN', 
-                    zone: acc.zone || 'UNKNOWN' 
+                    zone: acc.zone || 'UNKNOWN',
+                    expiry: (acc.details && acc.details.BATCH_EXPIRY) ? acc.details.BATCH_EXPIRY : null // KOD BARU: Tarik expiry
                 };
             }
             batchGroups[acc.batch_name].count++;
@@ -3851,19 +3869,46 @@ window.renderBatchList = function() {
         return;
     }
 
-    batchKeys.forEach(bName => {
+batchKeys.forEach(bName => {
         let bInfo = batchGroups[bName];
         
         let actionButtons = '';
         if (currentUser.role !== 'admin') {
             actionButtons = `
-                <button class="btn-filter" style="border: 1px solid var(--success-green); color: var(--success-green); background: #f0fdf4; margin-right: 5px;" onclick="exportByBatch('${bName}')" title="Export Batch Ini">📥 EXPORT</button>
+                <button class="btn-update" style="color: var(--success-green); border-color: var(--success-green); background: #f0fdf4; margin-right: 5px;" onclick="exportByBatch('${bName}')" title="Export Batch Ini">📥 EXPORT</button>
                 <button class="btn-update" style="color: var(--status-call); border-color: var(--status-call); margin-right: 5px;" onclick="openTransferBatchModal('${bName}')">🔄 TRANSFER</button>
                 <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteBatch('${bName}')">🗑️ DELETE</button>
             `;
         } else {
-            actionButtons = '<span style="font-size: 10px; font-weight: 600; color: var(--text-muted);">VIEW ONLY</span>';
+            actionButtons = `
+                <button class="btn-update" style="color: var(--success-green); border-color: var(--success-green); background: #f0fdf4; margin-right: 5px;" onclick="exportByBatch('${bName}')" title="Export Batch Ini">📥 EXPORT</button>
+                <span style="font-size: 10px; font-weight: 600; color: var(--text-muted);">VIEW ONLY</span>
+            `;
         }
+
+        // --- KOD BARU: Logik Tarikh Luput (Warna Merah/Hijau) ---
+        let expiryDisplay = '-';
+        let expiryColor = 'var(--text-main)';
+
+        if (bInfo.expiry) {
+            let parts = bInfo.expiry.split('-'); // Pisahkan format YYYY-MM-DD
+            if (parts.length === 3) {
+                expiryDisplay = `${parts[2]}/${parts[1]}/${parts[0].slice(-2)}`; // Jadi format DD/MM/YY
+                
+                // Cari tarikh harini dalam format YYYY-MM-DD
+                let d = new Date();
+                let localTodayStr = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
+                
+                // Kalau tarikh luput dah lepas (lebih kecil dari tarikh harini)
+                if (bInfo.expiry < localTodayStr) {
+                    expiryColor = 'var(--error-red)';
+                    expiryDisplay += ' 🔴'; // Ikon penanda expired
+                } else {
+                    expiryColor = 'var(--success-green)'; // Belum expired, kaler hijau
+                }
+            }
+        }
+        // --------------------------------------------------------
 
         tbody.innerHTML += `
             <tr>
@@ -3872,6 +3917,7 @@ window.renderBatchList = function() {
                 <td style="color: var(--text-muted);">${bInfo.uploaded_by.toUpperCase()}</td>
                 <td style="font-weight: bold; color: var(--text-main);">${bInfo.batch_owner.toUpperCase()}</td>
                 <td>${bInfo.count} Akaun</td>
+                <td style="font-weight: 700; color: ${expiryColor};">${expiryDisplay}</td> <!-- KOD BARU -->
                 <td style="text-align: right; white-space: nowrap;">
                     ${actionButtons}
                 </td>
