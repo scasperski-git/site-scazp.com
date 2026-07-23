@@ -5092,15 +5092,31 @@ window.executeEditExpiry = async function(batchName, newDate) {
             // Kemas kini memori tempatan
             acc.details = newDetails; 
             
+            // KOD YANG DIBETULKAN: Hanya senaraikan lajur yang wujud dalam Supabase
             return {
-                ...acc, // Ambil SEMUA data asal tanpa tercicir
-                details: newDetails
+                zone: acc.zone || '',
+                region: acc.region || '',
+                area: acc.area || '',
+                loc: acc.loc || '',
+                type: acc.type || '',
+                acct: acc.acct || '',
+                delq: acc.delq || '',
+                arrs_mth: acc.arrs_mth || 0,
+                osb: acc.osb || 0,
+                status: acc.status || 'PENDING',
+                collector: acc.collector || '',
+                details: newDetails,
+                batch_name: acc.batch_name || '',
+                uploaded_by: acc.uploaded_by || '',
+                batch_owner: acc.batch_owner || '',
+                assignee_id: acc.assignee_id || 'UNASSIGNED'
             };
         });
 
         let chunkSize = 1000;
         for (let i = 0; i < bulkData.length; i += chunkSize) {
             let chunk = bulkData.slice(i, i + chunkSize);
+            // Supabase takkan marah lagi sebab data dah ngam dengan skema jadual
             const { error } = await supabase.from('accounts').upsert(chunk, { onConflict: 'acct' });
             if (error) throw error;
         }
@@ -5112,7 +5128,6 @@ window.executeEditExpiry = async function(batchName, newDate) {
         await localforage.removeItem(cacheKey);
         localStorage.removeItem(timeKey);
         
-        // --- KOD YANG DITAMBAH: Arah sistem tarik balik data baru dari Supabase ---
         await fetchFullDatabaseData(); 
         
         renderBatchList();
