@@ -1732,6 +1732,20 @@ th {
     </div>
 </div>
 
+    <div class="modal-overlay" id="editExpiryModal" style="z-index: 1100;">
+    <div class="modal-content" style="text-align: center; max-width: 360px;">
+        <h2 style="color: var(--text-main); margin-top: 0; font-size: 20px;">UBAH TARIKH LUPUT</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Sila tetapkan tarikh luput baharu untuk batch: <br><b id="editExpiryBatchName" style="color: var(--accent-gold);"></b></p>
+        
+        <input type="date" id="editExpiryInput" class="form-control" style="font-weight: bold; text-align: center; font-family: inherit; margin-bottom: 25px;">
+        
+        <div style="display: flex; gap: 12px;">
+            <button class="btn-cancel" style="flex: 1;" onclick="document.getElementById('editExpiryModal').style.display='none'">BATAL</button>
+            <button class="btn-submit" style="flex: 1; background-color: var(--success-green);" id="btnConfirmEditExpiry">SIMPAN</button>
+        </div>
+    </div>
+</div>
+    
     <div class="modal-overlay" id="batchTransferModal" style="z-index: 1100;">
     <div class="modal-content" style="text-align: center; max-width: 360px;">
         <h2 style="color: var(--text-main); margin-top: 0; font-size: 20px;">TRANSFER BATCH</h2>
@@ -3876,6 +3890,7 @@ batchKeys.forEach(bName => {
         if (currentUser.role !== 'admin') {
             actionButtons = `
                 <button class="btn-update" style="color: var(--success-green); border-color: var(--success-green); background: #f0fdf4; margin-right: 5px;" onclick="exportByBatch('${bName}')" title="Export Batch Ini">📥 EXPORT</button>
+                <button class="btn-update" style="color: #f59e0b; border-color: #fcd34d; background: #fffbeb; margin-right: 5px;" onclick="openEditExpiryModal('${bName}')">🗓️ EDIT DATE</button>
                 <button class="btn-update" style="color: var(--status-call); border-color: var(--status-call); margin-right: 5px;" onclick="openTransferBatchModal('${bName}')">🔄 TRANSFER</button>
                 <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteBatch('${bName}')">🗑️ DELETE</button>
             `;
@@ -5039,6 +5054,82 @@ window.exportByBatch = async function(batchName) {
         if(document.getElementById('loadingModal')) document.getElementById('loadingModal').style.display = 'none';
         console.error(err);
         alert("Ralat semasa mengekstrak batch: " + err.message);
+    }
+};
+
+        window.openEditExpiryModal = function(batchName) {
+    document.getElementById('editExpiryBatchName').innerText = batchName;
+    document.getElementById('editExpiryInput').value = '';
+    document.getElementById('editExpiryModal').style.display = 'flex';
+    
+    document.getElementById('btnConfirmEditExpiry').onclick = function() {
+        let newDate = document.getElementById('editExpiryInput').value;
+        if (!newDate) {
+            alert("Sila pilih tarikh luput yang sah.");
+            return;
+        }
+        executeEditExpiry(batchName, newDate);
+    };
+};
+
+window.executeEditExpiry = async function(batchName, newDate) {
+    document.getElementById('editExpiryModal').style.display = 'none';
+    document.getElementById('loadingText').innerText = "Mengemaskini tarikh luput di pelayan (server)...";
+    document.getElementById('loadingModal').style.display = 'flex';
+
+    try {
+        // Tapis keluar semua akaun dalam batch yang dipilih
+        let batchAccs = globalAccounts.filter(a => a.batch_name === batchName);
+        
+        let bulkData = batchAccs.map(acc => {
+            // Suntik tarikh baharu ke dalam objek details
+            let newDetails = { ...acc.details, BATCH_EXPIRY: newDate };
+            acc.details = newDetails; 
+            
+            // Siapkan susunan data penuh untuk Upsert
+            return {
+                zone: acc.zone,
+                region: acc.region,
+                area: acc.area,
+                loc: acc.loc,
+                type: acc.type,
+                acct: acc.acct,
+                delq: acc.delq,
+                arrs_mth: acc.arrs_mth,
+                osb: acc.osb,
+                status: acc.status,
+                collector: acc.collector,
+                details: newDetails,
+                batch_name: acc.batch_name,
+                uploaded_by: acc.uploaded_by,
+                batch_owner: acc.batch_owner,
+                assignee_id: acc.assignee_id
+            };
+        });
+
+        // Proses muat naik mengikut chunk untuk keselamatan server
+        let chunkSize = 1000;
+        for (let i = 0; i < bulkData.length; i += chunkSize) {
+            let chunk = bulkData.slice(i, i + chunkSize);
+            const { error } = await supabase.from('accounts').upsert(chunk, { onConflict: 'acct' });
+            if (error) throw error;
+        }
+
+        showNotification("SUCCESS", `Tarikh luput untuk batch <b>${batchName}</b> telah berjaya dikemas kini.`);
+        
+        // Padam cache lama supaya sistem muat turun data segar
+        const cacheKey = `scazp_cache_${currentUser.id}`;
+        const timeKey = `scazp_time_${currentUser.id}`;
+        await localforage.removeItem(cacheKey);
+        localStorage.removeItem(timeKey);
+        
+        // Segarkan jadual paparan
+        renderBatchList();
+
+    } catch (err) {
+        showNotification("ERROR", err.message, true);
+    } finally {
+        document.getElementById('loadingModal').style.display = 'none';
     }
 };
         
