@@ -5092,7 +5092,10 @@ window.executeEditExpiry = async function(batchName, newDate) {
             // Kemas kini memori tempatan
             acc.details = newDetails; 
             
-            // KOD YANG DIBETULKAN: Hanya senaraikan lajur yang wujud dalam Supabase
+            // KOD YANG DIBETULKAN: Paksa convert ke Nombor untuk elak ralat numeric ""
+            let safeArrsMth = Number(acc.arrs_mth);
+            let safeOsb = Number(acc.osb);
+            
             return {
                 zone: acc.zone || '',
                 region: acc.region || '',
@@ -5100,9 +5103,9 @@ window.executeEditExpiry = async function(batchName, newDate) {
                 loc: acc.loc || '',
                 type: acc.type || '',
                 acct: acc.acct || '',
-                delq: acc.delq || '',
-                arrs_mth: acc.arrs_mth || 0,
-                osb: acc.osb || 0,
+                delq: String(acc.delq || ''), // Pastikan ini sentiasa format teks
+                arrs_mth: isNaN(safeArrsMth) ? 0 : safeArrsMth, // Guna 0 kalau bukan nombor
+                osb: isNaN(safeOsb) ? 0 : safeOsb,             // Guna 0 kalau bukan nombor
                 status: acc.status || 'PENDING',
                 collector: acc.collector || '',
                 details: newDetails,
@@ -5116,7 +5119,6 @@ window.executeEditExpiry = async function(batchName, newDate) {
         let chunkSize = 1000;
         for (let i = 0; i < bulkData.length; i += chunkSize) {
             let chunk = bulkData.slice(i, i + chunkSize);
-            // Supabase takkan marah lagi sebab data dah ngam dengan skema jadual
             const { error } = await supabase.from('accounts').upsert(chunk, { onConflict: 'acct' });
             if (error) throw error;
         }
