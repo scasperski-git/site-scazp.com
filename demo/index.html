@@ -4314,27 +4314,30 @@ window.saveFinding = async function() {
             updatedDetailsObj.last_remark_date = dateStr;
             updatedDetailsObj.timestamp = today.getTime();
             
-            let currentDateTime = new Date();
+let currentDateTime = new Date();
             let formattedDate = String(currentDateTime.getDate()).padStart(2, '0') + '/' + 
                                 String(currentDateTime.getMonth() + 1).padStart(2, '0') + '/' + 
-                                String(currentDateTime.getFullYear()).slice(-2); // YY (Untuk paparan log teks)
-            let formattedTime = currentDateTime.toLocaleTimeString('en-US', { 
+                                String(currentDateTime.getFullYear()).slice(-2); 
+            
+            // TUKAR KE FORMAT 24-JAM UNTUK JIMAT RUANG
+            let formattedTime = currentDateTime.toLocaleTimeString('en-GB', { 
                 hour: '2-digit', 
-                minute: '2-digit', 
-                hour12: true 
+                minute: '2-digit'
             });
 
-let r5Auto = "";
-            // Ambil jumlah sedia ada dalam database. Jika tiada, mula dengan 0.
+            let r5Auto = "";
             let currentCollected = parseFloat(updatedDetailsObj.amt_collected) || 0; 
+            
+            // HADKAN NAMA USER KEPADA 10 HURUF SAHAJA
+            let shortUser = currentUser.username.toUpperCase().substring(0, 10);
 
             if (selectedStatus === 'PAID') {
-                r5Auto = `[${selectedStatus} : RM ${amtCollected.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${formattedDate} ${formattedTime}`;
-                // Campurkan bayaran baharu ke dalam jumlah sedia ada (Accumulate)
+                // FORMAT BARU: [PAID RM1,250.00] @SARAVANAN 21/07/26 21:42
+                r5Auto = `[${selectedStatus} RM${amtCollected.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}] @${shortUser} ${formattedDate} ${formattedTime}`;
                 updatedDetailsObj.amt_collected = currentCollected + amtCollected;
             } else {
-                r5Auto = `[${selectedStatus}] ATTENDED BY (${currentUser.username.toUpperCase()}) - ${formattedDate} ${formattedTime}`;
-                // Biarkan jumlah terkumpul kekal seperti asal, JANGAN reset ke 0
+                // FORMAT BARU: [CALL] @SARAVANAN 21/07/26 21:42
+                r5Auto = `[${selectedStatus}] @${shortUser} ${formattedDate} ${formattedTime}`;
                 updatedDetailsObj.amt_collected = currentCollected; 
             }
             
