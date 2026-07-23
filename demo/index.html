@@ -3623,13 +3623,74 @@ window.processExcelUpload = async function() {
 
     let rawBatchName = batchData.name.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_');
     let batchZone = batchData.zone.toUpperCase();
-    let batchExpiry = batchData.expiry; // KOD BARU: Terima tarikh luput
+    let batchExpiry = batchData.expiry; 
 
     let d = new Date();
     let timeSuffix = String(d.getDate()).padStart(2, '0') + String(d.getMonth() + 1).padStart(2, '0') + d.getFullYear() + '_' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0');
     let finalBatchName = `${rawBatchName}_${timeSuffix}`;
 
     document.getElementById('mappingModal').style.display = 'none';
+
+    // ----------------------------------------------------------------------
+    // 🛡️ KOD BARU: PENGESAN PRA-MUAT NAIK (SERVER-SIDE VALIDATION)
+    // ----------------------------------------------------------------------
+    const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : '';
+    
+    document.getElementById('loadingText').innerText = "Menyemak pertindihan akaun dengan pangkalan data...";
+    document.getElementById('loadingModal').style.display = 'flex';
+
+    // 1. Kumpul semua nombor akaun dari Excel
+    let uploadedAccts = [];
+    for (const row of parsedExcelRows) {
+        let acctVal = String(row[getVal('map-acct')]).trim();
+        if (acctVal && acctVal !== "undefined") {
+            uploadedAccts.push(acctVal);
+        }
+    }
+
+    // 2. Semak dengan Supabase (Secara berperingkat untuk elak server jam)
+    let duplicateAccounts = [];
+    let checkChunkSize = 300; 
+    
+    try {
+        for (let i = 0; i < uploadedAccts.length; i += checkChunkSize) {
+            let chunk = uploadedAccts.slice(i, i + checkChunkSize);
+            let { data, error } = await supabase
+                .from('accounts')
+                .select('acct, batch_name')
+                .in('acct', chunk);
+                
+            if (error) throw error;
+            if (data && data.length > 0) {
+                duplicateAccounts.push(...data);
+            }
+        }
+    } catch (err) {
+        document.getElementById('loadingModal').style.display = 'none';
+        alert("Ralat semasa menyemak pangkalan data: " + err.message);
+        return;
+    }
+
+    document.getElementById('loadingModal').style.display = 'none';
+
+    // 3. Jika ada pertindihan, sekat dan tunjuk amaran!
+    if (duplicateAccounts.length > 0) {
+        let dupCount = duplicateAccounts.length;
+        // Ambil 3 contoh teratas untuk dipaparkan
+        let examples = duplicateAccounts.slice(0, 3).map(d => `${d.acct} (${d.batch_name})`).join('\n- ');
+        
+        let confirmMsg = `AMARAN KESELAMATAN DATA! 🚨\n\nTerdapat ${dupCount} akaun di dalam fail Excel ini yang MASIH AKTIF dalam sistem.\n\nContoh Akaun Bertindih:\n- ${examples}\n\nOleh kerana akaun-akaun ini masih aktif, sistem menghalang muat naik ini bagi mengelakkan pertindihan data.\n\nSila CLOSE/ABORT batch yang lama dahulu, atau buang akaun tersebut dari fail Excel anda.`;
+        
+        alert(confirmMsg);
+        document.getElementById('excel-file-input').value = ''; // Reset input fail
+        return; // HENTIKAN PROSES SEPENUHNYA!
+    }
+    // ----------------------------------------------------------------------
+    // 🛡️ TAMAT KOD PENGESAN KESELAMATAN
+    // ----------------------------------------------------------------------
+
+
+    // Kalau lulus semakan, baru teruskan dengan Progress Bar dan proses Upsert
     document.getElementById('progressModal').style.display = 'flex';
     
     const progressBar = document.getElementById('upload-progress-bar');
