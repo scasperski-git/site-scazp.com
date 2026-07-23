@@ -4319,7 +4319,7 @@ let currentDateTime = new Date();
                                 String(currentDateTime.getMonth() + 1).padStart(2, '0') + '/' + 
                                 String(currentDateTime.getFullYear()).slice(-2); 
             
-            // TUKAR KE FORMAT 24-JAM UNTUK JIMAT RUANG
+            // Format 24-Jam
             let formattedTime = currentDateTime.toLocaleTimeString('en-GB', { 
                 hour: '2-digit', 
                 minute: '2-digit'
@@ -4328,17 +4328,21 @@ let currentDateTime = new Date();
             let r5Auto = "";
             let currentCollected = parseFloat(updatedDetailsObj.amt_collected) || 0; 
             
-            // HADKAN NAMA USER KEPADA 10 HURUF SAHAJA
-            let shortUser = currentUser.username.toUpperCase().substring(0, 10);
+            // Tarik nama penuh tanpa had
+            let fullUser = currentUser.username.toUpperCase();
 
             if (selectedStatus === 'PAID') {
-                // FORMAT BARU: [PAID RM1,250.00] @SARAVANAN 21/07/26 21:42
-                r5Auto = `[${selectedStatus} RM${amtCollected.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}] @${shortUser} ${formattedDate} ${formattedTime}`;
+                // toFixed(2) akan buang koma pada nilai ribuan dan kekalkan 2 titik perpuluhan
+                r5Auto = `[${selectedStatus} RM${amtCollected.toFixed(2)}] ${fullUser} ${formattedDate} ${formattedTime}`;
                 updatedDetailsObj.amt_collected = currentCollected + amtCollected;
             } else {
-                // FORMAT BARU: [CALL] @SARAVANAN 21/07/26 21:42
-                r5Auto = `[${selectedStatus}] @${shortUser} ${formattedDate} ${formattedTime}`;
+                r5Auto = `[${selectedStatus}] ${fullUser} ${formattedDate} ${formattedTime}`;
                 updatedDetailsObj.amt_collected = currentCollected; 
+            }
+
+            // Jaring keselamatan: Wajib ada untuk elak ralat pangkalan data jika lebih 50 karakter
+            if (r5Auto.length > 50) {
+                r5Auto = r5Auto.substring(0, 50);
             }
             
             try {
