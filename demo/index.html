@@ -4333,10 +4333,10 @@ let currentDateTime = new Date();
 
             if (selectedStatus === 'PAID') {
                 // toFixed(2) akan buang koma pada nilai ribuan dan kekalkan 2 titik perpuluhan
-                r5Auto = `[${selectedStatus} RM${amtCollected.toFixed(2)}] ${fullUser} ${formattedDate} ${formattedTime}`;
+                r5Auto = `[${selectedStatus} RM${amtCollected.toFixed(2)}] @${fullUser} ${formattedDate} ${formattedTime}`;
                 updatedDetailsObj.amt_collected = currentCollected + amtCollected;
             } else {
-                r5Auto = `[${selectedStatus}] ${fullUser} ${formattedDate} ${formattedTime}`;
+                r5Auto = `[${selectedStatus}] @${fullUser} ${formattedDate} ${formattedTime}`;
                 updatedDetailsObj.amt_collected = currentCollected; 
             }
 
