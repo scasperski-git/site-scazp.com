@@ -3658,6 +3658,8 @@ window.processExcelUpload = async function() {
         let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; 
         let currentFindingStatus = existingAcc ? existingAcc.finding_status : '';
 
+        let prevBatchName = existingAcc ? (existingAcc.batch_name || '') : '';
+
         const parseAndFlip = (val) => {
             if (!val || val === "undefined") return 0;
             let str = String(val).trim();
@@ -3721,6 +3723,7 @@ window.processExcelUpload = async function() {
         let detailsJSON = {
             ...row, 
             BATCH_EXPIRY: batchExpiry, // KOD BARU: Sumbat tarikh luput ke dalam objek details
+            PREV_BATCH: prevBatchName,
             SALES_REP_DT: formatExcelDate(row[salesKey]),
             HP_MATURE_DT: formatExcelDate(row[matureKey]),
             h_name: row[getVal('map-h-name')] || '',
@@ -3947,36 +3950,66 @@ batchKeys.forEach(bName => {
 };
 
 window.deleteBatch = async function(batchName) {
-    let isConfirmed = await customConfirm(`STRICT WARNING:\nAdakah anda pasti mahu memadam KESELURUHAN akaun untuk batch ${batchName}? Tindakan ini akan memadam data sepenuhnya dari pelayan.`);
-    if (!isConfirmed) return;
+    let confirmMsg = `Adakah anda pasti mahu memadam batch: ${batchName}?\n\nJangan risau, jika terdapat akaun lama yang 'tercampur' di dalam batch ini, ia tidak akan dipadam, sebaliknya akan dikembalikan ke batch asalnya secara automatik.`;
+    
+    if (!confirm(confirmMsg)) return;
 
-    let isVerified = await verifyAdminPasscode();
-    if (!isVerified) return;
-
-    document.getElementById('loadingText').innerText = "Memadam rekod batch dari pangkalan data...";
+    document.getElementById('loadingText').innerText = "Sedang memadam batch dan memulihkan akaun lama...";
     document.getElementById('loadingModal').style.display = 'flex';
 
     try {
-        const { error } = await supabase.from('accounts').delete().eq('batch_name', batchName);
-        if (error) throw error;
+        let batchAccs = globalAccounts.filter(a => a.batch_name === batchName);
 
-        showNotification("SUCCESS", `Batch <b>${batchName}</b> telah berjaya dipadam sepenuhnya.`);
-        
+        // Asingkan kepada dua kumpulan
+        let accsToRestore = [];
+        let acctsToDelete = [];
+
+        batchAccs.forEach(acc => {
+            // Jika akaun ni ada sejarah batch lama dan batch lama tu tak sama dengan batch sekarang
+            if (acc.details && acc.details.PREV_BATCH && acc.details.PREV_BATCH !== batchName) {
+                accsToRestore.push({
+                    ...acc,
+                    batch_name: acc.details.PREV_BATCH // Pulangkan ke batch lama
+                });
+            } else {
+                // Akaun ni memang tulen milik batch yang nak dipadam
+                acctsToDelete.push(acc.acct);
+            }
+        });
+
+        // 1. PADAM akaun yang tulen
+        if (acctsToDelete.length > 0) {
+            let chunkSize = 1000;
+            for (let i = 0; i < acctsToDelete.length; i += chunkSize) {
+                let chunk = acctsToDelete.slice(i, i + chunkSize);
+                const { error } = await supabase.from('accounts').delete().in('acct', chunk);
+                if (error) throw error;
+            }
+        }
+
+        // 2. PULIHKAN (Update) akaun yang "diculik"
+        if (accsToRestore.length > 0) {
+            let chunkSize = 1000;
+            for (let i = 0; i < accsToRestore.length; i += chunkSize) {
+                let chunk = accsToRestore.slice(i, i + chunkSize);
+                const { error } = await supabase.from('accounts').upsert(chunk, { onConflict: 'acct' });
+                if (error) throw error;
+            }
+        }
+
+        alert(`Selesai! Batch ${batchName} telah dipadam.\n${accsToRestore.length} akaun selamat dikembalikan ke batch asal.`);
+
+        // Padam cache dan muat semula
         const cacheKey = `scazp_cache_${currentUser.id}`;
         const timeKey = `scazp_time_${currentUser.id}`;
         await localforage.removeItem(cacheKey);
         localStorage.removeItem(timeKey);
-        
-        await fetchFullDatabaseData();
-        applyFilterAndRender();
-        
-        if (document.getElementById('assign-panel').style.display === 'block') {
-            renderBatchList();
-            renderAssignTable();
-        }
+
+        await fetchFullDatabaseData(); 
+        renderBatchList();
 
     } catch (err) {
-        showNotification("DELETE ERROR", err.message, true);
+        alert("Gagal memadam batch: " + err.message);
     } finally {
         document.getElementById('loadingModal').style.display = 'none';
     }
