@@ -3623,7 +3623,7 @@ window.processExcelUpload = async function() {
 
     let rawBatchName = batchData.name.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_');
     let batchZone = batchData.zone.toUpperCase();
-    let batchExpiry = batchData.expiry;
+    let batchExpiry = batchData.expiry; // KOD BARU: Terima tarikh luput
 
     let d = new Date();
     let timeSuffix = String(d.getDate()).padStart(2, '0') + String(d.getMonth() + 1).padStart(2, '0') + d.getFullYear() + '_' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0');
@@ -3654,21 +3654,9 @@ window.processExcelUpload = async function() {
         const rawAccountNo = String(row[getVal('map-acct')]).trim();
         if (!rawAccountNo || rawAccountNo === "undefined") continue; 
         
-        // --- KOD KESELAMATAN (SAFE MERGE) BERMULA DI SINI ---
         let existingAcc = globalAccounts.find(a => a.acct === rawAccountNo);
-        
-        // Kekalkan memori lama jika ada
         let currentStatus = existingAcc ? existingAcc.status : 'PENDING'; 
         let currentFindingStatus = existingAcc ? existingAcc.finding_status : '';
-        let prevBatchName = existingAcc ? (existingAcc.batch_name || '') : ''; 
-        
-        // KEKALKAN HAK MILIK! Jangan overwrite owner & assignee kalau akaun dah wujud
-        let safeUploadedBy = existingAcc ? existingAcc.uploaded_by : currentUser.id;
-        let safeOwner = existingAcc ? existingAcc.batch_owner : currentUser.id;
-        let safeAssignee = existingAcc ? existingAcc.assignee_id : 'UNASSIGNED';
-        
-        // Kekalkan segala data dalam 'details' supaya tak hilang
-        let oldDetails = existingAcc ? (existingAcc.details || {}) : {};
 
         const parseAndFlip = (val) => {
             if (!val || val === "undefined") return 0;
@@ -3712,6 +3700,11 @@ window.processExcelUpload = async function() {
         
         let keyLoc = getVal('map-loc');
         let rawLocCd = (keyLoc && row[keyLoc]) ? String(row[keyLoc]).trim() : "";
+        
+        let finalZone = batchZone; 
+        let finalRegion = ""; 
+        let finalArea = "";   
+
         if (rawLocCd === "UNDEFINED") rawLocCd = "";
         
         let rawType = String(row[getVal('map-type')]).trim();
@@ -3726,10 +3719,8 @@ window.processExcelUpload = async function() {
         let matureKey = getVal('map-hp-mature-dt') || 'HP_MATURE_DT';
 
         let detailsJSON = {
-            ...oldDetails, // KOD KESELAMATAN: Tampal balik semua rekod lama dulu
-            ...row,        // Lepas tu baru tindih dengan maklumat Excel terbaru
-            BATCH_EXPIRY: batchExpiry, 
-            PREV_BATCH: prevBatchName, 
+            ...row, 
+            BATCH_EXPIRY: batchExpiry, // KOD BARU: Sumbat tarikh luput ke dalam objek details
             SALES_REP_DT: formatExcelDate(row[salesKey]),
             HP_MATURE_DT: formatExcelDate(row[matureKey]),
             h_name: row[getVal('map-h-name')] || '',
@@ -3761,25 +3752,22 @@ window.processExcelUpload = async function() {
             finding_status: currentFindingStatus 
         };
 
-        const toNull = (val) => (val === "" || val === "undefined" || val === undefined || val === null) ? null : val;
-
         bulkData.push({
-            zone: existingAcc ? existingAcc.zone : batchZone, // Kekalkan zon asal jika ada
-            region: toNull(existingAcc ? existingAcc.region : finalRegion), 
-            area: toNull(existingAcc ? existingAcc.area : finalArea),     
-            loc: toNull(rawLocCd),
-            type: toNull(type), 
+            zone: finalZone,
+            region: finalRegion, 
+            area: finalArea,     
+            loc: rawLocCd,
+            type: type, 
             acct: rawAccountNo,
-            delq: toNull(rawDelq), 
-            arrs_mth: isNaN(finalArrMth) ? 0 : finalArrMth, 
-            osb: isNaN(finalOsb) ? 0 : finalOsb,  
+            delq: rawDelq, 
+            arrs_mth: finalArrMth, 
+            osb: finalOsb,  
             status: currentStatus, 
-            collector: toNull(rawColl),
+            collector: rawColl,
             details: detailsJSON,
             batch_name: finalBatchName, 
-            uploaded_by: safeUploadedBy, // KOD KESELAMATAN
-            batch_owner: safeOwner,      // KOD KESELAMATAN
-            assignee_id: safeAssignee    // KOD KESELAMATAN
+            uploaded_by: currentUser.id,
+            batch_owner: currentUser.id
         });
     }
 
@@ -3959,66 +3947,36 @@ batchKeys.forEach(bName => {
 };
 
 window.deleteBatch = async function(batchName) {
-    let confirmMsg = `Adakah anda pasti mahu memadam batch: ${batchName}?\n\nJangan risau, jika terdapat akaun lama yang 'tercampur' di dalam batch ini, ia tidak akan dipadam, sebaliknya akan dikembalikan ke batch asalnya secara automatik.`;
-    
-    if (!confirm(confirmMsg)) return;
+    let isConfirmed = await customConfirm(`STRICT WARNING:\nAdakah anda pasti mahu memadam KESELURUHAN akaun untuk batch ${batchName}? Tindakan ini akan memadam data sepenuhnya dari pelayan.`);
+    if (!isConfirmed) return;
 
-    document.getElementById('loadingText').innerText = "Sedang memadam batch dan memulihkan akaun lama...";
+    let isVerified = await verifyAdminPasscode();
+    if (!isVerified) return;
+
+    document.getElementById('loadingText').innerText = "Memadam rekod batch dari pangkalan data...";
     document.getElementById('loadingModal').style.display = 'flex';
 
     try {
-        let batchAccs = globalAccounts.filter(a => a.batch_name === batchName);
+        const { error } = await supabase.from('accounts').delete().eq('batch_name', batchName);
+        if (error) throw error;
 
-        // Asingkan kepada dua kumpulan
-        let accsToRestore = [];
-        let acctsToDelete = [];
-
-        batchAccs.forEach(acc => {
-            // Jika akaun ni ada sejarah batch lama dan batch lama tu tak sama dengan batch sekarang
-            if (acc.details && acc.details.PREV_BATCH && acc.details.PREV_BATCH !== batchName) {
-                accsToRestore.push({
-                    ...acc,
-                    batch_name: acc.details.PREV_BATCH // Pulangkan ke batch lama
-                });
-            } else {
-                // Akaun ni memang tulen milik batch yang nak dipadam
-                acctsToDelete.push(acc.acct);
-            }
-        });
-
-        // 1. PADAM akaun yang tulen
-        if (acctsToDelete.length > 0) {
-            let chunkSize = 1000;
-            for (let i = 0; i < acctsToDelete.length; i += chunkSize) {
-                let chunk = acctsToDelete.slice(i, i + chunkSize);
-                const { error } = await supabase.from('accounts').delete().in('acct', chunk);
-                if (error) throw error;
-            }
-        }
-
-        // 2. PULIHKAN (Update) akaun yang "diculik"
-        if (accsToRestore.length > 0) {
-            let chunkSize = 1000;
-            for (let i = 0; i < accsToRestore.length; i += chunkSize) {
-                let chunk = accsToRestore.slice(i, i + chunkSize);
-                const { error } = await supabase.from('accounts').upsert(chunk, { onConflict: 'acct' });
-                if (error) throw error;
-            }
-        }
-
-        alert(`Selesai! Batch ${batchName} telah dipadam.\n${accsToRestore.length} akaun selamat dikembalikan ke batch asal.`);
-
-        // Padam cache dan muat semula
+        showNotification("SUCCESS", `Batch <b>${batchName}</b> telah berjaya dipadam sepenuhnya.`);
+        
         const cacheKey = `scazp_cache_${currentUser.id}`;
         const timeKey = `scazp_time_${currentUser.id}`;
         await localforage.removeItem(cacheKey);
         localStorage.removeItem(timeKey);
-
-        await fetchFullDatabaseData(); 
-        renderBatchList();
+        
+        await fetchFullDatabaseData();
+        applyFilterAndRender();
+        
+        if (document.getElementById('assign-panel').style.display === 'block') {
+            renderBatchList();
+            renderAssignTable();
+        }
 
     } catch (err) {
-        alert("Gagal memadam batch: " + err.message);
+        showNotification("DELETE ERROR", err.message, true);
     } finally {
         document.getElementById('loadingModal').style.display = 'none';
     }
