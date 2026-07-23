@@ -2434,9 +2434,9 @@ window.toggleKPIMode = function(mode) {
 
         function renderZoneSelectionUI() {
     const container = document.getElementById('zone-buttons');
-    container.innerHTML = '<button class="btn-filter" style="font-weight: 800; box-shadow: 0 0 8px rgba(59,130,246,0.4);" onclick="clearZoneSelection(this)">👑 ALL ZONES</button>';
+    container.innerHTML = '<button class="btn-filter" style="font-weight: 800; box-shadow: 0 0 8px rgba(59,130,246,0.4);" onclick="clearZoneSelection(this)">ALL ZONES</button>';
             
-            let masterZones = new Set(['BC', 'WEST', 'EAST', 'HO']);
+            let masterZones = new Set(['BC', 'WEST', 'EAST']);
             globalAccounts.forEach(row => {
                 if (row.zone && row.zone !== 'SYSTEM' && row.zone !== 'UNKNOWN') masterZones.add(row.zone.toUpperCase().trim());
             });
