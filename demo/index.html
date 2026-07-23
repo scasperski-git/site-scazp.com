@@ -3828,6 +3828,11 @@ window.renderBatchList = function() {
                     expiry: (acc.details && acc.details.BATCH_EXPIRY) ? acc.details.BATCH_EXPIRY : null // KOD BARU: Tarik expiry
                 };
             }
+            // --- KOD BARU: Kalau terlepas kat baris pertama, dia tangkap kat baris seterusnya ---
+            if (!batchGroups[acc.batch_name].expiry && acc.details && acc.details.BATCH_EXPIRY) {
+                batchGroups[acc.batch_name].expiry = acc.details.BATCH_EXPIRY;
+            }
+
             batchGroups[acc.batch_name].count++;
         }
     });
@@ -5078,36 +5083,21 @@ window.executeEditExpiry = async function(batchName, newDate) {
     document.getElementById('loadingModal').style.display = 'flex';
 
     try {
-        // Tapis keluar semua akaun dalam batch yang dipilih
         let batchAccs = globalAccounts.filter(a => a.batch_name === batchName);
         
         let bulkData = batchAccs.map(acc => {
-            // Suntik tarikh baharu ke dalam objek details
-            let newDetails = { ...acc.details, BATCH_EXPIRY: newDate };
+            let currentDetails = acc.details || {};
+            let newDetails = { ...currentDetails, BATCH_EXPIRY: newDate };
+            
+            // Kemas kini memori tempatan
             acc.details = newDetails; 
             
-            // Siapkan susunan data penuh untuk Upsert
             return {
-                zone: acc.zone,
-                region: acc.region,
-                area: acc.area,
-                loc: acc.loc,
-                type: acc.type,
-                acct: acc.acct,
-                delq: acc.delq,
-                arrs_mth: acc.arrs_mth,
-                osb: acc.osb,
-                status: acc.status,
-                collector: acc.collector,
-                details: newDetails,
-                batch_name: acc.batch_name,
-                uploaded_by: acc.uploaded_by,
-                batch_owner: acc.batch_owner,
-                assignee_id: acc.assignee_id
+                ...acc, // Ambil SEMUA data asal tanpa tercicir
+                details: newDetails
             };
         });
 
-        // Proses muat naik mengikut chunk untuk keselamatan server
         let chunkSize = 1000;
         for (let i = 0; i < bulkData.length; i += chunkSize) {
             let chunk = bulkData.slice(i, i + chunkSize);
@@ -5117,13 +5107,14 @@ window.executeEditExpiry = async function(batchName, newDate) {
 
         showNotification("SUCCESS", `Tarikh luput untuk batch <b>${batchName}</b> telah berjaya dikemas kini.`);
         
-        // Padam cache lama supaya sistem muat turun data segar
         const cacheKey = `scazp_cache_${currentUser.id}`;
         const timeKey = `scazp_time_${currentUser.id}`;
         await localforage.removeItem(cacheKey);
         localStorage.removeItem(timeKey);
         
-        // Segarkan jadual paparan
+        // --- KOD YANG DITAMBAH: Arah sistem tarik balik data baru dari Supabase ---
+        await fetchFullDatabaseData(); 
+        
         renderBatchList();
 
     } catch (err) {
