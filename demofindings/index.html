@@ -1843,7 +1843,7 @@ th {
         let userCurrentPage = 1;
         const usersPerPage = 20;
 
-        let colFiltersDash = {};
+let colFiltersDash = {};
         let colFiltersAssign = {};
 
         window.updateExcelFilterOptions = function() {
@@ -1879,6 +1879,34 @@ th {
                 uniqueVals.forEach(v => { sel.innerHTML += `<option value="${v}">${v}</option>`; });
                 sel.value = currentVal;
             });
+
+            // 2. Auto-Inject untuk Jadual Assignment
+            const assignCols = ['zone', 'type', 'loc', 'pack_cd', 'delq', 'arrs_mth', 'status', 'batch_owner', 'collector', 'assignee_id'];
+            assignCols.forEach(col => {
+                let th = document.getElementById(`tha-${col}`);
+                if (!th) return;
+                
+                let sel = document.getElementById(`flt-assign-${col}`);
+                if (!sel) {
+                    sel = document.createElement('select');
+                    sel.id = `flt-assign-${col}`;
+                    sel.className = 'header-filter';
+                    sel.onclick = (e) => e.stopPropagation();
+                    sel.onchange = (e) => {
+                        colFiltersAssign[col] = e.target.value;
+                        renderAssignTable();
+                    };
+                    th.appendChild(sel);
+                }
+                
+                let currentVal = sel.value;
+                let uniqueVals = [...new Set(globalAccounts.map(a => getColVal(a, col)))].filter(Boolean).sort();
+                
+                sel.innerHTML = '<option value="">-- ALL --</option>';
+                uniqueVals.forEach(v => { sel.innerHTML += `<option value="${v}">${v}</option>`; });
+                sel.value = currentVal;
+            });
+        };
 
             // 2. Auto-Inject untuk Jadual Assignment
             const assignCols = ['zone', 'type', 'loc', 'pack_cd', 'delq', 'arrs_mth', 'status', 'batch_owner', 'collector', 'assignee_id'];
@@ -2415,11 +2443,17 @@ filteredAccounts = scopedGeoData.filter(row => {
                     }
                 }
                 
-                // KOD BARU: Tapisan Kolum ala-Excel Dashboard
+// KOD BARU: Tapisan Kolum ala-Excel Dashboard
                 let matchExcel = true;
                 for (let col in colFiltersDash) {
                     if (colFiltersDash[col]) {
-                        let rowVal = row[col] ? String(row[col]).toUpperCase().trim() : '';
+                        let rowVal = '';
+                        if (col === 'pack_cd') {
+                            rowVal = row.details && row.details.PACK_CD ? String(row.details.PACK_CD).toUpperCase().trim() : '';
+                        } else {
+                            rowVal = row[col] ? String(row[col]).toUpperCase().trim() : '';
+                        }
+                        
                         if (rowVal !== colFiltersDash[col]) {
                             matchExcel = false;
                             break;
@@ -4843,11 +4877,17 @@ assignAccounts = globalAccounts.filter(row => {
         let matchCollector = (collectorFilter === 'ALL' || !collectorFilter) ? true : (row.collector === collectorFilter);
         let matchBatch = (batchFilter === 'ALL' || !batchFilter) ? true : (row.batch_name === batchFilter);
         
-        // KOD BARU: Tapisan Kolum ala-Excel Assignment
+// KOD BARU: Tapisan Kolum ala-Excel Assignment
         let matchExcel = true;
         for (let col in colFiltersAssign) {
             if (colFiltersAssign[col]) {
-                let rowVal = row[col] ? String(row[col]).toUpperCase().trim() : '';
+                let rowVal = '';
+                if (col === 'pack_cd') {
+                    rowVal = row.details && row.details.PACK_CD ? String(row.details.PACK_CD).toUpperCase().trim() : '';
+                } else {
+                    rowVal = row[col] ? String(row[col]).toUpperCase().trim() : '';
+                }
+
                 if (rowVal !== colFiltersAssign[col]) {
                     matchExcel = false;
                     break;
@@ -4857,6 +4897,7 @@ assignAccounts = globalAccounts.filter(row => {
         
         return matchStatus && matchCollector && matchBatch && matchExcel;
     });
+    
     if (currentAssignSortColumn) {
         assignAccounts.sort((a, b) => {
             let valueA = currentAssignSortColumn === 'pack_cd' ? (a.details && a.details.PACK_CD ? a.details.PACK_CD : '') : a[currentAssignSortColumn];
