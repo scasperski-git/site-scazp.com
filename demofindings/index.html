@@ -1847,38 +1847,86 @@ let colFiltersDash = {};
         let colFiltersAssign = {};
 
         window.updateExcelFilterOptions = function() {
-            // Fungsi kecil untuk korek data (terutamanya pack_cd yang menyorok dalam details)
             const getColVal = (a, col) => {
                 if (col === 'pack_cd') return a.details && a.details.PACK_CD ? String(a.details.PACK_CD).toUpperCase().trim() : '';
                 return a[col] ? String(a[col]).toUpperCase().trim() : '';
             };
 
-            // 1. Auto-Inject untuk Jadual Dashboard
-            const dashCols = ['zone', 'batch_owner', 'type', 'loc', 'pack_cd', 'delq', 'arrs_mth', 'status', 'assignee_id'];
-            dashCols.forEach(col => {
-                let th = document.getElementById(`th-${col}`);
-                if (!th) return;
-                
-                let sel = document.getElementById(`flt-dash-${col}`);
-                if (!sel) {
-                    sel = document.createElement('select');
-                    sel.id = `flt-dash-${col}`;
-                    sel.className = 'header-filter';
-                    sel.onclick = (e) => e.stopPropagation(); 
-                    sel.onchange = (e) => {
-                        colFiltersDash[col] = e.target.value;
-                        applyFilterAndRender(); 
-                    };
-                    th.appendChild(sel);
-                }
-                
-                let currentVal = sel.value;
-                let uniqueVals = [...new Set(globalAccounts.map(a => getColVal(a, col)))].filter(Boolean).sort();
-                
-                sel.innerHTML = '<option value="">-- ALL --</option>';
-                uniqueVals.forEach(v => { sel.innerHTML += `<option value="${v}">${v}</option>`; });
-                sel.value = currentVal;
-            });
+            const setupTinyFilter = (tableType, cols) => {
+                cols.forEach(col => {
+                    let th = document.getElementById(tableType === 'dash' ? `th-${col}` : `tha-${col}`);
+                    if (!th) return;
+
+                    let selId = `flt-${tableType}-${col}`;
+                    let sel = document.getElementById(selId);
+                    
+                    if (!sel) {
+                        sel = document.createElement('select');
+                        sel.id = selId;
+                        sel.title = `Filter ${col.toUpperCase()}`;
+                        
+                        // STYLE MAGIK: Jadikan dia butang kecik sebelah arrow
+                        sel.style.width = '18px';
+                        sel.style.display = 'inline-block';
+                        sel.style.verticalAlign = 'middle';
+                        sel.style.marginLeft = '5px';
+                        sel.style.border = '1px solid transparent';
+                        sel.style.background = 'transparent';
+                        sel.style.cursor = 'pointer';
+                        sel.style.outline = 'none';
+                        sel.style.fontWeight = 'bold';
+                        sel.style.fontSize = '12px';
+
+                        // Halang jadual dari tersort bila klik butang filter ni
+                        sel.addEventListener('click', (e) => e.stopPropagation());
+                        sel.addEventListener('mousedown', (e) => e.stopPropagation());
+                        
+                        sel.onchange = (e) => {
+                            if(tableType === 'dash') {
+                                colFiltersDash[col] = e.target.value;
+                                applyFilterAndRender();
+                            } else {
+                                colFiltersAssign[col] = e.target.value;
+                                renderAssignTable();
+                            }
+                            
+                            // Highlight butang jadi MERAH bila ada filter aktif supaya staf perasan
+                            if(e.target.value !== "") {
+                                sel.style.color = 'white';
+                                sel.style.backgroundColor = 'var(--error-red)';
+                                sel.style.borderColor = 'var(--error-red)';
+                                sel.style.borderRadius = '3px';
+                            } else {
+                                sel.style.color = 'var(--text-main)';
+                                sel.style.backgroundColor = 'transparent';
+                                sel.style.borderColor = 'transparent';
+                            }
+                        };
+                        
+                        th.appendChild(sel);
+                    }
+
+                    // Tanam senarai filter unik
+                    let currentVal = sel.value;
+                    let uniqueVals = [...new Set(globalAccounts.map(a => getColVal(a, col)))].filter(Boolean).sort();
+                    
+                    sel.innerHTML = '<option value="">-- SHOW ALL --</option>';
+                    uniqueVals.forEach(v => { sel.innerHTML += `<option value="${v}">${v}</option>`; });
+                    sel.value = currentVal;
+                    
+                    // Kekalkan highlight masa jadual di-refresh
+                    if(currentVal !== "") {
+                        sel.style.color = 'white';
+                        sel.style.backgroundColor = 'var(--error-red)';
+                        sel.style.borderColor = 'var(--error-red)';
+                        sel.style.borderRadius = '3px';
+                    }
+                });
+            };
+
+            setupTinyFilter('dash', ['zone', 'batch_owner', 'type', 'loc', 'pack_cd', 'delq', 'arrs_mth', 'status', 'assignee_id']);
+            setupTinyFilter('assign', ['zone', 'type', 'loc', 'pack_cd', 'delq', 'arrs_mth', 'status', 'batch_owner', 'collector', 'assignee_id']);
+        };
 
             // 2. Auto-Inject untuk Jadual Assignment
             const assignCols = ['zone', 'type', 'loc', 'pack_cd', 'delq', 'arrs_mth', 'status', 'batch_owner', 'collector', 'assignee_id'];
