@@ -3966,9 +3966,9 @@ batchKeys.forEach(bName => {
         
         let actionButtons = '';
         if (currentUser.role !== 'admin') {
+            // BUTANG 'EDIT DATE' TELAH DIBUANG DARI SINI
             actionButtons = `
                 <button class="btn-update" style="color: var(--success-green); border-color: var(--success-green); background: #f0fdf4; margin-right: 5px;" onclick="exportByBatch('${bName}')" title="Export Batch Ini">📥 EXPORT</button>
-                <button class="btn-update" style="color: #f59e0b; border-color: #fcd34d; background: #fffbeb; margin-right: 5px;" onclick="openEditExpiryModal('${bName}')">🗓️ EDIT DATE</button>
                 <button class="btn-update" style="color: var(--status-call); border-color: var(--status-call); margin-right: 5px;" onclick="openTransferBatchModal('${bName}')">🔄 TRANSFER</button>
                 <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteBatch('${bName}')">🗑️ DELETE</button>
             `;
@@ -3979,29 +3979,36 @@ batchKeys.forEach(bName => {
             `;
         }
 
-        // --- KOD BARU: Logik Tarikh Luput (Warna Merah/Hijau) ---
+        // --- KOD BARU: Logik Tarikh Luput (Warna Merah/Hijau) & Jadikan Boleh Klik ---
         let expiryDisplay = '-';
         let expiryColor = 'var(--text-main)';
 
         if (bInfo.expiry) {
-            let parts = bInfo.expiry.split('-'); // Pisahkan format YYYY-MM-DD
+            let parts = bInfo.expiry.split('-'); 
             if (parts.length === 3) {
-                expiryDisplay = `${parts[2]}/${parts[1]}/${parts[0].slice(-2)}`; // Jadi format DD/MM/YY
+                expiryDisplay = `${parts[2]}/${parts[1]}/${parts[0].slice(-2)}`; 
                 
-                // Cari tarikh harini dalam format YYYY-MM-DD
                 let d = new Date();
                 let localTodayStr = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
                 
-                // Kalau tarikh luput dah lepas (lebih kecil dari tarikh harini)
                 if (bInfo.expiry < localTodayStr) {
                     expiryColor = 'var(--error-red)';
-                    expiryDisplay += ' 🔴'; // Ikon penanda expired
+                    expiryDisplay += ' 🔴'; 
                 } else {
-                    expiryColor = 'var(--success-green)'; // Belum expired, kaler hijau
+                    expiryColor = 'var(--success-green)'; 
                 }
             }
         }
-        // --------------------------------------------------------
+        
+        // Jadikan tarikh luput (atau tanda '-') boleh diklik untuk ubah tarikh
+        let clickableExpiry = '';
+        if (currentUser.role !== 'admin') {
+            // Beri efek garis bawah (underline) supaya nampak macam pautan
+            clickableExpiry = `<span style="cursor: pointer; text-decoration: underline; text-underline-offset: 3px;" onclick="openEditExpiryModal('${bName}')" title="Klik untuk ubah tarikh luput">${expiryDisplay} ✏️</span>`;
+        } else {
+            // Admin (view only) tak boleh klik
+            clickableExpiry = `<span>${expiryDisplay}</span>`;
+        }
 
         tbody.innerHTML += `
             <tr>
@@ -4010,7 +4017,7 @@ batchKeys.forEach(bName => {
                 <td style="color: var(--text-muted);">${bInfo.uploaded_by.toUpperCase()}</td>
                 <td style="font-weight: bold; color: var(--text-main);">${bInfo.batch_owner.toUpperCase()}</td>
                 <td>${bInfo.count} Akaun</td>
-                <td style="font-weight: 700; color: ${expiryColor};">${expiryDisplay}</td> <!-- KOD BARU -->
+                <td style="font-weight: 700; color: ${expiryColor};">${clickableExpiry}</td> <!-- KOD YANG DIKEMASKINI -->
                 <td style="text-align: right; white-space: nowrap;">
                     ${actionButtons}
                 </td>
