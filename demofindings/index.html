@@ -3966,10 +3966,10 @@ batchKeys.forEach(bName => {
         
         let actionButtons = '';
         if (currentUser.role !== 'admin') {
-            // BUTANG 'EDIT DATE' TELAH DIBUANG DARI SINI
             actionButtons = `
                 <button class="btn-update" style="color: var(--success-green); border-color: var(--success-green); background: #f0fdf4; margin-right: 5px;" onclick="exportByBatch('${bName}')" title="Export Batch Ini">📥 EXPORT</button>
                 <button class="btn-update" style="color: var(--status-call); border-color: var(--status-call); margin-right: 5px;" onclick="openTransferBatchModal('${bName}')">🔄 TRANSFER</button>
+                <button class="btn-update" style="color: #ffffff; background-color: #f97316; border-color: #f97316; margin-right: 5px;" onclick="abortBatch('${bName}')" title="Tamatkan Tugasan Batch Ini">🛑 ABORT</button>
                 <button class="btn-update" style="color: var(--error-red); border-color: #fecaca;" onclick="deleteBatch('${bName}')">🗑️ DELETE</button>
             `;
         } else {
@@ -4130,6 +4130,55 @@ window.executeBatchTransfer = async function(batchName, targetUser) {
 
     } catch (err) {
         showNotification("TRANSFER ERROR", err.message, true);
+    } finally {
+        document.getElementById('loadingModal').style.display = 'none';
+    }
+};
+
+        window.abortBatch = async function(batchName) {
+    // 1. Minta pengesahan supaya tak tertekan secara tak sengaja
+    let isConfirmed = await customConfirm(`PENGESAHAN PENAMATAN TUGASAN:\nAdakah anda pasti mahu MENUTUP (ABORT) batch ${batchName}?\n\nTindakan ini akan membuang kesemua akaun aktif dari dashboard untuk menjimatkan storan pangkalan data, namun rekod log Findings akan disimpan kekal.`);
+    if (!isConfirmed) return;
+
+    // 2. Minta passcode admin sebab ini tindakan kritikal
+    let isVerified = await verifyAdminPasscode();
+    if (!isVerified) return;
+
+    document.getElementById('loadingText').innerText = "Menutup batch & menyimpan rekod sejarah...";
+    document.getElementById('loadingModal').style.display = 'flex';
+
+    try {
+        // 3. Padam akaun dari jadual utama (dashboard akan bersih)
+        const { error: delError } = await supabase.from('accounts').delete().eq('batch_name', batchName);
+        if (delError) throw delError;
+
+        // 4. Tinggalkan satu log peringatan dalam jadual Findings sebagai bukti sejarah
+        const { error: logError } = await supabase.from('findings').insert([{
+            acct: 'SYSTEM',
+            remark1: `BATCH ABORTED / CLOSED: Tugasan untuk Batch ${batchName} telah ditamatkan secara rasmi oleh ${currentUser.id.toUpperCase()}`,
+            updated_by: currentUser.username,
+            updated_at: new Date().toISOString()
+        }]);
+        if (logError) console.warn("Gagal simpan log penutupan batch:", logError);
+
+        showNotification("BATCH DITUTUP", `Tugasan untuk Batch <b>${batchName}</b> telah berjaya ditamatkan dan dibersihkan dari dashboard.`);
+        
+        // 5. Padam cache dan segar semula skrin
+        const cacheKey = `scazp_cache_${currentUser.id}`;
+        const timeKey = `scazp_time_${currentUser.id}`;
+        await localforage.removeItem(cacheKey);
+        localStorage.removeItem(timeKey);
+        
+        await fetchFullDatabaseData();
+        applyFilterAndRender();
+        
+        if (document.getElementById('assign-panel').style.display === 'block') {
+            renderBatchList();
+            renderAssignTable();
+        }
+
+    } catch (err) {
+        showNotification("ERROR", err.message, true);
     } finally {
         document.getElementById('loadingModal').style.display = 'none';
     }
